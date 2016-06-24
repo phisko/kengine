@@ -3,8 +3,11 @@
 //
 
 #include <stdlib.h>
+#include <iostream>
+#include "KTypes.hpp"
 
 int main()
 {
-    return (EXIT_SUCCESS);
+    std::cout << (unsigned) ComponentMask::_LAST << std::endl;
+    return (0);
 }

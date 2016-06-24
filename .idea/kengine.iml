@@ -2,9 +2,13 @@
 <module type="CPP_MODULE" version="4">
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/src/core/Component.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/core/GameObject.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/test/main.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/include/core/Component.hpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/include/core/GameObject.hpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/include/core/KTypes.hpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/include/core/IComponent.hpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/CMakeLists.txt" isTestSource="false" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
