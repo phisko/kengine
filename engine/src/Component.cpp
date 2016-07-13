@@ -3,3 +3,5 @@
 //
 
 #include "Component.hpp"
+
+ComponentMask Component::Mask = ComponentMask::Default;

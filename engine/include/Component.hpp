@@ -6,12 +6,15 @@
 # define KENGINE_COMPONENT_HPP
 
 # include <string>
-# include "GameObject.hpp"
+# include "IComponent.hpp"
+# include "Object.hpp"
 
-class Component
+class Component : public IComponent
 {
 public:
-    Component(std::string const& name, GameObject const *const parent)
+    static ComponentMask Mask;
+public:
+    Component(std::string const& name, Object const *parent)
             : _parent(parent), _name(name)
     { }
 
@@ -25,8 +28,12 @@ public:
 public:
     friend void swap(Component& left, Component& right);
 
+public:
+    virtual ComponentMask getMask() const override;
+    virtual std::string const& toString() const override;
+
 private:
-    GameObject const *const _parent;
+    const Object      *_parent;
     std::string       _name;
     static const bool _unique;
 };

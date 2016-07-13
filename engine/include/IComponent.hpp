@@ -6,8 +6,9 @@
 # define KENGINE_ICOMPONENT_HPP
 
 # include "KTypes.hpp"
+# include "Object.hpp"
 
-class IComponent
+class IComponent : public Object
 {
 public:
     virtual ComponentMask getMask() const = 0;

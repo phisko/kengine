@@ -8,14 +8,16 @@
 # include <string>
 # include <map>
 # include "IComponent.hpp"
+# include "Object.hpp"
 
-class GameObject
+class GameObject : public Object
 {
 public:
     GameObject(std::string const& name);
     GameObject(GameObject const& other);
     GameObject(GameObject&& other);
     GameObject& operator=(GameObject other);
+    ~GameObject();
 
 public:
     friend void swap(GameObject& left, GameObject& right);
@@ -23,6 +25,9 @@ public:
 public:
     void attachComponent(IComponent const& comp);
     void attachComponent(IComponent&& comp);
+
+public:
+    virtual std::string const& toString() const;
 
 private:
     std::string                              _name;
