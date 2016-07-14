@@ -10,7 +10,7 @@
 class Object
 {
 public:
-    virtual std::string const& toString() const = 0;
+    virtual std::string toString() const = 0;
 
     virtual ~Object() { }
 };

@@ -4,10 +4,16 @@
 
 #include <stdlib.h>
 #include <iostream>
+#include <EntityManager.hpp>
 #include "KTypes.hpp"
 
 int main()
 {
-    std::cout << (unsigned) ComponentMask::_LAST << std::endl;
+    EntityManager em;
+
+    auto entity = em.createEntity<GameObject>("LeTest");
+
+    std::cout << entity.toString() << std::endl;
+
     return (0);
 }

@@ -4,4 +4,5 @@
 
 #include "Component.hpp"
 
-ComponentMask Component::Mask = ComponentMask::Default;
+ComponentMask       Component::Mask    = ComponentMask::Default;
+const bool          Component::_unique = false;

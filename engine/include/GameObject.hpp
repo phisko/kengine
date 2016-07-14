@@ -17,7 +17,9 @@ public:
     GameObject(GameObject const& other);
     GameObject(GameObject&& other);
     GameObject& operator=(GameObject other);
-    ~GameObject();
+    GameObject& operator=(GameObject&& other);
+
+    virtual ~GameObject();
 
 public:
     friend void swap(GameObject& left, GameObject& right);
@@ -27,7 +29,7 @@ public:
     void attachComponent(IComponent&& comp);
 
 public:
-    virtual std::string const& toString() const;
+    virtual std::string toString() const;
 
 private:
     std::string                              _name;

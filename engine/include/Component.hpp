@@ -21,16 +21,20 @@ public:
     Component(Component const& other);
     Component(Component&& other);
     Component& operator=(Component other);
+    Component& operator=(Component&& other);
 
     virtual ~Component()
     { }
+
+public:
+    bool isUnique() const;
 
 public:
     friend void swap(Component& left, Component& right);
 
 public:
     virtual ComponentMask getMask() const override;
-    virtual std::string const& toString() const override;
+    virtual std::string   toString() const override;
 
 private:
     const Object      *_parent;
