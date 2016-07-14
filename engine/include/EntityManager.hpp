@@ -26,13 +26,8 @@ public:
              typename = typename std::enable_if<
                      std::is_base_of<GameObject, GO>::value
              >::type>
-    GO& createEntity(std::string const& name, Args&& ... params)
+    constexpr GO& createEntity(std::string const& name, Args&& ... params) noexcept
     {
-        auto selected = _entities.find(name);
-
-        if (selected != _entities.end())
-            throw std::logic_error("GameObject with name " + name + " already exists");
-
         _entities.emplace(name, std::make_unique<GO>(name, std::forward(params)...));
 
         return *_entities[name];

@@ -8,4 +8,4 @@ file(GLOB src_files
         include/*.hpp
         )
 
-add_library(kengine ${src_files})
+add_library(kengine SHARED ${src_files})
