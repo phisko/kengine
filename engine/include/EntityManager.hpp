@@ -9,7 +9,10 @@
 # include <map>
 # include <memory>
 # include <type_traits>
+#include <iostream>
 # include "GameObject.hpp"
+# include "Component.hpp"
+#include "ComponentFactory.hpp"
 
 class EntityManager
 {
@@ -33,8 +36,26 @@ public:
         return *_entities[name];
     }
 
+    template<class CT, class ... Args>
+    constexpr CT& attachComponent(GameObject const& parent, std::string const& name, Args... params) noexcept
+    {
+        std::cout << parent.get_name() << " " << name << std::endl;
+        _components.emplace(hashCompName(parent.get_name(), name),
+                            std::make_unique<CT>(name, std::forward(params)...));
+
+        return *_components[name];
+    };
+
+private:
+    std::string hashCompName(std::string const& pName, std::string const& cName)
+    {
+        return pName + "--" + cName;
+    }
+
 private:
     std::map<std::string, std::unique_ptr<GameObject>> _entities;
+    std::map<std::string, std::unique_ptr<Component>>  _components;
+    std::map<std::string, std::string>                 _compHierarchy;
 };
 
 

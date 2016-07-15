@@ -7,15 +7,14 @@
 
 # include <string>
 # include "IComponent.hpp"
-# include "Object.hpp"
 
 class Component : public IComponent
 {
 public:
     static ComponentMask Mask;
 public:
-    Component(std::string const& name, Object const *parent)
-            : _parent(parent), _name(name)
+    Component(std::string const& name)
+            : _name(name)
     { }
 
     Component(Component const& other);
@@ -37,7 +36,6 @@ public:
     virtual std::string   toString() const override;
 
 private:
-    const Object      *_parent;
     std::string       _name;
     static const bool _unique;
 };

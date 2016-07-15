@@ -65,3 +65,8 @@ std::string GameObject::toString() const
 
     return ss.str();
 }
+
+std::string const& GameObject::get_name() const
+{
+    return _name;
+}

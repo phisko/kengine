@@ -31,6 +31,9 @@ public:
 public:
     virtual std::string toString() const;
 
+public:
+    std::string const& get_name() const;
+
 private:
     std::string                              _name;
     std::map<std::string const, IComponent&> _components;

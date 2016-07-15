@@ -6,11 +6,12 @@
       <sourceFolder url="file://$MODULE_DIR$/engine/src/GameObject.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/engine/src/EntityManager.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/engine/include/GameObject.hpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/engine/include/KTypes.hpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/engine/include/Object.hpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/engine/include/ComponentFactory.hpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/engine/include/EntityManager.hpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/engine/include/IComponent.hpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/engine/include/Component.hpp" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/engine/include/KTypes.hpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/engine/CMakeLists.txt" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/CMakeLists.txt" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/test/src/main.cpp" isTestSource="false" />

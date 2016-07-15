@@ -13,7 +13,9 @@ int main()
 
     auto entity = em.createEntity<GameObject>("LeTest");
 
-    std::cout << entity.toString() << std::endl;
+     auto comp = em.attachComponent<Component>(entity, "LeComp");
+
+    std::cout << entity.toString() << std::endl << comp.toString() << std::endl;
 
     return (0);
 }
