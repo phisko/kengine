@@ -9,7 +9,7 @@ GameObject::GameObject(GameObject const& other)
 {
     if (this != &other)
     {
-        _name = other._name;
+        _name       = other._name;
         _components = _components;
     }
 }
@@ -47,14 +47,9 @@ void swap(GameObject& left, GameObject& right)
     swap(left._components, right._components);
 }
 
-void GameObject::attachComponent(IComponent const& comp)
+void GameObject::attachComponent(IComponent *comp)
 {
-    (void)comp;
-}
-
-void GameObject::attachComponent(IComponent&& comp)
-{
-    (void)comp;
+    _components[comp->get_name()] = comp;
 }
 
 std::string GameObject::toString() const

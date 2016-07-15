@@ -38,13 +38,14 @@ public:
     }
 
     template<class CT, class ... Args>
-    constexpr CT& attachComponent(GameObject const& parent, std::string const& name, Args... params) noexcept
+    constexpr CT& attachComponent(GameObject& parent, std::string const& name, Args... params) noexcept
     {
         auto str = hashCompName(parent.get_name(), name);
 
         _components.emplace(str,
                             ComponentFactory::createComponent<CT>(name, std::forward(params)...));
 
+        parent.attachComponent(_components[str].get());
         return *_components[str];
     };
 

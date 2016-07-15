@@ -35,6 +35,12 @@ public:
     virtual ComponentMask getMask() const override;
     virtual std::string   toString() const override;
 
+
+    std::string const& get_name() const
+    {
+        return _name;
+    }
+
 private:
     std::string       _name;
     static const bool _unique;
