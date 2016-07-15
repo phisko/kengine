@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <EntityManager.hpp>
+#include <assert.h>
 #include "KTypes.hpp"
 
 int main()

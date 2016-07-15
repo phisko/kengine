@@ -9,8 +9,9 @@
       <sourceFolder url="file://$MODULE_DIR$/engine/include/KTypes.hpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/engine/include/Object.hpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/engine/include/ComponentFactory.hpp" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/engine/include/EntityManager.hpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/engine/include/ISystem.hpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/engine/include/IComponent.hpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/engine/include/EntityManager.hpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/engine/include/Component.hpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/engine/CMakeLists.txt" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/CMakeLists.txt" isTestSource="false" />

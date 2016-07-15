@@ -52,6 +52,11 @@ void GameObject::attachComponent(IComponent *comp)
     _components[comp->get_name()] = comp;
 }
 
+void GameObject::detachComponent(IComponent *comp)
+{
+    _components.erase(comp->get_name());
+}
+
 std::string GameObject::toString() const
 {
     std::stringstream ss;
@@ -65,3 +70,4 @@ std::string const& GameObject::get_name() const
 {
     return _name;
 }
+

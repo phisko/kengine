@@ -13,11 +13,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4280985d-7a16-441e-b4ac-bb28c26932fb" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/engine/include/Component.hpp" afterPath="$PROJECT_DIR$/engine/include/Component.hpp" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/engine/include/ISystem.hpp" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/kengine.iml" afterPath="$PROJECT_DIR$/.idea/kengine.iml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/engine/include/EntityManager.hpp" afterPath="$PROJECT_DIR$/engine/include/EntityManager.hpp" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/engine/include/GameObject.hpp" afterPath="$PROJECT_DIR$/engine/include/GameObject.hpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/engine/include/IComponent.hpp" afterPath="$PROJECT_DIR$/engine/include/IComponent.hpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/engine/include/Object.hpp" afterPath="$PROJECT_DIR$/engine/include/Object.hpp" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/engine/src/GameObject.cpp" afterPath="$PROJECT_DIR$/engine/src/GameObject.cpp" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/src/main.cpp" afterPath="$PROJECT_DIR$/test/src/main.cpp" />
     </list>
@@ -45,8 +45,8 @@
           <file leaf-file-name="main.cpp" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/test/src/main.cpp">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="234">
-                  <caret line="16" column="52" selection-start-line="16" selection-start-column="52" selection-end-line="16" selection-end-column="52" />
+                <state relative-caret-position="324">
+                  <caret line="22" column="0" selection-start-line="22" selection-start-column="0" selection-end-line="22" selection-end-column="0" />
                   <folding />
                 </state>
               </provider>
@@ -56,14 +56,14 @@
       </split-first>
       <split-second>
         <leaf>
-          <file leaf-file-name="GameObject.hpp" pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/engine/include/GameObject.hpp">
+          <file leaf-file-name="EntityManager.hpp" pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/engine/include/EntityManager.hpp">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="701">
-                  <caret line="57" column="52" selection-start-line="57" selection-start-column="52" selection-end-line="57" selection-end-column="52" />
+                <state relative-caret-position="413">
+                  <caret line="43" column="0" selection-start-line="43" selection-start-column="0" selection-end-line="43" selection-end-column="0" />
                   <folding>
-                    <element signature="e#626#767#0" expanded="true" />
-                    <element signature="e#1023#1164#0" expanded="true" />
+                    <element signature="e#572#728#0" expanded="true" />
+                    <element signature="e#948#974#0" expanded="true" />
                   </folding>
                 </state>
               </provider>
@@ -96,10 +96,11 @@
         <option value="$PROJECT_DIR$/engine/include/Component.hpp" />
         <option value="$PROJECT_DIR$/engine/include/IComponent.hpp" />
         <option value="$PROJECT_DIR$/engine/include/Object.hpp" />
-        <option value="$PROJECT_DIR$/engine/src/GameObject.cpp" />
-        <option value="$PROJECT_DIR$/engine/include/EntityManager.hpp" />
         <option value="$PROJECT_DIR$/test/src/main.cpp" />
         <option value="$PROJECT_DIR$/engine/include/GameObject.hpp" />
+        <option value="$PROJECT_DIR$/engine/src/GameObject.cpp" />
+        <option value="$PROJECT_DIR$/engine/include/EntityManager.hpp" />
+        <option value="$PROJECT_DIR$/engine/include/ISystem.hpp" />
       </list>
     </option>
   </component>
@@ -110,9 +111,9 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="-1" />
-    <option name="y" value="-33" />
-    <option name="width" value="1922" />
+    <option name="x" value="-7" />
+    <option name="y" value="-27" />
+    <option name="width" value="1934" />
     <option name="height" value="1114" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
@@ -164,11 +165,11 @@
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="prop_add_unversioned_files" value="true" />
-    <property name="settings.editor.selected.configurable" value="com.maddyhome.idea.vim.ui.VimEmulationConfigurable" />
+    <property name="settings.editor.selected.configurable" value="CMakeSettings" />
     <property name="settings.editor.splitter.proportion" value="0.2" />
     <property name="js-jscs-nodeInterpreter" value="/usr/bin/node" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="SearchEverywhereHistoryKey" value="GO&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/GameObject.hpp&#10;main&#9;FILE&#9;file:///home/naliwe/work/kengine/test/src/main.cpp&#10;EM\&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/EntityManager.hpp&#10;Com&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/Component.hpp&#10;Gam&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/src/GameObject.cpp&#10;C&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/CMakeLists.txt&#10;CMa&#9;FILE&#9;file:///home/naliwe/work/kengine/CMakeLists.txt&#10;CmakeL&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/CMakeLists.txt&#10;em&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/EntityManager.hpp&#10;cf&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/ComponentFactory.hpp&#10;com&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/Component.hpp&#10;Co&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/src/Component.cpp&#10;om&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/Component.hpp&#10;EM&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/EntityManager.hpp&#10;CF&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/ComponentFactory.hpp&#10;ain&#9;FILE&#9;file:///home/naliwe/work/kengine/test/src/main.cpp&#10;mai&#9;FILE&#9;file:///home/naliwe/work/kengine/test/src/main.cpp&#10;CMakeLists&#9;FILE&#9;file:///home/naliwe/work/kengine/CMakeLists.txt&#10;CM&#9;FILE&#9;file:///home/naliwe/work/kengine/CMakeLists.txt&#10;Ga&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/GameObject.hpp&#10;Game&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/src/GameObject.cpp&#10;cma&#9;FILE&#9;file:///home/naliwe/work/kengine/CMakeLists.txt&#10;co&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/src/Component.cpp" />
+    <property name="SearchEverywhereHistoryKey" value="em&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/EntityManager.hpp&#10;Gam&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/GameObject.hpp&#10;ma&#9;FILE&#9;file:///home/naliwe/work/kengine/test/src/main.cpp&#10;cmak&#9;FILE&#9;file:///home/naliwe/work/kengine/CMakeLists.txt&#10;ga&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/GameObject.hpp&#10;GO&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/GameObject.hpp&#10;main&#9;FILE&#9;file:///home/naliwe/work/kengine/test/src/main.cpp&#10;EM\&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/EntityManager.hpp&#10;Com&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/Component.hpp&#10;C&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/CMakeLists.txt&#10;CMa&#9;FILE&#9;file:///home/naliwe/work/kengine/CMakeLists.txt&#10;CmakeL&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/CMakeLists.txt&#10;cf&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/ComponentFactory.hpp&#10;com&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/Component.hpp&#10;Co&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/src/Component.cpp&#10;om&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/Component.hpp&#10;EM&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/EntityManager.hpp&#10;CF&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/ComponentFactory.hpp&#10;ain&#9;FILE&#9;file:///home/naliwe/work/kengine/test/src/main.cpp&#10;mai&#9;FILE&#9;file:///home/naliwe/work/kengine/test/src/main.cpp&#10;CMakeLists&#9;FILE&#9;file:///home/naliwe/work/kengine/CMakeLists.txt&#10;CM&#9;FILE&#9;file:///home/naliwe/work/kengine/CMakeLists.txt&#10;Ga&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/GameObject.hpp&#10;Game&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/src/GameObject.cpp&#10;cma&#9;FILE&#9;file:///home/naliwe/work/kengine/CMakeLists.txt&#10;co&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/src/Component.cpp" />
     <property name="FullScreen" value="true" />
   </component>
   <component name="RecentsManager">
@@ -357,10 +358,15 @@
       <envs />
       <method />
     </configuration>
-    <list size="3">
+    <configuration default="false" name="Realease All" type="CMakeRunConfiguration" factoryName="Application" WORKING_DIR="" PASS_PARENT_ENVS_2="true" CONFIG_NAME="Release" RUN_TARGET_PROJECT_NAME="kengine" RUN_TARGET_NAME="ktest" EXPLICIT_BUILD_TARGET_NAME="all">
+      <envs />
+      <method />
+    </configuration>
+    <list size="4">
       <item index="0" class="java.lang.String" itemvalue="Application.ktest" />
       <item index="1" class="java.lang.String" itemvalue="Application.kengine" />
       <item index="2" class="java.lang.String" itemvalue="Application.Build All" />
+      <item index="3" class="java.lang.String" itemvalue="Application.Realease All" />
     </list>
   </component>
   <component name="ShelveChangesManager" show_recycled="false">
@@ -380,20 +386,20 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-1" y="-33" width="1922" height="1114" extended-state="6" />
-    <editor active="true" />
+    <frame x="-7" y="-27" width="1934" height="1114" extended-state="6" />
+    <editor active="false" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.12532912" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33425927" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="CMake" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3287037" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32905984" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32985386" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33333334" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="CMake" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3287037" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32905984" sideWeight="0.5" order="8" side_tool="true" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32985386" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3287037" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39907408" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3985043" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -405,22 +411,22 @@
     <layout-to-restore>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3351852" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33333334" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="CMake" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32903227" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="CMake" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3287037" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32905984" sideWeight="0.5" order="9" side_tool="true" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32905984" sideWeight="0.5" order="8" side_tool="true" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32985386" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32985386" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32985386" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3287037" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.12532912" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39957264" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3985043" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
     </layout-to-restore>
   </component>
   <component name="Vcs.Log.UiProperties">
@@ -439,7 +445,7 @@
       <breakpoints-dialog>
         <breakpoints-dialog />
       </breakpoints-dialog>
-      <option name="time" value="9" />
+      <option name="time" value="10" />
     </breakpoint-manager>
     <watches-manager>
       <configuration name="CMakeRunConfiguration">
@@ -453,6 +459,32 @@
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/test/src/main.cpp">
       <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="288">
+          <caret line="16" column="0" selection-start-line="16" selection-start-column="0" selection-end-line="16" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/engine/include/GameObject.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="756">
+          <caret line="42" column="0" selection-start-line="42" selection-start-column="0" selection-end-line="42" selection-end-column="0" />
+          <folding>
+            <marker date="1468616030942" expanded="true" signature="0:38" ph="//..." />
+            <marker date="1468616030942" expanded="false" signature="114:209" ph="..." />
+            <marker date="1468616030942" expanded="true" signature="244:1947" ph="{...}" />
+            <marker date="1468616030942" expanded="true" signature="662:811" ph="&lt;CT,=std::enable_if&lt;std::is_base_of&lt;IComponent,CT&gt;::value&gt;::type&gt;" />
+            <marker date="1468616030942" expanded="true" signature="728:804" ph="&lt;~&gt;" />
+            <marker date="1468616030942" expanded="true" signature="862:1052" ph="{...}" />
+            <marker date="1468616030942" expanded="true" signature="1059:1208" ph="&lt;CT,=std::enable_if&lt;std::is_base_of&lt;IComponent,CT&gt;::value&gt;::type&gt;" />
+            <marker date="1468616030942" expanded="true" signature="1125:1201" ph="&lt;~&gt;" />
+            <marker date="1468616030942" expanded="true" signature="1236:1733" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test/src/main.cpp">
+      <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="216">
           <caret line="12" column="0" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
           <folding />
@@ -463,18 +495,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <marker date="1468581712157" expanded="true" signature="0:38" ph="//..." />
-            <marker date="1468581712157" expanded="true" signature="49:83" ph="..." />
-            <marker date="1468581712157" expanded="true" signature="245:313" ph="{...}" />
-            <marker date="1468581712157" expanded="true" signature="355:382" ph="{...}" />
-            <marker date="1468581712157" expanded="true" signature="433:479" ph="{...}" />
-            <marker date="1468581712157" expanded="true" signature="532:578" ph="{...}" />
-            <marker date="1468581712157" expanded="true" signature="613:636" ph="{...}" />
-            <marker date="1468581712157" expanded="true" signature="683:743" ph="{...}" />
-            <marker date="1468581712157" expanded="true" signature="786:806" ph="{...}" />
-            <marker date="1468581712157" expanded="true" signature="848:946" ph="{...}" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -482,18 +503,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="126">
           <caret line="7" column="0" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
-          <folding>
-            <marker date="1468581712157" expanded="true" signature="0:38" ph="//..." />
-            <marker date="1468581712157" expanded="true" signature="49:83" ph="..." />
-            <marker date="1468581712157" expanded="true" signature="245:313" ph="{...}" />
-            <marker date="1468581712157" expanded="true" signature="355:382" ph="{...}" />
-            <marker date="1468581712157" expanded="true" signature="433:479" ph="{...}" />
-            <marker date="1468581712157" expanded="true" signature="532:578" ph="{...}" />
-            <marker date="1468581712157" expanded="true" signature="613:636" ph="{...}" />
-            <marker date="1468581712157" expanded="true" signature="683:743" ph="{...}" />
-            <marker date="1468581712157" expanded="true" signature="786:806" ph="{...}" />
-            <marker date="1468581712157" expanded="true" signature="848:946" ph="{...}" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -517,18 +527,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="108">
           <caret line="6" column="13" selection-start-line="6" selection-start-column="13" selection-end-line="6" selection-end-column="13" />
-          <folding>
-            <marker date="1468581712157" expanded="true" signature="0:38" ph="//..." />
-            <marker date="1468581712157" expanded="true" signature="49:83" ph="..." />
-            <marker date="1468581712157" expanded="true" signature="245:313" ph="{...}" />
-            <marker date="1468581712157" expanded="true" signature="355:382" ph="{...}" />
-            <marker date="1468581712157" expanded="true" signature="433:479" ph="{...}" />
-            <marker date="1468581712157" expanded="true" signature="532:578" ph="{...}" />
-            <marker date="1468581712157" expanded="true" signature="613:636" ph="{...}" />
-            <marker date="1468581712157" expanded="true" signature="683:743" ph="{...}" />
-            <marker date="1468581712157" expanded="true" signature="786:806" ph="{...}" />
-            <marker date="1468581712157" expanded="true" signature="848:946" ph="{...}" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -537,8 +536,15 @@
         <state relative-caret-position="522">
           <caret line="29" column="48" selection-start-line="29" selection-start-column="48" selection-end-line="29" selection-end-column="48" />
           <folding>
-            <element signature="e#626#767#0" expanded="true" />
-            <element signature="e#1023#1164#0" expanded="true" />
+            <marker date="1468616030942" expanded="true" signature="0:38" ph="//..." />
+            <marker date="1468616030942" expanded="false" signature="114:209" ph="..." />
+            <marker date="1468616030942" expanded="true" signature="244:1947" ph="{...}" />
+            <marker date="1468616030942" expanded="true" signature="662:811" ph="&lt;CT,=std::enable_if&lt;std::is_base_of&lt;IComponent,CT&gt;::value&gt;::type&gt;" />
+            <marker date="1468616030942" expanded="true" signature="728:804" ph="&lt;~&gt;" />
+            <marker date="1468616030942" expanded="true" signature="862:1052" ph="{...}" />
+            <marker date="1468616030942" expanded="true" signature="1059:1208" ph="&lt;CT,=std::enable_if&lt;std::is_base_of&lt;IComponent,CT&gt;::value&gt;::type&gt;" />
+            <marker date="1468616030942" expanded="true" signature="1125:1201" ph="&lt;~&gt;" />
+            <marker date="1468616030942" expanded="true" signature="1236:1733" ph="{...}" />
           </folding>
         </state>
       </provider>
@@ -547,7 +553,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="252">
           <caret line="14" column="23" selection-start-line="14" selection-start-column="23" selection-end-line="14" selection-end-column="23" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -625,30 +630,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/engine/src/EntityManager.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="324">
-          <caret line="18" column="0" selection-start-line="18" selection-start-column="0" selection-end-line="18" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/engine/src/Component.cpp">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="342">
           <caret line="19" column="10" selection-start-line="19" selection-start-column="10" selection-end-line="19" selection-end-column="10" />
-          <folding>
-            <marker date="1468581712157" expanded="true" signature="0:38" ph="//..." />
-            <marker date="1468581712157" expanded="true" signature="49:83" ph="..." />
-            <marker date="1468581712157" expanded="true" signature="245:313" ph="{...}" />
-            <marker date="1468581712157" expanded="true" signature="355:382" ph="{...}" />
-            <marker date="1468581712157" expanded="true" signature="433:479" ph="{...}" />
-            <marker date="1468581712157" expanded="true" signature="532:578" ph="{...}" />
-            <marker date="1468581712157" expanded="true" signature="613:636" ph="{...}" />
-            <marker date="1468581712157" expanded="true" signature="683:743" ph="{...}" />
-            <marker date="1468581712157" expanded="true" signature="786:806" ph="{...}" />
-            <marker date="1468581712157" expanded="true" signature="848:946" ph="{...}" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -656,22 +642,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="144">
           <caret line="8" column="0" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
-          <folding>
-            <marker date="1468581712157" expanded="true" signature="0:38" ph="//..." />
-            <marker date="1468581712157" expanded="true" signature="126:160" ph="..." />
-            <marker date="1468581712157" expanded="true" signature="191:885" ph="{...}" />
-            <marker date="1468581712157" expanded="false" signature="495:655" ph="&lt;CT,...Args,=std::enable_if&lt;std::is_base_of&lt;Component,CT&gt;::value&gt;::type&gt;" />
-            <marker date="1468581712157" expanded="true" signature="575:635" ph="&lt;~&gt;" />
-            <marker date="1468581712157" expanded="true" signature="755:883" ph="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="72">
-          <caret line="4" column="61" selection-start-line="4" selection-start-column="61" selection-end-line="4" selection-end-column="61" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -679,7 +649,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="198">
           <caret line="11" column="67" selection-start-line="11" selection-start-column="67" selection-end-line="11" selection-end-column="67" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -687,12 +656,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="162">
           <caret line="10" column="27" selection-start-line="10" selection-start-column="27" selection-end-line="10" selection-end-column="27" />
-          <folding>
-            <marker date="1468597847744" expanded="true" signature="0:38" ph="//..." />
-            <marker date="1468597847744" expanded="false" signature="112:147" ph="..." />
-            <marker date="1468597847744" expanded="true" signature="185:866" ph="{...}" />
-            <marker date="1468597847744" expanded="true" signature="765:794" ph="{...}" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -710,65 +674,93 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="360">
           <caret line="20" column="0" selection-start-line="20" selection-start-column="0" selection-end-line="20" selection-end-column="0" />
-          <folding>
-            <marker date="1468597933987" expanded="true" signature="0:37" ph="//..." />
-            <marker date="1468597933987" expanded="true" signature="128:269" ph="{...}" />
-          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/engine/include/EntityManager.hpp">
+    <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="215">
-          <caret line="39" column="23" selection-start-line="39" selection-start-column="23" selection-end-line="39" selection-end-column="23" />
-          <folding>
-            <marker date="1468598237074" expanded="true" signature="0:38" ph="//..." />
-            <marker date="1468598237074" expanded="true" signature="120:294" ph="..." />
-            <marker date="1468598237074" expanded="true" signature="316:1734" ph="{...}" />
-            <marker date="1468598237074" expanded="false" signature="558:722" ph="&lt;GO,...Args,=std::enable_if&lt;std::is_base_of&lt;GameObject,GO&gt;::value&gt;::type&gt;" />
-            <marker date="1468598237074" expanded="true" signature="639:715" ph="&lt;~&gt;" />
-            <marker date="1468598237074" expanded="true" signature="811:938" ph="{...}" />
-            <marker date="1468598237074" expanded="true" signature="944:978" ph="&lt;CT,...Args&gt;" />
-            <marker date="1468598237074" expanded="true" signature="1087:1376" ph="{...}" />
-            <marker date="1468598237074" expanded="true" signature="1473:1517" ph="{...}" />
-          </folding>
+        <state relative-caret-position="252">
+          <caret line="14" column="25" selection-start-line="14" selection-start-column="25" selection-end-line="14" selection-end-column="25" />
+          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/engine/src/GameObject.cpp">
+    <entry file="file://$PROJECT_DIR$/engine/src/EntityManager.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="179">
-          <caret line="35" column="0" selection-start-line="35" selection-start-column="0" selection-end-line="35" selection-end-column="0" />
+        <state relative-caret-position="108">
+          <caret line="6" column="15" selection-start-line="6" selection-start-column="15" selection-end-line="6" selection-end-column="15" />
           <folding>
-            <marker date="1468597995317" expanded="false" signature="9:44" ph="..." />
-            <marker date="1468597995317" expanded="true" signature="169:278" ph="{...}" />
-            <marker date="1468597995317" expanded="true" signature="324:351" ph="{...}" />
-            <marker date="1468597995317" expanded="true" signature="405:451" ph="{...}" />
-            <marker date="1468597995317" expanded="true" signature="507:553" ph="{...}" />
-            <marker date="1468597995317" expanded="true" signature="581:585" ph="{...}" />
-            <marker date="1468597995317" expanded="true" signature="634:741" ph="{...}" />
-            <marker date="1468597995317" expanded="true" signature="794:839" ph="{...}" />
-            <marker date="1468597995317" expanded="true" signature="882:968" ph="{...}" />
-            <marker date="1468597995317" expanded="true" signature="1018:1039" ph="{...}" />
+            <marker date="1468528280091" expanded="true" signature="0:38" ph="//..." />
+            <marker date="1468528280091" expanded="true" signature="101:105" ph="{...}" />
+            <marker date="1468528280091" expanded="true" signature="139:143" ph="{...}" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/test/src/main.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="234">
-          <caret line="16" column="52" selection-start-line="16" selection-start-column="52" selection-end-line="16" selection-end-column="52" />
+        <state relative-caret-position="324">
+          <caret line="22" column="0" selection-start-line="22" selection-start-column="0" selection-end-line="22" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/engine/include/GameObject.hpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="701">
-          <caret line="57" column="52" selection-start-line="57" selection-start-column="52" selection-end-line="57" selection-end-column="52" />
+        <state relative-caret-position="413">
+          <caret line="29" column="42" selection-start-line="29" selection-start-column="42" selection-end-line="29" selection-end-column="42" />
           <folding>
-            <element signature="e#626#767#0" expanded="true" />
-            <element signature="e#1023#1164#0" expanded="true" />
+            <marker date="1468616030942" expanded="true" signature="0:38" ph="//..." />
+            <marker date="1468616030942" expanded="false" signature="114:209" ph="..." />
+            <marker date="1468616030942" expanded="true" signature="244:1947" ph="{...}" />
+            <marker date="1468616030942" expanded="true" signature="662:811" ph="&lt;CT,=std::enable_if&lt;std::is_base_of&lt;IComponent,CT&gt;::value&gt;::type&gt;" />
+            <marker date="1468616030942" expanded="true" signature="728:804" ph="&lt;~&gt;" />
+            <marker date="1468616030942" expanded="true" signature="862:1052" ph="{...}" />
+            <marker date="1468616030942" expanded="true" signature="1059:1208" ph="&lt;CT,=std::enable_if&lt;std::is_base_of&lt;IComponent,CT&gt;::value&gt;::type&gt;" />
+            <marker date="1468616030942" expanded="true" signature="1125:1201" ph="&lt;~&gt;" />
+            <marker date="1468616030942" expanded="true" signature="1236:1733" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/engine/src/GameObject.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="737">
+          <caret line="60" column="0" selection-start-line="60" selection-start-column="0" selection-end-line="60" selection-end-column="0" />
+          <folding>
+            <marker date="1468616030982" expanded="false" signature="9:44" ph="..." />
+            <marker date="1468616030982" expanded="true" signature="169:278" ph="{...}" />
+            <marker date="1468616030982" expanded="true" signature="324:351" ph="{...}" />
+            <marker date="1468616030982" expanded="true" signature="405:451" ph="{...}" />
+            <marker date="1468616030982" expanded="true" signature="507:553" ph="{...}" />
+            <marker date="1468616030982" expanded="true" signature="581:585" ph="{...}" />
+            <marker date="1468616030982" expanded="true" signature="634:741" ph="{...}" />
+            <marker date="1468616030982" expanded="true" signature="794:839" ph="{...}" />
+            <marker date="1468616030982" expanded="true" signature="892:936" ph="{...}" />
+            <marker date="1468616030982" expanded="true" signature="979:1065" ph="{...}" />
+            <marker date="1468616030982" expanded="true" signature="1115:1136" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/engine/include/ISystem.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="396">
+          <caret line="22" column="0" selection-start-line="22" selection-start-column="0" selection-end-line="22" selection-end-column="0" />
+          <folding>
+            <marker date="1468616827447" expanded="true" signature="0:38" ph="//..." />
+            <marker date="1468616827447" expanded="true" signature="139:304" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/engine/include/EntityManager.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="413">
+          <caret line="43" column="0" selection-start-line="43" selection-start-column="0" selection-end-line="43" selection-end-column="0" />
+          <folding>
+            <element signature="e#572#728#0" expanded="true" />
+            <element signature="e#948#974#0" expanded="true" />
           </folding>
         </state>
       </provider>

@@ -27,6 +27,7 @@ public:
 
 public:
     void attachComponent(IComponent *comp);
+    void detachComponent(IComponent *comp);
 
     template<class CT,
              typename = typename std::enable_if<
