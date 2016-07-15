@@ -23,6 +23,7 @@ public:
 public:
     EntityManager(EntityManager const& o) = delete;
     EntityManager(EntityManager&& o)      = delete;
+    EntityManager& operator=(EntityManager const& o) = delete;
 
 public:
     template<class GO, class ...Args,
@@ -40,10 +41,13 @@ public:
     constexpr CT& attachComponent(GameObject const& parent, std::string const& name, Args... params) noexcept
     {
         std::cout << parent.get_name() << " " << name << std::endl;
+
+        auto str = parent.get_name();
+
         _components.emplace(hashCompName(parent.get_name(), name),
                             std::make_unique<CT>(name, std::forward(params)...));
 
-        return *_components[name];
+        return *_components[hashCompName(parent.get_name(), name)];
     };
 
 private:

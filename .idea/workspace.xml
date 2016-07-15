@@ -13,14 +13,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4280985d-7a16-441e-b4ac-bb28c26932fb" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/engine/include/ComponentFactory.hpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/kengine.iml" afterPath="$PROJECT_DIR$/.idea/kengine.iml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/engine/include/Component.hpp" afterPath="$PROJECT_DIR$/engine/include/Component.hpp" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/engine/include/EntityManager.hpp" afterPath="$PROJECT_DIR$/engine/include/EntityManager.hpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/engine/include/GameObject.hpp" afterPath="$PROJECT_DIR$/engine/include/GameObject.hpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/engine/src/Component.cpp" afterPath="$PROJECT_DIR$/engine/src/Component.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/engine/src/GameObject.cpp" afterPath="$PROJECT_DIR$/engine/src/GameObject.cpp" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test/src/main.cpp" afterPath="$PROJECT_DIR$/test/src/main.cpp" />
     </list>
     <ignored path="kengine.iws" />
@@ -47,8 +41,8 @@
           <file leaf-file-name="main.cpp" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/test/src/main.cpp">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="252">
-                  <caret line="17" column="0" selection-start-line="17" selection-start-column="0" selection-end-line="17" selection-end-column="0" />
+                <state relative-caret-position="216">
+                  <caret line="15" column="27" selection-start-line="15" selection-start-column="27" selection-end-line="15" selection-end-column="27" />
                   <folding />
                 </state>
               </provider>
@@ -58,13 +52,13 @@
       </split-first>
       <split-second>
         <leaf>
-          <file leaf-file-name="Component.cpp" pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/engine/src/Component.cpp">
+          <file leaf-file-name="EntityManager.hpp" pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/engine/include/EntityManager.hpp">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="251">
-                  <caret line="15" column="0" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
+                <state relative-caret-position="665">
+                  <caret line="49" column="63" selection-start-line="49" selection-start-column="63" selection-end-line="49" selection-end-column="63" />
                   <folding>
-                    <element signature="e#40#58#0" expanded="true" />
+                    <element signature="e#950#976#0" expanded="true" />
                   </folding>
                 </state>
               </provider>
@@ -95,10 +89,10 @@
         <option value="$PROJECT_DIR$/engine/src/GameObject.cpp" />
         <option value="$PROJECT_DIR$/CMakeLists.txt" />
         <option value="$PROJECT_DIR$/engine/CMakeLists.txt" />
-        <option value="$PROJECT_DIR$/engine/src/Component.cpp" />
         <option value="$PROJECT_DIR$/engine/include/GameObject.hpp" />
         <option value="$PROJECT_DIR$/engine/include/ComponentFactory.hpp" />
         <option value="$PROJECT_DIR$/engine/include/Component.hpp" />
+        <option value="$PROJECT_DIR$/engine/src/Component.cpp" />
         <option value="$PROJECT_DIR$/test/src/main.cpp" />
         <option value="$PROJECT_DIR$/engine/include/EntityManager.hpp" />
       </list>
@@ -111,9 +105,9 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="-7" />
-    <option name="y" value="-27" />
-    <option name="width" value="1934" />
+    <option name="x" value="-1" />
+    <option name="y" value="-33" />
+    <option name="width" value="1922" />
     <option name="height" value="1114" />
   </component>
   <component name="ProjectInspectionProfilesVisibleTreeState">
@@ -169,7 +163,7 @@
     <property name="settings.editor.splitter.proportion" value="0.2" />
     <property name="js-jscs-nodeInterpreter" value="/usr/bin/node" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="SearchEverywhereHistoryKey" value="em&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/EntityManager.hpp&#10;cf&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/ComponentFactory.hpp&#10;com&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/Component.hpp&#10;Co&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/src/Component.cpp&#10;om&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/Component.hpp&#10;EM&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/EntityManager.hpp&#10;CF&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/ComponentFactory.hpp&#10;Com&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/Component.hpp&#10;ain&#9;FILE&#9;file:///home/naliwe/work/kengine/test/src/main.cpp&#10;mai&#9;FILE&#9;file:///home/naliwe/work/kengine/test/src/main.cpp&#10;CMakeLists&#9;FILE&#9;file:///home/naliwe/work/kengine/CMakeLists.txt&#10;CM&#9;FILE&#9;file:///home/naliwe/work/kengine/CMakeLists.txt&#10;main&#9;FILE&#9;file:///home/naliwe/work/kengine/test/src/main.cpp&#10;Ga&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/GameObject.hpp&#10;Game&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/src/GameObject.cpp&#10;cma&#9;FILE&#9;file:///home/naliwe/work/kengine/CMakeLists.txt&#10;co&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/src/Component.cpp" />
+    <property name="SearchEverywhereHistoryKey" value="em&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/EntityManager.hpp&#10;cf&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/ComponentFactory.hpp&#10;main&#9;FILE&#9;file:///home/naliwe/work/kengine/test/src/main.cpp&#10;GO&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/GameObject.hpp&#10;com&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/Component.hpp&#10;Co&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/src/Component.cpp&#10;om&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/Component.hpp&#10;EM&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/EntityManager.hpp&#10;CF&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/ComponentFactory.hpp&#10;Com&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/Component.hpp&#10;ain&#9;FILE&#9;file:///home/naliwe/work/kengine/test/src/main.cpp&#10;mai&#9;FILE&#9;file:///home/naliwe/work/kengine/test/src/main.cpp&#10;CMakeLists&#9;FILE&#9;file:///home/naliwe/work/kengine/CMakeLists.txt&#10;CM&#9;FILE&#9;file:///home/naliwe/work/kengine/CMakeLists.txt&#10;Ga&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/include/GameObject.hpp&#10;Game&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/src/GameObject.cpp&#10;cma&#9;FILE&#9;file:///home/naliwe/work/kengine/CMakeLists.txt&#10;co&#9;FILE&#9;file:///home/naliwe/work/kengine/engine/src/Component.cpp" />
     <property name="FullScreen" value="true" />
   </component>
   <component name="RecentsManager">
@@ -381,16 +375,16 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-7" y="-27" width="1934" height="1114" extended-state="6" />
+    <frame x="-1" y="-33" width="1922" height="1114" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.12532912" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3351852" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33425927" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="CMake" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32903227" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32905984" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32985386" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32962963" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3287037" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
@@ -437,7 +431,10 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="6" />
+      <breakpoints-dialog>
+        <breakpoints-dialog />
+      </breakpoints-dialog>
+      <option name="time" value="8" />
     </breakpoint-manager>
     <watches-manager>
       <configuration name="CMakeRunConfiguration">
@@ -449,11 +446,49 @@
     </watches-manager>
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/test/src/main.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="216">
+          <caret line="12" column="0" selection-start-line="12" selection-start-column="0" selection-end-line="12" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/engine/src/Component.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <marker date="1468581712157" expanded="true" signature="0:38" ph="//..." />
+            <marker date="1468581712157" expanded="true" signature="49:83" ph="..." />
+            <marker date="1468581712157" expanded="true" signature="245:313" ph="{...}" />
+            <marker date="1468581712157" expanded="true" signature="355:382" ph="{...}" />
+            <marker date="1468581712157" expanded="true" signature="433:479" ph="{...}" />
+            <marker date="1468581712157" expanded="true" signature="532:578" ph="{...}" />
+            <marker date="1468581712157" expanded="true" signature="613:636" ph="{...}" />
+            <marker date="1468581712157" expanded="true" signature="683:743" ph="{...}" />
+            <marker date="1468581712157" expanded="true" signature="786:806" ph="{...}" />
+            <marker date="1468581712157" expanded="true" signature="848:946" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/engine/src/Component.cpp">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="126">
           <caret line="7" column="0" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
-          <folding />
+          <folding>
+            <marker date="1468581712157" expanded="true" signature="0:38" ph="//..." />
+            <marker date="1468581712157" expanded="true" signature="49:83" ph="..." />
+            <marker date="1468581712157" expanded="true" signature="245:313" ph="{...}" />
+            <marker date="1468581712157" expanded="true" signature="355:382" ph="{...}" />
+            <marker date="1468581712157" expanded="true" signature="433:479" ph="{...}" />
+            <marker date="1468581712157" expanded="true" signature="532:578" ph="{...}" />
+            <marker date="1468581712157" expanded="true" signature="613:636" ph="{...}" />
+            <marker date="1468581712157" expanded="true" signature="683:743" ph="{...}" />
+            <marker date="1468581712157" expanded="true" signature="786:806" ph="{...}" />
+            <marker date="1468581712157" expanded="true" signature="848:946" ph="{...}" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -461,11 +496,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="504">
           <caret line="28" column="55" selection-start-line="28" selection-start-column="55" selection-end-line="28" selection-end-column="55" />
-          <folding>
-            <marker date="1468545708876" expanded="true" signature="0:38" ph="//..." />
-            <marker date="1468545708876" expanded="true" signature="112:147" ph="..." />
-            <marker date="1468545708876" expanded="true" signature="185:790" ph="{...}" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -481,7 +512,18 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="108">
           <caret line="6" column="13" selection-start-line="6" selection-start-column="13" selection-end-line="6" selection-end-column="13" />
-          <folding />
+          <folding>
+            <marker date="1468581712157" expanded="true" signature="0:38" ph="//..." />
+            <marker date="1468581712157" expanded="true" signature="49:83" ph="..." />
+            <marker date="1468581712157" expanded="true" signature="245:313" ph="{...}" />
+            <marker date="1468581712157" expanded="true" signature="355:382" ph="{...}" />
+            <marker date="1468581712157" expanded="true" signature="433:479" ph="{...}" />
+            <marker date="1468581712157" expanded="true" signature="532:578" ph="{...}" />
+            <marker date="1468581712157" expanded="true" signature="613:636" ph="{...}" />
+            <marker date="1468581712157" expanded="true" signature="683:743" ph="{...}" />
+            <marker date="1468581712157" expanded="true" signature="786:806" ph="{...}" />
+            <marker date="1468581712157" expanded="true" signature="848:946" ph="{...}" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -490,7 +532,9 @@
         <state relative-caret-position="522">
           <caret line="29" column="48" selection-start-line="29" selection-start-column="48" selection-end-line="29" selection-end-column="48" />
           <folding>
-            <element signature="e#104#122#0" expanded="false" />
+            <marker date="1468581712157" expanded="true" signature="0:38" ph="//..." />
+            <marker date="1468581712157" expanded="false" signature="114:188" ph="..." />
+            <marker date="1468581712157" expanded="true" signature="223:865" ph="{...}" />
           </folding>
         </state>
       </provider>
@@ -499,10 +543,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="252">
           <caret line="14" column="23" selection-start-line="14" selection-start-column="23" selection-end-line="14" selection-end-column="23" />
-          <folding>
-            <marker date="1468531421009" expanded="true" signature="0:37" ph="//..." />
-            <marker date="1468531421009" expanded="true" signature="128:212" ph="{...}" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -510,9 +551,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="162">
           <caret line="9" column="17" selection-start-line="9" selection-start-column="17" selection-end-line="9" selection-end-column="17" />
-          <folding>
-            <marker date="1467737525386" expanded="true" signature="132:242" ph="{...}" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -520,9 +558,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="252">
           <caret line="14" column="0" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
-          <folding>
-            <element signature="e#104#126#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -530,11 +565,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <marker date="1468545708876" expanded="true" signature="0:38" ph="//..." />
-            <marker date="1468545708876" expanded="true" signature="112:147" ph="..." />
-            <marker date="1468545708876" expanded="true" signature="185:790" ph="{...}" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -584,9 +615,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="162">
           <caret line="9" column="17" selection-start-line="9" selection-start-column="17" selection-end-line="9" selection-end-column="17" />
-          <folding>
-            <marker date="1467737525386" expanded="true" signature="132:242" ph="{...}" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -594,10 +622,55 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="324">
           <caret line="18" column="0" selection-start-line="18" selection-start-column="0" selection-end-line="18" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/engine/src/GameObject.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="501">
+          <caret line="56" column="14" selection-start-line="56" selection-start-column="14" selection-end-line="56" selection-end-column="14" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="72">
+          <caret line="4" column="61" selection-start-line="4" selection-start-column="61" selection-end-line="4" selection-end-column="61" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/engine/CMakeLists.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="10" column="40" selection-start-line="10" selection-start-column="40" selection-end-line="10" selection-end-column="40" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/engine/include/IComponent.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="162">
+          <caret line="10" column="6" selection-start-line="10" selection-start-column="6" selection-end-line="10" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/engine/include/Component.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="432">
+          <caret line="24" column="23" selection-start-line="24" selection-start-column="23" selection-end-line="24" selection-end-column="23" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/engine/include/GameObject.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="162">
+          <caret line="12" column="28" selection-start-line="12" selection-start-column="26" selection-end-line="12" selection-end-column="32" />
           <folding>
-            <marker date="1468528280091" expanded="true" signature="0:38" ph="//..." />
-            <marker date="1468528280091" expanded="true" signature="101:105" ph="{...}" />
-            <marker date="1468528280091" expanded="true" signature="139:143" ph="{...}" />
+            <marker date="1468581712157" expanded="true" signature="0:38" ph="//..." />
+            <marker date="1468581712157" expanded="false" signature="114:188" ph="..." />
+            <marker date="1468581712157" expanded="true" signature="223:865" ph="{...}" />
           </folding>
         </state>
       </provider>
@@ -606,80 +679,33 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="162">
           <caret line="9" column="6" selection-start-line="9" selection-start-column="6" selection-end-line="9" selection-end-column="6" />
-          <folding>
-            <marker date="1468531421009" expanded="true" signature="0:37" ph="//..." />
-            <marker date="1468531421009" expanded="true" signature="128:212" ph="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/engine/src/GameObject.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="501">
-          <caret line="56" column="14" selection-start-line="56" selection-start-column="14" selection-end-line="56" selection-end-column="14" />
-          <folding>
-            <marker date="1468544332916" expanded="true" signature="9:44" ph="..." />
-            <marker date="1468544332916" expanded="true" signature="169:272" ph="{...}" />
-            <marker date="1468544332916" expanded="true" signature="318:345" ph="{...}" />
-            <marker date="1468544332916" expanded="true" signature="399:445" ph="{...}" />
-            <marker date="1468544332916" expanded="true" signature="501:547" ph="{...}" />
-            <marker date="1468544332916" expanded="true" signature="575:579" ph="{...}" />
-            <marker date="1468544332916" expanded="true" signature="628:735" ph="{...}" />
-            <marker date="1468544332916" expanded="true" signature="794:813" ph="{...}" />
-            <marker date="1468544332916" expanded="true" signature="867:886" ph="{...}" />
-            <marker date="1468544332916" expanded="true" signature="929:1015" ph="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="72">
-          <caret line="4" column="61" selection-start-line="4" selection-start-column="61" selection-end-line="4" selection-end-column="61" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/engine/CMakeLists.txt">
+    <entry file="file://$PROJECT_DIR$/test/src/main.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="10" column="40" selection-start-line="10" selection-start-column="40" selection-end-line="10" selection-end-column="40" />
+        <state relative-caret-position="216">
+          <caret line="15" column="27" selection-start-line="15" selection-start-column="27" selection-end-line="15" selection-end-column="27" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/engine/include/GameObject.hpp">
+    <entry file="file://$PROJECT_DIR$/engine/src/Component.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="558">
-          <caret line="34" column="39" selection-start-line="34" selection-start-column="39" selection-end-line="34" selection-end-column="39" />
+        <state relative-caret-position="342">
+          <caret line="19" column="10" selection-start-line="19" selection-start-column="10" selection-end-line="19" selection-end-column="10" />
           <folding>
-            <marker date="1468544326097" expanded="true" signature="0:38" ph="//..." />
-            <marker date="1468544326097" expanded="false" signature="114:188" ph="..." />
-            <marker date="1468544326097" expanded="true" signature="223:865" ph="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/engine/include/IComponent.hpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="162">
-          <caret line="10" column="6" selection-start-line="10" selection-start-column="6" selection-end-line="10" selection-end-column="6" />
-          <folding>
-            <marker date="1467749324056" expanded="true" signature="0:38" ph="//..." />
-            <marker date="1467749324056" expanded="false" signature="114:149" ph="..." />
-            <marker date="1467749324056" expanded="true" signature="184:277" ph="{...}" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/engine/include/Component.hpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="432">
-          <caret line="24" column="23" selection-start-line="24" selection-start-column="23" selection-end-line="24" selection-end-column="23" />
-          <folding>
-            <marker date="1468545708876" expanded="true" signature="0:38" ph="//..." />
-            <marker date="1468545708876" expanded="true" signature="112:147" ph="..." />
-            <marker date="1468545708876" expanded="true" signature="185:790" ph="{...}" />
+            <marker date="1468581712157" expanded="true" signature="0:38" ph="//..." />
+            <marker date="1468581712157" expanded="true" signature="49:83" ph="..." />
+            <marker date="1468581712157" expanded="true" signature="245:313" ph="{...}" />
+            <marker date="1468581712157" expanded="true" signature="355:382" ph="{...}" />
+            <marker date="1468581712157" expanded="true" signature="433:479" ph="{...}" />
+            <marker date="1468581712157" expanded="true" signature="532:578" ph="{...}" />
+            <marker date="1468581712157" expanded="true" signature="613:636" ph="{...}" />
+            <marker date="1468581712157" expanded="true" signature="683:743" ph="{...}" />
+            <marker date="1468581712157" expanded="true" signature="786:806" ph="{...}" />
+            <marker date="1468581712157" expanded="true" signature="848:946" ph="{...}" />
           </folding>
         </state>
       </provider>
@@ -689,49 +715,23 @@
         <state relative-caret-position="144">
           <caret line="8" column="0" selection-start-line="8" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
           <folding>
-            <marker date="1468545582967" expanded="true" signature="0:38" ph="//..." />
-            <marker date="1468545582967" expanded="true" signature="126:160" ph="..." />
-            <marker date="1468545582967" expanded="true" signature="191:885" ph="{...}" />
-            <marker date="1468545582967" expanded="true" signature="495:655" ph="&lt;CT,...Args,=std::enable_if&lt;std::is_base_of&lt;Component,CT&gt;::value&gt;::type&gt;" />
-            <marker date="1468545582967" expanded="true" signature="575:635" ph="&lt;~&gt;" />
-            <marker date="1468545582967" expanded="true" signature="755:883" ph="{...}" />
+            <marker date="1468581712157" expanded="true" signature="0:38" ph="//..." />
+            <marker date="1468581712157" expanded="true" signature="126:160" ph="..." />
+            <marker date="1468581712157" expanded="true" signature="191:885" ph="{...}" />
+            <marker date="1468581712157" expanded="false" signature="495:655" ph="&lt;CT,...Args,=std::enable_if&lt;std::is_base_of&lt;Component,CT&gt;::value&gt;::type&gt;" />
+            <marker date="1468581712157" expanded="true" signature="575:635" ph="&lt;~&gt;" />
+            <marker date="1468581712157" expanded="true" signature="755:883" ph="{...}" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/engine/include/EntityManager.hpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="629">
-          <caret line="43" column="47" selection-start-line="43" selection-start-column="47" selection-end-line="43" selection-end-column="47" />
+        <state relative-caret-position="665">
+          <caret line="49" column="63" selection-start-line="49" selection-start-column="63" selection-end-line="49" selection-end-column="63" />
           <folding>
-            <marker date="1468545857395" expanded="true" signature="0:38" ph="//..." />
-            <marker date="1468545857395" expanded="true" signature="120:292" ph="..." />
-            <marker date="1468545857395" expanded="true" signature="314:1646" ph="{...}" />
-            <marker date="1468545857395" expanded="true" signature="493:657" ph="&lt;GO,...Args,=std::enable_if&lt;std::is_base_of&lt;GameObject,GO&gt;::value&gt;::type&gt;" />
-            <marker date="1468545857395" expanded="true" signature="574:650" ph="&lt;~&gt;" />
-            <marker date="1468545857395" expanded="true" signature="746:873" ph="{...}" />
-            <marker date="1468545857395" expanded="true" signature="879:913" ph="&lt;CT,...Args&gt;" />
-            <marker date="1468545857395" expanded="true" signature="1028:1288" ph="{...}" />
-            <marker date="1468545857395" expanded="true" signature="1385:1429" ph="{...}" />
+            <element signature="e#950#976#0" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/engine/src/Component.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="251">
-          <caret line="15" column="0" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
-          <folding>
-            <element signature="e#40#58#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/test/src/main.cpp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="252">
-          <caret line="17" column="0" selection-start-line="17" selection-start-column="0" selection-end-line="17" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
