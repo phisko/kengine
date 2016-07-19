@@ -9,4 +9,4 @@ file(GLOB src_files
         )
 
 add_library(kengine SHARED ${src_files})
-target_link_libraries(kengine sfml-graphics sfml-window sfml-system)
+target_link_libraries(kengine sfml-audio sfml-graphics sfml-window sfml-system)
