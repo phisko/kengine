@@ -11,8 +11,10 @@ class Object
 {
 public:
     virtual std::string toString() const = 0;
+    virtual std::string const& get_name() const = 0;
 
-    virtual ~Object() { }
+    virtual ~Object()
+    { }
 };
 
 #endif //KENGINE_OBJECT_HPP

@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <EntityManager.hpp>
+#include <assert.h>
 #include "KTypes.hpp"
 
 int main()
@@ -14,8 +15,9 @@ int main()
     auto entity = em.createEntity<GameObject>("LeTest");
 
     auto comp = em.attachComponent<Component>(entity, "LeComp");
+    auto otherComp = entity.getComponent<Component>();
 
-    std::cout << entity.toString() << std::endl << comp.toString() << std::endl;
+    std::cout << entity.toString() << std::endl << comp.toString() << otherComp.toString() << std::endl;
 
     return (0);
 }
