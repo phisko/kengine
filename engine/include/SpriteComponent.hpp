@@ -14,30 +14,33 @@
 
 class SpriteComponent : public IComponent
 {
-public:
+ public:
   static ComponentMask Mask;
 
-public:
+ public:
   SpriteComponent(const std::string& name);
   SpriteComponent(const SpriteComponent& other);
   SpriteComponent(SpriteComponent&& other);
-  SpriteComponent&	operator=(SpriteComponent other);
-  SpriteComponent&	operator=(SpriteComponent&& other);
-  virtual ~SpriteComponent() {}
+  SpriteComponent& operator=(SpriteComponent other);
+  SpriteComponent& operator=(SpriteComponent&& other);
+  virtual ~SpriteComponent()
+  { }
 
-public:
-  bool	isUnique() const;
+ public:
+  bool isUnique() const;
 
-public:
+ public:
   friend void swap(SpriteComponent& left, SpriteComponent& right);
 
-public:
+ public:
   virtual ComponentMask getMask() const override;
-  virtual std::string	toString() const override;
+  virtual std::string toString() const override;
+  virtual std::string const& get_name() const override
+  { return _name; }
 
-private:
-  std::string		_name;
-  static const bool	_unique;
+ private:
+  std::string       _name;
+  static const bool _unique;
 };
 
 #endif //!SPRITECOMPONENT_HPP_

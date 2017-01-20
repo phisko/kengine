@@ -14,12 +14,6 @@ GameObject::GameObject(GameObject const& other)
     }
 }
 
-
-GameObject::GameObject(GameObject&& other)
-{
-    swap(*this, other);
-}
-
 GameObject& GameObject::operator=(GameObject other)
 {
     swap(*this, other);

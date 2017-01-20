@@ -17,11 +17,6 @@ Component::Component(Component const& other)
     }
 }
 
-Component::Component(Component&& other)
-{
-    swap(*this, other);
-}
-
 Component& Component::operator=(Component other)
 {
     swap(*this, other);

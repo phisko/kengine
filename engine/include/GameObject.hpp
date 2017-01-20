@@ -16,7 +16,6 @@ class GameObject : public Object
 public:
     GameObject(std::string const& name);
     GameObject(GameObject const& other);
-    GameObject(GameObject&& other);
     GameObject& operator=(GameObject other);
     GameObject& operator=(GameObject&& other);
 

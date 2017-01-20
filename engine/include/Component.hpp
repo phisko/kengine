@@ -10,41 +10,36 @@
 
 class Component : public IComponent
 {
-public:
-    static ComponentMask Mask;
-public:
-    Component(std::string const& name)
-            : _name(name)
-    { }
+ public:
+  static ComponentMask Mask;
+ public:
+  Component(std::string const& name)
+    : _name(name)
+  { }
 
-    Component(Component const& other);
-    Component(Component&& other);
-    Component& operator=(Component other);
-    Component& operator=(Component&& other);
+  Component(Component const& other);
+  Component& operator=(Component other);
+  Component& operator=(Component&& other);
 
-    virtual ~Component()
-    { }
+  virtual ~Component()
+  { }
 
-public:
-    bool isUnique() const;
+ public:
+  bool isUnique() const;
 
-public:
-    friend void swap(Component& left, Component& right);
+ public:
+  friend void swap(Component& left, Component& right);
 
-public:
-    virtual ComponentMask getMask() const override;
-    virtual std::string   toString() const override;
+ public:
+  virtual ComponentMask getMask() const override;
+  virtual std::string toString() const override;
 
+  std::string const& get_name() const
+  { return _name; }
 
-    std::string const& get_name() const
-    {
-        return _name;
-    }
-
-private:
-    std::string       _name;
-    static const bool _unique;
+ private:
+  std::string       _name;
+  static const bool _unique;
 };
-
 
 #endif //KENGINE_COMPONENT_HPP

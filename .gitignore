@@ -32,3 +32,4 @@
 
 # Directories
 cmake/
+cmake-build-debug/
