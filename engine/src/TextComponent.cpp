@@ -53,7 +53,5 @@ ComponentMask TextComponent::getMask() const
 
 std::string TextComponent::toString() const
 {
-    std::stringstream ss;
-    ss << _text << std::endl;
-    return ss.str();
+    return _text;
 }
