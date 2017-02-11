@@ -4,17 +4,17 @@
 
 #include "TextSystem.hpp"
 
-TextSystem::TextSystem(TextComponent &comp)
+TextSystem::TextSystem()
 {
 }
 
 void TextSystem::execute()
 {
-    for(auto const& item : textcomponents)
+    for(auto const& item : _textComponents)
         std::cout << item.toString() << std::endl;
 }
 
 void TextSystem::registerComponent(TextComponent& comp)
 {
-    textcomponents.push_back(comp);
+    _textComponents.push_back(comp);
 }

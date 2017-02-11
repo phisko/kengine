@@ -10,7 +10,7 @@ GameObject::GameObject(GameObject const& other)
     if (this != &other)
     {
         _name       = other._name;
-        _components = _components;
+        _components = other._components;
     }
 }
 
@@ -29,9 +29,7 @@ GameObject& GameObject::operator=(GameObject&& other)
 }
 
 GameObject::~GameObject()
-{
-
-}
+{ }
 
 void swap(GameObject& left, GameObject& right)
 {

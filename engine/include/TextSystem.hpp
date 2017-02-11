@@ -12,15 +12,17 @@
 class TextSystem : ISystem
 {
 public:
-    TextSystem(TextComponent& comp);
-    ~TextSystem(){};
+    TextSystem();
+
+    ~TextSystem()
+    {};
 
 public:
     void execute();
     void registerComponent(TextComponent& comp);
 
 private:
-    std::vector<TextComponent> textcomponents;
+    std::vector<TextComponent> _textComponents;
 };
 
 #endif //KENGINE_TEXTSYSTEM_HPP
