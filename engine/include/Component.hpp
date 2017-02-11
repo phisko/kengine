@@ -25,7 +25,7 @@ public:
 public:
     friend void swap(Component& left, Component& right);
 
-private:
+protected:
     GameObject const *const _parent;
     std::string       _name;
     static const bool _unique;
