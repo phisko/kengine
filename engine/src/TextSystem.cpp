@@ -4,6 +4,8 @@
 
 #include "TextSystem.hpp"
 
+const ComponentMask TextSystem::Mask = ComponentMask::Ui;
+
 TextSystem::TextSystem()
 {
 }
@@ -14,7 +16,7 @@ void TextSystem::execute()
         std::cout << item.toString() << std::endl;
 }
 
-void TextSystem::registerComponent(TextComponent& comp)
+void TextSystem::registerComponent(Component& comp)
 {
     _textComponents.push_back(comp);
 }

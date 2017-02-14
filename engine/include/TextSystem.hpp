@@ -5,12 +5,15 @@
 #ifndef KENGINE_TEXTSYSTEM_HPP
 # define KENGINE_TEXTSYSTEM_HPP
 
-#include <vector>
+# include <vector>
 # include "TextComponent.hpp"
 # include "ISystem.hpp"
 
-class TextSystem : ISystem
+class TextSystem : public ISystem
 {
+public:
+    static const ComponentMask Mask;
+
 public:
     TextSystem();
 
@@ -19,10 +22,10 @@ public:
 
 public:
     void execute();
-    void registerComponent(TextComponent& comp);
+    void registerComponent(Component& comp);
 
 private:
-    std::vector<TextComponent> _textComponents;
+    std::vector<Component> _textComponents;
 };
 
 #endif //KENGINE_TEXTSYSTEM_HPP

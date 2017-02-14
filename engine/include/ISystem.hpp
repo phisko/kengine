@@ -10,8 +10,11 @@
 class ISystem
 {
 public:
+    static const ComponentMask Mask;
+
+public:
     virtual ~ISystem()
-    { }
+    {}
 
 public:
     virtual void execute()                          = 0;
