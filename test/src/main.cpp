@@ -17,7 +17,8 @@ int main()
     auto comp = em.attachComponent<Component>(entity, "LeComp");
     auto otherComp = entity.getComponent<Component>();
 
-    std::cout << entity.toString() << std::endl << comp.toString() << otherComp.toString() << std::endl;
+    std::cout << entity.toString() << std::endl << comp.toString()
+              << otherComp.toString() << std::endl;
 
     return (0);
 }

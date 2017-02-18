@@ -12,7 +12,7 @@ class ComponentFactory final
 {
 public:
     ComponentFactory()
-    { }
+    {}
 
 public:
     ComponentFactory(ComponentFactory const& o) = delete;
@@ -23,9 +23,9 @@ public:
 
 public:
     template<class CT, class... Args,
-            typename = typename std::enable_if<
-                    std::is_base_of<Component, CT>::value>
-            ::type>
+             typename = typename std::enable_if<
+                     std::is_base_of<Component, CT>::value>
+             ::type>
     static constexpr auto createComponent(std::string const& name, Args&& ... params) noexcept
     {
         std::unique_ptr<CT> ret(nullptr);
