@@ -22,10 +22,10 @@ public:
 
 public:
     void execute();
-    void registerComponent(Component& comp);
+    void registerGameObject(GameObject& gameObject);
 
 private:
-    std::vector<Component> _textComponents;
+    std::vector<GameObject*> _gameObjects;
 };
 
 #endif //KENGINE_TEXTSYSTEM_HPP

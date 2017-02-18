@@ -23,13 +23,12 @@ public:
 
 public:
     template<class CT, class... Args,
-             typename = typename std::enable_if<
-                     std::is_base_of<Component, CT>::value>
-             ::type>
+             typename = std::enable_if_t<
+                     std::is_base_of<IComponent, CT>::value>>
     static constexpr auto createComponent(std::string const& name, Args&& ... params) noexcept
     {
         std::unique_ptr<CT> ret(nullptr);
-        ret.reset(new CT(name, std::forward(params)...));
+        ret.reset(new CT(name, std::forward<Args>(params)...));
 
         return ret;
     }

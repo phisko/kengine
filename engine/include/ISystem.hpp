@@ -6,6 +6,7 @@
 # define KENGINE_ISYSTEM_HPP
 
 # include "Component.hpp"
+# include "GameObject.hpp"
 
 class ISystem
 {
@@ -18,7 +19,7 @@ public:
 
 public:
     virtual void execute()                          = 0;
-    virtual void registerComponent(Component& comp) = 0;
+    virtual void registerGameObject(GameObject& comp) = 0;
 };
 
 

@@ -63,10 +63,12 @@ public:
 
 public:
     std::string const& get_name() const;
+    ComponentMask getMask() const { return _mask; }
 
 private:
     std::string                         _name;
     std::map<std::string, IComponent *> _components;
+    ComponentMask                       _mask = ComponentMask::Default;
 };
 
 #endif //KENGINE_GAMEOBJECT_HPP

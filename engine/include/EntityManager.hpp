@@ -32,9 +32,9 @@ public:
              >::type>
     GO& createEntity(std::string const& name, Args&& ... params) noexcept
     {
-        _entities.emplace(name, std::make_unique<GO>(name, std::forward<Args>(params)...));
+        auto p = _entities.emplace(name, std::make_unique<GO>(name, std::forward<Args>(params)...));
 
-        return *_entities[name];
+        return *p.first->second;
     }
 
     template<class CT, class ... Args>
@@ -45,10 +45,11 @@ public:
         _components.emplace(str,
                             ComponentFactory::createComponent<CT>(name, std::forward<Args>(params)...));
 
-        parent.attachComponent(_components[str].get());
+        auto &comp = _components[str];
+        parent.attachComponent(comp.get());
         _compHierarchy.emplace(name, parent.get_name());
 
-        return *_components[str];
+        return static_cast<CT&>(*comp);
     };
 
     void detachComponent(GameObject& go, Component& comp)
@@ -70,7 +71,7 @@ private:
 
 private:
     std::map<std::string, std::unique_ptr<GameObject>> _entities;
-    std::map<std::string, std::unique_ptr<Component>>  _components;
+    std::map<std::string, std::unique_ptr<IComponent>>  _components;
     std::map<std::string, std::string>                 _compHierarchy;
 };
 

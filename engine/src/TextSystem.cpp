@@ -12,11 +12,11 @@ TextSystem::TextSystem()
 
 void TextSystem::execute()
 {
-    for(auto const& item : _textComponents)
-        std::cout << item.toString() << std::endl;
+    for (auto const& item : _gameObjects)
+        std::cout << item->toString() << std::endl;
 }
 
-void TextSystem::registerComponent(Component& comp)
+void TextSystem::registerGameObject(GameObject &gameObject)
 {
-    _textComponents.push_back(comp);
+    _gameObjects.push_back(&gameObject);
 }

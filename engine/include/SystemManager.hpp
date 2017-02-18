@@ -8,11 +8,13 @@
 # include <map>
 # include <memory>
 # include "ISystem.hpp"
-
-using system_map = std::multimap<ComponentMask, std::unique_ptr<ISystem>>;
+# include "GameObject.hpp"
 
 class SystemManager
 {
+private:
+    using system_map = std::multimap<ComponentMask, std::unique_ptr<ISystem>>;
+
 public:
     SystemManager(SystemManager const& o) = delete;
     SystemManager(SystemManager&& o) = delete;
@@ -20,6 +22,21 @@ public:
 
 public:
     SystemManager();
+
+public:
+    void execute()
+    {
+        for (auto &p : _sysMap)
+            p.second->execute();
+    }
+
+public:
+    void registerGameObject(GameObject &gameObject)
+    {
+        for (auto &p : _sysMap)
+            if ((unsigned char)p.first & (unsigned char)gameObject.getMask())
+                p.second->registerGameObject(gameObject);
+    }
 
 public:
     template<typename T,

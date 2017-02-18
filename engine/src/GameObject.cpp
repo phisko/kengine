@@ -42,6 +42,7 @@ void swap(GameObject& left, GameObject& right)
 void GameObject::attachComponent(IComponent *comp)
 {
     _components[comp->get_name()] = comp;
+    (unsigned char&)_mask |= (unsigned char)comp->getMask();
 }
 
 void GameObject::detachComponent(IComponent *comp)
