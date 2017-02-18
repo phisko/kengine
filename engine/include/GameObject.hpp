@@ -7,7 +7,7 @@
 
 # include <string>
 # include <map>
-#include <algorithm>
+# include <algorithm>
 # include "IComponent.hpp"
 # include "Object.hpp"
 
@@ -32,19 +32,19 @@ public:
              typename = typename std::enable_if<
                      std::is_base_of<IComponent, CT>::value
              >::type>
-    CT& getComponent(std::string const& name)
+    CT& getComponent(std::string const& name) const
     {
         if (_components.find(name) == _components.end())
             throw std::logic_error("Component " + name + " not found");
 
-        return static_cast<CT&>(*_components[name]);
+        return static_cast<CT&>(*_components.at(name));
     };
 
     template<class CT,
              typename = typename std::enable_if<
                      std::is_base_of<IComponent, CT>::value
              >::type>
-    CT& getComponent()
+    CT& getComponent() const
     {
         auto selected = std::find_if(_components.begin(), _components.end(),
                                      [](auto&& elem)

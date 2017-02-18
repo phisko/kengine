@@ -32,7 +32,7 @@ public:
              >::type>
     GO& createEntity(std::string const& name, Args&& ... params) noexcept
     {
-        _entities.emplace(name, std::make_unique<GO>(name, std::forward<Args...>(params)...));
+        _entities.emplace(name, std::make_unique<GO>(name, std::forward<Args>(params)...));
 
         return *_entities[name];
     }
@@ -43,8 +43,7 @@ public:
         auto str = hashCompName(parent.get_name(), name);
 
         _components.emplace(str,
-                            ComponentFactory::createComponent<CT>(name, std::forward<Args...>
-                                    (params)...));
+                            ComponentFactory::createComponent<CT>(name, std::forward<Args>(params)...));
 
         parent.attachComponent(_components[str].get());
         _compHierarchy.emplace(name, parent.get_name());

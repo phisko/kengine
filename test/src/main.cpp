@@ -6,6 +6,8 @@
 #include <iostream>
 #include <EntityManager.hpp>
 #include <assert.h>
+#include <SystemManager.hpp>
+#include <TextSystem.hpp>
 #include "KTypes.hpp"
 
 int main()
@@ -19,6 +21,10 @@ int main()
 
     std::cout << entity.toString() << std::endl << comp.toString()
               << otherComp.toString() << std::endl;
+
+    SystemManager sm;
+
+    sm.registerSystem<TextSystem>();
 
     return (0);
 }
