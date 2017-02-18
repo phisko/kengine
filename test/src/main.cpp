@@ -9,6 +9,7 @@
 #include <SystemManager.hpp>
 #include <TextSystem.hpp>
 #include "KTypes.hpp"
+#include "Vector.hpp"
 
 int main()
 {
