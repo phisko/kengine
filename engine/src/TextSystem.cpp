@@ -20,3 +20,9 @@ void TextSystem::registerGameObject(GameObject &gameObject)
 {
     _gameObjects.push_back(&gameObject);
 }
+
+
+void TextSystem::removeGameObject(GameObject &gameObject)
+{
+    _gameObjects.erase(std::find(_gameObjects.begin(), _gameObjects.end(), &gameObject));
+}

@@ -23,6 +23,7 @@ public:
 public:
     void execute();
     void registerGameObject(GameObject& gameObject);
+    void removeGameObject(GameObject& gameObject);
 
 private:
     std::vector<GameObject*> _gameObjects;

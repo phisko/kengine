@@ -6,7 +6,7 @@
 # define KENGINE_ENTITYMANAGER_HPP
 
 # include <string>
-# include <map>
+# include <unordered_map>
 # include <memory>
 # include <type_traits>
 # include <iostream>
@@ -32,9 +32,20 @@ public:
              >::type>
     GO& createEntity(std::string const& name, Args&& ... params) noexcept
     {
-        auto p = _entities.emplace(name, std::make_unique<GO>(name, std::forward<Args>(params)...));
+        const auto p = _entities.emplace(name, std::make_unique<GO>(name, std::forward<Args>(params)...));
 
         return *p.first->second;
+    }
+
+    GameObject *removeEntity(std::string const& name)
+    {
+        const auto p = _entities.find(name);
+        if (p == _entities.end())
+            throw std::out_of_range("No such entity");
+
+        const auto ret = p->second.get();
+        _entities.erase(p);
+        return ret;
     }
 
     template<class CT, class ... Args>
@@ -70,9 +81,9 @@ private:
     { return pName + "--" + cName; }
 
 private:
-    std::map<std::string, std::unique_ptr<GameObject>> _entities;
-    std::map<std::string, std::unique_ptr<IComponent>>  _components;
-    std::map<std::string, std::string>                 _compHierarchy;
+    std::unordered_map<std::string, std::unique_ptr<GameObject>> _entities;
+    std::unordered_map<std::string, std::unique_ptr<IComponent>>  _components;
+    std::unordered_map<std::string, std::string>                 _compHierarchy;
 };
 
 #endif //KENGINE_ENTITYMANAGER_HPP

@@ -5,7 +5,7 @@
 #ifndef MEETABLE_CORE_SYSTEMMANAGER_HPP
 # define MEETABLE_CORE_SYSTEMMANAGER_HPP
 
-# include <map>
+# include <unordered_map>
 # include <memory>
 # include "ISystem.hpp"
 # include "GameObject.hpp"
@@ -13,7 +13,7 @@
 class SystemManager
 {
 private:
-    using system_map = std::multimap<ComponentMask, std::unique_ptr<ISystem>>;
+    using system_map = std::unordered_multimap<ComponentMask, std::unique_ptr<ISystem>>;
 
 public:
     SystemManager(SystemManager const& o) = delete;
@@ -37,13 +37,19 @@ public:
             if ((unsigned char)p.first & (unsigned char)gameObject.getMask())
                 p.second->registerGameObject(gameObject);
     }
+    void removeGameObject(GameObject &gameObject)
+    {
+        for (auto &p : _sysMap)
+            if ((unsigned char)p.first & (unsigned char)gameObject.getMask())
+                p.second->removeGameObject(gameObject);
+    }
 
 public:
-    template<typename T,
+    template<typename T, typename ...Args,
              typename = std::enable_if_t<std::is_base_of<ISystem, T>::value>>
-    void registerSystem()
+    void registerSystem(Args &&...args)
     {
-        _sysMap.emplace(std::make_pair(T::Mask, std::make_unique<T>()));
+        _sysMap.emplace(std::make_pair(T::Mask, std::make_unique<T>(std::forward<Args>(args)...)));
     }
 
 private:

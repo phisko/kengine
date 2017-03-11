@@ -19,7 +19,8 @@ public:
 
 public:
     virtual void execute()                          = 0;
-    virtual void registerGameObject(GameObject& comp) = 0;
+    virtual void registerGameObject(GameObject& go) = 0;
+    virtual void removeGameObject(GameObject& go) = 0;
 };
 
 
