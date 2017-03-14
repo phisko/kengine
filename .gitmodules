@@ -1,0 +1,3 @@
+[submodule "engine/mediator"]
+	path = engine/mediator
+	url = git@github.com:phiste/mediator.git

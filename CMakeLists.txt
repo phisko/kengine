@@ -7,6 +7,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/)
 
 include_directories(test/include)
 include_directories(engine/include)
+include_directories(engine/mediator)
 
 add_subdirectory(engine)
 

@@ -7,15 +7,16 @@
 
 # include "Component.hpp"
 # include "GameObject.hpp"
+# include "Module.hpp"
 
-class ISystem
+class ISystem : public putils::Module
 {
 public:
     static const ComponentMask Mask;
 
 public:
-    virtual ~ISystem()
-    {}
+    ISystem(int tag = putils::DataPacket::Ignore) : Module(tag) {}
+    virtual ~ISystem() = default;
 
 public:
     virtual void execute()                          = 0;

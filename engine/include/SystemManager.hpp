@@ -17,11 +17,11 @@ private:
 
 public:
     SystemManager(SystemManager const& o) = delete;
-    SystemManager(SystemManager&& o) = delete;
     SystemManager& operator=(SystemManager const& o) = delete;
 
 public:
-    SystemManager();
+    SystemManager() = default;
+    ~SystemManager() = default;
 
 public:
     void execute()
@@ -34,22 +34,23 @@ public:
     void registerGameObject(GameObject &gameObject)
     {
         for (auto &p : _sysMap)
-            if ((unsigned char)p.first & (unsigned char)gameObject.getMask())
+            if (p.first & gameObject.getMask())
                 p.second->registerGameObject(gameObject);
     }
     void removeGameObject(GameObject &gameObject)
     {
         for (auto &p : _sysMap)
-            if ((unsigned char)p.first & (unsigned char)gameObject.getMask())
+            if (p.first & gameObject.getMask())
                 p.second->removeGameObject(gameObject);
     }
 
 public:
     template<typename T, typename ...Args,
              typename = std::enable_if_t<std::is_base_of<ISystem, T>::value>>
-    void registerSystem(Args &&...args)
+    T &registerSystem(Args &&...args)
     {
-        _sysMap.emplace(std::make_pair(T::Mask, std::make_unique<T>(std::forward<Args>(args)...)));
+        const auto p = _sysMap.emplace(std::make_pair(T::Mask, std::make_unique<T>(std::forward<Args>(args)...)));
+        return static_cast<T&>(*p->second);
     }
 
 private:

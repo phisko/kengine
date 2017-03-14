@@ -1,7 +1,17 @@
 cmake_minimum_required(VERSION 3.0)
 project(kengine)
 
+add_subdirectory(mediator)
+include_directories(mediator)
+
 include_directories(include)
+
+set(new_includes
+        ${CMAKE_CURRENT_LIST_DIR}/mediator
+        ${CMAKE_CURRENT_LIST_DIR}/include
+        )
+set(INCLUDE_DIRS ${INCLUDE_DIRS} ${new_includes} PARENT_SCOPE)
+include_directories(${INCLUDE_DIRS})
 
 file(GLOB src_files
         src/*.cpp
@@ -9,4 +19,4 @@ file(GLOB src_files
         )
 
 add_library(kengine SHARED ${src_files})
-target_link_libraries(kengine sfml-audio sfml-graphics sfml-window sfml-system)
+target_link_libraries(kengine mediator)

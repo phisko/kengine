@@ -5,7 +5,7 @@
 #ifndef KENGINE_KTYPES_HPP
 # define KENGINE_KTYPES_HPP
 
-enum class ComponentMask : unsigned
+enum ComponentMask
 {
     Default   = 0,
     Graphical = (1 << 0),

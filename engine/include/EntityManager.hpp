@@ -13,12 +13,18 @@
 # include "GameObject.hpp"
 # include "Component.hpp"
 # include "ComponentFactory.hpp"
+# include "SystemManager.hpp"
+# include "EntityFactory.hpp"
+# include "ModuleMediator.hpp"
 
 class EntityManager final
 {
 public:
-    EntityManager();
-    ~EntityManager();
+    EntityManager(std::unique_ptr<EntityFactory> &&factory)
+            : _factory(std::move(factory))
+    {}
+
+    ~EntityManager() = default;
 
 public:
     EntityManager(EntityManager const& o) = delete;
@@ -26,18 +32,40 @@ public:
     EntityManager& operator=(EntityManager const& o) = delete;
 
 public:
-    template<class GO, class ...Args,
-             typename = typename std::enable_if<
-                     std::is_base_of<GameObject, GO>::value
-             >::type>
-    GO& createEntity(std::string const& name, Args&& ... params) noexcept
-    {
-        const auto p = _entities.emplace(name, std::make_unique<GO>(name, std::forward<Args>(params)...));
+    void execute() { _sm.execute(); }
 
-        return *p.first->second;
+public:
+    template<typename T, typename ...Args>
+    void createSystem(Args &&...args)
+    {
+        auto &s = _sm.registerSystem<T>(std::forward<Args>(args)...);
+        _mediator.addModule(&s);
     }
 
-    GameObject *removeEntity(std::string const& name)
+public:
+    GameObject &createEntity(const std::string &type, const std::string &name)
+    {
+        return addEntity(name, _factory->make(type, name));
+    }
+
+    template<class GO, class ...Args,
+             typename = std::enable_if_t<std::is_base_of<GameObject, GO>::value>>
+    GO& createEntity(std::string const& name, Args&& ... params) noexcept
+    {
+        return addEntity(name, std::make_unique<GO>(name, std::forward<Args>(params)...));
+    }
+
+private:
+    GameObject &addEntity(const std::string &name, std::unique_ptr<GameObject> &&obj)
+    {
+        auto &ret = *obj;
+        const auto p = _entities.emplace(name, std::move(obj));
+        _sm.registerGameObject(*p.first->second);
+        return ret;
+    }
+
+public:
+    void removeEntity(std::string const& name)
     {
         const auto p = _entities.find(name);
         if (p == _entities.end())
@@ -45,7 +73,7 @@ public:
 
         const auto ret = p->second.get();
         _entities.erase(p);
-        return ret;
+        _sm.removeGameObject(*ret);
     }
 
     template<class CT, class ... Args>
@@ -54,7 +82,8 @@ public:
         auto str = hashCompName(parent.get_name(), name);
 
         _components.emplace(str,
-                            ComponentFactory::createComponent<CT>(name, std::forward<Args>(params)...));
+                ComponentFactory::createComponent<CT>(name, std::forward<Args>(params)...)
+        );
 
         auto &comp = _components[str];
         parent.attachComponent(comp.get());
@@ -76,9 +105,18 @@ public:
         _components.erase(hashCompName(go.get_name(), comp.get_name()));
     }
 
+public:
+    void send(const putils::DataPacket &packet) { _mediator.send(packet); }
+    void runTask(const std::function<void()> &f) { _mediator.runTask(f); }
+
 private:
-    std::string hashCompName(std::string const& pName, std::string const& cName)
+    static std::string hashCompName(std::string const& pName, std::string const& cName)
     { return pName + "--" + cName; }
+
+private:
+    putils::ModuleMediator _mediator;
+    SystemManager _sm;
+    std::unique_ptr<EntityFactory> _factory;
 
 private:
     std::unordered_map<std::string, std::unique_ptr<GameObject>> _entities;
