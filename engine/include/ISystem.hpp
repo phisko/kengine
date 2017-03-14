@@ -15,7 +15,7 @@ public:
     static const ComponentMask Mask;
 
 public:
-    ISystem(int tag = putils::DataPacket::Ignore) : Module(tag) {}
+    ISystem(int tag = putils::ADataPacket::Ignore) : Module(tag) {}
     virtual ~ISystem() = default;
 
 public:

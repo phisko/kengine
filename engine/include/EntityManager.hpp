@@ -106,7 +106,7 @@ public:
     }
 
 public:
-    void send(const putils::DataPacket &packet) { _mediator.send(packet); }
+    void send(const putils::ADataPacket &packet) { _mediator.send(packet); }
     void runTask(const std::function<void()> &f) { _mediator.runTask(f); }
 
 private:
