@@ -8,38 +8,42 @@
 # include <string>
 # include "IComponent.hpp"
 
+template<ComponentMask Mask, bool Unique = false>
 class Component : public IComponent
 {
-public:
-    static ComponentMask Mask;
 public:
     Component(std::string const& name)
             : _name(name)
     {}
 
-    Component(Component const& other);
-    Component& operator=(Component other);
-    Component& operator=(Component&& other);
+    Component(Component const& other) = default;
+    Component& operator=(Component other) { swap(*this, other); return *this; }
+    Component& operator=(Component&& other) { swap(*this, other); return *this; }
 
     virtual ~Component()
     {}
 
 public:
-    bool isUnique() const;
+    bool isUnique() const { return Unique; }
 
 public:
-    friend void swap(Component& left, Component& right);
+    friend void swap(Component& left, Component& right)
+    {
+        using std::swap;
+        swap(left._name, right._name);
+    }
 
 public:
-    virtual ComponentMask getMask() const override;
-    virtual std::string toString() const override;
-
-    std::string const& get_name() const
-    { return _name; }
+    virtual ComponentMask getMask() const noexcept override { return Mask; }
+    std::string const& get_name() const noexcept override { return _name; }
+    virtual std::string toString() const noexcept override
+    {
+        using namespace std::literals;
+        return "Component"s + _name;
+    }
 
 private:
     std::string       _name;
-    static const bool _unique;
 };
 
 #endif //KENGINE_COMPONENT_HPP

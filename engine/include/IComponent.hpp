@@ -11,8 +11,8 @@
 class IComponent : public Object
 {
 public:
-    virtual ComponentMask getMask() const = 0;
-    virtual std::string const& get_name() const = 0;
+    virtual ComponentMask getMask() const noexcept = 0;
+    virtual std::string const& get_name() const noexcept = 0;
 
     virtual ~IComponent()
     { }

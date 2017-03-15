@@ -92,7 +92,7 @@ public:
         return static_cast<CT&>(*comp);
     };
 
-    void detachComponent(GameObject& go, Component& comp)
+    void detachComponent(GameObject& go, IComponent& comp)
     {
         if (_components.find(hashCompName(go.get_name(), comp.get_name())) == _components.end())
             throw std::logic_error("Could not find component " + comp.toString());
