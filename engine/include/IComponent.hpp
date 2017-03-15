@@ -8,14 +8,17 @@
 # include "KTypes.hpp"
 # include "Object.hpp"
 
-class IComponent : public Object
+namespace kengine
 {
-public:
-    virtual ComponentMask getMask() const noexcept = 0;
-    virtual std::string const& get_name() const noexcept = 0;
+    class IComponent : public Object
+    {
+    public:
+        virtual ComponentMask getMask() const noexcept = 0;
 
-    virtual ~IComponent()
-    { }
-};
+        virtual std::string const &get_name() const noexcept = 0;
+
+        virtual ~IComponent() {}
+    };
+}
 
 #endif //KENGINE_ICOMPONENT_HPP

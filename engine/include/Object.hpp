@@ -7,14 +7,17 @@
 
 # include <string>
 
-class Object
+namespace kengine
 {
-public:
-    virtual std::string toString() const = 0;
-    virtual std::string const& get_name() const = 0;
+    class Object
+    {
+    public:
+        virtual std::string toString() const = 0;
 
-    virtual ~Object()
-    { }
-};
+        virtual std::string const &get_name() const = 0;
+
+        virtual ~Object() {}
+    };
+}
 
 #endif //KENGINE_OBJECT_HPP

@@ -3,11 +3,14 @@
 #include <memory>
 #include <GameObject.hpp>
 
-class EntityFactory
+namespace kengine
 {
-public:
-    virtual ~EntityFactory() = default;
+    class EntityFactory
+    {
+    public:
+        virtual ~EntityFactory() = default;
 
-public:
-    virtual std::unique_ptr<GameObject> make(const std::string &type, const std::string &name) = 0;
-};
+    public:
+        virtual std::unique_ptr<GameObject> make(const std::string &type, const std::string &name) = 0;
+    };
+}

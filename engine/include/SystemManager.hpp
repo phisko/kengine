@@ -10,56 +10,61 @@
 # include "ISystem.hpp"
 # include "GameObject.hpp"
 
-class SystemManager
+namespace kengine
 {
-public:
-    SystemManager(SystemManager const& o) = delete;
-    SystemManager& operator=(SystemManager const& o) = delete;
-
-public:
-    SystemManager() = default;
-    ~SystemManager() = default;
-
-public:
-    void execute()
+    class SystemManager
     {
-        for (auto &category : _systems)
-            for (auto &s : category.second)
-                s->execute();
-    }
+    public:
+        SystemManager(SystemManager const &o) = delete;
 
-public:
-    void registerGameObject(GameObject &gameObject)
-    {
-        for (auto &category : _systems)
-            if (category.first & gameObject.getMask())
+        SystemManager &operator=(SystemManager const &o) = delete;
+
+    public:
+        SystemManager() = default;
+
+        ~SystemManager() = default;
+
+    public:
+        void execute()
+        {
+            for (auto &category : _systems)
                 for (auto &s : category.second)
-                    s->registerGameObject(gameObject);
-    }
+                    s->execute();
+        }
 
-    void removeGameObject(GameObject &gameObject)
-    {
-        for (auto &category : _systems)
-            if (category.first & gameObject.getMask())
-                for (auto &s : category.second)
-                    s->removeGameObject(gameObject);
-    }
+    public:
+        void registerGameObject(GameObject &gameObject)
+        {
+            for (auto &category : _systems)
+                if (category.first & gameObject.getMask())
+                    for (auto &s : category.second)
+                        s->registerGameObject(gameObject);
+        }
 
-public:
-    template<typename T, typename ...Args,
-             typename = std::enable_if_t<std::is_base_of<ISystem, T>::value>>
-    T &registerSystem(Args &&...args)
-    {
-        auto system = std::make_unique<T>(std::forward<Args>(args)...);
-        auto &ret = *system;
-        auto &category = _systems[T::Mask];
-        category.emplace_back(std::move(system));
-        return ret;
-    }
+        void removeGameObject(GameObject &gameObject)
+        {
+            for (auto &category : _systems)
+                if (category.first & gameObject.getMask())
+                    for (auto &s : category.second)
+                        s->removeGameObject(gameObject);
+        }
 
-private:
-    using Category = std::vector<std::unique_ptr<ISystem>>;
-    std::unordered_map<ComponentMask, Category> _systems;
-};
+    public:
+        template<typename T, typename ...Args,
+                typename = std::enable_if_t<std::is_base_of<ISystem, T>::value>>
+        T &registerSystem(Args &&...args)
+        {
+            auto system = std::make_unique<T>(std::forward<Args>(args)...);
+            auto &ret = *system;
+            auto &category = _systems[ret.getMask()];
+            category.emplace_back(std::move(system));
+            return ret;
+        }
+
+    private:
+        using Category = std::vector<std::unique_ptr<ISystem>>;
+        std::unordered_map<ComponentMask, Category> _systems;
+    };
+}
 
 #endif //MEETABLE_CORE_SYSTEMMANAGER_HPP

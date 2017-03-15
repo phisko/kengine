@@ -8,42 +8,45 @@
 # include <string>
 # include "IComponent.hpp"
 
-template<ComponentMask Mask, bool Unique = false>
-class Component : public IComponent
+namespace kengine
 {
-public:
-    Component(std::string const& name)
-            : _name(name)
-    {}
-
-    Component(Component const& other) = default;
-    Component& operator=(Component other) { swap(*this, other); return *this; }
-    Component& operator=(Component&& other) { swap(*this, other); return *this; }
-
-    virtual ~Component()
-    {}
-
-public:
-    bool isUnique() const { return Unique; }
-
-public:
-    friend void swap(Component& left, Component& right)
+    template<ComponentMask Mask, bool Unique = false>
+    class Component : public IComponent
     {
-        using std::swap;
-        swap(left._name, right._name);
-    }
+    public:
+        Component(std::string const& name)
+                : _name(name)
+        {}
 
-public:
-    virtual ComponentMask getMask() const noexcept override { return Mask; }
-    std::string const& get_name() const noexcept override { return _name; }
-    virtual std::string toString() const noexcept override
-    {
-        using namespace std::literals;
-        return "Component"s + _name;
-    }
+        Component(Component const& other) = default;
+        Component& operator=(Component other) { swap(*this, other); return *this; }
+        Component& operator=(Component&& other) { swap(*this, other); return *this; }
 
-private:
-    std::string       _name;
-};
+        virtual ~Component()
+        {}
+
+    public:
+        bool isUnique() const { return Unique; }
+
+    public:
+        friend void swap(Component& left, Component& right)
+        {
+            using std::swap;
+            swap(left._name, right._name);
+        }
+
+    public:
+        virtual ComponentMask getMask() const noexcept override { return Mask; }
+        std::string const& get_name() const noexcept override { return _name; }
+        virtual std::string toString() const noexcept override
+        {
+            using namespace std::literals;
+            return "Component"s + _name;
+        }
+
+    private:
+        std::string       _name;
+    };
+}
 
 #endif //KENGINE_COMPONENT_HPP
