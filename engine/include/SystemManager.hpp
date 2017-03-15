@@ -2,19 +2,16 @@
 // Created by naliwe on 2/12/17.
 //
 
-#ifndef MEETABLE_CORE_SYSTEMMANAGER_HPP
-# define MEETABLE_CORE_SYSTEMMANAGER_HPP
+#ifndef CORE_SYSTEMMANAGER_HPP
+# define CORE_SYSTEMMANAGER_HPP
 
-# include <unordered_map>
+# include <vector>
 # include <memory>
 # include "ISystem.hpp"
 # include "GameObject.hpp"
 
 class SystemManager
 {
-private:
-    using system_map = std::unordered_multimap<ComponentMask, std::unique_ptr<ISystem>>;
-
 public:
     SystemManager(SystemManager const& o) = delete;
     SystemManager& operator=(SystemManager const& o) = delete;
@@ -26,22 +23,26 @@ public:
 public:
     void execute()
     {
-        for (auto &p : _sysMap)
-            p.second->execute();
+        for (auto &category : _systems)
+            for (auto &s : category.second)
+                s->execute();
     }
 
 public:
     void registerGameObject(GameObject &gameObject)
     {
-        for (auto &p : _sysMap)
-            if (p.first & gameObject.getMask())
-                p.second->registerGameObject(gameObject);
+        for (auto &category : _systems)
+            if (category.first & gameObject.getMask())
+                for (auto &s : category.second)
+                    s->registerGameObject(gameObject);
     }
+
     void removeGameObject(GameObject &gameObject)
     {
-        for (auto &p : _sysMap)
-            if (p.first & gameObject.getMask())
-                p.second->removeGameObject(gameObject);
+        for (auto &category : _systems)
+            if (category.first & gameObject.getMask())
+                for (auto &s : category.second)
+                    s->removeGameObject(gameObject);
     }
 
 public:
@@ -49,12 +50,16 @@ public:
              typename = std::enable_if_t<std::is_base_of<ISystem, T>::value>>
     T &registerSystem(Args &&...args)
     {
-        const auto p = _sysMap.emplace(std::make_pair(T::Mask, std::make_unique<T>(std::forward<Args>(args)...)));
-        return static_cast<T&>(*p->second);
+        auto system = std::make_unique<T>(std::forward<Args>(args)...);
+        auto &ret = *system;
+        auto &category = _systems[T::Mask];
+        category.emplace_back(std::move(system));
+        return ret;
     }
 
 private:
-    system_map _sysMap;
+    using Category = std::vector<std::unique_ptr<ISystem>>;
+    std::unordered_map<ComponentMask, Category> _systems;
 };
 
 #endif //MEETABLE_CORE_SYSTEMMANAGER_HPP

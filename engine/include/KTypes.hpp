@@ -11,8 +11,7 @@ enum ComponentMask
     Graphical = (1 << 0),
     Kinematic = (1 << 1),
     Behaviour = (1 << 2),
-    Ui = (1 << 3),
-    _LAST
+    Ui = (1 << 3)
 };
 
 #endif //KENGINE_KTYPES_HPP
