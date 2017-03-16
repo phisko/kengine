@@ -15,14 +15,12 @@ namespace kengine
     class SystemManager
     {
     public:
-        SystemManager(SystemManager const &o) = delete;
-
-        SystemManager &operator=(SystemManager const &o) = delete;
+        SystemManager() = default;
+        ~SystemManager() = default;
 
     public:
-        SystemManager() = default;
-
-        ~SystemManager() = default;
+        SystemManager(SystemManager const &o) = delete;
+        SystemManager &operator=(SystemManager const &o) = delete;
 
     public:
         void execute()

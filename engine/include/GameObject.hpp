@@ -6,7 +6,7 @@
 # define KENGINE_GAMEOBJECT_HPP
 
 # include <string>
-# include <map>
+# include <unordered_map>
 # include <algorithm>
 # include "IComponent.hpp"
 # include "Object.hpp"
@@ -29,27 +29,28 @@ namespace kengine
     public:
         friend void swap(GameObject &left, GameObject &right);
 
-    public:
+    private:
+        friend class EntityManager;
         void attachComponent(IComponent *comp);
-
         void detachComponent(IComponent *comp);
 
+    public:
         template<class CT,
                 typename = typename std::enable_if<
                         std::is_base_of<IComponent, CT>::value
                 >::type>
         CT &getComponent(std::string const &name) const
         {
-            if (_components.find(name) == _components.end())
+            auto it = _components.find(name);
+            if (it == _components.end())
                 throw std::logic_error("Component " + name + " not found");
 
-            return static_cast<CT &>(*_components.at(name));
+            return static_cast<CT *>(*it->second);
         };
 
         template<class CT,
-                typename = typename std::enable_if<
-                        std::is_base_of<IComponent, CT>::value
-                >::type>
+                typename = typename std::enable_if_t<
+                        std::is_base_of<IComponent, CT>::value>>
         CT &getComponent() const
         {
             auto selected = std::find_if(_components.begin(), _components.end(),
@@ -65,16 +66,15 @@ namespace kengine
         };
 
     public:
-        virtual std::string toString() const;
+        std::string toString() const override;
 
     public:
-        std::string const &get_name() const;
-
+        std::string const &get_name() const override { return _name; }
         ComponentMask getMask() const { return _mask; }
 
     private:
         std::string _name;
-        std::map<std::string, IComponent *> _components;
+        std::unordered_map<std::string, IComponent *> _components;
         ComponentMask _mask = ComponentMask::Default;
     };
 }

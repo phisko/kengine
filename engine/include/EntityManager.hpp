@@ -75,8 +75,8 @@ namespace kengine
                 throw std::out_of_range("No such entity");
 
             const auto ret = p->second.get();
-            _entities.erase(p);
             _sm.removeGameObject(*ret);
+            _entities.erase(p);
         }
 
         template<class CT, class ... Args>
@@ -91,6 +91,8 @@ namespace kengine
             auto &comp = _components[str];
             parent.attachComponent(comp.get());
             _compHierarchy.emplace(name, parent.get_name());
+
+            _sm.registerGameObject(parent);
 
             return static_cast<CT &>(*comp);
         };

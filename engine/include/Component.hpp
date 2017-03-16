@@ -10,9 +10,12 @@
 
 namespace kengine
 {
-    template<ComponentMask Mask, bool Unique = false>
+    template<ComponentMask TMask, bool Unique = false>
     class Component : public IComponent
     {
+    public:
+        static constexpr ComponentMask Mask = TMask;
+
     public:
         Component(std::string const& name)
                 : _name(name)
@@ -36,12 +39,11 @@ namespace kengine
         }
 
     public:
-        virtual ComponentMask getMask() const noexcept override { return Mask; }
+        virtual ComponentMask getMask() const noexcept override { return TMask; }
         std::string const& get_name() const noexcept override { return _name; }
         virtual std::string toString() const noexcept override
         {
-            using namespace std::literals;
-            return "Component"s + _name;
+            return _name;
         }
 
     private:

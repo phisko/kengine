@@ -54,14 +54,24 @@ namespace kengine
     {
         std::stringstream ss;
 
-        ss << "GameObject:" << _name;
+        ss << "{" << std::endl
+           << "\tname: " << _name << ", " << std::endl
+           << "\tcomponents: {" << std::endl;
+
+        bool first = true;
+        for (const auto &p : _components)
+        {
+            if (first)
+                first = false;
+            else
+                ss << "," << std::endl;
+
+            ss << "\t\t" << p.second->toString() << "";
+        }
+        ss << std::endl << "\t}" << std::endl
+                << "}";
 
         return ss.str();
-    }
-
-    std::string const &GameObject::get_name() const
-    {
-        return _name;
     }
 }
 
