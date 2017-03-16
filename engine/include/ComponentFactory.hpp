@@ -28,9 +28,9 @@ namespace kengine
         template<class CT, class... Args,
                 typename = std::enable_if_t<
                         std::is_base_of<IComponent, CT>::value>>
-        static constexpr auto createComponent(std::string const &name, Args &&... params) noexcept
+        static constexpr auto createComponent(Args &&... params) noexcept
         {
-            return std::make_unique<CT>(name, std::forward<Args>(params)...);
+            return std::make_unique<CT>(std::forward<Args>(params)...);
         }
     };
 }

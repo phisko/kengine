@@ -10,11 +10,12 @@
 
 namespace kengine
 {
-    template<ComponentMask TMask, bool Unique = false>
+    template<ComponentMask TMask, bool TUnique = false>
     class Component : public IComponent
     {
     public:
         static constexpr ComponentMask Mask = TMask;
+        static constexpr bool Unique = TUnique;
 
     public:
         Component(std::string const& name)
@@ -29,7 +30,7 @@ namespace kengine
         {}
 
     public:
-        bool isUnique() const { return Unique; }
+        bool isUnique() const { return TUnique; }
 
     public:
         friend void swap(Component& left, Component& right)

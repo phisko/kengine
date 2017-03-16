@@ -79,22 +79,24 @@ namespace kengine
             _entities.erase(p);
         }
 
+    public:
         template<class CT, class ... Args>
-        CT &attachComponent(GameObject &parent, std::string const &name, Args &&... params) noexcept
+        CT &attachComponent(GameObject &parent, Args &&... params) noexcept
         {
+            auto ptr = ComponentFactory::createComponent<CT>(std::forward<Args>(params)...);
+
+            auto &comp = *ptr;
+            const auto &name = comp.get_name();
             auto str = hashCompName(parent.get_name(), name);
 
-            _components.emplace(str,
-                    ComponentFactory::createComponent<CT>(name, std::forward<Args>(params)...)
-            );
+            _components.emplace(str, std::move(ptr));
 
-            auto &comp = _components[str];
-            parent.attachComponent(comp.get());
+            parent.attachComponent(&comp);
             _compHierarchy.emplace(name, parent.get_name());
 
             _sm.registerGameObject(parent);
 
-            return static_cast<CT &>(*comp);
+            return static_cast<CT &>(comp);
         };
 
         void detachComponent(GameObject &go, IComponent &comp)
