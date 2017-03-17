@@ -18,7 +18,7 @@ namespace kengine
 
         virtual bool isUnique() const noexcept = 0;
 
-        virtual std::string const &get_name() const noexcept = 0;
+        virtual std::string const &getName() const noexcept = 0;
 
         virtual ~IComponent() {}
     };

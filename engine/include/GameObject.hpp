@@ -69,7 +69,7 @@ namespace kengine
         std::string toString() const override;
 
     public:
-        std::string const &get_name() const override { return _name; }
+        std::string const &getName() const override { return _name; }
         ComponentMask getMask() const { return _mask; }
 
     private:

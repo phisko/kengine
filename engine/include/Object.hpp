@@ -14,7 +14,7 @@ namespace kengine
     public:
         virtual std::string toString() const = 0;
 
-        virtual std::string const &get_name() const = 0;
+        virtual std::string const &getName() const = 0;
 
         virtual ~Object() {}
     };

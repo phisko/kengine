@@ -102,8 +102,8 @@ namespace kengine
     private:
         void registerComponent(const GameObject &parent, std::unique_ptr<IComponent> &&comp)
         {
-            const auto &name = comp->get_name();
-            const auto &parentName = parent.get_name();
+            const auto &name = comp->getName();
+            const auto &parentName = parent.getName();
             const auto str = hashCompName(parentName, name);
 
             _components.emplace(str, std::move(comp));
@@ -113,15 +113,15 @@ namespace kengine
     public:
         void detachComponent(GameObject &go, IComponent &comp)
         {
-            if (_components.find(hashCompName(go.get_name(), comp.get_name())) == _components.end())
+            if (_components.find(hashCompName(go.getName(), comp.getName())) == _components.end())
                 throw std::logic_error("Could not find component " + comp.toString());
-            if (_entities.find(go.get_name()) == _entities.end())
-                throw std::logic_error("Could not find entity " + go.get_name());
+            if (_entities.find(go.getName()) == _entities.end())
+                throw std::logic_error("Could not find entity " + go.getName());
 
             //TODO: Recycle component
-            _compHierarchy.erase(comp.get_name());
+            _compHierarchy.erase(comp.getName());
             go.detachComponent(&comp);
-            _components.erase(hashCompName(go.get_name(), comp.get_name()));
+            _components.erase(hashCompName(go.getName(), comp.getName()));
 
             // TODO: find some way to call removeGameObject on systems
         }

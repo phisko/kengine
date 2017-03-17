@@ -38,7 +38,7 @@ namespace kengine
 
     public:
         virtual ComponentMask getMask() const noexcept override { return TMask; }
-        std::string const& get_name() const noexcept override { return _name; }
+        std::string const& getName() const noexcept override { return _name; }
         virtual std::string toString() const noexcept override
         {
             return _name;
