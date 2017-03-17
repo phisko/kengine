@@ -7,13 +7,16 @@
 
 # include "KTypes.hpp"
 # include "Object.hpp"
+# include "Module.hpp"
 
 namespace kengine
 {
-    class IComponent : public Object
+    class IComponent : public Object, public putils::Module
     {
     public:
         virtual ComponentMask getMask() const noexcept = 0;
+
+        virtual bool isUnique() const noexcept = 0;
 
         virtual std::string const &get_name() const noexcept = 0;
 

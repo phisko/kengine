@@ -45,6 +45,7 @@ namespace kengine
             if (it == _gameObjects.end())
                 _gameObjects.push_back(&go);
         }
+
         void removeGameObject(GameObject &go) override
         {
             _gameObjects.erase(std::find(_gameObjects.begin(), _gameObjects.end(), &go));

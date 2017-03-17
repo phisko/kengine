@@ -55,7 +55,12 @@ namespace kengine
                 typename = std::enable_if_t<std::is_base_of<GameObject, GO>::value>>
         GO &createEntity(std::string const &name, Args &&... params) noexcept
         {
-            return addEntity(name, std::make_unique<GO>(name, std::forward<Args>(params)...));
+            auto entity = std::make_unique<GO>(name, std::forward<Args>(params)...);
+
+            for (const auto &p : entity->_components)
+                registerComponent(*entity, std::unique_ptr<IComponent>(p.second));
+
+            return addEntity(name, std::move(entity));
         }
 
     private:
@@ -84,21 +89,28 @@ namespace kengine
         CT &attachComponent(GameObject &parent, Args &&... params) noexcept
         {
             auto ptr = ComponentFactory::createComponent<CT>(std::forward<Args>(params)...);
-
             auto &comp = *ptr;
-            const auto &name = comp.get_name();
-            auto str = hashCompName(parent.get_name(), name);
 
-            _components.emplace(str, std::move(ptr));
+            registerComponent(parent, std::move(ptr));
 
             parent.attachComponent(&comp);
-            _compHierarchy.emplace(name, parent.get_name());
-
             _sm.registerGameObject(parent);
 
             return static_cast<CT &>(comp);
         };
 
+    private:
+        void registerComponent(const GameObject &parent, std::unique_ptr<IComponent> &&comp)
+        {
+            const auto &name = comp->get_name();
+            const auto &parentName = parent.get_name();
+            const auto str = hashCompName(parentName, name);
+
+            _components.emplace(str, std::move(comp));
+            _compHierarchy.emplace(name, parentName);
+        }
+
+    public:
         void detachComponent(GameObject &go, IComponent &comp)
         {
             if (_components.find(hashCompName(go.get_name(), comp.get_name())) == _components.end())
@@ -110,6 +122,8 @@ namespace kengine
             _compHierarchy.erase(comp.get_name());
             go.detachComponent(&comp);
             _components.erase(hashCompName(go.get_name(), comp.get_name()));
+
+            // TODO: find some way to call removeGameObject on systems
         }
 
     public:

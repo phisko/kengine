@@ -10,29 +10,29 @@
 # include <algorithm>
 # include "IComponent.hpp"
 # include "Object.hpp"
+# include "ModuleMediator.hpp"
 
 namespace kengine
 {
-    class GameObject : public Object
+    class GameObject : public Object, public putils::ModuleMediator
     {
     public:
         GameObject(std::string const &name);
+        GameObject(GameObject &&other) = default;
+        GameObject &operator=(GameObject &&other) = default;
 
-        GameObject(GameObject const &other);
+        virtual ~GameObject() = default;
 
-        GameObject &operator=(GameObject other);
-
-        GameObject &operator=(GameObject &&other);
-
-        virtual ~GameObject();
-
-    public:
-        friend void swap(GameObject &left, GameObject &right);
-
-    private:
+    protected:
         friend class EntityManager;
         void attachComponent(IComponent *comp);
         void detachComponent(IComponent *comp);
+
+        template<typename CT, typename ...Args, typename = std::enable_if_t<std::is_base_of<kengine::IComponent, CT>::value>>
+        void attachComponent(Args &&...args)
+        {
+            attachComponent(new CT(std::forward<Args>(args)...));
+        };
 
     public:
         template<class CT,

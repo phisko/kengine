@@ -22,22 +22,19 @@ namespace kengine
                 : _name(name)
         {}
 
-        Component(Component const& other) = default;
-        Component& operator=(Component other) { swap(*this, other); return *this; }
-        Component& operator=(Component&& other) { swap(*this, other); return *this; }
+        Component(const Component &other) = default;
+        Component& operator=(const Component &other) = default;
 
-        virtual ~Component()
-        {}
+        Component(Component &&other) = default;
+        Component& operator=(Component&& other) = default;
 
-    public:
-        bool isUnique() const { return TUnique; }
+        virtual ~Component() = default;
 
     public:
-        friend void swap(Component& left, Component& right)
-        {
-            using std::swap;
-            swap(left._name, right._name);
-        }
+        void receive(const putils::ADataPacket &) noexcept override {}
+
+    public:
+        bool isUnique() const noexcept override { return TUnique; }
 
     public:
         virtual ComponentMask getMask() const noexcept override { return TMask; }
