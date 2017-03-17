@@ -45,7 +45,7 @@ namespace kengine
             if (it == _components.end())
                 throw std::logic_error("Component " + name + " not found");
 
-            return static_cast<CT *>(*it->second);
+            return static_cast<CT &>(*it->second);
         };
 
         template<class CT,
@@ -60,7 +60,7 @@ namespace kengine
                     });
 
             if (selected == _components.end())
-                throw std::logic_error("Could not find component with mask" + (uint8_t) CT::Mask);
+                throw std::logic_error("Could not find component with mask " + CT::Mask);
 
             return static_cast<CT &>(*(selected->second));
         };
@@ -70,12 +70,12 @@ namespace kengine
 
     public:
         std::string const &getName() const override { return _name; }
-        ComponentMask getMask() const { return _mask; }
+        const std::vector<std::size_t> &getMask() const { return _mask; }
 
     private:
         std::string _name;
         std::unordered_map<std::string, IComponent *> _components;
-        ComponentMask _mask = ComponentMask::Default;
+        std::vector<std::size_t> _mask;
     };
 }
 

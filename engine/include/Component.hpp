@@ -2,19 +2,18 @@
 // Created by naliwe on 6/24/16.
 //
 
-#ifndef KENGINE_COMPONENT_HPP
-# define KENGINE_COMPONENT_HPP
+#pragma once
 
-# include <string>
-# include "IComponent.hpp"
+#include <string>
+#include "IComponent.hpp"
 
 namespace kengine
 {
-    template<ComponentMask TMask, bool TUnique = false>
-    class Component : public IComponent
+    template<typename CRTP, bool TUnique = false, typename ...DataPackets>
+    class Component : public IComponent, public putils::Module<DataPackets...>
     {
     public:
-        static constexpr ComponentMask Mask = TMask;
+        static const std::size_t Mask;
         static constexpr bool Unique = TUnique;
 
     public:
@@ -37,7 +36,7 @@ namespace kengine
         bool isUnique() const noexcept override { return TUnique; }
 
     public:
-        virtual ComponentMask getMask() const noexcept override { return TMask; }
+        virtual std::size_t getMask() const noexcept override { return Mask; }
         std::string const& getName() const noexcept override { return _name; }
         virtual std::string toString() const noexcept override
         {
@@ -47,6 +46,7 @@ namespace kengine
     private:
         std::string       _name;
     };
-}
 
-#endif //KENGINE_COMPONENT_HPP
+    template<typename CRTP, bool TUnique, typename ...DataPackets>
+    const std::size_t Component<CRTP, TUnique, DataPackets...>::Mask = pmeta::type<CRTP>::index;
+}

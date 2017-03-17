@@ -2,13 +2,12 @@
 // Created by naliwe on 2/12/17.
 //
 
-#ifndef CORE_SYSTEMMANAGER_HPP
-# define CORE_SYSTEMMANAGER_HPP
+#pragma once
 
-# include <vector>
-# include <memory>
-# include "ISystem.hpp"
-# include "GameObject.hpp"
+#include <vector>
+#include <memory>
+#include "ISystem.hpp"
+#include "GameObject.hpp"
 
 namespace kengine
 {
@@ -34,7 +33,7 @@ namespace kengine
         void registerGameObject(GameObject &gameObject)
         {
             for (auto &category : _systems)
-                if (category.first & gameObject.getMask())
+                if (matchMasks(category.first, gameObject))
                     for (auto &s : category.second)
                         s->registerGameObject(gameObject);
         }
@@ -42,9 +41,16 @@ namespace kengine
         void removeGameObject(GameObject &gameObject)
         {
             for (auto &category : _systems)
-                if (category.first & gameObject.getMask())
+                if (matchMasks(category.first, gameObject))
                     for (auto &s : category.second)
                         s->removeGameObject(gameObject);
+        }
+
+    private:
+        bool matchMasks(pmeta::type_index mask, const kengine::GameObject &go)
+        {
+            const auto &goMask = go.getMask();
+            return std::find(goMask.begin(), goMask.end(), mask) != goMask.end();
         }
 
     public:
@@ -61,8 +67,6 @@ namespace kengine
 
     private:
         using Category = std::vector<std::unique_ptr<ISystem>>;
-        std::unordered_map<ComponentMask, Category> _systems;
+        std::unordered_map<pmeta::type_index, Category> _systems;
     };
 }
-
-#endif //MEETABLE_CORE_SYSTEMMANAGER_HPP

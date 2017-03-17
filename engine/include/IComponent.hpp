@@ -2,19 +2,17 @@
 // Created by naliwe on 6/24/16.
 //
 
-#ifndef KENGINE_ICOMPONENT_HPP
-# define KENGINE_ICOMPONENT_HPP
+#pragma once
 
-# include "KTypes.hpp"
-# include "Object.hpp"
-# include "Module.hpp"
+#include "Object.hpp"
+#include "Module.hpp"
 
 namespace kengine
 {
-    class IComponent : public Object, public putils::Module
+    class IComponent : public Object, public virtual putils::BaseModule
     {
     public:
-        virtual ComponentMask getMask() const noexcept = 0;
+        virtual std::size_t getMask() const noexcept = 0;
 
         virtual bool isUnique() const noexcept = 0;
 
@@ -23,5 +21,3 @@ namespace kengine
         virtual ~IComponent() {}
     };
 }
-
-#endif //KENGINE_ICOMPONENT_HPP
