@@ -15,7 +15,7 @@
 # include "ComponentFactory.hpp"
 # include "SystemManager.hpp"
 # include "EntityFactory.hpp"
-# include "ModuleMediator.hpp"
+# include "Mediator.hpp"
 
 namespace kengine
 {
@@ -138,7 +138,7 @@ namespace kengine
         }
 
     private:
-        putils::ModuleMediator _mediator;
+        putils::Mediator _mediator;
         SystemManager _sm;
         std::unique_ptr<EntityFactory> _factory;
 

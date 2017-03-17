@@ -10,11 +10,11 @@
 # include <algorithm>
 # include "IComponent.hpp"
 # include "Object.hpp"
-# include "ModuleMediator.hpp"
+# include "Mediator.hpp"
 
 namespace kengine
 {
-    class GameObject : public Object, public putils::ModuleMediator
+    class GameObject : public Object, public putils::Mediator
     {
     public:
         GameObject(std::string const &name);
