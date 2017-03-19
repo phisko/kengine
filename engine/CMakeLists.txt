@@ -4,18 +4,16 @@ project(kengine)
 add_subdirectory(mediator)
 include_directories(mediator)
 
-include_directories(include)
-
 set(new_includes
         ${CMAKE_CURRENT_LIST_DIR}/mediator
-        ${CMAKE_CURRENT_LIST_DIR}/include
+        ${CMAKE_CURRENT_LIST_DIR}
         )
 set(INCLUDE_DIRS ${INCLUDE_DIRS} ${new_includes} PARENT_SCOPE)
 include_directories(${INCLUDE_DIRS})
 
 file(GLOB src_files
-        src/*.cpp
-        include/*.hpp
+        *.cpp
+        *.hpp
         )
 
 add_library(kengine SHARED ${src_files})
