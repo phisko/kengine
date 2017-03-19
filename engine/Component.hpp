@@ -30,9 +30,6 @@ namespace kengine
         virtual ~Component() = default;
 
     public:
-        void receive(const putils::ADataPacket &) noexcept override {}
-
-    public:
         bool isUnique() const noexcept override { return TUnique; }
 
     public:
