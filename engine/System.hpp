@@ -16,7 +16,7 @@ namespace kengine
     protected:
         using ISystem::ISystem;
         auto &getGameObjects() { return _gameObjects; }
-        auto &getGameObjects() const { return _gameObjects; }
+        const auto &getGameObjects() const { return _gameObjects; }
 
     public:
         void registerGameObject(GameObject &go) override

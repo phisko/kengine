@@ -2,15 +2,14 @@
 // Created by naliwe on 6/24/16.
 //
 
-#ifndef KENGINE_GAMEOBJECT_HPP
-# define KENGINE_GAMEOBJECT_HPP
+#pragma once
 
-# include <string>
-# include <unordered_map>
-# include <algorithm>
-# include "IComponent.hpp"
-# include "Object.hpp"
-# include "Mediator.hpp"
+#include <string>
+#include <unordered_map>
+#include <algorithm>
+#include "IComponent.hpp"
+#include "Object.hpp"
+#include "Mediator.hpp"
 
 namespace kengine
 {
@@ -78,5 +77,3 @@ namespace kengine
         std::vector<pmeta::type_index > _types;
     };
 }
-
-#endif //KENGINE_GAMEOBJECT_HPP

@@ -92,6 +92,15 @@ namespace kengine
         }
 
     public:
+        GameObject &getEntity(const std::string &name)
+        {
+            const auto it = _entities.find(name);
+            if (it == _entities.end())
+                throw std::out_of_range(name + ": No such entity");
+            return *it->second;
+        }
+
+    public:
         template<class CT, class ... Args>
         CT &attachComponent(GameObject &parent, Args &&... params) noexcept
         {
