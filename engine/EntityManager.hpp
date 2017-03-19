@@ -19,7 +19,7 @@
 
 namespace kengine
 {
-    class EntityManager final
+    class EntityManager : public putils::Mediator
     {
     public:
         EntityManager(std::unique_ptr<EntityFactory> &&factory)
@@ -42,13 +42,13 @@ namespace kengine
         void createSystem(Args &&...args)
         {
             auto &s = _sm.registerSystem<T>(std::forward<Args>(args)...);
-            _mediator.addModule(&s);
+            addModule(&s);
         }
 
     public:
         void addSystem(std::unique_ptr<ISystem> &&system)
         {
-            _mediator.addModule(system.get());
+            addModule(system.get());
             _sm.registerSystem(std::move(system));
         }
 
@@ -133,11 +133,6 @@ namespace kengine
             // TODO: find some way to call removeGameObject on systems
         }
 
-    public:
-        void send(const putils::ADataPacket &packet) { _mediator.send(packet); }
-
-        void runTask(const std::function<void()> &f) { _mediator.runTask(f); }
-
     private:
         static std::string hashCompName(std::string const &pName, std::string const &cName)
         {
@@ -145,7 +140,6 @@ namespace kengine
         }
 
     private:
-        putils::Mediator _mediator;
         SystemManager _sm;
         std::unique_ptr<EntityFactory> _factory;
 
