@@ -56,11 +56,11 @@ namespace kengine
             auto selected = std::find_if(_components.begin(), _components.end(),
                     [](auto &&elem)
                     {
-                        return (CT::Mask == elem.second->getMask());
+                        return (CT::Type == elem.second->getType());
                     });
 
             if (selected == _components.end())
-                throw std::logic_error("Could not find component with mask " + CT::Mask);
+                throw std::logic_error("Could not find component with provided type");
 
             return static_cast<CT &>(*(selected->second));
         };
@@ -70,12 +70,12 @@ namespace kengine
 
     public:
         std::string const &getName() const override { return _name; }
-        const std::vector<std::size_t> &getMask() const { return _mask; }
+        const std::vector<pmeta::type_index> &getTypes() const { return _types; }
 
     private:
         std::string _name;
         std::unordered_map<std::string, IComponent *> _components;
-        std::vector<std::size_t> _mask;
+        std::vector<pmeta::type_index > _types;
     };
 }
 

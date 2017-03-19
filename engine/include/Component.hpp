@@ -13,7 +13,7 @@ namespace kengine
     class Component : public IComponent, public putils::Module<DataPackets...>
     {
     public:
-        static const std::size_t Mask;
+        static const pmeta::type_index Type;
         static constexpr bool Unique = TUnique;
 
     public:
@@ -36,9 +36,9 @@ namespace kengine
         bool isUnique() const noexcept override { return TUnique; }
 
     public:
-        virtual std::size_t getMask() const noexcept override { return Mask; }
+        pmeta::type_index getType() const noexcept override { return Type; }
         std::string const& getName() const noexcept override { return _name; }
-        virtual std::string toString() const noexcept override
+        std::string toString() const noexcept override
         {
             return _name;
         }
@@ -48,5 +48,5 @@ namespace kengine
     };
 
     template<typename CRTP, bool TUnique, typename ...DataPackets>
-    const std::size_t Component<CRTP, TUnique, DataPackets...>::Mask = pmeta::type<CRTP>::index;
+    const pmeta::type_index Component<CRTP, TUnique, DataPackets...>::Type = pmeta::type<CRTP>::index;
 }

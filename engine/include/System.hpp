@@ -11,7 +11,7 @@ namespace kengine
     class System : public ISystem, public putils::Module<DataPackets...>
     {
     public:
-        virtual std::size_t getMask() const noexcept { return pmeta::type<RegisteredComponent>::index; }
+        pmeta::type_index getCompType() const noexcept override { return pmeta::type<RegisteredComponent>::index; }
 
     protected:
         using ISystem::ISystem;

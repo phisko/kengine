@@ -46,6 +46,12 @@ namespace kengine
         }
 
     public:
+        void addSystem(std::unique_ptr<ISystem> &&system)
+        {
+            _sm.registerSystem(std::move(system));
+        }
+
+    public:
         GameObject &createEntity(const std::string &type, const std::string &name)
         {
             return addEntity(name, _factory->make(type, name));

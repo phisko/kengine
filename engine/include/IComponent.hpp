@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "meta/type.hpp"
 #include "Object.hpp"
 #include "Module.hpp"
 
@@ -12,7 +13,7 @@ namespace kengine
     class IComponent : public Object, public virtual putils::BaseModule
     {
     public:
-        virtual std::size_t getMask() const noexcept = 0;
+        virtual pmeta::type_index getType() const noexcept = 0;
 
         virtual bool isUnique() const noexcept = 0;
 

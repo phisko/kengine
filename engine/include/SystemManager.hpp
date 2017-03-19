@@ -49,7 +49,7 @@ namespace kengine
     private:
         bool matchMasks(pmeta::type_index mask, const kengine::GameObject &go)
         {
-            const auto &goMask = go.getMask();
+            const auto &goMask = go.getTypes();
             return std::find(goMask.begin(), goMask.end(), mask) != goMask.end();
         }
 
@@ -60,9 +60,16 @@ namespace kengine
         {
             auto system = std::make_unique<T>(std::forward<Args>(args)...);
             auto &ret = *system;
-            auto &category = _systems[ret.getMask()];
+            auto &category = _systems[ret.getCompType()];
             category.emplace_back(std::move(system));
             return ret;
+        }
+
+    public:
+        void registerSystem(std::unique_ptr<ISystem> &&system)
+        {
+            auto &category = _systems[system->getCompType()];
+            category.emplace_back(std::move(system));
         }
 
     private:

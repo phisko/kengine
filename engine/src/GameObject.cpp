@@ -10,13 +10,13 @@ namespace kengine
     {
         this->addModule(comp);
         _components[comp->getName()] = comp;
-        _mask.push_back(comp->getMask());
+        _types.push_back(comp->getType());
     }
 
     void GameObject::detachComponent(IComponent *comp)
     {
         _components.erase(comp->getName());
-        _mask.erase(std::find(_mask.begin(), _mask.end(), comp->getMask()));
+        _types.erase(std::find(_types.begin(), _types.end(), comp->getType()));
     }
 
     std::string GameObject::toString() const

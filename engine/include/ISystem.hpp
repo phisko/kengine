@@ -5,7 +5,7 @@
 #pragma once
 
 #include <vector>
-#include <meta/type.hpp>
+#include "meta/type.hpp"
 #include "Component.hpp"
 #include "GameObject.hpp"
 #include "Module.hpp"
@@ -24,6 +24,6 @@ namespace kengine
         virtual void execute()                          = 0;
         virtual void registerGameObject(GameObject& go) = 0;
         virtual void removeGameObject(GameObject& go) = 0;
-        virtual std::size_t getMask() const noexcept = 0;
+        virtual pmeta::type_index getCompType() const noexcept = 0;
     };
 }
