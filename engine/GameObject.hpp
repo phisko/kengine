@@ -40,8 +40,8 @@ namespace kengine
                 >::type>
         CT &getComponent(std::string const &name) const
         {
-            auto it = _components.find(name);
-            if (it == _components.end())
+            auto it = _componentsByName.find(name);
+            if (it == _componentsByName.end())
                 throw std::logic_error("Component " + name + " not found");
 
             return static_cast<CT &>(*it->second);
@@ -52,16 +52,11 @@ namespace kengine
                         std::is_base_of<IComponent, CT>::value>>
         CT &getComponent() const
         {
-            auto selected = std::find_if(_components.begin(), _components.end(),
-                    [](auto &&elem)
-                    {
-                        return (CT::Type == elem.second->getType());
-                    });
+            const auto it = _componentsByType.find(CT::Type);
+            if (it == _componentsByType.end())
+                throw std::out_of_range("Could not find component with provided type");
 
-            if (selected == _components.end())
-                throw std::logic_error("Could not find component with provided type");
-
-            return static_cast<CT &>(*(selected->second));
+            return static_cast<CT &>(*(it->second));
         };
 
     public:
@@ -73,7 +68,8 @@ namespace kengine
 
     private:
         std::string _name;
-        std::unordered_map<std::string, IComponent *> _components;
+        std::unordered_map<std::string, IComponent *> _componentsByName;
+        std::unordered_map<pmeta::type_index , IComponent *> _componentsByType;
         std::vector<pmeta::type_index > _types;
     };
 }
