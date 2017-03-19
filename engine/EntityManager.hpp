@@ -48,6 +48,7 @@ namespace kengine
     public:
         void addSystem(std::unique_ptr<ISystem> &&system)
         {
+            _mediator.addModule(system.get());
             _sm.registerSystem(std::move(system));
         }
 
