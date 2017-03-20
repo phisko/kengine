@@ -19,7 +19,6 @@ namespace kengine
         pmeta::type_index getCompType() const noexcept override { return pmeta::type<RegisteredComponent>::index; }
 
     private:
-
         void registerGameObject(GameObject &go) override
         {
             const auto it = std::find(_gameObjects.begin(), _gameObjects.end(), &go);
@@ -29,7 +28,9 @@ namespace kengine
 
         void removeGameObject(GameObject &go) override
         {
-            _gameObjects.erase(std::find(_gameObjects.begin(), _gameObjects.end(), &go));
+            const auto it = std::find(_gameObjects.begin(), _gameObjects.end(), &go);
+            if (it != _gameObjects.end())
+                _gameObjects.erase(it);
         }
 
     private:
