@@ -10,15 +10,16 @@ namespace kengine
     template<typename RegisteredComponent = IgnoreComponents, typename ...DataPackets>
     class System : public ISystem, public putils::Module<DataPackets...>
     {
-    public:
-        pmeta::type_index getCompType() const noexcept override { return pmeta::type<RegisteredComponent>::index; }
-
     protected:
         using ISystem::ISystem;
         auto &getGameObjects() { return _gameObjects; }
         const auto &getGameObjects() const { return _gameObjects; }
 
     public:
+        pmeta::type_index getCompType() const noexcept override { return pmeta::type<RegisteredComponent>::index; }
+
+    private:
+
         void registerGameObject(GameObject &go) override
         {
             const auto it = std::find(_gameObjects.begin(), _gameObjects.end(), &go);

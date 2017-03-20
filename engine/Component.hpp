@@ -35,10 +35,7 @@ namespace kengine
     public:
         pmeta::type_index getType() const noexcept override { return Type; }
         std::string const& getName() const noexcept override { return _name; }
-        std::string toString() const noexcept override
-        {
-            return _name;
-        }
+        std::string toString() const noexcept override { return _name; }
 
     private:
         std::string       _name;
