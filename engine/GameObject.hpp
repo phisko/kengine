@@ -60,6 +60,11 @@ namespace kengine
         };
 
     public:
+        bool hasComponent(const std::string &name) const noexcept { return _componentsByName.find(name) != _componentsByName.end(); }
+        template<typename CT, typename = std::enable_if_t<std::is_base_of<IComponent, CT>::value>>
+        bool hasComponent() const noexcept { return _componentsByType.find(CT::Type) != _componentsByType.end(); }
+
+    public:
         std::string toString() const override;
 
     public:

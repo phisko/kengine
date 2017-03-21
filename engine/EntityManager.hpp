@@ -2,20 +2,19 @@
 // Created by naliwe on 7/14/16.
 //
 
-#ifndef KENGINE_ENTITYMANAGER_HPP
-# define KENGINE_ENTITYMANAGER_HPP
+#pragma once
 
-# include <string>
-# include <unordered_map>
-# include <memory>
-# include <type_traits>
-# include <iostream>
-# include "GameObject.hpp"
-# include "Component.hpp"
-# include "ComponentFactory.hpp"
-# include "SystemManager.hpp"
-# include "EntityFactory.hpp"
-# include "Mediator.hpp"
+#include <string>
+#include <unordered_map>
+#include <memory>
+#include <type_traits>
+#include <iostream>
+#include "GameObject.hpp"
+#include "Component.hpp"
+#include "ComponentFactory.hpp"
+#include "SystemManager.hpp"
+#include "EntityFactory.hpp"
+#include "Mediator.hpp"
 
 namespace kengine
 {
@@ -158,5 +157,3 @@ namespace kengine
         std::unordered_map<std::string, std::string> _compHierarchy;
     };
 }
-
-#endif //KENGINE_ENTITYMANAGER_HPP
