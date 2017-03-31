@@ -52,16 +52,30 @@ namespace kengine
         }
 
     public:
-        GameObject &createEntity(const std::string &type, const std::string &name)
+        GameObject &createEntity(const std::string &type, const std::string &name,
+                                 const std::function<void(GameObject &)> &postCreate = nullptr)
         {
-            return addEntity(name, _factory->make(type, name));
+            auto e = _factory->make(type, name);
+
+            if (postCreate != nullptr)
+                postCreate(*e);
+
+            for (const auto &p : e->_components)
+                registerComponent(*e, std::unique_ptr<IComponent>(p.second));
+
+            return addEntity(name, std::move(e));
         }
 
         template<class GO, class ...Args,
                 typename = std::enable_if_t<std::is_base_of<GameObject, GO>::value>>
-        GO &createEntity(std::string const &name, Args &&... params) noexcept
+        GO &createEntity(std::string const &name,
+                         const std::function<void(GameObject &)> &postCreate = nullptr,
+                         Args &&... params) noexcept
         {
             auto entity = std::make_unique<GO>(name, std::forward<Args>(params)...);
+
+            if (postCreate != nullptr)
+                postCreate(static_cast<GameObject &>(*entity));
 
             for (const auto &p : entity->_components)
                 registerComponent(*entity, std::unique_ptr<IComponent>(p.second));
