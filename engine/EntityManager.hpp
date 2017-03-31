@@ -73,8 +73,10 @@ namespace kengine
         GameObject &addEntity(const std::string &name, std::unique_ptr<GameObject> &&obj)
         {
             auto &ret = *obj;
-            const auto p = _entities.emplace(name, std::move(obj));
-            _sm.registerGameObject(*p.first->second);
+            _entities[name] = std::move(obj);
+            _sm.registerGameObject(ret);
+            // const auto p = _entities.emplace(name, std::move(obj));
+            // _sm.registerGameObject(*p.first->second);
             return ret;
         }
 
@@ -117,26 +119,26 @@ namespace kengine
     private:
         void registerComponent(const GameObject &parent, std::unique_ptr<IComponent> &&comp)
         {
-            const auto &name = comp->getName();
             const auto &parentName = parent.getName();
-            const auto str = hashCompName(parentName, name);
 
-            _components.emplace(str, std::move(comp));
-            _compHierarchy.emplace(name, parentName);
+            _compHierarchy.emplace(comp.get(), parentName);
+            _components.push_back(std::move(comp));
         }
 
     public:
-        void detachComponent(GameObject &go, IComponent &comp)
+        void detachComponent(GameObject &go, const IComponent &comp)
         {
-            if (_components.find(hashCompName(go.getName(), comp.getName())) == _components.end())
+            const auto it = std::find_if(_components.begin(), _components.end(), [&comp](auto &&ptr) { return ptr.get() == &comp; });
+
+            if (it == _components.end())
                 throw std::logic_error("Could not find component " + comp.toString());
             if (_entities.find(go.getName()) == _entities.end())
                 throw std::logic_error("Could not find entity " + go.getName());
 
             //TODO: Recycle component
-            _compHierarchy.erase(comp.getName());
+            _compHierarchy.erase(&comp);
             go.detachComponent(&comp);
-            _components.erase(hashCompName(go.getName(), comp.getName()));
+            _components.erase(it);
 
             // TODO: find some way to call removeGameObject on systems
         }
@@ -153,7 +155,7 @@ namespace kengine
 
     private:
         std::unordered_map<std::string, std::unique_ptr<GameObject>> _entities;
-        std::unordered_map<std::string, std::unique_ptr<IComponent>> _components;
-        std::unordered_map<std::string, std::string> _compHierarchy;
+        std::vector<std::unique_ptr<IComponent>> _components;
+        std::unordered_map<const IComponent *, std::string> _compHierarchy;
     };
 }

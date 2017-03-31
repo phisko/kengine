@@ -7,16 +7,21 @@ namespace kengine
 {
     using IgnoreComponents = nullptr_t;
 
-    template<typename RegisteredComponent = IgnoreComponents, typename ...DataPackets>
-    class System : public ISystem, public putils::Module<DataPackets...>
+    template<typename CRTP, typename RegisteredComponent = IgnoreComponents, typename ...DataPackets>
+    class System : public ISystem, public putils::Module<CRTP, DataPackets...>
     {
+
     protected:
         using ISystem::ISystem;
-        auto &getGameObjects() { return _gameObjects; }
-        const auto &getGameObjects() const { return _gameObjects; }
+        std::vector<GameObject*> &getGameObjects() { return _gameObjects; }
+        const std::vector<GameObject*> &getGameObjects() const { return _gameObjects; }
 
     public:
-        pmeta::type_index getCompType() const noexcept override { return pmeta::type<RegisteredComponent>::index; }
+        pmeta::type_index getCompType() const noexcept override
+        {
+            static_assert(std::is_base_of<System, CRTP>::value, "System's first template parameter should be inheriting class");
+            return pmeta::type<RegisteredComponent>::index;
+        }
 
     private:
         void registerGameObject(GameObject &go) override

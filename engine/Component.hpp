@@ -9,16 +9,14 @@
 
 namespace kengine
 {
-    template<typename CRTP, bool TUnique = false, typename ...DataPackets>
-    class Component : public IComponent, public putils::Module<DataPackets...>
+    template<typename CRTP, typename ...DataPackets>
+    class Component : public IComponent, public putils::Module<CRTP, DataPackets...>
     {
     public:
         static const pmeta::type_index Type;
-        static constexpr bool Unique = TUnique;
 
     public:
-        Component(std::string const& name)
-                : _name(name)
+        Component()
         {}
 
         Component(const Component &other) = default;
@@ -30,17 +28,9 @@ namespace kengine
         virtual ~Component() = default;
 
     public:
-        bool isUnique() const noexcept override { return TUnique; }
-
-    public:
         pmeta::type_index getType() const noexcept override { return Type; }
-        std::string const& getName() const noexcept override { return _name; }
-        std::string toString() const noexcept override { return _name; }
-
-    private:
-        std::string       _name;
     };
 
-    template<typename CRTP, bool TUnique, typename ...DataPackets>
-    const pmeta::type_index Component<CRTP, TUnique, DataPackets...>::Type = pmeta::type<CRTP>::index;
+    template<typename CRTP, typename ...DataPackets>
+    const pmeta::type_index Component<CRTP, DataPackets...>::Type = pmeta::type<CRTP>::index;
 }

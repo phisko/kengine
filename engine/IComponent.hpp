@@ -17,6 +17,5 @@ namespace kengine
 
     public:
         virtual pmeta::type_index getType() const noexcept = 0;
-        virtual bool isUnique() const noexcept = 0;
     };
 }

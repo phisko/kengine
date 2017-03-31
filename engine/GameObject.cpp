@@ -9,17 +9,15 @@ namespace kengine
     void GameObject::attachComponent(IComponent *comp)
     {
         this->addModule(comp);
-        _componentsByName[comp->getName()] = comp;
         const auto type = comp->getType();
-        _componentsByType[type] = comp;
+        _components[type] = comp;
         _types.push_back(type);
     }
 
-    void GameObject::detachComponent(IComponent *comp)
+    void GameObject::detachComponent(const IComponent *comp)
     {
-        _componentsByName.erase(comp->getName());
         const auto type = comp->getType();
-        _componentsByType.erase(type);
+        _components.erase(type);
         _types.erase(std::find(_types.begin(), _types.end(), type));
     }
 
@@ -32,7 +30,7 @@ namespace kengine
            << "\tcomponents: {" << std::endl;
 
         bool first = true;
-        for (const auto &p : _componentsByName)
+        for (const auto &p : _components)
         {
             if (first)
                 first = false;

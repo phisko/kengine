@@ -30,12 +30,18 @@ namespace kengine
         }
 
     public:
-        void registerGameObject(GameObject &gameObject)
+        void registerGameObject(GameObject &gameObject) noexcept
         {
             for (auto &category : _systems)
                 if (matchMasks(category.first, gameObject))
                     for (auto &s : category.second)
-                        s->registerGameObject(gameObject);
+                    {
+                        try
+                        {
+                            s->registerGameObject(gameObject);
+                        }
+                        catch (const std::exception &e) { std::cerr << e.what() << std::endl; }
+                    }
         }
 
         void removeGameObject(GameObject &gameObject)
@@ -43,7 +49,13 @@ namespace kengine
             for (auto &category : _systems)
                 if (matchMasks(category.first, gameObject))
                     for (auto &s : category.second)
-                        s->removeGameObject(gameObject);
+                    {
+                        try
+                        {
+                            s->removeGameObject(gameObject);
+                        }
+                        catch (const std::exception &e) { std::cerr << e.what() << std::endl; }
+                    }
         }
 
     private:
