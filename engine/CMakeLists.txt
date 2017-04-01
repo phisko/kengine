@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
 project(kengine)
 
-add_subdirectory(mediator)
-include_directories(mediator)
+add_subdirectory(putils)
 
 set(new_includes
         ${CMAKE_CURRENT_LIST_DIR}/mediator
