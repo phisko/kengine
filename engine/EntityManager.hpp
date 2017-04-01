@@ -80,7 +80,7 @@ namespace kengine
             for (const auto &p : entity->_components)
                 registerComponent(*entity, std::unique_ptr<IComponent>(p.second));
 
-            return addEntity(name, std::move(entity));
+            return static_cast<GO&>(addEntity(name, std::move(entity)));
         }
 
     private:
