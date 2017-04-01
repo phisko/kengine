@@ -87,10 +87,10 @@ namespace kengine
         GameObject &addEntity(const std::string &name, std::unique_ptr<GameObject> &&obj)
         {
             auto &ret = *obj;
+
             _entities[name] = std::move(obj);
             _sm.registerGameObject(ret);
-            // const auto p = _entities.emplace(name, std::move(obj));
-            // _sm.registerGameObject(*p.first->second);
+
             return ret;
         }
 
