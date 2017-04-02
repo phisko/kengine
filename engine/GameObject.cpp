@@ -27,7 +27,7 @@ namespace kengine
 
         ss << "{" << std::endl
            << "\tname: " << _name << ", " << std::endl
-           << "\tcomponents: {" << std::endl;
+           << "\tcomponents: [" << std::endl;
 
         bool first = true;
         for (const auto &p : _components)
@@ -39,7 +39,7 @@ namespace kengine
 
             ss << "\t\t" << p.second->toString() << "";
         }
-        ss << std::endl << "\t}" << std::endl
+        ss << std::endl << "\t]" << std::endl
                 << "}";
 
         return ss.str();
