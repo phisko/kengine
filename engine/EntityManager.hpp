@@ -95,14 +95,19 @@ namespace kengine
         }
 
     public:
+        void removeEntity(kengine::GameObject &go)
+        {
+            _sm.removeGameObject(go);
+            _entities.erase(_entities.find(go.getName()));
+        }
+
         void removeEntity(std::string const &name)
         {
             const auto p = _entities.find(name);
             if (p == _entities.end())
                 throw std::out_of_range("No such entity");
 
-            const auto ret = p->second.get();
-            _sm.removeGameObject(*ret);
+            _sm.removeGameObject(*p->second);
             _entities.erase(p);
         }
 
