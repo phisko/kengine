@@ -1,6 +1,9 @@
 #include <sstream>
 #include "GameObject.hpp"
 
+#include "concat.hpp"
+#include "prettyprint.hpp"
+
 namespace kengine
 {
     GameObject::GameObject(std::string const &name)
@@ -23,11 +26,9 @@ namespace kengine
 
     std::string GameObject::toString() const
     {
-        std::stringstream ss;
+        std::string ret;
 
-        ss << "{" << std::endl
-           << "\tname: " << _name << ", " << std::endl
-           << "\tcomponents: [" << std::endl;
+        ret = putils::concat("{name:", _name, ", components:[");
 
         bool first = true;
         for (const auto &p : _components)
@@ -35,14 +36,13 @@ namespace kengine
             if (first)
                 first = false;
             else
-                ss << "," << std::endl;
+                ret.append(1, ',');
 
-            ss << "\t\t" << p.second->toString() << "";
+            ret += p.second->toString();
         }
-        ss << std::endl << "\t]" << std::endl
-                << "}";
+        ret += "]}";
 
-        return ss.str();
+        return putils::prettyPrint::json(std::move(ret));
     }
 }
 
