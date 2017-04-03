@@ -2,7 +2,7 @@
 #include "GameObject.hpp"
 
 #include "concat.hpp"
-#include "prettyprint.hpp"
+#include "json.hpp"
 
 namespace kengine
 {
@@ -42,7 +42,7 @@ namespace kengine
         }
         ret += "]}";
 
-        return putils::prettyPrint::json(std::move(ret));
+        return putils::json::prettyPrint(std::move(ret));
     }
 }
 
