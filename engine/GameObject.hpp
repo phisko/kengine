@@ -7,20 +7,44 @@
 #include <string>
 #include <unordered_map>
 #include <algorithm>
+
 #include "IComponent.hpp"
 #include "Object.hpp"
 #include "Mediator.hpp"
 
+#include "concat.hpp"
+#include "json.hpp"
+#include "to_string.hpp"
+
 namespace kengine
 {
-    class GameObject : public Object, public putils::Mediator
+    class GameObject : public putils::Mediator
     {
     public:
         GameObject(std::string const &name);
         GameObject(GameObject &&other) = default;
         GameObject &operator=(GameObject &&other) = default;
+        ~GameObject() = default;
 
-        virtual ~GameObject() = default;
+        friend std::ostream &operator<<(std::ostream &s, const kengine::GameObject &obj)
+        {
+            std::string ret = putils::concat("{name:", obj._name, ", components:[");
+
+            bool first = true;
+            for (const auto &p : obj._components)
+            {
+                if (first)
+                    first = false;
+                else
+                    ret.append(1, ',');
+
+                ret += putils::to_string(*p.second);
+            }
+            ret += "]}";
+
+            s << putils::json::prettyPrint(std::move(ret));
+            return s;
+        }
 
     protected:
         friend class EntityManager;
@@ -49,9 +73,6 @@ namespace kengine
     public:
         template<typename CT, typename = std::enable_if_t<std::is_base_of<IComponent, CT>::value>>
         bool hasComponent() const noexcept { return _components.find(CT::Type) != _components.end(); }
-
-    public:
-        std::string toString() const override;
 
     public:
         const std::string &getName() const { return _name; }

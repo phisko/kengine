@@ -150,7 +150,7 @@ namespace kengine
             const auto it = std::find_if(_components.begin(), _components.end(), [&comp](auto &&ptr) { return ptr.get() == &comp; });
 
             if (it == _components.end())
-                throw std::logic_error("Could not find component " + comp.toString());
+                throw std::logic_error("Could not find component " + putils::to_string(comp));
             if (_entities.find(go.getName()) == _entities.end())
                 throw std::logic_error("Could not find entity " + go.getName());
 

@@ -1,8 +1,6 @@
 #include <sstream>
 #include "GameObject.hpp"
 
-#include "concat.hpp"
-#include "json.hpp"
 
 namespace kengine
 {
@@ -22,27 +20,6 @@ namespace kengine
         const auto type = comp->getType();
         _components.erase(type);
         _types.erase(std::find(_types.begin(), _types.end(), type));
-    }
-
-    std::string GameObject::toString() const
-    {
-        std::string ret;
-
-        ret = putils::concat("{name:", _name, ", components:[");
-
-        bool first = true;
-        for (const auto &p : _components)
-        {
-            if (first)
-                first = false;
-            else
-                ret.append(1, ',');
-
-            ret += p.second->toString();
-        }
-        ret += "]}";
-
-        return putils::json::prettyPrint(std::move(ret));
     }
 }
 
