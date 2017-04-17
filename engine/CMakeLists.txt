@@ -4,7 +4,6 @@ project(kengine)
 add_subdirectory(putils)
 
 set(new_includes
-        ${CMAKE_CURRENT_LIST_DIR}/mediator
         ${CMAKE_CURRENT_LIST_DIR}
         )
 set(INCLUDE_DIRS ${INCLUDE_DIRS} ${new_includes} PARENT_SCOPE)
@@ -16,4 +15,4 @@ file(GLOB src_files
         )
 
 add_library(kengine SHARED ${src_files})
-target_link_libraries(kengine mediator)
+target_link_libraries(kengine mediator http)
