@@ -1,19 +1,18 @@
 cmake_minimum_required(VERSION 3.0)
 project(kengine)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -std=c++14")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib/)
+add_subdirectory(putils)
 
-add_subdirectory(engine)
-set(INCLUDE_DIRS ${INCLUDE_DIRS} PARENT_SCOPE)
+set(new_includes
+        ${CMAKE_CURRENT_LIST_DIR}
+        )
+set(INCLUDE_DIRS ${INCLUDE_DIRS} ${new_includes} PARENT_SCOPE)
+include_directories(${INCLUDE_DIRS})
 
-include_directories(test/include)
-
-file(GLOB test_src_files
-        test/src/*.cpp
-        test/include/*.hpp
+file(GLOB src_files
+        *.cpp
+        *.hpp
         )
 
-add_executable(ktest ${test_src_files})
-target_link_libraries(ktest kengine)
+add_library(kengine SHARED ${src_files})
+target_link_libraries(kengine mediator http)
