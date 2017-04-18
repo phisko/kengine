@@ -1,3 +1,0 @@
-Button.Button2 {
-    TextColor : rgb(0, 255, 255);
-}
