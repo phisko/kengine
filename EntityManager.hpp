@@ -21,7 +21,7 @@ namespace kengine
     class EntityManager : public putils::Mediator
     {
     public:
-        EntityManager(std::unique_ptr<EntityFactory> &&factory)
+        EntityManager(std::unique_ptr<EntityFactory> &&factory = nullptr)
                 : _factory(std::move(factory)) {}
 
         ~EntityManager() = default;
@@ -37,10 +37,10 @@ namespace kengine
         void execute() { _sm.execute(); }
 
     public:
-        template<typename T, typename ...Args>
-        void createSystem(Args &&...args)
+        template<typename T>
+        void createSystem(auto &&...args)
         {
-            auto &s = _sm.registerSystem<T>(std::forward<Args>(args)...);
+            auto &s = _sm.registerSystem<T>(FWD(args)...);
             addModule(&s);
         }
 
@@ -66,13 +66,12 @@ namespace kengine
             return addEntity(name, std::move(e));
         }
 
-        template<class GO, class ...Args,
-                typename = std::enable_if_t<std::is_base_of<GameObject, GO>::value>>
+        template<class GO, typename = std::enable_if_t<std::is_base_of<GameObject, GO>::value>>
         GO &createEntity(std::string const &name,
                          const std::function<void(GameObject &)> &postCreate = nullptr,
-                         Args &&... params) noexcept
+                         auto &&... params) noexcept
         {
-            auto entity = std::make_unique<GO>(name, std::forward<Args>(params)...);
+            auto entity = std::make_unique<GO>(name, FWD(params)...);
 
             if (postCreate != nullptr)
                 postCreate(static_cast<GameObject &>(*entity));
@@ -121,10 +120,10 @@ namespace kengine
         }
 
     public:
-        template<class CT, class ... Args>
-        CT &attachComponent(GameObject &parent, Args &&... params) noexcept
+        template<class CT>
+        CT &attachComponent(GameObject &parent, auto &&... params) noexcept
         {
-            auto ptr = ComponentFactory::createComponent<CT>(std::forward<Args>(params)...);
+            auto ptr = ComponentFactory::createComponent<CT>(FWD(params)...);
             auto &comp = *ptr;
 
             registerComponent(parent, std::move(ptr));

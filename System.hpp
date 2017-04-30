@@ -23,7 +23,7 @@ namespace kengine
             return pmeta::type<RegisteredComponent>::index;
         }
 
-    private:
+    protected:
         void registerGameObject(GameObject &go) override
         {
             const auto it = std::find(_gameObjects.begin(), _gameObjects.end(), &go);
