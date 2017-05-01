@@ -172,8 +172,8 @@ namespace kengine
         std::unique_ptr<EntityFactory> _factory;
 
     private:
-        std::unordered_map<std::string, std::unique_ptr<GameObject>> _entities;
         std::vector<std::unique_ptr<IComponent>> _components;
+        std::unordered_map<std::string, std::unique_ptr<GameObject>> _entities;
         std::unordered_map<const IComponent *, std::string> _compHierarchy;
     };
 }
