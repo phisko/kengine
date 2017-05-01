@@ -61,7 +61,7 @@ namespace kengine
                 postCreate(*e);
 
             for (const auto &p : e->_components)
-                registerComponent(*e, std::unique_ptr<IComponent>(p.second));
+                registerComponent(*e, *p.second);
 
             return addEntity(name, std::move(e));
         }
@@ -77,7 +77,7 @@ namespace kengine
                 postCreate(static_cast<GameObject &>(*entity));
 
             for (const auto &p : entity->_components)
-                registerComponent(*entity, std::unique_ptr<IComponent>(p.second));
+                registerComponent(*entity, *p.second);
 
             return static_cast<GO&>(addEntity(name, std::move(entity)));
         }
@@ -126,45 +126,31 @@ namespace kengine
             auto ptr = ComponentFactory::createComponent<CT>(FWD(params)...);
             auto &comp = *ptr;
 
-            registerComponent(parent, std::move(ptr));
+            registerComponent(parent, comp);
 
-            parent.attachComponent(&comp);
+            parent.attachComponent(std::move(ptr));
             _sm.registerGameObject(parent);
 
-            return static_cast<CT &>(comp);
+            return comp;
         };
 
     private:
-        void registerComponent(const GameObject &parent, std::unique_ptr<IComponent> &&comp)
+        void registerComponent(const GameObject &parent, const IComponent &comp)
         {
-            const auto &parentName = parent.getName();
-
-            _compHierarchy.emplace(comp.get(), parentName);
-            _components.push_back(std::move(comp));
+            _compHierarchy.emplace(&comp, &parent);
         }
 
     public:
         void detachComponent(GameObject &go, const IComponent &comp)
         {
-            const auto it = std::find_if(_components.begin(), _components.end(), [&comp](auto &&ptr) { return ptr.get() == &comp; });
-
-            if (it == _components.end())
-                throw std::logic_error("Could not find component " + putils::to_string(comp));
             if (_entities.find(go.getName()) == _entities.end())
                 throw std::logic_error("Could not find entity " + go.getName());
 
             //TODO: Recycle component
             _compHierarchy.erase(&comp);
-            go.detachComponent(&comp);
-            _components.erase(it);
+            go.detachComponent(comp);
 
             // TODO: find some way to call removeGameObject on systems
-        }
-
-    private:
-        static std::string hashCompName(std::string const &pName, std::string const &cName)
-        {
-            return pName + "--" + cName;
         }
 
     private:
@@ -172,8 +158,7 @@ namespace kengine
         std::unique_ptr<EntityFactory> _factory;
 
     private:
-        std::vector<std::unique_ptr<IComponent>> _components;
         std::unordered_map<std::string, std::unique_ptr<GameObject>> _entities;
-        std::unordered_map<const IComponent *, std::string> _compHierarchy;
+        std::unordered_map<const IComponent *, const GameObject *> _compHierarchy;
     };
 }

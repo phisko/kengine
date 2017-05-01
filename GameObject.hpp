@@ -21,7 +21,8 @@ namespace kengine
     class GameObject : public putils::Mediator
     {
     public:
-        GameObject(std::string const &name);
+        GameObject(std::string const &name) : _name(name) {}
+
         GameObject(GameObject &&other) = default;
         GameObject &operator=(GameObject &&other) = default;
         ~GameObject() = default;
@@ -48,13 +49,22 @@ namespace kengine
 
     protected:
         friend class EntityManager;
-        void attachComponent(IComponent *comp);
-        void detachComponent(const IComponent *comp);
+
+        template<typename CT, typename = std::enable_if_t<std::is_base_of<IComponent, CT>::value>>
+        void attachComponent(std::unique_ptr<CT> &&comp)
+        {
+            this->addModule(comp.get());
+            const auto type = comp->getType();
+            _components[type] = std::move(comp);
+            _types.push_back(type);
+        }
+
+        void detachComponent(const IComponent &comp);
 
         template<typename CT, typename ...Args, typename = std::enable_if_t<std::is_base_of<kengine::IComponent, CT>::value>>
         void attachComponent(Args &&...args)
         {
-            attachComponent(new CT(std::forward<Args>(args)...));
+            attachComponent(std::make_unique<CT>(std::forward<Args>(args)...));
         };
 
     public:
@@ -80,7 +90,7 @@ namespace kengine
 
     private:
         std::string _name;
-        std::unordered_map<pmeta::type_index, IComponent *> _components;
+        std::unordered_map<pmeta::type_index, std::unique_ptr<IComponent>> _components;
         std::vector<pmeta::type_index > _types;
     };
 }
