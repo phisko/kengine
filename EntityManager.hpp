@@ -87,6 +87,9 @@ namespace kengine
         {
             auto &ret = *obj;
 
+            if (_entities.find(name) != _entities.end())
+                throw std::runtime_error("Entity exists");
+
             _entities[name] = std::move(obj);
             _sm.registerGameObject(ret);
 

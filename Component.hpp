@@ -6,11 +6,12 @@
 
 #include <string>
 #include "IComponent.hpp"
+#include "PooledObject.hpp"
 
 namespace kengine
 {
     template<typename CRTP, typename ...DataPackets>
-    class Component : public IComponent, public putils::Module<CRTP, DataPackets...>
+    class Component : public IComponent, public putils::Module<CRTP, DataPackets...>, public putils::PooledObject<CRTP>
     {
     public:
         static const pmeta::type_index Type;

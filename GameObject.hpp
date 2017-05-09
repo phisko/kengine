@@ -12,21 +12,30 @@
 #include "Object.hpp"
 #include "Mediator.hpp"
 
+#include "Serializable.hpp"
+
 #include "concat.hpp"
 #include "json.hpp"
 #include "to_string.hpp"
 
 namespace kengine
 {
-    class GameObject : public putils::Mediator
+    class GameObject : public putils::Mediator, public putils::Serializable<GameObject, false>
     {
     public:
-        GameObject(std::string const &name) : _name(name) {}
+        GameObject(std::string const &name) :
+                Serializable(
+                        std::make_pair("name", &GameObject::_name),
+                        std::make_pair("components", &GameObject::_components)
+                ),
+                _name(name)
+        {}
 
         GameObject(GameObject &&other) = default;
         GameObject &operator=(GameObject &&other) = default;
         ~GameObject() = default;
 
+/*
         friend std::ostream &operator<<(std::ostream &s, const kengine::GameObject &obj)
         {
             std::string ret = putils::concat("{name:", obj._name, ", components:[");
@@ -46,6 +55,7 @@ namespace kengine
             s << putils::json::prettyPrint(std::move(ret));
             return s;
         }
+*/
 
     protected:
         friend class EntityManager;
