@@ -6,12 +6,12 @@
 namespace kengine
 {
     template<typename CRTP, typename ...DataPackets>
-    class SerializableComponent : public Component<CRTP, DataPackets...>, public putils::Serializable<CRTP>
+    class SerializableComponent : public Component<CRTP, DataPackets...>, public putils::Serializable<CRTP, false>
     {
     public:
         template<typename ...MemberPairs>
         SerializableComponent(MemberPairs &&...pairs)
-                : putils::Serializable<CRTP>(FWD(pairs)...)
+                : putils::Serializable<CRTP, false>(FWD(pairs)...)
         {}
 
         std::string toString() const noexcept override
