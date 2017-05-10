@@ -35,28 +35,6 @@ namespace kengine
         GameObject &operator=(GameObject &&other) = default;
         ~GameObject() = default;
 
-/*
-        friend std::ostream &operator<<(std::ostream &s, const kengine::GameObject &obj)
-        {
-            std::string ret = putils::concat("{name:", obj._name, ", components:[");
-
-            bool first = true;
-            for (const auto &p : obj._components)
-            {
-                if (first)
-                    first = false;
-                else
-                    ret.append(1, ',');
-
-                ret += putils::to_string(*p.second);
-            }
-            ret += "]}";
-
-            s << putils::json::prettyPrint(std::move(ret));
-            return s;
-        }
-*/
-
     protected:
         friend class EntityManager;
 
