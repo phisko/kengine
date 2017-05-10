@@ -39,20 +39,24 @@ namespace kengine
         friend class EntityManager;
 
         template<typename CT, typename = std::enable_if_t<std::is_base_of<IComponent, CT>::value>>
-        void attachComponent(std::unique_ptr<CT> &&comp)
+        CT &attachComponent(std::unique_ptr<CT> &&comp)
         {
+            auto &ret = *comp;
+
             this->addModule(comp.get());
             const auto type = comp->getType();
             _components[type] = std::move(comp);
             _types.push_back(type);
+
+            return ret;
         }
 
         void detachComponent(const IComponent &comp);
 
         template<typename CT, typename ...Args, typename = std::enable_if_t<std::is_base_of<kengine::IComponent, CT>::value>>
-        void attachComponent(Args &&...args)
+        CT &attachComponent(Args &&...args)
         {
-            attachComponent(std::make_unique<CT>(std::forward<Args>(args)...));
+            return attachComponent(std::make_unique<CT>(std::forward<Args>(args)...));
         };
 
     public:

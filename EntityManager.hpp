@@ -123,6 +123,9 @@ namespace kengine
         }
 
     public:
+        bool hasEntity(const std::string &name) const noexcept { return _entities.find(name) != _entities.end(); }
+
+    public:
         template<class CT>
         CT &attachComponent(GameObject &parent, auto &&... params) noexcept
         {

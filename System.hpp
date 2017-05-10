@@ -24,6 +24,8 @@ namespace kengine
         }
 
     protected:
+        void execute() override {}
+
         void registerGameObject(GameObject &go) override
         {
             const auto it = std::find(_gameObjects.begin(), _gameObjects.end(), &go);
