@@ -9,7 +9,6 @@
 #include <algorithm>
 
 #include "IComponent.hpp"
-#include "Object.hpp"
 #include "Mediator.hpp"
 
 #include "Serializable.hpp"

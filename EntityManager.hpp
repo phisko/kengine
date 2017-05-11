@@ -37,8 +37,8 @@ namespace kengine
         void execute() { _sm.execute(); }
 
     public:
-        template<typename T>
-        void createSystem(auto &&...args)
+        template<typename T, typename ...Args>
+        void createSystem(Args &&...args)
         {
             auto &s = _sm.registerSystem<T>(FWD(args)...);
             addModule(&s);
@@ -66,10 +66,10 @@ namespace kengine
             return addEntity(name, std::move(e));
         }
 
-        template<class GO, typename = std::enable_if_t<std::is_base_of<GameObject, GO>::value>>
+        template<class GO, typename = std::enable_if_t<std::is_base_of<GameObject, GO>::value>, typename ...Params>
         GO &createEntity(std::string const &name,
                          const std::function<void(GameObject &)> &postCreate = nullptr,
-                         auto &&... params) noexcept
+                         Params &&... params) noexcept
         {
             auto entity = std::make_unique<GO>(name, FWD(params)...);
 
@@ -126,8 +126,8 @@ namespace kengine
         bool hasEntity(const std::string &name) const noexcept { return _entities.find(name) != _entities.end(); }
 
     public:
-        template<class CT>
-        CT &attachComponent(GameObject &parent, auto &&... params) noexcept
+        template<class CT, typename ...Params>
+        CT &attachComponent(GameObject &parent, Params &&... params) noexcept
         {
             auto ptr = ComponentFactory::createComponent<CT>(FWD(params)...);
             auto &comp = *ptr;

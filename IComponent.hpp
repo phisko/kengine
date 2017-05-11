@@ -5,7 +5,6 @@
 #pragma once
 
 #include "meta/type.hpp"
-#include "Object.hpp"
 #include "Module.hpp"
 
 namespace kengine
