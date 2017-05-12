@@ -64,7 +64,7 @@ namespace kengine
                         std::is_base_of<IComponent, CT>::value>>
         CT &getComponent() const
         {
-            const auto it = _components.find(CT::Type);
+            const auto it = _components.find(pmeta::type<CT>::index);
             if (it == _components.end())
                 throw std::out_of_range("Could not find component with provided type");
 
@@ -73,7 +73,7 @@ namespace kengine
 
     public:
         template<typename CT, typename = std::enable_if_t<std::is_base_of<IComponent, CT>::value>>
-        bool hasComponent() const noexcept { return _components.find(CT::Type) != _components.end(); }
+        bool hasComponent() const noexcept { return _components.find(pmeta::type<CT>::index) != _components.end(); }
 
     public:
         const std::string &getName() const { return _name; }

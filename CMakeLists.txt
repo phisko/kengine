@@ -14,5 +14,11 @@ file(GLOB src_files
         *.hpp
         )
 
-add_library(kengine SHARED ${src_files})
+if(UNIX)
+    set(type SHARED)
+elseif(WIN32)
+    set(type STATIC)
+endif()
+
+add_library(kengine ${type} ${src_files})
 target_link_libraries(kengine mediator)
