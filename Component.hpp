@@ -14,6 +14,6 @@ namespace kengine
     class Component : public IComponent, public putils::Module<CRTP, DataPackets...>, public putils::PooledObject<CRTP>
     {
     public:
-        pmeta::type_index getType() const noexcept override { return pmeta::type<CRTP>::index; }
+        pmeta::type_index getType() const noexcept final { return pmeta::type<CRTP>::index; }
     };
 }

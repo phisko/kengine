@@ -1,12 +1,9 @@
-//
-// Created by naliwe on 6/24/16.
-//
-
 #pragma once
 
 #include <string>
 #include <unordered_map>
 #include <algorithm>
+#include <memory>
 
 #include "IComponent.hpp"
 #include "Mediator.hpp"
@@ -16,6 +13,7 @@
 #include "concat.hpp"
 #include "json.hpp"
 #include "to_string.hpp"
+#include "fwd.hpp"
 
 namespace kengine
 {
@@ -55,20 +53,32 @@ namespace kengine
         template<typename CT, typename ...Args, typename = std::enable_if_t<std::is_base_of<kengine::IComponent, CT>::value>>
         CT &attachComponent(Args &&...args)
         {
-            return attachComponent(std::make_unique<CT>(std::forward<Args>(args)...));
+            auto comp = std::make_unique<CT>(FWD(args)...);
+
+            auto &ret = *comp;
+            addModule(comp.get());
+            const auto type = pmeta::type<CT>::index;
+            _components[type] = std::move(comp);
+            _types.push_back(type);
+
+            return ret;
         };
 
     public:
         template<class CT,
                 typename = typename std::enable_if_t<
                         std::is_base_of<IComponent, CT>::value>>
-        CT &getComponent() const
+        CT &getComponent()
         {
-            const auto it = _components.find(pmeta::type<CT>::index);
-            if (it == _components.end())
-                throw std::out_of_range("Could not find component with provided type");
+            return static_cast<CT &>(*_components.at(pmeta::type<CT>::index));
+        };
 
-            return static_cast<CT &>(*(it->second));
+        template<class CT,
+                typename = typename std::enable_if_t<
+                        std::is_base_of<IComponent, CT>::value>>
+        const CT &getComponent() const
+        {
+            return static_cast<const CT &>(*_components.at(pmeta::type<CT>::index));
         };
 
     public:
