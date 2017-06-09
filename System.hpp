@@ -5,7 +5,7 @@
 
 namespace kengine
 {
-    using IgnoreComponents = nullptr_t;
+    using IgnoreComponents = std::nullptr_t;
 
     template<typename CRTP, typename RegisteredComponent = IgnoreComponents, typename ...DataPackets>
     class System : public ISystem, public putils::Module<CRTP, DataPackets...>
