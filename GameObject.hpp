@@ -42,7 +42,7 @@ namespace kengine
 
             this->addModule(comp.get());
             const auto type = comp->getType();
-            _components[type] = std::move(comp);
+            _components.emplace(type, std::move(comp));
             _types.push_back(type);
 
             return ret;
@@ -58,7 +58,7 @@ namespace kengine
             auto &ret = *comp;
             addModule(comp.get());
             const auto type = pmeta::type<CT>::index;
-            _components[type] = std::move(comp);
+            _components.emplace(type, std::move(comp));
             _types.push_back(type);
 
             return ret;
