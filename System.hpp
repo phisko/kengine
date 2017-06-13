@@ -39,6 +39,9 @@ namespace kengine
                 _gameObjects.erase(it);
         }
 
+        bool hasGameObject(GameObject &go) const noexcept
+        { return std::find(_gameObjects.begin(), _gameObjects.end(), &go) != _gameObjects.end(); }
+
     private:
         std::vector<GameObject*> _gameObjects;
     };
