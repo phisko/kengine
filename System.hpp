@@ -11,6 +11,9 @@ namespace kengine
     class System : public ISystem, public putils::Module<CRTP, DataPackets...>
     {
     protected:
+        using super = System<CRTP, RegisteredComponent, DataPackets...>;
+
+    protected:
         using ISystem::ISystem;
         std::vector<GameObject*> &getGameObjects() { return _gameObjects; }
         const std::vector<GameObject*> &getGameObjects() const { return _gameObjects; }
