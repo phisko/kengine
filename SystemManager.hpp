@@ -24,17 +24,17 @@ namespace kengine
     public:
         void execute()
         {
-            for (auto &category : _systems)
-                for (auto &s : category.second)
+            for (auto & [type, systems] : _systems)
+                for (auto &s : systems)
                     s->execute();
         }
 
     public:
         void registerGameObject(GameObject &gameObject) noexcept
         {
-            for (auto &category : _systems)
-                if (matchMasks(category.first, gameObject))
-                    for (auto &s : category.second)
+            for (auto & [type, systems] : _systems)
+                if (matchMasks(type, gameObject))
+                    for (auto &s : systems)
                     {
                         try
                         {
@@ -46,9 +46,9 @@ namespace kengine
 
         void removeGameObject(GameObject &gameObject)
         {
-            for (auto &category : _systems)
-                if (matchMasks(category.first, gameObject))
-                    for (auto &s : category.second)
+            for (auto & [type, systems] : _systems)
+                if (matchMasks(type, gameObject))
+                    for (auto &s : systems)
                     {
                         try
                         {

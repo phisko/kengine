@@ -11,7 +11,6 @@
 #include <iostream>
 #include "GameObject.hpp"
 #include "Component.hpp"
-#include "ComponentFactory.hpp"
 #include "SystemManager.hpp"
 #include "EntityFactory.hpp"
 #include "Mediator.hpp"
@@ -60,8 +59,8 @@ namespace kengine
             if (postCreate != nullptr)
                 postCreate(*e);
 
-            for (const auto &p : e->_components)
-                registerComponent(*e, *p.second);
+            for (const auto & [type, comp] : e->_components)
+                registerComponent(*e, *comp);
 
             return addEntity(name, std::move(e));
         }
@@ -76,8 +75,8 @@ namespace kengine
             if (postCreate != nullptr)
                 postCreate(static_cast<GameObject &>(*entity));
 
-            for (const auto &p : entity->_components)
-                registerComponent(*entity, *p.second);
+            for (const auto & [type, comp] : entity->_components)
+                registerComponent(*entity, *comp);
 
             return static_cast<GO &>(addEntity(name, std::move(entity)));
         }
@@ -109,7 +108,9 @@ namespace kengine
             if (p == _entities.end())
                 throw std::out_of_range("No such entity");
 
-            _sm.removeGameObject(*p->second);
+            const auto & [_, e] = *p;
+
+            _sm.removeGameObject(*e);
             _entities.erase(p);
         }
 
@@ -129,7 +130,7 @@ namespace kengine
         template<class CT, typename ...Params>
         CT &attachComponent(GameObject &parent, Params &&... params) noexcept
         {
-            auto ptr = ComponentFactory::createComponent<CT>(FWD(params)...);
+            auto ptr = std::make_unique<CT>(FWD(params)...);
             auto &comp = *ptr;
 
             registerComponent(parent, comp);
