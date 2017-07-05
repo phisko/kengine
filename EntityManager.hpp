@@ -99,7 +99,7 @@ namespace kengine
         void removeEntity(kengine::GameObject &go)
         {
             _sm.removeGameObject(go);
-            _entities.erase(_entities.find(go.getName()));
+            _entities.erase(_entities.find(go.getName().data()));
         }
 
         void removeEntity(std::string const &name)
@@ -150,8 +150,8 @@ namespace kengine
     public:
         void detachComponent(GameObject &go, const IComponent &comp)
         {
-            if (_entities.find(go.getName()) == _entities.end())
-                throw std::logic_error("Could not find entity " + go.getName());
+            if (_entities.find(go.getName().data()) == _entities.end())
+                throw std::logic_error(putils::concat("Could not find entity ", go.getName()));
 
             //TODO: Recycle component
             _compHierarchy.erase(&comp);

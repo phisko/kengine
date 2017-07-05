@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <algorithm>
 #include <memory>
@@ -20,7 +21,7 @@ namespace kengine
     class GameObject : public putils::Mediator, public putils::Serializable<GameObject, false>
     {
     public:
-        GameObject(std::string const &name) :
+        GameObject(std::string_view name) :
                 Serializable(
                         std::make_pair("name", &GameObject::_name),
                         std::make_pair("components", &GameObject::_components)
@@ -86,7 +87,7 @@ namespace kengine
         bool hasComponent() const noexcept { return _components.find(pmeta::type<CT>::index) != _components.end(); }
 
     public:
-        const std::string &getName() const { return _name; }
+        std::string_view getName() const { return _name; }
         const std::vector<pmeta::type_index> &getTypes() const { return _types; }
 
     private:
