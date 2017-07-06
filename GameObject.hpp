@@ -34,11 +34,14 @@ namespace kengine
         ~GameObject() = default;
 
     protected:
-        friend class EntityManager;
+        friend class ComponentManager;
 
-        template<typename CT, typename = std::enable_if_t<std::is_base_of<IComponent, CT>::value>>
+        template<typename CT>
         CT &attachComponent(std::unique_ptr<CT> &&comp)
         {
+            if constexpr (!std::is_base_of<IComponent, CT>::value)
+                static_assert("Attempt to attach something that's not a component");
+
             auto &ret = *comp;
 
             this->addModule(comp.get());
@@ -49,11 +52,19 @@ namespace kengine
             return ret;
         }
 
-        void detachComponent(const IComponent &comp);
+        void detachComponent(const IComponent &comp)
+        {
+            const auto type = comp.getType();
+            _components.erase(type);
+            _types.erase(std::find(_types.begin(), _types.end(), type));
+        }
 
-        template<typename CT, typename ...Args, typename = std::enable_if_t<std::is_base_of<kengine::IComponent, CT>::value>>
+        template<typename CT, typename ...Args>
         CT &attachComponent(Args &&...args)
         {
+            if constexpr (!std::is_base_of<IComponent, CT>::value)
+                static_assert("Attempt to attach something that's not a component");
+
             auto comp = std::make_unique<CT>(FWD(args)...);
 
             auto &ret = *comp;
@@ -66,25 +77,33 @@ namespace kengine
         };
 
     public:
-        template<class CT,
-                typename = typename std::enable_if_t<
-                        std::is_base_of<IComponent, CT>::value>>
+        template<class CT>
         CT &getComponent()
         {
+            if constexpr (!std::is_base_of<IComponent, CT>::value)
+                static_assert("Attempt to get something that's not a component");
+
             return static_cast<CT &>(*_components.at(pmeta::type<CT>::index));
         };
 
-        template<class CT,
-                typename = typename std::enable_if_t<
-                        std::is_base_of<IComponent, CT>::value>>
+        template<class CT>
         const CT &getComponent() const
         {
+            if constexpr (!std::is_base_of<IComponent, CT>::value)
+                static_assert("Attempt to get something that's not a component");
+
             return static_cast<const CT &>(*_components.at(pmeta::type<CT>::index));
         };
 
     public:
-        template<typename CT, typename = std::enable_if_t<std::is_base_of<IComponent, CT>::value>>
-        bool hasComponent() const noexcept { return _components.find(pmeta::type<CT>::index) != _components.end(); }
+        template<typename CT>
+        bool hasComponent() const noexcept
+        {
+            if constexpr (!std::is_base_of<IComponent, CT>::value)
+                static_assert("Attempt to get something that's not a component");
+
+            return _components.find(pmeta::type<CT>::index) != _components.end();
+        }
 
     public:
         std::string_view getName() const { return _name; }

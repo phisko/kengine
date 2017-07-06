@@ -8,10 +8,11 @@
 #include <memory>
 #include "ISystem.hpp"
 #include "GameObject.hpp"
+#include "Mediator.hpp"
 
 namespace kengine
 {
-    class SystemManager
+    class SystemManager : public putils::Mediator
     {
     public:
         SystemManager() = default;
@@ -27,6 +28,27 @@ namespace kengine
             for (auto & [type, systems] : _systems)
                 for (auto &s : systems)
                     s->execute();
+        }
+
+    public:
+        template<typename T, typename ...Args>
+        void createSystem(Args &&...args)
+        {
+            if constexpr (!std::is_base_of<ISystem, T>::value)
+                static_assert("Attempt to create something that's not a System");
+
+            auto system = std::make_unique<T>(std::forward<Args>(args)...);
+            auto module = system.get();
+            auto &category = _systems[module->getCompType()];
+            category.emplace_back(std::move(system));
+            addModule(module);
+        }
+
+        void addSystem(std::unique_ptr<ISystem> &&system)
+        {
+            addModule(system.get());
+            auto &category = _systems[system->getCompType()];
+            category.emplace_back(std::move(system));
         }
 
     public:
@@ -58,30 +80,12 @@ namespace kengine
                     }
         }
 
+        // Implementation detail
     private:
         bool matchMasks(pmeta::type_index mask, const kengine::GameObject &go)
         {
             const auto &goMask = go.getTypes();
             return std::find(goMask.begin(), goMask.end(), mask) != goMask.end();
-        }
-
-    public:
-        template<typename T, typename ...Args,
-                typename = std::enable_if_t<std::is_base_of<ISystem, T>::value>>
-        T &registerSystem(Args &&...args)
-        {
-            auto system = std::make_unique<T>(std::forward<Args>(args)...);
-            auto &ret = *system;
-            auto &category = _systems[ret.getCompType()];
-            category.emplace_back(std::move(system));
-            return ret;
-        }
-
-    public:
-        void registerSystem(std::unique_ptr<ISystem> &&system)
-        {
-            auto &category = _systems[system->getCompType()];
-            category.emplace_back(std::move(system));
         }
 
     private:

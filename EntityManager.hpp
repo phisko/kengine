@@ -10,15 +10,13 @@
 #include <memory>
 #include <type_traits>
 #include <iostream>
-#include "GameObject.hpp"
-#include "Component.hpp"
 #include "SystemManager.hpp"
+#include "ComponentManager.hpp"
 #include "EntityFactory.hpp"
-#include "Mediator.hpp"
 
 namespace kengine
 {
-    class EntityManager : public putils::Mediator
+    class EntityManager : public SystemManager, public ComponentManager
     {
     public:
         EntityManager(std::unique_ptr<EntityFactory> &&factory = nullptr)
@@ -34,24 +32,6 @@ namespace kengine
         EntityManager &operator=(EntityManager const &o) = delete;
 
     public:
-        void execute() { _sm.execute(); }
-
-    public:
-        template<typename T, typename ...Args>
-        void createSystem(Args &&...args)
-        {
-            auto &s = _sm.registerSystem<T>(FWD(args)...);
-            addModule(&s);
-        }
-
-    public:
-        void addSystem(std::unique_ptr<ISystem> &&system)
-        {
-            addModule(system.get());
-            _sm.registerSystem(std::move(system));
-        }
-
-    public:
         GameObject &createEntity(std::string_view type, std::string_view name,
                                  const std::function<void(GameObject &)> &postCreate = nullptr)
         {
@@ -59,9 +39,6 @@ namespace kengine
 
             if (postCreate != nullptr)
                 postCreate(*e);
-
-            for (const auto & [type, comp] : e->_components)
-                registerComponent(*e, *comp);
 
             return addEntity(name, std::move(e));
         }
@@ -76,9 +53,6 @@ namespace kengine
             if (postCreate != nullptr)
                 postCreate(static_cast<GameObject &>(*entity));
 
-            for (const auto & [type, comp] : entity->_components)
-                registerComponent(*entity, *comp);
-
             return static_cast<GO &>(addEntity(name, std::move(entity)));
         }
 
@@ -91,7 +65,9 @@ namespace kengine
                 throw std::runtime_error("Entity exists");
 
             _entities[name.data()] = std::move(obj);
-            _sm.registerGameObject(ret);
+
+            ComponentManager::registerGameObject(ret);
+            SystemManager::registerGameObject(ret);
 
             return ret;
         }
@@ -99,7 +75,7 @@ namespace kengine
     public:
         void removeEntity(kengine::GameObject &go)
         {
-            _sm.removeGameObject(go);
+            SystemManager::removeGameObject(go);
             _entities.erase(_entities.find(go.getName().data()));
         }
 
@@ -111,7 +87,7 @@ namespace kengine
 
             const auto & [_, e] = *p;
 
-            _sm.removeGameObject(*e);
+            SystemManager::removeGameObject(*e);
             _entities.erase(p);
         }
 
@@ -124,49 +100,18 @@ namespace kengine
             return *it->second;
         }
 
-    public:
         bool hasEntity(std::string_view name) const noexcept { return _entities.find(name.data()) != _entities.end(); }
 
     public:
-        template<class CT, typename ...Params>
-        CT &attachComponent(GameObject &parent, Params &&... params) noexcept
-        {
-            auto ptr = std::make_unique<CT>(FWD(params)...);
-            auto &comp = *ptr;
+        void addLink(const GameObject &parent, const GameObject &child) { _entityHierarchy[&child] = &parent; }
 
-            registerComponent(parent, comp);
-
-            parent.attachComponent(std::move(ptr));
-            _sm.registerGameObject(parent);
-
-            return comp;
-        };
+        const GameObject &getParent(const GameObject &go) const { return *_entityHierarchy.at(&go); }
 
     private:
-        void registerComponent(const GameObject &parent, const IComponent &comp)
-        {
-            _compHierarchy.emplace(&comp, &parent);
-        }
-
-    public:
-        void detachComponent(GameObject &go, const IComponent &comp)
-        {
-            if (_entities.find(go.getName().data()) == _entities.end())
-                throw std::logic_error(putils::concat("Could not find entity ", go.getName()));
-
-            //TODO: Recycle component
-            _compHierarchy.erase(&comp);
-            go.detachComponent(comp);
-
-            // TODO: find some way to call removeGameObject on systems
-        }
-
-    private:
-        SystemManager _sm;
         std::unique_ptr<EntityFactory> _factory;
 
     private:
         std::unordered_map<std::string, std::unique_ptr<GameObject>> _entities;
-        std::unordered_map<const IComponent *, const GameObject *> _compHierarchy;
+        std::unordered_map<const GameObject *, const GameObject *> _entityHierarchy;
     };
 }
