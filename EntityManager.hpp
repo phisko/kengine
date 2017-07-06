@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <string_view>
 #include <string>
 #include <unordered_map>
 #include <memory>
@@ -51,7 +52,7 @@ namespace kengine
         }
 
     public:
-        GameObject &createEntity(const std::string &type, const std::string &name,
+        GameObject &createEntity(std::string_view type, std::string_view name,
                                  const std::function<void(GameObject &)> &postCreate = nullptr)
         {
             auto e = _factory->make(type, name);
@@ -66,7 +67,7 @@ namespace kengine
         }
 
         template<class GO, typename = std::enable_if_t<std::is_base_of<GameObject, GO>::value>, typename ...Params>
-        GO &createEntity(std::string const &name,
+        GO &createEntity(std::string_view name,
                          const std::function<void(GameObject &)> &postCreate = nullptr,
                          Params &&... params) noexcept
         {
@@ -82,14 +83,14 @@ namespace kengine
         }
 
     private:
-        GameObject &addEntity(const std::string &name, std::unique_ptr<GameObject> &&obj)
+        GameObject &addEntity(std::string_view name, std::unique_ptr<GameObject> &&obj)
         {
             auto &ret = *obj;
 
-            if (_entities.find(name) != _entities.end())
+            if (_entities.find(name.data()) != _entities.end())
                 throw std::runtime_error("Entity exists");
 
-            _entities[name] = std::move(obj);
+            _entities[name.data()] = std::move(obj);
             _sm.registerGameObject(ret);
 
             return ret;
@@ -102,9 +103,9 @@ namespace kengine
             _entities.erase(_entities.find(go.getName().data()));
         }
 
-        void removeEntity(std::string const &name)
+        void removeEntity(std::string_view name)
         {
-            const auto p = _entities.find(name);
+            const auto p = _entities.find(name.data());
             if (p == _entities.end())
                 throw std::out_of_range("No such entity");
 
@@ -115,16 +116,16 @@ namespace kengine
         }
 
     public:
-        GameObject &getEntity(const std::string &name)
+        GameObject &getEntity(std::string_view name)
         {
-            const auto it = _entities.find(name);
+            const auto it = _entities.find(name.data());
             if (it == _entities.end())
-                throw std::out_of_range(name + ": No such entity");
+                throw std::out_of_range(putils::concat(name.data(), ": No such entity"));
             return *it->second;
         }
 
     public:
-        bool hasEntity(const std::string &name) const noexcept { return _entities.find(name) != _entities.end(); }
+        bool hasEntity(std::string_view name) const noexcept { return _entities.find(name.data()) != _entities.end(); }
 
     public:
         template<class CT, typename ...Params>

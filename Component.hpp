@@ -11,7 +11,7 @@
 namespace kengine
 {
     template<typename CRTP, typename ...DataPackets>
-    class Component : public IComponent, public putils::Module<CRTP, DataPackets...>, public putils::PooledObject<CRTP>
+    class Component : public IComponent, public putils::Module<CRTP, DataPackets...>
     {
     public:
         pmeta::type_index getType() const noexcept final { return pmeta::type<CRTP>::index; }

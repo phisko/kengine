@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string_view>
 #include <memory>
 #include <GameObject.hpp>
 
@@ -11,6 +12,6 @@ namespace kengine
         virtual ~EntityFactory() = default;
 
     public:
-        virtual std::unique_ptr<GameObject> make(const std::string &type, const std::string &name) = 0;
+        virtual std::unique_ptr<GameObject> make(std::string_view type, std::string_view name) = 0;
     };
 }
