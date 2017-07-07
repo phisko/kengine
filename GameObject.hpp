@@ -18,6 +18,8 @@
 
 namespace kengine
 {
+    class ComponentManager;
+
     class GameObject : public putils::Mediator, public putils::Serializable<GameObject, false>
     {
     public:
@@ -33,31 +35,14 @@ namespace kengine
         GameObject &operator=(GameObject &&other) = default;
         ~GameObject() = default;
 
-    protected:
+    public:
         friend class ComponentManager;
 
         template<typename CT>
-        CT &attachComponent(std::unique_ptr<CT> &&comp)
-        {
-            if constexpr (!std::is_base_of<IComponent, CT>::value)
-                static_assert("Attempt to attach something that's not a component");
+        CT &attachComponent(std::unique_ptr<CT> &&comp);
 
-            auto &ret = *comp;
-
-            this->addModule(comp.get());
-            const auto type = comp->getType();
-            _components.emplace(type, std::move(comp));
-            _types.push_back(type);
-
-            return ret;
-        }
-
-        void detachComponent(const IComponent &comp)
-        {
-            const auto type = comp.getType();
-            _components.erase(type);
-            _types.erase(std::find(_types.begin(), _types.end(), type));
-        }
+        template<typename CT>
+        void detachComponent(const CT &comp);
 
         template<typename CT, typename ...Args>
         CT &attachComponent(Args &&...args)
@@ -65,16 +50,8 @@ namespace kengine
             if constexpr (!std::is_base_of<IComponent, CT>::value)
                 static_assert("Attempt to attach something that's not a component");
 
-            auto comp = std::make_unique<CT>(FWD(args)...);
-
-            auto &ret = *comp;
-            addModule(comp.get());
-            const auto type = pmeta::type<CT>::index;
-            _components.emplace(type, std::move(comp));
-            _types.push_back(type);
-
-            return ret;
-        };
+            return attachComponent(std::make_unique<CT>(FWD(args)...));
+        }
 
     public:
         template<class CT>
@@ -110,8 +87,51 @@ namespace kengine
         const std::vector<pmeta::type_index> &getTypes() const { return _types; }
 
     private:
+        ComponentManager *_manager = nullptr;
+        void setManager(ComponentManager *manager)
+        {
+            _manager = manager;
+        }
+
+    private:
         std::string _name;
         std::unordered_map<pmeta::type_index, std::unique_ptr<IComponent>> _components;
         std::vector<pmeta::type_index > _types;
     };
 }
+
+#include "ComponentManager.hpp"
+
+template<typename CT>
+void kengine::GameObject::detachComponent(const CT &comp)
+{
+    if constexpr (!std::is_base_of<IComponent, CT>::value)
+        static_assert("Attempt to detach something that's not a component");
+
+    if (_manager)
+        _manager->removeComponent(comp);
+
+    const auto type = comp.getType();
+    _components.erase(type);
+    _types.erase(std::find(_types.begin(), _types.end(), type));
+}
+
+template<typename CT>
+CT &kengine::GameObject::attachComponent(std::unique_ptr<CT> &&comp)
+{
+    if constexpr (!std::is_base_of<IComponent, CT>::value)
+        static_assert("Attempt to attach something that's not a component");
+
+    auto &ret = *comp;
+
+    this->addModule(comp.get());
+    const auto type = comp->getType();
+    _components.emplace(type, std::move(comp));
+    _types.push_back(type);
+
+    if (_manager)
+        _manager->registerComponent(*this, ret);
+
+    return ret;
+}
+
