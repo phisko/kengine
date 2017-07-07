@@ -104,6 +104,7 @@ namespace kengine
 
     public:
         void addLink(const GameObject &parent, const GameObject &child) { _entityHierarchy[&child] = &parent; }
+        void removeLink(const GameObject &child) { _entityHierarchy.erase(&child); }
 
         const GameObject &getParent(const GameObject &go) const { return *_entityHierarchy.at(&go); }
 
