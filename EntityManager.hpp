@@ -43,11 +43,14 @@ namespace kengine
             return addEntity(name, std::move(e));
         }
 
-        template<class GO, typename = std::enable_if_t<std::is_base_of<GameObject, GO>::value>, typename ...Params>
+        template<class GO, typename ...Params>
         GO &createEntity(std::string_view name,
                          const std::function<void(GameObject &)> &postCreate = nullptr,
                          Params &&... params) noexcept
         {
+            if constexpr (!std::is_base_of<GameObject, GO>::value)
+                static_assert("Attempt to create something that's not a GameObject");
+
             auto entity = std::make_unique<GO>(name, FWD(params)...);
 
             if (postCreate != nullptr)

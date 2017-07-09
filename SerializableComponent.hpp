@@ -1,7 +1,6 @@
 #pragma once
 
-#include "Component.hpp"
-#include "putils/Serializable.hpp"
+#include "SerializableComponent.hpp"
 
 namespace kengine
 {
@@ -13,6 +12,8 @@ namespace kengine
         SerializableComponent(MemberPairs &&...pairs)
                 : putils::Serializable<CRTP, false>(FWD(pairs)...)
         {}
+
+        SerializableComponent() = default;
 
         std::string toString() const noexcept override
         {

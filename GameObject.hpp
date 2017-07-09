@@ -9,7 +9,7 @@
 #include "IComponent.hpp"
 #include "Mediator.hpp"
 
-#include "Serializable.hpp"
+#include "reflection/Serializable.hpp"
 
 #include "concat.hpp"
 #include "json.hpp"
@@ -36,8 +36,6 @@ namespace kengine
         ~GameObject() = default;
 
     public:
-        friend class ComponentManager;
-
         template<typename CT>
         CT &attachComponent(std::unique_ptr<CT> &&comp);
 
@@ -87,6 +85,7 @@ namespace kengine
         const std::vector<pmeta::type_index> &getTypes() const { return _types; }
 
     private:
+        friend class ComponentManager;
         ComponentManager *_manager = nullptr;
         void setManager(ComponentManager *manager)
         {
