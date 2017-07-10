@@ -17,3 +17,7 @@ endif()
 add_library(kengine INTERFACE)
 target_link_libraries(kengine INTERFACE mediator)
 target_include_directories(kengine INTERFACE .)
+
+if(PUTILS_BUILD_PSE)
+    add_subdirectory(common/systems/sfml)
+endif()

@@ -20,16 +20,12 @@ namespace kengine
 {
     class ComponentManager;
 
-    class GameObject : public putils::Mediator, public putils::Serializable<GameObject, false>
+    class GameObject : public putils::Mediator,
+                       public putils::Reflectible<GameObject>,
+                       public putils::Serializable<GameObject, false>
     {
     public:
-        GameObject(std::string_view name) :
-                Serializable(
-                        std::make_pair("name", &GameObject::_name),
-                        std::make_pair("components", &GameObject::_components)
-                ),
-                _name(name)
-        {}
+        GameObject(std::string_view name) : _name(name) {}
 
         GameObject(GameObject &&other) = default;
         GameObject &operator=(GameObject &&other) = default;
@@ -96,6 +92,34 @@ namespace kengine
         std::string _name;
         std::unordered_map<pmeta::type_index, std::unique_ptr<IComponent>> _components;
         std::vector<pmeta::type_index > _types;
+
+    /*
+     * Reflectible
+     */
+
+    public:
+        static const auto &get_attributes()
+        {
+            static const auto table = pmeta::make_table(
+                    "name", &GameObject::_name,
+                    "components", &GameObject::_components
+            );
+            return table;
+        }
+
+        static const auto &get_methods()
+        {
+            static const auto table = pmeta::make_table();
+            return table;
+        }
+
+        static const auto &get_parents()
+        {
+            static const auto table = pmeta::make_table(
+                    "Mediator", pmeta::type<putils::Mediator>()
+            );
+            return table;
+        }
     };
 }
 

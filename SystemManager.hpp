@@ -9,9 +9,12 @@
 #include "ISystem.hpp"
 #include "GameObject.hpp"
 #include "Mediator.hpp"
+#include "pluginManager/PluginManager.hpp"
 
 namespace kengine
 {
+    class EntityManager;
+
     class SystemManager : public putils::Mediator
     {
     public:
@@ -50,6 +53,35 @@ namespace kengine
             auto &category = _systems[system->getCompType()];
             category.emplace_back(std::move(system));
         }
+
+    public:
+        template<typename ...Systems>
+        void loadSystems(std::string_view pluginDir = "plugins", std::string_view creatorFunction = "getSystem")
+        {
+            putils::PluginManager pm(pluginDir);
+
+            // Call "creatorFunc" in each plugin, passing myself as an EntityManager
+            auto &em = static_cast<kengine::EntityManager &>(*this);
+
+            const auto systems = pm.executeWithReturn<kengine::ISystem *>(
+                    creatorFunction, em
+            );
+
+            for (auto s : systems)
+                addSystem(std::unique_ptr<kengine::ISystem>(s));
+
+            pmeta::tuple_for_each(std::tuple<pmeta::type<Systems>...>(),
+                    [this, &em](auto &&type)
+                    {
+                        using System = pmeta_wrapped(type);
+                        createSystem<System>(em);
+                    }
+            );
+        }
+
+        /*
+         * Internal
+         */
 
     public:
         void registerGameObject(GameObject &gameObject) noexcept
