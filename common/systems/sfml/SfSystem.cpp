@@ -12,26 +12,50 @@ EXPORT kengine::ISystem *getSystem(kengine::EntityManager &em)
     return new kengine::SfSystem(em);
 }
 
-static const putils::Point<std::size_t> screenSize { 1280, 720 };
-
-static const putils::Point<std::size_t> tileSize { 32, 32 };
-
-static const putils::Point<std::size_t> tiles
-        {
-                screenSize.x / tileSize.x,
-                screenSize.y / tileSize.y
-        };
-
 namespace kengine
 {
 /*
  * Constructor
  */
+    static putils::json::Object parseConfig()
+    {
+        std::ifstream config("sf-config.json");
+        std::string str((std::istreambuf_iterator<char>(config)),
+                        std::istreambuf_iterator<char>());
+        return putils::json::lex(str);
+    }
 
     SfSystem::SfSystem(kengine::EntityManager &em)
-            : _em(em),
-              _engine(screenSize.x, screenSize.y, "Koadom Wars")
+            : _config(parseConfig()),
+              _screenSize(parseSize("windowSize", { 1280, 720 })),
+              _tileSize(parseSize("tileSize", { 1, 1 })),
+              _fullScreen(parseBool("fullScreen", false)),
+              _em(em),
+              _engine(_screenSize.x, _screenSize.y, "Koadom Wars", _fullScreen ? sf::Style::Fullscreen : sf::Style::Close)
     {
+    }
+
+    /*
+     * Config parsers
+     */
+
+    putils::Point<std::size_t> SfSystem::parseSize(std::string_view jsonProperty,
+                                                   const putils::Point<std::size_t> &_default)
+    {
+        if (_config.fields.find(jsonProperty.data()) != _config.fields.end())
+            return {
+                    (std::size_t)std::stoi(_config[jsonProperty]["x"]),
+                    (std::size_t)std::stoi(_config[jsonProperty]["y"])
+            };
+
+        return _default;
+    }
+
+    bool SfSystem::parseBool(std::string_view propertyName, bool _default)
+    {
+        if (_config.fields.find(propertyName.data()) != _config.fields.end())
+            return _config[propertyName].value == "true";
+        return _default;
     }
 
 /*
@@ -66,8 +90,8 @@ namespace kengine
             const auto &transform = go->getComponent<kengine::TransformComponent2d>();
             const auto &pos = transform.boundingBox.topLeft;
             const auto &size = transform.boundingBox.size;
-            comp.getViewItem()->setPosition({ (float)(tileSize.x * pos.x), (float)(tileSize.y * pos.y)} );
-            comp.getViewItem()->setSize({ (float)(tileSize.x * size.x), (float)(tileSize.y * size.y) });
+            comp.getViewItem()->setPosition({ (float)(_tileSize.x * pos.x), (float)(_tileSize.y * pos.y)} );
+            comp.getViewItem()->setSize({ (float)(_tileSize.x * size.x), (float)(_tileSize.y * size.y) });
         }
 
         sf::Event e;
@@ -89,10 +113,10 @@ namespace kengine
             const auto &transform = go.getComponent<kengine::TransformComponent2d>();
 
             const auto &pos = transform.boundingBox.topLeft;
-            v->setPosition({ (float)(tileSize.x * pos.x), (float)(tileSize.y * pos.y) });
+            v->setPosition({ (float)(_tileSize.x * pos.x), (float)(_tileSize.y * pos.y) });
 
             const auto &size = transform.boundingBox.size;
-            v->setSize({ (float)(tileSize.x * size.x), (float)(tileSize.y * size.y) });
+            v->setSize({ (float)(_tileSize.x * size.x), (float)(_tileSize.y * size.y) });
 
             const auto &viewItem = _em.attachComponent<SfComponent>(go, std::move(v));
             _engine.addItem(viewItem.getViewItem());

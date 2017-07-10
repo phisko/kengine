@@ -1,0 +1,11 @@
+{
+    windowSize: {
+        x: 1280,
+        y: 720
+    }
+    tileSize: {
+        x: 16,
+        y: 16
+    }
+    fullScreen: false
+}

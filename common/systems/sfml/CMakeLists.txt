@@ -13,3 +13,5 @@ add_library(${name}
         )
 target_link_libraries(${name} kengine pse pluginManager)
 target_include_directories(${name} PRIVATE ${CMAKE_CURRENT_LIST_DIR})
+
+file(COPY sf-config.json DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
