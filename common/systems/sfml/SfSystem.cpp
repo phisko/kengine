@@ -87,11 +87,14 @@ namespace kengine
         for (auto go : getGameObjects())
         {
             auto &comp = go->getComponent<SfComponent>();
-            const auto &transform = go->getComponent<kengine::TransformComponent2d>();
+            const auto &transform = go->getComponent<kengine::TransformComponent3d>();
             const auto &pos = transform.boundingBox.topLeft;
             const auto &size = transform.boundingBox.size;
-            comp.getViewItem()->setPosition({ (float)(_tileSize.x * pos.x), (float)(_tileSize.y * pos.y)} );
-            comp.getViewItem()->setSize({ (float)(_tileSize.x * size.x), (float)(_tileSize.y * size.y) });
+
+            comp.getViewItem().setPosition({ (float)(_tileSize.x * pos.x), (float)(_tileSize.y * pos.y)} );
+            comp.getViewItem().setSize({ (float)(_tileSize.x * size.x), (float)(_tileSize.y * size.y) });
+
+            _engine.setItemHeight(comp.getViewItem(), (std::size_t)pos.z);
         }
 
         sf::Event e;
@@ -110,7 +113,7 @@ namespace kengine
         try
         {
             auto v = getResource(go);
-            const auto &transform = go.getComponent<kengine::TransformComponent2d>();
+            const auto &transform = go.getComponent<kengine::TransformComponent3d>();
 
             const auto &pos = transform.boundingBox.topLeft;
             v->setPosition({ (float)(_tileSize.x * pos.x), (float)(_tileSize.y * pos.y) });
@@ -118,8 +121,9 @@ namespace kengine
             const auto &size = transform.boundingBox.size;
             v->setSize({ (float)(_tileSize.x * size.x), (float)(_tileSize.y * size.y) });
 
-            const auto &viewItem = _em.attachComponent<SfComponent>(go, std::move(v));
-            _engine.addItem(viewItem.getViewItem());
+            auto &viewItem = _em.attachComponent<SfComponent>(go, std::move(v));
+
+            _engine.addItem(viewItem.getViewItem(), (std::size_t)pos.z);
             getGameObjects().push_back(&go);
         }
         catch (const std::out_of_range &e)

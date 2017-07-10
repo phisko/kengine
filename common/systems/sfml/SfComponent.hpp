@@ -16,7 +16,8 @@ public:
     {}
 
 public:
-    pse::ViewItem *getViewItem() const { return _viewItem.get(); }
+    pse::ViewItem &getViewItem() { return *_viewItem.get(); }
+    const pse::ViewItem &getViewItem() const { return *_viewItem.get(); }
 
 public:
     std::string toString() const final { return "{type:sfml}"; }
