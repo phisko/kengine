@@ -11,13 +11,13 @@ namespace kengine
                                public kengine::SerializableComponent<TransformComponent<Precision, Dimensions>>
     {
     public:
-        TransformComponent(const putils::Point<Precision, Dimensions> &pos = { 0, 0, 0 },
-                           const putils::Point<Precision, Dimensions> &size = { 1, 1, 1 })
-                : boundingBox{pos, size}
+        TransformComponent(const putils::Point<Precision, 3> &pos = { 0, 0, 0 },
+                           const putils::Point<Precision, 3> &size = { 1, 1, 1 })
+                : boundingBox(pos, size)
         {}
 
         const std::string type = "transform";
-        putils::Rect<Precision, 3> boundingBox;
+        putils::Rect<Precision, Dimensions> boundingBox;
         Precision yaw = 0; // Radians
 
         /*
