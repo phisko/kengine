@@ -6,7 +6,7 @@
 
 #include <vector>
 #include <memory>
-#include "ISystem.hpp"
+#include "System.hpp"
 #include "GameObject.hpp"
 #include "Mediator.hpp"
 #include "pluginManager/PluginManager.hpp"
@@ -91,7 +91,7 @@ namespace kengine
         void registerGameObject(GameObject &gameObject) noexcept
         {
             for (auto & [type, systems] : _systems)
-                if (matchMasks(type, gameObject))
+                if (type == pmeta::type<kengine::AllComponents>::index || matchMasks(type, gameObject))
                     for (auto &s : systems)
                     {
                         try
