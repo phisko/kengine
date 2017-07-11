@@ -20,6 +20,8 @@ namespace kengine
          */
 
     public:
+        static const auto get_class_name() { return "MetaComponent"; }
+
         static const auto &get_attributes()
         {
             static const auto table = pmeta::make_table(

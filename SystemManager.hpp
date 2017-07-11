@@ -6,7 +6,7 @@
 
 #include <vector>
 #include <memory>
-#include "ISystem.hpp"
+#include "System.hpp"
 #include "GameObject.hpp"
 #include "Mediator.hpp"
 #include "pluginManager/PluginManager.hpp"
@@ -28,9 +28,8 @@ namespace kengine
     public:
         void execute()
         {
-            for (auto & [type, systems] : _systems)
-                for (auto &s : systems)
-                    s->execute();
+            for (auto & [type, s] : _systems)
+                s->execute();
         }
 
     public:
@@ -40,18 +39,14 @@ namespace kengine
             if constexpr (!std::is_base_of<ISystem, T>::value)
                 static_assert("Attempt to create something that's not a System");
 
-            auto system = std::make_unique<T>(std::forward<Args>(args)...);
-            auto module = system.get();
-            auto &category = _systems[module->getCompType()];
-            category.emplace_back(std::move(system));
-            addModule(module);
+            addSystem(std::make_unique<T>(std::forward<Args>(args)...));
         }
 
         void addSystem(std::unique_ptr<ISystem> &&system)
         {
             addModule(system.get());
-            auto &category = _systems[system->getCompType()];
-            category.emplace_back(std::move(system));
+            const auto type = system->getType();
+            _systems.emplace(type, std::move(system));
         }
 
     public:
@@ -79,37 +74,40 @@ namespace kengine
             );
         }
 
+    public:
+        template<typename T>
+        T &getSystem() { return static_cast<T &>(*_systems.at(pmeta::type<T>::index)); }
+
+        template<typename T>
+        const T &getSystem() const { return static_cast<const T &>(*_systems.at(pmeta::type<T>::index)); }
+
         /*
          * Internal
          */
 
-    public:
+    protected:
         void registerGameObject(GameObject &gameObject) noexcept
         {
-            for (auto & [type, systems] : _systems)
-                if (matchMasks(type, gameObject))
-                    for (auto &s : systems)
-                    {
-                        try
-                        {
-                            s->registerGameObject(gameObject);
-                        }
-                        catch (const std::exception &e) { std::cerr << e.what() << std::endl; }
-                    }
+            for (auto & [type, s] : _systems)
+            {
+                try
+                {
+                    s->registerGameObject(gameObject);
+                }
+                catch (const std::exception &e) { std::cerr << e.what() << std::endl; }
+            }
         }
 
         void removeGameObject(GameObject &gameObject)
         {
-            for (auto & [type, systems] : _systems)
-                if (matchMasks(type, gameObject))
-                    for (auto &s : systems)
-                    {
-                        try
-                        {
-                            s->removeGameObject(gameObject);
-                        }
-                        catch (const std::exception &e) { std::cerr << e.what() << std::endl; }
-                    }
+            for (auto & [type, s] : _systems)
+            {
+                try
+                {
+                    s->removeGameObject(gameObject);
+                }
+                catch (const std::exception &e) { std::cerr << e.what() << std::endl; }
+            }
         }
 
         // Implementation detail
@@ -121,7 +119,6 @@ namespace kengine
         }
 
     private:
-        using Category = std::vector<std::unique_ptr<ISystem>>;
-        std::unordered_map<pmeta::type_index, Category> _systems;
+        std::unordered_map<pmeta::type_index, std::unique_ptr<ISystem>> _systems;
     };
 }

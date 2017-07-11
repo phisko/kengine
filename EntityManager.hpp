@@ -79,6 +79,7 @@ namespace kengine
         void removeEntity(kengine::GameObject &go)
         {
             SystemManager::removeGameObject(go);
+            ComponentManager::removeGameObject(go);
             _entities.erase(_entities.find(go.getName().data()));
         }
 
@@ -91,6 +92,7 @@ namespace kengine
             const auto & [_, e] = *p;
 
             SystemManager::removeGameObject(*e);
+            ComponentManager::removeGameObject(*e);
             _entities.erase(p);
         }
 
@@ -110,6 +112,13 @@ namespace kengine
         void removeLink(const GameObject &child) { _entityHierarchy.erase(&child); }
 
         const GameObject &getParent(const GameObject &go) const { return *_entityHierarchy.at(&go); }
+
+    public:
+        template<typename T>
+        T &getFactory() { return static_cast<T &>(*_factory); }
+
+        template<typename T>
+        const T &getFactory() const { return static_cast<const T &>(*_factory); }
 
     private:
         std::unique_ptr<EntityFactory> _factory;
