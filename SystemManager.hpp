@@ -40,17 +40,14 @@ namespace kengine
             if constexpr (!std::is_base_of<ISystem, T>::value)
                 static_assert("Attempt to create something that's not a System");
 
-            auto system = std::make_unique<T>(std::forward<Args>(args)...);
-            auto module = system.get();
-            auto &category = _systems[module->getCompType()];
-            category.emplace_back(std::move(system));
-            addModule(module);
+            addSystem(std::make_unique<T>(std::forward<Args>(args)...));
         }
 
         void addSystem(std::unique_ptr<ISystem> &&system)
         {
             addModule(system.get());
             auto &category = _systems[system->getCompType()];
+            _systemsByType[system->getType()] = system.get();
             category.emplace_back(std::move(system));
         }
 
@@ -79,11 +76,18 @@ namespace kengine
             );
         }
 
+    public:
+        template<typename T>
+        T &getSystem() { return static_cast<T &>(*_systemsByType.at(pmeta::type<T>::index)); }
+
+        template<typename T>
+        const T &getSystem() const { return static_cast<const T &>(*_systemsByType.at(pmeta::type<T>::index)); }
+
         /*
          * Internal
          */
 
-    public:
+    protected:
         void registerGameObject(GameObject &gameObject) noexcept
         {
             for (auto & [type, systems] : _systems)
@@ -123,5 +127,7 @@ namespace kengine
     private:
         using Category = std::vector<std::unique_ptr<ISystem>>;
         std::unordered_map<pmeta::type_index, Category> _systems;
+
+        std::unordered_map<pmeta::type_index, ISystem*> _systemsByType;
     };
 }

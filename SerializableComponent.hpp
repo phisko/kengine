@@ -1,11 +1,13 @@
 #pragma once
 
-#include "SerializableComponent.hpp"
+#include "Component.hpp"
+#include "reflection/Serializable.hpp"
 
 namespace kengine
 {
     template<typename CRTP, typename ...DataPackets>
-    class SerializableComponent : public Component<CRTP, DataPackets...>, public putils::Serializable<CRTP, false>
+    class SerializableComponent : public Component<CRTP, DataPackets...>,
+                                  public putils::Serializable<CRTP, false>
     {
     public:
         template<typename ...MemberPairs>

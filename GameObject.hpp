@@ -90,7 +90,7 @@ namespace kengine
 
     private:
         std::string _name;
-        std::unordered_map<pmeta::type_index, std::unique_ptr<IComponent>> _components;
+        std::unordered_map<pmeta::type_index, std::shared_ptr<IComponent>> _components;
         std::vector<pmeta::type_index > _types;
 
     /*
@@ -98,6 +98,8 @@ namespace kengine
      */
 
     public:
+        static const auto get_class_name() { return "GameObject"; }
+
         static const auto &get_attributes()
         {
             static const auto table = pmeta::make_table(
@@ -109,7 +111,9 @@ namespace kengine
 
         static const auto &get_methods()
         {
-            static const auto table = pmeta::make_table();
+            static const auto table = pmeta::make_table(
+                    "getName", &GameObject::getName
+            );
             return table;
         }
 

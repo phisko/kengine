@@ -26,4 +26,7 @@ namespace kengine
     public:
         virtual pmeta::type_index getType() const noexcept = 0;
     };
+
+    template<typename T>
+    using is_component = std::is_base_of<IComponent, T>;
 }

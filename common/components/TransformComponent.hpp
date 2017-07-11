@@ -25,6 +25,8 @@ namespace kengine
          */
 
     public:
+        static const auto get_class_name() { return "TransformComponent"; }
+
         static const auto &get_attributes()
         {
             static const auto table = pmeta::make_table(

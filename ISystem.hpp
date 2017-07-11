@@ -25,5 +25,6 @@ namespace kengine
         virtual void registerGameObject(GameObject& go) = 0;
         virtual void removeGameObject(GameObject& go) = 0;
         virtual pmeta::type_index getCompType() const noexcept = 0;
+        virtual pmeta::type_index getType() const noexcept = 0;
     };
 }

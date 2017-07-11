@@ -21,15 +21,15 @@ namespace kengine
         }
 
     public:
+        const GameObject &getParent(const IComponent &comp) const { return *_compHierarchy.at(&comp); }
+
+    protected:
         void registerGameObject(GameObject &go)
         {
             go.setManager(this);
             for (const auto & [type, comp] : go._components)
                 registerComponent(go, *comp);
         }
-
-    public:
-        const GameObject &getParent(const IComponent &comp) const { return *_compHierarchy.at(&comp); }
 
     private:
         friend class GameObject;
