@@ -5,16 +5,19 @@
 #include "lua/lua.hpp"
 #include "reflection/Reflectible.hpp"
 
+#include "EntityManager.hpp"
+#include "common/components/LuaComponent.hpp"
+
 namespace kengine
 {
-    class LuaSystem : public kengine::System<LuaSystem, kengine::AllComponents>
+    class LuaSystem : public kengine::System<LuaSystem>
     {
     public:
-        LuaSystem(kengine::EntityManager &em)
+        LuaSystem(kengine::EntityManager &em) : _em(em)
         {
             _lua.open_libraries(sol::lib::base, sol::lib::base);
 
-            _lua.set_function("getGameObjects", [this] { return getGameObjects(); });
+            _lua.set_function("getGameObjects", [&em] { return em.getGameObjects(); });
             _lua.set_function("createEntity",
                               [&em] (const std::string &type, const std::string &name)
                               { return std::ref(em.createEntity(type, name)); }
@@ -32,9 +35,12 @@ namespace kengine
         }
 
         template<typename T>
-        void registerType()
+        void registerType() noexcept
         {
             putils::lua::registerType<T>(_lua);
+
+            const auto sender = putils::concat("send", T::get_class_name());
+            _lua.set_function(sender, [this](const T &packet) { send(packet); });
 
             if constexpr (kengine::is_component<T>::value)
             {
@@ -54,27 +60,83 @@ namespace kengine
             }
         }
 
-        // System methods
-        void execute() final
+        template<typename ...Types>
+        void registerTypes() noexcept
         {
-            putils::Directory d("scripts");
-
-            d.for_each(
-                    [this](const putils::Directory::File &f)
-                    {
-                        try
-                        {
-                            _lua.script_file(f.fullPath);
-                        }
-                        catch (const std::exception &e)
-                        {
-                            std::cerr << "[LuaSystem] Error in '" << f.fullPath << "': " << e.what() << std::endl;
-                        }
-                    }
+            pmeta::tuple_for_each(std::make_tuple(pmeta::type<Types>()...),
+                                  [this](auto &&t)
+                                  {
+                                      using Type = pmeta_wrapped(t);
+                                      registerType<Type>();
+                                  }
             );
         }
 
+    public:
+        void addScriptDirectory(std::string_view dir) noexcept
+        {
+            _directories.push_back(dir.data());
+        }
+
+        // System methods
+    public:
+        void execute() final
+        {
+            executeDirectories();
+            executeScriptedObjects();
+        }
+
+        // Helpers
     private:
+        void executeDirectories() noexcept
+        {
+            for (const auto &dir : _directories)
+            {
+                putils::Directory d(dir);
+
+                d.for_each(
+                        [this](const putils::Directory::File &f)
+                        {
+                            if (!f.isDirectory)
+                                executeScript(f.fullPath);
+                        }
+                );
+            }
+        }
+
+        void executeScriptedObjects() noexcept
+        {
+            for (const auto go : _em.getGameObjects<kengine::LuaComponent>())
+            {
+                const auto &comp = go->getComponent<kengine::LuaComponent>();
+                for (const auto &s : comp.getScripts())
+                {
+                    auto tmp = _lua["getGameObjects"];
+                    _lua["self"] = go;
+
+                    executeScript(s);
+
+                    _lua["self"] = sol::nil;
+                    _lua["getGameObjects"] = tmp;
+                }
+            }
+        }
+
+        void executeScript(std::string_view fileName) noexcept
+        {
+            try
+            {
+                _lua.script_file(fileName.data());
+            }
+            catch (const std::exception &e)
+            {
+                std::cerr << "[LuaSystem] Error in '" << fileName << "': " << e.what() << std::endl;
+            }
+        }
+
+    private:
+        kengine::EntityManager &_em;
+        std::vector<std::string> _directories;
         sol::state _lua;
     };
 }

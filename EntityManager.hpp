@@ -79,6 +79,7 @@ namespace kengine
         void removeEntity(kengine::GameObject &go)
         {
             SystemManager::removeGameObject(go);
+            ComponentManager::removeGameObject(go);
             _entities.erase(_entities.find(go.getName().data()));
         }
 
@@ -91,6 +92,7 @@ namespace kengine
             const auto & [_, e] = *p;
 
             SystemManager::removeGameObject(*e);
+            ComponentManager::removeGameObject(*e);
             _entities.erase(p);
         }
 

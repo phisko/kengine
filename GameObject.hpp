@@ -136,7 +136,7 @@ void kengine::GameObject::detachComponent(const CT &comp)
         static_assert("Attempt to detach something that's not a component");
 
     if (_manager)
-        _manager->removeComponent(comp);
+        _manager->removeComponent(*this, comp);
 
     const auto type = comp.getType();
     _components.erase(type);
