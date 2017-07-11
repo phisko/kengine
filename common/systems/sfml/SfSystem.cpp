@@ -7,7 +7,7 @@
 #include "common/components/TransformComponent.hpp"
 #include "common/packets/Log.hpp"
 
-EXPORT kengine::ISystem *getSystem(kengine::EntityManager &em)
+EXPORT kengine::ISystem* getSystem(kengine::EntityManager& em)
 {
     return new kengine::SfSystem(em);
 }
@@ -21,18 +21,19 @@ namespace kengine
     static putils::json::Object parseConfig()
     {
         std::ifstream config("sf-config.json");
-        std::string str((std::istreambuf_iterator<char>(config)),
-                        std::istreambuf_iterator<char>());
+        std::string   str((std::istreambuf_iterator<char>(config)),
+                          std::istreambuf_iterator<char>());
         return putils::json::lex(str);
     }
 
-    SfSystem::SfSystem(kengine::EntityManager &em)
+    SfSystem::SfSystem(kengine::EntityManager& em)
             : _config(parseConfig()),
-              _screenSize(parseSize("windowSize", { 1280, 720 })),
-              _tileSize(parseSize("tileSize", { 1, 1 })),
+              _screenSize(parseSize("windowSize", {1280, 720})),
+              _tileSize(parseSize("tileSize", {1, 1})),
               _fullScreen(parseBool("fullScreen", false)),
               _em(em),
-              _engine(_screenSize.x, _screenSize.y, "Koadom Wars", _fullScreen ? sf::Style::Fullscreen : sf::Style::Close)
+              _engine(_screenSize.x, _screenSize.y, "Koadom Wars",
+                      _fullScreen ? sf::Style::Fullscreen : sf::Style::Close)
     {
     }
 
@@ -41,12 +42,12 @@ namespace kengine
      */
 
     putils::Point<std::size_t> SfSystem::parseSize(std::string_view jsonProperty,
-                                                   const putils::Point<std::size_t> &_default)
+                                                   const putils::Point<std::size_t>& _default)
     {
         if (_config.fields.find(jsonProperty.data()) != _config.fields.end())
             return {
-                    (std::size_t)std::stoi(_config[jsonProperty]["x"]),
-                    (std::size_t)std::stoi(_config[jsonProperty]["y"])
+                    (std::size_t) std::stoi(_config[jsonProperty]["x"]),
+                    (std::size_t) std::stoi(_config[jsonProperty]["y"])
             };
 
         return _default;
@@ -65,12 +66,13 @@ namespace kengine
 
     static std::unique_ptr<pse::Sprite> makeSprite(std::string_view sprite)
     {
-        return std::make_unique<pse::Sprite>(sprite.data(), sf::Vector2f{0, 0}, sf::Vector2f{16, 16});
+        return std::make_unique<pse::Sprite>(sprite.data(), sf::Vector2f{0, 0},
+                                             sf::Vector2f{16, 16});
     }
 
-    std::unique_ptr<pse::ViewItem> SfSystem::getResource(const kengine::GameObject &go)
+    std::unique_ptr<pse::ViewItem> SfSystem::getResource(const kengine::GameObject& go)
     {
-        const auto &meta = go.getComponent<MetaComponent>();
+        const auto& meta = go.getComponent<MetaComponent>();
 
         std::string_view str = _appearances.find(meta.appearance) != _appearances.end()
                                ? _appearances.at(meta.appearance)
@@ -85,17 +87,19 @@ namespace kengine
 
     void SfSystem::execute()
     {
-        for (auto go : getGameObjects())
+        for (auto go : _em.getGameObjects<SfComponent>())
         {
-            auto &comp = go->getComponent<SfComponent>();
-            const auto &transform = go->getComponent<kengine::TransformComponent3d>();
-            const auto &pos = transform.boundingBox.topLeft;
-            const auto &size = transform.boundingBox.size;
+            auto      & comp      = go->getComponent<SfComponent>();
+            const auto& transform = go->getComponent<kengine::TransformComponent3d>();
+            const auto& pos       = transform.boundingBox.topLeft;
+            const auto& size      = transform.boundingBox.size;
 
-            comp.getViewItem().setPosition({ (float)(_tileSize.x * pos.x), (float)(_tileSize.y * pos.y)} );
-            comp.getViewItem().setSize({ (float)(_tileSize.x * size.x), (float)(_tileSize.y * size.y) });
+            comp.getViewItem().setPosition(
+                    {(float) (_tileSize.x * pos.x), (float) (_tileSize.y * pos.y)});
+            comp.getViewItem().setSize(
+                    {(float) (_tileSize.x * size.x), (float) (_tileSize.y * size.y)});
 
-            _engine.setItemHeight(comp.getViewItem(), (std::size_t)pos.z);
+            _engine.setItemHeight(comp.getViewItem(), (std::size_t) pos.z);
         }
 
         sf::Event e;
@@ -106,7 +110,7 @@ namespace kengine
         _engine.update(true);
     }
 
-    void SfSystem::registerGameObject(kengine::GameObject &go)
+    void SfSystem::registerGameObject(kengine::GameObject& go)
     {
         if (go.hasComponent<SfComponent>() || !go.hasComponent<MetaComponent>())
             return;
@@ -114,45 +118,42 @@ namespace kengine
         try
         {
             auto v = getResource(go);
-            const auto &transform = go.getComponent<kengine::TransformComponent3d>();
+            const auto& transform = go.getComponent<kengine::TransformComponent3d>();
 
-            const auto &pos = transform.boundingBox.topLeft;
-            v->setPosition({ (float)(_tileSize.x * pos.x), (float)(_tileSize.y * pos.y) });
+            const auto& pos = transform.boundingBox.topLeft;
+            v->setPosition({(float) (_tileSize.x * pos.x), (float) (_tileSize.y * pos.y)});
 
-            const auto &size = transform.boundingBox.size;
-            v->setSize({ (float)(_tileSize.x * size.x), (float)(_tileSize.y * size.y) });
+            const auto& size = transform.boundingBox.size;
+            v->setSize({(float) (_tileSize.x * size.x), (float) (_tileSize.y * size.y)});
 
-            auto &viewItem = _em.attachComponent<SfComponent>(go, std::move(v));
+            auto& viewItem = _em.attachComponent<SfComponent>(go, std::move(v));
 
-            _engine.addItem(viewItem.getViewItem(), (std::size_t)pos.z);
-            getGameObjects().push_back(&go);
+            _engine.addItem(viewItem.getViewItem(), (std::size_t) pos.z);
         }
-        catch (const std::out_of_range &e)
+        catch (const std::out_of_range& e)
         {
             send(kengine::packets::Log{
-                    putils::concat("[SfSystem] Unknown appearance: ", go.getComponent<MetaComponent>().appearance)
+                    putils::concat("[SfSystem] Unknown appearance: ",
+                                   go.getComponent<MetaComponent>().appearance)
             });
         }
     }
 
-    void SfSystem::removeGameObject(kengine::GameObject &go)
+    void SfSystem::removeGameObject(kengine::GameObject& go)
     {
         if (!go.hasComponent<SfComponent>())
             return;
 
-        const auto &comp = go.getComponent<SfComponent>();
+        const auto& comp = go.getComponent<SfComponent>();
         _engine.removeItem(comp.getViewItem());
         _em.detachComponent(go, comp);
-
-        auto &gameObject = getGameObjects();
-        gameObject.erase(std::find(gameObject.begin(), gameObject.end(), &go));
     }
 
 /*
  * DataPacket handlers
  */
 
-    void SfSystem::handle(const kengine::packets::RegisterAppearance &p) noexcept
+    void SfSystem::handle(const kengine::packets::RegisterAppearance& p) noexcept
     {
         _appearances[p.appearance] = p.resource;
     }

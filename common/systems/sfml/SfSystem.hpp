@@ -11,39 +11,38 @@ namespace kengine
     class EntityManager;
 
     class SfSystem : public kengine::System<SfSystem,
-            MetaComponent,
-            packets::RegisterAppearance>
+                                            packets::RegisterAppearance>
     {
     public:
-        SfSystem(kengine::EntityManager &em);
+        SfSystem(kengine::EntityManager& em);
 
     public:
         void execute() final;
-        void registerGameObject(kengine::GameObject &go) override;
-        void removeGameObject(kengine::GameObject &go) override;
+        void registerGameObject(kengine::GameObject& go) override;
+        void removeGameObject(kengine::GameObject& go) override;
 
     public:
-        void handle(const packets::RegisterAppearance &p) noexcept;
+        void handle(const packets::RegisterAppearance& p) noexcept;
 
     private:
-        std::unique_ptr<pse::ViewItem> getResource(const kengine::GameObject &go);
+        std::unique_ptr<pse::ViewItem> getResource(const kengine::GameObject& go);
 
     private:
-        putils::json::Object _config;
+        putils::json::Object       _config;
         putils::Point<std::size_t> _screenSize;
         putils::Point<std::size_t> _tileSize;
-        bool _fullScreen;
+        bool                       _fullScreen;
 
         // Config parsers
     private:
         putils::Point<std::size_t> parseSize(std::string_view propertyName,
-                                             const putils::Point<std::size_t> &_default);
+                                             const putils::Point<std::size_t>& _default);
         bool parseBool(std::string_view propertyName, bool _default);
 
     private:
-        kengine::EntityManager &_em;
-        pse::Engine _engine;
+        kengine::EntityManager                                                   & _em;
+        pse::Engine                                                              _engine;
         std::unordered_map<kengine::GameObject*, std::unique_ptr<pse::ViewItem>> _viewItems;
-        std::unordered_map<std::string, std::string> _appearances;
+        std::unordered_map<std::string, std::string>                             _appearances;
     };
 }
