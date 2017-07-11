@@ -17,7 +17,8 @@ namespace kengine
         {
             _lua.open_libraries(sol::lib::base, sol::lib::base);
 
-            _lua.set_function("getGameObjects", [&em] { return em.getGameObjects(); });
+            _lua.set_function("getGameObjects", [&em] { return std::ref(em.getGameObjects()); });
+
             _lua.set_function("createEntity",
                               [&em] (const std::string &type, const std::string &name)
                               { return std::ref(em.createEntity(type, name)); }
