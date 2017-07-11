@@ -9,45 +9,29 @@ A system holds game logic. It can subscribe to a certain type of [Component](Com
 ##### Definition
 
 ```
-template<typename CRTP, typename RegisteredComponent = IgnoreComponents, typename ...DataPackets>
+template<typename CRTP, typename ...DataPackets>
 class System;
 ```
 
-A `System` is defined by its sub-type (see `CRTP`), the type of `Component` it would like to register to (none by default), and the list of `DataPackets` types it would like to receive.
+A `System` is defined by its sub-type (see `CRTP`) and the list of `DataPackets` types it would like to receive.
 
 ##### execute
 
 ```
 virtual void execute() = 0;
 ```
-
 Runs the system's game logic. Called each frame.
 
 ##### registerGameObject
 
 ```
-void registerGameObject(GameObject &go);
+virtual void registerGameObject(GameObject &go) {}
 ```
-
-Automatically called when an "interesting" `GameObject` is added (one with the type of `Component` this system is registered to).
-
-By default, this simply adds the `GameObject` to an `std::vector` which can be accessed through `getGameObjects()`. Inheriting classes may override it to perform an action upon registration.
+Automatically called for each new `GameObject`.
 
 ##### removeGameObject
 
 ```
-void removeGameObject(GameObject &go);
+virtual void removeGameObject(GameObject &go) {}
 ```
-
-Automatically called when an "interesting" `GameObject` is removed (one with the type of `Component` this system is registered to).
-
-By default, this simply removes the `GameObject` from an `std::vector` which can be accessed through `getGameObjects()`. Inheriting classes may override it to perform an action upon removal.
-
-##### getGameObjects
-
-```
-std::vector<GameObject*> &getGameObjects() { return _gameObjects; }
-const std::vector<GameObject*> &getGameObjects() const { return _gameObjects; }
-```
-
-Provides access to the list of `GameObjects` which have been registered.
+Automatically called for each `GameObject` that is removed.

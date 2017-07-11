@@ -89,10 +89,10 @@ namespace kengine
     {
         for (auto go : _em.getGameObjects<SfComponent>())
         {
-            auto      & comp      = go->getComponent<SfComponent>();
-            const auto& transform = go->getComponent<kengine::TransformComponent3d>();
-            const auto& pos       = transform.boundingBox.topLeft;
-            const auto& size      = transform.boundingBox.size;
+            auto &comp = go->getComponent<SfComponent>();
+            const auto &transform = go->getComponent<kengine::TransformComponent3d>();
+            const auto &pos = transform.boundingBox.topLeft;
+            const auto &size = transform.boundingBox.size;
 
             comp.getViewItem().setPosition(
                     {(float) (_tileSize.x * pos.x), (float) (_tileSize.y * pos.y)});
@@ -118,15 +118,15 @@ namespace kengine
         try
         {
             auto v = getResource(go);
-            const auto& transform = go.getComponent<kengine::TransformComponent3d>();
+            const auto &transform = go.getComponent<kengine::TransformComponent3d>();
 
-            const auto& pos = transform.boundingBox.topLeft;
+            const auto &pos = transform.boundingBox.topLeft;
             v->setPosition({(float) (_tileSize.x * pos.x), (float) (_tileSize.y * pos.y)});
 
-            const auto& size = transform.boundingBox.size;
+            const auto &size = transform.boundingBox.size;
             v->setSize({(float) (_tileSize.x * size.x), (float) (_tileSize.y * size.y)});
 
-            auto& viewItem = _em.attachComponent<SfComponent>(go, std::move(v));
+            auto &viewItem = _em.attachComponent<SfComponent>(go, std::move(v));
 
             _engine.addItem(viewItem.getViewItem(), (std::size_t) pos.z);
         }
@@ -149,9 +149,9 @@ namespace kengine
         _em.detachComponent(go, comp);
     }
 
-/*
- * DataPacket handlers
- */
+    /*
+     * DataPacket handlers
+     */
 
     void SfSystem::handle(const kengine::packets::RegisterAppearance& p) noexcept
     {

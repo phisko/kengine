@@ -24,6 +24,26 @@ friend std::ostream &operator<<(std::ostream &s, const kengine::GameObject &obj)
 
 `GameObjects` can be serialized to a JSON-formatted string.
 
+##### attachComponent
+
+```
+template<typename CT, typename ...Args>
+CT &attachComponent(Args &&...args);
+```
+Creates and attaches a new `Component` of type `CT`.
+
+```
+template<typename CT>
+CT &attachComponent(std::unique_ptr<CT> &&comp);
+```
+
+##### detachComponent
+
+```
+template<typename CT>
+void detachComponent(const CT &comp);
+```
+
 ##### getComponent
 
 ```
