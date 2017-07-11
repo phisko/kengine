@@ -14,9 +14,10 @@ EXPORT kengine::ISystem *getSystem(kengine::EntityManager &em)
 
 namespace kengine
 {
-/*
- * Constructor
- */
+    /*
+     * Constructor
+     */
+
     static putils::json::Object parseConfig()
     {
         std::ifstream config("sf-config.json");
@@ -58,9 +59,9 @@ namespace kengine
         return _default;
     }
 
-/*
- * Helper
- */
+    /*
+     * Helper
+     */
 
     static std::unique_ptr<pse::Sprite> makeSprite(std::string_view sprite)
     {
@@ -78,9 +79,9 @@ namespace kengine
         return makeSprite(str);
     }
 
-/*
- * System functions
- */
+    /*
+     * System functions
+     */
 
     void SfSystem::execute()
     {

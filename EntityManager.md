@@ -4,6 +4,14 @@ Manages [GameObjects](GameObject.md), [Components](Component.md) and [Systems](S
 
 An `EntityManager` is also a [Mediator](putils/mediator/README.md), managing communication for `Systems`.
 
+### Base classes
+
+An `EntityManager`'s role is split-up into three parts:
+
+* the `EntityManager` itself, which simply manages entities
+* a [ComponentManager](ComponentManager.md) base
+* a [SystemManager](SystemManager.md) base
+
 ### Members
 
 ##### Constructor
@@ -11,39 +19,13 @@ An `EntityManager` is also a [Mediator](putils/mediator/README.md), managing com
 ```
 EntityManager(std::unique_ptr<EntityFactory> &&factory = nullptr);
 ```
-
 An `EntityManager` can be constructed with an `EntityFactory`, which will be used to `create` entities.
-
-##### execute
-
-```
-void execute();
-```
-
-Calls `execute()` for each `System`.
-
-##### createSystem
-
-```
-template<typename T>
-void createSystem(auto &&...args)
-```
-
-Creates a new `System` of type `T` and registers it.
-
-##### addSystem
-
-```
-void addSystem(std::unique_ptr<ISystem> &&system);
-```
-
-Registers an already existing `System`.
 
 ##### createEntity
 
 ```
-GameObject &createEntity(const std::string &type, const std::string &name,
-        const std::function<void(GameObject &)> &postCreate = nullptr)
+GameObject &createEntity(std::string_view type, std::string name,
+                        const std::function<void(GameObject &)> &postCreate = nullptr)
 ```
 
 Asks the underlying `EntityFactory` to create an entity of type `type`, with the given `name`.
@@ -65,28 +47,45 @@ Once creation is complete, calls `postCreate` on the entity.
 
 ```
 void removeEntity(kengine::GameObject &go);
-void removeEntity(std::string const &name);
+void removeEntity(std::string_view name);
 ```
 
 ##### getEntity
 
 ```
-GameObject &getEntity(const std::string &name);
+GameObject &getEntity(std::string_view name);
 ```
 
-##### attachComponent
+##### hasEntity
 
 ```
-template<class CT>
-CT &attachComponent(GameObject &parent, auto &&... params);
+bool hasEntity(std::string_view name) const noexcept;
 ```
 
-Creates a new `Component` of type `CT`, passing it `params` as constructor arguments, and attaches it to `parent`.
-
-##### detachComponent
+##### addLink
 
 ```
-void detachComponent(GameObject &go, const IComponent &comp);
+void addLink(const GameObject &parent, const GameObject &child);
 ```
 
-Removes `comp` from `go`.
+Registers `parent` as `child`'s parent object. This process can be used by systems to store relations between `GameObjects`.
+
+##### removeLink
+
+```
+void removeLink(const GameObject &child);
+```
+
+##### getParent
+
+```
+const GameObject &getParent(const GameObject &go) const;
+```
+
+##### getFactory
+
+```
+template<typename T>
+T &getFactory();
+```
+Returns the `EntityFactory` as a `T`.

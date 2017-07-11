@@ -50,6 +50,9 @@ namespace kengine
         }
     };
 
+    using TransformComponent2i = TransformComponent<int, 2>;
+    using TransformComponent3i = TransformComponent<int, 3>;
+
     using TransformComponent2d = TransformComponent<double, 2>;
     using TransformComponent3d = TransformComponent<double, 3>;
 

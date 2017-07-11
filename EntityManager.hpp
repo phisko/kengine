@@ -97,13 +97,7 @@ namespace kengine
         }
 
     public:
-        GameObject &getEntity(std::string_view name)
-        {
-            const auto it = _entities.find(name.data());
-            if (it == _entities.end())
-                throw std::out_of_range(putils::concat(name.data(), ": No such entity"));
-            return *it->second;
-        }
+        GameObject &getEntity(std::string_view name) { return *_entities.at(name.data()); }
 
         bool hasEntity(std::string_view name) const noexcept { return _entities.find(name.data()) != _entities.end(); }
 

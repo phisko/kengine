@@ -26,7 +26,7 @@ namespace kengine
         SystemManager &operator=(SystemManager const &o) = delete;
 
     public:
-        void execute()
+        void execute() const
         {
             for (auto & [type, s] : _systems)
                 s->execute();

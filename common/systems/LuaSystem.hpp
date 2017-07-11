@@ -15,7 +15,7 @@ namespace kengine
     public:
         LuaSystem(kengine::EntityManager &em) : _em(em)
         {
-            _lua.open_libraries(sol::lib::base, sol::lib::base);
+            _lua.open_libraries();
 
             _lua.set_function("getGameObjects", [&em] { return std::ref(em.getGameObjects()); });
 

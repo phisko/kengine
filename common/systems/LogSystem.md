@@ -1,0 +1,12 @@
+# LogSystem
+
+`System` that receive [kengine::packets::Log](../packets/Log.hpp) packets and simply prints them to the standard output.
+
+### Members
+
+##### handle(const packets::Log &)
+
+```
+void handle(const packets::Log &packet) const noexcept;
+```
+Handler for the `packets::Log` datapacket. See [Mediator](../../putils/mediator/README.md) for clarification about how datapackets are transmitted.
