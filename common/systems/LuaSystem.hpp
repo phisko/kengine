@@ -32,6 +32,9 @@ namespace kengine
                               { return std::ref(em.getEntity(name)); }
             );
 
+            _lua.set_function("getDeltaTime", [this] { return time.getDeltaTime(); });
+            _lua.set_function("getFixedDeltaTime", [this] { return time.getFixedDeltaTime(); });
+
             registerType<kengine::GameObject>();
         }
 

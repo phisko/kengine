@@ -35,3 +35,12 @@ Automatically called for each new `GameObject`.
 virtual void removeGameObject(GameObject &go) {}
 ```
 Automatically called for each `GameObject` that is removed.
+
+##### getFrameRate
+
+```
+virtual std::size_t getFrameRate() const noexcept { return 60; }
+```
+Returns how many times `execute` should be called each second.
+
+Should return 0 if the framerate shouldn't be limited.

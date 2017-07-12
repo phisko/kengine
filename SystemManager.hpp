@@ -10,6 +10,7 @@
 #include "GameObject.hpp"
 #include "Mediator.hpp"
 #include "pluginManager/PluginManager.hpp"
+#include "Timer.hpp"
 
 namespace kengine
 {
@@ -29,7 +30,20 @@ namespace kengine
         void execute() const
         {
             for (auto & [type, s] : _systems)
-                s->execute();
+            {
+                auto &time = s->time;
+                auto &timer = time.timer;
+
+                if (time.alwaysCall || time.timer.isDone())
+                {
+                    time.deltaTime = timer.getTimeSinceStart();
+                    timer.setStart(
+                            putils::Timer::t_clock::now() - timer.getTimeSinceDone()
+                    );
+
+                    s->execute();
+                }
+            }
         }
 
     public:
@@ -44,6 +58,21 @@ namespace kengine
 
         void addSystem(std::unique_ptr<ISystem> &&system)
         {
+            const auto nbFrames = system->getFrameRate();
+
+            auto &time = system->time;
+            if (nbFrames == 0)
+            {
+                time.alwaysCall = true;
+                time.fixedDeltaTime = std::chrono::seconds(0);
+            }
+            else
+            {
+                time.alwaysCall = false;
+                time.fixedDeltaTime = std::chrono::milliseconds(1000 / nbFrames);
+            }
+            time.timer.setDuration(time.fixedDeltaTime);
+
             addModule(system.get());
             const auto type = system->getType();
             _systems.emplace(type, std::move(system));
