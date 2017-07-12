@@ -36,6 +36,9 @@ namespace kengine
         CT &attachComponent(std::unique_ptr<CT> &&comp);
 
         template<typename CT>
+        void detachComponent();
+
+        template<typename CT>
         void detachComponent(const CT &comp);
 
         template<typename CT, typename ...Args>
@@ -128,6 +131,20 @@ namespace kengine
 }
 
 #include "ComponentManager.hpp"
+
+template<typename CT>
+void kengine::GameObject::detachComponent()
+{
+    if constexpr (!std::is_base_of<IComponent, CT>::value)
+        static_assert("Attempt to detach something that's not a component");
+
+    if (_manager)
+        _manager->removeComponent(*this, getComponent<CT>());
+
+    const auto type = pmeta::type<CT>::index;
+    _components.erase(type);
+    _types.erase(std::find(_types.begin(), _types.end(), type));
+}
 
 template<typename CT>
 void kengine::GameObject::detachComponent(const CT &comp)

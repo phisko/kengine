@@ -44,21 +44,7 @@ namespace kengine
             _lua.set_function(sender, [this](const T &packet) { send(packet); });
 
             if constexpr (kengine::is_component<T>::value)
-            {
-                const auto getter = putils::concat("get", T::get_class_name());
-                _lua[kengine::GameObject::get_class_name()][getter] =
-                    [](kengine::GameObject &self)
-                    {
-                        return std::ref(self.getComponent<T>());
-                    };
-
-                const auto checker = putils::concat("has", T::get_class_name());
-                _lua[kengine::GameObject::get_class_name()][checker] =
-                    [](kengine::GameObject &self)
-                    {
-                        return self.hasComponent<T>();
-                    };
-            }
+                registerComponent<T>();
         }
 
         template<typename ...Types>
@@ -89,6 +75,28 @@ namespace kengine
 
         // Helpers
     private:
+        template<typename T>
+        void registerComponent() noexcept
+        {
+            _lua[kengine::GameObject::get_class_name()][putils::concat("get", T::get_class_name())] =
+                    [](kengine::GameObject &self) { return std::ref(self.getComponent<T>()); };
+
+            _lua[kengine::GameObject::get_class_name()][putils::concat("has", T::get_class_name())] =
+                    [](kengine::GameObject &self) { return self.hasComponent<T>(); };
+
+            _lua[kengine::GameObject::get_class_name()][putils::concat("attach", T::get_class_name())] =
+                    [](kengine::GameObject &self) { return std::ref(self.attachComponent<T>()); };
+
+            _lua[kengine::GameObject::get_class_name()][putils::concat("detach", T::get_class_name())] =
+                    [](kengine::GameObject &self) { self.detachComponent<T>(); };
+        }
+
+        template<typename F>
+        void addEntityFunction(const std::string &name, F &&func) noexcept
+        {
+            _lua[kengine::GameObject::get_class_name()][name] = func;
+        }
+
         void executeDirectories() noexcept
         {
             for (const auto &dir : _directories)

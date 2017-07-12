@@ -41,6 +41,11 @@ CT &attachComponent(std::unique_ptr<CT> &&comp);
 
 ```
 template<typename CT>
+void detachComponent();
+```
+
+```
+template<typename CT>
 void detachComponent(const CT &comp);
 ```
 

@@ -9,7 +9,7 @@ namespace kengine
                           public putils::Reflectible<MetaComponent>
     {
     public:
-        MetaComponent(std::string_view appearance)
+        MetaComponent(std::string_view appearance = "")
                 : appearance(appearance) {}
 
         const std::string type = "meta";
