@@ -18,12 +18,12 @@ These are pre-built, extensible and pluggable elements that can be used in any p
 
 * [LuaComponent](common/components/LuaComponent.md): defines the lua scripts to be run by the `LuaSystem` for a `GameObject`
 * [MetaComponent](common/components/MetaComponent.md): provides metadata about a `GameObject`, such as its appearance, used by the `SfSystem`
-* [TransformComponent](common/components/TransformComponent.hpp): defines a `GameObject`'s position and size
+* [TransformComponent](common/components/TransformComponent.md): defines a `GameObject`'s position and size
 
 ##### Systems
 
-* [LogSystem](common/systems/LogSystem.hpp): logs messages
-* [LuaSystem](common/systems/LuaSystem.hpp): executes scripts, either global or attached to an entity
+* [LogSystem](common/systems/LogSystem.md): logs messages
+* [LuaSystem](common/systems/LuaSystem.md): executes scripts, either global or attached to an entity
 * [SfSystem](common/systems/sfml/SfSystem.md): displays entities in an SFML render window
 
 ##### DataPackets
