@@ -20,11 +20,11 @@ int main(int, char **av)
 
     // Load the specified systems, and any plugin placed in the executable's directory
     //      If you specify 'PUTILS_BUILD_PSE' as TRUE in your CMakeLists.txt, this will load the SfSystem
+    em.loadSystems<kengine::LuaSystem, kengine::LogSystem>(".");
 
     // To add a new system, simply add a DLL with a
     //      `ISystem *getSystem(kengine::EntityManager &em)`
     // function to the "plugins" directory
-    em.loadSystems<kengine::LuaSystem, kengine::LogSystem>(".");
 
 
     // Get the factory and register any desired types
