@@ -34,6 +34,7 @@ namespace kengine
 
             _lua.set_function("getDeltaTime", [this] { return time.getDeltaTime(); });
             _lua.set_function("getFixedDeltaTime", [this] { return time.getFixedDeltaTime(); });
+            _lua.set_function("getDeltaFrames", [this] { return time.getDeltaFrames(); });
 
             registerType<kengine::GameObject>();
         }
