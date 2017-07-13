@@ -44,3 +44,19 @@ virtual std::size_t getFrameRate() const noexcept { return 60; }
 Returns how many times `execute` should be called each second.
 
 Should return 0 if the framerate shouldn't be limited.
+
+##### time
+
+Each `System` has a `time` member that exposes the following functions:
+
+```
+putils::Timer::t_duration getDeltaTime() const;
+```
+Returns the time since the last call to `execute`.
+
+```
+putils::Timee::t_duration getFixedDeltaTime() const;
+```
+Returns the expected time between two calls to execute, as determined by `getFrameRate`.
+
+The `time` member structure is automatically managed by the `SystemManager`.

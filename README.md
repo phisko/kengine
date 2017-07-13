@@ -80,7 +80,7 @@ int main(int, char **av)
     auto &luaComp = player.attachComponent<kengine::LuaComponent>();
     luaComp.attachScript("scripts/unit/unit.lua");
 
-    // Add a directory of scripts to be executed
+    // Register types to be used in lua and add a directory of scripts to be executed
     try
     {
         auto &lua = em.getSystem<kengine::LuaSystem>();
