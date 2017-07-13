@@ -20,8 +20,8 @@ namespace kengine
             _lua.set_function("getGameObjects", [&em] { return std::ref(em.getGameObjects()); });
 
             _lua.set_function("createEntity",
-                              [&em] (const std::string &type, const std::string &name)
-                              { return std::ref(em.createEntity(type, name)); }
+                              [&em] (const std::string &type, const std::string &name, const sol::function &f)
+                              { return std::ref(em.createEntity(type, name, f)); }
             );
             _lua.set_function("removeEntity",
                               [&em] (kengine::GameObject &go)

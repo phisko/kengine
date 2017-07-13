@@ -12,7 +12,7 @@ namespace kengine
         MetaComponent(std::string_view appearance = "")
                 : appearance(appearance) {}
 
-        const std::string type = "meta";
+        const std::string type = "MetaComponent";
         std::string appearance;
 
         /*

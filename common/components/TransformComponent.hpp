@@ -16,7 +16,7 @@ namespace kengine
                 : boundingBox(pos, size)
         {}
 
-        const std::string type = "transform";
+        const std::string type = get_class_name();
         putils::Rect<Precision, Dimensions> boundingBox;
         Precision yaw = 0; // Radians
 

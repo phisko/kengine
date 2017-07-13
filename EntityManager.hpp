@@ -59,7 +59,7 @@ namespace kengine
             return static_cast<GO &>(addEntity(name, std::move(entity)));
         }
 
-    public:
+    private:
         GameObject &addEntity(std::string_view name, std::unique_ptr<GameObject> &&obj)
         {
             auto &ret = *obj;

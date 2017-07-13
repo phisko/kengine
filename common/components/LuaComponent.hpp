@@ -27,7 +27,7 @@ namespace kengine
         const std::vector<std::string> &getScripts() const noexcept { return _scripts; }
 
     private:
-        const std::string type = "lua";
+        const std::string type = "LuaComponent";
         std::vector<std::string> _scripts;
 
         /*
