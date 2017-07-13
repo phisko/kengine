@@ -69,7 +69,7 @@ int main(int, char **av)
 
     // Get the factory and register any desired types
     auto &factory = em.getFactory<kengine::ExtensibleFactory>();
-    factory.addType("GameObject", [](auto name) { return std::make_unique<kengine::GameObject>(name); });
+    factory.registerTypes<kengine::GameObject>();
 
     // Create a GameObject and attach Components to it
     auto &player = em.createEntity<kengine::GameObject>("player");

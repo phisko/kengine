@@ -63,6 +63,10 @@ namespace kengine
         }
 
     public:
+        sol::state &getState() { return _lua; }
+        const sol::state &getState() const { return _lua; }
+
+    public:
         void addScriptDirectory(std::string_view dir) noexcept
         {
             _directories.push_back(dir.data());

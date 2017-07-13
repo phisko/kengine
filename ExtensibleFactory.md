@@ -11,12 +11,28 @@ using Creator = std::function<std::unique_ptr<GameObject>(std::string_view name)
 ```
 A `Creator` is a function that will be called to create a given type.
 
+##### registerType
+
+```
+template<typename T>
+void registerType();
+```
+Assuming `T` is a [putils::Reflectible](putils/reflection/README.md), registers a creator for `T` under its name.
+
+##### registerTypes
+
+```
+template<typename ...Types>
+void registerTypes();
+```
+Calls `registerType` for each `T` in `Types`.
+
 ##### addType
 
 ```
 void addType(std::string_view type, const Creator &creator);
 ```
-Registers `creator` as the funciton to be called to create `type`.
+Registers `creator` as the function to be called to create `type`.
 
 ##### make
 
