@@ -51,9 +51,8 @@ namespace kengine
         template<typename T, typename ...Args>
         void createSystem(Args &&...args)
         {
-            if constexpr (!std::is_base_of<ISystem, T>::value)
-                static_assert("Attempt to create something that's not a System");
-
+            static_assert(std::is_base_of<ISystem, T>::value,
+                          "Attempt to create something that's not a System");
             addSystem(std::make_unique<T>(std::forward<Args>(args)...));
         }
 

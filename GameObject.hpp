@@ -44,9 +44,8 @@ namespace kengine
         template<typename CT, typename ...Args>
         CT &attachComponent(Args &&...args)
         {
-            if constexpr (!std::is_base_of<IComponent, CT>::value)
-                static_assert("Attempt to attach something that's not a component");
-
+            static_assert(std::is_base_of<IComponent, CT>::value,
+                          "Attempt to attach something that's not a component");
             return attachComponent(std::make_unique<CT>(FWD(args)...));
         }
 
@@ -54,18 +53,16 @@ namespace kengine
         template<class CT>
         CT &getComponent()
         {
-            if constexpr (!std::is_base_of<IComponent, CT>::value)
-                static_assert("Attempt to get something that's not a component");
-
+            static_assert(std::is_base_of<IComponent, CT>::value,
+                          "Attempt to get something that's not a component");
             return static_cast<CT &>(*_components.at(pmeta::type<CT>::index));
         };
 
         template<class CT>
         const CT &getComponent() const
         {
-            if constexpr (!std::is_base_of<IComponent, CT>::value)
-                static_assert("Attempt to get something that's not a component");
-
+            static_assert(std::is_base_of<IComponent, CT>::value,
+                          "Attempt to get something that's not a component");
             return static_cast<const CT &>(*_components.at(pmeta::type<CT>::index));
         };
 
@@ -73,9 +70,8 @@ namespace kengine
         template<typename CT>
         bool hasComponent() const noexcept
         {
-            if constexpr (!std::is_base_of<IComponent, CT>::value)
-                static_assert("Attempt to get something that's not a component");
-
+            static_assert(std::is_base_of<IComponent, CT>::value,
+                          "Attempt to get something that's not a component");
             return _components.find(pmeta::type<CT>::index) != _components.end();
         }
 
@@ -135,8 +131,8 @@ namespace kengine
 template<typename CT>
 void kengine::GameObject::detachComponent()
 {
-    if constexpr (!std::is_base_of<IComponent, CT>::value)
-        static_assert("Attempt to detach something that's not a component");
+    static_assert(std::is_base_of<IComponent, CT>::value,
+                  "Attempt to detach something that's not a component");
 
     if (_manager)
         _manager->removeComponent(*this, getComponent<CT>());
@@ -149,8 +145,8 @@ void kengine::GameObject::detachComponent()
 template<typename CT>
 void kengine::GameObject::detachComponent(const CT &comp)
 {
-    if constexpr (!std::is_base_of<IComponent, CT>::value)
-        static_assert("Attempt to detach something that's not a component");
+    static_assert(std::is_base_of<IComponent, CT>::value,
+                  "Attempt to detach something that's not a component");
 
     if (_manager)
         _manager->removeComponent(*this, comp);
@@ -163,8 +159,8 @@ void kengine::GameObject::detachComponent(const CT &comp)
 template<typename CT>
 CT &kengine::GameObject::attachComponent(std::unique_ptr<CT> &&comp)
 {
-    if constexpr (!std::is_base_of<IComponent, CT>::value)
-        static_assert("Attempt to attach something that's not a component");
+    static_assert(std::is_base_of<IComponent, CT>::value,
+                  "Attempt to attach something that's not a component");
 
     auto &ret = *comp;
 

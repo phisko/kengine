@@ -27,7 +27,8 @@ namespace kengine
         template<typename T>
         const std::vector<GameObject *> &getGameObjects()
         {
-            static_assert(kengine::is_component<T>::value, "getGameObjects called without component type");
+            static_assert(kengine::is_component<T>::value,
+                          "getGameObjects called without component type");
             return _entitiesByType[pmeta::type<T>::index];
         }
 

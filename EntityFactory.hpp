@@ -27,7 +27,8 @@ namespace kengine
         template<typename T>
         void registerType()
         {
-            static_assert(putils::is_reflectible<T>::value, "Please make your type reflectible before registering it");
+            static_assert(putils::is_reflectible<T>::value,
+                          "Please make your type reflectible before registering it");
             _creators[T::get_class_name()] = [](auto name) { return std::make_unique<T>(name); };
         }
 

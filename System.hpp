@@ -14,7 +14,8 @@ namespace kengine
     public:
         pmeta::type_index getType() const noexcept final
         {
-            static_assert(std::is_base_of<System, CRTP>::value, "System's first template parameter should be inheriting class");
+            static_assert(std::is_base_of<System, CRTP>::value,
+                          "System's first template parameter should be inheriting class");
             return pmeta::type<CRTP>::index;
         }
     };
