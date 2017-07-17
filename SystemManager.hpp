@@ -34,11 +34,12 @@ namespace kengine
                 auto &time = s->time;
                 auto &timer = time.timer;
 
-                if (time.alwaysCall || time.timer.isDone())
+                if (time.alwaysCall || timer.isDone())
                 {
                     time.deltaTime = timer.getTimeSinceStart();
                     timer.setStart(
-                            putils::Timer::t_clock::now() - timer.getTimeSinceDone()
+                            putils::Timer::t_clock::now() -
+                                    std::chrono::duration_cast<putils::Timer::t_clock::duration>(timer.getTimeSinceDone())
                     );
 
                     s->execute();

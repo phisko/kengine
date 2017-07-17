@@ -6,9 +6,11 @@ namespace kengine
 {
     namespace packets
     {
-        struct Log : putils::Reflectible<Log>
+        struct Log : public putils::Reflectible<Log>
         {
             std::string msg;
+
+            Log(std::string_view msg) : msg(msg) {}
 
             /*
              * Reflectible
