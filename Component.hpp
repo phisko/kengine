@@ -6,7 +6,6 @@
 
 #include <string>
 #include "IComponent.hpp"
-#include "PooledObject.hpp"
 
 namespace kengine
 {
