@@ -19,21 +19,22 @@ namespace kengine
     class EntityManager : public SystemManager, public ComponentManager
     {
     public:
-        EntityManager(std::unique_ptr<EntityFactory> &&factory = nullptr)
-                : _factory(std::move(factory)) {}
+        EntityManager(std::unique_ptr<EntityFactory>&& factory = nullptr)
+                : _factory(std::move(factory))
+        {}
 
         ~EntityManager() = default;
 
     public:
-        EntityManager(EntityManager const &o) = delete;
+        EntityManager(EntityManager const& o) = delete;
 
-        EntityManager(EntityManager &&o) = delete;
+        EntityManager(EntityManager&& o) = delete;
 
-        EntityManager &operator=(EntityManager const &o) = delete;
+        EntityManager& operator=(EntityManager const& o) = delete;
 
     public:
-        GameObject &createEntity(std::string_view type, std::string_view name,
-                                 const std::function<void(GameObject &)> &postCreate = nullptr)
+        GameObject& createEntity(std::string_view type, std::string_view name,
+                                 const std::function<void(GameObject&)>& postCreate = nullptr)
         {
             auto e = _factory->make(type, name);
 
@@ -44,9 +45,9 @@ namespace kengine
         }
 
         template<class GO, typename ...Params>
-        GO &createEntity(std::string_view name,
-                         const std::function<void(GameObject &)> &postCreate = nullptr,
-                         Params &&... params) noexcept
+        GO& createEntity(std::string_view name,
+                         const std::function<void(GameObject&)>& postCreate = nullptr,
+                         Params&& ... params) noexcept
         {
             static_assert(std::is_base_of<GameObject, GO>::value,
                           "Attempt to create something that's not a GameObject");
@@ -54,15 +55,15 @@ namespace kengine
             auto entity = std::make_unique<GO>(name, FWD(params)...);
 
             if (postCreate != nullptr)
-                postCreate(static_cast<GameObject &>(*entity));
+                postCreate(static_cast<GameObject&>(*entity));
 
-            return static_cast<GO &>(addEntity(name, std::move(entity)));
+            return static_cast<GO&>(addEntity(name, std::move(entity)));
         }
 
     private:
-        GameObject &addEntity(std::string_view name, std::unique_ptr<GameObject> &&obj)
+        GameObject& addEntity(std::string_view name, std::unique_ptr<GameObject>&& obj)
         {
-            auto &ret = *obj;
+            auto& ret = *obj;
 
             if (_entities.find(name.data()) != _entities.end())
                 throw std::runtime_error("Entity exists");
@@ -76,7 +77,7 @@ namespace kengine
         }
 
     public:
-        void removeEntity(kengine::GameObject &go)
+        void removeEntity(kengine::GameObject& go)
         {
             SystemManager::removeGameObject(go);
             ComponentManager::removeGameObject(go);
@@ -89,7 +90,8 @@ namespace kengine
             if (p == _entities.end())
                 throw std::out_of_range("No such entity");
 
-            const auto & [_, e] = *p;
+            const auto &
+            [_, e] = *p;
 
             SystemManager::removeGameObject(*e);
             ComponentManager::removeGameObject(*e);
@@ -97,28 +99,36 @@ namespace kengine
         }
 
     public:
-        GameObject &getEntity(std::string_view name) { return *_entities.at(name.data()); }
+        GameObject& getEntity(std::string_view name)
+        { return *_entities.at(name.data()); }
 
-        bool hasEntity(std::string_view name) const noexcept { return _entities.find(name.data()) != _entities.end(); }
+        bool hasEntity(std::string_view name) const noexcept
+        { return _entities.find(name.data()) != _entities.end(); }
 
     public:
-        void addLink(const GameObject &parent, const GameObject &child) { _entityHierarchy[&child] = &parent; }
-        void removeLink(const GameObject &child) { _entityHierarchy.erase(&child); }
+        void addLink(const GameObject& parent, const GameObject& child)
+        { _entityHierarchy[&child] = &parent; }
 
-        const GameObject &getParent(const GameObject &go) const { return *_entityHierarchy.at(&go); }
+        void removeLink(const GameObject& child)
+        { _entityHierarchy.erase(&child); }
+
+        const GameObject& getParent(const GameObject& go) const
+        { return *_entityHierarchy.at(&go); }
 
     public:
         template<typename T>
-        T &getFactory() { return static_cast<T &>(*_factory); }
+        T& getFactory()
+        { return static_cast<T&>(*_factory); }
 
         template<typename T>
-        const T &getFactory() const { return static_cast<const T &>(*_factory); }
+        const T& getFactory() const
+        { return static_cast<const T&>(*_factory); }
 
     private:
         std::unique_ptr<EntityFactory> _factory;
 
     private:
         std::unordered_map<std::string, std::unique_ptr<GameObject>> _entities;
-        std::unordered_map<const GameObject *, const GameObject *> _entityHierarchy;
+        std::unordered_map<const GameObject*, const GameObject*>     _entityHierarchy;
     };
 }
