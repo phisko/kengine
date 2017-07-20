@@ -35,8 +35,7 @@ namespace kengine
               _em(em),
               _engine(_screenSize.x, _screenSize.y, "Koadom Wars",
                       _fullScreen ? sf::Style::Fullscreen : sf::Style::Close)
-    {
-    }
+    {}
 
     /*
      * Config parsers
@@ -65,13 +64,7 @@ namespace kengine
      * Helper
      */
 
-    static std::unique_ptr<pse::Sprite> makeSprite(std::string_view sprite)
-    {
-        return std::make_unique<pse::Sprite>(sprite.data(), sf::Vector2f{0, 0},
-                                             sf::Vector2f{16, 16});
-    }
-
-    std::unique_ptr<pse::ViewItem> SfSystem::getResource(const kengine::GameObject& go)
+    SfComponent& SfSystem::getResource(kengine::GameObject& go)
     {
         const auto& meta = go.getComponent<MetaComponent>();
 
@@ -79,7 +72,13 @@ namespace kengine
                                ? _appearances.at(meta.appearance)
                                : meta.appearance;
 
-        return makeSprite(str);
+        auto& comp = go.attachComponent<SfComponent>(
+                std::make_unique<pse::Sprite>(str.data(),
+                                              sf::Vector2f{0, 0},
+                                              sf::Vector2f{16, 16})
+        );
+
+        return comp;
     }
 
     /*
@@ -97,19 +96,9 @@ namespace kengine
 
             comp.getViewItem().setPosition(
                     {(float) (_tileSize.x * pos.x), (float) (_tileSize.y * pos.y)});
-            comp.getViewItem().setSize(
-                    {(float) (_tileSize.x * size.x), (float) (_tileSize.y * size.y)});
-
-            _engine.setItemHeight(comp.getViewItem(), (std::size_t) pos.z);
-        }
-        for (auto go : _em.getGameObjects<SfTextComponent>())
-        {
-            auto      & comp      = go->getComponent<SfTextComponent>();
-            const auto& transform = go->getComponent<kengine::TransformComponent3d>();
-            const auto& pos       = transform.boundingBox.topLeft;
-
-            comp.getViewItem().setPosition(
-                    {(float) (_tileSize.x * pos.x), (float) (_tileSize.y * pos.y)});
+            if (!comp.isFixedSize())
+                comp.getViewItem().setSize(
+                        {(float) (_tileSize.x * size.x), (float) (_tileSize.y * size.y)});
 
             _engine.setItemHeight(comp.getViewItem(), (std::size_t) pos.z);
         }
@@ -124,33 +113,28 @@ namespace kengine
 
     void SfSystem::registerGameObject(kengine::GameObject& go)
     {
-        if (go.hasComponent<SfTextComponent>())
-        {
-            auto      & v         = go.getComponent<SfTextComponent>().getViewItem();
-            const auto& transform = go.getComponent<kengine::TransformComponent3d>();
-
-            const auto& pos = transform.boundingBox.topLeft;
-            v.setPosition({(float) (_tileSize.x * pos.x), (float) (_tileSize.y * pos.y)});
-
-            _engine.addItem(v, (std::size_t) pos.z);
-        }
-        if (!go.hasComponent<MetaComponent>())
+        if (!go.hasComponent<SfComponent>() && !go.hasComponent<MetaComponent>())
             return;
 
         try
         {
-            auto v = getResource(go);
+            auto& v = go.hasComponent<SfComponent>() ? go.getComponent<SfComponent>()
+                                                     : getResource(go);
+
             const auto& transform = go.getComponent<kengine::TransformComponent3d>();
 
             const auto& pos = transform.boundingBox.topLeft;
-            v->setPosition({(float) (_tileSize.x * pos.x), (float) (_tileSize.y * pos.y)});
+            v.getViewItem().setPosition({(float) (_tileSize.x * pos.x), (float) (_tileSize.y *
+                                                                                 pos.y)});
 
-            const auto& size = transform.boundingBox.size;
-            v->setSize({(float) (_tileSize.x * size.x), (float) (_tileSize.y * size.y)});
+            if (!v.isFixedSize())
+            {
+                const auto& size = transform.boundingBox.size;
+                v.getViewItem().setSize({(float) (_tileSize.x * size.x), (float) (_tileSize.y *
+                                                                                  size.y)});
+            }
 
-            auto& viewItem = _em.attachComponent<SfComponent>(go, std::move(v));
-
-            _engine.addItem(viewItem.getViewItem(), (std::size_t) pos.z);
+            _engine.addItem(v.getViewItem(), (std::size_t) pos.z);
         }
         catch (const std::out_of_range& e)
         {
@@ -166,18 +150,11 @@ namespace kengine
         if (!go.hasComponent<SfComponent>())
             return;
 
-        std::cout << "removing: "  << go.getName() << std::endl;
+        std::cout << "removing: " << go.getName() << std::endl;
 
         const auto& comp = go.getComponent<SfComponent>();
         _engine.removeItem(comp.getViewItem());
         _em.detachComponent(go, comp);
-
-        if (!go.hasComponent<SfTextComponent>())
-            return;
-
-        const auto& comp2 = go.getComponent<SfTextComponent>();
-        _engine.removeItem(comp2.getViewItem());
-        _em.detachComponent(go, comp2);
     }
 
     /*
