@@ -46,7 +46,7 @@ namespace kengine
         template<class GO, typename ...Params>
         GO &createEntity(std::string_view name,
                          const std::function<void(GameObject &)> &postCreate = nullptr,
-                         Params &&... params) noexcept
+                         Params &&... params)
         {
             static_assert(std::is_base_of<GameObject, GO>::value,
                           "Attempt to create something that's not a GameObject");
