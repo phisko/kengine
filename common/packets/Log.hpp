@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include "putils/reflection/Reflectible.hpp"
 
 namespace kengine
 {
