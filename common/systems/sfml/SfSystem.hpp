@@ -5,6 +5,7 @@
 #include "common/packets/RegisterAppearance.hpp"
 
 #include "pse/Engine.hpp"
+#include "SfComponent.hpp"
 
 namespace kengine
 {
@@ -24,7 +25,7 @@ namespace kengine
         void handle(const packets::RegisterAppearance& p) noexcept;
 
     private:
-        std::unique_ptr<pse::ViewItem> getResource(const kengine::GameObject& go);
+        SfComponent &getResource(kengine::GameObject& go);
 
     private:
         putils::json::Object _config;
