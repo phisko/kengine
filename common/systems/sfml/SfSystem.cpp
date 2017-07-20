@@ -107,7 +107,6 @@ namespace kengine
             auto      & comp      = go->getComponent<SfTextComponent>();
             const auto& transform = go->getComponent<kengine::TransformComponent3d>();
             const auto& pos       = transform.boundingBox.topLeft;
-            const auto& size      = transform.boundingBox.size;
 
             comp.getViewItem().setPosition(
                     {(float) (_tileSize.x * pos.x), (float) (_tileSize.y * pos.y)});
@@ -134,8 +133,6 @@ namespace kengine
             v.setPosition({(float) (_tileSize.x * pos.x), (float) (_tileSize.y * pos.y)});
 
             _engine.addItem(v, (std::size_t) pos.z);
-
-            return;
         }
         if (!go.hasComponent<MetaComponent>())
             return;
@@ -169,6 +166,8 @@ namespace kengine
         if (!go.hasComponent<SfComponent>())
             return;
 
+        std::cout << "removing: "  << go.getName() << std::endl;
+
         const auto& comp = go.getComponent<SfComponent>();
         _engine.removeItem(comp.getViewItem());
         _em.detachComponent(go, comp);
@@ -176,7 +175,7 @@ namespace kengine
         if (!go.hasComponent<SfTextComponent>())
             return;
 
-        const auto& comp2 = go.getComponent<SfComponent>();
+        const auto& comp2 = go.getComponent<SfTextComponent>();
         _engine.removeItem(comp2.getViewItem());
         _em.detachComponent(go, comp2);
     }
