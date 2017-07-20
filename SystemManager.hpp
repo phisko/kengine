@@ -42,7 +42,11 @@ namespace kengine
                                     std::chrono::duration_cast<putils::Timer::t_clock::duration>(timer.getTimeSinceDone())
                     );
 
-                    s->execute();
+                    try
+                    {
+                        s->execute();
+                    }
+                    catch (const std::exception &e) { std::cerr << e.what() << std::endl; }
                 }
             }
         }
