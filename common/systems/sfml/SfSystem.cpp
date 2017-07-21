@@ -33,7 +33,7 @@ namespace kengine
               _tileSize(parseSize("tileSize", {1, 1})),
               _fullScreen(parseBool("fullScreen", false)),
               _em(em),
-              _engine(_screenSize.x, _screenSize.y, "Koadom Wars",
+              _engine(_screenSize.x, _screenSize.y, "Kengine",
                       _fullScreen ? sf::Style::Fullscreen : sf::Style::Close)
     {}
 
