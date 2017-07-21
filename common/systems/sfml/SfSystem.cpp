@@ -136,7 +136,7 @@ namespace kengine
 
             _engine.addItem(v.getViewItem(), (std::size_t) pos.z);
         }
-        catch (const std::out_of_range& e)
+        catch (const std::exception &e)
         {
             send(kengine::packets::Log{
                     putils::concat("[SfSystem] Unknown appearance: ",
@@ -149,8 +149,6 @@ namespace kengine
     {
         if (!go.hasComponent<SfComponent>())
             return;
-
-        std::cout << "removing: " << go.getName() << std::endl;
 
         const auto& comp = go.getComponent<SfComponent>();
         _engine.removeItem(comp.getViewItem());
