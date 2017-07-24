@@ -59,7 +59,7 @@ int main(int, char **av)
     kengine::EntityManager em(std::make_unique<kengine::ExtensibleFactory>());
 
     // Load the specified systems, and any plugin placed in the executable's directory
-    //      If you specify 'PUTILS_BUILD_PSE' as TRUE in your CMakeLists.txt, this will load the SfSystem
+    //      If you specify 'KENGINE_SFML' as TRUE in your CMakeLists.txt, this will load the SfSystem
     em.loadSystems<kengine::LuaSystem, kengine::LogSystem>(".");
 
     // To add a new system, simply add a DLL with a
