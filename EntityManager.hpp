@@ -19,7 +19,7 @@ namespace kengine
     class EntityManager : public SystemManager, public ComponentManager
     {
     public:
-        EntityManager(std::unique_ptr<EntityFactory>&& factory = nullptr)
+        EntityManager(std::unique_ptr<EntityFactory>&& factory = std::make_unique<ExtensibleFactory>())
                 : _factory(std::move(factory))
         {}
 
