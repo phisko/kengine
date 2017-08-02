@@ -77,7 +77,7 @@ namespace kengine
             }
             time.timer.setDuration(time.fixedDeltaTime);
 
-            addModule(system.get());
+            addModule(*system);
             const auto type = system->getType();
             _systems.emplace(type, std::move(system));
         }

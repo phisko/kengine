@@ -164,7 +164,7 @@ CT &kengine::GameObject::attachComponent(std::unique_ptr<CT> &&comp)
 
     auto &ret = *comp;
 
-    this->addModule(comp.get());
+    addModule(*comp);
     const auto type = comp->getType();
     _components.emplace(type, std::move(comp));
     _types.push_back(type);
