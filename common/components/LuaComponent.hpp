@@ -16,6 +16,9 @@ namespace kengine
         }
 
     public:
+        std::string meta;
+
+    public:
         void attachScript(std::string_view file) noexcept { _scripts.push_back(file.data()); }
 
         void removeScript(std::string_view file) noexcept
@@ -40,7 +43,8 @@ namespace kengine
         {
             static const auto table = pmeta::make_table(
                     "type", &LuaComponent::type,
-                    "scripts", &LuaComponent::_scripts
+                    "scripts", &LuaComponent::_scripts,
+                    "meta", &LuaComponent::meta
             );
             return table;
         }
