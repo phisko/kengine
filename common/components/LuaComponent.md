@@ -31,3 +31,11 @@ void removeScript(std::string_view file) noexcept;
 ```
 const std::vector<std::string> &getScripts() const noexcept;
 ```
+
+##### meta
+
+```
+std::string meta;
+```
+
+Lua scripts can set this value to anything they desire for debug purposes.

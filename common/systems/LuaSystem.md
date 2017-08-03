@@ -32,6 +32,8 @@ If `T` is a `Component`, the following member functions is added to the `GameObj
 * `getT()` (e.g. `getMetaComponent()`)
 * `hasT()` (e.g. `hasMetaComponent()`)
 
+A global `getGameObjectsWithT()` is also defined, that returns all the `GameObjects` with a `T` component.
+
 This allows lua scripts to perform any operation on `GameObjects` if the necessary types are registered. Client code can either give full access to lua scripts by registering all its types (and therefore having a fully extensible game that can be developed almost entirely in lua), or only register a small set of types and/or members, to restrict what modders can do.
 
 ##### registerTypes

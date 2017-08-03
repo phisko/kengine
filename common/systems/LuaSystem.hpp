@@ -86,6 +86,9 @@ namespace kengine
         template<typename T>
         void registerComponent() noexcept
         {
+            _lua[putils::concat("getGameObjectsWith", T::get_class_name())] =
+                    [this] { return _em.getGameObjects<T>(); };
+
             _lua[kengine::GameObject::get_class_name()][putils::concat("get", T::get_class_name())] =
                     [](kengine::GameObject &self) { return std::ref(self.getComponent<T>()); };
 
