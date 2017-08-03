@@ -35,7 +35,7 @@ const std::vector<std::string> &getScripts() const noexcept;
 ##### meta
 
 ```
-std::string meta;
+sol::object meta;
 ```
 
-Lua scripts can set this value to anything they desire for debug purposes.
+Lua scripts can set this value to anything they desire.

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include "lua/sol.hpp"
 
 #include "SerializableComponent.hpp"
 
@@ -16,7 +17,8 @@ namespace kengine
         }
 
     public:
-        std::string meta;
+        sol::object meta;
+        std::string debug;
 
     public:
         void attachScript(std::string_view file) noexcept { _scripts.push_back(file.data()); }
@@ -44,7 +46,8 @@ namespace kengine
             static const auto table = pmeta::make_table(
                     "type", &LuaComponent::type,
                     "scripts", &LuaComponent::_scripts,
-                    "meta", &LuaComponent::meta
+                    "meta", &LuaComponent::meta,
+                    "debug", &LuaComponent::debug
             );
             return table;
         }
