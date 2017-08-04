@@ -74,7 +74,7 @@ int main(int, char **av)
 
     // To add a new system, simply add a DLL with a
     //      `ISystem *getSystem(kengine::EntityManager &em)`
-    // function to the "plugins" directory
+    // function to the executable directory
 
 
     // Get the factory and register any desired types
