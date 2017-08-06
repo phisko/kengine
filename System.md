@@ -1,6 +1,6 @@
 # System
 
-A system holds game logic. It can subscribe to a certain type of [Component](Component.md), in which case it will automatically `register` all [GameObjects](GameObject.md) with a `Component` of that type.
+A system holds game logic.
 
 `Systems` are also [Modules](putils/mediator/README.md), the `EntityManager` being their `Mediator`. This lets `Systems` easily communicate through `DataPackets`.
 
