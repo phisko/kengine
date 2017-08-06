@@ -2,6 +2,16 @@
 
 The Koala engine is a type-safe and self-documenting implementation of an Entity-Component-System (ECS).
 
+## Installation
+
+The project uses git submodules extensively, and must therefore be cloned recursively.
+
+```
+git clone --recursive git@github.com:phiste/kengine
+```
+
+Alternatively, if using this resository as a submodule of your own project, make sure to init, sync and update your submodules in order to make sure the "putils" folder isn't empty.
+
 ### Classes
 
 * [Component](Component.md): contains information about a certain property of an entity (for instance, a `TransformComponent` might hold an entity's position and size)
@@ -64,7 +74,7 @@ int main(int, char **av)
 
     // To add a new system, simply add a DLL with a
     //      `ISystem *getSystem(kengine::EntityManager &em)`
-    // function to the "plugins" directory
+    // function to the executable directory
 
 
     // Get the factory and register any desired types
