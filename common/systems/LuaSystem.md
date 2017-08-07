@@ -21,7 +21,7 @@ The [GameObject](../../GameObject.md) type is also registered.
 template<typename T>
 void registerType() noexcept;
 ```
-Registers the [Reflectible](../../putils/reflection/README.md) type `T` with the underlying lua state.
+Registers the [Reflectible](https://github.com/phiste/putils/blob/master/reflection/README.md) type `T` with the underlying lua state.
 
 This allows lua scripts to access any attribute or method in `T`'s `Reflectible` API.
 
