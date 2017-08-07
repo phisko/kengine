@@ -2,9 +2,9 @@
 
 Represents an in-game entity. `GameObjects` do not hold any data themselves, but instead contain [Components](Component.md).
 
-Inherits from [putils::Reflectible](../../putils/reflection/Reflectible.md).
+Inherits from [putils::Reflectible](https://github.com/phiste/putils/blob/master/reflection/Reflectible.md).
 
-A `GameObject` is also a [Mediator](putils/mediator/README.md), managing communication for its `Components`.
+A `GameObject` is also a [Mediator](https://github.com/phiste/putils/blob/master/mediator/README.md), managing communication for its `Components`.
 
 ### Members
 
