@@ -2,7 +2,7 @@
 
 Manages [GameObjects](GameObject.md), [Components](Component.md) and [Systems](System.md).
 
-An `EntityManager` is also a [Mediator](putils/mediator/README.md), managing communication for `Systems`.
+An `EntityManager` is also a [Mediator](https://github.com/phiste/putils/blob/master/mediator/README.md), managing communication for `Systems`.
 
 ### Base classes
 
