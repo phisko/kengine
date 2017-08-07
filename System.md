@@ -2,7 +2,7 @@
 
 A system holds game logic.
 
-`Systems` are also [Modules](putils/mediator/README.md), the `EntityManager` being their `Mediator`. This lets `Systems` easily communicate through `DataPackets`.
+`Systems` are also [Modules](https://github.com/phiste/putils/blob/master/mediator/README.md), the `EntityManager` being their `Mediator`. This lets `Systems` easily communicate through `DataPackets`.
 
 ### Members
 
