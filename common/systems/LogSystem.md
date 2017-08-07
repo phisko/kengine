@@ -9,4 +9,4 @@
 ```
 void handle(const packets::Log &packet) const noexcept;
 ```
-Handler for the `packets::Log` datapacket. See [Mediator](../../putils/mediator/README.md) for clarification about how datapackets are transmitted.
+Handler for the `packets::Log` datapacket. See [Mediator](https://github.com/phiste/putils/blob/master/mediator/README.md) for clarification about how datapackets are transmitted.
