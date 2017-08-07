@@ -2,7 +2,7 @@
 
 `Component` providing a `GameObject`'s position and size. Template parameters are the type used for the coordinates (`Precision`) and the number of `Dimensions` (2 or 3).
 
-Inherits from [putils::Reflectible](../../putils/reflection/Reflectible.md).
+Inherits from [putils::Reflectible](https://github.com/phiste/putils/blob/master/reflection/Reflectible.md).
 
 Some specializations are pre-defined:
 
