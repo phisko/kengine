@@ -2,11 +2,11 @@
 
 Holds information about a certain property of a [GameObject](GameObject.md).
 
-`Components` are also [Modules](putils/mediator/README.md), the `GameObject` being the `Mediator`. This allows the various `Components` of a `GameObject` to have a simple means of communication.
+`Components` are also [Modules](https://github.com/phiste/putils/blob/master/mediator/README.md), the `GameObject` being the `Mediator`. This allows the various `Components` of a `GameObject` to have a simple means of communication.
 
 ### See also
 
-[SerializableComponent](SerializableComponent.md): a `Component` using [putils::Serializable](putils/Serializable.md) to implement the `toString` virtual member.
+[SerializableComponent](SerializableComponent.md): a `Component` using [putils::Serializable](https://github.com/phiste/putils/blob/master/reflection/Serializable.md) to implement the `toString` virtual member.
 
 ### Members
 
