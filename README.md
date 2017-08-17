@@ -45,6 +45,10 @@ These are datapackets sent from one `System` to another to communicate.
 
 ### Example
 
+A POC game using the engine is available [here](https://github.com/phiste/hackemup).
+
+Below is a commented main function that creates an entity and attaches some components to it, as well as some lua scripts (one of which is attached to the entity, while the other is run as a "system"). These should let you get an idea of what is possible using the kengine's support for reflection and runtime extensibility, as well as the compile-time clarity and type-safety that were the two motivations behind the project.
+
 ##### main.cpp
 
 ```
