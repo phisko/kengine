@@ -32,22 +32,22 @@ namespace kengine
         const std::vector<std::string> &getScripts() const noexcept { return _scripts; }
 
     private:
-        const std::string type = "LuaComponent";
+        const std::string type = pmeta_nameof(LuaComponent);
         std::vector<std::string> _scripts;
 
         /*
          * Reflectible
          */
     public:
-        static const auto get_class_name() { return "LuaComponent"; }
+        static const auto get_class_name() { return pmeta_nameof(LuaComponent); }
 
         static const auto &get_attributes()
         {
             static const auto table = pmeta::make_table(
-                    "type", &LuaComponent::type,
-                    "scripts", &LuaComponent::_scripts,
-                    "meta", &LuaComponent::meta,
-                    "debug", &LuaComponent::debug
+                    pmeta_reflectible_attribute(&LuaComponent::type),
+                    pmeta_reflectible_attribute_private(&LuaComponent::_scripts),
+                    pmeta_reflectible_attribute(&LuaComponent::meta),
+                    pmeta_reflectible_attribute(&LuaComponent::debug)
             );
             return table;
         }
@@ -55,8 +55,8 @@ namespace kengine
         static const auto &get_methods()
         {
             static const auto table = pmeta::make_table(
-                    "attachScript", &LuaComponent::attachScript,
-                    "removeScript", &LuaComponent::removeScript
+                    pmeta_reflectible_attribute(&LuaComponent::attachScript),
+                    pmeta_reflectible_attribute(&LuaComponent::removeScript)
             );
             return table;
         }

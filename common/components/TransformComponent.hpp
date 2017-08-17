@@ -16,7 +16,7 @@ namespace kengine
                 : boundingBox(pos, size)
         {}
 
-        const std::string type = get_class_name();
+        const std::string type = pmeta_nameof(TransformComponent);
         putils::Rect<Precision, Dimensions> boundingBox;
         Precision yaw = 0; // Radians
 
@@ -25,14 +25,14 @@ namespace kengine
          */
 
     public:
-        static const auto get_class_name() { return "TransformComponent"; }
+        static const auto get_class_name() { return pmeta_nameof(TransformComponent); }
 
         static const auto &get_attributes()
         {
             static const auto table = pmeta::make_table(
-                    "type", &TransformComponent::type,
-                    "boundingBox", &TransformComponent::boundingBox,
-                    "yaw", &TransformComponent::yaw
+                    pmeta_reflectible_attribute(&TransformComponent::type),
+                    pmeta_reflectible_attribute(&TransformComponent::boundingBox),
+                    pmeta_reflectible_attribute(&TransformComponent::yaw)
             );
             return table;
         }

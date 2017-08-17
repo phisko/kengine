@@ -40,12 +40,15 @@ namespace kengine
             go.setManager(this);
             for (auto & [type, comp] : go._components)
                 registerComponent(go, *comp);
+            _allEntities.push_back(&go);
         }
 
         void removeGameObject(const GameObject &go)
         {
             for (auto & [type, comp] : go._components)
                 removeComponent(go, *comp);
+
+            _allEntities.erase(std::find(_allEntities.begin(), _allEntities.end(), &go));
         }
 
     private:
@@ -55,7 +58,6 @@ namespace kengine
         {
             _compHierarchy.emplace(&comp, &parent);
             _entitiesByType[comp.getType()].push_back(&parent);
-            _allEntities.push_back(&parent);
         }
 
         void removeComponent(const GameObject &go, const IComponent &comp)
@@ -64,8 +66,6 @@ namespace kengine
 
             auto &category = _entitiesByType[comp.getType()];
             category.erase(std::find(category.begin(), category.end(), &go));
-
-            _allEntities.erase(std::find(_allEntities.begin(), _allEntities.end(), &go));
         }
 
     private:

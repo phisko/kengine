@@ -26,13 +26,6 @@ namespace kengine
         ~EntityManager() = default;
 
     public:
-        EntityManager(EntityManager const& o) = delete;
-
-        EntityManager(EntityManager&& o) = delete;
-
-        EntityManager& operator=(EntityManager const& o) = delete;
-
-    public:
         GameObject& createEntity(std::string_view type, std::string_view name,
                                  const std::function<void(GameObject&)>& postCreate = nullptr)
         {
