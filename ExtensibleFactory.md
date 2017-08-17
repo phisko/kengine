@@ -17,7 +17,7 @@ A `Creator` is a function that will be called to create a given type.
 template<typename T>
 void registerType();
 ```
-Assuming `T` is a [putils::Reflectible](putils/reflection/README.md), registers a creator for `T` under its name.
+Assuming `T` is a [putils::Reflectible](https://github.com/phiste/putils/blob/master/reflection/README.md), registers a creator for `T` under its name.
 
 ##### registerTypes
 
