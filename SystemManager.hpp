@@ -79,24 +79,19 @@ namespace kengine
 
             addModule(*system);
             const auto type = system->getType();
+
             _systems.emplace(type, std::move(system));
         }
 
     public:
         template<typename ...Systems>
-        void loadSystems(std::string_view pluginDir = "plugins", std::string_view creatorFunction = "getSystem")
+        void loadSystems(std::string_view pluginDir = "plugins", std::string_view creatorFunction = "getSystem", bool pluginsFirst = false)
         {
-            putils::PluginManager pm(pluginDir);
+            if (pluginsFirst)
+                loadPlugins(pluginDir, creatorFunction);
 
             // Call "creatorFunc" in each plugin, passing myself as an EntityManager
             auto &em = static_cast<kengine::EntityManager &>(*this);
-
-            const auto systems = pm.executeWithReturn<kengine::ISystem *>(
-                    creatorFunction, em
-            );
-
-            for (auto s : systems)
-                addSystem(std::unique_ptr<kengine::ISystem>(s));
 
             pmeta::tuple_for_each(std::tuple<pmeta::type<Systems>...>(),
                     [this, &em](auto &&type)
@@ -105,6 +100,9 @@ namespace kengine
                         createSystem<System>(em);
                     }
             );
+
+            if (!pluginsFirst)
+                loadPlugins(pluginDir, creatorFunction);
         }
 
     public:
@@ -143,12 +141,21 @@ namespace kengine
             }
         }
 
-        // Implementation detail
     private:
-        bool matchMasks(pmeta::type_index mask, const kengine::GameObject &go)
+        template<typename StringView>
+        void loadPlugins(StringView pluginDir, StringView creatorFunction)
         {
-            const auto &goMask = go.getTypes();
-            return std::find(goMask.begin(), goMask.end(), mask) != goMask.end();
+            putils::PluginManager pm(pluginDir);
+
+            // Call "creatorFunc" in each plugin, passing myself as an EntityManager
+            auto &em = static_cast<kengine::EntityManager &>(*this);
+
+            const auto systems = pm.executeWithReturn<kengine::ISystem *>(
+                    creatorFunction, em
+            );
+
+            for (auto s : systems)
+                addSystem(std::unique_ptr<kengine::ISystem>(s));
         }
 
     private:
