@@ -1,6 +1,5 @@
 #include "SfSystem.hpp"
 #include "SfComponent.hpp"
-#include "SfTextComponent.hpp"
 
 #include "EntityManager.hpp"
 #include "common/components/TransformComponent.hpp"
