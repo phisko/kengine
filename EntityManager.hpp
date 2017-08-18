@@ -117,6 +117,35 @@ namespace kengine
         const T& getFactory() const
         { return static_cast<const T&>(*_factory); }
 
+    public:
+        template<typename RegisterWith, typename ...Types>
+        void registerTypes()
+        {
+            if constexpr (!std::is_same<RegisterWith, nullptr_t>::value)
+            {
+                try
+                {
+                    auto &s = getSystem<RegisterWith>();
+                    s.registerTypes<Types...>();
+                }
+                catch (const std::out_of_range &) {}
+            }
+
+            try
+            {
+                auto &factory = getFactory<kengine::ExtensibleFactory>();
+                pmeta::tuple_for_each(std::make_tuple(pmeta::type<Types>()...),
+                                      [&factory](auto &&t)
+                                      {
+                                          using Type = pmeta_wrapped(t);
+                                          if constexpr (std::is_base_of<kengine::GameObject, Type>::value)
+                                              factory.registerType<Type>();
+                                      }
+                );
+            }
+            catch (const std::out_of_range &) {}
+        }
+
     private:
         std::unique_ptr<EntityFactory> _factory;
 
