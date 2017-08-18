@@ -1,12 +1,12 @@
-#include <pse/Shape.hpp>
 #include "SfSystem.hpp"
 #include "SfComponent.hpp"
-#include "pluginManager/Export.hpp"
+#include "SfTextComponent.hpp"
 
 #include "EntityManager.hpp"
 #include "common/components/TransformComponent.hpp"
 #include "common/packets/Log.hpp"
-#include "SfTextComponent.hpp"
+
+#include "pluginManager/Export.hpp"
 
 EXPORT kengine::ISystem* getSystem(kengine::EntityManager& em)
 {
@@ -105,8 +105,36 @@ namespace kengine
 
         sf::Event e;
         while (_engine.pollEvent(e))
+        {
             if (e.type == sf::Event::Closed)
                 getMediator()->running = false;
+            else if (e.type == sf::Event::KeyPressed)
+            {
+                const auto it = _keyHandlers.find(e.key.code);
+                if (it != _keyHandlers.end())
+                    it->second.onPress();
+            }
+            else if (e.type == sf::Event::KeyReleased)
+            {
+                const auto it = _keyHandlers.find(e.key.code);
+                if (it != _keyHandlers.end())
+                    it->second.onRelease();
+            }
+            else if (e.type == sf::Event::MouseMoved && _mouseMovedHandler != nullptr)
+                _mouseMovedHandler({ e.mouseMove.x, e.mouseMove.y });
+            else if (e.type == sf::Event::MouseButtonPressed)
+            {
+                const auto it = _mouseButtonHandlers.find(e.mouseButton.button);
+                if (it != _mouseButtonHandlers.end())
+                    it->second.onPress();
+            }
+            else if (e.type == sf::Event::MouseButtonReleased)
+            {
+                const auto it = _mouseButtonHandlers.find(e.mouseButton.button);
+                if (it != _mouseButtonHandlers.end())
+                    it->second.onRelease();
+            }
+        }
 
         _engine.update(true);
     }
@@ -162,5 +190,36 @@ namespace kengine
     void SfSystem::handle(const kengine::packets::RegisterAppearance& p) noexcept
     {
         _appearances[p.appearance] = p.resource;
+    }
+
+    void SfSystem::handle(const packets::RegisterKeyHandler &p) noexcept
+    {
+        _keyHandlers[p.key] = p;
+    }
+
+    void SfSystem::handle(const packets::RegisterMouseMovedHandler &p) noexcept
+    {
+        _mouseMovedHandler = p.handler;
+    }
+
+    void SfSystem::handle(const packets::RegisterMouseButtonHandler &p) noexcept
+    {
+        _mouseButtonHandlers[p.button] = p;
+    }
+
+    void SfSystem::handle(const packets::KeyStatus::Query &p) noexcept
+    {
+        sendTo(packets::KeyStatus::Response { sf::Keyboard::isKeyPressed(p.key) }, *p.sender);
+    }
+
+    void SfSystem::handle(const packets::MouseButtonStatus::Query &p) noexcept
+    {
+        sendTo(packets::MouseButtonStatus::Response { sf::Mouse::isButtonPressed(p.button) }, *p.sender);
+    }
+
+    void SfSystem::handle(const packets::MousePosition::Query &p) noexcept
+    {
+        const auto pos = sf::Mouse::getPosition();
+        sendTo(packets::MousePosition::Response { { pos.x, pos.y } }, *p.sender);
     }
 }
