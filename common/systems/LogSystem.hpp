@@ -4,17 +4,19 @@
 #include "common/packets/Log.hpp"
 #include "EntityManager.hpp"
 
-class LogSystem : public kengine::System<LogSystem, kengine::IgnoreComponents,
-        packets::Log>
+namespace kengine
 {
-    // Ctor
-public:
-    LogSystem(kengine::EntityManager &) = default;
-
-    // Packet handlers
-public:
-    void handle(const packets::Log &packet) const noexcept
+    class LogSystem : public kengine::System<LogSystem, packets::Log>
     {
-        std::cout << packet.msg << std::endl;
-    }
-};
+        // Ctor
+    public:
+        LogSystem(kengine::EntityManager &) {}
+
+        // Packet handlers
+    public:
+        void handle(const packets::Log &packet) const noexcept
+        {
+            std::cout << packet.msg << std::endl;
+        }
+    };
+}
