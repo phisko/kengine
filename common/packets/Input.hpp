@@ -14,8 +14,8 @@ namespace kengine
         struct RegisterKeyHandler
         {
             sf::Keyboard::Key key;
-            std::function<void()> onPress;
-            std::function<void()> onRelease;
+            std::function<void(sf::Keyboard::Key)> onPress;
+            std::function<void(sf::Keyboard::Key)> onRelease;
         };
 
         struct RegisterMouseMovedHandler
@@ -26,8 +26,8 @@ namespace kengine
         struct RegisterMouseButtonHandler
         {
             sf::Mouse::Button button;
-            std::function<void()> onPress;
-            std::function<void()> onRelease;
+            std::function<void(sf::Mouse::Button)> onPress;
+            std::function<void(sf::Mouse::Button)> onRelease;
         };
 
         namespace KeyStatus

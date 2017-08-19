@@ -36,12 +36,9 @@ public:
     std::string toString() const final
     { return "{type:sfml}"; }
 
-    bool isFixedSize() const
-    {
-        return _fixedSize;
-    }
+    bool isFixedSize() const { return _fixedSize; }
 
 private:
     std::unique_ptr<pse::ViewItem> _viewItem;
-    bool                           _fixedSize = false;
+    bool _fixedSize = false;
 };

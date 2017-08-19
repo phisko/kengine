@@ -88,13 +88,14 @@ namespace kengine
     {
         for (auto go : _em.getGameObjects<SfComponent>())
         {
-            auto      & comp      = go->getComponent<SfComponent>();
-            const auto& transform = go->getComponent<kengine::TransformComponent3d>();
-            const auto& pos       = transform.boundingBox.topLeft;
-            const auto& size      = transform.boundingBox.size;
+            auto &comp = go->getComponent<SfComponent>();
+            const auto &transform = go->getComponent<kengine::TransformComponent3d>();
+            const auto &pos = transform.boundingBox.topLeft;
 
             comp.getViewItem().setPosition(
                     {(float) (_tileSize.x * pos.x), (float) (_tileSize.y * pos.y)});
+
+            const auto &size = transform.boundingBox.size;
             if (!comp.isFixedSize())
                 comp.getViewItem().setSize(
                         {(float) (_tileSize.x * size.x), (float) (_tileSize.y * size.y)});
@@ -111,13 +112,21 @@ namespace kengine
             {
                 const auto it = _keyHandlers.find(e.key.code);
                 if (it != _keyHandlers.end())
-                    it->second.onPress();
+                    it->second.onPress(e.key.code);
+
+                const auto it2 = _keyHandlers.find(sf::Keyboard::KeyCount);
+                if (it2 != _keyHandlers.end())
+                    it2->second.onPress(e.key.code);
             }
             else if (e.type == sf::Event::KeyReleased)
             {
                 const auto it = _keyHandlers.find(e.key.code);
                 if (it != _keyHandlers.end())
-                    it->second.onRelease();
+                    it->second.onRelease(e.key.code);
+
+                const auto it2 = _keyHandlers.find(sf::Keyboard::KeyCount);
+                if (it2 != _keyHandlers.end())
+                    it2->second.onRelease(e.key.code);
             }
             else if (e.type == sf::Event::MouseMoved && _mouseMovedHandler != nullptr)
                 _mouseMovedHandler({ e.mouseMove.x, e.mouseMove.y });
@@ -125,13 +134,21 @@ namespace kengine
             {
                 const auto it = _mouseButtonHandlers.find(e.mouseButton.button);
                 if (it != _mouseButtonHandlers.end())
-                    it->second.onPress();
+                    it->second.onPress(e.mouseButton.button);
+
+                const auto it2 = _mouseButtonHandlers.find(sf::Mouse::ButtonCount);
+                if (it2 != _mouseButtonHandlers.end())
+                    it2->second.onPress(e.mouseButton.button);
             }
             else if (e.type == sf::Event::MouseButtonReleased)
             {
                 const auto it = _mouseButtonHandlers.find(e.mouseButton.button);
                 if (it != _mouseButtonHandlers.end())
-                    it->second.onRelease();
+                    it->second.onRelease(e.mouseButton.button);
+
+                const auto it2 = _mouseButtonHandlers.find(sf::Mouse::ButtonCount);
+                if (it2 != _mouseButtonHandlers.end())
+                    it2->second.onRelease(e.mouseButton.button);
             }
         }
 
@@ -145,18 +162,18 @@ namespace kengine
 
         try
         {
-            auto& v = go.hasComponent<SfComponent>() ? go.getComponent<SfComponent>()
+            auto &v = go.hasComponent<SfComponent>() ? go.getComponent<SfComponent>()
                                                      : getResource(go);
 
-            const auto& transform = go.getComponent<kengine::TransformComponent3d>();
+            const auto &transform = go.getComponent<kengine::TransformComponent3d>();
 
-            const auto& pos = transform.boundingBox.topLeft;
+            const auto &pos = transform.boundingBox.topLeft;
             v.getViewItem().setPosition({(float) (_tileSize.x * pos.x), (float) (_tileSize.y *
                                                                                  pos.y)});
 
             if (!v.isFixedSize())
             {
-                const auto& size = transform.boundingBox.size;
+                const auto &size = transform.boundingBox.size;
                 v.getViewItem().setSize({(float) (_tileSize.x * size.x), (float) (_tileSize.y *
                                                                                   size.y)});
             }

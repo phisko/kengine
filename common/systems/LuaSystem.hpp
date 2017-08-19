@@ -31,6 +31,10 @@ namespace kengine
                               [&em] (std::string_view name)
                               { return std::ref(em.getEntity(name)); }
             );
+            _lua.set_function("hasEntity",
+                              [&em] (std::string_view name)
+                              { return em.hasEntity(name); }
+            );
 
             _lua.set_function("getDeltaTime", [this] { return time.getDeltaTime(); });
             _lua.set_function("getFixedDeltaTime", [this] { return time.getFixedDeltaTime(); });
