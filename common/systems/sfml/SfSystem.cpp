@@ -7,6 +7,9 @@
 
 #include "pluginManager/Export.hpp"
 
+#include "common/systems/LuaSystem.hpp"
+#include "common/components/GUIComponent.hpp"
+
 EXPORT kengine::ISystem* getSystem(kengine::EntityManager& em)
 {
     return new kengine::SfSystem(em);
@@ -34,7 +37,30 @@ namespace kengine
               _em(em),
               _engine(_screenSize.x, _screenSize.y, "Kengine",
                       _fullScreen ? sf::Style::Fullscreen : sf::Style::Close)
-    {}
+    {
+        try
+        {
+            auto &lua = em.getSystem<kengine::LuaSystem>().getState();
+            lua["setKeyHandler"] =
+                    [this](const std::function<void(sf::Keyboard::Key)> &onPress,
+                                const std::function<void(sf::Keyboard::Key)> &onRelease)
+                    {
+                        auto &handler = _keyHandlers[sf::Keyboard::KeyCount];
+                        handler.onPress = onPress;
+                        handler.onRelease = onRelease;
+                    };
+
+            lua["setMouseButtonHandler"] =
+                    [this, &em](const std::function<void(sf::Mouse::Button)> &onPress,
+                                const std::function<void(sf::Mouse::Button)> &onRelease)
+                    {
+                        auto &handler = _mouseButtonHandlers[sf::Mouse::ButtonCount];
+                        handler.onPress = onPress;
+                        handler.onRelease = onRelease;
+                    };
+        }
+        catch (const std::out_of_range &) {}
+    }
 
     /*
      * Config parsers
@@ -60,32 +86,12 @@ namespace kengine
     }
 
     /*
-     * Helper
-     */
-
-    SfComponent& SfSystem::getResource(kengine::GameObject& go)
-    {
-        const auto& meta = go.getComponent<MetaComponent>();
-
-        std::string_view str = _appearances.find(meta.appearance) != _appearances.end()
-                               ? _appearances.at(meta.appearance)
-                               : meta.appearance;
-
-        auto& comp = go.attachComponent<SfComponent>(
-                std::make_unique<pse::Sprite>(str.data(),
-                                              sf::Vector2f{0, 0},
-                                              sf::Vector2f{16, 16})
-        );
-
-        return comp;
-    }
-
-    /*
      * System functions
      */
 
     void SfSystem::execute()
     {
+        // Update positions
         for (auto go : _em.getGameObjects<SfComponent>())
         {
             auto &comp = go->getComponent<SfComponent>();
@@ -103,6 +109,14 @@ namespace kengine
             _engine.setItemHeight(comp.getViewItem(), (std::size_t) pos.z);
         }
 
+        for (const auto go : _em.getGameObjects<kengine::GUIComponent>())
+        {
+            const auto &text = go->getComponent<kengine::GUIComponent>().text;
+            auto &view = static_cast<pse::Text &>(go->getComponent<SfComponent>().getViewItem());
+            view.setString(text);
+        }
+
+        // Event handling
         sf::Event e;
         while (_engine.pollEvent(e))
         {
@@ -157,7 +171,7 @@ namespace kengine
 
     void SfSystem::registerGameObject(kengine::GameObject& go)
     {
-        if (!go.hasComponent<SfComponent>() && !go.hasComponent<MetaComponent>())
+        if (!go.hasComponent<SfComponent>() && !go.hasComponent<MetaComponent>() && !go.hasComponent<kengine::GUIComponent>())
             return;
 
         try
@@ -168,14 +182,16 @@ namespace kengine
             const auto &transform = go.getComponent<kengine::TransformComponent3d>();
 
             const auto &pos = transform.boundingBox.topLeft;
-            v.getViewItem().setPosition({(float) (_tileSize.x * pos.x), (float) (_tileSize.y *
-                                                                                 pos.y)});
+            v.getViewItem().setPosition(
+                    { (float) (_tileSize.x * pos.x), (float) (_tileSize.y * pos.y) }
+            );
 
             if (!v.isFixedSize())
             {
                 const auto &size = transform.boundingBox.size;
-                v.getViewItem().setSize({(float) (_tileSize.x * size.x), (float) (_tileSize.y *
-                                                                                  size.y)});
+                v.getViewItem().setSize(
+                        { (float) (_tileSize.x * size.x), (float) (_tileSize.y * size.y) }
+                );
             }
 
             _engine.addItem(v.getViewItem(), (std::size_t) pos.z);
@@ -183,8 +199,7 @@ namespace kengine
         catch (const std::exception &e)
         {
             send(kengine::packets::Log{
-                    putils::concat("[SfSystem] Unknown appearance: ",
-                                   go.getComponent<MetaComponent>().appearance)
+                    putils::concat("[SfSystem] Unknown appearance: ", go.getComponent<MetaComponent>().appearance)
             });
         }
     }
@@ -238,4 +253,35 @@ namespace kengine
         const auto pos = sf::Mouse::getPosition();
         sendTo(packets::MousePosition::Response { { pos.x, pos.y } }, *p.sender);
     }
+
+    /*
+     * Helper
+     */
+
+    SfComponent& SfSystem::getResource(kengine::GameObject& go)
+    {
+        if (go.hasComponent<GUIComponent>())
+        {
+            const auto &gui = go.getComponent<GUIComponent>();
+            auto &comp = go.attachComponent<SfComponent>(
+                    gui.text, sf::Vector2f{ 0, 0 }, sf::Color::White, gui.textSize, gui.font
+            );
+            return comp;
+        }
+
+        const auto& meta = go.getComponent<MetaComponent>();
+
+        std::string_view str = _appearances.find(meta.appearance) != _appearances.end()
+                               ? _appearances.at(meta.appearance)
+                               : meta.appearance;
+
+        auto& comp = go.attachComponent<SfComponent>(
+                std::make_unique<pse::Sprite>(str.data(),
+                                              sf::Vector2f{0, 0},
+                                              sf::Vector2f{16, 16})
+        );
+
+        return comp;
+    }
 }
+
