@@ -6,6 +6,8 @@
 
 ### Using SfSystem
 
+##### 'Normal' objects
+
 `SfSystem` reads the resource file to be used for a `GameObject` from its [MetaComponent](../../components/MetaComponent.md)'s `appearance` property.
 
 If `appearance` was previously registered as an abstract appearance through a [RegisterAppearance](../../packets/RegisterAppearance.hpp) datapacket, the resource file that was associated to it is loaded instead.
@@ -15,6 +17,19 @@ If `appearance` was previously registered as an abstract appearance through a [R
 ```
 /!\ That 3d is important! TransformComponent2d, 2i, 3i, 3f... Will not be detected!
 ```
+
+##### GUI
+
+If a `GameObject` is found to have a [GUIComponent](../../components/GUIComponent.md), it will be rendered as using the information held in that `GUIComponent`.
+
+##### Input
+
+User input handlers can be registered through the [Input](../../packets/Input.hpp) datapackets.
+
+If a [kengine::LuaSystem](../../systems/LuaSystem.md) is found when the `SfSystem` is constructed, the following lua functions are registered:
+
+* `setKeyHandler(std::function<void(Sf::Keyboard::Key)> onPress, std::function<void(sf::Keyboard::Key)> onRelease)`: sets the key handler for all keys
+* `setMouseButtonHandler(std::function<void(Sf::Mouse::Button)> onPress, std::function<void(sf::Mouse::Button)> onRelease)`: sets the button handler for all keys
 
 ### Configuration
 

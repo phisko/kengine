@@ -109,11 +109,12 @@ namespace kengine
             _engine.setItemHeight(comp.getViewItem(), (std::size_t) pos.z);
         }
 
+        // GUI elements
         for (const auto go : _em.getGameObjects<kengine::GUIComponent>())
         {
-            const auto &text = go->getComponent<kengine::GUIComponent>().text;
+            const auto &gui = go->getComponent<kengine::GUIComponent>();
             auto &view = static_cast<pse::Text &>(go->getComponent<SfComponent>().getViewItem());
-            view.setString(text);
+            view.setString(gui.text);
         }
 
         // Event handling
