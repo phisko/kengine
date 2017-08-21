@@ -143,8 +143,14 @@ transform.boundingBox.topLeft.x = 42
 print(new)
 
 -- iterate over all entities
-for i, e in pairs(getGameObjects()) do
+for i, e in ipairs(getGameObjects()) do
     print(e)
+end
+
+-- iterate over specific entities
+for i, e in ipairs(getGameObjectsWithMetaComponent()) do
+    local comp = e:getTransformComponent()
+    print(comp)
 end
 
 -- remove an Entity
