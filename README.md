@@ -35,6 +35,7 @@ These are pre-built, extensible and pluggable elements that can be used in any p
 * [LogSystem](common/systems/LogSystem.md): logs messages
 * [LuaSystem](common/systems/LuaSystem.md): executes scripts, either global or attached to an entity
 * [SfSystem](common/systems/sfml/SfSystem.md): displays entities in an SFML render window
+* [OgreSystem](common/systems/ogre/OgreSystem.md): displays entities in an OGRE render window. OGRE must be installed separately.
 
 ##### DataPackets
 

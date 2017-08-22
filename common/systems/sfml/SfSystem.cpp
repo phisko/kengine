@@ -58,6 +58,10 @@ namespace kengine
                         handler.onPress = onPress;
                         handler.onRelease = onRelease;
                     };
+
+            lua["setMouseMovedHandler"] =
+                    [this, &em](const std::function<void(int x, int y)> &func)
+                    { _mouseMovedHandler = [func](const putils::Point2i &p) { func(p.x, p.y); }; };
         }
         catch (const std::out_of_range &) {}
     }

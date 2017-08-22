@@ -1,7 +1,6 @@
 #pragma once
 
 #include "GameObject.hpp"
-#include "common/systems/sfml/SfComponent.hpp"
 #include "common/components/TransformComponent.hpp"
 #include "common/components/GUIComponent.hpp"
 

@@ -22,6 +22,7 @@ namespace kengine
 
         const std::string type = pmeta_nameof(TransformComponent);
         putils::Rect<Precision, Dimensions> boundingBox;
+        Precision pitch = 0; // Radians
         Precision yaw = 0; // Radians
 
         /*
@@ -36,6 +37,7 @@ namespace kengine
             static const auto table = pmeta::make_table(
                     pmeta_reflectible_attribute(&TransformComponent::type),
                     pmeta_reflectible_attribute(&TransformComponent::boundingBox),
+                    pmeta_reflectible_attribute(&TransformComponent::pitch),
                     pmeta_reflectible_attribute(&TransformComponent::yaw)
             );
             return table;

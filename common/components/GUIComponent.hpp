@@ -15,7 +15,7 @@ namespace kengine
 
         const std::string type = pmeta_nameof(GUIComponent);
         std::string text;
-        std::size_t textSize;
+        double textSize;
         std::string font;
 
         /*

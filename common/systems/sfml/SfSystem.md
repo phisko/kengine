@@ -2,7 +2,7 @@
 
 `System` that displays entities in an SFML window.
 
-`SfSystem` is the only sample provided as a plugin. If the `KENGINE_SFML` option is set to `TRUE` in the project's `CMakeLists.txt`, the `SfSystem` will be automatically built into a shared library, in the `CMAKE_LIBRARY_OUTPUT_DIRECTORY`. Client code must then load the plugin (with [loadSystems](../../../SystemManager.md) for instance) at runtime.
+`SfSystem` is provided as a plugin. If the `KENGINE_SFML` option is set to `TRUE` in the project's `CMakeLists.txt`, the `SfSystem` will be automatically built into a shared library, in the `CMAKE_LIBRARY_OUTPUT_DIRECTORY`. Client code must then load the plugin (with [loadSystems](../../../SystemManager.md) for instance) at runtime.
 
 ### Using SfSystem
 
@@ -20,7 +20,7 @@ If `appearance` was previously registered as an abstract appearance through a [R
 
 ##### GUI
 
-If a `GameObject` is found to have a [GUIComponent](../../components/GUIComponent.md), it will be rendered as using the information held in that `GUIComponent`.
+If a `GameObject` is found to have a [GUIComponent](../../components/GUIComponent.md), it will be rendered as text using the information held in that `GUIComponent`.
 
 ##### Input
 
@@ -30,6 +30,7 @@ If a [kengine::LuaSystem](../../systems/LuaSystem.md) is found when the `SfSyste
 
 * `setKeyHandler(std::function<void(Sf::Keyboard::Key)> onPress, std::function<void(sf::Keyboard::Key)> onRelease)`: sets the key handler for all keys
 * `setMouseButtonHandler(std::function<void(Sf::Mouse::Button)> onPress, std::function<void(sf::Mouse::Button)> onRelease)`: sets the button handler for all keys
+* `setMouseMovedHandler(std::function<void(int x, int y)> func)`: sets the mouse move handler
 
 ### Configuration
 
