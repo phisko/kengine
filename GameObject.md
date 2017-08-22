@@ -1,4 +1,4 @@
-# GameObject
+# [GameObject](GameObject.hpp)
 
 Represents an in-game entity. `GameObjects` do not hold any data themselves, but instead contain [Components](Component.md).
 
