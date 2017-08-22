@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Component.hpp"
-#include "pogre/Text.hpp"
 #include "pogre/MovableText.hpp"
 
 class OgreTextComponent : public kengine::Component<OgreTextComponent>
