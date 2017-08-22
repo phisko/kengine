@@ -14,6 +14,8 @@ git clone --recursive git@github.com:phiste/kengine
 
 Alternatively, if using this resository as a submodule of your own project, make sure to init, sync and update your submodules in order to make sure the "putils" folder isn't empty.
 
+The engine requires a **C++17** compiler.
+
 ### Classes
 
 * [Component](Component.md): contains information about a certain property of an entity (for instance, a `TransformComponent` might hold an entity's position and size)
@@ -45,6 +47,10 @@ These are pre-built, extensible and pluggable elements that can be used in any p
 * [RegisterAppearance](common/packets/RegisterAppearance.hpp): received by the `SfSystem`, maps an abstract appearance to a concrete texture file.
 
 These are datapackets sent from one `System` to another to communicate.
+
+### Usage
+
+For a quick start, look at [this](https://github.com/phiste/flappy_koala) example project, or any of the examples below.
 
 ### Example
 
