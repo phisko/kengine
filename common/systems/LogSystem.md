@@ -1,4 +1,4 @@
-# LogSystem
+# [LogSystem](LogSystem.hpp)
 
 `System` that receive [kengine::packets::Log](../packets/Log.hpp) packets and simply prints them to the standard output.
 

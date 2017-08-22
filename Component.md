@@ -1,4 +1,4 @@
-# Component
+# [Component](Component.hpp)
 
 Holds information about a certain property of a [GameObject](GameObject.md).
 

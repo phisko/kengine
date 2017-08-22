@@ -2,6 +2,8 @@
 
 The Koala engine is a type-safe and self-documenting implementation of an Entity-Component-System (ECS), with a focus on runtime extensibility and compile-time type safety and clarity.
 
+![koala](koala.png)
+
 ## Installation
 
 The project uses git submodules extensively, and must therefore be cloned recursively.
@@ -46,7 +48,7 @@ These are datapackets sent from one `System` to another to communicate.
 
 ### Example
 
-A simple, half-a-day implementation of a Flappy Bird clone is availble [here](https://github.com/phiste/flappy_koala).
+A simple, half-a-day implementation of a Flappy Bird clone is available [here](https://github.com/phiste/flappy_koala).
 
 A more advanced, work-in-progress POC game using the engine with 3D graphics is available [here](https://github.com/phiste/hackemup).
 
@@ -144,8 +146,14 @@ transform.boundingBox.topLeft.x = 42
 print(new)
 
 -- iterate over all entities
-for i, e in pairs(getGameObjects()) do
+for i, e in ipairs(getGameObjects()) do
     print(e)
+end
+
+-- iterate over specific entities
+for i, e in ipairs(getGameObjectsWithMetaComponent()) do
+    local comp = e:getTransformComponent()
+    print(comp)
 end
 
 -- remove an Entity

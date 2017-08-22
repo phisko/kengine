@@ -1,4 +1,4 @@
-# LuaSystem
+# [LuaSystem](LuaSystem.hpp)
 
 `System` that executes lua scripts, either at a global scale or attached to a `GameObject` through a [LuaComponent](../components/LuaComponent.md).
 

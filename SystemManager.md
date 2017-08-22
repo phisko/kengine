@@ -1,4 +1,4 @@
-# SystemManager
+# [SystemManager](SystemManager.hpp)
 
 Manages `Systems`, and serves as a `Mediator` for them.
 

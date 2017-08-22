@@ -1,4 +1,4 @@
-# SfSystem
+# [SfSystem](SfSystem.hpp)
 
 `System` that displays entities in an SFML window.
 

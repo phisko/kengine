@@ -1,4 +1,4 @@
-# ComponentManager
+# [ComponentManager](ComponentManager.hpp)
 
 Manages `Components` and their relationships to `GameObjects`.
 

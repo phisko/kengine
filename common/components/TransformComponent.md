@@ -1,4 +1,4 @@
-# TransformComponent
+# [TransformComponent](TransformComponent.hpp)
 
 `Component` providing a `GameObject`'s position and size. Template parameters are the type used for the coordinates (`Precision`) and the number of `Dimensions` (2 or 3).
 

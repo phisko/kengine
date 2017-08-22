@@ -1,4 +1,4 @@
-# EntityManager
+# [EntityManager](EntityManager.hpp)
 
 Manages [GameObjects](GameObject.md), [Components](Component.md) and [Systems](System.md).
 

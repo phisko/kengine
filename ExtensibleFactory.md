@@ -1,4 +1,4 @@
-# ExtensibleFactory
+# [ExtensibleFactory](EntityFactory.hpp)
 
 A default implementation for `EntityFactory`, which lets users register their types at runtime.
 

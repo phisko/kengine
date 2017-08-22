@@ -1,4 +1,4 @@
-# LuaComponent
+# [LuaComponent](LuaComponent.hpp)
 
 `Component` that specifies the list of lua scripts to be run for the `GameObject` it is attached to.
 

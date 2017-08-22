@@ -1,4 +1,4 @@
-# MetaComponent
+# [MetaComponent](MetaComponent.hpp)
 
 `Component` providing metadata about a `GameObject`, such as its appearance.
 
