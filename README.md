@@ -45,7 +45,7 @@ These are datapackets sent from one `System` to another to communicate.
 
 ### Example
 
-A simple, half-a-day implementation of a Flappy Bird clone is availble [here](https://github.com/phiste/flappy_koala).
+A simple, half-a-day implementation of a Flappy Bird clone is available [here](https://github.com/phiste/flappy_koala).
 
 A more advanced, work-in-progress POC game using the engine with 3D graphics is available [here](https://github.com/phiste/hackemup).
 
