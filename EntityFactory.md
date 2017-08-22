@@ -1,4 +1,4 @@
-# EntityFactory
+# [EntityFactory](EntityFactory.hpp)
 
 Used to create `GameObjects` by providing their type as a string instead of a template parameter. This can be useful when the type of entity to create is known only at runtime.
 
