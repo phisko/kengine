@@ -126,7 +126,7 @@ namespace kengine
                 try
                 {
                     auto &s = getSystem<RegisterWith>();
-                    s.registerTypes<Types...>();
+                    s.template registerTypes<Types...>();
                 }
                 catch (const std::out_of_range &) {}
             }
