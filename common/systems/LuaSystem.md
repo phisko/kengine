@@ -17,7 +17,7 @@ The [GameObject](../../GameObject.md) type is also registered.
 
 ##### registerType
 
-```
+```cpp
 template<typename T>
 void registerType() noexcept;
 ```
@@ -38,7 +38,7 @@ This allows lua scripts to perform any operation on `GameObjects` if the necessa
 
 ##### registerTypes
 
-```
+```cpp
 template<typename ...Types>
 void registerTypes() noexcept;
 ```
@@ -47,7 +47,7 @@ For each type in `Types`, call `registerType` for it.
 
 ##### addScriptDirectory
 
-```
+```cpp
 void addScriptDirectory(std::string_view dir) noexcept;
 ```
 Adds `dir` as one of the directories in which to execute lua scripts. Each frame, all the files in `dir` will be interpreted as lua scripts and executed.
