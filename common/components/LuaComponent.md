@@ -10,31 +10,31 @@ In all the following functions, a `script` is the path to a file containing a sc
 
 ##### Constructor
 
-```
+```cpp
 LuaComponent(const std::vector<std::string> &scripts = {});
 ```
 
 ##### attachScript
 
-```
+```cpp
 void attachScript(std::string_view file) noexcept;
 ```
 
 ##### removeScript
 
-```
+```cpp
 void removeScript(std::string_view file) noexcept;
 ```
 
 ##### getScripts
 
-```
+```cpp
 const std::vector<std::string> &getScripts() const noexcept;
 ```
 
 ##### meta
 
-```
+```cpp
 sol::object meta;
 ```
 
