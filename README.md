@@ -67,7 +67,7 @@ Below is a commented main function that creates an entity and attaches some comp
 
 ##### main.cpp
 
-```
+```cpp
 #include <iostream>
 
 #include "go_to_bin_dir.hpp"
@@ -134,7 +134,7 @@ int main(int, char **av)
 
 ##### scripts/test.lua
 
-```
+```lua
 -- send a datapacket from Lua
 local log = Log.new()
 log.msg = "Log from lua"
@@ -173,7 +173,7 @@ removeEntity(new)
 
 ##### scripts/unit/unit.lua
 
-```
+```lua
 -- huhuhu, modifying components test
 
 local pos = self:getTransformComponent().boundingBox.topLeft

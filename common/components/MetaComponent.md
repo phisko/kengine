@@ -8,6 +8,6 @@ Inherits from [putils::Reflectible](https://github.com/phiste/putils/blob/master
 
 ##### appearance
 
-```
+```cpp
 std::string appearance;
 ```

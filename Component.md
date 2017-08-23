@@ -12,7 +12,7 @@ Holds information about a certain property of a [GameObject](GameObject.md).
 
 ##### Definition
 
-```
+```cpp
 template<typename CRTP, typename ...DataPackets>
 class Component;
 ```
@@ -23,7 +23,7 @@ A `Component` is defined by its sub-type (see `CRTP`) and the list of `DataPacke
 
 ##### toString
 
-```
+```cpp
 virtual std::string toString() const = 0;
 
 friend std::ostream &operator<<(std::ostream &s, const kengine::IComponent &obj)
