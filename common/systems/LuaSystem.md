@@ -12,6 +12,11 @@ The constructor automatically defines the following functions for lua scripts:
 * `createEntity(string type, string name)`
 * `removeEntity(GameObject go)`
 * `getEntity(string name)`
+* `hasEntity(string name)`
+* `getDeltaTime()`
+* `getFixedDeltaTime()`
+* `getDeltaFrames()`
+* `stopRunning()`
 
 The [GameObject](../../GameObject.md) type is also registered.
 
@@ -31,6 +36,8 @@ This also defines the following function for lua scripts:
 If `T` is a `Component`, the following member functions is added to the `GameObject` lua type for lua scripts:
 * `getT()` (e.g. `getMetaComponent()`)
 * `hasT()` (e.g. `hasMetaComponent()`)
+* `attachT()` (e.g. `attachMetaComponent()`)
+* `detachT()` (e.g. `detachMetaComponent()`)
 
 A global `getGameObjectsWithT()` is also defined, that returns all the `GameObjects` with a `T` component.
 
