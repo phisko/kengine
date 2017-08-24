@@ -15,10 +15,7 @@ namespace kengine
     public:
         LuaSystem(kengine::EntityManager &em) : _em(em)
         {
-            try
-            {
-                addScriptDirectory("scripts");
-            }
+            try { addScriptDirectory("scripts"); }
             catch (const std::runtime_error &e) {}
 
             _lua.open_libraries();
@@ -30,8 +27,8 @@ namespace kengine
                               { return std::ref(em.createEntity(type, name, f)); }
             );
             _lua.set_function("removeEntity",
-                              [&em] (kengine::GameObject &go)
-                              { em.removeEntity(go); }
+                              [&em] (const std::string &name)
+                              { em.removeEntity(name); }
             );
             _lua.set_function("getEntity",
                               [&em] (std::string_view name)
@@ -107,7 +104,7 @@ namespace kengine
         void registerComponent() noexcept
         {
             _lua[putils::concat("getGameObjectsWith", T::get_class_name())] =
-                    [this] { return _em.getGameObjects<T>(); };
+                    [this] { return std::ref(_em.getGameObjects<T>()); };
 
             _lua[kengine::GameObject::get_class_name()][putils::concat("get", T::get_class_name())] =
                     [](kengine::GameObject &self) { return std::ref(self.getComponent<T>()); };
@@ -153,20 +150,45 @@ namespace kengine
 
         void executeScriptedObjects() noexcept
         {
+            struct Create
+            {
+                std::string type;
+                std::string name;
+                std::function<void(kengine::GameObject &)> postCreate;
+            };
+
+            std::vector<Create> toCreate;
+            _lua["createEntity"] =
+                    [&toCreate] (const std::string &type, const std::string &name, const sol::function &f)
+                    { toCreate.push_back({ type, name, f }); };
+
+            std::vector<std::string> toRemove;
+            _lua["removeEntity"] =
+                    [&toRemove](const std::string &name) { toRemove.push_back(name); };
+
             for (const auto go : _em.getGameObjects<kengine::LuaComponent>())
             {
                 const auto &comp = go->getComponent<kengine::LuaComponent>();
                 for (const auto &s : comp.getScripts())
                 {
-                    auto tmp = _lua["getGameObjects"];
                     _lua["self"] = go;
-
                     executeScript(s);
-
                     _lua["self"] = sol::nil;
-                    _lua["getGameObjects"] = tmp;
                 }
             }
+
+            for (const auto &name : toRemove)
+                _em.removeEntity(name);
+
+            for (const auto &params : toCreate)
+                _em.createEntity(params.type, params.name, params.postCreate);
+
+            _lua["createEntity"] =
+                    [this] (const std::string &type, const std::string &name, const sol::function &f)
+                    { return std::ref(_em.createEntity(type, name, f)); };
+            _lua["removeEntity"] =
+                    [this] (const std::string &name)
+                    { _em.removeEntity(name); };
         }
 
         void executeScript(std::string_view fileName) noexcept
