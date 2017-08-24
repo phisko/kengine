@@ -114,7 +114,7 @@ int main(int, char **av)
     try
     {
         auto &lua = em.getSystem<kengine::LuaSystem>();
-        lua.addScriptDirectory("scripts");
+        lua.addScriptDirectory("scripts"); // The LuaSystem automatically opens the "scripts" directory, this is just an example
         lua.registerTypes<
                 kengine::MetaComponent,
                 kengine::TransformComponent3d, putils::Point<double, 3>, putils::Rect<double, 3>,
