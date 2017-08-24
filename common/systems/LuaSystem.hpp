@@ -80,7 +80,7 @@ namespace kengine
         const sol::state &getState() const { return _lua; }
 
     public:
-        void addScriptDirectory(std::string_view dir) noexcept
+        void addScriptDirectory(std::string_view dir)
         {
             try
             {
