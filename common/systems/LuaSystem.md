@@ -20,6 +20,8 @@ The constructor automatically defines the following functions for lua scripts:
 
 The [GameObject](../../GameObject.md) type is also registered.
 
+If a *"scripts"* directory is found, `addScriptDirectory("scripts")` is called.
+
 ##### registerType
 
 ```cpp
