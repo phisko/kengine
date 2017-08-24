@@ -15,7 +15,7 @@ namespace kengine
         };
 
     public:
-        void detachComponent(GameObject &go, const IComponent &comp) const
+        void detachComponent(GameObject &go, const IComponent &comp) const noexcept
         {
             go.detachComponent(comp);
         }
@@ -25,17 +25,17 @@ namespace kengine
 
     public:
         template<typename T>
-        const std::vector<GameObject *> &getGameObjects()
+        const std::vector<GameObject *> &getGameObjects() noexcept
         {
             static_assert(kengine::is_component<T>::value,
                           "getGameObjects called without component type");
             return _entitiesByType[pmeta::type<T>::index];
         }
 
-        const std::vector<GameObject *> &getGameObjects() const { return _allEntities; }
+        const std::vector<GameObject *> &getGameObjects() const noexcept { return _allEntities; }
 
     protected:
-        void registerGameObject(GameObject &go)
+        void registerGameObject(GameObject &go) noexcept
         {
             go.setManager(this);
             for (auto & [type, comp] : go._components)
@@ -43,7 +43,7 @@ namespace kengine
             _allEntities.push_back(&go);
         }
 
-        void removeGameObject(const GameObject &go)
+        void removeGameObject(const GameObject &go) noexcept
         {
             for (auto & [type, comp] : go._components)
                 removeComponent(go, *comp);
@@ -54,13 +54,13 @@ namespace kengine
     private:
         friend class GameObject;
 
-        void registerComponent(GameObject &parent, const IComponent &comp)
+        void registerComponent(GameObject &parent, const IComponent &comp) noexcept
         {
             _compHierarchy.emplace(&comp, &parent);
             _entitiesByType[comp.getType()].push_back(&parent);
         }
 
-        void removeComponent(const GameObject &go, const IComponent &comp)
+        void removeComponent(const GameObject &go, const IComponent &comp) noexcept
         {
             _compHierarchy.erase(&comp);
 
