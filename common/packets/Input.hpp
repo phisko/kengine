@@ -26,8 +26,8 @@ namespace kengine
         struct RegisterMouseButtonHandler
         {
             sf::Mouse::Button button;
-            std::function<void(sf::Mouse::Button)> onPress;
-            std::function<void(sf::Mouse::Button)> onRelease;
+            std::function<void(sf::Mouse::Button, int x, int y)> onPress;
+            std::function<void(sf::Mouse::Button, int x, int y)> onRelease;
         };
 
         namespace KeyStatus

@@ -41,6 +41,17 @@ namespace kengine
         try
         {
             auto &lua = em.getSystem<kengine::LuaSystem>().getState();
+
+            lua["getWindowSize"] =
+                    [this]
+                    {
+                        const auto size = _engine.getRenderWindow().getSize();
+                        return putils::Point3d{ (double)size.x, (double)size.y };
+                    };
+
+            lua["getTileSize"] =
+                    [this] { return putils::Point3d{ (double)_tileSize.x, (double)_tileSize.y }; };
+
             lua["setKeyHandler"] =
                     [this](const std::function<void(sf::Keyboard::Key)> &onPress,
                                 const std::function<void(sf::Keyboard::Key)> &onRelease)
@@ -51,8 +62,8 @@ namespace kengine
                     };
 
             lua["setMouseButtonHandler"] =
-                    [this, &em](const std::function<void(sf::Mouse::Button)> &onPress,
-                                const std::function<void(sf::Mouse::Button)> &onRelease)
+                    [this, &em](const std::function<void(sf::Mouse::Button, int x, int y)> &onPress,
+                                const std::function<void(sf::Mouse::Button, int x, int y)> &onRelease)
                     {
                         auto &handler = _mouseButtonHandlers[sf::Mouse::ButtonCount];
                         handler.onPress = onPress;
@@ -153,21 +164,21 @@ namespace kengine
             {
                 const auto it = _mouseButtonHandlers.find(e.mouseButton.button);
                 if (it != _mouseButtonHandlers.end())
-                    it->second.onPress(e.mouseButton.button);
+                    it->second.onPress(e.mouseButton.button, e.mouseButton.x, e.mouseButton.y);
 
                 const auto it2 = _mouseButtonHandlers.find(sf::Mouse::ButtonCount);
                 if (it2 != _mouseButtonHandlers.end())
-                    it2->second.onPress(e.mouseButton.button);
+                    it2->second.onPress(e.mouseButton.button, e.mouseButton.x, e.mouseButton.y);
             }
             else if (e.type == sf::Event::MouseButtonReleased)
             {
                 const auto it = _mouseButtonHandlers.find(e.mouseButton.button);
                 if (it != _mouseButtonHandlers.end())
-                    it->second.onRelease(e.mouseButton.button);
+                    it->second.onRelease(e.mouseButton.button, e.mouseButton.x, e.mouseButton.y);
 
                 const auto it2 = _mouseButtonHandlers.find(sf::Mouse::ButtonCount);
                 if (it2 != _mouseButtonHandlers.end())
-                    it2->second.onRelease(e.mouseButton.button);
+                    it2->second.onRelease(e.mouseButton.button, e.mouseButton.x, e.mouseButton.y);
             }
         }
 
