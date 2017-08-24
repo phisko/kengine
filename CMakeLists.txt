@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 project(kengine)
+set(CMAKE_CXX_STANDARD 17)
 
 if(KENGINE_SFML)
     set(PUTILS_BUILD_PSE TRUE)
