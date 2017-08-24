@@ -15,6 +15,12 @@ namespace kengine
     public:
         LuaSystem(kengine::EntityManager &em) : _em(em)
         {
+            try
+            {
+                addScriptDirectory("scripts");
+            }
+            catch (const std::runtime_error &e) {}
+
             _lua.open_libraries();
 
             _lua.set_function("getGameObjects", [&em] { return std::ref(em.getGameObjects()); });
@@ -76,7 +82,15 @@ namespace kengine
     public:
         void addScriptDirectory(std::string_view dir) noexcept
         {
-            _directories.push_back(dir.data());
+            try
+            {
+                putils::Directory d(dir);
+                _directories.push_back(dir.data());
+            }
+            catch (const std::runtime_error &e)
+            {
+                std::cerr << e.what() << std::endl;
+            }
         }
 
         // System methods
@@ -118,15 +132,22 @@ namespace kengine
         {
             for (const auto &dir : _directories)
             {
-                putils::Directory d(dir);
+                try
+                {
+                    putils::Directory d(dir);
 
-                d.for_each(
-                        [this](const putils::Directory::File &f)
-                        {
-                            if (!f.isDirectory)
-                                executeScript(f.fullPath);
-                        }
-                );
+                    d.for_each(
+                            [this](const putils::Directory::File &f)
+                            {
+                                if (!f.isDirectory)
+                                    executeScript(f.fullPath);
+                            }
+                    );
+                }
+                catch (const std::runtime_error &e)
+                {
+                    std::cerr << e.what() << std::endl;
+                }
             }
         }
 
