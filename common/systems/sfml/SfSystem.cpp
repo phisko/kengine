@@ -137,7 +137,11 @@ namespace kengine
         while (_engine.pollEvent(e))
         {
             if (e.type == sf::Event::Closed)
+            {
                 getMediator()->running = false;
+                _engine.getRenderWindow().close();
+                return;
+            }
             else if (e.type == sf::Event::KeyPressed)
             {
                 const auto it = _keyHandlers.find(e.key.code);
