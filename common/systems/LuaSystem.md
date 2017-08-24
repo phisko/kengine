@@ -26,6 +26,8 @@ Scripts attached to `GameObjects` can use the `self` global variable to access t
 /!\ Calling `createEntity` or `removeEntity` from a script attached to a `GameObject` will result in the entity being created or remove **only at the end of the current frame**. This is necessary to avoid memory corruption errors, as the newly created entities could invalidate iterators in the collection of entities being currently iterated on by the [LuaSystem](../systems/LuaSystem.md).
 ```
 
+If a *"scripts"* directory is found, `addScriptDirectory("scripts")` is called.
+
 ##### registerType
 
 ```cpp
