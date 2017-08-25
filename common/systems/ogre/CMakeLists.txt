@@ -8,4 +8,4 @@ add_library(${name}
         ${src}
         )
 target_include_directories(${name} PRIVATE .)
-target_link_libraries(${name} kengine pogre)
+target_link_libraries(${name} kengine pogre lua)
