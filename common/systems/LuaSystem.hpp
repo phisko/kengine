@@ -157,14 +157,18 @@ namespace kengine
                 std::function<void(kengine::GameObject &)> postCreate;
             };
 
-            std::vector<Create> toCreate;
+            std::vector<std::function<void()>> toExecute;
             _lua["createEntity"] =
-                    [&toCreate] (const std::string &type, const std::string &name, const sol::function &f)
-                    { toCreate.push_back({ type, name, f }); };
+                    [this, &toExecute] (const std::string &type, const std::string &name, const sol::function &f)
+                    {
+                        toExecute.push_back([this, type, name, f]{ _em.createEntity(type, name, f); });
+                    };
 
-            std::vector<std::string> toRemove;
             _lua["removeEntity"] =
-                    [&toRemove](const std::string &name) { toRemove.push_back(name); };
+                    [this, &toExecute](const std::string &name)
+                    {
+                        toExecute.push_back([this, name]{ _em.removeEntity(name); });
+                    };
 
             for (const auto go : _em.getGameObjects<kengine::LuaComponent>())
             {
@@ -177,11 +181,8 @@ namespace kengine
                 }
             }
 
-            for (const auto &name : toRemove)
-                _em.removeEntity(name);
-
-            for (const auto &params : toCreate)
-                _em.createEntity(params.type, params.name, params.postCreate);
+            for (const auto &f : toExecute)
+                f();
 
             _lua["createEntity"] =
                     [this] (const std::string &type, const std::string &name, const sol::function &f)
