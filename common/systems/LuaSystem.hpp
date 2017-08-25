@@ -158,6 +158,7 @@ namespace kengine
             };
 
             std::vector<std::function<void()>> toExecute;
+            std::vector<std::string> toRemove;
             _lua["createEntity"] =
                     [this, &toExecute] (const std::string &type, const std::string &name, const sol::function &f)
                     {
@@ -165,9 +166,17 @@ namespace kengine
                     };
 
             _lua["removeEntity"] =
-                    [this, &toExecute](const std::string &name)
+                    [this, &toExecute, &toRemove](const std::string &name)
                     {
                         toExecute.push_back([this, name]{ _em.removeEntity(name); });
+                        toRemove.push_back(name);
+                    };
+
+            _lua["hasEntity"] =
+                    [this, &toExecute, &toRemove](const std::string &name)
+                    {
+                        return _em.hasEntity(name) &&
+                                std::find(toRemove.begin(), toRemove.end(), name) == toRemove.end();
                     };
 
             for (const auto go : _em.getGameObjects<kengine::LuaComponent>())
@@ -177,9 +186,9 @@ namespace kengine
                 {
                     _lua["self"] = go;
                     executeScript(s);
-                    _lua["self"] = sol::nil;
                 }
             }
+            _lua["self"] = sol::nil;
 
             for (const auto &f : toExecute)
                 f();
@@ -190,6 +199,9 @@ namespace kengine
             _lua["removeEntity"] =
                     [this] (const std::string &name)
                     { _em.removeEntity(name); };
+            _lua["hasEntity"] =
+                    [this, &toExecute](const std::string &name)
+                    { return _em.hasEntity(name); };
         }
 
         void executeScript(std::string_view fileName) noexcept
