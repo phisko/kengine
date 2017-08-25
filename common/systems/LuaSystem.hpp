@@ -2,7 +2,7 @@
 
 #include "System.hpp"
 
-#include "lua/lua.hpp"
+#include "lua/plua.hpp"
 #include "reflection/Reflectible.hpp"
 
 #include "EntityManager.hpp"
