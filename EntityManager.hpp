@@ -41,7 +41,7 @@ namespace kengine
                 _ids.emplace(type, 0);
                 return createEntity(type, putils::concat(type, 0), postCreate);
             }
-            return createEntity(type, putils::concat(type, it->second++), postCreate);
+            return createEntity(type, putils::concat(type, ++it->second), postCreate);
         }
 
         template<class GO, typename ...Params>
@@ -72,7 +72,7 @@ namespace kengine
                 _ids.emplace(type, 0);
                 return createEntity<GO>(putils::concat(type, 0), postCreate, FWD(params)...);
             }
-            return createEntity<GO>(putils::concat(type, it->second++), postCreate, FWD(params)...);
+            return createEntity<GO>(putils::concat(type, ++it->second), postCreate, FWD(params)...);
         }
 
     private:

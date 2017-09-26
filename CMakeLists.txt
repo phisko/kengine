@@ -33,3 +33,13 @@ endif()
 if(KENGINE_OGRE)
     add_subdirectory(common/systems/ogre)
 endif()
+
+set(test_name kengine_test)
+file(GLOB testSrc
+        test/*.cpp test/*.hpp
+        test/*/*.cpp test/*/*.hpp
+        putils/test/*.cpp putils/test/*.hpp
+        putils/test/*/*.cpp putils/test/*/*.hpp
+        )
+add_executable(${test_name} ${testSrc})
+target_link_libraries(${test_name} kengine gtest_main)

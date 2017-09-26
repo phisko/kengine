@@ -62,6 +62,21 @@ GameObject &getEntity(std::string_view name);
 bool hasEntity(std::string_view name) const noexcept;
 ```
 
+##### getGameObjects
+
+```cpp
+const std::vector<GameObject> &getGameObjects();
+```
+
+Returns all `GameObjects`.
+
+```cpp
+template<typename T>
+const std::vector<GameObject> &getGameObjects<T>();
+```
+
+Returns all `GameObjects` with a `T` component.
+
 ##### addLink
 
 ```cpp
