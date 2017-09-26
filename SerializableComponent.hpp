@@ -23,5 +23,26 @@ namespace kengine
             this->serialize(s);
             return s.str();
         }
+
+    public:
+        static const auto get_class_name() { return pmeta_nameof(SerializableComponent); }
+
+        static const auto &get_attributes()
+        {
+            static const auto table = pmeta::make_table();
+            return table;
+        }
+
+        static const auto &get_methods()
+        {
+            static const auto table = pmeta::make_table();
+            return table;
+        }
+
+        static const auto &get_parents()
+        {
+            static const auto table = pmeta::make_table();
+            return table;
+        }
     };
 }
