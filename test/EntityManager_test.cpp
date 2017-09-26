@@ -120,3 +120,93 @@ TEST_F(EntityManagerTest, GetParentBad)
     auto &go = em.createEntity<kengine::GameObject>();
     EXPECT_THROW(em.getParent(go), std::out_of_range);
 }
+
+TEST_F(EntityManagerTest, GetSystem)
+{
+    struct S : kengine::System<S> {};
+    em.createSystem<S>();
+    auto &s = em.getSystem<S>();
+}
+
+TEST_F(EntityManagerTest, GetSystemBad)
+{
+    struct S : kengine::System<S> {};
+    EXPECT_THROW(em.getSystem<S>(), std::out_of_range);
+}
+
+TEST_F(EntityManagerTest, Execute)
+{
+    struct S : kengine::System<S>
+    {
+        S(std::string &msg) : msg(msg) {}
+        void execute() final { msg = "Changed"; }
+        std::size_t getFrameRate() const noexcept final { return 0; }
+        std::string &msg;
+    };
+
+    std::string msg;
+    em.createSystem<S>(msg);
+    em.execute();
+    EXPECT_EQ(msg, "Changed");
+}
+
+TEST_F(EntityManagerTest, ExecuteException)
+{
+    struct S : kengine::System<S>
+    {
+        void execute() final { throw std::out_of_range("msg"); }
+        std::size_t getFrameRate() const noexcept final { return 0; }
+    };
+
+    em.createSystem<S>();
+    testing::internal::CaptureStderr();
+    em.execute();
+    EXPECT_EQ(testing::internal::GetCapturedStderr(), "msg\n");
+}
+
+TEST_F(EntityManagerTest, ExecuteTimer)
+{
+    struct S : kengine::System<S>
+    {
+        S(std::string &msg) : msg(msg) {}
+        void execute() final { msg = "Changed"; }
+        std::string &msg;
+    };
+
+    std::string msg;
+    em.createSystem<S>(msg);
+    em.execute();
+    EXPECT_EQ(msg, "");
+    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    em.execute();
+    EXPECT_EQ(msg, "Changed");
+}
+
+TEST_F(EntityManagerTest, RegisterGameObject)
+{
+    struct S : kengine::System<S>
+    {
+        S(std::string &msg) : msg(msg) {}
+        void registerGameObject(kengine::GameObject &go) final { msg = go.getName(); }
+        std::string &msg;
+    };
+    std::string msg;
+    em.createSystem<S>(msg);
+    em.createEntity<kengine::GameObject>("name");
+    EXPECT_EQ(msg, "name");
+}
+
+TEST_F(EntityManagerTest, RemoveGameObject)
+{
+    struct S : kengine::System<S>
+    {
+        S(std::string &msg) : msg(msg) {}
+        void removeGameObject(kengine::GameObject &go) final { msg = go.getName(); }
+        std::string &msg;
+    };
+    std::string msg;
+    em.createSystem<S>(msg);
+    auto &go = em.createEntity<kengine::GameObject>("name");
+    em.removeEntity(go);
+    EXPECT_EQ(msg, "name");
+}
