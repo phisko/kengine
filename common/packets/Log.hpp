@@ -11,7 +11,7 @@ namespace kengine
         {
             std::string msg;
 
-            Log(std::string_view msg) : msg(msg) {}
+            Log(std::string_view msg = "") : msg(msg) {}
 
             /*
              * Reflectible

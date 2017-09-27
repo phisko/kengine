@@ -34,6 +34,8 @@ if(KENGINE_OGRE)
     add_subdirectory(common/systems/ogre)
 endif()
 
+# Test
+
 set(test_name kengine_test)
 file(GLOB testSrc
         test/*.cpp test/*.hpp
