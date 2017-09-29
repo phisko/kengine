@@ -11,13 +11,18 @@ namespace kengine
                                public kengine::SerializableComponent<TransformComponent<Precision, Dimensions>>
     {
     public:
-        TransformComponent(const putils::Point<Precision, 3> &pos = { 0, 0, 0 },
-                           const putils::Point<Precision, 3> &size = { 1, 1, 1 })
+        TransformComponent(const putils::Point<Precision, Dimensions> &pos = { 0, 0 },
+                           const putils::Point<Precision, Dimensions> &size = { 1, 1 })
                 : boundingBox(pos, size)
         {}
 
-        const std::string type = get_class_name();
+        TransformComponent(const putils::Rect<Precision, Dimensions> &rect)
+                : boundingBox(rect)
+        {}
+
+        const std::string type = pmeta_nameof(TransformComponent);
         putils::Rect<Precision, Dimensions> boundingBox;
+        Precision pitch = 0; // Radians
         Precision yaw = 0; // Radians
 
         /*
@@ -25,14 +30,15 @@ namespace kengine
          */
 
     public:
-        static const auto get_class_name() { return "TransformComponent"; }
+        static const auto get_class_name() { return pmeta_nameof(TransformComponent); }
 
         static const auto &get_attributes()
         {
             static const auto table = pmeta::make_table(
-                    "type", &TransformComponent::type,
-                    "boundingBox", &TransformComponent::boundingBox,
-                    "yaw", &TransformComponent::yaw
+                    pmeta_reflectible_attribute(&TransformComponent::type),
+                    pmeta_reflectible_attribute(&TransformComponent::boundingBox),
+                    pmeta_reflectible_attribute(&TransformComponent::pitch),
+                    pmeta_reflectible_attribute(&TransformComponent::yaw)
             );
             return table;
         }

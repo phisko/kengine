@@ -1,6 +1,20 @@
 # Kengine
 
-The Koala engine is a type-safe and self-documenting implementation of an Entity-Component-System (ECS).
+The Koala engine is a type-safe and self-documenting implementation of an Entity-Component-System (ECS), with a focus on runtime extensibility and compile-time type safety and clarity.
+
+![koala](koala.png)
+
+## Installation
+
+The project uses git submodules extensively, and must therefore be cloned recursively.
+
+```
+git clone --recursive git@github.com:phiste/kengine
+```
+
+Alternatively, if using this resository as a submodule of your own project, make sure to init, sync and update your submodules in order to make sure the "putils" folder isn't empty.
+
+The engine requires a **C++17** compiler.
 
 ### Classes
 
@@ -25,6 +39,7 @@ These are pre-built, extensible and pluggable elements that can be used in any p
 * [LogSystem](common/systems/LogSystem.md): logs messages
 * [LuaSystem](common/systems/LuaSystem.md): executes scripts, either global or attached to an entity
 * [SfSystem](common/systems/sfml/SfSystem.md): displays entities in an SFML render window
+* [OgreSystem](common/systems/ogre/OgreSystem.md): displays entities in an OGRE render window. OGRE must be installed separately.
 
 ##### DataPackets
 
@@ -33,11 +48,27 @@ These are pre-built, extensible and pluggable elements that can be used in any p
 
 These are datapackets sent from one `System` to another to communicate.
 
+### Usage
+
+For a quick start, look at [this](https://github.com/phiste/flappy_koala) example project, or any of the examples below.
+
 ### Example
+
+Here is a list of simple, half-a-day implementation of games:
+
+* [Flappy bird clone](https://github.com/phiste/flappy_koala)
+* [Tunnel game, dodging cubes](https://github.com/phiste/koala_tunnel)
+* [Tower defense "game", not much at stake though](https://github.com/phiste/koala_defense)
+
+
+
+A more advanced, work-in-progress POC game using the engine with 3D graphics is available [here](https://github.com/phiste/hackemup).
+
+Below is a commented main function that creates an entity and attaches some components to it, as well as some lua scripts (one of which is attached to the entity, while the other is run as a "system"). These should let you get an idea of what is possible using the kengine's support for reflection and runtime extensibility, as well as the compile-time clarity and type-safety that were the two motivations behind the project.
 
 ##### main.cpp
 
-```
+```cpp
 #include <iostream>
 
 #include "go_to_bin_dir.hpp"
@@ -59,12 +90,12 @@ int main(int, char **av)
     kengine::EntityManager em(std::make_unique<kengine::ExtensibleFactory>());
 
     // Load the specified systems, and any plugin placed in the executable's directory
-    //      If you specify 'PUTILS_BUILD_PSE' as TRUE in your CMakeLists.txt, this will load the SfSystem
+    //      If you specify 'KENGINE_SFML' as TRUE in your CMakeLists.txt, this will load the SfSystem
     em.loadSystems<kengine::LuaSystem, kengine::LogSystem>(".");
 
     // To add a new system, simply add a DLL with a
     //      `ISystem *getSystem(kengine::EntityManager &em)`
-    // function to the "plugins" directory
+    // function to the executable directory
 
 
     // Get the factory and register any desired types
@@ -84,7 +115,7 @@ int main(int, char **av)
     try
     {
         auto &lua = em.getSystem<kengine::LuaSystem>();
-        lua.addScriptDirectory("scripts");
+        lua.addScriptDirectory("scripts"); // The LuaSystem automatically opens the "scripts" directory, this is just an example
         lua.registerTypes<
                 kengine::MetaComponent,
                 kengine::TransformComponent3d, putils::Point<double, 3>, putils::Rect<double, 3>,
@@ -104,14 +135,18 @@ int main(int, char **av)
 
 ##### scripts/test.lua
 
-```
+```lua
 -- send a datapacket from Lua
 local log = Log.new()
 log.msg = "Log from lua"
 sendLog(log)
 
 -- create an entity from Lua
-local new = createEntity("GameObject", "bob")
+local new = createEntity("GameObject", "bob",
+    function (go)
+        print("Created " .. go:getName())
+    end
+)
 
 -- get an entity
 local otherRef = getEntity("bob")
@@ -127,17 +162,23 @@ transform.boundingBox.topLeft.x = 42
 print(new)
 
 -- iterate over all entities
-for i, e in pairs(getGameObjects()) do
+for i, e in ipairs(getGameObjects()) do
     print(e)
 end
 
+-- iterate over specific entities
+for i, e in ipairs(getGameObjectsWithMetaComponent()) do
+    local comp = e:getTransformComponent()
+    print(comp)
+end
+
 -- remove an Entity
-removeEntity(new)
+removeEntity(new:getName())
 ```
 
 ##### scripts/unit/unit.lua
 
-```
+```lua
 -- huhuhu, modifying components test
 
 local pos = self:getTransformComponent().boundingBox.topLeft

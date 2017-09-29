@@ -1,7 +1,3 @@
-//
-// Created by naliwe on 7/14/16.
-//
-
 #pragma once
 
 #include <string_view>
@@ -19,21 +15,14 @@ namespace kengine
     class EntityManager : public SystemManager, public ComponentManager
     {
     public:
-        EntityManager(std::unique_ptr<EntityFactory>&& factory = nullptr)
+        EntityManager(std::unique_ptr<EntityFactory>&& factory = std::make_unique<ExtensibleFactory>())
                 : _factory(std::move(factory))
         {}
 
         ~EntityManager() = default;
 
     public:
-        EntityManager(EntityManager const& o) = delete;
-
-        EntityManager(EntityManager&& o) = delete;
-
-        EntityManager& operator=(EntityManager const& o) = delete;
-
-    public:
-        GameObject& createEntity(std::string_view type, std::string_view name,
+        GameObject &createEntity(std::string_view type, std::string_view name,
                                  const std::function<void(GameObject&)>& postCreate = nullptr)
         {
             auto e = _factory->make(type, name);
@@ -44,10 +33,21 @@ namespace kengine
             return addEntity(name, std::move(e));
         }
 
+        GameObject &createEntity(std::string_view type, const std::function<void(GameObject &)> &postCreate = nullptr)
+        {
+            const auto it = _ids.find(type.data());
+            if (it == _ids.end())
+            {
+                _ids.emplace(type, 0);
+                return createEntity(type, putils::concat(type, 0), postCreate);
+            }
+            return createEntity(type, putils::concat(type, ++it->second), postCreate);
+        }
+
         template<class GO, typename ...Params>
         GO &createEntity(std::string_view name,
                          const std::function<void(GameObject &)> &postCreate = nullptr,
-                         Params &&... params)
+                         Params &&...params)
         {
             static_assert(std::is_base_of<GameObject, GO>::value,
                           "Attempt to create something that's not a GameObject");
@@ -58,6 +58,21 @@ namespace kengine
                 postCreate(static_cast<GameObject&>(*entity));
 
             return static_cast<GO&>(addEntity(name, std::move(entity)));
+        }
+
+        template<typename GO, typename ...Params>
+        GO &createEntity(const std::function<void(GameObject &)> &postCreate = nullptr, Params &&...params)
+        {
+            static_assert(putils::is_reflectible<GO>::value, "createEntity must be given an explicit name if the type parameter is not reflectible.");
+
+            const auto type = GO::get_class_name();
+            const auto it = _ids.find(type);
+            if (it == _ids.end())
+            {
+                _ids.emplace(type, 0);
+                return createEntity<GO>(putils::concat(type, 0), postCreate, FWD(params)...);
+            }
+            return createEntity<GO>(putils::concat(type, ++it->second), postCreate, FWD(params)...);
         }
 
     private:
@@ -124,8 +139,38 @@ namespace kengine
         const T& getFactory() const
         { return static_cast<const T&>(*_factory); }
 
+    public:
+        template<typename RegisterWith, typename ...Types>
+        void registerTypes()
+        {
+            if constexpr (!std::is_same<RegisterWith, nullptr_t>::value)
+            {
+                try
+                {
+                    auto &s = getSystem<RegisterWith>();
+                    s.template registerTypes<Types...>();
+                }
+                catch (const std::out_of_range &) {}
+            }
+
+            try
+            {
+                auto &factory = getFactory<kengine::ExtensibleFactory>();
+                pmeta::tuple_for_each(std::make_tuple(pmeta::type<Types>()...),
+                                      [&factory](auto &&t)
+                                      {
+                                          using Type = pmeta_wrapped(t);
+                                          if constexpr (std::is_base_of<kengine::GameObject, Type>::value)
+                                              factory.registerType<Type>();
+                                      }
+                );
+            }
+            catch (const std::out_of_range &) {}
+        }
+
     private:
         std::unique_ptr<EntityFactory> _factory;
+        std::unordered_map<std::string, std::size_t> _ids;
 
     private:
         std::unordered_map<std::string, std::unique_ptr<GameObject>> _entities;

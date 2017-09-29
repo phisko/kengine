@@ -102,8 +102,8 @@ namespace kengine
         static const auto &get_attributes()
         {
             static const auto table = pmeta::make_table(
-                    "name", &GameObject::_name,
-                    "components", &GameObject::_components
+                    pmeta_reflectible_attribute_private(&GameObject::_name),
+                    pmeta_reflectible_attribute_private(&GameObject::_components)
             );
             return table;
         }
@@ -111,7 +111,7 @@ namespace kengine
         static const auto &get_methods()
         {
             static const auto table = pmeta::make_table(
-                    "getName", &GameObject::getName
+                    pmeta_reflectible_attribute(&GameObject::getName)
             );
             return table;
         }
@@ -119,7 +119,7 @@ namespace kengine
         static const auto &get_parents()
         {
             static const auto table = pmeta::make_table(
-                    "Mediator", pmeta::type<putils::Mediator>()
+                    pmeta_reflectible_parent(putils::Mediator)
             );
             return table;
         }
@@ -164,7 +164,7 @@ CT &kengine::GameObject::attachComponent(std::unique_ptr<CT> &&comp)
 
     auto &ret = *comp;
 
-    this->addModule(comp.get());
+    addModule(*comp);
     const auto type = comp->getType();
     _components.emplace(type, std::move(comp));
     _types.push_back(type);

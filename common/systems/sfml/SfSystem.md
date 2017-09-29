@@ -1,10 +1,12 @@
-# SfSystem
+# [SfSystem](SfSystem.hpp)
 
 `System` that displays entities in an SFML window.
 
-`SfSystem` is the only sample provided as a plugin. If the `PUTILS_BUILD_PSE` option is set to `TRUE` in the project's `CMakeLists.txt`, the `SfSystem` will be automatically built into a shared library, in the `CMAKE_LIBRARY_OUTPUT_DIRECTORY`. Client code must then load the plugin (with [loadSystems](../../../SystemManager.md) for instance) at runtime.
+`SfSystem` is provided as a plugin. If the `KENGINE_SFML` option is set to `TRUE` in the project's `CMakeLists.txt`, the `SfSystem` will be automatically built into a shared library, in the `CMAKE_LIBRARY_OUTPUT_DIRECTORY`. Client code must then load the plugin (with [loadSystems](../../../SystemManager.md) for instance) at runtime.
 
 ### Using SfSystem
+
+##### 'Normal' objects
 
 `SfSystem` reads the resource file to be used for a `GameObject` from its [MetaComponent](../../components/MetaComponent.md)'s `appearance` property.
 
@@ -15,6 +17,22 @@ If `appearance` was previously registered as an abstract appearance through a [R
 ```
 /!\ That 3d is important! TransformComponent2d, 2i, 3i, 3f... Will not be detected!
 ```
+
+##### GUI
+
+If a `GameObject` is found to have a [GUIComponent](../../components/GUIComponent.md), it will be rendered as text using the information held in that `GUIComponent`.
+
+##### Input
+
+User input handlers can be registered through the [Input](../../packets/Input.hpp) datapackets.
+
+If a [kengine::LuaSystem](../../systems/LuaSystem.md) is found when the `SfSystem` is constructed, the following lua functions are registered:
+
+* `setKeyHandler(std::function<void(Sf::Keyboard::Key)> onPress, std::function<void(sf::Keyboard::Key)> onRelease)`: sets the key handler for all keys
+* `setMouseButtonHandler(std::function<void(Sf::Mouse::Button, int x, int y)> onPress, std::function<void(sf::Mouse::Button, int x, int y)> onRelease)`: sets the button handler for all keys
+* `setMouseMovedHandler(std::function<void(int x, int y)> func)`: sets the mouse move handler
+* `getWindowSize()`
+* `getTileSize()`
 
 ### Configuration
 

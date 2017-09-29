@@ -1,4 +1,4 @@
-# SystemManager
+# [SystemManager](SystemManager.hpp)
 
 Manages `Systems`, and serves as a `Mediator` for them.
 
@@ -6,14 +6,14 @@ Manages `Systems`, and serves as a `Mediator` for them.
 
 ##### execute
 
-```
+```cpp
 void execute() const;
 ```
 Calls the `execute` function of each `System`.
 
 ##### createSystem
 
-```
+```cpp
 template<typename T, typename ...Args>
 void createSystem(Args &&...args);
 ```
@@ -21,14 +21,14 @@ Creates and registers a new `System` of type `T`, passing it `args` as construct
 
 ##### addSystem
 
-```
+```cpp
 void addSystem(std::unique_ptr<ISystem> &&system);
 ```
 Adds a pre-existing `System`.
 
 ##### loadSystems
 
-```
+```cpp
 template<typename ...Systems>
 void loadSystems(std::string_view pluginDir = "plugins", std::string_view creatorFunction = "getSystem");
 ```
@@ -38,7 +38,7 @@ Then, for each shared library (.so or .dll) found in `pluginDir`, calls the `cre
 
 ##### getSystem
 
-```
+```cpp
 template<typename T>
 T &getSystem();
 ```

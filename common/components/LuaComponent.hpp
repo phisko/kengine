@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include "lua/sol.hpp"
 
 #include "SerializableComponent.hpp"
 
@@ -16,6 +17,10 @@ namespace kengine
         }
 
     public:
+        sol::object meta;
+        std::string debug;
+
+    public:
         void attachScript(std::string_view file) noexcept { _scripts.push_back(file.data()); }
 
         void removeScript(std::string_view file) noexcept
@@ -27,20 +32,22 @@ namespace kengine
         const std::vector<std::string> &getScripts() const noexcept { return _scripts; }
 
     private:
-        const std::string type = "LuaComponent";
+        const std::string type = pmeta_nameof(LuaComponent);
         std::vector<std::string> _scripts;
 
         /*
          * Reflectible
          */
     public:
-        static const auto get_class_name() { return "LuaComponent"; }
+        static const auto get_class_name() { return pmeta_nameof(LuaComponent); }
 
         static const auto &get_attributes()
         {
             static const auto table = pmeta::make_table(
-                    "type", &LuaComponent::type,
-                    "scripts", &LuaComponent::_scripts
+                    pmeta_reflectible_attribute(&LuaComponent::type),
+                    pmeta_reflectible_attribute_private(&LuaComponent::_scripts),
+                    pmeta_reflectible_attribute(&LuaComponent::meta),
+                    pmeta_reflectible_attribute(&LuaComponent::debug)
             );
             return table;
         }
@@ -48,8 +55,8 @@ namespace kengine
         static const auto &get_methods()
         {
             static const auto table = pmeta::make_table(
-                    "attachScript", &LuaComponent::attachScript,
-                    "removeScript", &LuaComponent::removeScript
+                    pmeta_reflectible_attribute(&LuaComponent::attachScript),
+                    pmeta_reflectible_attribute(&LuaComponent::removeScript)
             );
             return table;
         }
