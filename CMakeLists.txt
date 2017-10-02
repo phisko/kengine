@@ -9,6 +9,10 @@ if(KENGINE_OGRE)
     set(PUTILS_BUILD_POGRE TRUE)
 endif()
 
+if(KENGINE_TEST)
+    set(PUTILS_TEST TRUE)
+endif()
+
 add_subdirectory(putils)
 
 file(GLOB src_files
@@ -36,12 +40,14 @@ endif()
 
 # Test
 
-set(test_name kengine_test)
-file(GLOB testSrc
-        test/*.cpp test/*.hpp
-        test/*/*.cpp test/*/*.hpp
-        putils/test/*.cpp putils/test/*.hpp
-        putils/test/*/*.cpp putils/test/*/*.hpp
-        )
-add_executable(${test_name} ${testSrc})
-target_link_libraries(${test_name} kengine gtest_main)
+if(KENGINE_TEST)
+    set(test_name kengine_test)
+    file(GLOB testSrc
+            test/*.cpp test/*.hpp
+            test/*/*.cpp test/*/*.hpp
+            putils/test/*.cpp putils/test/*.hpp
+            putils/test/*/*.cpp putils/test/*/*.hpp
+            )
+    add_executable(${test_name} ${testSrc})
+    target_link_libraries(${test_name} kengine gtest_main)
+endif()
