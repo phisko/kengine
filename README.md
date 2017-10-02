@@ -142,7 +142,11 @@ log.msg = "Log from lua"
 sendLog(log)
 
 -- create an entity from Lua
-local new = createEntity("GameObject", "bob")
+local new = createEntity("GameObject", "bob",
+    function (go)
+        print("Created " .. go:getName())
+    end
+)
 
 -- get an entity
 local otherRef = getEntity("bob")
@@ -169,7 +173,7 @@ for i, e in ipairs(getGameObjectsWithMetaComponent()) do
 end
 
 -- remove an Entity
-removeEntity(new)
+removeEntity(new:getName())
 ```
 
 ##### scripts/unit/unit.lua
