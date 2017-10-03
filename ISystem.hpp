@@ -38,6 +38,7 @@ namespace kengine
             putils::Timer timer;
             putils::Timer::t_duration deltaTime;
             putils::Timer::t_duration fixedDeltaTime;
+            putils::Timer::t_clock::time_point lastCall;
 
             // Functions that may be called by System
         public:
@@ -45,6 +46,5 @@ namespace kengine
             putils::Timer::t_duration getFixedDeltaTime() const { return fixedDeltaTime; }
             double getDeltaFrames() const { return deltaTime / fixedDeltaTime; }
         } time;
-
     };
 }

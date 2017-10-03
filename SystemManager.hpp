@@ -1,9 +1,6 @@
-//
-// Created by naliwe on 2/12/17.
-//
-
 #pragma once
 
+#include <cmath>
 #include <vector>
 #include <memory>
 #include "System.hpp"
@@ -36,11 +33,12 @@ namespace kengine
 
                 if (time.alwaysCall || timer.isDone())
                 {
-                    time.deltaTime = timer.getTimeSinceStart();
-                    timer.setStart(
-                            putils::Timer::t_clock::now() -
-                                    std::chrono::duration_cast<putils::Timer::t_clock::duration>(timer.getTimeSinceDone())
-                    );
+                    const auto old = time.lastCall;
+                    time.lastCall = putils::Timer::t_clock::now();
+                    time.deltaTime = time.lastCall - old;
+                    const auto past = std::fmod(timer.getTimeSinceDone().count(), timer.getDuration().count());
+                    const auto dur = std::chrono::duration_cast<putils::Timer::t_clock::duration>(putils::Timer::seconds(past));
+                    timer.setStart(time.lastCall - dur);
 
                     try
                     {
