@@ -24,8 +24,15 @@ namespace kengine
         SystemManager &operator=(SystemManager const &o) = delete;
 
     public:
-        void execute() const
+        void execute()
         {
+            if (_first)
+            {
+                for (auto & [type, s] : _systems)
+                    s->time.timer.restart();
+                _first = false;
+            }
+
             for (auto & [type, s] : _systems)
             {
                 auto &time = s->time;
@@ -48,6 +55,8 @@ namespace kengine
                 }
             }
         }
+    private:
+        bool _first = true;
 
     public:
         template<typename T, typename ...Args>
