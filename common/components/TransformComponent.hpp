@@ -14,7 +14,11 @@ namespace kengine
         TransformComponent(const putils::Point<Precision, Dimensions> &pos = { 0, 0 },
                            const putils::Point<Precision, Dimensions> &size = { 1, 1 })
                 : boundingBox(pos, size)
-        {}
+        {
+            if constexpr (Dimensions == 3)
+                if (size == putils::Point3d{ 1, 1, 0 })
+                    boundingBox.size.z = 1;
+        }
 
         TransformComponent(const putils::Rect<Precision, Dimensions> &rect)
                 : boundingBox(rect)
