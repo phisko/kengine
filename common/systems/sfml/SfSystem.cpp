@@ -52,6 +52,13 @@ namespace kengine
             lua["getTileSize"] =
                     [this] { return putils::Point3d{ (double)_tileSize.x, (double)_tileSize.y }; };
 
+            lua["getGridSize"] =
+                    [this]
+                    {
+                        const auto size = _engine.getRenderWindow().getSize();
+                        return putils::Point3d{ (double)(size.x / _tileSize.x), double(size.y / _tileSize.y) };
+                    };
+
             lua["setKeyHandler"] =
                     [this](const std::function<void(sf::Keyboard::Key)> &onPress,
                                 const std::function<void(sf::Keyboard::Key)> &onRelease)
@@ -114,14 +121,14 @@ namespace kengine
             const auto &pos = transform.boundingBox.topLeft;
 
             comp.getViewItem().setPosition(
-                    {(float) (_tileSize.x * pos.x), (float) (_tileSize.y * pos.y)});
+                    {(float) (_tileSize.x * pos.x), (float) (_tileSize.y * pos.z)});
 
             const auto &size = transform.boundingBox.size;
             if (!comp.isFixedSize())
                 comp.getViewItem().setSize(
-                        {(float) (_tileSize.x * size.x), (float) (_tileSize.y * size.y)});
+                        {(float) (_tileSize.x * size.x), (float) (_tileSize.y * size.z)});
 
-            _engine.setItemHeight(comp.getViewItem(), (std::size_t) pos.z);
+            _engine.setItemHeight(comp.getViewItem(), (std::size_t) pos.y);
         }
 
         // GUI elements
@@ -203,18 +210,18 @@ namespace kengine
 
             const auto &pos = transform.boundingBox.topLeft;
             v.getViewItem().setPosition(
-                    { (float) (_tileSize.x * pos.x), (float) (_tileSize.y * pos.y) }
+                    { (float) (_tileSize.x * pos.x), (float) (_tileSize.y * pos.z) }
             );
 
             if (!v.isFixedSize())
             {
                 const auto &size = transform.boundingBox.size;
                 v.getViewItem().setSize(
-                        { (float) (_tileSize.x * size.x), (float) (_tileSize.y * size.y) }
+                        { (float) (_tileSize.x * size.x), (float) (_tileSize.y * size.z) }
                 );
             }
 
-            _engine.addItem(v.getViewItem(), (std::size_t) pos.z);
+            _engine.addItem(v.getViewItem(), (std::size_t) pos.y);
         }
         catch (const std::exception &e)
         {
