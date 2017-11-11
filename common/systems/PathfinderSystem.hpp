@@ -5,6 +5,7 @@
 #include "common/components/TransformComponent.hpp"
 #include "common/components/PathfinderComponent.hpp"
 #include "common/components/PhysicsComponent.hpp"
+#include "common/systems/PhysicsSystem.hpp"
 #include "QuadTree.hpp"
 #include "AStar.hpp"
 
@@ -28,13 +29,19 @@ namespace kengine
                     continue;
 
                 moveTowards(*go, comp);
-                const auto &boundingBox = go->getComponent<kengine::TransformComponent3d>().boundingBox;
-                if (boundingBox.topLeft.distanceTo(comp.dest) <= comp.desiredDistance)
+
+                if (reached(*go, comp.dest, comp.desiredDistance))
                 {
                     comp.reached = true;
                     go->getComponent<kengine::PhysicsComponent>().movement = { 0, 0, 0 };
                 }
             }
+        }
+
+        bool reached(const kengine::GameObject &go, const putils::Point3d &dest, double desiredDistance)
+        {
+            const auto &boundingBox = go.getComponent<kengine::TransformComponent3d>().boundingBox;
+            return boundingBox.topLeft.distanceTo(dest) <= desiredDistance;
         }
 
         void moveTowards(kengine::GameObject &go, const PathfinderComponent &comp)
@@ -56,34 +63,45 @@ namespace kengine
             );
 
             if (steps.empty())
-            {
-                phys.movement.x = 0;
-                phys.movement.z = 0;
-            }
+                noPathFound(phys);
             else
-            {
-                const auto &next = steps[0];
-                phys.movement.x = putils::sign(next.x - box.topLeft.x);
-                phys.movement.z = putils::sign(next.y - box.topLeft.z);
-            }
+                nextStep(steps[0], phys, box.topLeft);
+        }
+
+        void noPathFound(kengine::PhysicsComponent &phys) noexcept
+        {
+            phys.movement.x = 0;
+            phys.movement.z = 0;
+        }
+
+        void nextStep(const putils::Point2d &step, kengine::PhysicsComponent &phys, const putils::Point3d &pos)
+        {
+            phys.movement.x = putils::sign(step.x - pos.x);
+            phys.movement.z = putils::sign(step.y - pos.z);
         }
 
         bool canMoveTo(const kengine::GameObject &go, const putils::Rect3d &boundingBox,
-                       const putils::Point3d &dest, const putils::Point3d &goal, double maxAvoidance)
+                       const putils::Point3d &dest, const putils::Point3d &goal, double maxAvoidance) noexcept
         {
             if (dest.distanceTo(goal) > boundingBox.topLeft.distanceTo(goal) + maxAvoidance)
                 return false;
 
             const auto objects = _tree->query({ { dest.x, dest.z }, { boundingBox.size.x, boundingBox.size.z } });
-            for (const auto other : objects)
-                if (&go != other)
-                {
-                    std::cout << "Evaluating " << other->getName() << std::endl;
-                    const auto &otherBox = other->getComponent<kengine::TransformComponent3d>().boundingBox;
-                    if (boundingBox.intersect(otherBox))
-                        return false;
-                }
-            return true;
+            return !anObjectIntersects(objects, go);
+        }
+
+        bool anObjectIntersects(const std::vector<kengine::GameObject *> &objects, const kengine::GameObject &go) noexcept
+        {
+            const auto &boundingBox = go.getComponent<kengine::TransformComponent3d>().boundingBox;
+
+            return std::any_of(
+                    objects.begin(), objects.end(),
+                    [&go, &boundingBox](kengine::GameObject *other)
+                    {
+                        const auto &otherBox = other->getComponent<kengine::TransformComponent3d>().boundingBox;
+                        return &go != other && otherBox.intersect(boundingBox);
+                    }
+            );
         }
 
     private:
