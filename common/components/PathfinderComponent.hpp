@@ -12,7 +12,7 @@ namespace kengine
         bool reached = true;
         bool diagonals = true;
         double desiredDistance = 1;
-        double maxAvoidance = 0;
+        double maxAvoidance = std::numeric_limits<double>::max();
 
         /*
          * Reflectible
