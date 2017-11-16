@@ -30,17 +30,5 @@ namespace kengine
             );
             return table;
         }
-
-        static const auto &get_methods()
-        {
-            static const auto table = pmeta::make_table();
-            return table;
-        }
-
-        static const auto &get_parents()
-        {
-            static const auto table = pmeta::make_table();
-            return table;
-        }
     };
 }

@@ -1,6 +1,5 @@
-#include <GameObject.hpp>
 #include "gtest/gtest.h"
-#include "Component.hpp"
+#include "GameObject.hpp"
 
 struct ComponentTest : testing::Test
 {

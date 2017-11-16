@@ -82,7 +82,7 @@ namespace kengine
             try
             {
                 putils::Directory d(dir);
-                _directories.push_back(dir.data());
+                _directories.emplace_back(dir.data());
             }
             catch (const std::runtime_error &e)
             {
@@ -150,15 +150,9 @@ namespace kengine
 
         void executeScriptedObjects() noexcept
         {
-            struct Create
-            {
-                std::string type;
-                std::string name;
-                std::function<void(kengine::GameObject &)> postCreate;
-            };
-
             std::vector<std::function<void()>> toExecute;
             std::vector<std::string> toRemove;
+
             _lua["createEntity"] =
                     [this, &toExecute] (const std::string &type, const std::string &name, const sol::function &f)
                     {

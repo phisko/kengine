@@ -28,9 +28,8 @@ namespace kengine
         {
             if (_first)
             {
-                for (auto & [type, s] : _systems)
-                    s->time.timer.restart();
                 _first = false;
+                resetTimers();
             }
 
             for (auto & [type, s] : _systems)
@@ -40,34 +39,50 @@ namespace kengine
 
                 if (time.alwaysCall || timer.isDone())
                 {
-                    const auto old = time.lastCall;
-                    time.lastCall = putils::Timer::t_clock::now();
-                    time.deltaTime = time.lastCall - old;
-                    const auto past = std::fmod(timer.getTimeSinceDone().count(), timer.getDuration().count());
-                    const auto dur = std::chrono::duration_cast<putils::Timer::t_clock::duration>(putils::Timer::seconds(past));
-                    timer.setStart(time.lastCall - dur);
-
-                    try
-                    {
-                        s->execute();
-                    }
+                    updateTime(*s);
+                    try { s->execute(); }
                     catch (const std::exception &e) { std::cerr << e.what() << std::endl; }
                 }
             }
         }
+
+    private:
+        void resetTimers()
+        {
+            for (auto & [type, s] : _systems)
+            {
+                s->time.lastCall = putils::Timer::t_clock::now();
+                s->time.timer.restart();
+            }
+        }
+
+    private:
+        void updateTime(kengine::ISystem &s)
+        {
+            auto &time = s.time;
+            auto &timer = time.timer;
+
+            const auto old = time.lastCall;
+            time.lastCall = putils::Timer::t_clock::now();
+            time.deltaTime = time.lastCall - old;
+            const auto past = std::fmod(timer.getTimeSinceDone().count(), timer.getDuration().count());
+            const auto dur = std::chrono::duration_cast<putils::Timer::t_clock::duration>(putils::Timer::seconds(past));
+            timer.setStart(time.lastCall - dur);
+        }
+
     private:
         bool _first = true;
 
     public:
         template<typename T, typename ...Args>
-        void createSystem(Args &&...args)
+        T &createSystem(Args &&...args)
         {
             static_assert(std::is_base_of<ISystem, T>::value,
                           "Attempt to create something that's not a System");
-            addSystem(std::make_unique<T>(std::forward<Args>(args)...));
+            return static_cast<T &>(addSystem(std::make_unique<T>(FWD(args)...)));
         }
 
-        void addSystem(std::unique_ptr<ISystem> &&system)
+        ISystem &addSystem(std::unique_ptr<ISystem> &&system)
         {
             const auto nbFrames = system->getFrameRate();
 
@@ -82,19 +97,22 @@ namespace kengine
                 time.alwaysCall = false;
                 time.fixedDeltaTime = std::chrono::milliseconds(1000 / nbFrames);
             }
+            time.lastCall = putils::Timer::t_clock::now();
             time.timer.setDuration(time.fixedDeltaTime);
 
             addModule(*system);
             const auto type = system->getType();
 
+            auto &ret = *system;
             _systems.emplace(type, std::move(system));
+            return ret;
         }
 
     public:
         template<typename ...Systems>
-        void loadSystems(std::string_view pluginDir = "plugins", std::string_view creatorFunction = "getSystem", bool pluginsFirst = false)
+        void loadSystems(std::string_view pluginDir = "", std::string_view creatorFunction = "getSystem", bool pluginsFirst = false)
         {
-            if (pluginsFirst)
+            if (pluginsFirst && pluginDir.size() > 0)
                 loadPlugins(pluginDir, creatorFunction);
 
             // Call "creatorFunc" in each plugin, passing myself as an EntityManager
@@ -108,8 +126,21 @@ namespace kengine
                     }
             );
 
-            if (!pluginsFirst)
+            if (!pluginsFirst && pluginDir.size() > 0)
                 loadPlugins(pluginDir, creatorFunction);
+        }
+
+    private:
+        template<typename StringView>
+        void loadPlugins(StringView pluginDir, StringView creatorFunction)
+        {
+            auto &em = static_cast<kengine::EntityManager &>(*this);
+
+            putils::PluginManager pm(pluginDir);
+            const auto systems = pm.executeWithReturn<kengine::ISystem *>(creatorFunction, em);
+
+            for (auto s : systems)
+                addSystem(std::unique_ptr<kengine::ISystem>(s));
         }
 
     public:
@@ -127,42 +158,15 @@ namespace kengine
         void registerGameObject(GameObject &gameObject) noexcept
         {
             for (auto & [type, s] : _systems)
-            {
-                try
-                {
-                    s->registerGameObject(gameObject);
-                }
+                try { s->registerGameObject(gameObject); }
                 catch (const std::exception &e) { std::cerr << e.what() << std::endl; }
-            }
         }
 
         void removeGameObject(GameObject &gameObject)
         {
             for (auto & [type, s] : _systems)
-            {
-                try
-                {
-                    s->removeGameObject(gameObject);
-                }
+                try { s->removeGameObject(gameObject); }
                 catch (const std::exception &e) { std::cerr << e.what() << std::endl; }
-            }
-        }
-
-    private:
-        template<typename StringView>
-        void loadPlugins(StringView pluginDir, StringView creatorFunction)
-        {
-            putils::PluginManager pm(pluginDir);
-
-            // Call "creatorFunc" in each plugin, passing myself as an EntityManager
-            auto &em = static_cast<kengine::EntityManager &>(*this);
-
-            const auto systems = pm.executeWithReturn<kengine::ISystem *>(
-                    creatorFunction, em
-            );
-
-            for (auto s : systems)
-                addSystem(std::unique_ptr<kengine::ISystem>(s));
         }
 
     private:

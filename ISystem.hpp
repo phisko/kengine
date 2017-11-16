@@ -32,6 +32,11 @@ namespace kengine
 
         struct
         {
+        public:
+            putils::Timer::t_duration getDeltaTime() const { return deltaTime; }
+            putils::Timer::t_duration getFixedDeltaTime() const { return fixedDeltaTime; }
+            double getDeltaFrames() const { return deltaTime / fixedDeltaTime; }
+
             friend class SystemManager;
         private:
             bool alwaysCall;
@@ -39,12 +44,6 @@ namespace kengine
             putils::Timer::t_duration deltaTime;
             putils::Timer::t_duration fixedDeltaTime;
             putils::Timer::t_clock::time_point lastCall;
-
-            // Functions that may be called by System
-        public:
-            putils::Timer::t_duration getDeltaTime() const { return deltaTime; }
-            putils::Timer::t_duration getFixedDeltaTime() const { return fixedDeltaTime; }
-            double getDeltaFrames() const { return deltaTime / fixedDeltaTime; }
         } time;
     };
 }
