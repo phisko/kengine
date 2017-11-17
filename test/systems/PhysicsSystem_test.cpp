@@ -1,33 +1,9 @@
-#include "gtest/gtest.h"
+#include "SystemTest.hpp"
 #include "common/systems/PhysicsSystem.hpp"
 #include "common/gameobjects/KinematicObject.hpp"
 
-struct PhysicsSystemTest : testing::Test
+struct PhysicsSystemTest : SystemTest<kengine::PhysicsSystem>
 {
-    PhysicsSystemTest()
-    {
-        em.loadSystems<kengine::PhysicsSystem>();
-    }
-
-    void runTimes(std::size_t times)
-    {
-        const auto sleepTime = std::chrono::milliseconds(16);
-
-        if (first)
-        {
-            first = false;
-            em.execute(); // Reset timers
-        }
-
-        for (std::size_t i = 0; i < times; ++i)
-        {
-            std::this_thread::sleep_for(sleepTime);
-            em.execute();
-        }
-    }
-
-    kengine::EntityManager em;
-    bool first = true;
 };
 
 TEST_F(PhysicsSystemTest, Movement)

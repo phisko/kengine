@@ -77,8 +77,10 @@ namespace kengine
                 return;
 
             const auto pos = putils::Rect2d{ { dest.x, dest.z }, { box.size.x, box.size.z } };
+            std::cout << "Checking movement -- " << pos << std::endl;
             if (canMoveTo(go, pos))
             {
+                std::cout << "Moving to -- " << pos << std::endl;
                 box.topLeft = dest; // No collision
                 _tree.move(&go, pos);
             }
@@ -101,6 +103,7 @@ namespace kengine
                 {
                     const auto &me = go.getComponent<kengine::TransformComponent3d>().boundingBox;
                     const auto &other = obj->getComponent<kengine::TransformComponent3d>().boundingBox;
+                    std::cout << "Cannot move because of " << other << std::endl;
                     return false;
                 }
             return true;
