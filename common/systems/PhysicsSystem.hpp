@@ -77,10 +77,8 @@ namespace kengine
                 return;
 
             const auto pos = putils::Rect2d{ { dest.x, dest.z }, { box.size.x, box.size.z } };
-            std::cout << "Checking movement -- " << pos << std::endl;
             if (canMoveTo(go, pos))
             {
-                std::cout << "Moving to -- " << pos << std::endl;
                 box.topLeft = dest; // No collision
                 _tree.move(&go, pos);
             }
@@ -88,24 +86,21 @@ namespace kengine
 
         putils::Point3d getNewPos(const putils::Point3d &pos, const putils::Point3d &movement, double speed)
         {
-            auto ret = pos;
-            ret.x += movement.x * time.getDeltaFrames() * speed;
-            ret.y += movement.y * time.getDeltaFrames() * speed;
-            ret.z += movement.z * time.getDeltaFrames() * speed;
-            return ret;
+            return putils::Point3d {
+                    pos.x + movement.x * time.getDeltaFrames() * speed,
+                    pos.y + movement.y * time.getDeltaFrames() * speed,
+                    pos.z + movement.z * time.getDeltaFrames() * speed,
+            };
         }
 
         bool canMoveTo(kengine::GameObject &go, const putils::Rect2d &pos)
         {
             const auto objects =_tree.query(pos);
+
             for (const auto obj : objects)
                 if (obj != &go)
-                {
-                    const auto &me = go.getComponent<kengine::TransformComponent3d>().boundingBox;
-                    const auto &other = obj->getComponent<kengine::TransformComponent3d>().boundingBox;
-                    std::cout << "Cannot move because of " << other << std::endl;
                     return false;
-                }
+
             return true;
         }
 

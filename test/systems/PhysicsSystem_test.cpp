@@ -8,7 +8,7 @@ struct PhysicsSystemTest : SystemTest<kengine::PhysicsSystem>
 
 TEST_F(PhysicsSystemTest, Movement)
 {
-    auto &go = em.createEntity<kengine::KinematicObject>(
+    const auto &go = em.createEntity<kengine::KinematicObject>(
             "bite",
             [](kengine::GameObject &go)
             {
@@ -16,7 +16,6 @@ TEST_F(PhysicsSystemTest, Movement)
                 movement.x = 1;
             }
     );
-    auto &phys = go.getComponent<kengine::PhysicsComponent>();
 
     runTimes(1);
 
@@ -29,7 +28,7 @@ TEST_F(PhysicsSystemTest, Movement)
 
 TEST_F(PhysicsSystemTest, Continue)
 {
-    auto &go = em.createEntity<kengine::KinematicObject>(
+    const auto &go = em.createEntity<kengine::KinematicObject>(
             [](kengine::GameObject &go)
             {
                 auto &movement = go.getComponent<kengine::PhysicsComponent>().movement;
@@ -69,7 +68,7 @@ TEST_F(PhysicsSystemTest, Stop)
 
 TEST_F(PhysicsSystemTest, Fixed)
 {
-     auto &go = em.createEntity<kengine::KinematicObject>(
+     const auto &go = em.createEntity<kengine::KinematicObject>(
             [](kengine::GameObject &go)
             {
                 auto &phys = go.getComponent<kengine::PhysicsComponent>();
@@ -82,6 +81,59 @@ TEST_F(PhysicsSystemTest, Fixed)
 
     const auto &pos = go.getComponent<kengine::TransformComponent3d>().boundingBox.topLeft;
     EXPECT_EQ(pos.x, 0);
+    EXPECT_EQ(pos.y, 0);
+    EXPECT_EQ(pos.z, 0);
+}
+
+TEST_F(PhysicsSystemTest, Obstacle)
+{
+    const auto &go = em.createEntity<kengine::KinematicObject>(
+            [](kengine::GameObject &go)
+            {
+                auto &phys = go.getComponent<kengine::PhysicsComponent>();
+                phys.fixed = true;
+                phys.movement.x = 1;
+            }
+    );
+    em.createEntity<kengine::KinematicObject>(
+            [](kengine::GameObject &go)
+            {
+                auto &box = go.getComponent<kengine::TransformComponent3d>().boundingBox;
+                box.topLeft.x = 1;
+            }
+    );
+
+    runTimes(1);
+
+    const auto &pos = go.getComponent<kengine::TransformComponent3d>().boundingBox.topLeft;
+    EXPECT_EQ(pos.x, 0);
+    EXPECT_EQ(pos.y, 0);
+    EXPECT_EQ(pos.z, 0);
+}
+
+TEST_F(PhysicsSystemTest, NotBlocked)
+{
+    const auto &go = em.createEntity<kengine::KinematicObject>(
+            [](kengine::GameObject &go)
+            {
+                auto &phys = go.getComponent<kengine::PhysicsComponent>();
+                phys.movement.x = 1;
+                phys.speed = 0.9;
+            }
+    );
+    em.createEntity<kengine::KinematicObject>(
+            [](kengine::GameObject &go)
+            {
+                auto &box = go.getComponent<kengine::TransformComponent3d>().boundingBox;
+                box.topLeft.x = 2;
+            }
+    );
+
+    runTimes(1);
+
+    const auto &pos = go.getComponent<kengine::TransformComponent3d>().boundingBox.topLeft;
+    EXPECT_GT(pos.x, 0.9);
+    EXPECT_LT(pos.x, 1.0);
     EXPECT_EQ(pos.y, 0);
     EXPECT_EQ(pos.z, 0);
 }

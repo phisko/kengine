@@ -70,7 +70,6 @@ namespace kengine
 
         void noPathFound(kengine::PhysicsComponent &phys) noexcept
         {
-            std::cout << "No path found" << std::endl;
             phys.movement.x = 0;
             phys.movement.z = 0;
         }
@@ -79,7 +78,6 @@ namespace kengine
         {
             phys.movement.x = putils::sign(step.x - pos.x);
             phys.movement.z = putils::sign(step.y - pos.z);
-            std::cout << "Trying to move -- " << phys.movement << std::endl;
         }
 
         bool canMoveTo(const kengine::GameObject &go, const putils::Rect3d &boundingBox,
