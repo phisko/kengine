@@ -1,33 +1,9 @@
-#include <common/gameobjects/KinematicObject.hpp>
-#include "gtest/gtest.h"
+#include "SystemTest.hpp"
 #include "common/systems/PathfinderSystem.hpp"
+#include "common/gameobjects/KinematicObject.hpp"
 
-struct PathfinderSystemTest : testing::Test
+struct PathfinderSystemTest : SystemTest<kengine::PhysicsSystem, kengine::PathfinderSystem>
 {
-    PathfinderSystemTest()
-    {
-        em.loadSystems<kengine::PhysicsSystem, kengine::PathfinderSystem>();
-    }
-
-    void runTimes(std::size_t times)
-    {
-        const auto sleepTime = std::chrono::milliseconds(16);
-
-        if (first)
-        {
-            first = false;
-            em.execute(); // Reset timers
-        }
-
-        for (std::size_t i = 0; i < times; ++i)
-        {
-            std::this_thread::sleep_for(sleepTime);
-            em.execute();
-        }
-    }
-
-    kengine::EntityManager em;
-    bool first = true;
 };
 
 void expectReached(const kengine::GameObject &go, const putils::Point3d &dest)
@@ -60,6 +36,22 @@ TEST_F(PathfinderSystemTest, Move)
     runTimes(5);
 
     expectReached(go, { 4, 0, 0 });
+}
+
+TEST_F(PathfinderSystemTest, Move2d)
+{
+    const auto &go = em.createEntity<kengine::KinematicObject>(
+            [](kengine::GameObject &go)
+            {
+                auto &path = go.attachComponent<kengine::PathfinderComponent>();
+                path.dest = { 5, 0, 5 };
+                path.reached = false;
+            }
+    );
+
+    runTimes(10);
+
+    expectReached(go, { 5, 0, 5 });
 }
 
 TEST_F(PathfinderSystemTest, Obstacle)

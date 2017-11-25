@@ -50,4 +50,11 @@ if(KENGINE_TEST)
             )
     add_executable(${test_name} ${testSrc})
     target_link_libraries(${test_name} kengine gtest_main)
+
+    if(CMAKE_COMPILER_IS_GNUCXX)
+        append_coverage_compiler_flags()
+        setup_target_for_coverage(NAME ${test_name}_coverage
+                EXECUTABLE ${test_name}
+                coverage)
+    endif()
 endif()

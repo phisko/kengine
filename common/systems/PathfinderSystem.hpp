@@ -54,8 +54,8 @@ namespace kengine
 
             const auto steps = putils::AStar::getNextDirection<double>(
                     start, end, comp.diagonals,
-                    // phys.speed * time.getDeltaFrames(), comp.desiredDistance,
-                    phys.speed, comp.desiredDistance,
+                    phys.speed * time.getDeltaFrames(), comp.desiredDistance,
+                    // phys.speed, comp.desiredDistance,
                     [this, &go, &box, &comp](const putils::Point2d &, const putils::Point2d &to)
                     {
                         return canMoveTo(go, box, to, comp.dest, comp.maxAvoidance);
