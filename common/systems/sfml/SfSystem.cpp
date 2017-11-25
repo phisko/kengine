@@ -1,11 +1,8 @@
 #include "SfSystem.hpp"
-#include "SfComponent.hpp"
 
 #include "EntityManager.hpp"
 #include "common/components/TransformComponent.hpp"
 #include "common/packets/Log.hpp"
-
-#include "pluginManager/Export.hpp"
 
 #include "common/systems/LuaSystem.hpp"
 #include "common/components/GUIComponent.hpp"
@@ -38,6 +35,9 @@ namespace kengine
               _engine(_screenSize.x, _screenSize.y, "Kengine",
                       _fullScreen ? sf::Style::Fullscreen : sf::Style::Close)
     {
+        for (const auto go : _em.getGameObjects())
+            registerGameObject(*go);
+
         try
         {
             auto &lua = em.getSystem<kengine::LuaSystem>().getState();
@@ -212,6 +212,9 @@ namespace kengine
             v.getViewItem().setPosition(
                     { (float) (_tileSize.x * pos.x), (float) (_tileSize.y * pos.z) }
             );
+
+            std::cout << go.getName() << go.getComponent<kengine::TransformComponent3d>()
+                    .boundingBox.topLeft << std::endl;
 
             if (!v.isFixedSize())
             {
