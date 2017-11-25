@@ -86,6 +86,9 @@ namespace kengine
             if (dest.distanceTo(goal) > boundingBox.topLeft.distanceTo(goal) + maxAvoidance)
                 return false;
 
+            if (_tree == nullptr)
+                return true;
+
             const auto objects = _tree->query({ { dest.x, dest.z }, { boundingBox.size.x, boundingBox.size.z } });
             return !anObjectIntersects(objects, go);
         }

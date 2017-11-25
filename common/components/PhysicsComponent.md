@@ -1,6 +1,6 @@
 # [PhysicsComponent](PhysicsComponent.hpp)
 
-`Component` that specifies the movement information to be used by the [PhysicsSystem](../systems/PhysicsSystem.hpp).
+`Component` that specifies the movement information to be used by the [PhysicsSystem](../systems/PhysicsSystem.md).
 
 ### Members
 
