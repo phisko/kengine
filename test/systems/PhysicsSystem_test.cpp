@@ -87,11 +87,19 @@ TEST_F(PhysicsSystemTest, Fixed)
 
 TEST_F(PhysicsSystemTest, Obstacle)
 {
+    struct CollisionHandler : kengine::System<CollisionHandler, kengine::packets::Collision> {
+        void handle(const kengine::packets::Collision &p) {
+            ++received;
+        }
+
+        size_t received = 0;
+    };
+    const auto &handler = em.createSystem<CollisionHandler>();
+
     const auto &go = em.createEntity<kengine::KinematicObject>(
             [](kengine::GameObject &go)
             {
                 auto &phys = go.getComponent<kengine::PhysicsComponent>();
-                phys.fixed = true;
                 phys.movement.x = 1;
             }
     );
@@ -106,36 +114,12 @@ TEST_F(PhysicsSystemTest, Obstacle)
     runTimes(1);
 
     const auto &pos = go.getComponent<kengine::TransformComponent3d>().boundingBox.topLeft;
-    EXPECT_EQ(pos.x, 0);
+    EXPECT_GT(pos.x, 1);
+    EXPECT_LT(pos.x, 1.5);
     EXPECT_EQ(pos.y, 0);
     EXPECT_EQ(pos.z, 0);
-}
 
-TEST_F(PhysicsSystemTest, NotBlocked)
-{
-    const auto &go = em.createEntity<kengine::KinematicObject>(
-            [](kengine::GameObject &go)
-            {
-                auto &phys = go.getComponent<kengine::PhysicsComponent>();
-                phys.movement.x = 1;
-                phys.speed = 0.9;
-            }
-    );
-    em.createEntity<kengine::KinematicObject>(
-            [](kengine::GameObject &go)
-            {
-                auto &box = go.getComponent<kengine::TransformComponent3d>().boundingBox;
-                box.topLeft.x = 2;
-            }
-    );
-
-    runTimes(1);
-
-    const auto &pos = go.getComponent<kengine::TransformComponent3d>().boundingBox.topLeft;
-    EXPECT_GT(pos.x, 0.9);
-    EXPECT_LT(pos.x, 1.0);
-    EXPECT_EQ(pos.y, 0);
-    EXPECT_EQ(pos.z, 0);
+    EXPECT_EQ(handler.received, 1);
 }
 
 TEST_F(PhysicsSystemTest, Query)

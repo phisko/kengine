@@ -5,6 +5,7 @@
 #include "common/components/PhysicsComponent.hpp"
 #include "common/components/TransformComponent.hpp"
 #include "common/packets/Position.hpp"
+#include "common/packets/Collision.hpp"
 #include "QuadTree.hpp"
 
 namespace kengine
@@ -34,9 +35,7 @@ namespace kengine
 
         void registerGameObject(kengine::GameObject &go) noexcept final
         {
-            if (go.hasComponent<kengine::TransformComponent3d>()
-                && go.hasComponent<kengine::PhysicsComponent>()
-                && go.getComponent<kengine::PhysicsComponent>().solid)
+            if (go.hasComponent<kengine::TransformComponent3d>() && go.hasComponent<kengine::PhysicsComponent>())
             {
                 const auto &box = go.getComponent<kengine::TransformComponent3d>().boundingBox;
                 _tree.add(&go, { { box.topLeft.x, box.topLeft.z },
@@ -47,14 +46,17 @@ namespace kengine
     public:
         void handle(const packets::Position::Query &q)
         {
-            const auto objects = _tree.query(
-                    {
-                            { q.box.topLeft.x, q.box.topLeft.z },
-                            { q.box.size.x, q.box.size.z }
-                    }
+            sendTo(
+                    packets::Position::Response {
+                            _tree.query(
+                                    {
+                                            { q.box.topLeft.x, q.box.topLeft.z },
+                                            { q.box.size.x, q.box.size.z }
+                                    }
+                            )
+                    },
+                    *q.sender
             );
-
-            sendTo(packets::Position::Response{std::move(objects)}, *q.sender);
         }
 
         void handle(const packets::QuadTreeQuery &q)
@@ -77,11 +79,9 @@ namespace kengine
                 return;
 
             const auto pos = putils::Rect2d{ { dest.x, dest.z }, { box.size.x, box.size.z } };
-            if (canMoveTo(go, pos))
-            {
-                box.topLeft = dest; // No collision
-                _tree.move(&go, pos);
-            }
+            box.topLeft = dest;
+            _tree.move(&go, pos);
+            checkCollisions(go, pos);
         }
 
         putils::Point3d getNewPos(const putils::Point3d &pos, const putils::Point3d &movement, double speed)
@@ -93,15 +93,13 @@ namespace kengine
             };
         }
 
-        bool canMoveTo(kengine::GameObject &go, const putils::Rect2d &pos)
+        void checkCollisions(kengine::GameObject &go, const putils::Rect2d &box)
         {
-            const auto objects =_tree.query(pos);
+            const auto objects =_tree.query(box);
 
             for (const auto obj : objects)
                 if (obj != &go)
-                    return false;
-
-            return true;
+                    send(kengine::packets::Collision{ go, *obj });
         }
 
     private:
