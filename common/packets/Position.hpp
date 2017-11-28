@@ -5,20 +5,15 @@
 namespace kengine { class GameObject; }
 namespace putils { class BaseModule; }
 
-namespace kengine
-{
-    namespace packets
-    {
-        namespace Position
-        {
-            struct Query
-            {
+namespace kengine {
+    namespace packets {
+        namespace Position {
+            struct Query {
                 putils::Rect3d box;
-                putils::BaseModule *sender;
+                putils::BaseModule * sender;
             };
 
-            struct Response
-            {
+            struct Response {
                 std::vector<kengine::GameObject *> objects;
             };
         }

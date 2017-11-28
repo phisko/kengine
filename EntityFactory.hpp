@@ -4,10 +4,8 @@
 #include <memory>
 #include <GameObject.hpp>
 
-namespace kengine
-{
-    class EntityFactory
-    {
+namespace kengine {
+    class EntityFactory {
     public:
         virtual ~EntityFactory() = default;
 
@@ -15,36 +13,30 @@ namespace kengine
         virtual std::unique_ptr<GameObject> make(std::string_view type, std::string_view name) = 0;
     };
 
-    class ExtensibleFactory : public EntityFactory
-    {
+    class ExtensibleFactory : public EntityFactory {
     public:
         using Creator = std::function<std::unique_ptr<GameObject>(std::string_view name)>;
-        void addType(std::string_view type, const Creator &creator)
-        {
+        void addType(std::string_view type, const Creator & creator) {
             _creators[type.data()] = creator;
         }
 
         template<typename T>
-        void registerType()
-        {
+        void registerType() {
             static_assert(putils::is_reflectible<T>::value,
                           "Please make your type reflectible before registering it");
             _creators[T::get_class_name()] = [](auto name) { return std::make_unique<T>(name); };
         }
 
         template<typename ...Types>
-        void registerTypes()
-        {
+        void registerTypes() {
             pmeta::tuple_for_each(std::make_tuple(pmeta::type<Types>()...),
-                                  [this](auto &&t)
-                                  {
+                                  [this](auto && t) {
                                       registerType<pmeta_wrapped(t)>();
                                   }
             );
         }
 
-        std::unique_ptr<GameObject> make(std::string_view type, std::string_view name) final
-        {
+        std::unique_ptr<GameObject> make(std::string_view type, std::string_view name) final {
             return (_creators.at(type.data()))(name);
         }
 

@@ -3,11 +3,9 @@
 #include "SerializableComponent.hpp"
 #include "Point.hpp"
 
-namespace kengine
-{
+namespace kengine {
     class PhysicsComponent : public kengine::SerializableComponent<PhysicsComponent>,
-                             public putils::Reflectible<PhysicsComponent>
-    {
+                             public putils::Reflectible<PhysicsComponent> {
     public:
         PhysicsComponent(bool solid = true, bool fixed = false)
                 : solid(solid), fixed(false) {}
@@ -26,8 +24,7 @@ namespace kengine
     public:
         static const auto get_class_name() { return pmeta_nameof(PhysicsComponent); }
 
-        static const auto &get_attributes()
-        {
+        static const auto & get_attributes() {
             static const auto table = pmeta::make_table(
                     pmeta_reflectible_attribute(&PhysicsComponent::type),
                     pmeta_reflectible_attribute(&PhysicsComponent::solid),
@@ -38,14 +35,12 @@ namespace kengine
             return table;
         }
 
-        static const auto &get_methods()
-        {
+        static const auto & get_methods() {
             static const auto table = pmeta::make_table();
             return table;
         }
 
-        static const auto &get_parents()
-        {
+        static const auto & get_parents() {
             static const auto table = pmeta::make_table();
             return table;
         }

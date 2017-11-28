@@ -3,11 +3,9 @@
 #include <string>
 #include "SerializableComponent.hpp"
 
-namespace kengine
-{
+namespace kengine {
     class MetaComponent : public kengine::SerializableComponent<MetaComponent>,
-                          public putils::Reflectible<MetaComponent>
-    {
+                          public putils::Reflectible<MetaComponent> {
     public:
         MetaComponent(std::string_view appearance = "")
                 : appearance(appearance) {}
@@ -22,8 +20,7 @@ namespace kengine
     public:
         static const auto get_class_name() { return pmeta_nameof(MetaComponent); }
 
-        static const auto &get_attributes()
-        {
+        static const auto & get_attributes() {
             static const auto table = pmeta::make_table(
                     pmeta_reflectible_attribute(&MetaComponent::type),
                     pmeta_reflectible_attribute(&MetaComponent::appearance)

@@ -2,16 +2,16 @@ cmake_minimum_required(VERSION 3.0)
 project(kengine)
 set(CMAKE_CXX_STANDARD 17)
 
-if(KENGINE_SFML)
+if (KENGINE_SFML)
     set(PUTILS_BUILD_PSE TRUE)
-endif()
-if(KENGINE_OGRE)
+endif ()
+if (KENGINE_OGRE)
     set(PUTILS_BUILD_POGRE TRUE)
-endif()
+endif ()
 
-if(KENGINE_TEST)
+if (KENGINE_TEST)
     set(PUTILS_TEST TRUE)
-endif()
+endif ()
 
 add_subdirectory(putils)
 
@@ -20,27 +20,27 @@ file(GLOB src_files
         *.hpp
         )
 
-if(UNIX)
+if (UNIX)
     set(type SHARED)
-elseif(WIN32)
+elseif (WIN32)
     set(type STATIC)
-endif()
+endif ()
 
 add_library(kengine INTERFACE)
 target_link_libraries(kengine INTERFACE mediator pluginManager)
 target_include_directories(kengine INTERFACE .)
 
-if(KENGINE_SFML)
+if (KENGINE_SFML)
     add_subdirectory(common/systems/sfml)
-endif()
+endif ()
 
-if(KENGINE_OGRE)
+if (KENGINE_OGRE)
     add_subdirectory(common/systems/ogre)
-endif()
+endif ()
 
 # Test
 
-if(KENGINE_TEST)
+if (KENGINE_TEST)
     set(test_name kengine_test)
     file(GLOB testSrc
             test/*.cpp test/*.hpp
@@ -51,10 +51,10 @@ if(KENGINE_TEST)
     add_executable(${test_name} ${testSrc})
     target_link_libraries(${test_name} kengine gtest_main)
 
-    if(CMAKE_COMPILER_IS_GNUCXX)
+    if (CMAKE_COMPILER_IS_GNUCXX)
         append_coverage_compiler_flags()
         setup_target_for_coverage(NAME ${test_name}_coverage
                 EXECUTABLE ${test_name}
                 coverage)
-    endif()
-endif()
+    endif ()
+endif ()

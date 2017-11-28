@@ -5,15 +5,12 @@
 
 #include "SerializableComponent.hpp"
 
-namespace kengine
-{
+namespace kengine {
     class LuaComponent : public putils::Reflectible<LuaComponent>,
-                         public SerializableComponent<LuaComponent>
-    {
+                         public SerializableComponent<LuaComponent> {
     public:
-        LuaComponent(const std::vector<std::string> &scripts = {})
-                : _scripts(scripts)
-        {
+        LuaComponent(const std::vector<std::string> & scripts = {})
+                : _scripts(scripts) {
         }
 
     public:
@@ -23,13 +20,12 @@ namespace kengine
     public:
         void attachScript(std::string_view file) noexcept { _scripts.push_back(file.data()); }
 
-        void removeScript(std::string_view file) noexcept
-        {
+        void removeScript(std::string_view file) noexcept {
             _scripts.erase(std::find(_scripts.begin(), _scripts.end(), file.data()));
         }
 
     public:
-        const std::vector<std::string> &getScripts() const noexcept { return _scripts; }
+        const std::vector<std::string> & getScripts() const noexcept { return _scripts; }
 
     private:
         const std::string type = pmeta_nameof(LuaComponent);
@@ -41,8 +37,7 @@ namespace kengine
     public:
         static const auto get_class_name() { return pmeta_nameof(LuaComponent); }
 
-        static const auto &get_attributes()
-        {
+        static const auto & get_attributes() {
             static const auto table = pmeta::make_table(
                     pmeta_reflectible_attribute(&LuaComponent::type),
                     pmeta_reflectible_attribute_private(&LuaComponent::_scripts),
@@ -52,8 +47,7 @@ namespace kengine
             return table;
         }
 
-        static const auto &get_methods()
-        {
+        static const auto & get_methods() {
             static const auto table = pmeta::make_table(
                     pmeta_reflectible_attribute(&LuaComponent::attachScript),
                     pmeta_reflectible_attribute(&LuaComponent::removeScript)
@@ -61,8 +55,7 @@ namespace kengine
             return table;
         }
 
-        static const auto &get_parents()
-        {
+        static const auto & get_parents() {
             static const auto table = pmeta::make_table(
             );
             return table;

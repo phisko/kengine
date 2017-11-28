@@ -4,25 +4,21 @@
 #include "Point.hpp"
 #include "concat.hpp"
 
-namespace kengine
-{
+namespace kengine {
     template<typename Precision, std::size_t Dimensions>
     class TransformComponent : public putils::Reflectible<TransformComponent<Precision, Dimensions>>,
-                               public kengine::SerializableComponent<TransformComponent<Precision, Dimensions>>
-    {
+                               public kengine::SerializableComponent<TransformComponent<Precision, Dimensions>> {
     public:
-        TransformComponent(const putils::Point<Precision, Dimensions> &pos = { 0, 0 },
-                           const putils::Point<Precision, Dimensions> &size = { 1, 1 })
-                : boundingBox(pos, size)
-        {
+        TransformComponent(const putils::Point<Precision, Dimensions> & pos = { 0, 0 },
+                           const putils::Point<Precision, Dimensions> & size = { 1, 1 })
+                : boundingBox(pos, size) {
             if constexpr (Dimensions == 3)
-                if (size == putils::Point3d{ 1, 1, 0 })
-                    boundingBox.size.z = 1;
+            if (size == putils::Point3d{ 1, 1, 0 })
+                boundingBox.size.z = 1;
         }
 
-        TransformComponent(const putils::Rect<Precision, Dimensions> &rect)
-                : boundingBox(rect)
-        {}
+        TransformComponent(const putils::Rect<Precision, Dimensions> & rect)
+                : boundingBox(rect) {}
 
         const std::string type = pmeta_nameof(TransformComponent);
         putils::Rect<Precision, Dimensions> boundingBox;
@@ -36,8 +32,7 @@ namespace kengine
     public:
         static const auto get_class_name() { return pmeta_nameof(TransformComponent); }
 
-        static const auto &get_attributes()
-        {
+        static const auto & get_attributes() {
             static const auto table = pmeta::make_table(
                     pmeta_reflectible_attribute(&TransformComponent::type),
                     pmeta_reflectible_attribute(&TransformComponent::boundingBox),
@@ -47,14 +42,12 @@ namespace kengine
             return table;
         }
 
-        static const auto &get_methods()
-        {
+        static const auto & get_methods() {
             static const auto table = pmeta::make_table();
             return table;
         }
 
-        static const auto &get_parents()
-        {
+        static const auto & get_parents() {
             static const auto table = pmeta::make_table();
             return table;
         }

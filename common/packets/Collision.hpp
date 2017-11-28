@@ -1,15 +1,12 @@
 #pragma once
 
-namespace kengine
-{
+namespace kengine {
     class GameObject;
 
-    namespace packets
-    {
-        struct Collision
-        {
-            kengine::GameObject &first;
-            kengine::GameObject &second;
+    namespace packets {
+        struct Collision {
+            kengine::GameObject & first;
+            kengine::GameObject & second;
         };
     }
 }

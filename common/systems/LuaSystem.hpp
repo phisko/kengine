@@ -8,35 +8,28 @@
 #include "EntityManager.hpp"
 #include "common/components/LuaComponent.hpp"
 
-namespace kengine
-{
-    class LuaSystem : public kengine::System<LuaSystem>
-    {
+namespace kengine {
+    class LuaSystem : public kengine::System<LuaSystem> {
     public:
-        LuaSystem(kengine::EntityManager &em) : _em(em)
-        {
+        LuaSystem(kengine::EntityManager & em) : _em(em) {
             try { addScriptDirectory("scripts"); }
-            catch (const std::runtime_error &e) {}
+            catch (const std::runtime_error & e) {}
 
             _lua.open_libraries();
 
             _lua.set_function("getGameObjects", [&em] { return std::ref(em.getGameObjects()); });
 
             _lua.set_function("createEntity",
-                              [&em] (const std::string &type, const std::string &name, const sol::function &f)
-                              { return std::ref(em.createEntity(type, name, f)); }
+                              [&em](const std::string & type, const std::string & name, const sol::function & f) { return std::ref(em.createEntity(type, name, f)); }
             );
             _lua.set_function("removeEntity",
-                              [&em] (const std::string &name)
-                              { em.removeEntity(name); }
+                              [&em](const std::string & name) { em.removeEntity(name); }
             );
             _lua.set_function("getEntity",
-                              [&em] (std::string_view name)
-                              { return std::ref(em.getEntity(name)); }
+                              [&em](std::string_view name) { return std::ref(em.getEntity(name)); }
             );
             _lua.set_function("hasEntity",
-                              [&em] (std::string_view name)
-                              { return em.hasEntity(name); }
+                              [&em](std::string_view name) { return em.hasEntity(name); }
             );
 
             _lua.set_function("getDeltaTime", [this] { return time.getDeltaTime(); });
@@ -49,23 +42,20 @@ namespace kengine
         }
 
         template<typename T>
-        void registerType() noexcept
-        {
+        void registerType() noexcept {
             putils::lua::registerType<T>(_lua);
 
             const auto sender = putils::concat("send", T::get_class_name());
-            _lua.set_function(sender, [this](const T &packet) { send(packet); });
+            _lua.set_function(sender, [this](const T & packet) { send(packet); });
 
             if constexpr (kengine::is_component<T>::value)
-                registerComponent<T>();
+                    registerComponent<T>();
         }
 
         template<typename ...Types>
-        void registerTypes() noexcept
-        {
+        void registerTypes() noexcept {
             pmeta::tuple_for_each(std::make_tuple(pmeta::type<Types>()...),
-                                  [this](auto &&t)
-                                  {
+                                  [this](auto && t) {
                                       using Type = pmeta_wrapped(t);
                                       registerType<Type>();
                                   }
@@ -73,27 +63,23 @@ namespace kengine
         }
 
     public:
-        sol::state &getState() { return _lua; }
-        const sol::state &getState() const { return _lua; }
+        sol::state & getState() { return _lua; }
+        const sol::state & getState() const { return _lua; }
 
     public:
-        void addScriptDirectory(std::string_view dir)
-        {
-            try
-            {
+        void addScriptDirectory(std::string_view dir) {
+            try {
                 putils::Directory d(dir);
                 _directories.emplace_back(dir.data());
             }
-            catch (const std::runtime_error &e)
-            {
+            catch (const std::runtime_error & e) {
                 std::cerr << e.what() << std::endl;
             }
         }
 
         // System methods
     public:
-        void execute() final
-        {
+        void execute() final {
             executeDirectories();
             executeScriptedObjects();
         }
@@ -101,117 +87,98 @@ namespace kengine
         // Helpers
     private:
         template<typename T>
-        void registerComponent() noexcept
-        {
+        void registerComponent() noexcept {
             _lua[putils::concat("getGameObjectsWith", T::get_class_name())] =
                     [this] { return std::ref(_em.getGameObjects<T>()); };
 
             _lua[kengine::GameObject::get_class_name()][putils::concat("get", T::get_class_name())] =
-                    [](kengine::GameObject &self) { return std::ref(self.getComponent<T>()); };
+                    [](kengine::GameObject & self) { return std::ref(self.getComponent<T>()); };
 
             _lua[kengine::GameObject::get_class_name()][putils::concat("has", T::get_class_name())] =
-                    [](kengine::GameObject &self) { return self.hasComponent<T>(); };
+                    [](kengine::GameObject & self) { return self.hasComponent<T>(); };
 
             _lua[kengine::GameObject::get_class_name()][putils::concat("attach", T::get_class_name())] =
-                    [](kengine::GameObject &self) { return std::ref(self.attachComponent<T>()); };
+                    [](kengine::GameObject & self) { return std::ref(self.attachComponent<T>()); };
 
             _lua[kengine::GameObject::get_class_name()][putils::concat("detach", T::get_class_name())] =
-                    [](kengine::GameObject &self) { self.detachComponent<T>(); };
+                    [](kengine::GameObject & self) { self.detachComponent<T>(); };
         }
 
         template<typename F>
-        void addEntityFunction(const std::string &name, F &&func) noexcept
-        {
+        void addEntityFunction(const std::string & name, F && func) noexcept {
             _lua[kengine::GameObject::get_class_name()][name] = func;
         }
 
-        void executeDirectories() noexcept
-        {
-            for (const auto &dir : _directories)
-            {
-                try
-                {
+        void executeDirectories() noexcept {
+            for (const auto & dir : _directories) {
+                try {
                     putils::Directory d(dir);
 
                     d.for_each(
-                            [this](const putils::Directory::File &f)
-                            {
+                            [this](const putils::Directory::File & f) {
                                 if (!f.isDirectory)
                                     executeScript(f.fullPath);
                             }
                     );
                 }
-                catch (const std::runtime_error &e)
-                {
+                catch (const std::runtime_error & e) {
                     std::cerr << e.what() << std::endl;
                 }
             }
         }
 
-        void executeScriptedObjects() noexcept
-        {
+        void executeScriptedObjects() noexcept {
             std::vector<std::function<void()>> toExecute;
             std::vector<std::string> toRemove;
 
             _lua["createEntity"] =
-                    [this, &toExecute] (const std::string &type, const std::string &name, const sol::function &f)
-                    {
-                        toExecute.push_back([this, type, name, f]{ _em.createEntity(type, name, f); });
+                    [this, &toExecute](const std::string & type, const std::string & name, const sol::function & f) {
+                        toExecute.push_back([this, type, name, f] { _em.createEntity(type, name, f); });
                     };
 
             _lua["removeEntity"] =
-                    [this, &toExecute, &toRemove](const std::string &name)
-                    {
-                        toExecute.push_back([this, name]{ _em.removeEntity(name); });
+                    [this, &toExecute, &toRemove](const std::string & name) {
+                        toExecute.push_back([this, name] { _em.removeEntity(name); });
                         toRemove.push_back(name);
                     };
 
             _lua["hasEntity"] =
-                    [this, &toExecute, &toRemove](const std::string &name)
-                    {
+                    [this, &toExecute, &toRemove](const std::string & name) {
                         return _em.hasEntity(name) &&
-                                std::find(toRemove.begin(), toRemove.end(), name) == toRemove.end();
+                               std::find(toRemove.begin(), toRemove.end(), name) == toRemove.end();
                     };
 
-            for (const auto go : _em.getGameObjects<kengine::LuaComponent>())
-            {
-                const auto &comp = go->getComponent<kengine::LuaComponent>();
-                for (const auto &s : comp.getScripts())
-                {
+            for (const auto go : _em.getGameObjects<kengine::LuaComponent>()) {
+                const auto & comp = go->getComponent<kengine::LuaComponent>();
+                for (const auto & s : comp.getScripts()) {
                     _lua["self"] = go;
                     executeScript(s);
                 }
             }
             _lua["self"] = sol::nil;
 
-            for (const auto &f : toExecute)
+            for (const auto & f : toExecute)
                 f();
 
             _lua["createEntity"] =
-                    [this] (const std::string &type, const std::string &name, const sol::function &f)
-                    { return std::ref(_em.createEntity(type, name, f)); };
+                    [this](const std::string & type, const std::string & name, const sol::function & f) { return std::ref(_em.createEntity(type, name, f)); };
             _lua["removeEntity"] =
-                    [this] (const std::string &name)
-                    { _em.removeEntity(name); };
+                    [this](const std::string & name) { _em.removeEntity(name); };
             _lua["hasEntity"] =
-                    [this, &toExecute](const std::string &name)
-                    { return _em.hasEntity(name); };
+                    [this, &toExecute](const std::string & name) { return _em.hasEntity(name); };
         }
 
-        void executeScript(std::string_view fileName) noexcept
-        {
-            try
-            {
+        void executeScript(std::string_view fileName) noexcept {
+            try {
                 _lua.script_file(fileName.data());
             }
-            catch (const std::exception &e)
-            {
+            catch (const std::exception & e) {
                 std::cerr << "[LuaSystem] Error in '" << fileName << "': " << e.what() << std::endl;
             }
         }
 
     private:
-        kengine::EntityManager &_em;
+        kengine::EntityManager & _em;
         std::vector<std::string> _directories;
         sol::state _lua;
     };

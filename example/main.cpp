@@ -3,15 +3,13 @@
 #include "go_to_bin_dir.hpp"
 
 #include "EntityManager.hpp"
-#include "GameObject.hpp"
 
 #include "common/systems/LuaSystem.hpp"
 #include "common/systems/LogSystem.hpp"
 #include "common/components/MetaComponent.hpp"
 #include "common/components/TransformComponent.hpp"
 
-int main(int, char **av)
-{
+int main(int, char ** av) {
     // Go to the executable's directory to be next to resources and scripts
     putils::goToBinDir(av[0]);
 
@@ -28,22 +26,21 @@ int main(int, char **av)
 
 
     // Get the factory and register any desired types
-    auto &factory = em.getFactory<kengine::ExtensibleFactory>();
+    auto & factory = em.getFactory<kengine::ExtensibleFactory>();
     factory.registerTypes<kengine::GameObject>();
 
     // Create a GameObject and attach Components to it
-    auto &player = em.createEntity<kengine::GameObject>("player");
+    auto & player = em.createEntity<kengine::GameObject>("player");
     player.attachComponent<kengine::TransformComponent3d>();
     player.attachComponent<kengine::MetaComponent>();
 
     // Attach a lua script to a GameObject
-    auto &luaComp = player.attachComponent<kengine::LuaComponent>();
+    auto & luaComp = player.attachComponent<kengine::LuaComponent>();
     luaComp.attachScript("scripts/unit/unit.lua");
 
     // Add a directory of scripts to be executed
-    try
-    {
-        auto &lua = em.getSystem<kengine::LuaSystem>();
+    try {
+        auto & lua = em.getSystem<kengine::LuaSystem>();
         lua.addScriptDirectory("scripts");
         lua.registerTypes<
                 kengine::MetaComponent,

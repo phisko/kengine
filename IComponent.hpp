@@ -7,15 +7,12 @@
 #include "meta/type.hpp"
 #include "Module.hpp"
 
-namespace kengine
-{
-    class IComponent : public virtual putils::BaseModule
-    {
+namespace kengine {
+    class IComponent : public virtual putils::BaseModule {
     public:
         virtual ~IComponent() = default;
 
-        friend std::ostream &operator<<(std::ostream &s, const kengine::IComponent &obj)
-        {
+        friend std::ostream & operator<<(std::ostream & s, const kengine::IComponent & obj) {
             s << obj.toString();
             return s;
         }
