@@ -1,5 +1,6 @@
 #pragma once
 
+#include <utility>
 #include <cmath>
 #include <vector>
 #include <memory>
@@ -30,6 +31,8 @@ namespace kengine {
                 resetTimers();
             }
 
+            updateSystemList();
+
             for (auto & [type, s] : _systems) {
                 auto & time = s->time;
                 auto & timer = time.timer;
@@ -40,6 +43,22 @@ namespace kengine {
                     catch (const std::exception & e) { std::cerr << e.what() << std::endl; }
                 }
             }
+
+            updateSystemList();
+        }
+
+    private:
+        void updateSystemList() noexcept {
+            for (auto &p : _toAdd)
+                _systems.emplace(p.first, std::move(p.second));
+            _toAdd.clear();
+
+            for (const auto index : _toRemove) {
+                const auto it = _systems.find(index);
+                if (it != _systems.end())
+                    _systems.erase(it);
+            }
+            _toRemove.clear();
         }
 
     private:
@@ -92,7 +111,11 @@ namespace kengine {
             const auto type = system->getType();
 
             auto & ret = *system;
-            _systems.emplace(type, std::move(system));
+            _toAdd.emplace_back(type, std::move(system));
+
+            if (_first)
+                updateSystemList();
+
             return ret;
         }
 
@@ -130,10 +153,28 @@ namespace kengine {
 
     public:
         template<typename T>
-        T & getSystem() { return static_cast<T &>(*_systems.at(pmeta::type<T>::index)); }
+        T & getSystem() {
+            static_assert(std::is_base_of<System<T>, T>::value, "Attempt to get something that isn't a System");
+            return static_cast<T &>(*_systems.at(pmeta::type<T>::index));
+        }
 
         template<typename T>
-        const T & getSystem() const { return static_cast<const T &>(*_systems.at(pmeta::type<T>::index)); }
+        const T & getSystem() const {
+            static_assert(std::is_base_of<System<T>, T>::value, "Attempt to get something that isn't a System");
+            return static_cast<const T &>(*_systems.at(pmeta::type<T>::index));
+        }
+
+        template<typename T>
+        bool hasSystem() const noexcept {
+            static_assert(std::is_base_of<System<T>, T>::value, "Attempt to check something that isn't a System");
+            return _systems.find(pmeta::type<T>::index) != _systems.end();
+        }
+
+        template<typename T>
+        void removeSystem() noexcept {
+            static_assert(std::is_base_of<System<T>, T>::value, "Attempt to remove something that isn't a System");
+            _toRemove.emplace_back(pmeta::type<T>::index);
+        }
 
         /*
          * Internal
@@ -149,6 +190,8 @@ namespace kengine {
         }
 
     private:
+        std::vector<std::pair<pmeta::type_index, std::unique_ptr<ISystem>>> _toAdd;
+        std::vector<pmeta::type_index> _toRemove;
         std::unordered_map<pmeta::type_index, std::unique_ptr<ISystem>> _systems;
     };
 }
