@@ -1,7 +1,8 @@
 #pragma once
 
-#include <cstddef>
 #include "ISystem.hpp"
+#include "common/packets/RegisterGameObject.hpp"
+#include "common/packets/RemoveGameObject.hpp"
 
 namespace kengine {
     template<typename CRTP, typename ...DataPackets>
