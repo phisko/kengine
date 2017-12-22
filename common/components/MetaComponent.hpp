@@ -18,14 +18,10 @@ namespace kengine {
          */
 
     public:
-        static const auto get_class_name() { return pmeta_nameof(MetaComponent); }
-
-        static const auto & get_attributes() {
-            static const auto table = pmeta::make_table(
-                    pmeta_reflectible_attribute(&MetaComponent::type),
-                    pmeta_reflectible_attribute(&MetaComponent::appearance)
-            );
-            return table;
-        }
+        pmeta_get_class_name(MetaComponent);
+        pmeta_get_attributes(
+                pmeta_reflectible_attribute(&MetaComponent::type),
+                pmeta_reflectible_attribute(&MetaComponent::appearance)
+        );
     };
 }

@@ -22,27 +22,13 @@ namespace kengine {
          */
 
     public:
-        static const auto get_class_name() { return pmeta_nameof(PhysicsComponent); }
-
-        static const auto & get_attributes() {
-            static const auto table = pmeta::make_table(
-                    pmeta_reflectible_attribute(&PhysicsComponent::type),
-                    pmeta_reflectible_attribute(&PhysicsComponent::solid),
-                    pmeta_reflectible_attribute(&PhysicsComponent::fixed),
-                    pmeta_reflectible_attribute(&PhysicsComponent::movement),
-                    pmeta_reflectible_attribute(&PhysicsComponent::speed)
-            );
-            return table;
-        }
-
-        static const auto & get_methods() {
-            static const auto table = pmeta::make_table();
-            return table;
-        }
-
-        static const auto & get_parents() {
-            static const auto table = pmeta::make_table();
-            return table;
-        }
+        pmeta_get_class_name(PhysicsComponent);
+        pmeta_get_attributes(
+                pmeta_reflectible_attribute(&PhysicsComponent::type),
+                pmeta_reflectible_attribute(&PhysicsComponent::solid),
+                pmeta_reflectible_attribute(&PhysicsComponent::fixed),
+                pmeta_reflectible_attribute(&PhysicsComponent::movement),
+                pmeta_reflectible_attribute(&PhysicsComponent::speed)
+        );
     };
 }

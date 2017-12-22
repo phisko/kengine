@@ -30,27 +30,13 @@ namespace kengine {
          */
 
     public:
-        static const auto get_class_name() { return pmeta_nameof(TransformComponent); }
-
-        static const auto & get_attributes() {
-            static const auto table = pmeta::make_table(
-                    pmeta_reflectible_attribute(&TransformComponent::type),
-                    pmeta_reflectible_attribute(&TransformComponent::boundingBox),
-                    pmeta_reflectible_attribute(&TransformComponent::pitch),
-                    pmeta_reflectible_attribute(&TransformComponent::yaw)
-            );
-            return table;
-        }
-
-        static const auto & get_methods() {
-            static const auto table = pmeta::make_table();
-            return table;
-        }
-
-        static const auto & get_parents() {
-            static const auto table = pmeta::make_table();
-            return table;
-        }
+        pmeta_get_class_name(TransformComponent);
+        pmeta_get_attributes(
+                pmeta_reflectible_attribute(&TransformComponent::type),
+                pmeta_reflectible_attribute(&TransformComponent::boundingBox),
+                pmeta_reflectible_attribute(&TransformComponent::pitch),
+                pmeta_reflectible_attribute(&TransformComponent::yaw)
+        );
     };
 
     using TransformComponent2i = TransformComponent<int, 2>;

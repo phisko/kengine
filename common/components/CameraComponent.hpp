@@ -26,27 +26,15 @@ namespace kengine {
          */
 
     public:
-        static const auto get_class_name() { return pmeta_nameof(CameraComponent); }
-
-        static const auto & get_attributes() {
-            static const auto table = pmeta::make_table(
-                    pmeta_reflectible_attribute(&CameraComponent::type),
-                    pmeta_reflectible_attribute(&CameraComponent::frustrum),
-                    pmeta_reflectible_attribute(&CameraComponent::pitch),
-                    pmeta_reflectible_attribute(&CameraComponent::yaw)
-            );
-            return table;
-        }
-
-        static const auto & get_methods() {
-            static const auto table = pmeta::make_table();
-            return table;
-        }
-
-        static const auto & get_parents() {
-            static const auto table = pmeta::make_table();
-            return table;
-        }
+        pmeta_get_class_name(CameraComponent);
+        pmeta_get_attributes(
+                pmeta_reflectible_attribute(&CameraComponent::type),
+                pmeta_reflectible_attribute(&CameraComponent::frustrum),
+                pmeta_reflectible_attribute(&CameraComponent::pitch),
+                pmeta_reflectible_attribute(&CameraComponent::yaw)
+        );
+        pmeta_get_methods();
+        pmeta_get_parents();
     };
 
     using CameraComponent2i = CameraComponent<int, 2>;

@@ -35,30 +35,17 @@ namespace kengine {
          * Reflectible
          */
     public:
-        static const auto get_class_name() { return pmeta_nameof(LuaComponent); }
-
-        static const auto & get_attributes() {
-            static const auto table = pmeta::make_table(
-                    pmeta_reflectible_attribute(&LuaComponent::type),
-                    pmeta_reflectible_attribute_private(&LuaComponent::_scripts),
-                    pmeta_reflectible_attribute(&LuaComponent::meta),
-                    pmeta_reflectible_attribute(&LuaComponent::debug)
-            );
-            return table;
-        }
-
-        static const auto & get_methods() {
-            static const auto table = pmeta::make_table(
-                    pmeta_reflectible_attribute(&LuaComponent::attachScript),
-                    pmeta_reflectible_attribute(&LuaComponent::removeScript)
-            );
-            return table;
-        }
-
-        static const auto & get_parents() {
-            static const auto table = pmeta::make_table(
-            );
-            return table;
-        }
+        pmeta_get_class_name(LuaComponent);
+        pmeta_get_attributes(
+                pmeta_reflectible_attribute(&LuaComponent::type),
+                pmeta_reflectible_attribute_private(&LuaComponent::_scripts),
+                pmeta_reflectible_attribute(&LuaComponent::meta),
+                pmeta_reflectible_attribute(&LuaComponent::debug)
+        );
+        pmeta_get_methods(
+                pmeta_reflectible_attribute(&LuaComponent::attachScript),
+                pmeta_reflectible_attribute(&LuaComponent::removeScript)
+        );
+        pmeta_get_parents();
     };
 }

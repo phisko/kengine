@@ -91,29 +91,20 @@ namespace kengine {
          */
 
     public:
-        static const auto get_class_name() { return "GameObject"; }
+        pmeta_get_class_name(GameObject);
 
-        static const auto & get_attributes() {
-            static const auto table = pmeta::make_table(
-                    pmeta_reflectible_attribute_private(&GameObject::_name),
-                    pmeta_reflectible_attribute_private(&GameObject::_components)
-            );
-            return table;
-        }
+        pmeta_get_attributes(
+                pmeta_reflectible_attribute_private(&GameObject::_name),
+                pmeta_reflectible_attribute_private(&GameObject::_components)
+        );
 
-        static const auto & get_methods() {
-            static const auto table = pmeta::make_table(
-                    pmeta_reflectible_attribute(&GameObject::getName)
-            );
-            return table;
-        }
+        pmeta_get_methods(
+                pmeta_reflectible_attribute(&GameObject::getName)
+        );
 
-        static const auto & get_parents() {
-            static const auto table = pmeta::make_table(
-                    pmeta_reflectible_parent(putils::Mediator)
-            );
-            return table;
-        }
+        pmeta_get_parents(
+                pmeta_reflectible_parent(putils::Mediator)
+        );
     };
 }
 

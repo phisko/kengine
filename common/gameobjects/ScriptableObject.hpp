@@ -11,6 +11,6 @@ namespace kengine {
             attachComponent<kengine::LuaComponent>(scripts);
         }
 
-        static const auto get_class_name() { return pmeta_nameof(ScriptableObject); }
+        pmeta_get_class_name(ScriptableObject);
     };
 }

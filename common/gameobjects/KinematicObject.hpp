@@ -15,6 +15,6 @@ namespace kengine {
             attachComponent<kengine::PhysicsComponent>(solid, fixed);
         }
 
-        static const auto get_class_name() { return pmeta_nameof(KinematicObject); }
+        pmeta_get_class_name(KinematicObject);
     };
 }

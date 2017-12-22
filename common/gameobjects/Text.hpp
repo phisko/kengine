@@ -13,7 +13,6 @@ namespace kengine {
             attachComponent<kengine::TransformComponent3d>();
         }
 
-    public:
-        static const auto get_class_name() { return pmeta_nameof(Text); }
+        pmeta_get_class_name(Text);
     };
 }

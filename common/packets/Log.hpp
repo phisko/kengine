@@ -14,23 +14,12 @@ namespace kengine {
              * Reflectible
              */
 
-            static const auto get_class_name() { return pmeta_nameof(Log); }
-            static const auto & get_attributes() {
-                static const auto table = pmeta::make_table(
-                        pmeta_reflectible_attribute(&Log::msg)
-                );
-                return table;
-            }
-
-            static const auto & get_methods() {
-                static const auto table = pmeta::make_table();
-                return table;
-            }
-
-            static const auto & get_parents() {
-                static const auto table = pmeta::make_table();
-                return table;
-            }
+            pmeta_get_class_name(Log);
+            pmeta_get_attributes(
+                    pmeta_reflectible_attribute(&Log::msg)
+            );
+            pmeta_get_methods();
+            pmeta_get_parents();
         };
     }
 }
