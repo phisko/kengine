@@ -329,7 +329,7 @@ void OgreSystem::createText(kengine::GameObject &go) noexcept
 {
     const auto &gui = go.getComponent<kengine::GUIComponent>();
 
-    auto text = new Ogre::MovableText(go.getName().data(), gui.text);
+    auto text = new Ogre::MovableText(go.getName(), gui.text);
     text->setTextAlignment(Ogre::MovableText::H_CENTER, Ogre::MovableText::V_CENTER);
     text->setCharacterHeight(gui.textSize);
     text->setFontName("StarWars");

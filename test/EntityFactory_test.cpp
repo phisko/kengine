@@ -3,7 +3,7 @@
 
 struct EntityFactoryTest : testing::Test {
     struct Example : kengine::EntityFactory {
-        std::unique_ptr<kengine::GameObject> make(std::string_view type, std::string_view name) final {
+        std::unique_ptr<kengine::GameObject> make(const std::string & type, const std::string & name) final {
             return std::make_unique<kengine::GameObject>(name);
         }
     };

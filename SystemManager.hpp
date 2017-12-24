@@ -121,7 +121,7 @@ namespace kengine {
 
     public:
         template<typename ...Systems>
-        void loadSystems(std::string_view pluginDir = "", std::string_view creatorFunction = "getSystem", bool pluginsFirst = false) {
+        void loadSystems(const std::string & pluginDir = "", const std::string & creatorFunction = "getSystem", bool pluginsFirst = false) {
             if (pluginsFirst && pluginDir.size() > 0)
                 loadPlugins(pluginDir, creatorFunction);
 
@@ -140,12 +140,12 @@ namespace kengine {
         }
 
     private:
-        template<typename StringView>
-        void loadPlugins(StringView pluginDir, StringView creatorFunction) {
+        template<typename String, typename String2>
+        void loadPlugins(String && pluginDir, String2 && creatorFunction) {
             auto & em = static_cast<kengine::EntityManager &>(*this);
 
-            putils::PluginManager pm(pluginDir);
-            const auto systems = pm.executeWithReturn<kengine::ISystem *>(creatorFunction, em);
+            putils::PluginManager pm(FWD(pluginDir));
+            const auto systems = pm.executeWithReturn<kengine::ISystem *>(FWD(creatorFunction), em);
 
             for (auto s : systems)
                 addSystem(std::unique_ptr < kengine::ISystem > (s));

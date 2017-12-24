@@ -26,10 +26,10 @@ namespace kengine {
                               [&em](const std::string & name) { em.removeEntity(name); }
             );
             _lua.set_function("getEntity",
-                              [&em](std::string_view name) { return std::ref(em.getEntity(name)); }
+                              [&em](const std::string & name) { return std::ref(em.getEntity(name)); }
             );
             _lua.set_function("hasEntity",
-                              [&em](std::string_view name) { return em.hasEntity(name); }
+                              [&em](const std::string & name) { return em.hasEntity(name); }
             );
 
             _lua.set_function("getDeltaTime", [this] { return time.getDeltaTime(); });
@@ -67,10 +67,11 @@ namespace kengine {
         const sol::state & getState() const { return _lua; }
 
     public:
-        void addScriptDirectory(std::string_view dir) {
+        template<typename String>
+        void addScriptDirectory(String && dir) {
             try {
                 putils::Directory d(dir);
-                _directories.emplace_back(dir.data());
+                _directories.emplace_back(FWD(dir));
             }
             catch (const std::runtime_error & e) {
                 std::cerr << e.what() << std::endl;
@@ -168,9 +169,9 @@ namespace kengine {
                     [this, &toExecute](const std::string & name) { return _em.hasEntity(name); };
         }
 
-        void executeScript(std::string_view fileName) noexcept {
+        void executeScript(const std::string & fileName) noexcept {
             try {
-                _lua.script_file(fileName.data());
+                _lua.script_file(fileName);
             }
             catch (const std::exception & e) {
                 std::cerr << "[LuaSystem] Error in '" << fileName << "': " << e.what() << std::endl;

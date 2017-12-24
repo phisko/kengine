@@ -70,7 +70,7 @@ namespace kengine {
         }
 
     public:
-        std::string_view getName() const { return _name; }
+        const std::string & getName() const { return _name; }
         const std::vector<pmeta::type_index> & getTypes() const { return _types; }
 
     private:

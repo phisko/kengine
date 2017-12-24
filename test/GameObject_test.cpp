@@ -4,7 +4,7 @@
 struct GameObjectTest : testing::Test {
     struct A : kengine::Component<A> {
         A() = default;
-        A(std::string_view t) : msg(t.data()) {}
+        A(std::string_view t) : msg(t) {}
 
         std::string toString() const noexcept final { return ""; }
 

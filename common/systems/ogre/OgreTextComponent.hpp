@@ -15,7 +15,7 @@ public:
 public:
     // void setText(std::string_view text) { _text.setText(text); }
     // void setPosition(const putils::Point3d &pos) { _text.setPos({ pos.x, pos.y }); }
-    void setText(std::string_view text) { _text.setCaption(text.data()); }
+    void setText(const std::string & text) { _text.setCaption(text); }
     void setPosition(const putils::Point3d &pos) { _node.setPosition((float)pos.x, (float)pos.y, (float)pos.z); }
 
 public:

@@ -19,7 +19,7 @@ namespace kengine {
         ~EntityManager() = default;
 
     public:
-        GameObject & createEntity(std::string_view type, std::string_view name,
+        GameObject & createEntity(const std::string & type, const std::string & name,
                                   const std::function<void(GameObject &)> & postCreate = nullptr) {
             auto e = _factory->make(type, name);
 
@@ -29,8 +29,8 @@ namespace kengine {
             return addEntity(name, std::move(e));
         }
 
-        GameObject & createEntity(std::string_view type, const std::function<void(GameObject &)> & postCreate = nullptr) {
-            const auto it = _ids.find(type.data());
+        GameObject & createEntity(const std::string & type, const std::function<void(GameObject &)> & postCreate = nullptr) {
+            const auto it = _ids.find(type);
             if (it == _ids.end()) {
                 _ids.emplace(type, 0);
                 return createEntity(type, putils::concat(type, 0), postCreate);
@@ -39,7 +39,7 @@ namespace kengine {
         }
 
         template<class GO, typename ...Params>
-        GO & createEntity(std::string_view name,
+        GO & createEntity(const std::string & name,
                           const std::function<void(GameObject &)> & postCreate = nullptr,
                           Params && ...params) {
             static_assert(std::is_base_of<GameObject, GO>::value,
@@ -67,13 +67,13 @@ namespace kengine {
         }
 
     private:
-        GameObject & addEntity(std::string_view name, std::unique_ptr<GameObject> && obj) {
+        GameObject & addEntity(const std::string & name, std::unique_ptr<GameObject> && obj) {
             auto & ret = *obj;
 
-            if (_entities.find(name.data()) != _entities.end())
+            if (_entities.find(name) != _entities.end())
                 throw std::runtime_error("Entity exists");
 
-            _entities[name.data()] = std::move(obj);
+            _entities[name] = std::move(obj);
 
             ComponentManager::registerGameObject(ret);
             SystemManager::registerGameObject(ret);
@@ -85,11 +85,11 @@ namespace kengine {
         void removeEntity(kengine::GameObject & go) {
             SystemManager::removeGameObject(go);
             ComponentManager::removeGameObject(go);
-            _entities.erase(_entities.find(go.getName().data()));
+            _entities.erase(_entities.find(go.getName()));
         }
 
-        void removeEntity(std::string_view name) {
-            const auto p = _entities.find(name.data());
+        void removeEntity(const std::string & name) {
+            const auto p = _entities.find(name);
             if (p == _entities.end())
                 throw std::out_of_range("No such entity");
 
@@ -101,9 +101,9 @@ namespace kengine {
         }
 
     public:
-        GameObject & getEntity(std::string_view name) { return *_entities.at(name.data()); }
+        GameObject & getEntity(const std::string & name) { return *_entities.at(name); }
 
-        bool hasEntity(std::string_view name) const noexcept { return _entities.find(name.data()) != _entities.end(); }
+        bool hasEntity(const std::string & name) const noexcept { return _entities.find(name) != _entities.end(); }
 
     public:
         void addLink(const GameObject & parent, const GameObject & child) { _entityHierarchy[&child] = &parent; }

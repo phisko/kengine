@@ -52,9 +52,8 @@ namespace kengine {
 
         // Config parsers
     private:
-        putils::Point<std::size_t> parseSize(std::string_view propertyName,
-                                             const putils::Point<std::size_t> & _default);
-        bool parseBool(std::string_view propertyName, bool _default);
+        putils::Point<std::size_t> parseSize(const std::string & propertyName, const putils::Point<std::size_t> & _default);
+        bool parseBool(const std::string & propertyName, bool _default);
 
     private:
         kengine::EntityManager & _em;

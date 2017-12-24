@@ -76,8 +76,8 @@ namespace kengine {
      * Config parsers
      */
 
-    putils::Point<std::size_t> SfSystem::parseSize(std::string_view jsonProperty, const putils::Point<std::size_t> & _default) {
-        if (_config.fields.find(jsonProperty.data()) != _config.fields.end())
+    putils::Point<std::size_t> SfSystem::parseSize(const std::string & jsonProperty, const putils::Point<std::size_t> & _default) {
+        if (_config.fields.find(jsonProperty) != _config.fields.end())
             return {
                     (std::size_t) std::stoi(_config[jsonProperty]["x"]),
                     (std::size_t) std::stoi(_config[jsonProperty]["y"])
@@ -86,8 +86,8 @@ namespace kengine {
         return _default;
     }
 
-    bool SfSystem::parseBool(std::string_view propertyName, bool _default) {
-        if (_config.fields.find(propertyName.data()) != _config.fields.end())
+    bool SfSystem::parseBool(const std::string & propertyName, bool _default) {
+        if (_config.fields.find(propertyName) != _config.fields.end())
             return _config[propertyName].value == "true";
         return _default;
     }
@@ -302,12 +302,12 @@ namespace kengine {
 
         const auto & meta = go.getComponent<MetaComponent>();
 
-        std::string_view str = _appearances.find(meta.appearance) != _appearances.end()
-                               ? _appearances.at(meta.appearance)
-                               : meta.appearance;
+        auto str = _appearances.find(meta.appearance) != _appearances.end()
+                   ? _appearances.at(meta.appearance)
+                   : meta.appearance;
 
         auto & comp = go.attachComponent<SfComponent>(
-                std::make_unique<pse::Sprite>(str.data(),
+                std::make_unique<pse::Sprite>(str,
                                               sf::Vector2f{ 0, 0 },
                                               sf::Vector2f{ 16, 16 })
         );

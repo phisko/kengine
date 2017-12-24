@@ -18,10 +18,10 @@ namespace kengine {
         std::string debug;
 
     public:
-        void attachScript(std::string_view file) noexcept { _scripts.push_back(file.data()); }
+        void attachScript(const std::string & file) noexcept { _scripts.push_back(file); }
 
-        void removeScript(std::string_view file) noexcept {
-            _scripts.erase(std::find(_scripts.begin(), _scripts.end(), file.data()));
+        void removeScript(const std::string & file) noexcept {
+            _scripts.erase(std::find(_scripts.begin(), _scripts.end(), file));
         }
 
     public:
