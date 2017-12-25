@@ -9,7 +9,7 @@
 #include "OgreTextComponent.hpp"
 
 #include "common/components/TransformComponent.hpp"
-#include "common/components/MetaComponent.hpp"
+#include "common/components/GraphicsComponent.hpp"
 #include "common/components/CameraComponent.hpp"
 #include "common/components/GUIComponent.hpp"
 
@@ -159,7 +159,7 @@ void OgreSystem::execute()
 
 void OgreSystem::registerGameObject(kengine::GameObject &go)
 {
-    if (!go.hasComponent<kengine::MetaComponent>() && !go.hasComponent<kengine::CameraComponent3d>() && !go.hasComponent<kengine::GUIComponent>())
+    if (!go.hasComponent<kengine::GraphicsComponent>() && !go.hasComponent<kengine::CameraComponent3d>() && !go.hasComponent<kengine::GUIComponent>())
         return;
     ToSpawnLock _(_toSpawnMutex);
     _toSpawn.push_back(&go);
@@ -266,7 +266,7 @@ void OgreSystem::createEntity(kengine::GameObject &go) noexcept
         return;
     }
 
-    const auto &appearance = go.getComponent<kengine::MetaComponent>().appearance;
+    const auto &appearance = go.getComponent<kengine::GraphicsComponent>().appearance;
 
     if (appearance == "light")
     {

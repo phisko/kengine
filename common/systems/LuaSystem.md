@@ -43,10 +43,10 @@ This also defines the following function for lua scripts:
 * `sendT(T packet)` (e.g. `sendLog(Log packet)`): sends `packet` as a datapacket to all `Systems`
 
 If `T` is a `Component`, the following member functions is added to the `GameObject` lua type for lua scripts:
-* `getT()` (e.g. `getMetaComponent()`)
-* `hasT()` (e.g. `hasMetaComponent()`)
-* `attachT()` (e.g. `attachMetaComponent()`)
-* `detachT()` (e.g. `detachMetaComponent()`)
+* `getT()` (e.g. `getGraphicsComponent()`)
+* `hasT()` (e.g. `hasGraphicsComponent()`)
+* `attachT()` (e.g. `attachGraphicsComponent()`)
+* `detachT()` (e.g. `detachGraphicsComponent()`)
 
 A global `getGameObjectsWithT()` is also defined, that returns all the `GameObjects` with a `T` component.
 

@@ -6,7 +6,7 @@
 
 #include "common/systems/LuaSystem.hpp"
 #include "common/systems/LogSystem.hpp"
-#include "common/components/MetaComponent.hpp"
+#include "common/components/GraphicsComponent.hpp"
 #include "common/components/TransformComponent.hpp"
 
 int main(int, char ** av) {
@@ -32,7 +32,7 @@ int main(int, char ** av) {
     // Create a GameObject and attach Components to it
     auto & player = em.createEntity<kengine::GameObject>("player");
     player.attachComponent<kengine::TransformComponent3d>();
-    player.attachComponent<kengine::MetaComponent>();
+    player.attachComponent<kengine::GraphicsComponent>();
 
     // Attach a lua script to a GameObject
     auto & luaComp = player.attachComponent<kengine::LuaComponent>();
@@ -43,7 +43,7 @@ int main(int, char ** av) {
         auto & lua = em.getSystem<kengine::LuaSystem>();
         lua.addScriptDirectory("scripts");
         lua.registerTypes<
-                kengine::MetaComponent,
+                kengine::GraphicsComponent,
                 kengine::TransformComponent3d, putils::Point<double, 3>, putils::Rect<double, 3>,
                 kengine::LuaComponent,
                 kengine::packets::Log

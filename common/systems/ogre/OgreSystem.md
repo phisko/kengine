@@ -8,7 +8,7 @@
 
 ##### 'Normal' objects
 
-`OgreSystem` reads the mesh to be used for a `GameObject` from its [MetaComponent](../../components/MetaComponent.md)'s `appearance` property.
+`OgreSystem` reads the mesh to be used for a `GameObject` from its [GraphicsComponent](../../components/GraphicsComponent.md)'s `appearance` property.
 
 If `appearance` is *"light"*, `OgreSystem` will spawn a `PointLight` instead of a mesh.
 

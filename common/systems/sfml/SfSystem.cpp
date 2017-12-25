@@ -6,6 +6,7 @@
 
 #include "common/systems/LuaSystem.hpp"
 #include "common/components/GUIComponent.hpp"
+#include "common/components/CameraComponent.hpp"
 
 EXPORT kengine::ISystem * getSystem(kengine::EntityManager & em) {
     return new kengine::SfSystem(em);
@@ -97,6 +98,23 @@ namespace kengine {
      */
 
     void SfSystem::execute() {
+        for (auto go : _em.getGameObjects<kengine::CameraComponent3d>()) {
+            auto & view = _engine.getView(go->getName());
+
+            const auto & frustrum = go->getComponent<kengine::CameraComponent3d>().frustrum;
+            view.setCenter(
+                    (float)(frustrum.topLeft.x + frustrum.size.x / 2) * _tileSize.x,
+                    (float)(frustrum.topLeft.z + frustrum.size.z / 2) * _tileSize.y
+            );
+            view.setSize((float)frustrum.size.x * _tileSize.x, (float)frustrum.size.z * _tileSize.y);
+
+            const auto & box = go->getComponent<kengine::TransformComponent3d>().boundingBox;
+            view.setViewport(sf::FloatRect{
+                    (float)box.topLeft.x, (float)box.topLeft.z,
+                    (float)box.size.x, (float)box.size.z
+            });
+            _engine.setViewHeight(go->getName(), (size_t)box.topLeft.y);
+        }
 
         // Update positions
         for (auto go : _em.getGameObjects<SfComponent>()) {
@@ -129,7 +147,6 @@ namespace kengine {
     }
 
     void SfSystem::handleEvents() noexcept {
-         // Event handling
         static const std::unordered_map<sf::Event::EventType, std::function<void(const sf::Event &)>> handlers {
                 {
                         {
@@ -212,7 +229,7 @@ namespace kengine {
 
     void SfSystem::handle(const kengine::packets::RegisterGameObject & p) {
         auto & go = p.go;
-        if (!go.hasComponent<SfComponent>() && !go.hasComponent<MetaComponent>() &&
+        if (!go.hasComponent<SfComponent>() && !go.hasComponent<GraphicsComponent>() &&
             !go.hasComponent<kengine::GUIComponent>())
             return;
 
@@ -238,13 +255,16 @@ namespace kengine {
         }
         catch (const std::exception & e) {
             send(kengine::packets::Log{
-                    putils::concat("[SfSystem] Unknown appearance: ", go.getComponent<MetaComponent>().appearance)
+                    putils::concat("[SfSystem] Unknown appearance: ", go.getComponent<GraphicsComponent>().appearance)
             });
         }
     }
 
     void SfSystem::handle(const kengine::packets::RemoveGameObject & p) {
         auto & go = p.go;
+
+        if (go.hasComponent<kengine::CameraComponent3d>() && _engine.hasView(go.getName()))
+            _engine.removeView(go.getName());
 
         if (!go.hasComponent<SfComponent>())
             return;
@@ -300,16 +320,14 @@ namespace kengine {
             return comp;
         }
 
-        const auto & meta = go.getComponent<MetaComponent>();
+        const auto & meta = go.getComponent<GraphicsComponent>();
 
         auto str = _appearances.find(meta.appearance) != _appearances.end()
                    ? _appearances.at(meta.appearance)
                    : meta.appearance;
 
         auto & comp = go.attachComponent<SfComponent>(
-                std::make_unique<pse::Sprite>(str,
-                                              sf::Vector2f{ 0, 0 },
-                                              sf::Vector2f{ 16, 16 })
+                std::make_unique<pse::Sprite>(str, sf::Vector2f{ 0, 0 }, sf::Vector2f{ 16, 16 })
         );
 
         return comp;

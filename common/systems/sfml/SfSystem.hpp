@@ -2,7 +2,7 @@
 
 #include <SDL2/SDL.h>
 #include "System.hpp"
-#include "common/components/MetaComponent.hpp"
+#include "common/components/GraphicsComponent.hpp"
 #include "common/packets/RegisterAppearance.hpp"
 #include "common/packets/Input.hpp"
 #include "common/packets/RemoveGameObject.hpp"

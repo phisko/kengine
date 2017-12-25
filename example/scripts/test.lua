@@ -20,8 +20,8 @@ local new = createEntity("GameObject", "bob",
 local otherRef = getEntity("bob")
 
 -- attach a component
-local meta = new:attachMetaComponent()
-meta.appearance = "human"
+local graphics = new:attachGraphicsComponent()
+graphics.appearance = "human"
 
 local transform = new:attachTransformComponent()
 transform.boundingBox.topLeft.x = 42

@@ -31,7 +31,7 @@ These are pre-built, extensible and pluggable elements that can be used in any p
 ##### Components
 
 * [LuaComponent](common/components/LuaComponent.md): defines the lua scripts to be run by the `LuaSystem` for a `GameObject`
-* [MetaComponent](common/components/MetaComponent.md): provides metadata about a `GameObject`, such as its appearance, used by the `SfSystem`
+* [GraphicsComponent](common/components/GraphicsComponent.md): provides graphical information about a `GameObject`, such as its appearance, used by the `SfSystem`
 * [TransformComponent](common/components/TransformComponent.md): defines a `GameObject`'s position and size
 * [PhysicsComponent](common/components/PhysicsComponent.md): defines a `GameObject`'s movement
 * [PathfinderComponent](common/components/PathfinderComponent.md): defines a `GameObject`'s pathfinding information
@@ -83,7 +83,7 @@ Below is a commented main function that creates an entity and attaches some comp
 
 #include "common/systems/LuaSystem.hpp"
 #include "common/systems/LogSystem.hpp"
-#include "common/components/MetaComponent.hpp"
+#include "common/components/GraphicsComponent.hpp"
 #include "common/components/TransformComponent.hpp"
 
 int main(int, char **av)
@@ -110,7 +110,7 @@ int main(int, char **av)
     // Create a GameObject and attach Components to it
     auto &player = em.createEntity<kengine::GameObject>("player");
     player.attachComponent<kengine::TransformComponent3d>();
-    player.attachComponent<kengine::MetaComponent>();
+    player.attachComponent<kengine::GraphicsComponent>();
 
     // Attach a lua script to a GameObject
     auto &luaComp = player.attachComponent<kengine::LuaComponent>();
@@ -122,7 +122,7 @@ int main(int, char **av)
         auto &lua = em.getSystem<kengine::LuaSystem>();
         lua.addScriptDirectory("scripts"); // The LuaSystem automatically opens the "scripts" directory, this is just an example
         lua.registerTypes<
-                kengine::MetaComponent,
+                kengine::GraphicsComponent,
                 kengine::TransformComponent3d, putils::Point<double, 3>, putils::Rect<double, 3>,
                 kengine::LuaComponent,
                 kengine::packets::Log
@@ -157,7 +157,7 @@ local new = createEntity("GameObject", "bob",
 local otherRef = getEntity("bob")
 
 -- attach a component
-local meta = new:attachMetaComponent()
+local meta = new:attachGraphicsComponent()
 meta.appearance = "human"
 
 local transform = new:attachTransformComponent()
@@ -172,7 +172,7 @@ for i, e in ipairs(getGameObjects()) do
 end
 
 -- iterate over specific entities
-for i, e in ipairs(getGameObjectsWithMetaComponent()) do
+for i, e in ipairs(getGameObjectsWithGraphicsComponent()) do
     local comp = e:getTransformComponent()
     print(comp)
 end
