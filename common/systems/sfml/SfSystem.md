@@ -20,11 +20,11 @@ If `appearance` was previously registered as an abstract appearance through a [R
 
 ##### Cameras
 
-A *"default"* camera is added upon system construction, meaning typical use does not require any action. For further configuration of the rendered areas, `CameraComponents` can be used.
+A *"default"* camera is added upon system construction, meaning typical use does not require any action. For further configuration of the rendered areas, `CameraComponents3d` can be used.
 
-If a `GameObject` is found to have a [CameraComponent](../../components/CameraComponent.hpp), a camera will be added to the scene.
+If a `GameObject` is found to have a [CameraComponent3d](../../components/CameraComponent.hpp), a camera will be added to the scene.
 
- The `CameraComponent`'s `frustrum` property defines the area to be rendered, whereas the `GameObject`'s `TransformComponent3d`'s `boundingBox` property defines the bounds of the viewport to be displayed. The `boundingBox.topLeft.y` property defines the "height" at which the camera should be rendered (higher cameras appear in front of lower ones).
+ The `CameraComponent3d`'s `frustrum` property defines the area to be rendered, whereas the `GameObject`'s `TransformComponent3d`'s `boundingBox` property defines the bounds of the viewport to be displayed. The `boundingBox.topLeft.y` property defines the "height" at which the camera should be rendered (higher cameras appear in front of lower ones).
 
 Refer to [the SFML website](https://www.sfml-dev.org/tutorials/2.0/graphics-view.php) for more information about viewports.
 
