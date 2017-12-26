@@ -42,7 +42,10 @@ namespace kengine {
 
     private:
         SfComponent & getResource(kengine::GameObject & go);
+        void registerLuaFunctions() noexcept;
         void handleEvents() noexcept;
+        void updateCameras() noexcept;
+        void updateDrawables() noexcept;
 
     private:
         putils::json::Object _config;

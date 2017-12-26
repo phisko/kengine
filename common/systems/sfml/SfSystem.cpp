@@ -35,8 +35,12 @@ namespace kengine {
         for (const auto go : _em.getGameObjects())
             handle(kengine::packets::RegisterGameObject{ *go });
 
+        registerLuaFunctions();
+    }
+
+    void SfSystem::registerLuaFunctions() noexcept {
         try {
-            auto & lua = em.getSystem<kengine::LuaSystem>().getState();
+            auto & lua = _em.getSystem<kengine::LuaSystem>().getState();
 
             lua["getWindowSize"] = [this] {
                 const auto size = _engine.getRenderWindow().getSize();
@@ -59,14 +63,14 @@ namespace kengine {
                 handler.onRelease = onRelease;
             };
 
-            lua["setMouseButtonHandler"] = [this, &em](const std::function<void(sf::Mouse::Button, int x, int y)> & onPress,
+            lua["setMouseButtonHandler"] = [this](const std::function<void(sf::Mouse::Button, int x, int y)> & onPress,
                                                        const std::function<void(sf::Mouse::Button, int x, int y)> & onRelease) {
                 auto & handler = _mouseButtonHandlers[sf::Mouse::ButtonCount];
                 handler.onPress = onPress;
                 handler.onRelease = onRelease;
             };
 
-            lua["setMouseMovedHandler"] = [this, &em](const std::function<void(int x, int y)> & func) {
+            lua["setMouseMovedHandler"] = [this](const std::function<void(int x, int y)> & func) {
                 _mouseMovedHandler = [func](const putils::Point2i & p) { func(p.x, p.y); };
             };
         }
@@ -98,7 +102,19 @@ namespace kengine {
      */
 
     void SfSystem::execute() {
-        for (auto go : _em.getGameObjects<kengine::CameraComponent3d>()) {
+        handleEvents();
+        updateCameras();
+        updateDrawables();
+        _engine.update(true);
+    }
+
+    void SfSystem::updateCameras() noexcept {
+        const auto & cameras = _em.getGameObjects<kengine::CameraComponent3d>();
+
+        if (!cameras.empty())
+            _engine.removeView("default");
+
+        for (auto go : cameras) {
             auto & view = _engine.getView(go->getName());
 
             const auto & frustrum = go->getComponent<kengine::CameraComponent3d>().frustrum;
@@ -115,7 +131,9 @@ namespace kengine {
             });
             _engine.setViewHeight(go->getName(), (size_t)box.topLeft.y);
         }
+    }
 
+    void SfSystem::updateDrawables() noexcept {
         // Update positions
         for (auto go : _em.getGameObjects<SfComponent>()) {
             auto & comp = go->getComponent<SfComponent>();
@@ -141,9 +159,6 @@ namespace kengine {
             auto & view = static_cast<pse::Text &>(go->getComponent<SfComponent>().getViewItem());
             view.setString(gui.text);
         }
-
-        handleEvents();
-        _engine.update(true);
     }
 
     void SfSystem::handleEvents() noexcept {
@@ -215,7 +230,6 @@ namespace kengine {
         };
 
         sf::Event e;
-
         while (_engine.pollEvent(e)) {
             const auto it = handlers.find(e.type);
 
