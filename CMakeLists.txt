@@ -58,3 +58,5 @@ if (KENGINE_TEST)
                 coverage)
     endif ()
 endif ()
+
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} PARENT_SCOPE)
