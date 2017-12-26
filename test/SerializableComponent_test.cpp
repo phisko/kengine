@@ -11,6 +11,6 @@ struct SerializableComponentTest : testing::Test {
 };
 
 TEST_F(SerializableComponentTest, Test) {
-    EXPECT_EQ(putils::to_string(A()), "{msg: \"msg\"}");
+    EXPECT_EQ(putils::to_string(A()), "{\"msg\": \"msg\"}");
     EXPECT_EQ(putils::to_string(A()), A().toString());
 }
