@@ -154,25 +154,25 @@ namespace kengine {
     public:
         template<typename T>
         T & getSystem() {
-            static_assert(std::is_base_of<System<T>, T>::value, "Attempt to get something that isn't a System");
+            static_assert(std::is_base_of<ISystem, T>::value, "Attempt to get something that isn't a System");
             return static_cast<T &>(*_systems.at(pmeta::type<T>::index));
         }
 
         template<typename T>
         const T & getSystem() const {
-            static_assert(std::is_base_of<System<T>, T>::value, "Attempt to get something that isn't a System");
+            static_assert(std::is_base_of<ISystem, T>::value, "Attempt to get something that isn't a System");
             return static_cast<const T &>(*_systems.at(pmeta::type<T>::index));
         }
 
         template<typename T>
         bool hasSystem() const noexcept {
-            static_assert(std::is_base_of<System<T>, T>::value, "Attempt to check something that isn't a System");
+            static_assert(std::is_base_of<ISystem, T>::value, "Attempt to check something that isn't a System");
             return _systems.find(pmeta::type<T>::index) != _systems.end();
         }
 
         template<typename T>
         void removeSystem() noexcept {
-            static_assert(std::is_base_of<System<T>, T>::value, "Attempt to remove something that isn't a System");
+            static_assert(std::is_base_of<ISystem, T>::value, "Attempt to remove something that isn't a System");
             _toRemove.emplace_back(pmeta::type<T>::index);
         }
 
