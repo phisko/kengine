@@ -20,27 +20,28 @@ namespace kengine {
 
             _lua.set_function("getGameObjects", [&em] { return std::ref(em.getGameObjects()); });
 
-            _lua.set_function("createEntity",
-                              [&em](const std::string & type, const std::string & name, const sol::function & f) { return std::ref(em.createEntity(type, name, f)); }
-            );
-            _lua.set_function("createNoNameEntity",
-                              [&em](const std::string & type, const sol::function & f) { return std::ref(em.createEntity(type, f)); }
-            );
-            _lua.set_function("removeEntity",
-                              [&em](const std::string & name) { em.removeEntity(name); }
-            );
-            _lua.set_function("getEntity",
-                              [&em](const std::string & name) { return std::ref(em.getEntity(name)); }
-            );
-            _lua.set_function("hasEntity",
-                              [&em](const std::string & name) { return em.hasEntity(name); }
-            );
+            _lua["createEntity"] =
+                    [this](const std::string & type, const std::string & name, const sol::function & f) {
+                        _toExecute.push_back([this, type, name, f] { _em.createEntity(type, name, f); });
+                    };
+            _lua["createNoNameEntity"] =
+                    [&em](const std::string & type, const sol::function & f) {
+                        return std::ref(em.createEntity(type, f));
+                    };
 
-            _lua.set_function("getDeltaTime", [this] { return time.getDeltaTime(); });
-            _lua.set_function("getFixedDeltaTime", [this] { return time.getFixedDeltaTime(); });
-            _lua.set_function("getDeltaFrames", [this] { return time.getDeltaFrames(); });
+            _lua["removeEntity"] =
+                    [this](const std::string & name) {
+                        _toExecute.push_back([this, name] { _em.removeEntity(name); });
+                    };
 
-            _lua.set_function("stopRunning", [&em] { em.running = false; });
+            _lua["getEntity"] = [&em](const std::string & name) { return std::ref(em.getEntity(name)); };
+            _lua["hasEntity"] = [&em](const std::string & name) { return em.hasEntity(name); };
+
+            _lua["getDeltaTime"] = [this] { return time.getDeltaTime(); };
+            _lua["getFixedDeltaTime"] = [this] { return time.getFixedDeltaTime(); };
+            _lua["getDeltaFrames"] = [this] { return time.getDeltaFrames(); };
+
+            _lua["stopRunning"] = [&em] { em.running = false; };
 
             registerType<kengine::GameObject>();
         }
@@ -87,8 +88,11 @@ namespace kengine {
         // System methods
     public:
         void execute() final {
+            _toExecute.clear();
             executeDirectories();
             executeScriptedObjects();
+            for (const auto & f: _toExecute)
+                f();
         }
 
         // Helpers
@@ -135,26 +139,6 @@ namespace kengine {
         }
 
         void executeScriptedObjects() noexcept {
-            std::vector<std::function<void()>> toExecute;
-            std::vector<std::string> toRemove;
-
-            _lua["createEntity"] =
-                    [this, &toExecute](const std::string & type, const std::string & name, const sol::function & f) {
-                        toExecute.push_back([this, type, name, f] { _em.createEntity(type, name, f); });
-                    };
-
-            _lua["removeEntity"] =
-                    [this, &toExecute, &toRemove](const std::string & name) {
-                        toExecute.push_back([this, name] { _em.removeEntity(name); });
-                        toRemove.push_back(name);
-                    };
-
-            _lua["hasEntity"] =
-                    [this, &toExecute, &toRemove](const std::string & name) {
-                        return _em.hasEntity(name) &&
-                               std::find(toRemove.begin(), toRemove.end(), name) == toRemove.end();
-                    };
-
             for (const auto go : _em.getGameObjects<kengine::LuaComponent>()) {
                 const auto & comp = go->getComponent<kengine::LuaComponent>();
                 for (const auto & s : comp.getScripts()) {
@@ -163,16 +147,6 @@ namespace kengine {
                 }
             }
             _lua["self"] = sol::nil;
-
-            for (const auto & f : toExecute)
-                f();
-
-            _lua["createEntity"] =
-                    [this](const std::string & type, const std::string & name, const sol::function & f) { return std::ref(_em.createEntity(type, name, f)); };
-            _lua["removeEntity"] =
-                    [this](const std::string & name) { _em.removeEntity(name); };
-            _lua["hasEntity"] =
-                    [this, &toExecute](const std::string & name) { return _em.hasEntity(name); };
         }
 
         void executeScript(const std::string & fileName) noexcept {
@@ -188,5 +162,6 @@ namespace kengine {
         kengine::EntityManager & _em;
         std::vector<std::string> _directories;
         sol::state _lua;
+        std::vector<std::function<void()>> _toExecute;
     };
 }
