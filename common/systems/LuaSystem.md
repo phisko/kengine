@@ -9,7 +9,8 @@
 The constructor automatically defines the following functions for lua scripts:
 
 * `getGameObjects()`: returns all the `GameObjects` currently in existence.
-* `createEntity(string type, string name)`
+* `createEntity(string type, string name, function postCreate)`
+* `createNoNameEntity(string type, function postCreate)`
 * `removeEntity(string name)`
 * `getEntity(string name)`
 * `hasEntity(string name)`
@@ -67,3 +68,7 @@ For each type in `Types`, call `registerType` for it.
 void addScriptDirectory(std::string_view dir) noexcept;
 ```
 Adds `dir` as one of the directories in which to execute lua scripts. Each frame, all the files in `dir` will be interpreted as lua scripts and executed.
+
+### Queries
+
+In order to easily extend the `LuaSystem`'s behavior (cf. [LuaCollisionSystem](LuaCollisionSystem.md)), the lua global state can be obtained through a [LuaState::Query](../packets/LuaState.hpp).

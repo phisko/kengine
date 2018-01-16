@@ -7,9 +7,10 @@
 
 #include "EntityManager.hpp"
 #include "common/components/LuaComponent.hpp"
+#include "common/packets/LuaState.hpp"
 
 namespace kengine {
-    class LuaSystem : public kengine::System<LuaSystem> {
+    class LuaSystem : public kengine::System<LuaSystem, kengine::packets::LuaState::Query> {
     public:
         LuaSystem(kengine::EntityManager & em) : _em(em) {
             try { addScriptDirectory("scripts"); }
@@ -21,6 +22,9 @@ namespace kengine {
 
             _lua.set_function("createEntity",
                               [&em](const std::string & type, const std::string & name, const sol::function & f) { return std::ref(em.createEntity(type, name, f)); }
+            );
+            _lua.set_function("createNoNameEntity",
+                              [&em](const std::string & type, const sol::function & f) { return std::ref(em.createEntity(type, f)); }
             );
             _lua.set_function("removeEntity",
                               [&em](const std::string & name) { em.removeEntity(name); }
@@ -41,6 +45,7 @@ namespace kengine {
             registerType<kengine::GameObject>();
         }
 
+    public:
         template<typename T>
         void registerType() noexcept {
             putils::lua::registerType<T>(_lua);
@@ -63,10 +68,6 @@ namespace kengine {
         }
 
     public:
-        sol::state & getState() { return _lua; }
-        const sol::state & getState() const { return _lua; }
-
-    public:
         template<typename String>
         void addScriptDirectory(String && dir) {
             try {
@@ -76,6 +77,11 @@ namespace kengine {
             catch (const std::runtime_error & e) {
                 std::cerr << e.what() << std::endl;
             }
+        }
+
+    public:
+        void handle(const kengine::packets::LuaState::Query & q) noexcept {
+            sendTo(kengine::packets::LuaState::Response{ &_lua }, *q.sender);
         }
 
         // System methods

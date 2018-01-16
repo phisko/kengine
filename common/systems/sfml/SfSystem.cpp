@@ -25,7 +25,8 @@ namespace kengine {
     }
 
     SfSystem::SfSystem(kengine::EntityManager & em)
-            : _config(parseConfig()),
+            : putils::BaseModule(&em),
+              _config(parseConfig()),
               _screenSize(parseSize("windowSize", { 1280, 720 })),
               _tileSize(parseSize("tileSize", { 1, 1 })),
               _fullScreen(parseBool("fullScreen", false)),
@@ -40,7 +41,7 @@ namespace kengine {
 
     void SfSystem::registerLuaFunctions() noexcept {
         try {
-            auto & lua = _em.getSystem<kengine::LuaSystem>().getState();
+            auto & lua = *query<kengine::packets::LuaState::Response>(kengine::packets::LuaState::Query{}).state;
 
             lua["getWindowSize"] = [this] {
                 const auto size = _engine.getRenderWindow().getSize();
