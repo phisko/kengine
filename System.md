@@ -50,6 +50,11 @@ Should return 0 if the framerate shouldn't be limited.
 Each `System` has a `time` member that exposes the following functions:
 
 ```cpp
+double getDeltaFrames() const;
+```
+Returns the number of frames since the last call to `execute`.
+
+```cpp
 putils::Timer::t_duration getDeltaTime() const;
 ```
 Returns the time since the last call to `execute`.
