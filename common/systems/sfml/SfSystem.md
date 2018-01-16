@@ -61,15 +61,15 @@ This file should contain a single JSON object, with `windowSize`, `tileSize` and
 
 ```
 {
-    windowSize: {
-        x: 1280,
-        y: 720
-    }
-    tileSize: {
-        x: 16,
-        y: 16
-    }
-    fullScreen: false
+    "windowSize": {
+        "x": 1280,
+        "y": 720
+    },
+    "tileSize": {
+        "x": 16,
+        "y": 16
+    },
+    "fullScreen": false
 }
 ```
 
