@@ -16,7 +16,7 @@ namespace kengine {
     }
 
     class PhysicsSystem : public kengine::System<PhysicsSystem,
-            kengine::packets::RegisterGameObject,
+            kengine::packets::RegisterGameObject, kengine::packets::RemoveGameObject,
             packets::Position::Query, packets::QuadTreeQuery> {
     public:
         PhysicsSystem(kengine::EntityManager & em)
@@ -37,6 +37,12 @@ namespace kengine {
                 _tree.add(&go, { { box.topLeft.x, box.topLeft.z },
                                  { box.size.x,    box.size.z } });
             }
+        }
+
+        void handle(const kengine::packets::RemoveGameObject & p) noexcept {
+             auto & go = p.go;
+            if (go.hasComponent<kengine::TransformComponent3d>() && go.hasComponent<kengine::PhysicsComponent>())
+                _tree.remove(&go);
         }
 
     public:
