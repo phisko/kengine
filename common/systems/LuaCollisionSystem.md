@@ -4,19 +4,12 @@
 
 ### Behavior
 
-##### *"collisions"* table
-
-Whenever a `Collision` packet is received, the `LuaCollisionSystem` adds an entry to the ***"collisions"*** table in the `LuaSystem`'s state.
-
-After receiving a `Collision` between two entities *"A"* and *"B"*, the following will be true:
+Upon construction, a global `collisionHandlers` table is definde in the `LuaSystem`'s state. This table can be populated by scripts by adding functions with the following prototype:
 
 ```lua
-collisions["A"] == "B"
-collisions["B"] == "A"
+function (name, otherName) end
 ```
 
-The table is never purged or reset. Once a collision is processed, scripts should remove it from the table.
+`name` and `otherName` are the names of the [GameObjects](../../GameObject.md) involved in the collision.
 
-##### Collision handlers
-
-Whenever a `Collision` packet is received, the `LuaCollisionSystem` also looks for a `collis
+Whenever a `Collision` packet is received, the `LuaCollisionSystem` iterates over the `collisionHandlers` table and calls each handler it contains with the name of the two `GameObjects` involved.
