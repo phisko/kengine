@@ -31,7 +31,6 @@ namespace kengine {
 
             _lua["removeEntity"] =
                     [this](const std::string & name) {
-                        std::cout << "[system] Removing " << name << std::endl;
                         _toExecute.push_back([this, name] { _em.removeEntity(name); });
                     };
 
