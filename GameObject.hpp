@@ -145,7 +145,7 @@ CT & kengine::GameObject::attachComponent(std::unique_ptr<CT> && comp) {
 
     addModule(*comp);
     const auto type = comp->getType();
-    _components.emplace(type, std::move(comp));
+    _components[type] = std::move(comp);
     _types.push_back(type);
 
     if (_manager)
