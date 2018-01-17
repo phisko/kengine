@@ -18,7 +18,7 @@ namespace kengine {
 
             _lua.open_libraries();
 
-            _lua.set_function("getGameObjects", [&em] { return std::ref(em.getGameObjects()); });
+            _lua["getGameObjects"] = [&em] { return std::ref(em.getGameObjects()); };
 
             _lua["createEntity"] =
                     [this](const std::string & type, const std::string & name, const sol::function & f) {
@@ -31,6 +31,7 @@ namespace kengine {
 
             _lua["removeEntity"] =
                     [this](const std::string & name) {
+                        std::cout << "[system] Removing " << name << std::endl;
                         _toExecute.push_back([this, name] { _em.removeEntity(name); });
                     };
 
@@ -88,11 +89,12 @@ namespace kengine {
         // System methods
     public:
         void execute() final {
-            _toExecute.clear();
             executeDirectories();
             executeScriptedObjects();
-            for (const auto & f: _toExecute)
-                f();
+            for (const auto & f: _toExecute) {
+                try { f(); } catch (const std::exception &) {}
+            }
+            _toExecute.clear();
         }
 
         // Helpers
