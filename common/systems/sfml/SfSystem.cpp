@@ -153,13 +153,17 @@ namespace kengine {
                 );
 
             _engine.setItemHeight(comp.getViewItem(), (std::size_t) pos.y);
-        }
 
-        // GUI elements
-        for (const auto go : _em.getGameObjects<kengine::GUIComponent>()) {
-            const auto & gui = go->getComponent<kengine::GUIComponent>();
-            auto & view = static_cast<pse::Text &>(go->getComponent<SfComponent>().getViewItem());
-            view.setString(gui.text);
+            if (go->hasComponent<kengine::GraphicsComponent>()) {
+                const auto & appearance = go->getComponent<kengine::GraphicsComponent>().appearance;
+                auto & sprite = static_cast<pse::Sprite &>(comp.getViewItem());
+                sprite.setTexture(appearance);
+            }
+            else if (go->hasComponent<kengine::GUIComponent>()) {
+                const auto & gui = go->getComponent<kengine::GUIComponent>();
+                auto & view = static_cast<pse::Text &>(comp.getViewItem());
+                view.setString(gui.text);
+            }
         }
     }
 
@@ -338,9 +342,9 @@ namespace kengine {
 
         const auto & meta = go.getComponent<GraphicsComponent>();
 
-        auto str = _appearances.find(meta.appearance) != _appearances.end()
-                   ? _appearances.at(meta.appearance)
-                   : meta.appearance;
+        const auto & str = _appearances.find(meta.appearance) != _appearances.end()
+                           ? _appearances.at(meta.appearance)
+                           : meta.appearance;
 
         auto & comp = go.attachComponent<SfComponent>(
                 std::make_unique<pse::Sprite>(str, sf::Vector2f{ 0, 0 }, sf::Vector2f{ 16, 16 })
