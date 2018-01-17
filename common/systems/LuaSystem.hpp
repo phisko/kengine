@@ -24,9 +24,10 @@ namespace kengine {
                     [this](const std::string & type, const std::string & name, const sol::function & f) {
                         _toExecute.push_back([this, type, name, f] { _em.createEntity(type, name, f); });
                     };
+
             _lua["createNoNameEntity"] =
-                    [&em](const std::string & type, const sol::function & f) {
-                        return std::ref(em.createEntity(type, f));
+                    [this](const std::string & type, const sol::function & f) {
+                        _toExecute.push_back([this, type, f] { _em.createEntity(type, f); });
                     };
 
             _lua["removeEntity"] =
@@ -91,7 +92,11 @@ namespace kengine {
             executeDirectories();
             executeScriptedObjects();
             for (const auto & f: _toExecute) {
-                try { f(); } catch (const std::exception &) {}
+                try {
+                    f();
+                } catch (const std::exception &e) {
+                    std::cerr << "[LuaSystem] Error: '" <<  e.what() << std::endl;
+                }
             }
             _toExecute.clear();
         }
