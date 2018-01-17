@@ -3,8 +3,9 @@
 #include "EntityManager.hpp"
 #include "common/components/TransformComponent.hpp"
 #include "common/packets/Log.hpp"
+#include "common/packets/LuaState.hpp"
+#include "lua/plua.hpp"
 
-#include "common/systems/LuaSystem.hpp"
 #include "common/components/GUIComponent.hpp"
 #include "common/components/CameraComponent.hpp"
 
