@@ -71,7 +71,7 @@ namespace kengine {
             auto & ret = *obj;
 
             if (_entities.find(name) != _entities.end())
-                throw std::runtime_error("Entity exists");
+                throw std::runtime_error(name + ": entity exists");
 
             _entities[name] = std::move(obj);
 
@@ -91,7 +91,7 @@ namespace kengine {
         void removeEntity(const std::string & name) {
             const auto p = _entities.find(name);
             if (p == _entities.end())
-                throw std::out_of_range("No such entity");
+                throw std::out_of_range(name + ": no such entity");
 
             const auto & [_, e] = *p;
 
