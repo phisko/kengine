@@ -12,6 +12,8 @@
 
 If `appearance` was previously registered as an abstract appearance through a [RegisterAppearance](../../packets/RegisterAppearance.hpp) datapacket, the resource file that was associated to it is loaded instead.
 
+If the `GraphicsComponent`'s `size` property's `x` or `y` fields are set to anything but 0, the `SfSystem` wil use these values instead of the `TransformComponent3d`'s to set the drawable's size.
+
 `SfSystem` expects `GameObjects` to have a [TransformComponent3d](../../components/TransformComponent.md) component, to specify its size and position. The position's `z` property defines the "height" at which objects will be rendered.
 
 ```

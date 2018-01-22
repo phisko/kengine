@@ -155,9 +155,16 @@ namespace kengine {
             comp.getViewItem().setRotation(transform.yaw);
 
             if (go->hasComponent<kengine::GraphicsComponent>()) {
-                const auto & appearance = go->getComponent<kengine::GraphicsComponent>().appearance;
+                const auto & graphics = go->getComponent<kengine::GraphicsComponent>();
+                const auto & appearance = graphics.appearance;
                 auto & sprite = static_cast<pse::Sprite &>(comp.getViewItem());
                 sprite.setTexture(appearance);
+
+                if (graphics.size.x != 0 || graphics.size.z != 0) {
+                    comp.getViewItem().setSize(
+                            { (float) (_tileSize.x * graphics.size.x), (float) (_tileSize.y * graphics.size.z) }
+                    );
+                }
             } else if (go->hasComponent<kengine::GUIComponent>()) {
                 const auto & gui = go->getComponent<kengine::GUIComponent>();
                 auto & view = static_cast<pse::Text &>(comp.getViewItem());
