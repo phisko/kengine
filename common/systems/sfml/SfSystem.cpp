@@ -136,7 +136,6 @@ namespace kengine {
     }
 
     void SfSystem::updateDrawables() noexcept {
-        // Update positions
         for (auto go : _em.getGameObjects<SfComponent>()) {
             auto & comp = go->getComponent<SfComponent>();
             const auto & transform = go->getComponent<kengine::TransformComponent3d>();
@@ -145,6 +144,7 @@ namespace kengine {
             comp.getViewItem().setPosition(
                     { (float) (_tileSize.x * pos.x), (float) (_tileSize.y * pos.z) }
             );
+            _engine.setItemHeight(comp.getViewItem(), (std::size_t) pos.y);
 
             const auto & size = transform.boundingBox.size;
             if (!comp.isFixedSize())
@@ -152,14 +152,13 @@ namespace kengine {
                         { (float) (_tileSize.x * size.x), (float) (_tileSize.y * size.z) }
                 );
 
-            _engine.setItemHeight(comp.getViewItem(), (std::size_t) pos.y);
+            comp.getViewItem().setRotation(transform.yaw);
 
             if (go->hasComponent<kengine::GraphicsComponent>()) {
                 const auto & appearance = go->getComponent<kengine::GraphicsComponent>().appearance;
                 auto & sprite = static_cast<pse::Sprite &>(comp.getViewItem());
                 sprite.setTexture(appearance);
-            }
-            else if (go->hasComponent<kengine::GUIComponent>()) {
+            } else if (go->hasComponent<kengine::GUIComponent>()) {
                 const auto & gui = go->getComponent<kengine::GUIComponent>();
                 auto & view = static_cast<pse::Text &>(comp.getViewItem());
                 view.setString(gui.text);
