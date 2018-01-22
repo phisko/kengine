@@ -32,7 +32,8 @@ namespace kengine {
 
         void handle(const kengine::packets::RegisterGameObject & p) noexcept {
             auto & go = p.go;
-            if (go.hasComponent<kengine::TransformComponent3d>() && go.hasComponent<kengine::PhysicsComponent>()) {
+            if (go.hasComponent<kengine::TransformComponent3d>() && go.hasComponent<kengine::PhysicsComponent>() &&
+                go.getComponent<kengine::PhysicsComponent>().solid) {
                 const auto & box = go.getComponent<kengine::TransformComponent3d>().boundingBox;
                 _tree.add(&go, { { box.topLeft.x, box.topLeft.z },
                                  { box.size.x,    box.size.z } });
@@ -40,8 +41,9 @@ namespace kengine {
         }
 
         void handle(const kengine::packets::RemoveGameObject & p) noexcept {
-             auto & go = p.go;
-            if (go.hasComponent<kengine::TransformComponent3d>() && go.hasComponent<kengine::PhysicsComponent>())
+            auto & go = p.go;
+            if (go.hasComponent<kengine::TransformComponent3d>() && go.hasComponent<kengine::PhysicsComponent>() &&
+                go.getComponent<kengine::PhysicsComponent>().solid)
                 _tree.remove(&go);
         }
 
@@ -80,8 +82,11 @@ namespace kengine {
             const auto pos = putils::Rect2d{ { dest.x,     dest.z },
                                              { box.size.x, box.size.z } };
             box.topLeft = dest;
-            _tree.move(&go, pos);
-            checkCollisions(go, pos);
+
+            if (phys.solid) {
+                _tree.move(&go, pos);
+                checkCollisions(go, pos);
+            }
         }
 
         putils::Point3d getNewPos(const putils::Point3d & pos, const putils::Point3d & movement, double speed) {
