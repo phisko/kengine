@@ -66,8 +66,10 @@ namespace kengine {
 
         // Input
     private:
+        std::unordered_map<sf::Keyboard::Key, bool> _pressedKeys;
         std::unordered_map<sf::Keyboard::Key, packets::RegisterKeyHandler> _keyHandlers;
         std::function<void(const putils::Point2i &)> _mouseMovedHandler = nullptr;
+        std::unordered_map<sf::Mouse::Button, bool> _pressedButtons;
         std::unordered_map<sf::Mouse::Button, packets::RegisterMouseButtonHandler> _mouseButtonHandlers;
     };
 }

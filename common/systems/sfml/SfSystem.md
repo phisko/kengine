@@ -12,9 +12,11 @@
 
 If `appearance` was previously registered as an abstract appearance through a [RegisterAppearance](../../packets/RegisterAppearance.hpp) datapacket, the resource file that was associated to it is loaded instead.
 
+`SfSystem` expects `GameObjects` to have a [TransformComponent3d](../../components/TransformComponent.md) component, to specify its size and position. The position's `z` property defines the "height" at which objects will be rendered.
+
 If the `GraphicsComponent`'s `size` property's `x` or `y` fields are set to anything but 0, the `SfSystem` wil use these values instead of the `TransformComponent3d`'s to set the drawable's size.
 
-`SfSystem` expects `GameObjects` to have a [TransformComponent3d](../../components/TransformComponent.md) component, to specify its size and position. The position's `z` property defines the "height" at which objects will be rendered.
+A `GameObject`'s rotation is defined by its `TransformComponent3d`'s `yaw` property ADDED TO its `GraphicsComponent`'s yaw property. This lets you define a graphical yaw that you do not have to compensate throughout the rest of your code (as you simply work on the `TransformComponent`).
 
 ```
 /!\ That 3d is important! TransformComponent2d, 2i, 3i, 3f... Will not be detected!

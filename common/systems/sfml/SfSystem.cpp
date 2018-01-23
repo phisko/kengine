@@ -152,13 +152,15 @@ namespace kengine {
                         { (float) (_tileSize.x * size.x), (float) (_tileSize.y * size.z) }
                 );
 
-            comp.getViewItem().setRotation(transform.yaw);
+            comp.getViewItem().setRotation(-transform.yaw);
 
             if (go->hasComponent<kengine::GraphicsComponent>()) {
                 const auto & graphics = go->getComponent<kengine::GraphicsComponent>();
                 const auto & appearance = graphics.appearance;
                 auto & sprite = static_cast<pse::Sprite &>(comp.getViewItem());
                 sprite.setTexture(appearance);
+
+                comp.getViewItem().setRotation(-transform.yaw - graphics.yaw);
 
                 if (graphics.size.x != 0 || graphics.size.z != 0) {
                     comp.getViewItem().setSize(
@@ -186,6 +188,11 @@ namespace kengine {
                         {
                                 sf::Event::KeyPressed,
                                 [this](auto && e) {
+                                    const auto pressed = _pressedKeys.find(e.key.code);
+                                    if (pressed != _pressedKeys.end() && pressed->second)
+                                        return;
+                                    _pressedKeys[e.key.code] = true;
+
                                     const auto it = _keyHandlers.find(e.key.code);
                                     if (it != _keyHandlers.end())
                                         it->second.onPress(e.key.code);
@@ -198,8 +205,10 @@ namespace kengine {
                         {
                                 sf::Event::KeyReleased,
                                 [this](auto && e) {
+                                    _pressedKeys[e.key.code] = false;
+
                                     const auto it = _keyHandlers.find(e.key.code);
-                                    if (it != _keyHandlers.end())
+                                    if (it != _keyHandlers.cend())
                                         it->second.onRelease(e.key.code);
 
                                     const auto it2 = _keyHandlers.find(sf::Keyboard::KeyCount);
@@ -217,6 +226,11 @@ namespace kengine {
                         {
                                 sf::Event::MouseButtonPressed,
                                 [this](auto && e) {
+                                    const auto pressed = _pressedButtons.find(e.mouseButton.button);
+                                    if (pressed != _pressedButtons.cend() && pressed->second)
+                                        return;
+                                    _pressedButtons[e.mouseButton.button] = true;
+
                                     const auto it = _mouseButtonHandlers.find(e.mouseButton.button);
                                     if (it != _mouseButtonHandlers.end())
                                         it->second.onPress(e.mouseButton.button, e.mouseButton.x, e.mouseButton.y);
@@ -229,6 +243,8 @@ namespace kengine {
                         {
                                 sf::Event::MouseButtonReleased,
                                 [this](auto && e) {
+                                    _pressedButtons[e.mouseButton.button] = false;
+
                                     const auto it = _mouseButtonHandlers.find(e.mouseButton.button);
                                     if (it != _mouseButtonHandlers.end())
                                         it->second.onRelease(e.mouseButton.button, e.mouseButton.x, e.mouseButton.y);
