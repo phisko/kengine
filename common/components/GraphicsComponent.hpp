@@ -14,7 +14,7 @@ namespace kengine {
         const std::string type = pmeta_nameof(GraphicsComponent);
         std::string appearance;
         putils::Point3d size;
-        double yaw;
+        double yaw = 0;
 
         /*
          * Reflectible
