@@ -167,7 +167,7 @@ namespace kengine {
     private:
         kengine::EntityManager & _em;
         std::vector<std::string> _directories;
-        sol::state _lua;
+        sol::state & _lua = *(new sol::state);
         std::vector<std::function<void()>> _toExecute;
     };
 }
