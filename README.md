@@ -64,6 +64,7 @@ Here is a list of simple, half-a-day implementation of games:
 * [Flappy bird clone](https://github.com/phiste/flappy_koala)
 * [Tunnel game, dodging cubes](https://github.com/phiste/koala_tunnel)
 * [Tower defense "game", not much at stake though](https://github.com/phiste/koala_defense)
+* [Shoot'em up game, using both scripts and C++ systems](https://github.com/phiste/shmup)
 
 
 
