@@ -28,7 +28,7 @@ endif ()
 
 add_library(kengine INTERFACE)
 target_link_libraries(kengine INTERFACE mediator pluginManager)
-target_include_directories(kengine INTERFACE .)
+target_include_directories(kengine INTERFACE . common)
 
 if (KENGINE_SFML)
     add_subdirectory(common/systems/sfml)
