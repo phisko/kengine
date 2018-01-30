@@ -136,43 +136,87 @@ namespace kengine {
     }
 
     void SfSystem::updateDrawables() noexcept {
+        std::vector<kengine::GameObject *> toDetach;
+
         for (auto go : _em.getGameObjects<SfComponent>()) {
             auto & comp = go->getComponent<SfComponent>();
-            const auto & transform = go->getComponent<kengine::TransformComponent3d>();
-            const auto & pos = transform.boundingBox.topLeft;
 
-            comp.getViewItem().setPosition(
-                    { (float) (_tileSize.x * pos.x), (float) (_tileSize.y * pos.z) }
-            );
-            _engine.setItemHeight(comp.getViewItem(), (std::size_t) pos.y);
-
-            const auto & size = transform.boundingBox.size;
-            if (!comp.isFixedSize())
-                comp.getViewItem().setSize(
-                        { (float) (_tileSize.x * size.x), (float) (_tileSize.y * size.z) }
-                );
-
-            comp.getViewItem().setRotation(-transform.yaw);
-
-            if (go->hasComponent<kengine::GraphicsComponent>()) {
-                const auto & graphics = go->getComponent<kengine::GraphicsComponent>();
-                const auto & appearance = graphics.appearance;
-                auto & sprite = static_cast<pse::Sprite &>(comp.getViewItem());
-                sprite.setTexture(appearance);
-
-                comp.getViewItem().setRotation(-transform.yaw - graphics.yaw);
-
-                if (graphics.size.x != 0 || graphics.size.z != 0) {
-                    comp.getViewItem().setSize(
-                            { (float) (_tileSize.x * graphics.size.x), (float) (_tileSize.y * graphics.size.z) }
-                    );
-                }
-            } else if (go->hasComponent<kengine::GUIComponent>()) {
-                const auto & gui = go->getComponent<kengine::GUIComponent>();
-                auto & view = static_cast<pse::Text &>(comp.getViewItem());
-                view.setString(gui.text);
-            }
+            if (go->hasComponent<kengine::GUIComponent>())
+                updateGUIElement(*go, comp);
+            else if (go->hasComponent<kengine::GraphicsComponent>())
+                updateObject(*go, comp);
+            else
+                toDetach.push_back(go);
         }
+
+        for (const auto go : toDetach)
+            go->detachComponent<SfComponent>();
+    }
+
+    void SfSystem::updateObject(kengine::GameObject & go, SfComponent & comp) noexcept {
+        const auto & transform = go.getComponent<kengine::TransformComponent3d>();
+        updateTransform(go, comp, transform);
+
+        const auto & graphics = go.getComponent<kengine::GraphicsComponent>();
+        const auto & appearance = graphics.appearance;
+        auto & sprite = static_cast<pse::Sprite &>(comp.getViewItem());
+        sprite.setTexture(appearance);
+
+        sprite.setRotation(-transform.yaw - graphics.yaw);
+
+        if (graphics.size.x != 0 || graphics.size.z != 0) {
+            sprite.setSize(
+                    { (float) (_tileSize.x * graphics.size.x), (float) (_tileSize.y * graphics.size.z) }
+            );
+        }
+
+        if (graphics.repeated) {
+            const auto & box = transform.boundingBox;
+
+            sf::IntRect rect = (graphics.size.x != 0 || graphics.size.z != 0) ? sf::IntRect{
+                    (int)(_tileSize.x * box.topLeft.x), (int)(_tileSize.y * box.topLeft.z),
+                    (int)(_tileSize.x * graphics.size.x), (int)(_tileSize.x * graphics.size.z)
+            } : sf::IntRect{
+                    (int)(_tileSize.x * box.topLeft.x), (int)(_tileSize.y * box.topLeft.z),
+                    (int)(_tileSize.x * box.size.x), (int)(_tileSize.x * box.size.z)
+            };
+
+            sprite.repeat(rect);
+        } else
+            sprite.unrepeat();
+    }
+
+    void SfSystem::updateGUIElement(kengine::GameObject & go, SfComponent & comp) noexcept {
+        const auto & gui = go.getComponent<kengine::GUIComponent>();
+        auto & view = static_cast<pse::Text &>(comp.getViewItem());
+        view.setString(gui.text);
+
+        auto & transform = go.getComponent<kengine::TransformComponent3d>();
+        if (gui.camera != nullptr) {
+            const auto & frustrum = gui.camera->getComponent<kengine::CameraComponent3d>().frustrum;
+            transform.boundingBox.topLeft.x = frustrum.topLeft.x + frustrum.size.x * gui.topLeft.x;
+            transform.boundingBox.topLeft.z = frustrum.topLeft.z + frustrum.size.z * gui.topLeft.z;
+            transform.boundingBox.topLeft.y = gui.topLeft.y;
+        }
+
+        updateTransform(go, comp, transform);
+    }
+
+    void SfSystem::updateTransform(kengine::GameObject & go, SfComponent & comp, const kengine::TransformComponent3d & transform) noexcept {
+        const auto & pos = transform.boundingBox.topLeft;
+        comp.getViewItem().setPosition(
+                { (float) (_tileSize.x * pos.x), (float) (_tileSize.y * pos.z) }
+        );
+        _engine.setItemHeight(comp.getViewItem(), (std::size_t) pos.y);
+
+        const auto & size = transform.boundingBox.size;
+        if (!comp.isFixedSize())
+            comp.getViewItem().setSize(
+                    { (float) (_tileSize.x * size.x), (float) (_tileSize.y * size.z) }
+            );
+
+        comp.getViewItem().setRotation(-transform.yaw);
+
     }
 
     void SfSystem::handleEvents() noexcept {

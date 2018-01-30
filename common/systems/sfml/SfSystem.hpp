@@ -1,6 +1,6 @@
 #pragma once
 
-#include <SDL2/SDL.h>
+#include <common/components/TransformComponent.hpp>
 #include "System.hpp"
 #include "common/components/GraphicsComponent.hpp"
 #include "common/packets/RegisterAppearance.hpp"
@@ -46,6 +46,9 @@ namespace kengine {
         void handleEvents() noexcept;
         void updateCameras() noexcept;
         void updateDrawables() noexcept;
+        void updateObject(kengine::GameObject & go, SfComponent & comp) noexcept;
+        void updateGUIElement(kengine::GameObject & go, SfComponent & comp) noexcept;
+        void updateTransform(kengine::GameObject & go, SfComponent & comp, const kengine::TransformComponent3d & transform) noexcept;
 
     private:
         putils::json::Object _config;
