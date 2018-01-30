@@ -12,8 +12,10 @@ namespace kengine {
 
         const std::string type = pmeta_nameof(GUIComponent);
         std::string text;
-        double textSize;
+        double textSize = 12;
         std::string font;
+        putils::Point3d topLeft;
+        kengine::GameObject * camera = nullptr;
 
         /*
          * Reflectible
@@ -25,7 +27,9 @@ namespace kengine {
                 pmeta_reflectible_attribute(&GUIComponent::type),
                 pmeta_reflectible_attribute(&GUIComponent::text),
                 pmeta_reflectible_attribute(&GUIComponent::textSize),
-                pmeta_reflectible_attribute(&GUIComponent::font)
+                pmeta_reflectible_attribute(&GUIComponent::font),
+                pmeta_reflectible_attribute(&GUIComponent::topLeft),
+                pmeta_reflectible_attribute(&GUIComponent::camera)
         );
         pmeta_get_methods();
         pmeta_get_parents();
