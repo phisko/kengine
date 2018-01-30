@@ -15,6 +15,7 @@ namespace kengine {
         std::string appearance;
         putils::Point3d size;
         double yaw = 0;
+        bool repeated = false;
 
         /*
          * Reflectible
@@ -26,7 +27,8 @@ namespace kengine {
                 pmeta_reflectible_attribute(&GraphicsComponent::type),
                 pmeta_reflectible_attribute(&GraphicsComponent::appearance),
                 pmeta_reflectible_attribute(&GraphicsComponent::size),
-                pmeta_reflectible_attribute(&GraphicsComponent::yaw)
+                pmeta_reflectible_attribute(&GraphicsComponent::yaw),
+                pmeta_reflectible_attribute(&GraphicsComponent::repeated)
         );
     };
 }
