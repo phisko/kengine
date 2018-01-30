@@ -89,16 +89,11 @@ namespace kengine {
         // System methods
     public:
         void execute() final {
+            executeBuffer();
             executeDirectories();
+            executeBuffer();
             executeScriptedObjects();
-            for (const auto & f: _toExecute) {
-                try {
-                    f();
-                } catch (const std::exception &e) {
-                    std::cerr << "[LuaSystem] Error: '" <<  e.what() << std::endl;
-                }
-            }
-            _toExecute.clear();
+            executeBuffer();
         }
 
         // Helpers
@@ -142,6 +137,17 @@ namespace kengine {
                     std::cerr << e.what() << std::endl;
                 }
             }
+        }
+
+        void executeBuffer() noexcept {
+            for (const auto & f: _toExecute) {
+                try {
+                    f();
+                } catch (const std::exception &e) {
+                    std::cerr << "[LuaSystem] Error: '" <<  e.what() << std::endl;
+                }
+            }
+            _toExecute.clear();
         }
 
         void executeScriptedObjects() noexcept {
