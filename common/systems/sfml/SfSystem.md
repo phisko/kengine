@@ -36,6 +36,21 @@ Refer to [the SFML website](https://www.sfml-dev.org/tutorials/2.0/graphics-view
 
 If a `GameObject` is found to have a [GUIComponent](../../components/GUIComponent.md), it will be rendered as text using the information held in that `GUIComponent`.
 
+If the `GUIComponent`'s `camera` property points to a `GameObject` (and not `nullptr`), the `SfSystem` will interpret the `GUIComponent`'s `topLeft` property as relative to the `camera`'s `CameraComponent3d`'s `frustrum`. For example:
+
+```c++
+auto & gui = gameObject.getComponent<GUIComponent>();
+gui.topLeft.x = 0.5;
+
+gui.camera = &cameraObject;
+
+auto & frustrum = cameraObject.getComponent<CameraComponent3d>().frustrum;
+frustrum.topLeft.x = 20;
+frustrum.size.x = 10;
+```
+
+Based on the code above, `gameObject`'s text will be rendered in the middle of the viewport for `cameraObject`. Its `x` coordinate in the "rendered game world" will be `20 + 0.5 * 10 = 25`.
+
 ##### Input
 
 User input handlers can be registered through the [Input](../../packets/Input.hpp) datapackets.
