@@ -1,11 +1,11 @@
 #pragma once
 
+#include <unordered_set>
 #include <string_view>
 #include <string>
 #include <unordered_map>
 #include <memory>
 #include <type_traits>
-#include <iostream>
 #include "SystemManager.hpp"
 #include "ComponentManager.hpp"
 #include "EntityFactory.hpp"
@@ -82,22 +82,15 @@ namespace kengine {
         }
 
     public:
-        void removeEntity(kengine::GameObject & go) {
-            SystemManager::removeGameObject(go);
-            ComponentManager::removeGameObject(go);
-            _entities.erase(_entities.find(go.getName()));
+        void removeEntity(kengine::GameObject & go) noexcept {
+            _toRemove.insert(&go);
         }
 
-        void removeEntity(const std::string & name) {
+        void removeEntity(const std::string & name) noexcept {
             const auto p = _entities.find(name);
             if (p == _entities.end())
-                throw std::out_of_range(name + ": no such entity");
-
-            const auto & [_, e] = *p;
-
-            SystemManager::removeGameObject(*e);
-            ComponentManager::removeGameObject(*e);
-            _entities.erase(p);
+                return;
+            _toRemove.insert(p->second.get());
         }
 
     public:
@@ -143,6 +136,32 @@ namespace kengine {
             catch (const std::out_of_range &) {}
         }
 
+    public:
+        void execute(const std::function<void()> & betweenSystems = []{}) noexcept {
+            SystemManager::execute([this, &betweenSystems] {
+                doRemove();
+                updateEntitiesByType();
+                betweenSystems();
+            });
+        }
+
+    private:
+        void doRemove() noexcept {
+            while (!_toRemove.empty()) {
+                const auto tmp = _toRemove;
+                _toRemove.clear();
+
+                for (const auto go : tmp) {
+                    SystemManager::removeGameObject(*go);
+                    ComponentManager::removeGameObject(*go);
+                    _entities.erase(_entities.find(go->getName()));
+                }
+
+                for (const auto go : tmp)
+                    _toRemove.erase(go);
+            }
+        }
+
     private:
         std::unique_ptr<EntityFactory> _factory;
         std::unordered_map<std::string, std::size_t> _ids;
@@ -150,5 +169,6 @@ namespace kengine {
     private:
         std::unordered_map<std::string, std::unique_ptr<GameObject>> _entities;
         std::unordered_map<const GameObject *, const GameObject *> _entityHierarchy;
+        std::unordered_set<GameObject *> _toRemove;
     };
 }

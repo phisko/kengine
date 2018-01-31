@@ -25,7 +25,7 @@ namespace kengine {
         SystemManager & operator=(SystemManager const & o) = delete;
 
     public:
-        void execute() {
+        void execute(const std::function<void()> & betweenSystems = []{}) noexcept {
             if (_first) {
                 _first = false;
                 resetTimers();
@@ -39,7 +39,10 @@ namespace kengine {
 
                 if (time.alwaysCall || timer.isDone()) {
                     updateTime(*s);
-                    try { s->execute(); }
+                    try {
+                        s->execute();
+                        betweenSystems();
+                    }
                     catch (const std::exception & e) { std::cerr << e.what() << std::endl; }
                 }
             }
@@ -129,10 +132,10 @@ namespace kengine {
             auto & em = static_cast<kengine::EntityManager &>(*this);
 
             pmeta::tuple_for_each(std::tuple < pmeta::type<Systems>... > (),
-                    [this, &em](auto && type) {
-                        using System = pmeta_wrapped(type);
-                        createSystem<System>(em);
-                    }
+                                  [this, &em](auto && type) {
+                                      using System = pmeta_wrapped(type);
+                                      createSystem<System>(em);
+                                  }
             );
 
             if (!pluginsFirst && pluginDir.size() > 0)

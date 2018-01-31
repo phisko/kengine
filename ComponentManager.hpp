@@ -29,6 +29,19 @@ namespace kengine {
 
         const std::vector<GameObject *> & getGameObjects() const noexcept { return _allEntities; }
 
+        void updateEntitiesByType() noexcept {
+            for (const auto & p : _toAdd) {
+                _entitiesByType[p.type].push_back(p.go);
+            }
+            _toAdd.clear();
+
+            for (const auto & p : _toRemove) {
+                auto & category = _entitiesByType[p.type];
+                category.erase(std::find(category.begin(), category.end(), p.go));
+            }
+            _toRemove.clear();
+        }
+
     protected:
         void registerGameObject(GameObject & go) noexcept {
             go.setManager(this);
@@ -49,19 +62,31 @@ namespace kengine {
 
         void registerComponent(GameObject & parent, const IComponent & comp) noexcept {
             _compHierarchy.emplace(&comp, &parent);
-            _entitiesByType[comp.getType()].push_back(&parent);
+            _toAdd.push_back({ &parent, &comp, comp.getType() });
         }
 
         void removeComponent(const GameObject & go, const IComponent & comp) noexcept {
             _compHierarchy.erase(&comp);
-
-            auto & category = _entitiesByType[comp.getType()];
-            category.erase(std::find(category.begin(), category.end(), &go));
+            _toRemove.push_back({ &go, &comp, comp.getType() });
         }
 
     private:
         std::unordered_map<const IComponent *, const GameObject *> _compHierarchy;
         std::unordered_map<pmeta::type_index, std::vector<GameObject *>> _entitiesByType;
         std::vector<GameObject *> _allEntities;
+
+        struct ToAdd {
+            GameObject * go;
+            const IComponent * comp;
+            pmeta::type_index type;
+        };
+        std::vector<ToAdd> _toAdd;
+
+        struct ToRemove {
+            const GameObject * go;
+            const IComponent * comp;
+            pmeta::type_index type;
+        };
+        std::vector<ToRemove> _toRemove;
     };
 }
