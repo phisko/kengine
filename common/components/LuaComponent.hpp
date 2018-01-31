@@ -14,8 +14,7 @@ namespace kengine {
         }
 
     public:
-        sol::object meta;
-        std::string debug;
+        sol::table meta;
 
     public:
         void attachScript(const std::string & file) noexcept { _scripts.push_back(file); }
@@ -39,8 +38,7 @@ namespace kengine {
         pmeta_get_attributes(
                 pmeta_reflectible_attribute(&LuaComponent::type),
                 pmeta_reflectible_attribute_private(&LuaComponent::_scripts),
-                pmeta_reflectible_attribute(&LuaComponent::meta),
-                pmeta_reflectible_attribute(&LuaComponent::debug)
+                pmeta_reflectible_attribute(&LuaComponent::meta)
         );
         pmeta_get_methods(
                 pmeta_reflectible_attribute(&LuaComponent::attachScript),
