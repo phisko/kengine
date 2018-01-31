@@ -4,12 +4,9 @@
 
 ### Behavior
 
-Upon construction, a global `collisionHandlers` table is definde in the `LuaSystem`'s state. This table can be populated by scripts by adding functions with the following prototype:
+Whenever a `Collision` packet is received, the `LuaCollisionSystem` performs the following for each `GameObject` involved in the collision:
 
-```lua
-function (name, otherName) end
-```
+* If the `GameObject` has a [LuaComponent](../components/LuaComponent.md)
+    * If its `LuaComponent`'s `meta` property has an `onCollision` field
+        * Call `meta.onCollision(go, other)`, with `go` and `other` being the references to the two `GameObjects` involved.
 
-`name` and `otherName` are the names of the [GameObjects](../../GameObject.md) involved in the collision.
-
-Whenever a `Collision` packet is received, the `LuaCollisionSystem` iterates over the `collisionHandlers` table and calls each handler it contains with the name of the two `GameObjects` involved.

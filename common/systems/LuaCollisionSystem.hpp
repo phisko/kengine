@@ -15,20 +15,23 @@ namespace kengine {
     public:
         LuaCollisionSystem(kengine::EntityManager & em)
                 : putils::BaseModule(&em),
-                  _lua(*query<kengine::packets::LuaState::Response>(kengine::packets::LuaState::Query{}).state) {
-            _lua["collisionHandlers"] = sol::new_table();
-        }
+                  _lua(*query<kengine::packets::LuaState::Response>(kengine::packets::LuaState::Query{}).state)
+        {}
 
     public:
         void handle(const kengine::packets::Collision & p) noexcept {
-            const auto & firstName = p.first.getName();
-            const auto & secondName = p.second.getName();
+            callHandler(p.first, p.second);
+            callHandler(p.second, p.first);
+        }
 
-            sol::table handlers = _lua["collisionHandlers"];
-            handlers.for_each([&firstName, &secondName](auto && pair) {
-                sol::function f = pair.second;
-                f(firstName, secondName);
-            });
+        void callHandler(kengine::GameObject & go, kengine::GameObject & other) noexcept {
+            if (go.hasComponent<kengine::LuaComponent>()) {
+                auto & meta = go.getComponent<kengine::LuaComponent>().meta;
+                if (meta != sol::nil && meta["onCollision"] != sol::nil) {
+                    sol::function handler = meta["onCollision"];
+                    handler(go, other);
+                }
+            }
         }
 
     private:
