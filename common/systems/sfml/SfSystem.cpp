@@ -357,7 +357,6 @@ namespace kengine {
 
         const auto & comp = go.getComponent<SfComponent>();
         _engine.removeItem(comp.getViewItem());
-        _em.detachComponent(go, comp);
     }
 
     /*
