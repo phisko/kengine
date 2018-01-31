@@ -21,18 +21,23 @@ namespace kengine {
             _lua["getGameObjects"] = [&em] { return std::ref(em.getGameObjects()); };
 
             _lua["createEntity"] =
-                    [this](const std::string & type, const std::string & name, const sol::function & f) {
-                        _toExecute.push_back([this, type, name, f] { _em.createEntity(type, name, f); });
+                    [&em](const std::string & type, const std::string & name, const sol::function & f) {
+                        return std::ref(em.createEntity(type, name, f));
                     };
 
             _lua["createNoNameEntity"] =
-                    [this](const std::string & type, const sol::function & f) {
-                        _toExecute.push_back([this, type, f] { _em.createEntity(type, f); });
+                    [&em](const std::string & type, const sol::function & f) {
+                        return std::ref(em.createEntity(type, f));
                     };
 
             _lua["removeEntity"] =
+                    [&em](kengine::GameObject & go) {
+                        em.removeEntity(go);
+                    };
+
+            _lua["removeEntityByName"] =
                     [this](const std::string & name) {
-                        _toExecute.push_back([this, name] { _em.removeEntity(name); });
+                        _em.removeEntity(name);
                     };
 
             _lua["getEntity"] = [&em](const std::string & name) { return std::ref(em.getEntity(name)); };
@@ -56,7 +61,7 @@ namespace kengine {
             _lua.set_function(sender, [this](const T & packet) { send(packet); });
 
             if constexpr (kengine::is_component<T>::value)
-                    registerComponent<T>();
+                registerComponent<T>();
         }
 
         template<typename ...Types>
@@ -75,8 +80,7 @@ namespace kengine {
             try {
                 putils::Directory d(dir);
                 _directories.emplace_back(FWD(dir));
-            }
-            catch (const std::runtime_error & e) {
+            } catch (const std::runtime_error & e) {
                 std::cerr << e.what() << std::endl;
             }
         }
@@ -89,11 +93,8 @@ namespace kengine {
         // System methods
     public:
         void execute() final {
-            executeBuffer();
             executeDirectories();
-            executeBuffer();
             executeScriptedObjects();
-            executeBuffer();
         }
 
         // Helpers
@@ -116,38 +117,20 @@ namespace kengine {
                     [](kengine::GameObject & self) { self.detachComponent<T>(); };
         }
 
-        template<typename F>
-        void addEntityFunction(const std::string & name, F && func) noexcept {
-            _lua[kengine::GameObject::get_class_name()][name] = func;
-        }
-
         void executeDirectories() noexcept {
             for (const auto & dir : _directories) {
                 try {
                     putils::Directory d(dir);
 
-                    d.for_each(
-                            [this](const putils::Directory::File & f) {
-                                if (!f.isDirectory)
-                                    executeScript(f.fullPath);
-                            }
+                    d.for_each([this](const putils::Directory::File & f) {
+                                   if (!f.isDirectory)
+                                       executeScript(f.fullPath);
+                               }
                     );
-                }
-                catch (const std::runtime_error & e) {
+                } catch (const std::runtime_error & e) {
                     std::cerr << e.what() << std::endl;
                 }
             }
-        }
-
-        void executeBuffer() noexcept {
-            for (const auto & f: _toExecute) {
-                try {
-                    f();
-                } catch (const std::exception &e) {
-                    std::cerr << "[LuaSystem] Error: '" <<  e.what() << std::endl;
-                }
-            }
-            _toExecute.clear();
         }
 
         void executeScriptedObjects() noexcept {
@@ -164,8 +147,7 @@ namespace kengine {
         void executeScript(const std::string & fileName) noexcept {
             try {
                 _lua.script_file(fileName);
-            }
-            catch (const std::exception & e) {
+            } catch (const std::exception & e) {
                 std::cerr << "[LuaSystem] Error in '" << fileName << "': " << e.what() << std::endl;
             }
         }
@@ -174,6 +156,5 @@ namespace kengine {
         kengine::EntityManager & _em;
         std::vector<std::string> _directories;
         sol::state & _lua = *(new sol::state);
-        std::vector<std::function<void()>> _toExecute;
     };
 }
