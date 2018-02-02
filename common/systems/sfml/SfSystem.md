@@ -53,16 +53,7 @@ Based on the code above, `gameObject`'s text will be rendered in the middle of t
 
 ##### Input
 
-User input handlers can be registered through the [Input](../../packets/Input.hpp) datapackets.
-
-If a [kengine::LuaSystem](../../systems/LuaSystem.md) is found when the `SfSystem` is constructed, the following lua functions are registered:
-
-* `setKeyHandler(std::function<void(Sf::Keyboard::Key)> onPress, std::function<void(sf::Keyboard::Key)> onRelease)`: sets the key handler for all keys
-* `setMouseButtonHandler(std::function<void(Sf::Mouse::Button, int x, int y)> onPress, std::function<void(sf::Mouse::Button, int x, int y)> onRelease)`: sets the button handler for all keys
-* `setMouseMovedHandler(std::function<void(int x, int y)> func)`: sets the mouse move handler
-* `getWindowSize()`: returns the window size in pixels
-* `getTileSize()`: returns the tile size in pixels
-* `getGridSize()`: returns the window size in tiles
+User input can be handled by attaching [InputComponents](../../components/InputComponent.hpp) to `GameObjects`.
 
 ### Configuration
 

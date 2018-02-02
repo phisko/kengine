@@ -1,13 +1,15 @@
 #include "SfSystem.hpp"
 
 #include "EntityManager.hpp"
-#include "common/components/TransformComponent.hpp"
-#include "common/packets/Log.hpp"
-#include "common/packets/LuaState.hpp"
+#include "components/TransformComponent.hpp"
+#include "components/GraphicsComponent.hpp"
+#include "components/GUIComponent.hpp"
+#include "components/CameraComponent.hpp"
+#include "components/InputComponent.hpp"
+#include "packets/Log.hpp"
+#include "packets/LuaState.hpp"
 #include "lua/plua.hpp"
 
-#include "common/components/GUIComponent.hpp"
-#include "common/components/CameraComponent.hpp"
 
 EXPORT kengine::ISystem * getSystem(kengine::EntityManager & em) {
     return new kengine::SfSystem(em);
@@ -56,24 +58,6 @@ namespace kengine {
             lua["getGridSize"] = [this] {
                 const auto size = _engine.getRenderWindow().getSize();
                 return putils::Point3d{ (double) (size.x / _tileSize.x), double(size.y / _tileSize.y) };
-            };
-
-            lua["setKeyHandler"] = [this](const std::function<void(sf::Keyboard::Key)> & onPress,
-                                          const std::function<void(sf::Keyboard::Key)> & onRelease) {
-                auto & handler = _keyHandlers[sf::Keyboard::KeyCount];
-                handler.onPress = onPress;
-                handler.onRelease = onRelease;
-            };
-
-            lua["setMouseButtonHandler"] = [this](const std::function<void(sf::Mouse::Button, int x, int y)> & onPress,
-                                                       const std::function<void(sf::Mouse::Button, int x, int y)> & onRelease) {
-                auto & handler = _mouseButtonHandlers[sf::Mouse::ButtonCount];
-                handler.onPress = onPress;
-                handler.onRelease = onRelease;
-            };
-
-            lua["setMouseMovedHandler"] = [this](const std::function<void(int x, int y)> & func) {
-                _mouseMovedHandler = [func](const putils::Point2i & p) { func(p.x, p.y); };
             };
         }
         catch (const std::out_of_range &) {}
@@ -220,96 +204,27 @@ namespace kengine {
     }
 
     void SfSystem::handleEvents() noexcept {
-        static const std::unordered_map<sf::Event::EventType, std::function<void(const sf::Event &)>> handlers {
-                {
-                        {
-                                sf::Event::Closed,
-                                [this](auto && e) {
-                                    getMediator()->running = false;
-                                    _engine.getRenderWindow().close();
-                                }
-                        },
-                        {
-                                sf::Event::KeyPressed,
-                                [this](auto && e) {
-                                    const auto pressed = _pressedKeys.find(e.key.code);
-                                    if (pressed != _pressedKeys.end() && pressed->second)
-                                        return;
-                                    _pressedKeys[e.key.code] = true;
-
-                                    const auto it = _keyHandlers.find(e.key.code);
-                                    if (it != _keyHandlers.end())
-                                        it->second.onPress(e.key.code);
-
-                                    const auto it2 = _keyHandlers.find(sf::Keyboard::KeyCount);
-                                    if (it2 != _keyHandlers.end())
-                                        it2->second.onPress(e.key.code);
-                                }
-                        },
-                        {
-                                sf::Event::KeyReleased,
-                                [this](auto && e) {
-                                    _pressedKeys[e.key.code] = false;
-
-                                    const auto it = _keyHandlers.find(e.key.code);
-                                    if (it != _keyHandlers.cend())
-                                        it->second.onRelease(e.key.code);
-
-                                    const auto it2 = _keyHandlers.find(sf::Keyboard::KeyCount);
-                                    if (it2 != _keyHandlers.end())
-                                        it2->second.onRelease(e.key.code);
-                                }
-                        },
-                        {
-                                sf::Event::MouseMoved,
-                                [this](auto && e) {
-                                    if (_mouseMovedHandler != nullptr)
-                                        _mouseMovedHandler({ e.mouseMove.x, e.mouseMove.y });
-                                }
-                        },
-                        {
-                                sf::Event::MouseButtonPressed,
-                                [this](auto && e) {
-                                    const auto pressed = _pressedButtons.find(e.mouseButton.button);
-                                    if (pressed != _pressedButtons.cend() && pressed->second)
-                                        return;
-                                    _pressedButtons[e.mouseButton.button] = true;
-
-                                    const auto it = _mouseButtonHandlers.find(e.mouseButton.button);
-                                    if (it != _mouseButtonHandlers.end())
-                                        it->second.onPress(e.mouseButton.button, e.mouseButton.x, e.mouseButton.y);
-
-                                    const auto it2 = _mouseButtonHandlers.find(sf::Mouse::ButtonCount);
-                                    if (it2 != _mouseButtonHandlers.end())
-                                        it2->second.onPress(e.mouseButton.button, e.mouseButton.x, e.mouseButton.y);
-                                }
-                        },
-                        {
-                                sf::Event::MouseButtonReleased,
-                                [this](auto && e) {
-                                    _pressedButtons[e.mouseButton.button] = false;
-
-                                    const auto it = _mouseButtonHandlers.find(e.mouseButton.button);
-                                    if (it != _mouseButtonHandlers.end())
-                                        it->second.onRelease(e.mouseButton.button, e.mouseButton.x, e.mouseButton.y);
-
-                                    const auto it2 = _mouseButtonHandlers.find(sf::Mouse::ButtonCount);
-                                    if (it2 != _mouseButtonHandlers.end())
-                                        it2->second.onRelease(e.mouseButton.button, e.mouseButton.x, e.mouseButton.y);
-                                }
-                        }
-                }
-        };
-
         sf::Event e;
+        std::vector<sf::Event> allEvents;
         while (_engine.pollEvent(e)) {
-            const auto it = handlers.find(e.type);
+            if (e.type == sf::Event::Closed) {
+                getMediator()->running = false;
+                _engine.getRenderWindow().close();
+                return;
+            }
+            allEvents.push_back(e);
+        }
 
-            if (it == handlers.end())
-                continue;
-
-            const auto & func = it->second;
-            func(e);
+        for (const auto go : _em.getGameObjects<kengine::InputComponent>()) {
+            const auto & input = go->getComponent<kengine::InputComponent>();
+            for (const auto & e : allEvents) {
+                if (input.onMouseButton != nullptr && (e.type == sf::Event::MouseButtonPressed || e.type == sf::Event::MouseButtonPressed))
+                    input.onMouseButton(e.mouseButton.button, e.mouseButton.x, e.mouseButton.y, e.type == sf::Event::MouseButtonPressed);
+                else if (input.onMouseMove != nullptr && e.type == sf::Event::MouseMoved)
+                    input.onMouseMove(e.mouseMove.x, e.mouseMove.y);
+                else if (input.onKey != nullptr && (e.type == sf::Event::KeyPressed || e.type == sf::Event::KeyReleased))
+                    input.onKey(e.key.code, e.type == sf::Event::KeyPressed);
+            }
         }
     }
 
@@ -365,18 +280,6 @@ namespace kengine {
 
     void SfSystem::handle(const kengine::packets::RegisterAppearance & p) noexcept {
         _appearances[p.appearance] = p.resource;
-    }
-
-    void SfSystem::handle(const packets::RegisterKeyHandler & p) noexcept {
-        _keyHandlers[p.key] = p;
-    }
-
-    void SfSystem::handle(const packets::RegisterMouseMovedHandler & p) noexcept {
-        _mouseMovedHandler = p.handler;
-    }
-
-    void SfSystem::handle(const packets::RegisterMouseButtonHandler & p) noexcept {
-        _mouseButtonHandlers[p.button] = p;
     }
 
     void SfSystem::handle(const packets::KeyStatus::Query & p) noexcept {
