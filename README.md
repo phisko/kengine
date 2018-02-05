@@ -31,6 +31,7 @@ These are pre-built, extensible and pluggable elements that can be used in any p
 ##### Components
 
 * [LuaComponent](common/components/LuaComponent.md): defines the lua scripts to be run by the `LuaSystem` for a `GameObject`
+* [PyComponent](common/components/PyComponent.md): defines the Python scripts to be run by the `PySystem` for a `GameObject`
 * [GraphicsComponent](common/components/GraphicsComponent.md): provides graphical information about a `GameObject`, such as its appearance, used by the `SfSystem`
 * [TransformComponent](common/components/TransformComponent.md): defines a `GameObject`'s position and size
 * [PhysicsComponent](common/components/PhysicsComponent.md): defines a `GameObject`'s movement
@@ -39,7 +40,8 @@ These are pre-built, extensible and pluggable elements that can be used in any p
 ##### Systems
 
 * [LogSystem](common/systems/LogSystem.md): logs messages
-* [LuaSystem](common/systems/LuaSystem.md): executes scripts, either global or attached to an entity
+* [LuaSystem](common/systems/LuaSystem.md): executes lua scripts, either global or attached to an entity
+* [PySystem](common/systems/PySystem.md): executes Python scripts, either global or attached to an entity
 * [PhysicsSystem](common/systems/PhysicsSystem.md): moves entities in a framerate-independent way
 * [PathfinderSystem](common/systems/PathfinderSystem.md): uses an AStar algorithm to move entities towards their destination
 * [SfSystem](common/systems/sfml/SfSystem.md): displays entities in an SFML render window
