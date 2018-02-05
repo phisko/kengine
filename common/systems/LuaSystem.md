@@ -10,7 +10,7 @@ The constructor automatically defines the following functions for lua scripts:
 
 * `getGameObjects()`: returns all the `GameObjects` currently in existence.
 * `createEntity(string type, string name, function postCreate)`
-* `createNoNameEntity(string type, function postCreate)`
+* `createNamelessEntity(string type, function postCreate)`
 * `removeEntity(GameObject go)`
 * `removeEntityByName(string name)`
 * `getEntity(string name)`

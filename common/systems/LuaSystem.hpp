@@ -13,8 +13,7 @@ namespace kengine {
     class LuaSystem : public kengine::System<LuaSystem, kengine::packets::LuaState::Query> {
     public:
         LuaSystem(kengine::EntityManager & em) : _em(em) {
-            try { addScriptDirectory("scripts"); }
-            catch (const std::runtime_error & e) {}
+            addScriptDirectory("scripts");
 
             _lua.open_libraries();
 
@@ -25,7 +24,7 @@ namespace kengine {
                         return std::ref(em.createEntity(type, name, f));
                     };
 
-            _lua["createNoNameEntity"] =
+            _lua["createNamelessEntity"] =
                     [&em](const std::string & type, const sol::function & f) {
                         return std::ref(em.createEntity(type, f));
                     };
@@ -76,7 +75,7 @@ namespace kengine {
 
     public:
         template<typename String>
-        void addScriptDirectory(String && dir) {
+        void addScriptDirectory(String && dir) noexcept {
             try {
                 putils::Directory d(dir);
                 _directories.emplace_back(FWD(dir));
@@ -136,10 +135,9 @@ namespace kengine {
         void executeScriptedObjects() noexcept {
             for (const auto go : _em.getGameObjects<kengine::LuaComponent>()) {
                 const auto & comp = go->getComponent<kengine::LuaComponent>();
-                for (const auto & s : comp.getScripts()) {
-                    _lua["self"] = go;
+                _lua["self"] = go;
+                for (const auto & s : comp.getScripts())
                     executeScript(s);
-                }
             }
             _lua["self"] = sol::nil;
         }
