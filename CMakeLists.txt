@@ -13,6 +13,15 @@ if (KENGINE_TEST)
     set(PUTILS_TEST TRUE)
 endif ()
 
+if(KENGINE_LUA)
+    set(PUTILS_BUILD_LUA TRUE)
+endif()
+
+if(KENGINE_PYTHON)
+    set(PUTILS_BUILD_PYTHON TRUE)
+endif()
+
+set(PUTILS_BUILD_MEDIATOR TRUE)
 add_subdirectory(putils)
 
 file(GLOB src_files
