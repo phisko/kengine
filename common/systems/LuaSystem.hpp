@@ -47,6 +47,11 @@ namespace kengine {
             _lua["getDeltaFrames"] = [this] { return time.getDeltaFrames(); };
 
             _lua["stopRunning"] = [&em] { em.running = false; };
+            _lua["setSpeed"] = [&em](double speed) { em.setSpeed(speed); };
+            _lua["getSpeed"] = [&em] { return em.getSpeed(); };
+            _lua["isPaused"] = [this] { return isPaused(); };
+            _lua["pause"] = [&em] { em.pause(); };
+            _lua["resume"] = [&em] { em.resume(); };
 
             registerType<kengine::GameObject>();
         }

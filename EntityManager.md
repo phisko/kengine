@@ -77,6 +77,38 @@ const std::vector<GameObject> &getGameObjects<T>();
 
 Returns all `GameObjects` with a `T` component.
 
+##### pause
+
+```cpp
+void pause();
+```
+
+Used to pause the game by setting the `speed` to 0. Calling `isPaused` from a [System](System.md) will return `true`, and `time.getDeltaFrames()` will always return 0. This means that most systems do not have to take any special measures to adapt to the game being paused, as long as they use `time.getDeltaFrames()` to adapt their behavior. The [PhysicsSystem](common/systems/PhysicsSystem.md), for instance, multiplies the `GameObjects`' movement by `time.getDeltaFrames()` to accomodate for dropped frames, and will therefore automatically stop moving them when the game is paused.
+
+##### resume
+
+```cpp
+void resume();
+```
+
+Used to resume the game by setting the `speed` to 1.
+
+##### setSpeed
+
+```cpp
+void setSpeed(double speed);
+```
+
+Sets the game's speed to `speed`. This will impact the return value of `time.getDeltaFrames()` in `Systems`, letting them automatically adjust their behavior if they take framerate into account.
+
+##### getSpeed
+
+```cpp
+double getSpeed() const;
+```
+
+Returns the game's speed.
+
 ##### addLink
 
 ```cpp

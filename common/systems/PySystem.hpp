@@ -47,6 +47,11 @@ namespace kengine {
             _m.def("getDeltaFrames", [this] { return time.getDeltaFrames(); });
 
             _m.def("stopRunning", [&em] { em.running = false; });
+            _m.def("setSpeed", [&em](double speed) { em.setSpeed(speed); });
+            _m.def("getSpeed", [&em] { return em.getSpeed(); });
+            _m.def("isPaused", [this] { return isPaused(); });
+            _m.def("pause", [&em] { em.pause(); });
+            _m.def("resume", [&em] { em.resume(); });
 
             _go = new py::class_<GameObject>(_m, GameObject::get_class_name(), py::dynamic_attr());
             pmeta::tuple_for_each(GameObject::get_attributes().getKeyValues(), [this](auto && p) {

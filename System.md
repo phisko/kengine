@@ -45,6 +45,14 @@ Returns how many times `execute` should be called each second.
 
 Should return 0 if the framerate shouldn't be limited.
 
+##### isPaused
+
+```cpp
+bool isPaused() const;
+```
+
+Returns whether the game is paused.
+
 ##### time
 
 Each `System` has a `time` member that exposes the following functions:

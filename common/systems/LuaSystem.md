@@ -19,6 +19,11 @@ The constructor automatically defines the following functions for lua scripts:
 * `getFixedDeltaTime()`
 * `getDeltaFrames()`
 * `stopRunning()`
+* `pause()`
+* `resume()`
+* `isPaused()`
+* `setSpeed()`
+* `getSpeed()`
 
 The [GameObject](../../GameObject.md) type is also registered.
 

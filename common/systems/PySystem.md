@@ -19,6 +19,11 @@ The constructor automatically defines a `pk` ("Python Kengine") package containi
 * `getFixedDeltaTime()`
 * `getDeltaFrames()`
 * `stopRunning()`
+* `pause()`
+* `resume()`
+* `isPaused()`
+* `setSpeed()`
+* `getSpeed()`
 
 The [GameObject](../../GameObject.md) type is also registered.
 
