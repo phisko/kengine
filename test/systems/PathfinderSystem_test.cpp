@@ -7,13 +7,13 @@ struct PathfinderSystemTest : SystemTest<kengine::PhysicsSystem, kengine::Pathfi
 
 void expectReached(const kengine::GameObject & go, const putils::Point3d & dest) {
     const auto & pos = go.getComponent<kengine::TransformComponent3d>().boundingBox.topLeft;
-    EXPECT_GE(pos.x, dest.x);
+    EXPECT_GE(pos.x, dest.x - 1);
     EXPECT_LE(pos.x, dest.x + 1);
 
-    EXPECT_GE(pos.y, dest.y);
+    EXPECT_GE(pos.y, dest.y - 1);
     EXPECT_LE(pos.y, dest.y + 1);
 
-    EXPECT_GE(pos.z, dest.z);
+    EXPECT_GE(pos.z, dest.z - 1);
     EXPECT_LE(pos.z, dest.z + 1);
 
     const auto & path = go.getComponent<kengine::PathfinderComponent>();
