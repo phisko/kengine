@@ -43,6 +43,7 @@ These are pre-built, extensible and pluggable elements that can be used in any p
 * [LuaSystem](common/systems/LuaSystem.md): executes lua scripts, either global or attached to an entity
 * [PySystem](common/systems/PySystem.md): executes Python scripts, either global or attached to an entity
 * [PhysicsSystem](common/systems/PhysicsSystem.md): moves entities in a framerate-independent way
+* [Box2DSystem](common/systems/box2d/Box2DSystem.md): performs the same duties as the `PhysicsSystem`, but using the **Box2D** library
 * [PathfinderSystem](common/systems/PathfinderSystem.md): uses an AStar algorithm to move entities towards their destination
 * [SfSystem](common/systems/sfml/SfSystem.md): displays entities in an SFML render window
 * [OgreSystem](common/systems/ogre/OgreSystem.md): displays entities in an OGRE render window. OGRE must be installed separately.

@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 if (KENGINE_SFML)
     set(PUTILS_BUILD_PSE TRUE)
 endif ()
+
 if (KENGINE_OGRE)
     set(PUTILS_BUILD_POGRE TRUE)
 endif ()
@@ -45,6 +46,10 @@ endif ()
 
 if (KENGINE_OGRE)
     add_subdirectory(common/systems/ogre)
+endif ()
+
+if (KENGINE_B2D)
+    add_subdirectory(common/systems/box2d)
 endif ()
 
 # Test
