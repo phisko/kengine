@@ -6,15 +6,12 @@
 #include "common/components/PathfinderComponent.hpp"
 #include "common/components/PhysicsComponent.hpp"
 #include "common/systems/PhysicsSystem.hpp"
-#include "QuadTree.hpp"
 #include "AStar.hpp"
 
 namespace kengine {
     class PathfinderSystem : public kengine::System<PathfinderSystem> {
     public:
-        PathfinderSystem(kengine::EntityManager & em)
-                : putils::BaseModule(&em), _em(em),
-                  _tree(query<decltype(_tree)>(packets::QuadTreeQuery{})) {}
+        PathfinderSystem(kengine::EntityManager & em) : putils::BaseModule(&em), _em(em) {}
 
     public:
         void execute() noexcept final {
@@ -74,12 +71,14 @@ namespace kengine {
             if (dest.distanceTo(goal) > boundingBox.topLeft.distanceTo(goal) + maxAvoidance)
                 return false;
 
-            if (_tree == nullptr)
-                return true;
+            const auto objects = query<kengine::packets::Position::Response>(kengine::packets::Position::Query{
+                    {
+                            { dest.x, dest.z },
+                            { boundingBox.size.x, boundingBox.size.z }
+                    }
+            });
 
-            const auto objects = _tree->query({ { dest.x,             dest.z },
-                                                { boundingBox.size.x, boundingBox.size.z } });
-            return !anObjectIntersects(objects, go);
+            return !anObjectIntersects(objects.objects, go);
         }
 
         bool anObjectIntersects(const std::vector<kengine::GameObject *> & objects, const kengine::GameObject & go) noexcept {
@@ -96,6 +95,5 @@ namespace kengine {
 
     private:
         kengine::EntityManager & _em;
-        putils::QuadTree<kengine::GameObject *, double> * _tree;
     };
 }
