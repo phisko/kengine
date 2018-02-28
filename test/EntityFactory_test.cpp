@@ -16,12 +16,11 @@ TEST_F(EntityFactoryTest, SimpleMake) {
 
 TEST_F(EntityFactoryTest, ExtensibleFactory) {
     kengine::ExtensibleFactory f;
-    f.registerType<kengine::GameObject>();
     EXPECT_EQ(f.make("GameObject", "name")->getName(), "name");
 }
 
 TEST_F(EntityFactoryTest, ExtensibleFactoryBad) {
     kengine::ExtensibleFactory f;
-    EXPECT_THROW(f.make("GameObject", "name"), std::out_of_range);
+    EXPECT_THROW(f.make("Stoopid", "name"), std::out_of_range);
 }
 
