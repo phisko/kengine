@@ -114,7 +114,7 @@ TEST_F(PhysicsSystemTest, Query) {
     struct GetObjects : kengine::System<GetObjects> {
         void execute() final {
             response = query<kengine::packets::Position::Response>(
-                    kengine::packets::Position::Query { { { 0, 0, 0 }, { 1, 0, 1 } } }
+                    kengine::packets::Position::Query { { { 0, 0, 0 }, { 1, 1, 1 } } }
             );
         }
         kengine::packets::Position::Response response;
