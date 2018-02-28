@@ -47,6 +47,7 @@ TEST_F(EntityManagerTest, CreateEntityFactoryNoNameFactory) {
 TEST_F(EntityManagerTest, RemoveEntityRef) {
     auto & go = em.createEntity<kengine::GameObject>("name");
     em.removeEntity(go);
+    em.execute();
     EXPECT_FALSE(em.hasEntity("name"));
     auto & other = em.createEntity<kengine::GameObject>("name");
     EXPECT_EQ(other.getName(), "name");
@@ -56,15 +57,11 @@ TEST_F(EntityManagerTest, RemoveEntityRef) {
 TEST_F(EntityManagerTest, RemoveEntityName) {
     auto & go = em.createEntity<kengine::GameObject>("name");
     em.removeEntity("name");
+    em.execute();
     EXPECT_FALSE(em.hasEntity("name"));
     auto & other = em.createEntity<kengine::GameObject>("name");
     EXPECT_EQ(other.getName(), "name");
     EXPECT_TRUE(em.hasEntity("name"));
-}
-
-TEST_F(EntityManagerTest, RemoveEntityBad) {
-    em.createEntity<kengine::GameObject>("name");
-    EXPECT_THROW(em.removeEntity("stupid"), std::out_of_range);
 }
 
 TEST_F(EntityManagerTest, GetEntity) {
@@ -89,6 +86,7 @@ TEST_F(EntityManagerTest, GetGameObjectsWith) {
     auto & go = em.createEntity<kengine::GameObject>("name");
     em.createEntity<kengine::GameObject>("other");
     go.attachComponent<A>();
+    em.execute();
     const auto & objects = em.getGameObjects<A>();
     EXPECT_EQ(objects.size(), 1);
     EXPECT_EQ(objects[0]->getName(), "name");
@@ -181,19 +179,13 @@ TEST_F(EntityManagerTest, RemoveGameObject) {
     em.createSystem<S>(msg);
     auto & go = em.createEntity<kengine::GameObject>("name");
     em.removeEntity(go);
+    em.execute();
     EXPECT_EQ(msg, "name");
 }
 
 TEST_F(EntityManagerTest, CreateSystem) {
 
     struct S2 : kengine::System<S2> {};
-
-    struct S1 : kengine::System<S1> {
-        S1(kengine::EntityManager & em) : _em(em) {}
-        kengine::EntityManager & _em;
-
-        void execute() final { _em.createSystem<S2>(); }
-    };
 
     struct S : kengine::System<S> {
         S(kengine::EntityManager & em) : _em(em) {}
@@ -203,10 +195,10 @@ TEST_F(EntityManagerTest, CreateSystem) {
     };
 
     em.createSystem<S>(em);
-    em.createSystem<S1>(em);
 
     em.execute();
     std::this_thread::sleep_for(std::chrono::milliseconds(17));
+    em.execute();
     em.execute();
 
     EXPECT_TRUE(em.hasSystem<S2>());
@@ -216,8 +208,6 @@ TEST_F(EntityManagerTest, RemoveSystem) {
     struct S : kengine::System<S> {
         S(kengine::EntityManager & em) : _em(em) {}
         kengine::EntityManager & _em;
-
-        void execute() final { _em.removeSystem<S>(); }
     };
 
     struct S1 : kengine::System<S1> {
@@ -232,6 +222,7 @@ TEST_F(EntityManagerTest, RemoveSystem) {
 
     em.execute();
     std::this_thread::sleep_for(std::chrono::milliseconds(17));
+    em.execute();
     em.execute();
 
     EXPECT_FALSE(em.hasSystem<S>());
