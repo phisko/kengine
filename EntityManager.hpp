@@ -70,9 +70,6 @@ namespace kengine {
         GameObject & addEntity(const std::string & name, std::unique_ptr<GameObject> && obj) {
             auto & ret = *obj;
 
-            if (_entities.find(name) != _entities.end())
-                throw std::runtime_error(name + ": entity exists");
-
             _entities[name] = std::move(obj);
 
             ComponentManager::registerGameObject(ret);
@@ -138,6 +135,8 @@ namespace kengine {
 
     public:
         void execute(const std::function<void()> & betweenSystems = []{}) noexcept {
+            doRemove();
+            updateEntitiesByType();
             SystemManager::execute([this, &betweenSystems] {
                 doRemove();
                 updateEntitiesByType();
