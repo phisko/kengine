@@ -10,6 +10,8 @@
 #include "packets/LuaState.hpp"
 #include "lua/plua.hpp"
 
+#include "imgui.h"
+#include "imgui-SFML.h"
 
 EXPORT kengine::ISystem * getSystem(kengine::EntityManager & em) {
     return new kengine::SfSystem(em);
@@ -40,6 +42,8 @@ namespace kengine {
             handle(kengine::packets::RegisterGameObject{ *go });
 
         registerLuaFunctions();
+
+        ImGui::SFML::Init(_engine.getRenderWindow());
     }
 
     void SfSystem::registerLuaFunctions() noexcept {
@@ -89,9 +93,17 @@ namespace kengine {
 
     void SfSystem::execute() {
         handleEvents();
+
+        ImGui::SFML::Update(_engine.getRenderWindow(), _deltaClock.restart());
+
+		for (const auto & f : _imguiCallbacks)
+			f(*GImGui);
+		_imguiCallbacks.clear();
+
         updateCameras();
         updateDrawables();
-        _engine.update(true);
+
+        _engine.update(true, [this] { ImGui::SFML::Render(_engine.getRenderWindow()); });
     }
 
     void SfSystem::updateCameras() noexcept {
@@ -207,6 +219,8 @@ namespace kengine {
         sf::Event e;
         std::vector<sf::Event> allEvents;
         while (_engine.pollEvent(e)) {
+			ImGui::SFML::ProcessEvent(e);
+
             if (e.type == sf::Event::Closed) {
                 getMediator()->running = false;
                 _engine.getRenderWindow().close();
@@ -282,15 +296,19 @@ namespace kengine {
         _appearances[p.appearance] = p.resource;
     }
 
-    void SfSystem::handle(const packets::KeyStatus::Query & p) noexcept {
+	void SfSystem::handle(const kengine::packets::ImGuiDisplay & p) noexcept {
+		_imguiCallbacks.push_back(p.display);
+	}
+
+    void SfSystem::handle(const packets::KeyStatus::Query & p) const noexcept {
         sendTo(packets::KeyStatus::Response { sf::Keyboard::isKeyPressed(p.key) }, *p.sender);
     }
 
-    void SfSystem::handle(const packets::MouseButtonStatus::Query & p) noexcept {
+    void SfSystem::handle(const packets::MouseButtonStatus::Query & p) const noexcept {
         sendTo(packets::MouseButtonStatus::Response { sf::Mouse::isButtonPressed(p.button) }, *p.sender);
     }
 
-    void SfSystem::handle(const packets::MousePosition::Query & p) noexcept {
+    void SfSystem::handle(const packets::MousePosition::Query & p) const noexcept {
         const auto pos = sf::Mouse::getPosition();
         sendTo(packets::MousePosition::Response { { pos.x, pos.y } }, *p.sender);
     }

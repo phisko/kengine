@@ -6,6 +6,7 @@
 #include "packets/Input.hpp"
 #include "packets/RemoveGameObject.hpp"
 #include "packets/RegisterGameObject.hpp"
+#include "packets/ImGui.hpp"
 
 #include "pse/Engine.hpp"
 #include "SfComponent.hpp"
@@ -15,7 +16,7 @@ namespace kengine {
 
     class SfSystem : public kengine::System<SfSystem,
             packets::RegisterGameObject, packets::RemoveGameObject,
-            packets::RegisterAppearance,
+            packets::RegisterAppearance, packets::ImGuiDisplay,
             packets::KeyStatus::Query, packets::MouseButtonStatus::Query, packets::MousePosition::Query> {
     public:
         SfSystem(kengine::EntityManager & em);
@@ -27,11 +28,12 @@ namespace kengine {
 
     public:
         void handle(const packets::RegisterAppearance & p) noexcept;
+        void handle(const packets::ImGuiDisplay & p) noexcept;
 
     public:
-        void handle(const packets::KeyStatus::Query & p) noexcept;
-        void handle(const packets::MouseButtonStatus::Query & p) noexcept;
-        void handle(const packets::MousePosition::Query & p) noexcept;
+        void handle(const packets::KeyStatus::Query & p) const noexcept;
+        void handle(const packets::MouseButtonStatus::Query & p) const noexcept;
+        void handle(const packets::MousePosition::Query & p) const noexcept;
 
     private:
         SfComponent & getResource(kengine::GameObject & go);
@@ -57,6 +59,12 @@ namespace kengine {
     private:
         kengine::EntityManager & _em;
         pse::Engine _engine;
+
+    private:
+		sf::Clock _deltaClock;
+		std::vector<std::function<void(ImGuiContext &)>> _imguiCallbacks;
+
+    private:
         std::unordered_map<std::string, std::string> _appearances;
 
         // Input
