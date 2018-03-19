@@ -90,6 +90,9 @@ namespace kengine {
         }
 
     public:
+		sol::state & getState() { return _lua;  }
+
+    public:
         void handle(const kengine::packets::LuaState::Query & q) noexcept {
             sendTo(kengine::packets::LuaState::Response{ &_lua }, *q.sender);
         }

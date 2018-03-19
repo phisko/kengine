@@ -6,7 +6,6 @@
 #include "packets/Input.hpp"
 #include "packets/RemoveGameObject.hpp"
 #include "packets/RegisterGameObject.hpp"
-#include "packets/ImGui.hpp"
 
 #include "pse/Engine.hpp"
 #include "SfComponent.hpp"
