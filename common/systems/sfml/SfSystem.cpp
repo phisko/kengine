@@ -6,6 +6,7 @@
 #include "components/GUIComponent.hpp"
 #include "components/CameraComponent.hpp"
 #include "components/InputComponent.hpp"
+#include "components/ImGuiComponent.hpp"
 #include "packets/Log.hpp"
 #include "packets/LuaState.hpp"
 #include "lua/plua.hpp"
@@ -96,9 +97,11 @@ namespace kengine {
 
         ImGui::SFML::Update(_engine.getRenderWindow(), _deltaClock.restart());
 
-		for (const auto & f : _imguiCallbacks)
-			f(*GImGui);
-		_imguiCallbacks.clear();
+		const auto & objects = _em.getGameObjects<kengine::ImGuiComponent>();
+		for (const auto go : objects) {
+			const auto & comp = go->getComponent<kengine::ImGuiComponent>();
+			comp.display(GImGui);
+		}
 
         updateCameras();
         updateDrawables();
@@ -295,10 +298,6 @@ namespace kengine {
     void SfSystem::handle(const kengine::packets::RegisterAppearance & p) noexcept {
         _appearances[p.appearance] = p.resource;
     }
-
-	void SfSystem::handle(const kengine::packets::ImGuiDisplay & p) noexcept {
-		_imguiCallbacks.push_back(p.display);
-	}
 
     void SfSystem::handle(const packets::KeyStatus::Query & p) const noexcept {
         sendTo(packets::KeyStatus::Response { sf::Keyboard::isKeyPressed(p.key) }, *p.sender);

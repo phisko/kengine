@@ -57,21 +57,21 @@ User input can be handled by attaching [InputComponents](../../components/InputC
 
 ##### ImGui
 
-The `SfSystem` can also render any [ImGui](https://github.com/ocornut/imgui) elements through functions provided by other systems. To render an `ImGui` window, a system must simply send an [ImGuiDisplay](../../packets/ImGui.hpp) datapacket, providing a function that renders the window. For instance:
+The `SfSystem` can also render any [ImGui](https://github.com/ocornut/imgui) elements through functions provided by other systems. To render an `ImGui` window, simply add an [ImGuiComponent](../../components/ImGuiComponent.hpp) to a `GameObject`, providing a function that renders the window. For instance:
 
 ```c++
-send(kengine::packets::ImGuiDisplay {
-	[](ImGuiContext & context) {
+go.attachComponent<kengine::ImGuiComponent>(
+	[](void * context) {
 		kengine::packets::ImGuiDisplay::setupImGuiContext(context);
 		ImGui::Begin("Window");
 		if (ImGui::Button("Click me!"))
 			std::cout << "Clicked" << std::endl;
 		ImGui::End();
 	}
-});
+);
 ```
 
-The provided function must take an `ImGuiContext &` as parameter, and call `kengine::packets::ImGuiDisplay::setupImGuiContext()` before doing any actual rendering. This is necessary to recover `ImGui`'s global state from the `SfSystem`.
+The provided function must take a `void *` as parameter, and call `kengine::packets::ImGuiDisplay::setupImGuiContext()` before doing any actual rendering. This is necessary to recover `ImGui`'s global state from the `SfSystem`.
 
 ### Configuration
 

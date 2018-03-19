@@ -16,7 +16,7 @@ namespace kengine {
 
     class SfSystem : public kengine::System<SfSystem,
             packets::RegisterGameObject, packets::RemoveGameObject,
-            packets::RegisterAppearance, packets::ImGuiDisplay,
+            packets::RegisterAppearance,
             packets::KeyStatus::Query, packets::MouseButtonStatus::Query, packets::MousePosition::Query> {
     public:
         SfSystem(kengine::EntityManager & em);
@@ -28,7 +28,6 @@ namespace kengine {
 
     public:
         void handle(const packets::RegisterAppearance & p) noexcept;
-        void handle(const packets::ImGuiDisplay & p) noexcept;
 
     public:
         void handle(const packets::KeyStatus::Query & p) const noexcept;
@@ -45,31 +44,30 @@ namespace kengine {
         void updateGUIElement(kengine::GameObject & go, SfComponent & comp) noexcept;
         void updateTransform(kengine::GameObject & go, SfComponent & comp, const kengine::TransformComponent3d & transform) noexcept;
 
-    private:
-        putils::json::Object _config;
-        putils::Point<std::size_t> _screenSize;
-        putils::Point<std::size_t> _tileSize;
-        bool _fullScreen;
+	private:
+		putils::json::Object _config;
+		putils::Point<std::size_t> _screenSize;
+		putils::Point<std::size_t> _tileSize;
+		bool _fullScreen;
 
-        // Config parsers
-    private:
-        putils::Point<std::size_t> parseSize(const std::string & propertyName, const putils::Point<std::size_t> & _default);
-        bool parseBool(const std::string & propertyName, bool _default);
+		// Config parsers
+	private:
+		putils::Point<std::size_t> parseSize(const std::string & propertyName, const putils::Point<std::size_t> & _default);
+		bool parseBool(const std::string & propertyName, bool _default);
 
-    private:
-        kengine::EntityManager & _em;
-        pse::Engine _engine;
+	private:
+		kengine::EntityManager & _em;
+		pse::Engine _engine;
 
-    private:
+	private:
 		sf::Clock _deltaClock;
-		std::vector<std::function<void(ImGuiContext &)>> _imguiCallbacks;
 
-    private:
-        std::unordered_map<std::string, std::string> _appearances;
+	private:
+		std::unordered_map<std::string, std::string> _appearances;
 
-        // Input
-    private:
-        std::unordered_map<sf::Keyboard::Key, bool> _pressedKeys;
-        std::unordered_map<sf::Mouse::Button, bool> _pressedButtons;
-    };
+		// Input
+	private:
+		std::unordered_map<sf::Keyboard::Key, bool> _pressedKeys;
+		std::unordered_map<sf::Mouse::Button, bool> _pressedButtons;
+	};
 }
