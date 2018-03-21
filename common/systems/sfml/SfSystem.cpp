@@ -222,15 +222,23 @@ namespace kengine {
         sf::Event e;
         std::vector<sf::Event> allEvents;
         while (_engine.pollEvent(e)) {
-			ImGui::SFML::ProcessEvent(e);
+            ImGui::SFML::ProcessEvent(e);
 
             if (e.type == sf::Event::Closed) {
                 getMediator()->running = false;
                 _engine.getRenderWindow().close();
                 return;
             }
-            allEvents.push_back(e);
-        }
+
+			const auto & io = ImGui::GetIO();
+			if ((e.type == sf::Event::KeyPressed && !io.WantCaptureKeyboard) ||
+				(e.type == sf::Event::KeyReleased && !io.WantCaptureKeyboard) ||
+				(e.type == sf::Event::MouseMoved && !io.WantCaptureMouse) ||
+				(e.type == sf::Event::MouseButtonPressed && !io.WantCaptureMouse) ||
+				(e.type == sf::Event::MouseButtonReleased && !io.WantCaptureMouse) ||
+				(e.type == sf::Event::MouseWheelScrolled && !io.WantCaptureMouse))
+				allEvents.push_back(e);
+		}
 
         for (const auto go : _em.getGameObjects<kengine::InputComponent>()) {
             const auto & input = go->getComponent<kengine::InputComponent>();
