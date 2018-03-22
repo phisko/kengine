@@ -47,9 +47,12 @@ namespace kengine {
         ImGui::SFML::Init(_engine.getRenderWindow());
     }
 
-    void SfSystem::registerLuaFunctions() noexcept {
-        try {
-            auto & lua = *query<kengine::packets::LuaState::Response>(kengine::packets::LuaState::Query{}).state;
+	void SfSystem::registerLuaFunctions() noexcept {
+		try {
+			const auto ptr = query<kengine::packets::LuaState::Response>(kengine::packets::LuaState::Query{}).state;
+			if (ptr == nullptr)
+				return;
+			auto & lua = *ptr;
 
             lua["getWindowSize"] = [this] {
                 const auto size = _engine.getRenderWindow().getSize();

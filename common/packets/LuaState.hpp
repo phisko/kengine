@@ -7,11 +7,11 @@ namespace kengine {
     namespace packets {
         namespace LuaState {
             struct Query {
-                putils::BaseModule * sender;
+                putils::BaseModule * sender = nullptr;
             };
 
             struct Response {
-                sol::state * state;
+                sol::state * state = nullptr;
             };
         }
     }
