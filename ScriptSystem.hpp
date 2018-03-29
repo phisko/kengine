@@ -12,36 +12,96 @@ namespace kengine {
 	public:
 		void init() noexcept {
 			auto & crtp = static_cast<CRTP &>(*this);
-			crtp.registerFunction("getGameObjects", [this] { return std::ref(_em.getGameObjects()); });
+			crtp.registerFunction("getGameObjects",
+				std::function<const std::vector<kengine::GameObject*> &()>(
+					[this] { return std::ref(_em.getGameObjects()); }
+				)
+			);
 
 			crtp.registerFunction("createEntity",
-				[this](const std::string & type, const std::string & name, const sol::function & f) {
-					return std::ref(_em.createEntity(type, name, f));
-				}
+				std::function<kengine::GameObject &(const std::string &, const std::string &, const std::function<void(kengine::GameObject &)> &)>(
+					[this](const std::string & type, const std::string & name, auto && f) {
+						return std::ref(_em.createEntity(type, name, FWD(f)));
+					}
+				)
 			);
 
 			crtp.registerFunction("createNamelessEntity",
-				[this](const std::string & type, const sol::function & f) {
-					return std::ref(_em.createEntity(type, f));
-				}
+				std::function<kengine::GameObject &(const std::string &, const std::function<void(kengine::GameObject &)> &)>(
+					[this](const std::string & type, auto && f) {
+						return std::ref(_em.createEntity(type, FWD(f)));
+					}
+				)
 			);
 
-			crtp.registerFunction("removeEntity", [this](kengine::GameObject & go) { _em.removeEntity(go); });
-            crtp.registerFunction("removeEntityByName", [this](const std::string & name) { _em.removeEntity(name); });
+			crtp.registerFunction("removeEntity",
+				std::function<void(kengine::GameObject &)>(
+					[this](kengine::GameObject & go) { _em.removeEntity(go); }
+				)
+			);
+            crtp.registerFunction("removeEntityByName",
+				std::function<void(const std::string &)>(
+					[this](const std::string & name) { _em.removeEntity(name); }
+				)
+			);
 
-            crtp.registerFunction("getEntity", [this](const std::string & name) { return std::ref(_em.getEntity(name)); });
-            crtp.registerFunction("hasEntity", [this](const std::string & name) { return _em.hasEntity(name); });
+            crtp.registerFunction("getEntity",
+				std::function<kengine::GameObject &(const std::string &)>(
+					[this](const std::string & name) { return std::ref(_em.getEntity(name)); }
+				)
+			);
+            crtp.registerFunction("hasEntity",
+				std::function<bool(const std::string &)>(
+					[this](const std::string & name) { return _em.hasEntity(name); }
+				)
+			);
 
-            crtp.registerFunction("getDeltaTime", [this] { return time.getDeltaTime(); });
-            crtp.registerFunction("getFixedDeltaTime", [this] { return time.getFixedDeltaTime(); });
-            crtp.registerFunction("getDeltaFrames", [this] { return time.getDeltaFrames(); });
+            crtp.registerFunction("getDeltaTime",
+				std::function<putils::Timer::t_duration()>(
+					[this] { return this->time.getDeltaTime(); }
+				)
+			);
+            crtp.registerFunction("getFixedDeltaTime",
+				std::function<putils::Timer::t_duration()>(
+					[this] { return this->time.getFixedDeltaTime(); }
+				)
+			);
+            crtp.registerFunction("getDeltaFrames",
+				std::function<double()>(
+					[this] { return this->time.getDeltaFrames(); }
+				)
+			);
 
-            crtp.registerFunction("stopRunning", [this] { _em.running = false; });
-            crtp.registerFunction("setSpeed", [this](double speed) { _em.setSpeed(speed); });
-            crtp.registerFunction("getSpeed", [this] { return _em.getSpeed(); });
-            crtp.registerFunction("isPaused", [this] { return isPaused(); });
-            crtp.registerFunction("pause", [this] { _em.pause(); });
-            crtp.registerFunction("resume", [this] { _em.resume(); });
+            crtp.registerFunction("stopRunning",
+				std::function<void()>(
+					[this] { _em.running = false; }
+				)
+			);
+            crtp.registerFunction("setSpeed",
+				std::function<void(double)>(
+					[this](double speed) { _em.setSpeed(speed); }
+				)
+			);
+            crtp.registerFunction("getSpeed",
+				std::function<double()>(
+					[this] { return _em.getSpeed(); }
+				)
+			);
+            crtp.registerFunction("isPaused",
+				std::function<bool()>(
+					[this] { return this->isPaused(); }
+				)
+			);
+            crtp.registerFunction("pause",
+				std::function<void()>(
+					[this] { _em.pause(); }
+				)
+			);
+            crtp.registerFunction("resume",
+				std::function<void()>(
+					[this] { _em.resume(); }
+				)
+			);
 
             registerType<kengine::GameObject>();
 		}
@@ -61,10 +121,26 @@ namespace kengine {
         void registerType() noexcept {
 			auto & crtp = static_cast<CRTP &>(*this);
 
+#ifdef _WIN32
             crtp.registerTypeInternal<T>();
+#else
+            crtp.template registerTypeInternal<T>();
+#endif
 
             const auto sender = putils::concat("send", T::get_class_name());
-			crtp.registerFunction(sender, [this](const T & packet) { send(packet); });
+#ifdef _WIN32
+			crtp.registerFunction(sender,
+				std::function<void(const T &)>(
+					[this](const T & packet) { this->send(packet); }
+				)
+			);
+#else
+			crtp.template registerFunction(sender,
+				std::function<void(const T &)>(
+					[this](const T & packet) { this->send(packet); }
+				)
+			);
+#endif
 
             if constexpr (kengine::is_component<T>::value)
                 registerComponent<T>();
@@ -110,7 +186,11 @@ namespace kengine {
 			auto & crtp = static_cast<CRTP &>(*this);
 
 			for (const auto go : _em.getGameObjects<CompType>()) {
+#ifdef _WIN32
 				const auto & comp = go->getComponent<CompType>();
+#else
+				const auto & comp = go->template getComponent<CompType>();
+#endif
 				crtp.setSelf(*go);
 				for (const auto & s : comp.getScripts())
 					crtp.executeScript(s);
@@ -124,23 +204,33 @@ namespace kengine {
 			auto & crtp = static_cast<CRTP &>(*this);
 
 			crtp.registerFunction(putils::concat("getGameObjectsWith", T::get_class_name()),
-				[this] { return std::ref(_em.getGameObjects<T>()); }
+				std::function<const std::vector<kengine::GameObject *> &()>(
+					[this] { return std::ref(_em.getGameObjects<T>()); }
+				)
 			);
 
 			crtp.registerGameObjectMember(putils::concat("get", T::get_class_name()),
-				[](kengine::GameObject & self) { return std::ref(self.getComponent<T>()); }
+				std::function<T &(kengine::GameObject &)>(
+					[](kengine::GameObject & self) { return std::ref(self.getComponent<T>()); }
+				)
 			);
 
 			crtp.registerGameObjectMember(putils::concat("has", T::get_class_name()),
-				[](kengine::GameObject & self) { return self.hasComponent<T>(); }
+				std::function<bool(kengine::GameObject &)>(
+					[](kengine::GameObject & self) { return self.hasComponent<T>(); }
+				)
 			);
 
 			crtp.registerGameObjectMember(putils::concat("attach", T::get_class_name()),
-				[](kengine::GameObject & self) { return std::ref(self.attachComponent<T>()); }
+				std::function<T &(kengine::GameObject &)>(
+					[](kengine::GameObject & self) { return std::ref(self.attachComponent<T>()); }
+				)
 			);
 
 			crtp.registerGameObjectMember(putils::concat("detach", T::get_class_name()),
-				[](kengine::GameObject & self) { self.detachComponent<T>(); }
+				std::function<void(kengine::GameObject &)>(
+					[](kengine::GameObject & self) { self.detachComponent<T>(); }
+				)
 			);
 		}
 

@@ -16,14 +16,20 @@ namespace kengine {
         }
 
     public:
-		template<typename F>
-		void registerFunction(const std::string & name, F && func) {
-			_m.def(name.c_str(), FWD(func));
+		template<typename Ret, typename ...Args>
+		void registerFunction(const std::string & name, const std::function<Ret(Args...)> & func) {
+			if constexpr (std::is_reference_v<Ret>)
+				_m.def(name.c_str(), func, py::return_value_policy::reference);
+			else
+				_m.def(name.c_str(), func);
 		}
 
-		template<typename F>
-		void registerGameObjectMember(const std::string & name, F && func) {
-			_go->def(name.c_str(), FWD(func));
+		template<typename Ret, typename ...Args>
+		void registerGameObjectMember(const std::string & name, const std::function<Ret(Args...)> & func) {
+			if constexpr (std::is_reference_v<Ret>)
+				_go->def(name.c_str(), func, py::return_value_policy::reference);
+			else
+				_go->def(name.c_str(), func);
 		}
 
 		template<typename T>

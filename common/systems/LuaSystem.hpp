@@ -21,14 +21,14 @@ namespace kengine {
         }
 
     public:
-		template<typename F>
-		void registerFunction(const std::string & name, F && func) {
+		template<typename Ret, typename ...Args>
+		void registerFunction(const std::string & name, const std::function<Ret(Args...)> & func) {
 			_lua[name] = FWD(func);
 		}
 
-		template<typename F>
-		void registerGameObjectMember(const std::string & name, F && func) {
-			_lua[GameObject::get_class_name()][name] = FWD(func);
+		template<typename Ret, typename ...Args>
+		void registerGameObjectMember(const std::string & name, const std::function<Ret(Args...)> & func) {
+			_lua["GameObject"][name] = FWD(func);
 		}
 
 		template<typename T>
