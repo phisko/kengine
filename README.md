@@ -32,6 +32,8 @@ These are pre-built, extensible and pluggable elements that can be used in any p
 
 * [LuaComponent](common/components/LuaComponent.md): defines the lua scripts to be run by the `LuaSystem` for a `GameObject`
 * [PyComponent](common/components/PyComponent.md): defines the Python scripts to be run by the `PySystem` for a `GameObject`
+* [InputComponent](common/components/InputComponent.md): lets `GameObjects` receive keyboard and mouse events
+* [ImGuiComponent](common/components/ImGuiComponent.md): lets `GameObjects` render debug elements using [ImGui](https://github.com/ocornut/imgui/)
 * [GraphicsComponent](common/components/GraphicsComponent.md): provides graphical information about a `GameObject`, such as its appearance, used by the `SfSystem`
 * [TransformComponent](common/components/TransformComponent.md): defines a `GameObject`'s position and size
 * [PhysicsComponent](common/components/PhysicsComponent.md): defines a `GameObject`'s movement
@@ -68,6 +70,7 @@ Here is a list of simple, half-a-day implementation of games:
 * [Flappy bird clone](https://github.com/phiste/flappy_koala)
 * [Tunnel game, dodging cubes](https://github.com/phiste/koala_tunnel)
 * [Tower defense "game", not much at stake though](https://github.com/phiste/koala_defense)
+* [Shoot'em up game](https://github.com/phiste/shmup)
 
 
 
