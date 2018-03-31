@@ -139,10 +139,29 @@ namespace kengine {
             updateEntitiesByType();
             SystemManager::execute([this, &betweenSystems] {
                 doRemove();
+				doDisable();
                 updateEntitiesByType();
                 betweenSystems();
             });
         }
+
+    public:
+		bool isEntityEnabled(GameObject & go) noexcept { return _disabled.find(&go) == _disabled.end(); }
+		bool isEntityEnabled(const std::string & name) noexcept { return isEntityEnabled(getEntity(name)); }
+
+		void disableEntity(GameObject & go) noexcept {
+			_toDisable.emplace(&go);
+		}
+
+		void disableEntity(const std::string & name) { disableEntity(getEntity(name)); }
+
+		void enableEntity(GameObject & go) noexcept {
+			ComponentManager::registerGameObject(go);
+			SystemManager::registerGameObject(go);
+			_disabled.erase(&go);
+		}
+
+		void enableEntity(const std::string & name) { enableEntity(getEntity(name)); }
 
     private:
         void doRemove() noexcept {
@@ -162,6 +181,23 @@ namespace kengine {
         }
 
     private:
+		void doDisable() noexcept {
+			while (!_toDisable.empty()) {
+				const auto tmp = _toDisable;
+				_toDisable.clear();
+
+				for (const auto go : tmp) {
+					SystemManager::removeGameObject(*go);
+					ComponentManager::removeGameObject(*go);
+					_disabled.emplace(go);
+				}
+
+				for (const auto go : tmp)
+					_toDisable.erase(go);
+			}
+		}
+
+    private:
         std::unique_ptr<EntityFactory> _factory;
         std::unordered_map<std::string, std::size_t> _ids;
 
@@ -169,5 +205,9 @@ namespace kengine {
         std::unordered_map<std::string, std::unique_ptr<GameObject>> _entities;
         std::unordered_map<const GameObject *, const GameObject *> _entityHierarchy;
         std::unordered_set<GameObject *> _toRemove;
+
+    private:
+        std::unordered_set<GameObject *> _toDisable;
+        std::unordered_set<GameObject *> _disabled;
     };
 }

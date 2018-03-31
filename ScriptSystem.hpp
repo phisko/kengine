@@ -45,6 +45,39 @@ namespace kengine {
 				)
 			);
 
+			crtp.registerFunction("enableEntity",
+				std::function<void(kengine::GameObject &)>(
+					[this](kengine::GameObject & go) { _em.enableEntity(go); }
+				)
+			);
+			crtp.registerFunction("enableEntityByName",
+				std::function<void(const std::string &)>(
+					[this](const std::string & name) { _em.enableEntity(name); }
+				)
+			);
+
+			crtp.registerFunction("disableEntity",
+				std::function<void(kengine::GameObject &)>(
+					[this](kengine::GameObject & go) { _em.disableEntity(go); }
+				)
+			);
+			crtp.registerFunction("disableEntityByName",
+				std::function<void(const std::string &)>(
+					[this](const std::string & name) { _em.disableEntity(name); }
+				)
+			);
+
+			crtp.registerFunction("isEntityEnabled",
+				std::function<bool(kengine::GameObject &)>(
+					[this](kengine::GameObject & go) { return _em.isEntityEnabled(go); }
+				)
+			);
+			crtp.registerFunction("isEntityEnabledByName",
+				std::function<bool(const std::string &)>(
+					[this](const std::string & name) { return _em.isEntityEnabled(name); }
+				)
+			);
+
             crtp.registerFunction("getEntity",
 				std::function<kengine::GameObject &(const std::string &)>(
 					[this](const std::string & name) { return std::ref(_em.getEntity(name)); }

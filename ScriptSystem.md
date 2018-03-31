@@ -13,6 +13,12 @@ The constructor automatically defines the following functions for scripts:
 * `createNamelessEntity(string type, function postCreate)`
 * `removeEntity(GameObject go)`
 * `removeEntityByName(string name)`
+* `disableEntity(GameObject go)`
+* `disableEntityByName(string name)`
+* `enableEntity(GameObject go)`
+* `enableEntityByName(string name)`
+* `isEntityEnabled(GameObject go)`
+* `isEntityEnabledByName(string name)`
 * `getEntity(string name)`
 * `hasEntity(string name)`
 * `getDeltaTime()`
