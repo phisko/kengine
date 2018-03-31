@@ -137,7 +137,7 @@ namespace kengine {
         }
     }
 
-    void SfSystem::updateDrawables() noexcept {
+    void SfSystem::updateDrawables() {
         std::vector<kengine::GameObject *> toDetach;
 
         for (auto go : _em.getGameObjects<SfComponent>()) {
@@ -155,14 +155,19 @@ namespace kengine {
             go->detachComponent<SfComponent>();
     }
 
-    void SfSystem::updateObject(kengine::GameObject & go, SfComponent & comp) noexcept {
+    void SfSystem::updateObject(kengine::GameObject & go, SfComponent & comp) {
         const auto & transform = go.getComponent<kengine::TransformComponent3d>();
         updateTransform(go, comp, transform);
 
         const auto & graphics = go.getComponent<kengine::GraphicsComponent>();
         const auto & appearance = graphics.appearance;
         auto & sprite = static_cast<pse::Sprite &>(comp.getViewItem());
-        sprite.setTexture(appearance);
+
+		try {
+			sprite.setTexture(appearance);
+		} catch (const std::exception & e) {
+			std::cerr << "[SfSystem] Failed to set appearance: " << e.what() << std::endl;
+		}
 
         sprite.setRotation(-transform.yaw - graphics.yaw);
 

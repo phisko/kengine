@@ -38,8 +38,8 @@ namespace kengine {
         void registerLuaFunctions() noexcept;
         void handleEvents() noexcept;
         void updateCameras() noexcept;
-        void updateDrawables() noexcept;
-        void updateObject(kengine::GameObject & go, SfComponent & comp) noexcept;
+        void updateDrawables();
+        void updateObject(kengine::GameObject & go, SfComponent & comp);
         void updateGUIElement(kengine::GameObject & go, SfComponent & comp) noexcept;
         void updateTransform(kengine::GameObject & go, SfComponent & comp, const kengine::TransformComponent3d & transform) noexcept;
 
