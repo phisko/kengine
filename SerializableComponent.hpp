@@ -6,7 +6,7 @@
 namespace kengine {
     template<typename CRTP, typename ...DataPackets>
     class SerializableComponent : public Component<CRTP, DataPackets...>,
-                                  public putils::Serializable<CRTP, false> {
+                                  public putils::Serializable<CRTP> {
     public:
         template<typename ...MemberPairs>
         SerializableComponent(MemberPairs && ...pairs)

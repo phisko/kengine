@@ -21,9 +21,9 @@ namespace kengine {
 
     class GameObject : public putils::Mediator,
                        public putils::Reflectible<GameObject>,
-                       public putils::Serializable<GameObject, false> {
+                       public putils::Serializable<GameObject> {
     public:
-        GameObject(std::string_view name) : _name(name) {}
+        GameObject(std::string_view name = "") : _name(name) {}
 
         GameObject(GameObject && other) = default;
         GameObject & operator=(GameObject && other) = default;
