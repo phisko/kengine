@@ -109,6 +109,47 @@ double getSpeed() const;
 
 Returns the game's speed.
 
+##### CompLoader
+
+```cpp
+using CompLoader = std::function<void(kengine::GameObject &, const putils::json::Object &)>;
+```
+
+Defines a function used to load a `Component` type when unserializing `GameObjects`.
+
+##### registerCompLoader
+
+```cpp
+template<typename T>
+void registerCompLoader(const CompLoader & loader);
+```
+
+Lets users define a function to unserialize a specific `Component` type when re-loading the game. For the function to be called, the `Component` type must have a `type` field corresponding to its class name that gets serialized into the JSON object.
+
+##### save
+
+```cpp
+void save(const std::string & file);
+```
+
+Saves all `GameObjects` into `file` (in a JSON-like format).
+
+##### load
+
+```cpp
+void load(const std::string & file);
+```
+
+Removes all `GameObjects` in existence and loads those that were saved into `file`. After this is done, calls all functions registered through `onLoad`.
+
+##### onLoad
+
+```cpp
+void onLoad(const std::function<void()> & func);
+```
+
+Registers a function to be called after each call to `load`.
+
 ##### addLink
 
 ```cpp

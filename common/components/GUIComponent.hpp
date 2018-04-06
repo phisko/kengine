@@ -15,7 +15,7 @@ namespace kengine {
         double textSize = 12;
         std::string font;
         putils::Point3d topLeft;
-        kengine::GameObject * camera = nullptr;
+		std::string camera;
 
         /*
          * Reflectible

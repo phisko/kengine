@@ -69,12 +69,8 @@ namespace kengine {
     private:
         GameObject & addEntity(const std::string & name, std::unique_ptr<GameObject> && obj) {
             auto & ret = *obj;
-
-            _entities[name] = std::move(obj);
-
-            ComponentManager::registerGameObject(ret);
-            SystemManager::registerGameObject(ret);
-
+			_toAdd.push_back(std::move(obj));
+			_futureEntities[name] = &ret;
             return ret;
         }
 
@@ -90,8 +86,13 @@ namespace kengine {
             _toRemove.insert(p->second.get());
         }
 
-    public:
-        GameObject & getEntity(const std::string & name) { return *_entities.at(name); }
+	public:
+		GameObject & getEntity(const std::string & name) {
+			const auto it = _futureEntities.find(name);
+			if (it != _futureEntities.end())
+				return *it->second;
+			return *_entities.at(name);
+		}
 
         bool hasEntity(const std::string & name) const noexcept { return _entities.find(name) != _entities.end(); }
 
@@ -120,27 +121,24 @@ namespace kengine {
                 catch (const std::out_of_range &) {}
             }
 
-            try {
-                auto & factory = getFactory<kengine::ExtensibleFactory>();
-                pmeta::tuple_for_each(std::make_tuple(pmeta::type<Types>()...),
-                                      [&factory](auto && t) {
-                                          using Type = pmeta_wrapped(t);
-                                          if constexpr (std::is_base_of<kengine::GameObject, Type>::value)
-                                              factory.registerType<Type>();
-                                      }
-                );
-            }
-            catch (const std::out_of_range &) {}
-        }
+			try {
+				auto & factory = getFactory<kengine::ExtensibleFactory>();
+				pmeta_for_each(Types, [this pmeta_comma &factory](auto && t) {
+					using Type = pmeta_wrapped(t);
+					if constexpr (std::is_base_of<kengine::GameObject, Type>::value)
+						factory.registerType<Type>();
+					else if constexpr (kengine::is_component<Type>::value)
+						registerCompLoader<Type>();
+				});
+			}
+			catch (const std::out_of_range &) {}
+		}
 
     public:
         void execute(const std::function<void()> & betweenSystems = []{}) noexcept {
-            doRemove();
-            updateEntitiesByType();
+			updateEntities();
             SystemManager::execute([this, &betweenSystems] {
-                doRemove();
-				doDisable();
-                updateEntitiesByType();
+				updateEntities();
                 betweenSystems();
             });
         }
@@ -163,7 +161,100 @@ namespace kengine {
 
 		void enableEntity(const std::string & name) { enableEntity(getEntity(name)); }
 
+    public:
+		using CompLoader = std::function<void(kengine::GameObject &, const putils::json::Object &)>;
+
+		template<typename T>
+		void registerCompLoader(const CompLoader & loader) {
+			_loaders[T::get_class_name()] = loader;
+		}
+
+		template<typename T>
+		void registerCompLoader() {
+			if constexpr (kengine::is_component<T>::value)
+				_loaders[T::get_class_name()] = [](kengine::GameObject & go, const putils::json::Object & json) {
+				auto & comp = go.attachComponent<T>();
+				putils::parse(comp, json.value);
+			};
+		}
+
+		void onLoad(const std::function<void()> & func) {
+			_onLoad.push_back(func);
+		}
+
+		void save(const std::string & file) {
+			std::ofstream f(file, std::ofstream::trunc);
+
+			if (!f)
+				return;
+
+			for (const auto & go : getGameObjects())
+				f << *go;
+		}
+
+		void load(const std::string & file) {
+			std::ifstream f(file);
+
+			if (!f)
+				return;
+
+			try {
+				for (const auto &[name, go] : _entities)
+					removeEntity(*go);
+
+				while (f && !f.eof()) {
+					auto obj = putils::json::lex(f);
+					const auto & name = obj["name"].value;
+					createEntity<kengine::GameObject>(obj["name"].value, [this, &obj](kengine::GameObject & go) { loadComponents(obj, go); });
+				}
+			}
+			catch (const std::exception & e) {}
+
+			for (const auto & func : _onLoad)
+				func();
+		}
+
     private:
+		void loadComponents(const putils::json::Object & obj, kengine::GameObject & go) {
+			for (const auto &[type, comp] : obj["components"].fields) {
+				const auto it = comp.fields.find("type");
+				if (it == comp.fields.end())
+					continue;
+
+				const auto loader = _loaders.find(it->second);
+				if (loader != _loaders.end())
+					loader->second(go, comp);
+			}
+		}
+
+    private:
+		void updateEntities() noexcept {
+			doRemove();
+			updateEntitiesByType();
+			doAdd();
+			doDisable();
+			updateEntitiesByType();
+		}
+
+	private:
+		void doAdd() noexcept {
+			for (auto && go : _toAdd) {
+				const auto name = go->getName();
+				const auto it = _entities.find(name);
+				if (it != _entities.end()) {
+					ComponentManager::removeGameObject(*it->second);
+					SystemManager::removeGameObject(*it->second);
+				}
+				auto & obj = *go;
+				_entities[name] = std::move(go);
+
+				SystemManager::registerGameObject(obj);
+				ComponentManager::registerGameObject(obj);
+			}
+			_toAdd.clear();
+			_futureEntities.clear();
+		}
+
         void doRemove() noexcept {
             while (!_toRemove.empty()) {
                 const auto tmp = _toRemove;
@@ -172,7 +263,9 @@ namespace kengine {
                 for (const auto go : tmp) {
                     SystemManager::removeGameObject(*go);
                     ComponentManager::removeGameObject(*go);
-                    _entities.erase(_entities.find(go->getName()));
+					const auto it = _entities.find(go->getName());
+					if (it != _entities.end())
+						_entities.erase(it);
                 }
 
                 for (const auto go : tmp)
@@ -197,14 +290,23 @@ namespace kengine {
 			}
 		}
 
+	private:
+		std::unordered_map<std::string, CompLoader> _loaders;
+		std::vector<std::function<void()>> _onLoad;
+
     private:
         std::unique_ptr<EntityFactory> _factory;
         std::unordered_map<std::string, std::size_t> _ids;
 
     private:
         std::unordered_map<std::string, std::unique_ptr<GameObject>> _entities;
-        std::unordered_map<const GameObject *, const GameObject *> _entityHierarchy;
+
+        std::vector<std::unique_ptr<GameObject>> _toAdd;
+        std::unordered_map<std::string, GameObject *> _futureEntities;
+
         std::unordered_set<GameObject *> _toRemove;
+
+        std::unordered_map<const GameObject *, const GameObject *> _entityHierarchy;
 
     private:
         std::unordered_set<GameObject *> _toDisable;

@@ -19,7 +19,8 @@ namespace kengine {
 		void trigger(kengine::GameObject & go, kengine::GameObject & other) {
 			if (go.hasComponent<CollisionComponent>()) {
 				const auto & comp = go.getComponent<CollisionComponent>();
-				comp.onCollide(go, other);
+				if (comp.onCollide != nullptr)
+					comp.onCollide(go, other);
 			}
 		}
 	};

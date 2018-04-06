@@ -118,7 +118,7 @@ namespace kengine {
         if (!cameras.empty())
             _engine.removeView("default");
 
-        for (auto go : cameras) {
+        for (const auto go : cameras) {
             auto & view = _engine.getView(go->getName());
 
             const auto & frustrum = go->getComponent<kengine::CameraComponent3d>().frustrum;
@@ -140,7 +140,7 @@ namespace kengine {
     void SfSystem::updateDrawables() {
         std::vector<kengine::GameObject *> toDetach;
 
-        for (auto go : _em.getGameObjects<SfComponent>()) {
+        for (const auto go : _em.getGameObjects<SfComponent>()) {
             auto & comp = go->getComponent<SfComponent>();
 
             if (go->hasComponent<kengine::GUIComponent>())
@@ -199,8 +199,9 @@ namespace kengine {
         view.setString(gui.text);
 
         auto & transform = go.getComponent<kengine::TransformComponent3d>();
-        if (gui.camera != nullptr) {
-            const auto & frustrum = gui.camera->getComponent<kengine::CameraComponent3d>().frustrum;
+        if (!gui.camera.empty()) {
+			const auto & cam = _em.getEntity(gui.camera);
+            const auto & frustrum = cam.getComponent<kengine::CameraComponent3d>().frustrum;
             transform.boundingBox.topLeft.x = frustrum.topLeft.x + frustrum.size.x * gui.topLeft.x;
             transform.boundingBox.topLeft.z = frustrum.topLeft.z + frustrum.size.z * gui.topLeft.z;
             transform.boundingBox.topLeft.y = gui.topLeft.y;

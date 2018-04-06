@@ -58,7 +58,7 @@ namespace kengine {
 		}
 
 	public:
-		void setSelf(kengine::GameObject & go) { _m.attr("self") = go; }
+		void setSelf(kengine::GameObject & go) { _m.attr("self") = &go; }
 		void unsetSelf() { _m.attr("self") = nullptr; }
 
 	private:

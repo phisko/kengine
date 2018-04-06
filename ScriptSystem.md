@@ -30,6 +30,9 @@ The constructor automatically defines the following functions for scripts:
 * `isPaused()`
 * `setSpeed()`
 * `getSpeed()`
+* `save(string file)`
+* `load(string file)`
+* `onLoad(function func)`
 
 The [GameObject](GameObject.md) type is also registered.
 

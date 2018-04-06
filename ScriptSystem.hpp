@@ -13,7 +13,7 @@ namespace kengine {
 		void init() noexcept {
 			auto & crtp = static_cast<CRTP &>(*this);
 			crtp.registerFunction("getGameObjects",
-				std::function<const std::vector<kengine::GameObject*> &()>(
+				std::function<const std::vector<kengine::GameObject *> &()>(
 					[this] { return std::ref(_em.getGameObjects()); }
 				)
 			);
@@ -133,6 +133,23 @@ namespace kengine {
             crtp.registerFunction("resume",
 				std::function<void()>(
 					[this] { _em.resume(); }
+				)
+			);
+
+            crtp.registerFunction("save",
+				std::function<void(const std::string &)>(
+					[this](const std::string & file) { _em.save(file); }
+				)
+			);
+            crtp.registerFunction("load",
+				std::function<void(const std::string &)>(
+					[this](const std::string & file) { _em.load(file); }
+				)
+			);
+
+            crtp.registerFunction("onLoad",
+				std::function<void(const std::function<void()> &)>(
+					[this](const std::function<void()> & func) { _em.onLoad(func); }
 				)
 			);
 

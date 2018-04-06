@@ -1,6 +1,5 @@
 #pragma once
 
-// #include "GameObject.hpp"
 #include "Component.hpp"
 
 namespace kengine {
@@ -24,37 +23,29 @@ namespace kengine {
         const std::vector<GameObject *> & getGameObjects() noexcept {
             static_assert(kengine::is_component<T>::value,
                           "getGameObjects called without component type");
-            return _entitiesByType[pmeta::type<T>::index];
+            return _entitiesByType[pmeta::type<T>::index].safe;
         }
 
-        const std::vector<GameObject *> & getGameObjects() const noexcept { return _allEntities; }
+        const std::vector<GameObject *> & getGameObjects() const noexcept { return _allEntities.safe; }
 
-        void updateEntitiesByType() noexcept {
-            for (const auto & p : _toAdd) {
-                _entitiesByType[p.type].push_back(p.go);
-            }
-            _toAdd.clear();
-
-            for (const auto & p : _toRemove) {
-                auto & category = _entitiesByType[p.type];
-                category.erase(std::find(category.begin(), category.end(), p.go));
-            }
-            _toRemove.clear();
+		void updateEntitiesByType() noexcept {
+			_allEntities.safe = _allEntities.unsafe;
+			for (auto & [type, category] : _entitiesByType)
+				category.safe = category.unsafe;
         }
 
     protected:
         void registerGameObject(GameObject & go) noexcept {
-            go.setManager(this);
+			go.setManager(this);
             for (auto & [type, comp] : go._components)
                 registerComponent(go, *comp);
-            _allEntities.push_back(&go);
+            _allEntities.unsafe.push_back(&go);
         }
 
         void removeGameObject(const GameObject & go) noexcept {
-            for (auto & [type, comp] : go._components)
-                removeComponent(go, *comp);
-
-            _allEntities.erase(std::find(_allEntities.begin(), _allEntities.end(), &go));
+            for (const auto type : go._types)
+                removeComponent(go, type);
+			_allEntities.unsafe.erase(std::find(_allEntities.unsafe.begin(), _allEntities.unsafe.end(), &go));
         }
 
     private:
@@ -62,31 +53,23 @@ namespace kengine {
 
         void registerComponent(GameObject & parent, const IComponent & comp) noexcept {
             _compHierarchy.emplace(&comp, &parent);
-            _toAdd.push_back({ &parent, &comp, comp.getType() });
+			_entitiesByType[comp.getType()].unsafe.push_back(&parent);
         }
 
-        void removeComponent(const GameObject & go, const IComponent & comp) noexcept {
-            _compHierarchy.erase(&comp);
-            _toRemove.push_back({ &go, &comp, comp.getType() });
-        }
+		void removeComponent(const GameObject & go, pmeta::type_index type) noexcept {
+			auto & category = _entitiesByType[type];
+			category.unsafe.erase(std::find(category.unsafe.begin(), category.unsafe.end(), &go));
+		}
 
     private:
         std::unordered_map<const IComponent *, const GameObject *> _compHierarchy;
-        std::unordered_map<pmeta::type_index, std::vector<GameObject *>> _entitiesByType;
-        std::vector<GameObject *> _allEntities;
 
-        struct ToAdd {
-            GameObject * go;
-            const IComponent * comp;
-            pmeta::type_index type;
-        };
-        std::vector<ToAdd> _toAdd;
-
-        struct ToRemove {
-            const GameObject * go;
-            const IComponent * comp;
-            pmeta::type_index type;
-        };
-        std::vector<ToRemove> _toRemove;
+		struct EntityCollection
+		{
+			std::vector<GameObject *> safe;
+			std::vector<GameObject *> unsafe;
+		};
+        std::unordered_map<pmeta::type_index, EntityCollection> _entitiesByType;
+        EntityCollection _allEntities;
     };
 }
