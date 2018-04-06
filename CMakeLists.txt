@@ -52,28 +52,4 @@ if (KENGINE_B2D)
     add_subdirectory(common/systems/box2d)
 endif ()
 
-# Test
-
-if (KENGINE_TEST)
-    set(test_name kengine_test)
-    file(GLOB testSrc
-            test/*.cpp test/*.hpp
-            test/*/*.cpp test/*/*.hpp
-            putils/test/*.cpp putils/test/*.hpp
-            putils/test/*/*.cpp putils/test/*/*.hpp
-            )
-    add_executable(${test_name} ${testSrc})
-    target_link_libraries(${test_name} kengine gtest_main)
-
-    if (CMAKE_COMPILER_IS_GNUCXX)
-        append_coverage_compiler_flags()
-        find_program(lcov_found NAMES lcov)
-        if (lcov_found)
-            setup_target_for_coverage(NAME ${test_name}_coverage
-                    EXECUTABLE ${test_name}
-                    coverage)
-        endif()
-    endif ()
-endif ()
-
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} PARENT_SCOPE)
