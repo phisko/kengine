@@ -210,12 +210,7 @@ namespace kengine {
 			}
 			catch (const std::exception & e) {}
 
-			for (const auto & func : _onLoad) {
-				try {
-					func();
-				}
-				catch (const std::exception & e) { std::cerr << e.what() << std::endl; }
-			}
+			_justLoaded = true;
 		}
 
     private:
@@ -237,6 +232,18 @@ namespace kengine {
 			updateEntitiesByType();
 			doAdd();
 			doDisable();
+			updateEntitiesByType();
+
+			if (_justLoaded) {
+				for (const auto & func : _onLoad) {
+					try {
+						func();
+					}
+					catch (const std::exception & e) { std::cerr << e.what() << std::endl; }
+				}
+				_justLoaded = false;
+			}
+
 			updateEntitiesByType();
 		}
 
@@ -297,6 +304,7 @@ namespace kengine {
 	private:
 		std::unordered_map<std::string, CompLoader> _loaders;
 		std::vector<std::function<void()>> _onLoad;
+		bool _justLoaded = false;
 
     private:
         std::unique_ptr<EntityFactory> _factory;
