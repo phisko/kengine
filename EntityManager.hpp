@@ -210,8 +210,12 @@ namespace kengine {
 			}
 			catch (const std::exception & e) {}
 
-			for (const auto & func : _onLoad)
-				func();
+			for (const auto & func : _onLoad) {
+				try {
+					func();
+				}
+				catch (const std::exception & e) { std::cerr << e.what() << std::endl; }
+			}
 		}
 
     private:
