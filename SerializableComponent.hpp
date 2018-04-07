@@ -10,7 +10,7 @@ namespace kengine {
     public:
         template<typename ...MemberPairs>
         SerializableComponent(MemberPairs && ...pairs)
-                : putils::Serializable<CRTP, false>(FWD(pairs)...) {}
+                : putils::Serializable<CRTP>(FWD(pairs)...) {}
 
         SerializableComponent() = default;
 
