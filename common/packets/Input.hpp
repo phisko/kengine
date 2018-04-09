@@ -9,22 +9,6 @@ namespace putils { class BaseModule; }
 
 namespace kengine {
     namespace packets {
-        struct RegisterKeyHandler {
-            sf::Keyboard::Key key;
-            std::function<void(sf::Keyboard::Key)> onPress;
-            std::function<void(sf::Keyboard::Key)> onRelease;
-        };
-
-        struct RegisterMouseMovedHandler {
-            std::function<void(const putils::Point2i & pos)> handler;
-        };
-
-        struct RegisterMouseButtonHandler {
-            sf::Mouse::Button button;
-            std::function<void(sf::Mouse::Button, int x, int y)> onPress;
-            std::function<void(sf::Mouse::Button, int x, int y)> onRelease;
-        };
-
         namespace KeyStatus {
             struct Query {
                 sf::Keyboard::Key key;

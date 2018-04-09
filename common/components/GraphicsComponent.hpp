@@ -2,6 +2,7 @@
 
 #include <string>
 #include "SerializableComponent.hpp"
+#include "Point.hpp"
 
 namespace kengine {
     class GraphicsComponent : public kengine::SerializableComponent<GraphicsComponent>,
@@ -12,6 +13,9 @@ namespace kengine {
 
         const std::string type = pmeta_nameof(GraphicsComponent);
         std::string appearance;
+        putils::Point3d size;
+        double yaw = 0;
+        bool repeated = false;
 
         /*
          * Reflectible
@@ -21,7 +25,10 @@ namespace kengine {
         pmeta_get_class_name(GraphicsComponent);
         pmeta_get_attributes(
                 pmeta_reflectible_attribute(&GraphicsComponent::type),
-                pmeta_reflectible_attribute(&GraphicsComponent::appearance)
+                pmeta_reflectible_attribute(&GraphicsComponent::appearance),
+                pmeta_reflectible_attribute(&GraphicsComponent::size),
+                pmeta_reflectible_attribute(&GraphicsComponent::yaw),
+                pmeta_reflectible_attribute(&GraphicsComponent::repeated)
         );
     };
 }

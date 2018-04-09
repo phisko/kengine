@@ -21,9 +21,9 @@ namespace kengine {
 
     class GameObject : public putils::Mediator,
                        public putils::Reflectible<GameObject>,
-                       public putils::Serializable<GameObject, false> {
+                       public putils::Serializable<GameObject> {
     public:
-        GameObject(std::string_view name) : _name(name) {}
+        GameObject(std::string_view name = "") : _name(name) {}
 
         GameObject(GameObject && other) = default;
         GameObject & operator=(GameObject && other) = default;
@@ -115,10 +115,11 @@ void kengine::GameObject::detachComponent() {
     static_assert(std::is_base_of<IComponent, CT>::value,
                   "Attempt to detach something that's not a component");
 
-    if (_manager)
-        _manager->removeComponent(*this, getComponent<CT>());
-
     const auto type = pmeta::type<CT>::index;
+
+    if (_manager)
+        _manager->removeComponent(*this, type);
+
     _components.erase(type);
     _types.erase(std::find(_types.begin(), _types.end(), type));
 }
@@ -128,10 +129,11 @@ void kengine::GameObject::detachComponent(const CT & comp) {
     static_assert(std::is_base_of<IComponent, CT>::value,
                   "Attempt to detach something that's not a component");
 
-    if (_manager)
-        _manager->removeComponent(*this, comp);
-
     const auto type = comp.getType();
+
+    if (_manager)
+        _manager->removeComponent(*this, type);
+
     _components.erase(type);
     _types.erase(std::find(_types.begin(), _types.end(), type));
 }
@@ -145,7 +147,13 @@ CT & kengine::GameObject::attachComponent(std::unique_ptr<CT> && comp) {
 
     addModule(*comp);
     const auto type = comp->getType();
-    _components.emplace(type, std::move(comp));
+	const auto it = _components.find(type);
+	if (it != _components.end()) {
+		_types.erase(std::find(_types.begin(), _types.end(), type));
+		if (_manager)
+			_manager->removeComponent(*this, type);
+	}
+    _components[type] = std::move(comp);
     _types.push_back(type);
 
     if (_manager)

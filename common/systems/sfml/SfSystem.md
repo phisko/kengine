@@ -14,6 +14,10 @@ If `appearance` was previously registered as an abstract appearance through a [R
 
 `SfSystem` expects `GameObjects` to have a [TransformComponent3d](../../components/TransformComponent.md) component, to specify its size and position. The position's `z` property defines the "height" at which objects will be rendered.
 
+If the `GraphicsComponent`'s `size` property's `x` or `y` fields are set to anything but 0, the `SfSystem` wil use these values instead of the `TransformComponent3d`'s to set the drawable's size.
+
+A `GameObject`'s rotation is defined by its `TransformComponent3d`'s `yaw` property ADDED TO its `GraphicsComponent`'s yaw property. This lets you define a graphical yaw that you do not have to compensate throughout the rest of your code (as you simply work on the `TransformComponent`).
+
 ```
 /!\ That 3d is important! TransformComponent2d, 2i, 3i, 3f... Will not be detected!
 ```
@@ -32,18 +36,42 @@ Refer to [the SFML website](https://www.sfml-dev.org/tutorials/2.0/graphics-view
 
 If a `GameObject` is found to have a [GUIComponent](../../components/GUIComponent.md), it will be rendered as text using the information held in that `GUIComponent`.
 
+If the `GUIComponent`'s `camera` property points to a `GameObject` (and not `nullptr`), the `SfSystem` will interpret the `GUIComponent`'s `topLeft` property as relative to the `camera`'s `CameraComponent3d`'s `frustrum`. For example:
+
+```c++
+auto & gui = gameObject.getComponent<GUIComponent>();
+gui.topLeft.x = 0.5;
+
+gui.camera = &cameraObject;
+
+auto & frustrum = cameraObject.getComponent<CameraComponent3d>().frustrum;
+frustrum.topLeft.x = 20;
+frustrum.size.x = 10;
+```
+
+Based on the code above, `gameObject`'s text will be rendered in the middle of the viewport for `cameraObject`. Its `x` coordinate in the "rendered game world" will be `20 + 0.5 * 10 = 25`.
+
 ##### Input
 
-User input handlers can be registered through the [Input](../../packets/Input.hpp) datapackets.
+User input can be handled by attaching [InputComponents](../../components/InputComponent.hpp) to `GameObjects`.
 
-If a [kengine::LuaSystem](../../systems/LuaSystem.md) is found when the `SfSystem` is constructed, the following lua functions are registered:
+##### ImGui
 
-* `setKeyHandler(std::function<void(Sf::Keyboard::Key)> onPress, std::function<void(sf::Keyboard::Key)> onRelease)`: sets the key handler for all keys
-* `setMouseButtonHandler(std::function<void(Sf::Mouse::Button, int x, int y)> onPress, std::function<void(sf::Mouse::Button, int x, int y)> onRelease)`: sets the button handler for all keys
-* `setMouseMovedHandler(std::function<void(int x, int y)> func)`: sets the mouse move handler
-* `getWindowSize()`: returns the window size in pixels
-* `getTileSize()`: returns the tile size in pixels
-* `getGridSize()`: returns the window size in tiles
+The `SfSystem` can also render any [ImGui](https://github.com/ocornut/imgui) elements through functions provided by other systems. To render an `ImGui` window, simply add an [ImGuiComponent](../../components/ImGuiComponent.hpp) to a `GameObject`, providing a function that renders the window. For instance:
+
+```c++
+go.attachComponent<kengine::ImGuiComponent>(
+	[](void * context) {
+		kengine::packets::ImGuiDisplay::setupImGuiContext(context);
+		ImGui::Begin("Window");
+		if (ImGui::Button("Click me!"))
+			std::cout << "Clicked" << std::endl;
+		ImGui::End();
+	}
+);
+```
+
+The provided function must take a `void *` as parameter, and call `kengine::packets::ImGuiDisplay::setupImGuiContext()` before doing any actual rendering. This is necessary to recover `ImGui`'s global state from the `SfSystem`.
 
 ### Configuration
 

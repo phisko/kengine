@@ -25,7 +25,7 @@ namespace kengine {
         SystemManager & operator=(SystemManager const & o) = delete;
 
     public:
-        void execute() {
+        void execute(const std::function<void()> & betweenSystems = []{}) noexcept {
             if (_first) {
                 _first = false;
                 resetTimers();
@@ -39,12 +39,13 @@ namespace kengine {
 
                 if (time.alwaysCall || timer.isDone()) {
                     updateTime(*s);
-                    try { s->execute(); }
+                    try {
+                        s->execute();
+                        betweenSystems();
+                    }
                     catch (const std::exception & e) { std::cerr << e.what() << std::endl; }
                 }
             }
-
-            updateSystemList();
         }
 
     private:
@@ -76,7 +77,7 @@ namespace kengine {
 
             const auto old = time.lastCall;
             time.lastCall = putils::Timer::t_clock::now();
-            time.deltaTime = time.lastCall - old;
+            time.deltaTime = (time.lastCall - old) * _speed;
             const auto past = std::fmod(timer.getTimeSinceDone().count(), timer.getDuration().count());
             const auto dur = std::chrono::duration_cast<putils::Timer::t_clock::duration>(putils::Timer::seconds(past));
             timer.setStart(time.lastCall - dur);
@@ -129,10 +130,10 @@ namespace kengine {
             auto & em = static_cast<kengine::EntityManager &>(*this);
 
             pmeta::tuple_for_each(std::tuple < pmeta::type<Systems>... > (),
-                    [this, &em](auto && type) {
-                        using System = pmeta_wrapped(type);
-                        createSystem<System>(em);
-                    }
+                                  [this, &em](auto && type) {
+                                      using System = pmeta_wrapped(type);
+                                      createSystem<System>(em);
+                                  }
             );
 
             if (!pluginsFirst && pluginDir.size() > 0)
@@ -176,6 +177,12 @@ namespace kengine {
             _toRemove.emplace_back(pmeta::type<T>::index);
         }
 
+    public:
+        void setSpeed(double speed) noexcept { _speed = speed; }
+        double getSpeed() const noexcept { return _speed; }
+        void pause() noexcept { _speed = 0; }
+        void resume() noexcept { _speed = 1; }
+
         /*
          * Internal
          */
@@ -190,6 +197,7 @@ namespace kengine {
         }
 
     private:
+        double _speed = 1;
         std::vector<std::pair<pmeta::type_index, std::unique_ptr<ISystem>>> _toAdd;
         std::vector<pmeta::type_index> _toRemove;
         std::unordered_map<pmeta::type_index, std::unique_ptr<ISystem>> _systems;

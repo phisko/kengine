@@ -1,13 +1,18 @@
 #include "SfSystem.hpp"
 
 #include "EntityManager.hpp"
-#include "common/components/TransformComponent.hpp"
-#include "common/packets/Log.hpp"
-#include "common/packets/LuaState.hpp"
+#include "components/TransformComponent.hpp"
+#include "components/GraphicsComponent.hpp"
+#include "components/GUIComponent.hpp"
+#include "components/CameraComponent.hpp"
+#include "components/InputComponent.hpp"
+#include "components/ImGuiComponent.hpp"
+#include "packets/Log.hpp"
+#include "packets/LuaState.hpp"
 #include "lua/plua.hpp"
 
-#include "common/components/GUIComponent.hpp"
-#include "common/components/CameraComponent.hpp"
+#include "imgui.h"
+#include "imgui-SFML.h"
 
 EXPORT kengine::ISystem * getSystem(kengine::EntityManager & em) {
     return new kengine::SfSystem(em);
@@ -38,11 +43,16 @@ namespace kengine {
             handle(kengine::packets::RegisterGameObject{ *go });
 
         registerLuaFunctions();
+
+        ImGui::SFML::Init(_engine.getRenderWindow());
     }
 
-    void SfSystem::registerLuaFunctions() noexcept {
-        try {
-            auto & lua = *query<kengine::packets::LuaState::Response>(kengine::packets::LuaState::Query{}).state;
+	void SfSystem::registerLuaFunctions() noexcept {
+		try {
+			const auto ptr = query<kengine::packets::LuaState::Response>(kengine::packets::LuaState::Query{}).state;
+			if (ptr == nullptr)
+				return;
+			auto & lua = *ptr;
 
             lua["getWindowSize"] = [this] {
                 const auto size = _engine.getRenderWindow().getSize();
@@ -56,24 +66,6 @@ namespace kengine {
             lua["getGridSize"] = [this] {
                 const auto size = _engine.getRenderWindow().getSize();
                 return putils::Point3d{ (double) (size.x / _tileSize.x), double(size.y / _tileSize.y) };
-            };
-
-            lua["setKeyHandler"] = [this](const std::function<void(sf::Keyboard::Key)> & onPress,
-                                          const std::function<void(sf::Keyboard::Key)> & onRelease) {
-                auto & handler = _keyHandlers[sf::Keyboard::KeyCount];
-                handler.onPress = onPress;
-                handler.onRelease = onRelease;
-            };
-
-            lua["setMouseButtonHandler"] = [this](const std::function<void(sf::Mouse::Button, int x, int y)> & onPress,
-                                                       const std::function<void(sf::Mouse::Button, int x, int y)> & onRelease) {
-                auto & handler = _mouseButtonHandlers[sf::Mouse::ButtonCount];
-                handler.onPress = onPress;
-                handler.onRelease = onRelease;
-            };
-
-            lua["setMouseMovedHandler"] = [this](const std::function<void(int x, int y)> & func) {
-                _mouseMovedHandler = [func](const putils::Point2i & p) { func(p.x, p.y); };
             };
         }
         catch (const std::out_of_range &) {}
@@ -105,9 +97,19 @@ namespace kengine {
 
     void SfSystem::execute() {
         handleEvents();
+
+        ImGui::SFML::Update(_engine.getRenderWindow(), _deltaClock.restart());
+
+		const auto & objects = _em.getGameObjects<kengine::ImGuiComponent>();
+		for (const auto go : objects) {
+			const auto & comp = go->getComponent<kengine::ImGuiComponent>();
+			comp.display(GImGui);
+		}
+
         updateCameras();
         updateDrawables();
-        _engine.update(true);
+
+        _engine.update(true, [this] { ImGui::SFML::Render(_engine.getRenderWindow()); });
     }
 
     void SfSystem::updateCameras() noexcept {
@@ -116,7 +118,7 @@ namespace kengine {
         if (!cameras.empty())
             _engine.removeView("default");
 
-        for (auto go : cameras) {
+        for (const auto go : cameras) {
             auto & view = _engine.getView(go->getName());
 
             const auto & frustrum = go->getComponent<kengine::CameraComponent3d>().frustrum;
@@ -135,111 +137,128 @@ namespace kengine {
         }
     }
 
-    void SfSystem::updateDrawables() noexcept {
-        // Update positions
-        for (auto go : _em.getGameObjects<SfComponent>()) {
-            auto & comp = go->getComponent<SfComponent>();
-            const auto & transform = go->getComponent<kengine::TransformComponent3d>();
-            const auto & pos = transform.boundingBox.topLeft;
+    void SfSystem::updateDrawables() {
+        std::vector<kengine::GameObject *> toDetach;
 
-            comp.getViewItem().setPosition(
-                    { (float) (_tileSize.x * pos.x), (float) (_tileSize.y * pos.z) }
+        for (const auto go : _em.getGameObjects<SfComponent>()) {
+            auto & comp = go->getComponent<SfComponent>();
+
+            if (go->hasComponent<kengine::GUIComponent>())
+                updateGUIElement(*go, comp);
+            else if (go->hasComponent<kengine::GraphicsComponent>())
+                updateObject(*go, comp);
+            else
+                toDetach.push_back(go);
+        }
+
+        for (const auto go : toDetach)
+            go->detachComponent<SfComponent>();
+    }
+
+    void SfSystem::updateObject(kengine::GameObject & go, SfComponent & comp) {
+        const auto & transform = go.getComponent<kengine::TransformComponent3d>();
+        updateTransform(go, comp, transform);
+
+        const auto & graphics = go.getComponent<kengine::GraphicsComponent>();
+        const auto & appearance = graphics.appearance;
+        auto & sprite = static_cast<pse::Sprite &>(comp.getViewItem());
+
+		try {
+			sprite.setTexture(appearance);
+		} catch (const std::exception & e) {
+			std::cerr << "[SfSystem] Failed to set appearance: " << e.what() << std::endl;
+		}
+
+        sprite.setRotation(-transform.yaw - graphics.yaw);
+
+        if (graphics.size.x != 0 || graphics.size.z != 0) {
+            sprite.setSize(
+                    { (float) (_tileSize.x * graphics.size.x), (float) (_tileSize.y * graphics.size.z) }
+            );
+        }
+
+        if (graphics.repeated) {
+            const auto & box = transform.boundingBox;
+
+            sf::IntRect rect = (graphics.size.x != 0 || graphics.size.z != 0) ? sf::IntRect{
+                    (int)(_tileSize.x * box.topLeft.x), (int)(_tileSize.y * box.topLeft.z),
+                    (int)(_tileSize.x * graphics.size.x), (int)(_tileSize.x * graphics.size.z)
+            } : sf::IntRect{
+                    (int)(_tileSize.x * box.topLeft.x), (int)(_tileSize.y * box.topLeft.z),
+                    (int)(_tileSize.x * box.size.x), (int)(_tileSize.x * box.size.z)
+            };
+
+            sprite.repeat(rect);
+        } else
+            sprite.unrepeat();
+    }
+
+    void SfSystem::updateGUIElement(kengine::GameObject & go, SfComponent & comp) noexcept {
+        const auto & gui = go.getComponent<kengine::GUIComponent>();
+        auto & view = static_cast<pse::Text &>(comp.getViewItem());
+        view.setString(gui.text);
+
+        auto & transform = go.getComponent<kengine::TransformComponent3d>();
+        if (!gui.camera.empty()) {
+			const auto & cam = _em.getEntity(gui.camera);
+            const auto & frustrum = cam.getComponent<kengine::CameraComponent3d>().frustrum;
+            transform.boundingBox.topLeft.x = frustrum.topLeft.x + frustrum.size.x * gui.topLeft.x;
+            transform.boundingBox.topLeft.z = frustrum.topLeft.z + frustrum.size.z * gui.topLeft.z;
+            transform.boundingBox.topLeft.y = gui.topLeft.y;
+        }
+
+        updateTransform(go, comp, transform);
+    }
+
+    void SfSystem::updateTransform(kengine::GameObject & go, SfComponent & comp, const kengine::TransformComponent3d & transform) noexcept {
+        const auto & pos = transform.boundingBox.topLeft;
+        comp.getViewItem().setPosition(
+                { (float) (_tileSize.x * pos.x), (float) (_tileSize.y * pos.z) }
+        );
+        _engine.setItemHeight(comp.getViewItem(), (std::size_t) pos.y);
+
+        const auto & size = transform.boundingBox.size;
+        if (!comp.isFixedSize())
+            comp.getViewItem().setSize(
+                    { (float) (_tileSize.x * size.x), (float) (_tileSize.y * size.z) }
             );
 
-            const auto & size = transform.boundingBox.size;
-            if (!comp.isFixedSize())
-                comp.getViewItem().setSize(
-                        { (float) (_tileSize.x * size.x), (float) (_tileSize.y * size.z) }
-                );
+        comp.getViewItem().setRotation(-transform.yaw);
 
-            _engine.setItemHeight(comp.getViewItem(), (std::size_t) pos.y);
-        }
-
-        // GUI elements
-        for (const auto go : _em.getGameObjects<kengine::GUIComponent>()) {
-            const auto & gui = go->getComponent<kengine::GUIComponent>();
-            auto & view = static_cast<pse::Text &>(go->getComponent<SfComponent>().getViewItem());
-            view.setString(gui.text);
-        }
     }
 
     void SfSystem::handleEvents() noexcept {
-        static const std::unordered_map<sf::Event::EventType, std::function<void(const sf::Event &)>> handlers {
-                {
-                        {
-                                sf::Event::Closed,
-                                [this](auto && e) {
-                                    getMediator()->running = false;
-                                    _engine.getRenderWindow().close();
-                                }
-                        },
-                        {
-                                sf::Event::KeyPressed,
-                                [this](auto && e) {
-                                    const auto it = _keyHandlers.find(e.key.code);
-                                    if (it != _keyHandlers.end())
-                                        it->second.onPress(e.key.code);
-
-                                    const auto it2 = _keyHandlers.find(sf::Keyboard::KeyCount);
-                                    if (it2 != _keyHandlers.end())
-                                        it2->second.onPress(e.key.code);
-                                }
-                        },
-                        {
-                                sf::Event::KeyReleased,
-                                [this](auto && e) {
-                                    const auto it = _keyHandlers.find(e.key.code);
-                                    if (it != _keyHandlers.end())
-                                        it->second.onRelease(e.key.code);
-
-                                    const auto it2 = _keyHandlers.find(sf::Keyboard::KeyCount);
-                                    if (it2 != _keyHandlers.end())
-                                        it2->second.onRelease(e.key.code);
-                                }
-                        },
-                        {
-                                sf::Event::MouseMoved,
-                                [this](auto && e) {
-                                    if (_mouseMovedHandler != nullptr)
-                                        _mouseMovedHandler({ e.mouseMove.x, e.mouseMove.y });
-                                }
-                        },
-                        {
-                                sf::Event::MouseButtonPressed,
-                                [this](auto && e) {
-                                    const auto it = _mouseButtonHandlers.find(e.mouseButton.button);
-                                    if (it != _mouseButtonHandlers.end())
-                                        it->second.onPress(e.mouseButton.button, e.mouseButton.x, e.mouseButton.y);
-
-                                    const auto it2 = _mouseButtonHandlers.find(sf::Mouse::ButtonCount);
-                                    if (it2 != _mouseButtonHandlers.end())
-                                        it2->second.onPress(e.mouseButton.button, e.mouseButton.x, e.mouseButton.y);
-                                }
-                        },
-                        {
-                                sf::Event::MouseButtonReleased,
-                                [this](auto && e) {
-                                    const auto it = _mouseButtonHandlers.find(e.mouseButton.button);
-                                    if (it != _mouseButtonHandlers.end())
-                                        it->second.onRelease(e.mouseButton.button, e.mouseButton.x, e.mouseButton.y);
-
-                                    const auto it2 = _mouseButtonHandlers.find(sf::Mouse::ButtonCount);
-                                    if (it2 != _mouseButtonHandlers.end())
-                                        it2->second.onRelease(e.mouseButton.button, e.mouseButton.x, e.mouseButton.y);
-                                }
-                        }
-                }
-        };
-
         sf::Event e;
+        std::vector<sf::Event> allEvents;
         while (_engine.pollEvent(e)) {
-            const auto it = handlers.find(e.type);
+            ImGui::SFML::ProcessEvent(e);
 
-            if (it == handlers.end())
-                continue;
+            if (e.type == sf::Event::Closed) {
+                getMediator()->running = false;
+                _engine.getRenderWindow().close();
+                return;
+            }
 
-            const auto & func = it->second;
-            func(e);
+			const auto & io = ImGui::GetIO();
+			if ((e.type == sf::Event::KeyPressed && !io.WantCaptureKeyboard) ||
+				(e.type == sf::Event::KeyReleased && !io.WantCaptureKeyboard) ||
+				(e.type == sf::Event::MouseMoved && !io.WantCaptureMouse) ||
+				(e.type == sf::Event::MouseButtonPressed && !io.WantCaptureMouse) ||
+				(e.type == sf::Event::MouseButtonReleased && !io.WantCaptureMouse) ||
+				(e.type == sf::Event::MouseWheelScrolled && !io.WantCaptureMouse))
+				allEvents.push_back(e);
+		}
+
+        for (const auto go : _em.getGameObjects<kengine::InputComponent>()) {
+            const auto & input = go->getComponent<kengine::InputComponent>();
+            for (const auto & e : allEvents) {
+                if (input.onMouseButton != nullptr && (e.type == sf::Event::MouseButtonPressed || e.type == sf::Event::MouseButtonPressed))
+                    input.onMouseButton(e.mouseButton.button, e.mouseButton.x, e.mouseButton.y, e.type == sf::Event::MouseButtonPressed);
+                else if (input.onMouseMove != nullptr && e.type == sf::Event::MouseMoved)
+                    input.onMouseMove(e.mouseMove.x, e.mouseMove.y);
+                else if (input.onKey != nullptr && (e.type == sf::Event::KeyPressed || e.type == sf::Event::KeyReleased))
+                    input.onKey(e.key.code, e.type == sf::Event::KeyPressed);
+            }
         }
     }
 
@@ -287,7 +306,6 @@ namespace kengine {
 
         const auto & comp = go.getComponent<SfComponent>();
         _engine.removeItem(comp.getViewItem());
-        _em.detachComponent(go, comp);
     }
 
     /*
@@ -298,27 +316,15 @@ namespace kengine {
         _appearances[p.appearance] = p.resource;
     }
 
-    void SfSystem::handle(const packets::RegisterKeyHandler & p) noexcept {
-        _keyHandlers[p.key] = p;
-    }
-
-    void SfSystem::handle(const packets::RegisterMouseMovedHandler & p) noexcept {
-        _mouseMovedHandler = p.handler;
-    }
-
-    void SfSystem::handle(const packets::RegisterMouseButtonHandler & p) noexcept {
-        _mouseButtonHandlers[p.button] = p;
-    }
-
-    void SfSystem::handle(const packets::KeyStatus::Query & p) noexcept {
+    void SfSystem::handle(const packets::KeyStatus::Query & p) const noexcept {
         sendTo(packets::KeyStatus::Response { sf::Keyboard::isKeyPressed(p.key) }, *p.sender);
     }
 
-    void SfSystem::handle(const packets::MouseButtonStatus::Query & p) noexcept {
+    void SfSystem::handle(const packets::MouseButtonStatus::Query & p) const noexcept {
         sendTo(packets::MouseButtonStatus::Response { sf::Mouse::isButtonPressed(p.button) }, *p.sender);
     }
 
-    void SfSystem::handle(const packets::MousePosition::Query & p) noexcept {
+    void SfSystem::handle(const packets::MousePosition::Query & p) const noexcept {
         const auto pos = sf::Mouse::getPosition();
         sendTo(packets::MousePosition::Response { { pos.x, pos.y } }, *p.sender);
     }
@@ -338,9 +344,9 @@ namespace kengine {
 
         const auto & meta = go.getComponent<GraphicsComponent>();
 
-        auto str = _appearances.find(meta.appearance) != _appearances.end()
-                   ? _appearances.at(meta.appearance)
-                   : meta.appearance;
+        const auto & str = _appearances.find(meta.appearance) != _appearances.end()
+                           ? _appearances.at(meta.appearance)
+                           : meta.appearance;
 
         auto & comp = go.attachComponent<SfComponent>(
                 std::make_unique<pse::Sprite>(str, sf::Vector2f{ 0, 0 }, sf::Vector2f{ 16, 16 })

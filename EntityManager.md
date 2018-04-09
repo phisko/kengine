@@ -77,6 +77,79 @@ const std::vector<GameObject> &getGameObjects<T>();
 
 Returns all `GameObjects` with a `T` component.
 
+##### pause
+
+```cpp
+void pause();
+```
+
+Used to pause the game by setting the `speed` to 0. Calling `isPaused` from a [System](System.md) will return `true`, and `time.getDeltaFrames()` will always return 0. This means that most systems do not have to take any special measures to adapt to the game being paused, as long as they use `time.getDeltaFrames()` to adapt their behavior. The [PhysicsSystem](common/systems/PhysicsSystem.md), for instance, multiplies the `GameObjects`' movement by `time.getDeltaFrames()` to accomodate for dropped frames, and will therefore automatically stop moving them when the game is paused.
+
+##### resume
+
+```cpp
+void resume();
+```
+
+Used to resume the game by setting the `speed` to 1.
+
+##### setSpeed
+
+```cpp
+void setSpeed(double speed);
+```
+
+Sets the game's speed to `speed`. This will impact the return value of `time.getDeltaFrames()` in `Systems`, letting them automatically adjust their behavior if they take framerate into account.
+
+##### getSpeed
+
+```cpp
+double getSpeed() const;
+```
+
+Returns the game's speed.
+
+##### CompLoader
+
+```cpp
+using CompLoader = std::function<void(kengine::GameObject &, const putils::json::Object &)>;
+```
+
+Defines a function used to load a `Component` type when unserializing `GameObjects`.
+
+##### registerCompLoader
+
+```cpp
+template<typename T>
+void registerCompLoader(const CompLoader & loader);
+```
+
+Lets users define a function to unserialize a specific `Component` type when re-loading the game. For the function to be called, the `Component` type must have a `type` field corresponding to its class name that gets serialized into the JSON object.
+
+##### save
+
+```cpp
+void save(const std::string & file);
+```
+
+Saves all `GameObjects` into `file` (in a JSON-like format).
+
+##### load
+
+```cpp
+void load(const std::string & file);
+```
+
+Removes all `GameObjects` in existence and loads those that were saved into `file`. After this is done, calls all functions registered through `onLoad`.
+
+##### onLoad
+
+```cpp
+void onLoad(const std::function<void()> & func);
+```
+
+Registers a function to be called after each call to `load`.
+
 ##### addLink
 
 ```cpp

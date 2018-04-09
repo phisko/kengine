@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 if (KENGINE_SFML)
     set(PUTILS_BUILD_PSE TRUE)
 endif ()
+
 if (KENGINE_OGRE)
     set(PUTILS_BUILD_POGRE TRUE)
 endif ()
@@ -13,6 +14,15 @@ if (KENGINE_TEST)
     set(PUTILS_TEST TRUE)
 endif ()
 
+if(KENGINE_LUA)
+    set(PUTILS_BUILD_LUA TRUE)
+endif()
+
+if(KENGINE_PYTHON)
+    set(PUTILS_BUILD_PYTHON TRUE)
+endif()
+
+set(PUTILS_BUILD_MEDIATOR TRUE)
 add_subdirectory(putils)
 
 file(GLOB src_files
@@ -28,7 +38,7 @@ endif ()
 
 add_library(kengine INTERFACE)
 target_link_libraries(kengine INTERFACE mediator pluginManager)
-target_include_directories(kengine INTERFACE .)
+target_include_directories(kengine INTERFACE . common)
 
 if (KENGINE_SFML)
     add_subdirectory(common/systems/sfml)
@@ -38,28 +48,8 @@ if (KENGINE_OGRE)
     add_subdirectory(common/systems/ogre)
 endif ()
 
-# Test
-
-if (KENGINE_TEST)
-    set(test_name kengine_test)
-    file(GLOB testSrc
-            test/*.cpp test/*.hpp
-            test/*/*.cpp test/*/*.hpp
-            putils/test/*.cpp putils/test/*.hpp
-            putils/test/*/*.cpp putils/test/*/*.hpp
-            )
-    add_executable(${test_name} ${testSrc})
-    target_link_libraries(${test_name} kengine gtest_main)
-
-    if (CMAKE_COMPILER_IS_GNUCXX)
-        append_coverage_compiler_flags()
-        find_program(lcov_found NAMES lcov)
-        if (lcov_found)
-            setup_target_for_coverage(NAME ${test_name}_coverage
-                    EXECUTABLE ${test_name}
-                    coverage)
-        endif()
-    endif ()
+if (KENGINE_B2D)
+    add_subdirectory(common/systems/box2d)
 endif ()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} PARENT_SCOPE)

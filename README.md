@@ -31,6 +31,9 @@ These are pre-built, extensible and pluggable elements that can be used in any p
 ##### Components
 
 * [LuaComponent](common/components/LuaComponent.md): defines the lua scripts to be run by the `LuaSystem` for a `GameObject`
+* [PyComponent](common/components/PyComponent.md): defines the Python scripts to be run by the `PySystem` for a `GameObject`
+* [InputComponent](common/components/InputComponent.md): lets `GameObjects` receive keyboard and mouse events
+* [ImGuiComponent](common/components/ImGuiComponent.md): lets `GameObjects` render debug elements using [ImGui](https://github.com/ocornut/imgui/)
 * [GraphicsComponent](common/components/GraphicsComponent.md): provides graphical information about a `GameObject`, such as its appearance, used by the `SfSystem`
 * [TransformComponent](common/components/TransformComponent.md): defines a `GameObject`'s position and size
 * [PhysicsComponent](common/components/PhysicsComponent.md): defines a `GameObject`'s movement
@@ -39,8 +42,11 @@ These are pre-built, extensible and pluggable elements that can be used in any p
 ##### Systems
 
 * [LogSystem](common/systems/LogSystem.md): logs messages
-* [LuaSystem](common/systems/LuaSystem.md): executes scripts, either global or attached to an entity
+* [LuaSystem](common/systems/LuaSystem.md): executes lua scripts, either global or attached to an entity
+* [PySystem](common/systems/PySystem.md): executes Python scripts, either global or attached to an entity
 * [PhysicsSystem](common/systems/PhysicsSystem.md): moves entities in a framerate-independent way
+* [CollisionSystem](common/systems/CollisionSystem.md): transfers collision notifications to `GameObjects`
+* [Box2DSystem](common/systems/box2d/Box2DSystem.md): performs the same duties as the `PhysicsSystem`, but using the **Box2D** library
 * [PathfinderSystem](common/systems/PathfinderSystem.md): uses an AStar algorithm to move entities towards their destination
 * [SfSystem](common/systems/sfml/SfSystem.md): displays entities in an SFML render window
 * [OgreSystem](common/systems/ogre/OgreSystem.md): displays entities in an OGRE render window. OGRE must be installed separately.

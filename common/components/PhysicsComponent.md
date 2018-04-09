@@ -1,5 +1,6 @@
 # [PhysicsComponent](PhysicsComponent.hpp)
 
+
 `Component` that specifies the movement information to be used by the [PhysicsSystem](../systems/PhysicsSystem.md).
 
 ### Members
@@ -15,7 +16,7 @@ PhysicsComponent(bool solid = true, bool fixed = false);
 ```cpp
 bool solid = true;
 ```
-Can be used by client code to differentiate between solid and passthrough objects when handling [Collisions](../packets/Collision.hpp).
+Defines whether objects should trigger [Collisions](../packets/Collision.hpp) when colliding with other objects.
 
 ##### fixed
 

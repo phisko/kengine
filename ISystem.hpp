@@ -25,6 +25,8 @@ namespace kengine {
         // Should return 0 if the system's framerate shouldn't be limited
         virtual std::size_t getFrameRate() const noexcept { return 60; }
 
+        bool isPaused() const noexcept { return time.getDeltaFrames() == 0; }
+
         struct {
         public:
             putils::Timer::t_duration getDeltaTime() const { return deltaTime; }

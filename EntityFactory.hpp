@@ -4,6 +4,7 @@
 #include <memory>
 #include <GameObject.hpp>
 
+
 namespace kengine {
     class EntityFactory {
     public:
@@ -15,6 +16,10 @@ namespace kengine {
 
     class ExtensibleFactory : public EntityFactory {
     public:
+        ExtensibleFactory() {
+            registerType<kengine::GameObject>();
+        }
+
         using Creator = std::function<std::unique_ptr<GameObject>(const std::string & name)>;
         void addType(const std::string & type, const Creator & creator) {
             _creators[type] = creator;
@@ -24,7 +29,7 @@ namespace kengine {
         void registerType() {
             static_assert(putils::is_reflectible<T>::value,
                           "Please make your type reflectible before registering it");
-            _creators[T::get_class_name()] = [](auto name) { return std::make_unique<T>(name); };
+            _creators[T::get_class_name()] = [](const auto & name) { return std::make_unique<T>(name); };
         }
 
         template<typename ...Types>
