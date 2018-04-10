@@ -87,6 +87,13 @@ namespace kengine {
         }
 
 	public:
+		const GameObject & getEntity(const std::string & name) const {
+			const auto it = _futureEntities.find(name);
+			if (it != _futureEntities.end())
+				return *it->second;
+			return *_entities.at(name);
+		}
+
 		GameObject & getEntity(const std::string & name) {
 			const auto it = _futureEntities.find(name);
 			if (it != _futureEntities.end())
