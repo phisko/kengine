@@ -21,6 +21,22 @@ namespace kengine {
         Precision pitch = 0; // Radians
         Precision yaw = 0; // Radians
 
+		putils::Point2d getCoordinatesFromScreen(const putils::Point2d & screenCoordinates, const putils::Point2d & screenSize) const noexcept {
+			auto ret = screenCoordinates;
+
+			ret.x /= screenSize.x;
+			ret.y /= screenSize.y;
+
+			ret.x *= frustrum.size.x;
+			ret.y *= frustrum.size.z;
+
+			const auto & offset = frustrum.topLeft;
+			ret.x += frustrum.topLeft.x;
+			ret.y += frustrum.topLeft.z;
+
+			return ret;
+		}
+
         /*
          * Reflectible
          */

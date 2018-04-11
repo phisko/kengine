@@ -75,11 +75,11 @@ namespace kengine {
      * Config parsers
      */
 
-    putils::Point<std::size_t> SfSystem::parseSize(const std::string & jsonProperty, const putils::Point<std::size_t> & _default) {
+    putils::Point2d SfSystem::parseSize(const std::string & jsonProperty, const putils::Point2d & _default) {
         if (_config.fields.find(jsonProperty) != _config.fields.end())
             return {
-                    (std::size_t) std::stoi(_config[jsonProperty]["x"]),
-                    (std::size_t) std::stoi(_config[jsonProperty]["y"])
+                    (double) std::stoi(_config[jsonProperty]["x"]),
+                    (double) std::stoi(_config[jsonProperty]["y"])
             };
 
         return _default;
