@@ -1,7 +1,7 @@
 #pragma once
 
 #include <functional>
-#include "Component.hpp"
+#include "SerializableComponent.hpp"
 
 struct ImGuiContext;
 extern ImGuiContext * GImGui;
