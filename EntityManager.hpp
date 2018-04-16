@@ -195,6 +195,8 @@ namespace kengine {
 			if (!f)
 				return;
 
+			putils::OutputPolicies::Json::serialize(f, "ids", _ids);
+
 			for (const auto & go : getGameObjects())
 				f << *go;
 		}
@@ -204,6 +206,8 @@ namespace kengine {
 
 			if (!f)
 				return;
+
+			putils::OutputPolicies::Json::unserialize(f, _ids);
 
 			try {
 				for (const auto &[name, go] : _entities)
