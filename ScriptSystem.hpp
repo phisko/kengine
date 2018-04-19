@@ -207,6 +207,13 @@ namespace kengine {
 			}
 		}
 
+		template<typename String>
+		void removeScriptDirectory(String && dir) noexcept {
+			const auto it = std::find(_directories.begin(), _directories.end(), dir);
+			if (it != _directories.end())
+				_directories.erase(it);
+		}
+
         // System methods
     public:
         void execute() final {
