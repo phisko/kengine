@@ -26,7 +26,9 @@ namespace kengine {
 		pmeta_get_attributes(
 			pmeta_reflectible_attribute(&ImGuiComponent::display)
 		);
-		pmeta_get_methods();
+		pmeta_get_methods(
+			pmeta_reflectible_attribute(&ImGuiComponent::setupImGuiContext)
+		);
 		pmeta_get_parents();
 	};
 }
