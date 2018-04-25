@@ -10,7 +10,7 @@ namespace kengine {
     public:
         PySystem(kengine::EntityManager & em) : ScriptSystem(em) {
             addScriptDirectory("python");
-            locals["pk"] = _m;
+            py::globals()["pk"] = _m;
 
 			ScriptSystem::init();
         }
@@ -50,7 +50,7 @@ namespace kengine {
     public:
 		void executeScript(const std::string & fileName) noexcept {
 			try {
-				py::eval_file(fileName, py::globals(), locals);
+				py::eval_file(fileName, py::globals());
 			}
 			catch (const std::exception & e) {
 				std::cerr << "[PySystem] Error in '" << fileName << "': " << e.what() << std::endl;
@@ -64,7 +64,6 @@ namespace kengine {
 	private:
 		py::scoped_interpreter _guard;
 		py::module _m{ "pk" };
-		py::dict locals;
 		py::class_<GameObject> * _go;
 	};
 }
