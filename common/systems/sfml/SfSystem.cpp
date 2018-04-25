@@ -253,11 +253,23 @@ namespace kengine {
             const auto & input = go->getComponent<kengine::InputComponent>();
             for (const auto & e : allEvents) {
                 if (input.onMouseButton != nullptr && (e.type == sf::Event::MouseButtonPressed || e.type == sf::Event::MouseButtonPressed))
-                    input.onMouseButton(e.mouseButton.button, e.mouseButton.x, e.mouseButton.y, e.type == sf::Event::MouseButtonPressed);
+					try {
+						input.onMouseButton(e.mouseButton.button, e.mouseButton.x, e.mouseButton.y, e.type == sf::Event::MouseButtonPressed);
+					} catch (const std::exception & e) {
+						std::cerr << e.what() << std::endl;
+					}
                 else if (input.onMouseMove != nullptr && e.type == sf::Event::MouseMoved)
-                    input.onMouseMove(e.mouseMove.x, e.mouseMove.y);
+					try {
+						input.onMouseMove(e.mouseMove.x, e.mouseMove.y);
+					} catch (const std::exception & e) {
+						std::cerr << e.what() << std::endl;
+					}
                 else if (input.onKey != nullptr && (e.type == sf::Event::KeyPressed || e.type == sf::Event::KeyReleased))
-                    input.onKey(e.key.code, e.type == sf::Event::KeyPressed);
+					try {
+						input.onKey(e.key.code, e.type == sf::Event::KeyPressed);
+					} catch (const std::exception & e) {
+						std::cerr << e.what() << std::endl;
+					}
             }
         }
     }
