@@ -336,8 +336,8 @@ namespace kengine {
         sendTo(packets::MouseButtonStatus::Response { sf::Mouse::isButtonPressed(p.button) }, *p.sender);
     }
 
-    void SfSystem::handle(const packets::MousePosition::Query & p) const noexcept {
-        const auto pos = sf::Mouse::getPosition();
+    void SfSystem::handle(const packets::MousePosition::Query & p) noexcept {
+        const auto pos = sf::Mouse::getPosition(_engine.getRenderWindow());
         sendTo(packets::MousePosition::Response { { pos.x, pos.y } }, *p.sender);
     }
 

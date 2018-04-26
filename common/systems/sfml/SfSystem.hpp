@@ -38,7 +38,7 @@ namespace kengine {
     public:
         void handle(const packets::KeyStatus::Query & p) const noexcept;
         void handle(const packets::MouseButtonStatus::Query & p) const noexcept;
-        void handle(const packets::MousePosition::Query & p) const noexcept;
+        void handle(const packets::MousePosition::Query & p) noexcept;
 
     private:
         SfComponent & getResource(kengine::GameObject & go);
