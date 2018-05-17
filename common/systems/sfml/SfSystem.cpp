@@ -38,7 +38,7 @@ namespace kengine {
               _fullScreen(parseBool("fullScreen", false)),
               _em(em),
               _engine(_screenSize.x, _screenSize.y, "Kengine",
-                      _fullScreen ? sf::Style::Fullscreen : sf::Style::Close) {
+                      _fullScreen ? sf::Style::Fullscreen : sf::Style::Default) {
         for (const auto go : _em.getGameObjects())
             handle(kengine::packets::RegisterGameObject{ *go });
 
@@ -238,7 +238,7 @@ namespace kengine {
                 _engine.getRenderWindow().close();
                 return;
             }
-
+			
 			const auto & io = ImGui::GetIO();
 			if ((e.type == sf::Event::KeyPressed && !io.WantCaptureKeyboard) ||
 				(e.type == sf::Event::KeyReleased && !io.WantCaptureKeyboard) ||
@@ -252,15 +252,20 @@ namespace kengine {
         for (const auto go : _em.getGameObjects<kengine::InputComponent>()) {
             const auto & input = go->getComponent<kengine::InputComponent>();
             for (const auto & e : allEvents) {
-                if (input.onMouseButton != nullptr && (e.type == sf::Event::MouseButtonPressed || e.type == sf::Event::MouseButtonPressed))
+				if (input.onMouseButton != nullptr && (e.type == sf::Event::MouseButtonPressed || e.type == sf::Event::MouseButtonReleased))
 					try {
-						input.onMouseButton(e.mouseButton.button, e.mouseButton.x, e.mouseButton.y, e.type == sf::Event::MouseButtonPressed);
-					} catch (const std::exception & e) {
+						const auto x = (double)e.mouseButton.x / _engine.getRenderWindow().getSize().x * _screenSize.x;
+						const auto y = (double)e.mouseButton.y / _engine.getRenderWindow().getSize().y * _screenSize.y;
+						input.onMouseButton(e.mouseButton.button, x, y, e.type == sf::Event::MouseButtonPressed);
+					}
+					catch (const std::exception & e) {
 						std::cerr << e.what() << std::endl;
 					}
                 else if (input.onMouseMove != nullptr && e.type == sf::Event::MouseMoved)
 					try {
-						input.onMouseMove(e.mouseMove.x, e.mouseMove.y);
+						const auto x = (double)e.mouseMove.x / _engine.getRenderWindow().getSize().x * _screenSize.x;
+						const auto y = (double)e.mouseMove.y / _engine.getRenderWindow().getSize().y * _screenSize.y;
+						input.onMouseMove(x, y);
 					} catch (const std::exception & e) {
 						std::cerr << e.what() << std::endl;
 					}
