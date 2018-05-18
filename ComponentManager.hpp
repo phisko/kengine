@@ -58,7 +58,9 @@ namespace kengine {
 
 		void removeComponent(const GameObject & go, pmeta::type_index type) noexcept {
 			auto & category = _entitiesByType[type];
-			category.unsafe.erase(std::find(category.unsafe.begin(), category.unsafe.end(), &go));
+			const auto it = std::find(category.unsafe.begin(), category.unsafe.end(), &go);
+			if (it != category.unsafe.end())
+				category.unsafe.erase(it);
 		}
 
     private:

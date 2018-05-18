@@ -51,7 +51,7 @@ namespace kengine {
         void updateTransform(kengine::GameObject & go, SfComponent & comp, const kengine::TransformComponent3d & transform) noexcept;
 
 	private:
-		putils::json::Object _config;
+		putils::json _config;
 		putils::Point2d _screenSize;
 		putils::Point2d _tileSize;
 		bool _fullScreen;

@@ -11,7 +11,7 @@
 #include "EntityFactory.hpp"
 
 namespace kengine {
-    class EntityManager : public SystemManager, public ComponentManager {
+    class EntityManager : public SystemManager, public ComponentManager, public putils::Serializable<EntityManager> {
     public:
         EntityManager(std::unique_ptr<EntityFactory> && factory = std::make_unique<ExtensibleFactory>())
                 : _factory(std::move(factory)) {}
@@ -169,7 +169,7 @@ namespace kengine {
 		void enableEntity(const std::string & name) { enableEntity(getEntity(name)); }
 
     public:
-		using CompLoader = std::function<void(kengine::GameObject &, const putils::json::Object &)>;
+		using CompLoader = std::function<void(kengine::GameObject &, const putils::json &)>;
 
 		template<typename T>
 		void registerCompLoader(const CompLoader & loader) {
@@ -179,10 +179,10 @@ namespace kengine {
 		template<typename T>
 		void registerCompLoader() {
 			if constexpr (kengine::is_component<T>::value)
-				_loaders[T::get_class_name()] = [](kengine::GameObject & go, const putils::json::Object & json) {
-				auto & comp = go.attachComponent<T>();
-				putils::parse(comp, json.value);
-			};
+				_loaders[T::get_class_name()] = [](kengine::GameObject & go, const putils::json & json) {
+					auto & comp = go.attachComponent<T>();
+					putils::parse(comp, json.get<std::string>());
+				};
 		}
 
 		void onLoad(const std::function<void()> & func) {
@@ -194,11 +194,12 @@ namespace kengine {
 
 			if (!f)
 				return;
-
+			f << "{";
 			putils::OutputPolicies::Json::serialize(f, "ids", _ids);
-
+			f << ", \"entities\": [";
 			for (const auto & go : getGameObjects())
 				f << *go;
+			f << "]}";
 		}
 
 		void load(const std::string & file) {
@@ -207,16 +208,21 @@ namespace kengine {
 			if (!f)
 				return;
 
-			putils::OutputPolicies::Json::unserialize(f, _ids);
+			putils::json jsonObj;
+			f >> jsonObj;
+
+			std::stringstream s(jsonObj["ids"].dump());
+			putils::OutputPolicies::Json::unserialize(s, _ids);
 
 			try {
+				updateEntities();
 				for (const auto &[name, go] : _entities)
 					removeEntity(*go);
+				updateEntities();
 
-				while (f && !f.eof()) {
-					auto obj = putils::json::lex(f);
-					const auto & name = obj["name"].value;
-					createEntity<kengine::GameObject>(obj["name"].value, [this, &obj](kengine::GameObject & go) { loadComponents(obj, go); });
+				for (const auto & entity : jsonObj["entities"]) {
+					const std::string name = entity["name"];
+					createEntity<kengine::GameObject>(name, [this, &entity](kengine::GameObject & go) { loadComponents(entity, go); });
 				}
 			}
 			catch (const std::exception & e) {}
@@ -225,15 +231,15 @@ namespace kengine {
 		}
 
     private:
-		void loadComponents(const putils::json::Object & obj, kengine::GameObject & go) {
-			for (const auto &[type, comp] : obj["components"].fields) {
-				const auto it = comp.fields.find("type");
-				if (it == comp.fields.end())
+		void loadComponents(const putils::json & obj, kengine::GameObject & go) {
+			for (const auto & element : obj["components"]) {
+				const auto it = element.find("type");
+				if (it == element.end())
 					continue;
 
-				const auto loader = _loaders.find(it->second);
+				const auto loader = _loaders.find(*it);
 				if (loader != _loaders.end())
-					loader->second(go, comp);
+					loader->second(go, element);
 			}
 		}
 
@@ -334,5 +340,14 @@ namespace kengine {
     private:
         std::unordered_set<GameObject *> _toDisable;
         std::unordered_set<GameObject *> _disabled;
+
+    public:
+		pmeta_get_class_name(EntityManager);
+		pmeta_get_attributes(
+			pmeta_reflectible_attribute_private(&EntityManager::_ids),
+			pmeta_reflectible_attribute_private(&EntityManager::_entities)
+		);
+		pmeta_get_methods();
+		pmeta_get_parents();
     };
 }

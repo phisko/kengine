@@ -153,6 +153,13 @@ namespace kengine {
 				)
 			);
 
+            crtp.registerFunction("runAfterSystem",
+				std::function<void(const std::function<void()> &)>(
+					[this](const std::function<void()> & func) { _em.runAfterSystem(func); }
+				)
+			);
+
+
             registerType<kengine::GameObject>();
 		}
 

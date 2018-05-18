@@ -41,12 +41,21 @@ namespace kengine {
                     updateTime(*s);
                     try {
                         s->execute();
+						for (const auto & f : _afterSystem)
+							f();
+						_afterSystem.clear();
                         betweenSystems();
                     }
-                    catch (const std::exception & e) { std::cerr << e.what() << std::endl; }
+                    catch (const std::exception & e) {
+	                    std::cerr << e.what() << std::endl;
+						_afterSystem.clear();
+                    }
                 }
             }
         }
+		
+    public:
+		void runAfterSystem(const std::function<void()> & func) { _afterSystem.push_back(func); }
 
     private:
         void updateSystemList() noexcept {
@@ -201,5 +210,7 @@ namespace kengine {
         std::vector<std::pair<pmeta::type_index, std::unique_ptr<ISystem>>> _toAdd;
         std::vector<pmeta::type_index> _toRemove;
         std::unordered_map<pmeta::type_index, std::unique_ptr<ISystem>> _systems;
+
+		std::vector<std::function<void()>> _afterSystem;
     };
 }

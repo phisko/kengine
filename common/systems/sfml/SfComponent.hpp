@@ -33,8 +33,7 @@ public:
     { return *_viewItem.get(); }
 
 public:
-    std::string toString() const final
-    { return "{type:sfml}"; }
+    std::string toString() const final { return "{\"type\":\"sfml\"}"; }
 
     bool isFixedSize() const { return _fixedSize; }
 

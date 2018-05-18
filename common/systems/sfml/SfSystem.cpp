@@ -23,11 +23,11 @@ namespace kengine {
      * Constructor
      */
 
-    static putils::json::Object parseConfig() {
+    static putils::json parseConfig() {
         std::ifstream config("sf-config.json");
         std::string str((std::istreambuf_iterator<char>(config)),
                         std::istreambuf_iterator<char>());
-        return putils::json::lex(str);
+        return putils::json(str);
     }
 
     SfSystem::SfSystem(kengine::EntityManager & em)
@@ -76,18 +76,18 @@ namespace kengine {
      */
 
     putils::Point2d SfSystem::parseSize(const std::string & jsonProperty, const putils::Point2d & _default) {
-        if (_config.fields.find(jsonProperty) != _config.fields.end())
+        if (_config.find(jsonProperty) != _config.end())
             return {
-                    (double) std::stoi(_config[jsonProperty]["x"]),
-                    (double) std::stoi(_config[jsonProperty]["y"])
+					_config[jsonProperty]["x"],
+					_config[jsonProperty]["y"]
             };
 
         return _default;
     }
 
     bool SfSystem::parseBool(const std::string & propertyName, bool _default) {
-        if (_config.fields.find(propertyName) != _config.fields.end())
-            return _config[propertyName].value == "true";
+		if (_config.find(propertyName) != _config.end())
+			return _config[propertyName];
         return _default;
     }
 
@@ -249,6 +249,7 @@ namespace kengine {
 				allEvents.push_back(e);
 		}
 
+		const auto & objects = _em.getGameObjects<kengine::InputComponent>();
         for (const auto go : _em.getGameObjects<kengine::InputComponent>()) {
             const auto & input = go->getComponent<kengine::InputComponent>();
             for (const auto & e : allEvents) {
@@ -261,7 +262,7 @@ namespace kengine {
 					catch (const std::exception & e) {
 						std::cerr << e.what() << std::endl;
 					}
-                else if (input.onMouseMove != nullptr && e.type == sf::Event::MouseMoved)
+				else if (input.onMouseMove != nullptr && e.type == sf::Event::MouseMoved)
 					try {
 						const auto x = (double)e.mouseMove.x / _engine.getRenderWindow().getSize().x * _screenSize.x;
 						const auto y = (double)e.mouseMove.y / _engine.getRenderWindow().getSize().y * _screenSize.y;
@@ -269,7 +270,7 @@ namespace kengine {
 					} catch (const std::exception & e) {
 						std::cerr << e.what() << std::endl;
 					}
-                else if (input.onKey != nullptr && (e.type == sf::Event::KeyPressed || e.type == sf::Event::KeyReleased))
+				else if (input.onKey != nullptr && (e.type == sf::Event::KeyPressed || e.type == sf::Event::KeyReleased))
 					try {
 						input.onKey(e.key.code, e.type == sf::Event::KeyPressed);
 					} catch (const std::exception & e) {
