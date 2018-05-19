@@ -197,8 +197,13 @@ namespace kengine {
 			f << "{";
 			putils::OutputPolicies::Json::serialize(f, "ids", _ids);
 			f << ", \"entities\": [";
-			for (const auto & go : getGameObjects())
+			bool first = true;
+			for (const auto & go : getGameObjects()) {
+				if (!first)
+					f << ",";
 				f << *go;
+				first = false;
+			}
 			f << "]}";
 		}
 
@@ -215,10 +220,8 @@ namespace kengine {
 			putils::OutputPolicies::Json::unserialize(s, _ids);
 
 			try {
-				updateEntities();
 				for (const auto &[name, go] : _entities)
 					removeEntity(*go);
-				updateEntities();
 
 				for (const auto & entity : jsonObj["entities"]) {
 					const std::string name = entity["name"];
