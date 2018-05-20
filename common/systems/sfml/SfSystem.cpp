@@ -27,7 +27,7 @@ namespace kengine {
         std::ifstream config("sf-config.json");
         std::string str((std::istreambuf_iterator<char>(config)),
                         std::istreambuf_iterator<char>());
-        return putils::json(str);
+        return putils::json::parse(str);
     }
 
     SfSystem::SfSystem(kengine::EntityManager & em)
@@ -197,6 +197,7 @@ namespace kengine {
         const auto & gui = go.getComponent<kengine::GUIComponent>();
         auto & view = static_cast<pse::Text &>(comp.getViewItem());
         view.setString(gui.text);
+		view.setTextSize(gui.textSize);
 
         auto & transform = go.getComponent<kengine::TransformComponent3d>();
         if (!gui.camera.empty()) {

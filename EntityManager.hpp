@@ -181,7 +181,7 @@ namespace kengine {
 			if constexpr (kengine::is_component<T>::value)
 				_loaders[T::get_class_name()] = [](kengine::GameObject & go, const putils::json & json) {
 					auto & comp = go.attachComponent<T>();
-					putils::parse(comp, json.get<std::string>());
+					putils::parse(comp, json.dump());
 				};
 		}
 
@@ -228,19 +228,22 @@ namespace kengine {
 					createEntity<kengine::GameObject>(name, [this, &entity](kengine::GameObject & go) { loadComponents(entity, go); });
 				}
 			}
-			catch (const std::exception & e) {}
+			catch (const std::exception & e) {
+				std::cerr << "Error while loading:" << e.what() << std::endl;
+			}
 
 			_justLoaded = true;
 		}
 
     private:
 		void loadComponents(const putils::json & obj, kengine::GameObject & go) {
-			for (const auto & element : obj["components"]) {
-				const auto it = element.find("type");
-				if (it == element.end())
+			for (auto it = obj["components"].begin(); it != obj["components"].end(); ++it) {
+				const auto & element = it.value();
+				const auto type = element.find("type");
+				if (type == element.end())
 					continue;
 
-				const auto loader = _loaders.find(*it);
+				const auto loader = _loaders.find(type.value());
 				if (loader != _loaders.end())
 					loader->second(go, element);
 			}
