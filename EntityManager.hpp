@@ -219,21 +219,25 @@ namespace kengine {
 			std::stringstream s(jsonObj["ids"].dump());
 			putils::OutputPolicies::Json::unserialize(s, _ids);
 
-			try {
-				for (const auto &[name, go] : _entities)
-					removeEntity(*go);
+			for (const auto &[name, go] : _entities)
+				removeEntity(*go);
 
-				for (const auto & entity : jsonObj["entities"]) {
-					const std::string name = entity["name"];
-					createEntity<kengine::GameObject>(name, [this, &entity](kengine::GameObject & go) { loadComponents(entity, go); });
-				}
-			}
-			catch (const std::exception & e) {
-				std::cerr << "Error while loading:" << e.what() << std::endl;
-			}
+			for (const auto & entity : jsonObj["entities"])
+				loadEntity(entity);
 
 			_justLoaded = true;
 		}
+
+    public:
+		void loadEntity(const putils::json & jsonObject) {
+			const std::string & name = jsonObject["name"];
+			if (hasEntity(name))
+				removeEntity(name);
+			createEntity<kengine::GameObject>(name, [this, &jsonObject](kengine::GameObject & go) { loadComponents(jsonObject, go); });
+		}
+
+    public:
+		void loadEntity(const std::string & jsonString) { loadEntity(putils::json::parse(jsonString)); }
 
     private:
 		void loadComponents(const putils::json & obj, kengine::GameObject & go) {
