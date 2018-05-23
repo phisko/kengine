@@ -200,7 +200,7 @@ namespace kengine {
 		view.setTextSize(gui.textSize);
 
         auto & transform = go.getComponent<kengine::TransformComponent3d>();
-        if (!gui.camera.empty()) {
+        if (!gui.camera.empty() && _em.hasEntity(gui.camera)) {
 			const auto & cam = _em.getEntity(gui.camera);
             const auto & frustrum = cam.getComponent<kengine::CameraComponent3d>().frustrum;
             transform.boundingBox.topLeft.x = frustrum.topLeft.x + frustrum.size.x * gui.topLeft.x;
