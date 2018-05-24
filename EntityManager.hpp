@@ -213,8 +213,7 @@ namespace kengine {
 			if (!f)
 				return;
 
-			putils::json jsonObj;
-			f >> jsonObj;
+			const auto jsonObj = putils::json::parse(f);
 
 			std::stringstream s(jsonObj["ids"].dump());
 			putils::OutputPolicies::Json::unserialize(s, _ids);

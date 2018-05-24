@@ -2,12 +2,23 @@
 
 #include <functional>
 #include "SerializableComponent.hpp"
+#include "EntityManager.hpp"
 
 struct ImGuiContext;
 extern ImGuiContext * GImGui;
 
 namespace kengine {
 	class ImGuiComponent : public kengine::SerializableComponent<ImGuiComponent> {
+	public:
+		static void create(const std::string & name, kengine::EntityManager & em, const std::function<void()> & display) {
+			em.createEntity<kengine::GameObject>(name, [&display](kengine::GameObject & go) {
+				go.attachComponent<kengine::ImGuiComponent>([display](auto && context) {
+					setupImGuiContext(context);
+					display();
+				});
+			});
+		}
+
 	public:
 		ImGuiComponent(const std::function<void(void *)> & display = nullptr) : display(display) {}
 
