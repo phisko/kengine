@@ -17,8 +17,6 @@ namespace kengine {
 		AdjustableComponent(const std::string & name, double d) : name(name), d(d), adjustableType(Double) {}
 		AdjustableComponent(const std::string & name, int i) : name(name), i(i), adjustableType(Int) {}
 
-
-		const std::string type = pmeta_nameof(AdjustableComponent);
 		std::string name;
 
 		std::string * sPtr = nullptr;
@@ -43,22 +41,35 @@ namespace kengine {
 
 		template<typename T>
 		static kengine::GameObject & create(const std::string & name, kengine::EntityManager & em, T & val) {
-			return em.createEntity<kengine::GameObject>(name, [&name, &val](kengine::GameObject & go) {
-				go.attachComponent<AdjustableComponent>(name, val);
-			});
+			if (!em.hasEntity(name))
+				return em.createEntity<kengine::GameObject>(name, [&name, &val](kengine::GameObject & go) {
+					go.attachComponent<AdjustableComponent>(name, val);
+				});
+			else {
+				auto & go = em.getEntity(name);
+				if (!go.hasComponent<AdjustableComponent>())
+					go.attachComponent<AdjustableComponent>(name, val);
+				return go;
+			}
 		}
 
 		template<typename T>
 		static kengine::GameObject & create(const std::string & name, kengine::EntityManager & em, const T & val) {
-			return em.createEntity<kengine::GameObject>(name, [&name, &val](kengine::GameObject & go) {
-				go.attachComponent<AdjustableComponent>(name, val);
-			});
+			if (!em.hasEntity(name))
+				return em.createEntity<kengine::GameObject>(name, [&name, &val](kengine::GameObject & go) {
+					go.attachComponent<AdjustableComponent>(name, val);
+				});
+			else {
+				auto & go = em.getEntity(name);
+				if (!go.hasComponent<AdjustableComponent>())
+					go.attachComponent<AdjustableComponent>(name, val);
+				return go;
+			}
 		}
 
 	public:
 		pmeta_get_class_name(AdjustableComponent);
 		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&AdjustableComponent::type),
 			pmeta_reflectible_attribute(&AdjustableComponent::name),
 			pmeta_reflectible_attribute(&AdjustableComponent::s),
 			pmeta_reflectible_attribute(&AdjustableComponent::s),
