@@ -8,14 +8,20 @@
 namespace kengine {
 	class ImGuiAdjustableSystem : public kengine::System<ImGuiAdjustableSystem> {
 	public:
-		ImGuiAdjustableSystem(kengine::EntityManager & em) {
-			kengine::ImGuiComponent::create("imgui-adjustables", em, [&em] {
+		ImGuiAdjustableSystem(kengine::EntityManager & em) : _em(em) {
+			onLoad();
+			_em.onLoad([this] { onLoad(); });
+		}
+
+	private:
+		void onLoad() noexcept {
+			kengine::ImGuiComponent::create("imgui-adjustables", _em, [this] {
 				if (ImGui::Begin("Adjustables")) {
 					static char nameSearch[1024] = "";
 					ImGui::InputText("Name", nameSearch, sizeof(nameSearch));
 					ImGui::Separator();
 
-					for (const auto go : em.getGameObjects<AdjustableComponent>()) {
+					for (const auto go : _em.getGameObjects<AdjustableComponent>()) {
 						auto & comp = go->getComponent<AdjustableComponent>();
 						if (comp.name.find(nameSearch) == std::string::npos)
 							continue;
@@ -48,5 +54,7 @@ namespace kengine {
 				ImGui::End();
 			});
 		}
+
+		kengine::EntityManager & _em;
 	};
 }

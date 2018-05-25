@@ -7,10 +7,10 @@ namespace kengine {
 	public:
 		AdjustableComponent() = default;
 
-		AdjustableComponent(const std::string & name, std::string & s) : name(name), sPtr(&s), adjustableType(String) {}
-		AdjustableComponent(const std::string & name, bool & b) : name(name), bPtr(&b), adjustableType(Bool) {}
-		AdjustableComponent(const std::string & name, double & d) : name(name), dPtr(&d), adjustableType(Double) {}
-		AdjustableComponent(const std::string & name, int & i) : name(name), iPtr(&i), adjustableType(Int) {}
+		AdjustableComponent(const std::string & name, std::string * s) : name(name), sPtr(s), adjustableType(String) {}
+		AdjustableComponent(const std::string & name, bool * b) : name(name), bPtr(b), adjustableType(Bool) {}
+		AdjustableComponent(const std::string & name, double * d) : name(name), dPtr(d), adjustableType(Double) {}
+		AdjustableComponent(const std::string & name, int * i) : name(name), iPtr(i), adjustableType(Int) {}
 
 		AdjustableComponent(const std::string & name, const std::string & s) : name(name), s(s), adjustableType(String) {}
 		AdjustableComponent(const std::string & name, bool b) : name(name), b(b), adjustableType(Bool) {}
@@ -40,7 +40,7 @@ namespace kengine {
 		int adjustableType;
 
 		template<typename T>
-		static kengine::GameObject & create(const std::string & name, kengine::EntityManager & em, T & val) {
+		static kengine::GameObject & create(const std::string & name, kengine::EntityManager & em, T * val) {
 			if (!em.hasEntity(name))
 				return em.createEntity<kengine::GameObject>(name, [&name, &val](kengine::GameObject & go) {
 					go.attachComponent<AdjustableComponent>(name, val);
@@ -54,7 +54,7 @@ namespace kengine {
 		}
 
 		template<typename T>
-		static kengine::GameObject & create(const std::string & name, kengine::EntityManager & em, const T & val) {
+		static kengine::GameObject & create(const std::string & name, kengine::EntityManager & em, T val) {
 			if (!em.hasEntity(name))
 				return em.createEntity<kengine::GameObject>(name, [&name, &val](kengine::GameObject & go) {
 					go.attachComponent<AdjustableComponent>(name, val);
