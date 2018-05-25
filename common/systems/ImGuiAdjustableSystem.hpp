@@ -11,8 +11,14 @@ namespace kengine {
 		ImGuiAdjustableSystem(kengine::EntityManager & em) {
 			kengine::ImGuiComponent::create("imgui-adjustables", em, [&em] {
 				if (ImGui::Begin("Adjustables")) {
+					static char nameSearch[1024] = "";
+					ImGui::InputText("Name", nameSearch, sizeof(nameSearch));
+					ImGui::Separator();
+
 					for (const auto go : em.getGameObjects<AdjustableComponent>()) {
 						auto & comp = go->getComponent<AdjustableComponent>();
+						if (comp.name.find(nameSearch) == std::string::npos)
+							continue;
 
 						if (comp.adjustableType == AdjustableComponent::String) {
 							char buff[1024];
