@@ -42,7 +42,7 @@ public:
 		update();
 	}
 
-	unsigned int getPointCount() const override { return 4; }
+	std::size_t getPointCount() const override { return 4; }
 	sf::Vector2f getPoint(std::size_t index) const override { return vertices[index]; }
 
 private:

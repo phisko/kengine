@@ -25,6 +25,7 @@ namespace kengine {
 						setupImGuiContext(context);
 						display();
 					});
+				return go;
 			}
 		}
 
