@@ -21,7 +21,11 @@ namespace kengine {
 					ImGui::InputText("Name", nameSearch, sizeof(nameSearch));
 					ImGui::Separator();
 
-					for (const auto go : _em.getGameObjects<AdjustableComponent>()) {
+					auto objects = _em.getGameObjects<AdjustableComponent>();
+					std::sort(objects.begin(), objects.end(), [](kengine::GameObject * first, kengine::GameObject * second) {
+						return first->getComponent<AdjustableComponent>().name.compare(second->getComponent<AdjustableComponent>().name) < 0;
+					});
+					for (const auto go : objects) {
 						auto & comp = go->getComponent<AdjustableComponent>();
 						if (comp.name.find(nameSearch) == std::string::npos)
 							continue;
