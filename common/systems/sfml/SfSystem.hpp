@@ -27,6 +27,10 @@ namespace kengine {
         void handle(const kengine::packets::RegisterGameObject & p);
         void handle(const kengine::packets::RemoveGameObject & p);
 
+    private:
+		void attachDebug(kengine::GameObject & go);
+		void attachNormal(kengine::GameObject & go);
+
     public:
         void handle(const packets::RegisterAppearance & p) noexcept;
 
@@ -46,6 +50,7 @@ namespace kengine {
         void handleEvents() noexcept;
         void updateCameras() noexcept;
         void updateDrawables();
+        void updateDebug(kengine::GameObject & go, SfComponent & comp);
         void updateObject(kengine::GameObject & go, SfComponent & comp);
         void updateGUIElement(kengine::GameObject & go, SfComponent & comp) noexcept;
         void updateTransform(kengine::GameObject & go, SfComponent & comp, const kengine::TransformComponent3d & transform) noexcept;
@@ -60,6 +65,12 @@ namespace kengine {
 	private:
 		putils::Point2d parseSize(const std::string & propertyName, const putils::Point2d & _default);
 		bool parseBool(const std::string & propertyName, bool _default);
+
+		// Helpers
+    private:
+		sf::Vector2f toWorldPos(const putils::Point3d & pos) const {
+			return { (float)(pos.x * _tileSize.x), (float)(pos.z * _tileSize.y) };
+		}
 
 	private:
 		kengine::EntityManager & _em;
