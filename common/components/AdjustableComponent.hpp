@@ -7,10 +7,10 @@ namespace kengine {
 	public:
 		AdjustableComponent() = default;
 
-		AdjustableComponent(const std::string & name, std::string * s) : name(name), sPtr(s), adjustableType(String) {}
-		AdjustableComponent(const std::string & name, bool * b) : name(name), bPtr(b), adjustableType(Bool) {}
-		AdjustableComponent(const std::string & name, double * d) : name(name), dPtr(d), adjustableType(Double) {}
-		AdjustableComponent(const std::string & name, int * i) : name(name), iPtr(i), adjustableType(Int) {}
+		AdjustableComponent(const std::string & name, std::string * s) : name(name), sPtr(s), s(*s), adjustableType(String) {}
+		AdjustableComponent(const std::string & name, bool * b) : name(name), bPtr(b), b(*b), adjustableType(Bool) {}
+		AdjustableComponent(const std::string & name, double * d) : name(name), dPtr(d), d(*d), adjustableType(Double) {}
+		AdjustableComponent(const std::string & name, int * i) : name(name), iPtr(i), i(*i), adjustableType(Int) {}
 
 		AdjustableComponent(const std::string & name, const std::string & s) : name(name), s(s), adjustableType(String) {}
 		AdjustableComponent(const std::string & name, bool b) : name(name), b(b), adjustableType(Bool) {}
@@ -38,34 +38,6 @@ namespace kengine {
 		};
 
 		int adjustableType;
-
-		template<typename T>
-		static kengine::GameObject & create(const std::string & name, kengine::EntityManager & em, T * val) {
-			if (!em.hasEntity(name))
-				return em.createEntity<kengine::GameObject>(name, [&name, &val](kengine::GameObject & go) {
-					go.attachComponent<AdjustableComponent>(name, val);
-				});
-			else {
-				auto & go = em.getEntity(name);
-				if (!go.hasComponent<AdjustableComponent>())
-					go.attachComponent<AdjustableComponent>(name, val);
-				return go;
-			}
-		}
-
-		template<typename T>
-		static kengine::GameObject & create(const std::string & name, kengine::EntityManager & em, T val) {
-			if (!em.hasEntity(name))
-				return em.createEntity<kengine::GameObject>(name, [&name, &val](kengine::GameObject & go) {
-					go.attachComponent<AdjustableComponent>(name, val);
-				});
-			else {
-				auto & go = em.getEntity(name);
-				if (!go.hasComponent<AdjustableComponent>())
-					go.attachComponent<AdjustableComponent>(name, val);
-				return go;
-			}
-		}
 
 	public:
 		pmeta_get_class_name(AdjustableComponent);

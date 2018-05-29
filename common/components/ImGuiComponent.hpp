@@ -10,27 +10,11 @@ extern ImGuiContext * GImGui;
 namespace kengine {
 	class ImGuiComponent : public kengine::SerializableComponent<ImGuiComponent> {
 	public:
-		static kengine::GameObject & create(const std::string & name, kengine::EntityManager & em, const std::function<void()> & display) {
-			if (!em.hasEntity(name))
-				return em.createEntity<kengine::GameObject>(name, [&display](kengine::GameObject & go) {
-					go.attachComponent<kengine::ImGuiComponent>([display](auto && context) {
-						setupImGuiContext(context);
-						display();
-					});
-				});
-			else {
-				auto & go = em.getEntity(name);
-				if (!go.hasComponent<ImGuiComponent>())
-					go.attachComponent<kengine::ImGuiComponent>([display](auto && context) {
-						setupImGuiContext(context);
-						display();
-					});
-				return go;
-			}
-		}
-
-	public:
-		ImGuiComponent(const std::function<void(void *)> & display = nullptr) : display(display) {}
+		ImGuiComponent(const std::function<void()> & func = nullptr) : display([func](auto context) {
+			setupImGuiContext(context);
+			func();
+		})
+		{}
 
 	public:
 		std::function<void(void * context)> display;

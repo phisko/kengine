@@ -15,7 +15,7 @@ namespace kengine {
 
 	private:
 		void onLoad() noexcept {
-			kengine::ImGuiComponent::create("imgui-adjustables", _em, [this] {
+			_em.createOrAttach<kengine::ImGuiComponent>("imgui-adjustables", [this] {
 				if (ImGui::Begin("Adjustables")) {
 					static char nameSearch[1024] = "";
 					ImGui::InputText("Name", nameSearch, sizeof(nameSearch));

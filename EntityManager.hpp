@@ -66,6 +66,21 @@ namespace kengine {
             return createEntity<GO>(putils::concat(type, ++it->second), postCreate, FWD(params)...);
         }
 
+    public:
+		template<typename CompType, typename ...Params>
+		kengine::GameObject & createOrAttach(const std::string & name, Params && ...args) {
+			if (!hasEntity(name))
+				return createEntity<kengine::GameObject>(name, [&name, &args...](kengine::GameObject & go) {
+					go.attachComponent<CompType>(FWD(args)...);
+				});
+			else {
+				auto & go = getEntity(name);
+				if (!go.hasComponent<CompType>())
+					go.attachComponent<CompType>(FWD(args)...);
+				return go;
+			}
+		}
+
     private:
         GameObject & addEntity(const std::string & name, std::unique_ptr<GameObject> && obj) {
             auto & ret = *obj;

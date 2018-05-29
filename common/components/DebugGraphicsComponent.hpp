@@ -1,5 +1,6 @@
 #pragma once
 
+#include "EntityManager.hpp"
 #include "SerializableComponent.hpp"
 
 namespace kengine {
