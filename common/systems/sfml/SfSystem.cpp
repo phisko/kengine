@@ -162,10 +162,7 @@ namespace kengine {
 			auto & view = _engine.getView(go->getName());
 
 			const auto & frustrum = go->getComponent<kengine::CameraComponent3d>().frustrum;
-			view.setCenter(
-				(float)(frustrum.topLeft.x + frustrum.size.x / 2) * _tileSize.x,
-				(float)(frustrum.topLeft.z + frustrum.size.z / 2) * _tileSize.y
-			);
+			view.setCenter(toWorldPos(frustrum.getCenter()));
 			view.setSize(toWorldPos(frustrum.size));
 
 			const auto & box = go->getComponent<kengine::TransformComponent3d>().boundingBox;
