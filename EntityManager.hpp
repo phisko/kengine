@@ -75,7 +75,8 @@ namespace kengine {
 				});
 			else {
 				auto & go = getEntity(name);
-				go.attachComponent<CompType>(FWD(args)...);
+				if (!go.hasComponent<CompType>())
+					go.attachComponent<CompType>(FWD(args)...);
 				return go;
 			}
 		}
