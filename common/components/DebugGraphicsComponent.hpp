@@ -8,8 +8,8 @@ namespace kengine {
 	public:
 		DebugGraphicsComponent() = default;
 
-		DebugGraphicsComponent(const std::string & text, unsigned int textSize, const std::string & font, const putils::Point3d & startPos)
-			: text(text), textSize(textSize), font(font), startPos(startPos), debugType(Text) {}
+		DebugGraphicsComponent(const std::string & text, unsigned int textSize, const std::string & font, const putils::Point3d & startPos, unsigned int color)
+			: text(text), textSize(textSize), font(font), startPos(startPos), color(color), debugType(Text) {}
 
 		DebugGraphicsComponent(const putils::Point3d & startPos, const putils::Point3d & endPos, double thickness, unsigned int color)
 			: startPos(startPos), endPos(endPos), thickness(thickness), color(color), debugType(Line) {}

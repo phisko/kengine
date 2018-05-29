@@ -204,6 +204,7 @@ namespace kengine {
 			text.setString(debug.text);
 			text.setTextSize(debug.textSize);
 			text.setPosition(toWorldPos(debug.startPos));
+			text.setColor(sf::Color(debug.color));
 		}
 		else if (debug.debugType == DebugGraphicsComponent::Line)
 			static_cast<pse::Shape<sfLine> &>(item).get().set(
