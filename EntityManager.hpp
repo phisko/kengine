@@ -267,6 +267,11 @@ namespace kengine {
 					}
 					catch (const std::exception & e) { std::cerr << e.what() << std::endl; }
 				}
+
+				for (const auto go : getGameObjects())
+					if (go->_components.empty())
+						removeEntity(*go);
+
 				_justLoaded = false;
 			}
 

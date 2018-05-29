@@ -76,6 +76,7 @@ namespace kengine {
 
     private:
         friend class ComponentManager;
+        friend class EntityManager;
 
         ComponentManager * _manager = nullptr;
         void setManager(ComponentManager * manager) {
