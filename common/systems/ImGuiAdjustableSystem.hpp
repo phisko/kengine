@@ -30,29 +30,34 @@ namespace kengine {
 						if (comp.name.find(nameSearch) == std::string::npos)
 							continue;
 
+						ImGui::Columns(2);
+						ImGui::Text(comp.name.c_str());
+						ImGui::NextColumn();
+
 						if (comp.adjustableType == AdjustableComponent::String) {
 							char buff[1024];
 							comp.s.copy(buff, sizeof(buff));
-							ImGui::InputText(comp.name.c_str(), buff, sizeof(buff));
+							ImGui::InputText(putils::concat("##", comp.name).c_str(), buff, sizeof(buff));
 							comp.s = buff;
 							if (comp.sPtr != nullptr)
 								*comp.sPtr = comp.s;
 						}
 						else if (comp.adjustableType == AdjustableComponent::Bool) {
-							ImGui::Checkbox(comp.name.c_str(), &comp.b);
+							ImGui::Checkbox(putils::concat("##", comp.name).c_str(), &comp.b);
 							if (comp.bPtr != nullptr)
 								*comp.bPtr = comp.b;
 						}
 						else if (comp.adjustableType == AdjustableComponent::Double) {
-							ImGui::InputDouble(comp.name.c_str(), &comp.d);
+							ImGui::InputDouble(putils::concat("##", comp.name).c_str(), &comp.d);
 							if (comp.dPtr != nullptr)
 								*comp.dPtr = comp.d;
 						}
 						else if (comp.adjustableType == AdjustableComponent::Int) {
-							ImGui::InputInt(comp.name.c_str(), &comp.i);
+							ImGui::InputInt(putils::concat("##", comp.name).c_str(), &comp.i);
 							if (comp.iPtr != nullptr)
 								*comp.iPtr = comp.i;
 						}
+						ImGui::NextColumn();
 					}
 				}
 				ImGui::End();
