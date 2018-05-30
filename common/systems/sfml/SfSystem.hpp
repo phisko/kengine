@@ -1,5 +1,6 @@
 #pragma once
 
+
 #include "System.hpp"
 #include "components/TransformComponent.hpp"
 #include "packets/RegisterAppearance.hpp"
@@ -8,6 +9,7 @@
 #include "packets/RegisterGameObject.hpp"
 #include "packets/ScreenSize.hpp"
 
+#include "TGUI/Widget.hpp"
 #include "pse/Engine.hpp"
 #include "SfComponent.hpp"
 
@@ -29,6 +31,7 @@ namespace kengine {
 
     private:
 		void attachDebug(kengine::GameObject & go);
+		void attachGUI(kengine::GameObject & go);
 		void attachNormal(kengine::GameObject & go);
 
     public:
@@ -52,7 +55,7 @@ namespace kengine {
         void updateDrawables();
         void updateDebug(kengine::GameObject & go, SfComponent & comp);
         void updateObject(kengine::GameObject & go, SfComponent & comp);
-        void updateGUIElement(kengine::GameObject & go, SfComponent & comp) noexcept;
+        void updateGUIElement(kengine::GameObject & go) noexcept;
         void updateTransform(kengine::GameObject & go, SfComponent & comp, const kengine::TransformComponent3d & transform) noexcept;
 
 	private:
@@ -75,6 +78,7 @@ namespace kengine {
 	private:
 		kengine::EntityManager & _em;
 		pse::Engine _engine;
+		std::unordered_map<kengine::GameObject *, std::shared_ptr<tgui::Widget>> _guiElements;
 
 	private:
 		sf::Clock _deltaClock;

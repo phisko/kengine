@@ -16,6 +16,8 @@
 #include "imgui.h"
 #include "imgui-SFML.h"
 #include "Shape.hpp"
+#include "TGUI/Widgets/Button.hpp"
+#include <TGUI/Loading/Theme.hpp>
 
 // stolen from https://github.com/SFML/SFML/wiki/source:-line-segment-with-thickness
 class sfLine : public sf::Shape
@@ -175,14 +177,15 @@ namespace kengine {
 	}
 
 	void SfSystem::updateDrawables() {
+		for (const auto go : _em.getGameObjects<kengine::GUIComponent>())
+			updateGUIElement(*go);
+
 		std::vector<kengine::GameObject *> toDetach;
 
 		for (const auto go : _em.getGameObjects<SfComponent>()) {
 			auto & comp = go->getComponent<SfComponent>();
 
-			if (go->hasComponent<kengine::GUIComponent>())
-				updateGUIElement(*go, comp);
-			else if (go->hasComponent<kengine::GraphicsComponent>())
+			if (go->hasComponent<kengine::GraphicsComponent>())
 				updateObject(*go, comp);
 			else if (go->hasComponent<kengine::DebugGraphicsComponent>())
 				updateDebug(*go, comp);
@@ -252,22 +255,8 @@ namespace kengine {
 			sprite.unrepeat();
 	}
 
-	void SfSystem::updateGUIElement(kengine::GameObject & go, SfComponent & comp) noexcept {
+	void SfSystem::updateGUIElement(kengine::GameObject & go) noexcept {
 		const auto & gui = go.getComponent<kengine::GUIComponent>();
-		auto & view = static_cast<pse::Text &>(comp.getViewItem());
-		view.setString(gui.text);
-		view.setTextSize(gui.textSize);
-
-		auto & transform = go.getComponent<kengine::TransformComponent3d>();
-		if (!gui.camera.empty() && _em.hasEntity(gui.camera)) {
-			const auto & cam = _em.getEntity(gui.camera);
-			const auto & frustrum = cam.getComponent<kengine::CameraComponent3d>().frustrum;
-			transform.boundingBox.topLeft.x = frustrum.topLeft.x + frustrum.size.x * gui.topLeft.x;
-			transform.boundingBox.topLeft.z = frustrum.topLeft.z + frustrum.size.z * gui.topLeft.z;
-			transform.boundingBox.topLeft.y = gui.topLeft.y;
-		}
-
-		updateTransform(go, comp, transform);
 	}
 
 	void SfSystem::updateTransform(kengine::GameObject & go, SfComponent & comp, const kengine::TransformComponent3d & transform) noexcept {
@@ -346,13 +335,28 @@ namespace kengine {
 
 		if (go.hasComponent<DebugGraphicsComponent>())
 			attachDebug(go);
+		else if (go.hasComponent<GUIComponent>())
+			attachGUI(go);
 		else
 			attachNormal(go);
 
 	}
 
+	void SfSystem::attachGUI(kengine::GameObject & go) {
+		static auto theme = tgui::Theme::create("widgets/Black.txt");
+		const auto & gui = go.getComponent<GUIComponent>();
+
+		if (gui.guiType == GUIComponent::Button)
+			_guiElements[&go] = theme->load("Button");
+		else if (gui.guiType == GUIComponent::Text)
+			_guiElements[&go] = theme->load("TextBox");
+
+		_engine.addItem(_guiElements[&go]);
+	}
+
 	void SfSystem::attachDebug(kengine::GameObject & go) {
 		const auto & debug = go.getComponent<DebugGraphicsComponent>();
+
 		if (debug.debugType == DebugGraphicsComponent::Text)
 			go.attachComponent<SfComponent>(
 				debug.text, toWorldPos(debug.startPos), sf::Color(debug.color), debug.textSize, debug.font
@@ -367,6 +371,7 @@ namespace kengine {
 				));
 			static_cast<pse::Shape<sf::CircleShape> &>(comp.getViewItem()).get().setFillColor(sf::Color(debug.color));
 		}
+
 		_engine.addItem(go.getComponent<SfComponent>().getViewItem(), (std::size_t)debug.startPos.y);
 	}
 
@@ -434,14 +439,6 @@ namespace kengine {
 	 */
 
 	SfComponent & SfSystem::getResource(kengine::GameObject & go) {
-		if (go.hasComponent<GUIComponent>()) {
-			const auto & gui = go.getComponent<GUIComponent>();
-			auto & comp = go.attachComponent<SfComponent>(
-				gui.text, sf::Vector2f{ 0, 0 }, sf::Color::White, gui.textSize, gui.font
-				);
-			return comp;
-		}
-
 		const auto & meta = go.getComponent<GraphicsComponent>();
 
 		const auto & str = _appearances.find(meta.appearance) != _appearances.end()
