@@ -9,6 +9,7 @@
 #include "packets/RegisterGameObject.hpp"
 #include "packets/ScreenSize.hpp"
 
+#include "TGUI/TGUI.hpp"
 #include "TGUI/Widget.hpp"
 #include "pse/Engine.hpp"
 #include "SfComponent.hpp"
@@ -78,7 +79,12 @@ namespace kengine {
 	private:
 		kengine::EntityManager & _em;
 		pse::Engine _engine;
-		std::unordered_map<kengine::GameObject *, std::shared_ptr<tgui::Widget>> _guiElements;
+
+		struct GUIElement {
+			std::shared_ptr<tgui::Widget> frame = nullptr;
+			std::shared_ptr<tgui::Label> label = nullptr;
+		};
+		std::unordered_map<kengine::GameObject *, GUIElement> _guiElements;
 
 	private:
 		sf::Clock _deltaClock;

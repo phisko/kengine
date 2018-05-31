@@ -45,7 +45,9 @@ namespace kengine {
         void removeGameObject(const GameObject & go) noexcept {
             for (const auto type : go._types)
                 removeComponent(go, type);
-			_allEntities.unsafe.erase(std::find(_allEntities.unsafe.begin(), _allEntities.unsafe.end(), &go));
+			const auto it = std::find(_allEntities.unsafe.begin(), _allEntities.unsafe.end(), &go);
+			if (it != _allEntities.unsafe.end())
+				_allEntities.unsafe.erase(it);
         }
 
     private:

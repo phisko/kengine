@@ -16,8 +16,11 @@
 #include "imgui.h"
 #include "imgui-SFML.h"
 #include "Shape.hpp"
+
+#include <TGUI/TGUI.hpp>
 #include "TGUI/Widgets/Button.hpp"
 #include <TGUI/Loading/Theme.hpp>
+#include <TGUI/Widgets/TextBox.hpp>
 
 // stolen from https://github.com/SFML/SFML/wiki/source:-line-segment-with-thickness
 class sfLine : public sf::Shape
@@ -257,6 +260,13 @@ namespace kengine {
 
 	void SfSystem::updateGUIElement(kengine::GameObject & go) noexcept {
 		const auto & gui = go.getComponent<kengine::GUIComponent>();
+		if (gui.guiType == GUIComponent::Text || gui.guiType == GUIComponent::Button) {
+			auto & element = _guiElements[&go];
+			auto & win = _engine.getGui();
+			element.frame->setPosition(tgui::bindWidth(win) * gui.boundingBox.topLeft.x, tgui::bindHeight(win) * gui.boundingBox.topLeft.z);
+			element.frame->setSize(tgui::bindWidth(win) * gui.boundingBox.size.x, tgui::bindHeight(win) * gui.boundingBox.size.z);
+			element.label->setText(gui.text);
+		}
 	}
 
 	void SfSystem::updateTransform(kengine::GameObject & go, SfComponent & comp, const kengine::TransformComponent3d & transform) noexcept {
@@ -342,18 +352,6 @@ namespace kengine {
 
 	}
 
-	void SfSystem::attachGUI(kengine::GameObject & go) {
-		static auto theme = tgui::Theme::create("widgets/Black.txt");
-		const auto & gui = go.getComponent<GUIComponent>();
-
-		if (gui.guiType == GUIComponent::Button)
-			_guiElements[&go] = theme->load("Button");
-		else if (gui.guiType == GUIComponent::Text)
-			_guiElements[&go] = theme->load("TextBox");
-
-		_engine.addItem(_guiElements[&go]);
-	}
-
 	void SfSystem::attachDebug(kengine::GameObject & go) {
 		const auto & debug = go.getComponent<DebugGraphicsComponent>();
 
@@ -374,6 +372,38 @@ namespace kengine {
 
 		_engine.addItem(go.getComponent<SfComponent>().getViewItem(), (std::size_t)debug.startPos.y);
 	}
+
+	void SfSystem::attachGUI(kengine::GameObject & go) {
+		static auto theme = _config.find("theme") != _config.end() ? tgui::Theme::create(_config["theme"]) : nullptr;
+		const auto & gui = go.getComponent<GUIComponent>();
+
+		auto & win = _engine.getGui();
+
+		auto & element = _guiElements[&go];
+		if (gui.guiType == GUIComponent::Button || gui.guiType == GUIComponent::Text) {
+			std::shared_ptr<tgui::Button> button = theme != nullptr ? theme->load("Button") : tgui::Button::create();
+			button->setPosition(tgui::bindWidth(win) * gui.boundingBox.topLeft.x, tgui::bindHeight(win) * gui.boundingBox.topLeft.z);
+			button->setSize(tgui::bindWidth(win) * gui.boundingBox.size.x, tgui::bindHeight(win) * gui.boundingBox.size.z);
+
+			std::shared_ptr<tgui::Label> label = theme != nullptr ? theme->load("Label") : tgui::Label::create();
+			label->setText(gui.text);
+			label->setPosition(tgui::bindPosition(button));
+			label->setSize(tgui::bindSize(button));
+			label->setHorizontalAlignment(tgui::Label::HorizontalAlignment::Center);
+			label->setVerticalAlignment(tgui::Label::VerticalAlignment::Center);
+			if (gui.onClick != nullptr)
+				label->connect("clicked", gui.onClick);
+
+			element.frame = std::move(button);
+			element.label = std::move(label);
+		}
+
+		if (element.frame != nullptr)
+			_engine.addItem(element.frame);
+		if (element.label != nullptr)
+			_engine.addItem(element.label);
+	}
+
 
 	void SfSystem::attachNormal(kengine::GameObject & go) {
 		try {
@@ -405,6 +435,13 @@ namespace kengine {
 
 		if (go.hasComponent<kengine::CameraComponent3d>() && _engine.hasView(go.getName()))
 			_engine.removeView(go.getName());
+
+		if (go.hasComponent<GUIComponent>()) {
+			const auto & element = _guiElements[&go];
+			_engine.getGui().remove(element.frame);
+			_engine.getGui().remove(element.label);
+			_guiElements.erase(&go);
+		}
 
 		if (!go.hasComponent<SfComponent>())
 			return;
