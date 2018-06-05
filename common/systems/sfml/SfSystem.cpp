@@ -310,29 +310,32 @@ namespace kengine {
 			for (const auto & e : allEvents) {
 				if (input.onMouseButton != nullptr && (e.type == sf::Event::MouseButtonPressed || e.type == sf::Event::MouseButtonReleased))
 					try {
-					const auto x = (double)e.mouseButton.x / _engine.getRenderWindow().getSize().x * _screenSize.x;
-					const auto y = (double)e.mouseButton.y / _engine.getRenderWindow().getSize().y * _screenSize.y;
-					input.onMouseButton(e.mouseButton.button, x, y, e.type == sf::Event::MouseButtonPressed);
-				}
-				catch (const std::exception & e) {
-					std::cerr << e.what() << std::endl;
-				}
+						const auto x = (double)e.mouseButton.x / _engine.getRenderWindow().getSize().x * _screenSize.x;
+						const auto y = (double)e.mouseButton.y / _engine.getRenderWindow().getSize().y * _screenSize.y;
+						input.onMouseButton(e.mouseButton.button, x, y, e.type == sf::Event::MouseButtonPressed);
+					} catch (const std::exception & e) {
+						std::cerr << e.what() << std::endl;
+					}
 				else if (input.onMouseMove != nullptr && e.type == sf::Event::MouseMoved)
 					try {
-					const auto x = (double)e.mouseMove.x / _engine.getRenderWindow().getSize().x * _screenSize.x;
-					const auto y = (double)e.mouseMove.y / _engine.getRenderWindow().getSize().y * _screenSize.y;
-					input.onMouseMove(x, y);
-				}
-				catch (const std::exception & e) {
-					std::cerr << e.what() << std::endl;
-				}
+						const auto x = (double)e.mouseMove.x / _engine.getRenderWindow().getSize().x * _screenSize.x;
+						const auto y = (double)e.mouseMove.y / _engine.getRenderWindow().getSize().y * _screenSize.y;
+						input.onMouseMove(x, y);
+					} catch (const std::exception & e) {
+						std::cerr << e.what() << std::endl;
+					}
 				else if (input.onKey != nullptr && (e.type == sf::Event::KeyPressed || e.type == sf::Event::KeyReleased))
 					try {
-					input.onKey(e.key.code, e.type == sf::Event::KeyPressed);
-				}
-				catch (const std::exception & e) {
-					std::cerr << e.what() << std::endl;
-				}
+						input.onKey(e.key.code, e.type == sf::Event::KeyPressed);
+					} catch (const std::exception & e) {
+						std::cerr << e.what() << std::endl;
+					}
+				else if (input.onMouseWheel != nullptr && e.type == sf::Event::MouseWheelScrolled)
+					try {
+						input.onMouseWheel(e.mouseWheelScroll.delta, e.mouseWheelScroll.x, e.mouseWheelScroll.y);
+					} catch (const std::exception & e) {
+						std::cerr << e.what() << std::endl;
+					}
 			}
 		}
 	}
