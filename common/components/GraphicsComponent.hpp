@@ -50,6 +50,11 @@ namespace kengine {
 			return std::find_if(layers.begin(), layers.end(), [&name](auto && layer) { return layer.name == name; }) != layers.end();
 		}
 
+		Layer & getLayer(const std::string & name) {
+			const auto it = std::find_if(layers.begin(), layers.end(), [&name](auto && layer) { return layer.name == name; });
+			return *it;
+		}
+
         /*
          * Reflectible
          */
