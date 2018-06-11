@@ -276,12 +276,8 @@ namespace kengine {
 			updateEntitiesByType();
 
 			if (_justLoaded) {
-				for (const auto & func : _onLoad) {
-					try {
-						func();
-					}
-					catch (const std::exception & e) { std::cerr << e.what() << std::endl; }
-				}
+				for (const auto & func : _onLoad)
+					func();
 
 				for (const auto go : getGameObjects())
 					if (go->_components.empty())

@@ -3,6 +3,7 @@
 
 #include "System.hpp"
 #include "components/TransformComponent.hpp"
+#include "components/GraphicsComponent.hpp"
 #include "packets/RegisterAppearance.hpp"
 #include "packets/Input.hpp"
 #include "packets/RemoveGameObject.hpp"
@@ -34,6 +35,7 @@ namespace kengine {
 		void attachDebug(kengine::GameObject & go);
 		void attachGUI(kengine::GameObject & go);
 		void attachNormal(kengine::GameObject & go);
+		void attachLayer(SfComponent & comp, const kengine::GraphicsComponent::Layer & layer, const putils::Rect3d & boundingBox);
 
     public:
         void handle(const packets::RegisterAppearance & p) noexcept;
@@ -49,15 +51,15 @@ namespace kengine {
         void handle(const packets::MousePosition::Query & p) noexcept;
 
     private:
-        SfComponent & getResource(kengine::GameObject & go);
+        std::unique_ptr<pse::Sprite> getResource(const std::string & appearance);
         void registerLuaFunctions() noexcept;
         void handleEvents() noexcept;
         void updateCameras() noexcept;
         void updateDrawables();
-        void updateDebug(kengine::GameObject & go, SfComponent & comp);
-        void updateObject(kengine::GameObject & go, SfComponent & comp);
+        bool updateDebug(kengine::GameObject & go, pse::ViewItem & item);
+        void updateObject(kengine::GameObject & go, pse::ViewItem & item, const GraphicsComponent::Layer & layer, bool fixedSize);
         void updateGUIElement(kengine::GameObject & go) noexcept;
-        void updateTransform(kengine::GameObject & go, SfComponent & comp, const kengine::TransformComponent3d & transform) noexcept;
+        void updateTransform(kengine::GameObject & go, pse::ViewItem & item, const kengine::TransformComponent3d & transform, const GraphicsComponent::Layer & layer, bool fixedSize) noexcept;
 
 	private:
 		putils::json _config;

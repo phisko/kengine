@@ -2,7 +2,6 @@
 
 #include "EntityManager.hpp"
 #include "components/TransformComponent.hpp"
-#include "components/GraphicsComponent.hpp"
 #include "components/GUIComponent.hpp"
 #include "components/CameraComponent.hpp"
 #include "components/InputComponent.hpp"
@@ -20,7 +19,8 @@
 #include <TGUI/TGUI.hpp>
 #include "TGUI/Widgets/Button.hpp"
 #include <TGUI/Loading/Theme.hpp>
-#include <TGUI/Widgets/TextBox.hpp>
+
+#include "with.hpp"
 
 // stolen from https://github.com/SFML/SFML/wiki/source:-line-segment-with-thickness
 class sfLine : public sf::Shape
@@ -179,6 +179,13 @@ namespace kengine {
 		}
 	}
 
+	static const GraphicsComponent::Layer * getLayer(const std::string & name, const kengine::GraphicsComponent & graphics) {
+		const auto it = std::find_if(graphics.layers.begin(), graphics.layers.end(), [&name](auto && layer) { return layer.name == name; });
+		if (it == graphics.layers.end())
+			return nullptr;
+		return &*it;
+	}
+
 	void SfSystem::updateDrawables() {
 		for (const auto go : _em.getGameObjects<kengine::GUIComponent>())
 			updateGUIElement(*go);
@@ -186,25 +193,58 @@ namespace kengine {
 		std::vector<kengine::GameObject *> toDetach;
 
 		for (const auto go : _em.getGameObjects<SfComponent>()) {
-			auto & comp = go->getComponent<SfComponent>();
+			std::vector<const SfComponent::Layer *> toRemove;
 
-			if (go->hasComponent<kengine::GraphicsComponent>())
-				updateObject(*go, comp);
-			else if (go->hasComponent<kengine::DebugGraphicsComponent>())
-				updateDebug(*go, comp);
-			else
+			const GraphicsComponent * graphics = nullptr;
+			auto & comp = go->getComponent<SfComponent>();
+			auto & items = comp.viewItems;
+			for (const auto & layer : items) {
+				if (layer.name == "__debug__") {
+					if (!updateDebug(*go, *layer.item))
+						toRemove.push_back(&layer);
+					continue;
+				} 
+
+				if (graphics == nullptr)
+					graphics = &go->getComponent<GraphicsComponent>();
+				const auto graphicsLayer = getLayer(layer.name, *graphics);
+				if (graphicsLayer == nullptr)
+					toRemove.push_back(&layer);
+				else
+					updateObject(*go, *layer.item, *graphicsLayer, layer.fixedSize);
+			}
+
+			for (const auto layer : toRemove) {
+				const auto it = std::find_if(items.begin(), items.end(), [layer](auto && it) { return &it == layer; });
+				_engine.removeItem(*it->item);
+				items.erase(it);
+			}
+
+			if (go->hasComponent<GraphicsComponent>()) {
+				auto & transform = go->getComponent<TransformComponent3d>();
+				for (const auto & layer : go->getComponent<GraphicsComponent>().layers) {
+					const auto it = std::find_if(items.begin(), items.end(), [&layer](auto && item) { return layer.name == item.name; });
+					if (it == items.end())
+						attachLayer(comp, layer, transform.boundingBox);
+				}
+			}
+
+			if (items.empty())
 				toDetach.push_back(go);
 		}
 
 		for (const auto go : toDetach) {
-			_engine.removeItem(go->getComponent<SfComponent>().getViewItem());
+			for (const auto & layer : go->getComponent<SfComponent>().viewItems)
+				_engine.removeItem(*layer.item);
 			go->detachComponent<SfComponent>();
 		}
 	}
 
-	void SfSystem::updateDebug(kengine::GameObject & go, SfComponent & comp) {
+	bool SfSystem::updateDebug(kengine::GameObject & go, pse::ViewItem & item) {
+		if (!go.hasComponent<DebugGraphicsComponent>())
+			return false;
+
 		const auto & debug = go.getComponent<kengine::DebugGraphicsComponent>();
-		auto & item = comp.getViewItem();
 		if (debug.debugType == DebugGraphicsComponent::Text) {
 			auto & text = static_cast<pse::Text &>(item);
 			text.setString(debug.text);
@@ -224,15 +264,25 @@ namespace kengine {
 			circle.setFillColor(sf::Color(debug.color));
 		}
 		_engine.setItemHeight(item, debug.startPos.y);
+
+		return true;
 	}
 
-	void SfSystem::updateObject(kengine::GameObject & go, SfComponent & comp) {
+	static putils::Point3d getLayerSize(const putils::Point3d & transformSize, const putils::Point3d & layerSize) {
+		return {
+			transformSize.x * layerSize.x,
+			transformSize.y * layerSize.y,
+			transformSize.z * layerSize.z
+		};
+	}
+
+	void SfSystem::updateObject(kengine::GameObject & go, pse::ViewItem & item, const GraphicsComponent::Layer & layer, bool fixedSize) {
 		const auto & transform = go.getComponent<kengine::TransformComponent3d>();
-		updateTransform(go, comp, transform);
+		updateTransform(go, item, transform, layer, fixedSize);
 
 		const auto & graphics = go.getComponent<kengine::GraphicsComponent>();
-		const auto & appearance = graphics.appearance;
-		auto & sprite = static_cast<pse::Sprite &>(comp.getViewItem());
+		const auto & appearance = layer.appearance;
+		auto & sprite = static_cast<pse::Sprite &>(item);
 
 		try {
 			sprite.setTexture(appearance);
@@ -241,15 +291,12 @@ namespace kengine {
 			std::cerr << "[SfSystem] Failed to set appearance: " << e.what() << std::endl;
 		}
 
-		sprite.setRotation(-transform.yaw - graphics.yaw);
-
-		if (graphics.size.x != 0 || graphics.size.z != 0)
-			sprite.setSize(toWorldPos(graphics.size));
+		sprite.setRotation(-transform.yaw - layer.yaw);
 
 		if (graphics.repeated) {
 			const auto & box = transform.boundingBox;
 
-			const sf::FloatRect rect(toWorldPos(box.topLeft), toWorldPos(graphics.size.x != 0 || graphics.size.z != 0 ? graphics.size : box.size));
+			const sf::FloatRect rect(toWorldPos(box.topLeft), toWorldPos(getLayerSize(box.size, layer.boundingBox.size)));
 			const sf::IntRect r(rect);
 
 			sprite.repeat(r);
@@ -269,17 +316,23 @@ namespace kengine {
 		}
 	}
 
-	void SfSystem::updateTransform(kengine::GameObject & go, SfComponent & comp, const kengine::TransformComponent3d & transform) noexcept {
-		const auto & pos = transform.boundingBox.topLeft;
-		comp.getViewItem().setPosition(toWorldPos(pos));
-		_engine.setItemHeight(comp.getViewItem(), (std::size_t) pos.y);
+	void SfSystem::updateTransform(kengine::GameObject & go, pse::ViewItem & item, const TransformComponent3d & transform, const GraphicsComponent::Layer & layer, bool fixedSize) noexcept {
+		const auto center = transform.boundingBox.getCenter();
+		const auto size = getLayerSize(transform.boundingBox.size, layer.boundingBox.size);
+		const putils::Point3d endPos{
+			center.x - size.x / 2 + std::cos(transform.yaw) * layer.boundingBox.topLeft.x,
+			0,
+			center.z - size.x / 2 + std::sin(transform.yaw) * layer.boundingBox.topLeft.z,
+		};
+		item.setPosition(toWorldPos(endPos));
 
-		const auto & size = transform.boundingBox.size;
-		if (!comp.isFixedSize())
-			comp.getViewItem().setSize(toWorldPos(size));
+		const std::size_t height = transform.boundingBox.topLeft.y + layer.boundingBox.topLeft.y;
+		_engine.setItemHeight(item, height);
 
-		comp.getViewItem().setRotation(-transform.yaw);
+		if (!fixedSize)
+			item.setSize(toWorldPos(size));
 
+		item.setRotation(-transform.yaw - layer.yaw);
 	}
 
 	void SfSystem::handleEvents() noexcept {
@@ -308,72 +361,57 @@ namespace kengine {
 		for (const auto go : _em.getGameObjects<kengine::InputComponent>()) {
 			const auto & input = go->getComponent<kengine::InputComponent>();
 			for (const auto & e : allEvents) {
-				if (input.onMouseButton != nullptr && (e.type == sf::Event::MouseButtonPressed || e.type == sf::Event::MouseButtonReleased))
-					try {
-						const auto x = (double)e.mouseButton.x / _engine.getRenderWindow().getSize().x * _screenSize.x;
-						const auto y = (double)e.mouseButton.y / _engine.getRenderWindow().getSize().y * _screenSize.y;
-						input.onMouseButton(e.mouseButton.button, x, y, e.type == sf::Event::MouseButtonPressed);
-					} catch (const std::exception & e) {
-						std::cerr << e.what() << std::endl;
-					}
-				else if (input.onMouseMove != nullptr && e.type == sf::Event::MouseMoved)
-					try {
-						const auto x = (double)e.mouseMove.x / _engine.getRenderWindow().getSize().x * _screenSize.x;
-						const auto y = (double)e.mouseMove.y / _engine.getRenderWindow().getSize().y * _screenSize.y;
-						input.onMouseMove(x, y);
-					} catch (const std::exception & e) {
-						std::cerr << e.what() << std::endl;
-					}
+				if (input.onMouseButton != nullptr && (e.type == sf::Event::MouseButtonPressed || e.type == sf::Event::MouseButtonReleased)) {
+					const auto x = (double)e.mouseButton.x / _engine.getRenderWindow().getSize().x * _screenSize.x;
+					const auto y = (double)e.mouseButton.y / _engine.getRenderWindow().getSize().y * _screenSize.y;
+					input.onMouseButton(e.mouseButton.button, x, y, e.type == sf::Event::MouseButtonPressed);
+				}
+				else if (input.onMouseMove != nullptr && e.type == sf::Event::MouseMoved) {
+					const auto x = (double)e.mouseMove.x / _engine.getRenderWindow().getSize().x * _screenSize.x;
+					const auto y = (double)e.mouseMove.y / _engine.getRenderWindow().getSize().y * _screenSize.y;
+					input.onMouseMove(x, y);
+				}
 				else if (input.onKey != nullptr && (e.type == sf::Event::KeyPressed || e.type == sf::Event::KeyReleased))
-					try {
-						input.onKey(e.key.code, e.type == sf::Event::KeyPressed);
-					} catch (const std::exception & e) {
-						std::cerr << e.what() << std::endl;
-					}
+					input.onKey(e.key.code, e.type == sf::Event::KeyPressed);
 				else if (input.onMouseWheel != nullptr && e.type == sf::Event::MouseWheelScrolled)
-					try {
-						input.onMouseWheel(e.mouseWheelScroll.delta, e.mouseWheelScroll.x, e.mouseWheelScroll.y);
-					} catch (const std::exception & e) {
-						std::cerr << e.what() << std::endl;
-					}
+					input.onMouseWheel(e.mouseWheelScroll.delta, e.mouseWheelScroll.x, e.mouseWheelScroll.y);
 			}
 		}
 	}
 
 	void SfSystem::handle(const kengine::packets::RegisterGameObject & p) {
 		auto & go = p.go;
-		if (!go.hasComponent<SfComponent>() && !go.hasComponent<GraphicsComponent>() &&
-			!go.hasComponent<kengine::GUIComponent>() && !go.hasComponent<DebugGraphicsComponent>())
-			return;
 
+		if (go.hasComponent<SfComponent>() || go.hasComponent<GraphicsComponent>())
+			attachNormal(go);
 		if (go.hasComponent<DebugGraphicsComponent>())
 			attachDebug(go);
-		else if (go.hasComponent<GUIComponent>())
+		if (go.hasComponent<GUIComponent>())
 			attachGUI(go);
-		else
-			attachNormal(go);
-
 	}
 
 	void SfSystem::attachDebug(kengine::GameObject & go) {
 		const auto & debug = go.getComponent<DebugGraphicsComponent>();
 
+		auto & comp = go.hasComponent<SfComponent>() ?
+			go.getComponent<SfComponent>() :
+			go.attachComponent<SfComponent>();
+
+		std::unique_ptr<pse::ViewItem> v = nullptr;
+
 		if (debug.debugType == DebugGraphicsComponent::Text)
-			go.attachComponent<SfComponent>(
-				debug.text, toWorldPos(debug.startPos), sf::Color(debug.color), debug.textSize, debug.font
-				);
+			v = std::make_unique<pse::Text>(debug.text, toWorldPos(debug.startPos), sf::Color(debug.color), debug.textSize, debug.font);
 		else if (debug.debugType == DebugGraphicsComponent::Line)
-			auto & comp = go.attachComponent<SfComponent>(std::make_unique<pse::Shape<sfLine>>(
-				toWorldPos(debug.startPos), toWorldPos(debug.endPos), (float)debug.thickness, sf::Color(debug.color)
-			));
+			v = std::make_unique<pse::Shape<sfLine>>(toWorldPos(debug.startPos), toWorldPos(debug.endPos), (float)debug.thickness, sf::Color(debug.color));
 		else if (debug.debugType == DebugGraphicsComponent::Sphere) {
-			auto & comp = go.attachComponent<SfComponent>(std::make_unique<pse::Shape<sf::CircleShape>>(
-				(float)debug.radius
-				));
-			static_cast<pse::Shape<sf::CircleShape> &>(comp.getViewItem()).get().setFillColor(sf::Color(debug.color));
+			v = std::make_unique<pse::Shape<sf::CircleShape>>((float)debug.radius);
+			static_cast<pse::Shape<sf::CircleShape> &>(*v).get().setFillColor(sf::Color(debug.color));
 		}
 
-		_engine.addItem(go.getComponent<SfComponent>().getViewItem(), (std::size_t)debug.startPos.y);
+		if (v != nullptr) {
+			_engine.addItem(*v, (std::size_t)debug.startPos.y);
+			comp.viewItems.push_back({ "__debug__", std::move(v) });
+		}
 	}
 
 	void SfSystem::attachGUI(kengine::GameObject & go) {
@@ -407,31 +445,27 @@ namespace kengine {
 			_engine.addItem(element.label);
 	}
 
-
 	void SfSystem::attachNormal(kengine::GameObject & go) {
-		try {
-			auto & v = go.hasComponent<SfComponent>() ? go.getComponent<SfComponent>()
-				: getResource(go);
+		pmeta_with(go.getComponent<GraphicsComponent>()) {
+			auto & comp = go.attachComponent<SfComponent>();
 
 			const auto & transform = go.getComponent<kengine::TransformComponent3d>();
-
-			const auto & pos = transform.boundingBox.topLeft;
-			v.getViewItem().setPosition(toWorldPos(pos));
-
-			if (!v.isFixedSize()) {
-				const auto & size = transform.boundingBox.size;
-				v.getViewItem().setSize(toWorldPos(size));
-			}
-
-			_engine.addItem(v.getViewItem(), (std::size_t) pos.y);
-		}
-		catch (const std::exception & e) {
-			send(kengine::packets::Log{
-					putils::concat("[SfSystem] Unknown appearance: ", go.getComponent<GraphicsComponent>().appearance)
-				});
+			for (const auto & layer : _.layers)
+				attachLayer(comp, layer, transform.boundingBox);
 		}
 	}
 
+	void SfSystem::attachLayer(SfComponent & comp, const GraphicsComponent::Layer & layer, const putils::Rect3d & boundingBox) {
+		try {
+			auto v = getResource(layer.appearance);
+			v->setPosition(toWorldPos(boundingBox.topLeft + layer.boundingBox.topLeft));
+			v->setSize(toWorldPos(getLayerSize(boundingBox.size, layer.boundingBox.size)));
+			_engine.addItem(*v, (std::size_t) boundingBox.topLeft.y + layer.boundingBox.topLeft.y);
+			comp.viewItems.push_back({ layer.name, std::move(v) });
+		} catch (const std::exception & e) {
+			send(kengine::packets::Log{ putils::concat("[SfSystem] Unknown appearance: ", layer.appearance) });
+		}
+	}
 
 	void SfSystem::handle(const kengine::packets::RemoveGameObject & p) {
 		auto & go = p.go;
@@ -450,7 +484,8 @@ namespace kengine {
 			return;
 
 		const auto & comp = go.getComponent<SfComponent>();
-		_engine.removeItem(comp.getViewItem());
+		for (const auto & layer : comp.viewItems)
+			_engine.removeItem(*layer.item);
 	}
 
 	/*
@@ -478,18 +513,12 @@ namespace kengine {
 	 * Helper
 	 */
 
-	SfComponent & SfSystem::getResource(kengine::GameObject & go) {
-		const auto & meta = go.getComponent<GraphicsComponent>();
+	std::unique_ptr<pse::Sprite> SfSystem::getResource(const std::string & appearance) {
+		const auto & str = _appearances.find(appearance) != _appearances.end()
+			? _appearances.at(appearance)
+			: appearance;
 
-		const auto & str = _appearances.find(meta.appearance) != _appearances.end()
-			? _appearances.at(meta.appearance)
-			: meta.appearance;
-
-		auto & comp = go.attachComponent<SfComponent>(
-			std::make_unique<pse::Sprite>(str, sf::Vector2f{ 0, 0 }, sf::Vector2f{ 16, 16 })
-			);
-
-		return comp;
+		return std::make_unique<pse::Sprite>(str, sf::Vector2f{ 0, 0 }, sf::Vector2f{ 16, 16 });
 	}
 }
 

@@ -37,22 +37,16 @@ namespace kengine {
                 auto & time = s->time;
                 auto & timer = time.timer;
 
-                if (time.alwaysCall || timer.isDone()) {
-                    updateTime(*s);
-                    try {
-                        s->execute();
-						for (const auto & f : _afterSystem)
-							f();
-						_afterSystem.clear();
-                        betweenSystems();
-                    }
-                    catch (const std::exception & e) {
-	                    std::cerr << e.what() << std::endl;
-						_afterSystem.clear();
-                    }
-                }
-            }
-        }
+				if (time.alwaysCall || timer.isDone()) {
+					updateTime(*s);
+					s->execute();
+					for (const auto & f : _afterSystem)
+						f();
+					_afterSystem.clear();
+					betweenSystems();
+				}
+			}
+		}
 		
     public:
 		void runAfterSystem(const std::function<void()> & func) { _afterSystem.push_back(func); }

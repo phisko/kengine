@@ -206,14 +206,9 @@ namespace kengine {
 
 	public:
 		template<typename String>
-		void addScriptDirectory(String && dir) noexcept {
-			try {
-				putils::Directory d(dir);
-				_directories.emplace_back(FWD(dir));
-			}
-			catch (const std::runtime_error & e) {
-				std::cerr << e.what() << std::endl;
-			}
+		void addScriptDirectory(String && dir) {
+			putils::Directory d(dir);
+			_directories.emplace_back(FWD(dir));
 		}
 
 		template<typename String>
@@ -231,20 +226,15 @@ namespace kengine {
 		}
 
 	private:
-		void executeDirectories() noexcept {
+		void executeDirectories() {
 			{ pmeta_with(static_cast<CRTP &>(*this)) {
 				for (const auto & dir : _directories) {
-					try {
-						putils::Directory d(dir);
+					putils::Directory d(dir);
 
-						d.for_each([&_](const putils::Directory::File & f) {
-							if (!f.isDirectory)
-								_.executeScript(f.fullPath);
-						});
-					}
-					catch (const std::runtime_error & e) {
-						std::cerr << e.what() << std::endl;
-					}
+					d.for_each([&_](const putils::Directory::File & f) {
+						if (!f.isDirectory)
+							_.executeScript(f.fullPath);
+					});
 				}
 			}}
 		}
