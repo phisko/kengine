@@ -1,14 +1,10 @@
-//
-// Created by naliwe on 6/24/16.
-//
-
 #pragma once
 
 #include "meta/type.hpp"
 #include "Module.hpp"
 
 namespace kengine {
-    class IComponent : public virtual putils::BaseModule {
+    class IComponent {
     public:
         virtual ~IComponent() = default;
 

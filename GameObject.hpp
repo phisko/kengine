@@ -147,7 +147,6 @@ CT & kengine::GameObject::attachComponent(std::unique_ptr<CT> && comp) {
 
     auto & ret = *comp;
 
-    addModule(*comp);
     const auto type = comp->getType();
 	const auto it = _components.find(type);
 	if (it != _components.end()) {
@@ -163,4 +162,3 @@ CT & kengine::GameObject::attachComponent(std::unique_ptr<CT> && comp) {
 
     return ret;
 }
-

@@ -16,9 +16,6 @@ namespace kengine {
         }
 
     public:
-        const GameObject & getParent(const IComponent & comp) const { return *_compHierarchy.at(&comp); }
-
-    public:
         template<typename T>
         const std::vector<GameObject *> & getGameObjects() noexcept {
             static_assert(kengine::is_component<T>::value,
@@ -54,7 +51,6 @@ namespace kengine {
         friend class GameObject;
 
         void registerComponent(GameObject & parent, const IComponent & comp) noexcept {
-            _compHierarchy.emplace(&comp, &parent);
 			_entitiesByType[comp.getType()].unsafe.push_back(&parent);
         }
 
@@ -66,8 +62,6 @@ namespace kengine {
 		}
 
     private:
-        std::unordered_map<const IComponent *, const GameObject *> _compHierarchy;
-
 		struct EntityCollection
 		{
 			std::vector<GameObject *> safe;
