@@ -307,9 +307,21 @@ namespace kengine {
 
 	void SfSystem::updateGUIElement(kengine::GameObject & go) noexcept {
 		const auto & gui = go.getComponent<kengine::GUIComponent>();
-		if (gui.guiType == GUIComponent::Text || gui.guiType == GUIComponent::Button) {
-			auto & element = _guiElements[&go];
-			auto & win = _engine.getGui();
+		auto & element = _guiElements[&go];
+		auto & win = _engine.getGui();
+
+		if (gui.guiType == GUIComponent::ProgressBar) {
+			pmeta_with(static_cast<tgui::ProgressBar &>(*element.frame)) {
+				_.setMinimum(gui.min);
+				_.setMaximum(gui.max);
+				_.setValue(gui.value);
+				_.setText(gui.text);
+				_.setTextSize(18);
+				_.setFillDirection(tgui::ProgressBar::FillDirection::LeftToRight);
+			}
+		}
+
+		if (element.frame != nullptr) {
 			element.frame->setPosition(tgui::bindWidth(win) * gui.boundingBox.topLeft.x, tgui::bindHeight(win) * gui.boundingBox.topLeft.z);
 			element.frame->setSize(tgui::bindWidth(win) * gui.boundingBox.size.x, tgui::bindHeight(win) * gui.boundingBox.size.z);
 			element.label->setText(gui.text);
@@ -422,27 +434,28 @@ namespace kengine {
 
 		auto & element = _guiElements[&go];
 		if (gui.guiType == GUIComponent::Button || gui.guiType == GUIComponent::Text) {
-			std::shared_ptr<tgui::Button> button = theme != nullptr ? theme->load("Button") : tgui::Button::create();
-			button->setPosition(tgui::bindWidth(win) * gui.boundingBox.topLeft.x, tgui::bindHeight(win) * gui.boundingBox.topLeft.z);
-			button->setSize(tgui::bindWidth(win) * gui.boundingBox.size.x, tgui::bindHeight(win) * gui.boundingBox.size.z);
-
-			std::shared_ptr<tgui::Label> label = theme != nullptr ? theme->load("Label") : tgui::Label::create();
-			label->setText(gui.text);
-			label->setPosition(tgui::bindPosition(button));
-			label->setSize(tgui::bindSize(button));
-			label->setHorizontalAlignment(tgui::Label::HorizontalAlignment::Center);
-			label->setVerticalAlignment(tgui::Label::VerticalAlignment::Center);
-			if (gui.onClick != nullptr)
-				label->connect("clicked", gui.onClick);
-
-			element.frame = std::move(button);
-			element.label = std::move(label);
+			element.frame = theme != nullptr ? theme->load("Button") : tgui::Button::create();
+		} else if (gui.guiType == GUIComponent::ProgressBar) {
+			element.frame = theme != nullptr ? theme->load("ProgressBar") : tgui::ProgressBar::create();
 		}
 
-		if (element.frame != nullptr)
+		if (element.frame != nullptr) {
+			element.frame->setPosition(tgui::bindWidth(win) * gui.boundingBox.topLeft.x, tgui::bindHeight(win) * gui.boundingBox.topLeft.z);
+			element.frame->setSize(tgui::bindWidth(win) * gui.boundingBox.size.x, tgui::bindHeight(win) * gui.boundingBox.size.z);
+			if (gui.onClick != nullptr)
+				element.frame->connect("clicked", gui.onClick);
 			_engine.addItem(element.frame);
-		if (element.label != nullptr)
+
+			element.label = theme != nullptr ? theme->load("Label") : tgui::Label::create();
+			element.label->setText(gui.text);
+			element.label->setPosition(tgui::bindPosition(element.frame));
+			element.label->setSize(tgui::bindSize(element.frame));
+			element.label->setHorizontalAlignment(tgui::Label::HorizontalAlignment::Center);
+			element.label->setVerticalAlignment(tgui::Label::VerticalAlignment::Center);
+			if (gui.onClick != nullptr)
+				element.label->connect("clicked", gui.onClick);
 			_engine.addItem(element.label);
+		}
 	}
 
 	void SfSystem::attachNormal(kengine::GameObject & go) {

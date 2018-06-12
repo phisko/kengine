@@ -20,9 +20,15 @@ namespace kengine {
         std::string text;
         putils::Rect3d boundingBox;
 
+		// ProgressBar
+		unsigned int min;
+		unsigned int max;
+		unsigned int value;
+
         enum Type {
             Text,
-            Button
+            Button,
+			ProgressBar
         };
 
 		int guiType = Type::Text;

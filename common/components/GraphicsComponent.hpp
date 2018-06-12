@@ -73,7 +73,9 @@ namespace kengine {
         );
 		pmeta_get_methods(
 			pmeta_reflectible_attribute(&GraphicsComponent::addLayer),
-			pmeta_reflectible_attribute(&GraphicsComponent::removeLayer)
+			pmeta_reflectible_attribute(&GraphicsComponent::removeLayer),
+			pmeta_reflectible_attribute(&GraphicsComponent::getLayer),
+			pmeta_reflectible_attribute(&GraphicsComponent::hasLayer)
 		);
     };
 }
