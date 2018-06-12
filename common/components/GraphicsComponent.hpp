@@ -16,13 +16,18 @@ namespace kengine {
         const std::string type = pmeta_nameof(GraphicsComponent);
         bool repeated = false;
 
-		struct Layer {
+		struct Layer : public putils::Reflectible<Layer>, public putils::Serializable<Layer> {
+			Layer(const std::string & name = "", const std::string & appearance = "",
+				const putils::Rect3d & boundingBox = { {}, { 1, 1, 1 } }, double yaw = 0)
+				: name(name), appearance(appearance), boundingBox(boundingBox), yaw(yaw)
+			{}
+
 			std::string name;
 			std::string appearance;
 			putils::Rect3d boundingBox = { {}, { 1, 1, 1 } };
 			double yaw = 0;
 
-			pmeta_get_class_name(GraphicsComponent::Layer);
+			pmeta_get_class_name(GraphicsComponentLayer);
 			pmeta_get_attributes(
 				pmeta_reflectible_attribute(&Layer::name),
 				pmeta_reflectible_attribute(&Layer::appearance),
