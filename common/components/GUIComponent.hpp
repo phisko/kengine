@@ -21,14 +21,22 @@ namespace kengine {
         putils::Rect3d boundingBox;
 
 		// ProgressBar
-		unsigned int min;
-		unsigned int max;
-		unsigned int value;
+		struct {
+			unsigned int min;
+			unsigned int max;
+			unsigned int value;
+		} progressBar;
+
+		struct {
+			std::vector<std::string> items;
+			std::function<void(const std::string &)> onItemClick;
+		} list;
 
         enum Type {
             Text,
             Button,
-			ProgressBar
+			ProgressBar,
+			List
         };
 
 		int guiType = Type::Text;

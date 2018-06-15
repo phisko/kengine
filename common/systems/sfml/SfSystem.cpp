@@ -312,19 +312,30 @@ namespace kengine {
 
 		if (gui.guiType == GUIComponent::ProgressBar) {
 			pmeta_with(static_cast<tgui::ProgressBar &>(*element.frame)) {
-				_.setMinimum(gui.min);
-				_.setMaximum(gui.max);
-				_.setValue(gui.value);
+				_.setMinimum(gui.progressBar.min);
+				_.setMaximum(gui.progressBar.max);
+				_.setValue(gui.progressBar.value);
 				_.setText(gui.text);
 				_.setTextSize(18);
 				_.setFillDirection(tgui::ProgressBar::FillDirection::LeftToRight);
+			}
+		} else if (gui.guiType == GUIComponent::List) {
+			pmeta_with(static_cast<tgui::ListBox &>(*element.frame)) {
+				for (int i = _.getItemCount() - 1; i >= (int)gui.list.items.size(); --i)
+					_.removeItemByIndex(i);
+				int i = 0;
+				for (; i < _.getItemCount(); ++i)
+					_.changeItemByIndex(i, gui.list.items[i]);
+				for (; i < gui.list.items.size(); ++i)
+					_.addItem(gui.list.items[i]);
 			}
 		}
 
 		if (element.frame != nullptr) {
 			element.frame->setPosition(tgui::bindWidth(win) * gui.boundingBox.topLeft.x, tgui::bindHeight(win) * gui.boundingBox.topLeft.z);
 			element.frame->setSize(tgui::bindWidth(win) * gui.boundingBox.size.x, tgui::bindHeight(win) * gui.boundingBox.size.z);
-			element.label->setText(gui.text);
+			if (element.label != nullptr)
+				element.label->setText(gui.text);
 		}
 	}
 
@@ -437,6 +448,10 @@ namespace kengine {
 			element.frame = theme != nullptr ? theme->load("Button") : tgui::Button::create();
 		} else if (gui.guiType == GUIComponent::ProgressBar) {
 			element.frame = theme != nullptr ? theme->load("ProgressBar") : tgui::ProgressBar::create();
+		} else if (gui.guiType == GUIComponent::List) {
+			element.frame = theme != nullptr ? theme->load("ListBox") : tgui::ListBox::create();
+			if (gui.list.onItemClick != nullptr)
+				static_cast<tgui::ListBox &>(*element.frame).connect("itemselected", gui.list.onItemClick);
 		}
 
 		if (element.frame != nullptr) {
@@ -446,15 +461,17 @@ namespace kengine {
 				element.frame->connect("clicked", gui.onClick);
 			_engine.addItem(element.frame);
 
-			element.label = theme != nullptr ? theme->load("Label") : tgui::Label::create();
-			element.label->setText(gui.text);
-			element.label->setPosition(tgui::bindPosition(element.frame));
-			element.label->setSize(tgui::bindSize(element.frame));
-			element.label->setHorizontalAlignment(tgui::Label::HorizontalAlignment::Center);
-			element.label->setVerticalAlignment(tgui::Label::VerticalAlignment::Center);
-			if (gui.onClick != nullptr)
-				element.label->connect("clicked", gui.onClick);
-			_engine.addItem(element.label);
+			if (gui.guiType == GUIComponent::Button || gui.guiType == GUIComponent::Text || gui.guiType == GUIComponent::ProgressBar) {
+				element.label = theme != nullptr ? theme->load("Label") : tgui::Label::create();
+				element.label->setText(gui.text);
+				element.label->setPosition(tgui::bindPosition(element.frame));
+				element.label->setSize(tgui::bindSize(element.frame));
+				element.label->setHorizontalAlignment(tgui::Label::HorizontalAlignment::Center);
+				element.label->setVerticalAlignment(tgui::Label::VerticalAlignment::Center);
+				if (gui.onClick != nullptr)
+					element.label->connect("clicked", gui.onClick);
+				_engine.addItem(element.label);
+			}
 		}
 	}
 
