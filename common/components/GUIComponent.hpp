@@ -3,9 +3,11 @@
 #include <string>
 #include "SerializableComponent.hpp"
 #include "Point.hpp"
+#include "Observable.hpp"
 
 namespace kengine {
-    class GUIComponent : public kengine::SerializableComponent<GUIComponent>,
+    class GUIComponent : public putils::Observable<>,
+						 public kengine::SerializableComponent<GUIComponent>,
                          public putils::Reflectible<GUIComponent> {
     public:
 		GUIComponent() = default;
@@ -54,7 +56,9 @@ namespace kengine {
                 pmeta_reflectible_attribute(&GUIComponent::boundingBox),
                 pmeta_reflectible_attribute(&GUIComponent::guiType)
         );
-        pmeta_get_methods();
+        pmeta_get_methods(
+			pmeta_reflectible_attribute(&GUIComponent::changed)
+		);
         pmeta_get_parents();
     };
 }

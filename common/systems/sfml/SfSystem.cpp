@@ -187,9 +187,6 @@ namespace kengine {
 	}
 
 	void SfSystem::updateDrawables() {
-		for (const auto go : _em.getGameObjects<kengine::GUIComponent>())
-			updateGUIElement(*go);
-
 		std::vector<kengine::GameObject *> toDetach;
 
 		for (const auto go : _em.getGameObjects<SfComponent>()) {
@@ -315,8 +312,7 @@ namespace kengine {
 				_.setMinimum(gui.progressBar.min);
 				_.setMaximum(gui.progressBar.max);
 				_.setValue(gui.progressBar.value);
-				_.setText(gui.text);
-				_.setTextSize(18);
+				// _.setText(gui.text);
 				_.setFillDirection(tgui::ProgressBar::FillDirection::LeftToRight);
 			}
 		} else if (gui.guiType == GUIComponent::List) {
@@ -332,10 +328,21 @@ namespace kengine {
 		}
 
 		if (element.frame != nullptr) {
+			if (gui.onClick != nullptr) {
+				element.frame->disconnectAll("clicked");
+				element.frame->connect("clicked", gui.onClick);
+			}
+
 			element.frame->setPosition(tgui::bindWidth(win) * gui.boundingBox.topLeft.x, tgui::bindHeight(win) * gui.boundingBox.topLeft.z);
 			element.frame->setSize(tgui::bindWidth(win) * gui.boundingBox.size.x, tgui::bindHeight(win) * gui.boundingBox.size.z);
-			if (element.label != nullptr)
+
+			if (element.label != nullptr) {
 				element.label->setText(gui.text);
+				if (gui.onClick != nullptr) {
+					element.label->disconnectAll("clicked");
+					element.label->connect("clicked", gui.onClick);
+				}
+			}
 		}
 	}
 
@@ -439,7 +446,9 @@ namespace kengine {
 
 	void SfSystem::attachGUI(kengine::GameObject & go) {
 		static auto theme = _config.find("theme") != _config.end() ? tgui::Theme::create(_config["theme"]) : nullptr;
-		const auto & gui = go.getComponent<GUIComponent>();
+		auto & gui = go.getComponent<GUIComponent>();
+
+		gui.addObserver([this, &go] { updateGUIElement(go); });
 
 		auto & win = _engine.getGui();
 
@@ -451,7 +460,7 @@ namespace kengine {
 		} else if (gui.guiType == GUIComponent::List) {
 			element.frame = theme != nullptr ? theme->load("ListBox") : tgui::ListBox::create();
 			if (gui.list.onItemClick != nullptr)
-				static_cast<tgui::ListBox &>(*element.frame).connect("itemselected", gui.list.onItemClick);
+				static_cast<tgui::ListBox &>(*element.frame).connect("ItemSelected", gui.list.onItemClick);
 		}
 
 		if (element.frame != nullptr) {
@@ -505,8 +514,8 @@ namespace kengine {
 
 		if (go.hasComponent<GUIComponent>()) {
 			const auto & element = _guiElements[&go];
-			_engine.getGui().remove(element.frame);
-			_engine.getGui().remove(element.label);
+			_engine.removeItem(element.frame);
+			_engine.removeItem(element.label);
 			_guiElements.erase(&go);
 		}
 
