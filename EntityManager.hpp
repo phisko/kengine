@@ -170,12 +170,19 @@ namespace kengine {
 		bool isEntityEnabled(const std::string & name) noexcept { return isEntityEnabled(getEntity(name)); }
 
 		void disableEntity(GameObject & go) noexcept {
+			if (!isEntityEnabled(go))
+				return;
 			_toDisable.emplace(&go);
 		}
 
-		void disableEntity(const std::string & name) { disableEntity(getEntity(name)); }
+		void disableEntity(const std::string & name) {
+			disableEntity(getEntity(name));
+		}
 
 		void enableEntity(GameObject & go) noexcept {
+			if (isEntityEnabled(go))
+				return;
+
 			ComponentManager::registerGameObject(go);
 			SystemManager::registerGameObject(go);
 			_disabled.erase(&go);
