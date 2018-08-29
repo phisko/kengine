@@ -136,24 +136,18 @@ namespace kengine {
         template<typename RegisterWith, typename ...Types>
         void registerTypes() {
             if constexpr (!std::is_same<RegisterWith, nullptr_t>::value) {
-                try {
-                    auto & s = getSystem<RegisterWith>();
-                    s.template registerTypes<Types...>();
-                }
-                catch (const std::out_of_range &) {}
+				auto & s = getSystem<RegisterWith>();
+				s.template registerTypes<Types...>();
             }
 
-			try {
-				auto & factory = getFactory<kengine::ExtensibleFactory>();
-				pmeta_for_each(Types, [this pmeta_comma &factory](auto && t) {
-					using Type = pmeta_wrapped(t);
-					if constexpr (std::is_base_of<kengine::GameObject, Type>::value)
-						factory.registerType<Type>();
-					else if constexpr (kengine::is_component<Type>::value)
-						registerCompLoader<Type>();
-				});
-			}
-			catch (const std::out_of_range &) {}
+			auto & factory = getFactory<kengine::ExtensibleFactory>();
+			pmeta_for_each(Types, [this pmeta_comma &factory](auto && t) {
+				using Type = pmeta_wrapped(t);
+				if constexpr (std::is_base_of<kengine::GameObject, Type>::value)
+					factory.registerType<Type>();
+				else if constexpr (kengine::is_component<Type>::value)
+					registerCompLoader<Type>();
+			});
 		}
 
     public:
