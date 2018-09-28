@@ -242,26 +242,41 @@ namespace kengine {
 			return false;
 
 		const auto & debug = go.getComponent<kengine::DebugGraphicsComponent>();
-		if (debug.debugType == DebugGraphicsComponent::Text) {
-			auto & text = static_cast<pse::Text &>(item);
-			text.setString(debug.text);
-			text.setTextSize(debug.textSize);
-			text.setPosition(toWorldPos(debug.startPos));
-			text.setColor(sf::Color(debug.color));
+		switch (debug.debugType) {
+			case DebugGraphicsComponent::Text: {
+				auto & text = static_cast<pse::Text &>(item);
+				text.setString(debug.text);
+				text.setTextSize(debug.textSize);
+				text.setPosition(toWorldPos(debug.startPos));
+				text.setColor(sf::Color(debug.color));
+				break;
+			}
+			case DebugGraphicsComponent::Line: {
+				static_cast<pse::Shape<sfLine> &>(item).get().set(
+					toWorldPos(debug.startPos), toWorldPos(debug.endPos), debug.thickness, sf::Color(debug.color)
+				);
+				break;
+			}
+			case DebugGraphicsComponent::Sphere: {
+				auto & circle = static_cast<pse::Shape<sf::CircleShape> &>(item).get();
+				circle.setPosition(toWorldPos(debug.startPos));
+				circle.setRadius(debug.radius * _tileSize.x);
+				circle.setOrigin(circle.getRadius(), circle.getRadius());
+				circle.setFillColor(sf::Color(debug.color));
+				break;
+			}
+			case DebugGraphicsComponent::Box: {
+				auto & box = static_cast<pse::Shape<sf::RectangleShape> &>(item).get();
+				box.setPosition(toWorldPos(debug.box.topLeft));
+				box.setSize(toWorldPos(debug.box.size));
+				box.setFillColor(sf::Color(debug.color));
+				break;
+			}
+			default:
+				throw std::logic_error("[SfSystem] Unknown debug type");
 		}
-		else if (debug.debugType == DebugGraphicsComponent::Line)
-			static_cast<pse::Shape<sfLine> &>(item).get().set(
-				toWorldPos(debug.startPos), toWorldPos(debug.endPos), debug.thickness, sf::Color(debug.color)
-			);
-		else if (debug.debugType == DebugGraphicsComponent::Sphere) {
-			auto & circle = static_cast<pse::Shape<sf::CircleShape> &>(item).get();
-			circle.setPosition(toWorldPos(debug.startPos));
-			circle.setRadius(debug.radius * _tileSize.x);
-			circle.setOrigin(circle.getRadius(), circle.getRadius());
-			circle.setFillColor(sf::Color(debug.color));
-		}
-		_engine.setItemHeight(item, debug.startPos.y);
 
+		_engine.setItemHeight(item, debug.startPos.y);
 		return true;
 	}
 
@@ -350,9 +365,15 @@ namespace kengine {
 		const auto center = transform.boundingBox.getCenter();
 		const auto size = getLayerSize(transform.boundingBox.size, layer.boundingBox.size);
 		const putils::Point3d endPos{
-			center.x - size.x / 2 + std::cos(transform.yaw) * layer.boundingBox.topLeft.x,
+			// x' = y*sin(a) + x*cos(a)
+			center.x - size.x / 2 + layer.boundingBox.topLeft.x
+				+ std::cos(transform.yaw) * layer.boundingBox.topLeft.x
+				+ std::sin(transform.yaw) * layer.boundingBox.topLeft.y,
 			0,
-			center.z - size.x / 2 + std::sin(transform.yaw) * layer.boundingBox.topLeft.z,
+			// y' = y*cos(a) - x*sin(a)
+			center.z - size.x / 2 + layer.boundingBox.topLeft.z
+				+ std::cos(transform.yaw) * layer.boundingBox.topLeft.z
+				- std::sin(transform.yaw) * layer.boundingBox.topLeft.x,
 		};
 		item.setPosition(toWorldPos(endPos));
 
@@ -429,13 +450,26 @@ namespace kengine {
 
 		std::unique_ptr<pse::ViewItem> v = nullptr;
 
-		if (debug.debugType == DebugGraphicsComponent::Text)
-			v = std::make_unique<pse::Text>(debug.text, toWorldPos(debug.startPos), sf::Color(debug.color), debug.textSize, debug.font);
-		else if (debug.debugType == DebugGraphicsComponent::Line)
-			v = std::make_unique<pse::Shape<sfLine>>(toWorldPos(debug.startPos), toWorldPos(debug.endPos), (float)debug.thickness, sf::Color(debug.color));
-		else if (debug.debugType == DebugGraphicsComponent::Sphere) {
-			v = std::make_unique<pse::Shape<sf::CircleShape>>((float)debug.radius);
-			static_cast<pse::Shape<sf::CircleShape> &>(*v).get().setFillColor(sf::Color(debug.color));
+		switch (debug.debugType) {
+			case DebugGraphicsComponent::Text: {
+				v = std::make_unique<pse::Text>(debug.text, toWorldPos(debug.startPos), sf::Color(debug.color), debug.textSize, debug.font);
+				break;
+			}
+			case DebugGraphicsComponent::Line: {
+				v = std::make_unique<pse::Shape<sfLine>>(toWorldPos(debug.startPos), toWorldPos(debug.endPos), (float)debug.thickness, sf::Color(debug.color));
+				break;
+			}
+			case DebugGraphicsComponent::Sphere: {
+				v = std::make_unique<pse::Shape<sf::CircleShape>>((float)debug.radius);
+				static_cast<pse::Shape<sf::CircleShape> &>(*v).get().setFillColor(sf::Color(debug.color));
+				break;
+			}
+			case DebugGraphicsComponent::Box: {
+				v = std::make_unique<pse::Shape<sf::RectangleShape>>();
+				break;
+			}
+			default:
+				throw std::logic_error("[SfSystem] Unknown debug type");
 		}
 
 		if (v != nullptr) {

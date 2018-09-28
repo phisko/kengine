@@ -17,6 +17,9 @@ namespace kengine {
 		DebugGraphicsComponent(const putils::Point3d & center, double radius, unsigned int color)
 			: startPos(center), radius(radius), color(color), debugType(Sphere) {}
 
+		DebugGraphicsComponent(const putils::Rect3d & box, unsigned int color)
+			: box(box), color(color), debugType(Box) {}
+
 		const std::string type = pmeta_nameof(DebugGraphicsComponent);
 
 		std::string text;
@@ -28,11 +31,13 @@ namespace kengine {
 		double radius;
 		double thickness;
 		unsigned int color;
+		putils::Rect3d box;
 
 		enum Type {
 			Text,
 			Line,
-			Sphere
+			Sphere,
+			Box
 		};
 
 		int debugType;
