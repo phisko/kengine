@@ -49,7 +49,6 @@ These are pre-built, extensible and pluggable elements that can be used in any p
 * [Box2DSystem](common/systems/box2d/Box2DSystem.md): performs the same duties as the `PhysicsSystem`, but using the **Box2D** library
 * [PathfinderSystem](common/systems/PathfinderSystem.md): uses an AStar algorithm to move entities towards their destination
 * [SfSystem](common/systems/sfml/SfSystem.md): displays entities in an SFML render window
-* [OgreSystem](common/systems/ogre/OgreSystem.md): displays entities in an OGRE render window. OGRE must be installed separately.
 
 ##### DataPackets
 
