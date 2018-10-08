@@ -1,7 +1,7 @@
 #pragma once
 
+#include <string>
 #include "meta/type.hpp"
-#include "Module.hpp"
 
 namespace kengine {
     class IComponent {

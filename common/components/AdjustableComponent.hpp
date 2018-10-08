@@ -41,17 +41,6 @@ namespace kengine {
 
 	public:
 		pmeta_get_class_name(AdjustableComponent);
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&AdjustableComponent::name),
-			pmeta_reflectible_attribute(&AdjustableComponent::s),
-			pmeta_reflectible_attribute(&AdjustableComponent::s),
-			pmeta_reflectible_attribute(&AdjustableComponent::b),
-			pmeta_reflectible_attribute(&AdjustableComponent::b),
-			pmeta_reflectible_attribute(&AdjustableComponent::d),
-			pmeta_reflectible_attribute(&AdjustableComponent::d),
-			pmeta_reflectible_attribute(&AdjustableComponent::i),
-			pmeta_reflectible_attribute(&AdjustableComponent::i),
-			pmeta_reflectible_attribute(&AdjustableComponent::adjustableType)
-		);
+		pmeta_get_attributes();
 	};
 }

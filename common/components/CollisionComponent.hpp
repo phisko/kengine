@@ -13,9 +13,6 @@ namespace kengine {
 
 	public:
 		pmeta_get_class_name(CollisionComponent);
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&CollisionComponent::type),
-			pmeta_reflectible_attribute(&CollisionComponent::onCollide)
-		);
+		pmeta_get_attributes();
 	};
 }

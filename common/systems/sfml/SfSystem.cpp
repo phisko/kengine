@@ -387,46 +387,64 @@ namespace kengine {
 	}
 
 	void SfSystem::handleEvents() noexcept {
-		sf::Event e;
-		std::vector<sf::Event> allEvents;
-		while (_engine.pollEvent(e)) {
-			ImGui::SFML::ProcessEvent(e);
+		std::vector<sf::Event> allEvents; {
+			sf::Event e;
+			while (_engine.pollEvent(e)) {
+				ImGui::SFML::ProcessEvent(e);
 
-			if (e.type == sf::Event::Closed) {
-				getMediator()->running = false;
-				_engine.getRenderWindow().close();
-				return;
+				if (e.type == sf::Event::Closed) {
+					getMediator()->running = false;
+					_engine.getRenderWindow().close();
+					return;
+				}
+
+				const auto & io = ImGui::GetIO();
+				if ((e.type == sf::Event::KeyPressed && !io.WantCaptureKeyboard) ||
+					(e.type == sf::Event::KeyReleased && !io.WantCaptureKeyboard) ||
+					(e.type == sf::Event::MouseMoved && !io.WantCaptureMouse) ||
+					(e.type == sf::Event::MouseButtonPressed && !io.WantCaptureMouse) ||
+					(e.type == sf::Event::MouseButtonReleased && !io.WantCaptureMouse) ||
+					(e.type == sf::Event::MouseWheelScrolled && !io.WantCaptureMouse))
+					allEvents.push_back(e);
 			}
-
-			const auto & io = ImGui::GetIO();
-			if ((e.type == sf::Event::KeyPressed && !io.WantCaptureKeyboard) ||
-				(e.type == sf::Event::KeyReleased && !io.WantCaptureKeyboard) ||
-				(e.type == sf::Event::MouseMoved && !io.WantCaptureMouse) ||
-				(e.type == sf::Event::MouseButtonPressed && !io.WantCaptureMouse) ||
-				(e.type == sf::Event::MouseButtonReleased && !io.WantCaptureMouse) ||
-				(e.type == sf::Event::MouseWheelScrolled && !io.WantCaptureMouse))
-				allEvents.push_back(e);
 		}
 
-		const auto & objects = _em.getGameObjects<kengine::InputComponent>();
 		for (const auto go : _em.getGameObjects<kengine::InputComponent>()) {
 			const auto & input = go->getComponent<kengine::InputComponent>();
-			for (const auto & e : allEvents) {
-				if (input.onMouseButton != nullptr && (e.type == sf::Event::MouseButtonPressed || e.type == sf::Event::MouseButtonReleased)) {
-					const auto x = (double)e.mouseButton.x / _engine.getRenderWindow().getSize().x * _screenSize.x;
-					const auto y = (double)e.mouseButton.y / _engine.getRenderWindow().getSize().y * _screenSize.y;
-					input.onMouseButton(e.mouseButton.button, x, y, e.type == sf::Event::MouseButtonPressed);
+
+			for (const auto & e : allEvents)
+				switch (e.type) {
+				case sf::Event::KeyPressed:
+				case sf::Event::KeyReleased:
+					if (input.onKey != nullptr && (e.type == sf::Event::KeyPressed || e.type == sf::Event::KeyReleased))
+						input.onKey(e.key.code, e.type == sf::Event::KeyPressed);
+					break;
+
+				case sf::Event::MouseButtonPressed:
+				case sf::Event::MouseButtonReleased:
+					if (input.onMouseButton != nullptr) {
+						const auto x = (double)e.mouseButton.x / _engine.getRenderWindow().getSize().x * _screenSize.x;
+						const auto y = (double)e.mouseButton.y / _engine.getRenderWindow().getSize().y * _screenSize.y;
+						input.onMouseButton(e.mouseButton.button, x, y, e.type == sf::Event::MouseButtonPressed);
+					}
+					break;
+
+				case sf::Event::MouseMoved:
+					if (input.onMouseMove != nullptr) {
+						const auto x = (double)e.mouseMove.x / _engine.getRenderWindow().getSize().x * _screenSize.x;
+						const auto y = (double)e.mouseMove.y / _engine.getRenderWindow().getSize().y * _screenSize.y;
+						input.onMouseMove(x, y);
+					}
+					break;
+
+				case sf::Event::MouseWheelScrolled:
+					if (input.onMouseWheel != nullptr && e.type == sf::Event::MouseWheelScrolled)
+						input.onMouseWheel(e.mouseWheelScroll.delta, e.mouseWheelScroll.x, e.mouseWheelScroll.y);
+					break;
+
+				default:
+					break;
 				}
-				else if (input.onMouseMove != nullptr && e.type == sf::Event::MouseMoved) {
-					const auto x = (double)e.mouseMove.x / _engine.getRenderWindow().getSize().x * _screenSize.x;
-					const auto y = (double)e.mouseMove.y / _engine.getRenderWindow().getSize().y * _screenSize.y;
-					input.onMouseMove(x, y);
-				}
-				else if (input.onKey != nullptr && (e.type == sf::Event::KeyPressed || e.type == sf::Event::KeyReleased))
-					input.onKey(e.key.code, e.type == sf::Event::KeyPressed);
-				else if (input.onMouseWheel != nullptr && e.type == sf::Event::MouseWheelScrolled)
-					input.onMouseWheel(e.mouseWheelScroll.delta, e.mouseWheelScroll.x, e.mouseWheelScroll.y);
-			}
 		}
 	}
 
@@ -535,7 +553,7 @@ namespace kengine {
 			v->setSize(toWorldPos(getLayerSize(boundingBox.size, layer.boundingBox.size)));
 			_engine.addItem(*v, (std::size_t) boundingBox.topLeft.y + layer.boundingBox.topLeft.y);
 			comp.viewItems.push_back({ layer.name, std::move(v) });
-		} catch (const std::exception & e) {
+		} catch (const std::exception &) {
 			send(kengine::packets::Log{ putils::concat("[SfSystem] Unknown appearance: ", layer.appearance) });
 		}
 	}

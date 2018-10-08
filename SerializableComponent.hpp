@@ -4,8 +4,8 @@
 #include "reflection/Serializable.hpp"
 
 namespace kengine {
-    template<typename CRTP, typename ...DataPackets>
-    class SerializableComponent : public Component<CRTP, DataPackets...>,
+    template<typename CRTP>
+    class SerializableComponent : public Component<CRTP>,
                                   public putils::Serializable<CRTP> {
     public:
         template<typename ...MemberPairs>
@@ -14,7 +14,7 @@ namespace kengine {
 
         SerializableComponent() = default;
 
-        std::string toString() const noexcept override {
+        std::string toString() const noexcept final {
             std::stringstream s;
             this->serialize(s);
             return s.str();
