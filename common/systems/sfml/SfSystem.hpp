@@ -75,6 +75,10 @@ namespace kengine {
 		// Helpers
     private:
 		sf::Vector2f toWorldPos(const putils::Point3d & pos) const {
+			return { (float)(pos.x * _tileSize.x), (float)(-pos.z * _tileSize.y) };
+		}
+
+		sf::Vector2f toWorldSize(const putils::Point3d & pos) const {
 			return { (float)(pos.x * _tileSize.x), (float)(pos.z * _tileSize.y) };
 		}
 

@@ -162,9 +162,12 @@ namespace kengine {
 		for (const auto go : cameras) {
 			auto & view = _engine.getView(go->getName());
 
-			const auto & frustrum = go->getComponent<kengine::CameraComponent3d>().frustrum;
-			view.setCenter(toWorldPos(frustrum.getCenter()));
-			view.setSize(toWorldPos(frustrum.size));
+			auto & frustrum = go->getComponent<kengine::CameraComponent3d>().frustrum; {
+				const auto pos = toWorldPos(frustrum.topLeft);
+				const auto size = toWorldSize(frustrum.size);
+				view.setCenter({ pos.x + size.x / 2, pos.y + size.y / 2 });
+			}
+			view.setSize(toWorldSize(frustrum.size));
 
 			const auto & box = go->getComponent<kengine::TransformComponent3d>().boundingBox;
 			view.setViewport(sf::FloatRect{
@@ -264,7 +267,7 @@ namespace kengine {
 			case DebugGraphicsComponent::Box: {
 				auto & box = static_cast<pse::Shape<sf::RectangleShape> &>(item).get();
 				box.setPosition(toWorldPos(debug.box.topLeft));
-				box.setSize(toWorldPos(debug.box.size));
+				box.setSize(toWorldSize(debug.box.size));
 				box.setFillColor(sf::Color(debug.color));
 				break;
 			}
@@ -304,7 +307,7 @@ namespace kengine {
 		if (graphics.repeated) {
 			const auto & box = transform.boundingBox;
 
-			const sf::FloatRect rect(toWorldPos(box.topLeft), toWorldPos(getLayerSize(box.size, layer.boundingBox.size)));
+			const sf::FloatRect rect(toWorldPos(box.topLeft), toWorldSize(getLayerSize(box.size, layer.boundingBox.size)));
 			const sf::IntRect r(rect);
 
 			sprite.repeat(r);
@@ -364,20 +367,20 @@ namespace kengine {
 			// x' = y*sin(a) + x*cos(a)
 			center.x - size.x / 2 + layer.boundingBox.topLeft.x
 				+ std::cos(transform.yaw) * layer.boundingBox.topLeft.x
-				+ std::sin(transform.yaw) * (-layer.boundingBox.topLeft.z),
+				+ std::sin(transform.yaw) * -layer.boundingBox.topLeft.z,
 			0,
 			// y' = y*cos(a) - x*sin(a)
-			-center.z - size.x / 2 + (-layer.boundingBox.topLeft.z)
-				+ std::cos(transform.yaw) * (-layer.boundingBox.topLeft.z)
+			-center.z - size.x / 2 + -layer.boundingBox.topLeft.z
+				+ std::cos(transform.yaw) * -layer.boundingBox.topLeft.z
 				- std::sin(transform.yaw) * layer.boundingBox.topLeft.x,
 		};
-		item.setPosition(toWorldPos(endPos));
+		item.setPosition(toWorldSize(endPos)); // hack, really meant to call toWorldSize to avoid negating z
 
 		const std::size_t height = transform.boundingBox.topLeft.y + layer.boundingBox.topLeft.y;
 		_engine.setItemHeight(item, height);
 
 		if (!fixedSize)
-			item.setSize(toWorldPos(size));
+			item.setSize(toWorldSize(size));
 
 		item.setRotation(-transform.yaw - layer.yaw);
 	}
@@ -546,7 +549,7 @@ namespace kengine {
 		try {
 			auto v = getResource(layer.appearance);
 			v->setPosition(toWorldPos(boundingBox.topLeft + layer.boundingBox.topLeft));
-			v->setSize(toWorldPos(getLayerSize(boundingBox.size, layer.boundingBox.size)));
+			v->setSize(toWorldSize(getLayerSize(boundingBox.size, layer.boundingBox.size)));
 			_engine.addItem(*v, (std::size_t) boundingBox.topLeft.y + layer.boundingBox.topLeft.y);
 			comp.viewItems.push_back({ layer.name, std::move(v) });
 		} catch (const std::exception &) {
