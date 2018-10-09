@@ -64,10 +64,6 @@ namespace kengine {
 	 * Constructor
 	 */
 
-	static sf::Vector2f convert(const putils::Point3d & pos) {
-		return { (float)pos.x, (float)pos.z };
-	}
-
 	static putils::json parseConfig() {
 		std::ifstream config("sf-config.json");
 		std::string str((std::istreambuf_iterator<char>(config)),
@@ -368,11 +364,11 @@ namespace kengine {
 			// x' = y*sin(a) + x*cos(a)
 			center.x - size.x / 2 + layer.boundingBox.topLeft.x
 				+ std::cos(transform.yaw) * layer.boundingBox.topLeft.x
-				+ std::sin(transform.yaw) * layer.boundingBox.topLeft.y,
+				+ std::sin(transform.yaw) * (-layer.boundingBox.topLeft.z),
 			0,
 			// y' = y*cos(a) - x*sin(a)
-			center.z - size.x / 2 + layer.boundingBox.topLeft.z
-				+ std::cos(transform.yaw) * layer.boundingBox.topLeft.z
+			-center.z - size.x / 2 + (-layer.boundingBox.topLeft.z)
+				+ std::cos(transform.yaw) * (-layer.boundingBox.topLeft.z)
 				- std::sin(transform.yaw) * layer.boundingBox.topLeft.x,
 		};
 		item.setPosition(toWorldPos(endPos));
