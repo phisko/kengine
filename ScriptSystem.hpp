@@ -91,13 +91,13 @@ namespace kengine {
 				);
 
 				_.registerFunction("getDeltaTime",
-					std::function<putils::Timer::t_duration()>(
-						[this] { return this->time.getDeltaTime(); }
+					std::function<double()>(
+						[this] { return this->time.getDeltaTime().count(); }
 						)
 				);
 				_.registerFunction("getFixedDeltaTime",
-					std::function<putils::Timer::t_duration()>(
-						[this] { return this->time.getFixedDeltaTime(); }
+					std::function<double()>(
+						[this] { return this->time.getFixedDeltaTime().count(); }
 						)
 				);
 				_.registerFunction("getDeltaFrames",
