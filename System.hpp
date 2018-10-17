@@ -4,6 +4,8 @@
 #include "common/packets/RegisterGameObject.hpp"
 #include "common/packets/RemoveGameObject.hpp"
 
+#pragma warning(disable : 4250)
+
 namespace kengine {
     class EntityManager;
 
