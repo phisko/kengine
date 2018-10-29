@@ -51,6 +51,7 @@ namespace kengine {
 			pmeta_reflectible_attribute(&DebugGraphicsComponent::radius),
 			pmeta_reflectible_attribute(&DebugGraphicsComponent::thickness),
 			pmeta_reflectible_attribute(&DebugGraphicsComponent::color),
+			pmeta_reflectible_attribute(&DebugGraphicsComponent::box),
 			pmeta_reflectible_attribute(&DebugGraphicsComponent::debugType)
 		);
 	};
