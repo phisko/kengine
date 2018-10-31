@@ -20,7 +20,7 @@ namespace kengine {
 			};
 
             struct Response {
-				putils::Point2d size;
+				putils::Point2f size;
             };
         }
     }

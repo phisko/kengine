@@ -181,8 +181,8 @@ namespace kengine {
         }
 
     public:
-        void setSpeed(double speed) noexcept { _speed = speed; }
-        double getSpeed() const noexcept { return _speed; }
+        void setSpeed(float speed) noexcept { _speed = speed; }
+        float getSpeed() const noexcept { return _speed; }
         void pause() noexcept { _speed = 0; }
         void resume() noexcept { _speed = 1; }
 
@@ -200,7 +200,7 @@ namespace kengine {
         }
 
     private:
-        double _speed = 1;
+        float _speed = 1;
         std::vector<std::pair<pmeta::type_index, std::unique_ptr<ISystem>>> _toAdd;
         std::vector<pmeta::type_index> _toRemove;
         std::unordered_map<pmeta::type_index, std::unique_ptr<ISystem>> _systems;

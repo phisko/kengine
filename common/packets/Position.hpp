@@ -9,7 +9,7 @@ namespace kengine {
     namespace packets {
         namespace Position {
             struct Query {
-                putils::Rect3d box;
+                putils::Rect3f box;
                 putils::BaseModule * sender;
             };
 

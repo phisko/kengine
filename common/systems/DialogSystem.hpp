@@ -37,12 +37,12 @@ namespace kengine {
 
 				{ pmeta_with(_.boundingBox) {
 					{ pmeta_with(_.topLeft) {
-						_.x = 0.1;
-						_.z = 0.4;
+						_.x = .1f;
+						_.z = .4f;
 					}}
 					{ pmeta_with(_.size) {
-						_.x = 0.4;
-						_.z = 0.2;
+						_.x = .4f;
+						_.z = .2f;
 					}}
 				}}
 				_.changed();
@@ -65,12 +65,12 @@ namespace kengine {
 
 					{ pmeta_with(_.boundingBox) {
 						{ pmeta_with(_.topLeft) {
-							_.x = 0.6;
-							_.z = i * 0.1 + 0.0125;
+							_.x = .6f;
+							_.z = i * .1f + .0125f;
 						}}
 						{ pmeta_with(_.size) {
-							_.x = 0.3;
-							_.z = 0.075;
+							_.x = .3f;
+							_.z = .075f;
 						}}
 					}}
 					_.changed();

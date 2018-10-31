@@ -66,7 +66,7 @@ namespace kengine {
 
 	static putils::json parseConfig() {
 		std::ifstream config("sf-config.json");
-		std::string str((std::istreambuf_iterator<char>(config)),
+		const std::string str((std::istreambuf_iterator<char>(config)),
 			std::istreambuf_iterator<char>());
 		return putils::json::parse(str);
 	}
@@ -77,9 +77,8 @@ namespace kengine {
 		_screenSize(parseSize("windowSize", { 1280, 720 })),
 		_tileSize(parseSize("tileSize", { 1, 1 })),
 		_fullScreen(parseBool("fullScreen", false)),
-		_em(em),
-		_engine(_screenSize.x, _screenSize.y, "Kengine",
-			_fullScreen ? sf::Style::Fullscreen : sf::Style::Default) {
+		_engine((size_t)_screenSize.x, (size_t)_screenSize.y, "Kengine", _fullScreen ? sf::Style::Fullscreen : sf::Style::Default),
+		_em(em) {
 		for (const auto go : _em.getGameObjects())
 			handle(kengine::packets::RegisterGameObject{ *go });
 
@@ -97,16 +96,16 @@ namespace kengine {
 
 			lua["getWindowSize"] = [this] {
 				const auto size = _engine.getRenderWindow().getSize();
-				return putils::Point3d{ (double)size.x, (double)size.y };
+				return putils::Point3f{ (float)size.x, (float)size.y };
 			};
 
 			lua["getTileSize"] = [this] {
-				return putils::Point3d{ (double)_tileSize.x, (double)_tileSize.y };
+				return putils::Point3f{ _tileSize.x, _tileSize.y };
 			};
 
 			lua["getGridSize"] = [this] {
 				const auto size = _engine.getRenderWindow().getSize();
-				return putils::Point3d{ (double)(size.x / _tileSize.x), double(size.y / _tileSize.y) };
+				return putils::Point3f{ size.x / _tileSize.x, size.y / _tileSize.y };
 			};
 		}
 		catch (const std::out_of_range &) {}
@@ -116,7 +115,7 @@ namespace kengine {
 	 * Config parsers
 	 */
 
-	putils::Point2d SfSystem::parseSize(const std::string & jsonProperty, const putils::Point2d & _default) {
+	putils::Point2f SfSystem::parseSize(const std::string & jsonProperty, const putils::Point2f & _default) {
 		if (_config.find(jsonProperty) != _config.end())
 			return {
 					_config[jsonProperty]["x"],
@@ -154,7 +153,7 @@ namespace kengine {
 	}
 
 	void SfSystem::updateCameras() noexcept {
-		const auto & cameras = _em.getGameObjects<kengine::CameraComponent3d>();
+		const auto & cameras = _em.getGameObjects<kengine::CameraComponent3f>();
 
 		if (!cameras.empty())
 			_engine.removeView("default");
@@ -162,14 +161,14 @@ namespace kengine {
 		for (const auto go : cameras) {
 			auto & view = _engine.getView(go->getName());
 
-			auto & frustrum = go->getComponent<kengine::CameraComponent3d>().frustrum; {
+			auto & frustrum = go->getComponent<kengine::CameraComponent3f>().frustrum; {
 				const auto pos = toWorldPos(frustrum.topLeft);
 				const auto size = toWorldSize(frustrum.size);
 				view.setCenter({ pos.x + size.x / 2, pos.y + size.y / 2 });
 			}
 			view.setSize(toWorldSize(frustrum.size));
 
-			const auto & box = go->getComponent<kengine::TransformComponent3d>().boundingBox;
+			const auto & box = go->getComponent<kengine::TransformComponent3f>().boundingBox;
 			view.setViewport(sf::FloatRect{
 					(float)box.topLeft.x, (float)box.topLeft.z,
 					(float)box.size.x, (float)box.size.z
@@ -217,7 +216,7 @@ namespace kengine {
 			}
 
 			if (go->hasComponent<GraphicsComponent>()) {
-				auto & transform = go->getComponent<TransformComponent3d>();
+				auto & transform = go->getComponent<TransformComponent3f>();
 				for (const auto & layer : go->getComponent<GraphicsComponent>().layers) {
 					const auto it = std::find_if(items.begin(), items.end(), [&layer](auto && item) { return layer.name == item.name; });
 					if (it == items.end())
@@ -275,11 +274,11 @@ namespace kengine {
 				throw std::logic_error("[SfSystem] Unknown debug type");
 		}
 
-		_engine.setItemHeight(item, debug.startPos.y);
+		_engine.setItemHeight(item, (size_t)debug.startPos.y);
 		return true;
 	}
 
-	static putils::Point3d getLayerSize(const putils::Point3d & transformSize, const putils::Point3d & layerSize) {
+	static putils::Point3f getLayerSize(const putils::Point3f & transformSize, const putils::Point3f & layerSize) {
 		return {
 			transformSize.x * layerSize.x,
 			transformSize.y * layerSize.y,
@@ -288,7 +287,7 @@ namespace kengine {
 	}
 
 	void SfSystem::updateObject(kengine::GameObject & go, pse::ViewItem & item, const GraphicsComponent::Layer & layer, bool fixedSize) {
-		const auto & transform = go.getComponent<kengine::TransformComponent3d>();
+		const auto & transform = go.getComponent<kengine::TransformComponent3f>();
 		updateTransform(go, item, transform, layer, fixedSize);
 
 		const auto & graphics = go.getComponent<kengine::GraphicsComponent>();
@@ -333,7 +332,7 @@ namespace kengine {
 			pmeta_with(static_cast<tgui::ListBox &>(*element.frame)) {
 				for (int i = _.getItemCount() - 1; i >= (int)gui.list.items.size(); --i)
 					_.removeItemByIndex(i);
-				int i = 0;
+				size_t i = 0;
 				for (; i < _.getItemCount(); ++i)
 					_.changeItemByIndex(i, gui.list.items[i]);
 				for (; i < gui.list.items.size(); ++i)
@@ -360,27 +359,31 @@ namespace kengine {
 		}
 	}
 
-	void SfSystem::updateTransform(kengine::GameObject & go, pse::ViewItem & item, const TransformComponent3d & transform, const GraphicsComponent::Layer & layer, bool fixedSize) noexcept {
+	void SfSystem::updateTransform(kengine::GameObject & go, pse::ViewItem & item, const TransformComponent3f & transform, const GraphicsComponent::Layer & layer, bool fixedSize) noexcept {
 		const auto center = transform.boundingBox.getCenter();
 		const auto size = getLayerSize(transform.boundingBox.size, layer.boundingBox.size);
-		const putils::Point3d endPos{
+		const putils::Point3f endPos{
 			// x' = y*sin(a) + x*cos(a)
 			center.x - size.x / 2 + layer.boundingBox.topLeft.x
 				+ std::cos(transform.yaw) * layer.boundingBox.topLeft.x
-				+ std::sin(transform.yaw) * -layer.boundingBox.topLeft.z,
+				+ std::sin(transform.yaw) * layer.boundingBox.topLeft.z,
 			0,
 			// y' = y*cos(a) - x*sin(a)
-			-center.z - size.x / 2 + -layer.boundingBox.topLeft.z
-				+ std::cos(transform.yaw) * -layer.boundingBox.topLeft.z
+			center.z + size.z / 2 + layer.boundingBox.topLeft.z
+				+ std::cos(transform.yaw) * layer.boundingBox.topLeft.z
 				- std::sin(transform.yaw) * layer.boundingBox.topLeft.x,
 		};
-		item.setPosition(toWorldSize(endPos)); // hack, really meant to call toWorldSize to avoid negating z
+		item.setPosition(toWorldPos(endPos));
 
-		const std::size_t height = transform.boundingBox.topLeft.y + layer.boundingBox.topLeft.y;
+		const std::size_t height = (unsigned)transform.boundingBox.topLeft.y + (unsigned)layer.boundingBox.topLeft.y;
 		_engine.setItemHeight(item, height);
 
-		if (!fixedSize)
-			item.setSize(toWorldSize(size));
+		if (!fixedSize) {
+			auto worldSize = toWorldSize(size);
+			if (layer.mirrored)
+				worldSize.x *= -1;
+			item.setSize(worldSize);
+		}
 
 		item.setRotation(-transform.yaw - layer.yaw);
 	}
@@ -422,23 +425,26 @@ namespace kengine {
 				case sf::Event::MouseButtonPressed:
 				case sf::Event::MouseButtonReleased:
 					if (input.onMouseButton != nullptr) {
-						const auto x = (double)e.mouseButton.x / _engine.getRenderWindow().getSize().x * _screenSize.x;
-						const auto y = (double)e.mouseButton.y / _engine.getRenderWindow().getSize().y * _screenSize.y;
+						const auto x = e.mouseButton.x / _engine.getRenderWindow().getSize().x * _screenSize.x;
+						const auto y = e.mouseButton.y / _engine.getRenderWindow().getSize().y * _screenSize.y;
 						input.onMouseButton(e.mouseButton.button, x, y, e.type == sf::Event::MouseButtonPressed);
 					}
 					break;
 
 				case sf::Event::MouseMoved:
 					if (input.onMouseMove != nullptr) {
-						const auto x = (double)e.mouseMove.x / _engine.getRenderWindow().getSize().x * _screenSize.x;
-						const auto y = (double)e.mouseMove.y / _engine.getRenderWindow().getSize().y * _screenSize.y;
+						const auto x = e.mouseMove.x / _engine.getRenderWindow().getSize().x * _screenSize.x;
+						const auto y = e.mouseMove.y / _engine.getRenderWindow().getSize().y * _screenSize.y;
 						input.onMouseMove(x, y);
 					}
 					break;
 
 				case sf::Event::MouseWheelScrolled:
-					if (input.onMouseWheel != nullptr && e.type == sf::Event::MouseWheelScrolled)
-						input.onMouseWheel(e.mouseWheelScroll.delta, e.mouseWheelScroll.x, e.mouseWheelScroll.y);
+					if (input.onMouseWheel != nullptr && e.type == sf::Event::MouseWheelScrolled) {
+						const auto x = e.mouseWheelScroll.x / _engine.getRenderWindow().getSize().x * _screenSize.x;
+						const auto y = e.mouseWheelScroll.y / _engine.getRenderWindow().getSize().y * _screenSize.y;
+						input.onMouseWheel(e.mouseWheelScroll.delta, x, y);
+					}
 					break;
 
 				default:
@@ -539,18 +545,18 @@ namespace kengine {
 		pmeta_with(go.getComponent<GraphicsComponent>()) {
 			auto & comp = go.attachComponent<SfComponent>();
 
-			const auto & transform = go.getComponent<kengine::TransformComponent3d>();
+			const auto & transform = go.getComponent<kengine::TransformComponent3f>();
 			for (const auto & layer : _.layers)
 				attachLayer(comp, layer, transform.boundingBox);
 		}
 	}
 
-	void SfSystem::attachLayer(SfComponent & comp, const GraphicsComponent::Layer & layer, const putils::Rect3d & boundingBox) {
+	void SfSystem::attachLayer(SfComponent & comp, const GraphicsComponent::Layer & layer, const putils::Rect3f & boundingBox) {
 		try {
 			auto v = getResource(layer.appearance);
 			v->setPosition(toWorldPos(boundingBox.topLeft + layer.boundingBox.topLeft));
 			v->setSize(toWorldSize(getLayerSize(boundingBox.size, layer.boundingBox.size)));
-			_engine.addItem(*v, (std::size_t) boundingBox.topLeft.y + layer.boundingBox.topLeft.y);
+			_engine.addItem(*v, (std::size_t)(boundingBox.topLeft.y + layer.boundingBox.topLeft.y));
 			comp.viewItems.push_back({ layer.name, std::move(v) });
 		} catch (const std::exception &) {
 			send(kengine::packets::Log{ putils::concat("[SfSystem] Unknown appearance: ", layer.appearance) });
@@ -560,7 +566,7 @@ namespace kengine {
 	void SfSystem::handle(const kengine::packets::RemoveGameObject & p) {
 		auto & go = p.go;
 
-		if (go.hasComponent<kengine::CameraComponent3d>() && _engine.hasView(go.getName()))
+		if (go.hasComponent<kengine::CameraComponent3f>() && _engine.hasView(go.getName()))
 			_engine.removeView(go.getName());
 
 		if (go.hasComponent<GUIComponent>()) {

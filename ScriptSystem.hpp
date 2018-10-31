@@ -16,148 +16,148 @@ namespace kengine {
 				_.registerFunction("getGameObjects",
 					std::function<const std::vector<kengine::GameObject *> &()>(
 						[this] { return std::ref(_em.getGameObjects()); }
-						)
+					)
 				);
 
 				_.registerFunction("createEntity",
 					std::function<kengine::GameObject &(const std::string &, const std::string &, const std::function<void(kengine::GameObject &)> &)>(
 						[this](const std::string & type, const std::string & name, auto && f) {
-					return std::ref(_em.createEntity(type, name, FWD(f)));
-				}
-						)
+							return std::ref(_em.createEntity(type, name, FWD(f)));
+						}
+					)
 				);
 
 				_.registerFunction("createNamelessEntity",
 					std::function<kengine::GameObject &(const std::string &, const std::function<void(kengine::GameObject &)> &)>(
 						[this](const std::string & type, auto && f) {
-					return std::ref(_em.createEntity(type, FWD(f)));
-				}
-						)
+							return std::ref(_em.createEntity(type, FWD(f)));
+						}
+					)
 				);
 
 				_.registerFunction("removeEntity",
 					std::function<void(kengine::GameObject &)>(
 						[this](kengine::GameObject & go) { _em.removeEntity(go); }
-						)
+					)
 				);
 				_.registerFunction("removeEntityByName",
 					std::function<void(const std::string &)>(
 						[this](const std::string & name) { _em.removeEntity(name); }
-						)
+					)
 				);
 
 				_.registerFunction("enableEntity",
 					std::function<void(kengine::GameObject &)>(
 						[this](kengine::GameObject & go) { _em.enableEntity(go); }
-						)
+					)
 				);
 				_.registerFunction("enableEntityByName",
 					std::function<void(const std::string &)>(
 						[this](const std::string & name) { _em.enableEntity(name); }
-						)
+					)
 				);
 
 				_.registerFunction("disableEntity",
 					std::function<void(kengine::GameObject &)>(
 						[this](kengine::GameObject & go) { _em.disableEntity(go); }
-						)
+					)
 				);
 				_.registerFunction("disableEntityByName",
 					std::function<void(const std::string &)>(
 						[this](const std::string & name) { _em.disableEntity(name); }
-						)
+					)
 				);
 
 				_.registerFunction("isEntityEnabled",
 					std::function<bool(kengine::GameObject &)>(
 						[this](kengine::GameObject & go) { return _em.isEntityEnabled(go); }
-						)
+					)
 				);
 				_.registerFunction("isEntityEnabledByName",
 					std::function<bool(const std::string &)>(
 						[this](const std::string & name) { return _em.isEntityEnabled(name); }
-						)
+					)
 				);
 
 				_.registerFunction("getEntity",
 					std::function<kengine::GameObject &(const std::string &)>(
 						[this](const std::string & name) { return std::ref(_em.getEntity(name)); }
-						)
+					)
 				);
 				_.registerFunction("hasEntity",
 					std::function<bool(const std::string &)>(
 						[this](const std::string & name) { return _em.hasEntity(name); }
-						)
+					)
 				);
 
 				_.registerFunction("getDeltaTime",
-					std::function<double()>(
+					std::function<float()>(
 						[this] { return this->time.getDeltaTime().count(); }
-						)
+					)
 				);
 				_.registerFunction("getFixedDeltaTime",
-					std::function<double()>(
+					std::function<float()>(
 						[this] { return this->time.getFixedDeltaTime().count(); }
-						)
+					)
 				);
 				_.registerFunction("getDeltaFrames",
-					std::function<double()>(
+					std::function<float()>(
 						[this] { return this->time.getDeltaFrames(); }
-						)
+					)
 				);
 
 				_.registerFunction("stopRunning",
 					std::function<void()>(
 						[this] { _em.running = false; }
-						)
+					)
 				);
 				_.registerFunction("setSpeed",
-					std::function<void(double)>(
-						[this](double speed) { _em.setSpeed(speed); }
-						)
+					std::function<void(float)>(
+						[this](float speed) { _em.setSpeed(speed); }
+					)
 				);
 				_.registerFunction("getSpeed",
-					std::function<double()>(
+					std::function<float()>(
 						[this] { return _em.getSpeed(); }
-						)
+					)
 				);
 				_.registerFunction("isPaused",
 					std::function<bool()>(
 						[this] { return this->isPaused(); }
-						)
+					)
 				);
 				_.registerFunction("pause",
 					std::function<void()>(
 						[this] { _em.pause(); }
-						)
+					)
 				);
 				_.registerFunction("resume",
 					std::function<void()>(
 						[this] { _em.resume(); }
-						)
+					)
 				);
 
 				_.registerFunction("save",
 					std::function<void(const std::string &)>(
 						[this](const std::string & file) { _em.save(file); }
-						)
+					)
 				);
 				_.registerFunction("load",
 					std::function<void(const std::string &)>(
 						[this](const std::string & file) { _em.load(file); }
-						)
+					)
 				);
 
 				_.registerFunction("onLoad",
 					std::function<void(const std::function<void()> &)>(
 						[this](const std::function<void()> & func) { _em.onLoad(func); }
-						)
+					)
 				);
 
 				_.registerFunction("runAfterSystem",
 					std::function<void(const std::function<void()> &)>(
 						[this](const std::function<void()> & func) { _em.runAfterSystem(func); }
-						)
+					)
 				);
 
 			}}

@@ -11,16 +11,16 @@ namespace kengine {
                          public putils::Reflectible<GUIComponent> {
     public:
 		GUIComponent() = default;
-		GUIComponent(const std::string & text, const putils::Rect3d & boundingBox)
+		GUIComponent(const std::string & text, const putils::Rect3f & boundingBox)
 			: text(text), boundingBox(boundingBox), guiType(Text) {}
 
-		GUIComponent(const std::string & text, const putils::Rect3d & boundingBox, const std::function<void()> & onClick)
+		GUIComponent(const std::string & text, const putils::Rect3f & boundingBox, const std::function<void()> & onClick)
 			: text(text), boundingBox(boundingBox), onClick(onClick), guiType(Button) {}
 
         const std::string type = pmeta_nameof(GUIComponent);
         std::function<void()> onClick = nullptr;
         std::string text;
-        putils::Rect3d boundingBox;
+        putils::Rect3f boundingBox;
 
 		// ProgressBar
 		struct {

@@ -37,7 +37,6 @@ These are pre-built, extensible and pluggable elements that can be used in any p
 * [GraphicsComponent](common/components/GraphicsComponent.md): provides graphical information about a `GameObject`, such as its appearance, used by the `SfSystem`
 * [TransformComponent](common/components/TransformComponent.md): defines a `GameObject`'s position and size
 * [PhysicsComponent](common/components/PhysicsComponent.md): defines a `GameObject`'s movement
-* [PathfinderComponent](common/components/PathfinderComponent.md): defines a `GameObject`'s pathfinding information
 
 ##### Systems
 
@@ -47,7 +46,6 @@ These are pre-built, extensible and pluggable elements that can be used in any p
 * [PhysicsSystem](common/systems/PhysicsSystem.md): moves entities in a framerate-independent way
 * [CollisionSystem](common/systems/CollisionSystem.md): transfers collision notifications to `GameObjects`
 * [Box2DSystem](common/systems/box2d/Box2DSystem.md): performs the same duties as the `PhysicsSystem`, but using the **Box2D** library
-* [PathfinderSystem](common/systems/PathfinderSystem.md): uses an AStar algorithm to move entities towards their destination
 * [SfSystem](common/systems/sfml/SfSystem.md): displays entities in an SFML render window
 
 ##### DataPackets
@@ -115,7 +113,7 @@ int main(int, char **av)
 
     // Create a GameObject and attach Components to it
     auto &player = em.createEntity<kengine::GameObject>("player");
-    player.attachComponent<kengine::TransformComponent3d>();
+    player.attachComponent<kengine::TransformComponent3f>();
     player.attachComponent<kengine::GraphicsComponent>();
 
     // Attach a lua script to a GameObject
@@ -129,7 +127,7 @@ int main(int, char **av)
         lua.addScriptDirectory("scripts"); // The LuaSystem automatically opens the "scripts" directory, this is just an example
         lua.registerTypes<
                 kengine::GraphicsComponent,
-                kengine::TransformComponent3d, putils::Point<double, 3>, putils::Rect<double, 3>,
+                kengine::TransformComponent3f, putils::Point<float, 3>, putils::Rect<float, 3>,
                 kengine::LuaComponent,
                 kengine::packets::Log
         >();

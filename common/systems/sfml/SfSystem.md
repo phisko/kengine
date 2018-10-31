@@ -12,23 +12,23 @@
 
 If `appearance` was previously registered as an abstract appearance through a [RegisterAppearance](../../packets/RegisterAppearance.hpp) datapacket, the resource file that was associated to it is loaded instead.
 
-`SfSystem` expects `GameObjects` to have a [TransformComponent3d](../../components/TransformComponent.md) component, to specify its size and position. The position's `z` property defines the "height" at which objects will be rendered.
+`SfSystem` expects `GameObjects` to have a [TransformComponent3f](../../components/TransformComponent.md) component, to specify its size and position. The position's `z` property defines the "height" at which objects will be rendered.
 
-If the `GraphicsComponent`'s `size` property's `x` or `y` fields are set to anything but 0, the `SfSystem` wil use these values instead of the `TransformComponent3d`'s to set the drawable's size.
+If the `GraphicsComponent`'s `size` property's `x` or `y` fields are set to anything but 0, the `SfSystem` wil use these values instead of the `TransformComponent3f`'s to set the drawable's size.
 
-A `GameObject`'s rotation is defined by its `TransformComponent3d`'s `yaw` property ADDED TO its `GraphicsComponent`'s yaw property. This lets you define a graphical yaw that you do not have to compensate throughout the rest of your code (as you simply work on the `TransformComponent`).
+A `GameObject`'s rotation is defined by its `TransformComponent3f`'s `yaw` property ADDED TO its `GraphicsComponent`'s yaw property. This lets you define a graphical yaw that you do not have to compensate throughout the rest of your code (as you simply work on the `TransformComponent`).
 
 ```
-/!\ That 3d is important! TransformComponent2d, 2i, 3i, 3f... Will not be detected!
+/!\ That 3f is important! TransformComponent2d, 2i, 3i, 3f... Will not be detected!
 ```
 
 ##### Cameras
 
-A *"default"* camera is added upon system construction, meaning typical use does not require any action. For further configuration of the rendered areas, `CameraComponents3d` can be used.
+A *"default"* camera is added upon system construction, meaning typical use does not require any action. For further configuration of the rendered areas, `CameraComponents3f` can be used.
 
-If a `GameObject` is found to have a [CameraComponent3d](../../components/CameraComponent.hpp), a camera will be added to the scene.
+If a `GameObject` is found to have a [CameraComponent3f](../../components/CameraComponent.hpp), a camera will be added to the scene.
 
- The `CameraComponent3d`'s `frustrum` property defines the area to be rendered, whereas the `GameObject`'s `TransformComponent3d`'s `boundingBox` property defines the bounds of the viewport to be displayed. The `boundingBox.topLeft.y` property defines the "height" at which the camera should be rendered (higher cameras appear in front of lower ones).
+ The `CameraComponent3f`'s `frustrum` property defines the area to be rendered, whereas the `GameObject`'s `TransformComponent3f`'s `boundingBox` property defines the bounds of the viewport to be displayed. The `boundingBox.topLeft.y` property defines the "height" at which the camera should be rendered (higher cameras appear in front of lower ones).
 
 Refer to [the SFML website](https://www.sfml-dev.org/tutorials/2.0/graphics-view.php) for more information about viewports.
 
@@ -36,7 +36,7 @@ Refer to [the SFML website](https://www.sfml-dev.org/tutorials/2.0/graphics-view
 
 If a `GameObject` is found to have a [GUIComponent](../../components/GUIComponent.md), it will be rendered as text using the information held in that `GUIComponent`.
 
-If the `GUIComponent`'s `camera` property points to a `GameObject` (and not `nullptr`), the `SfSystem` will interpret the `GUIComponent`'s `topLeft` property as relative to the `camera`'s `CameraComponent3d`'s `frustrum`. For example:
+If the `GUIComponent`'s `camera` property points to a `GameObject` (and not `nullptr`), the `SfSystem` will interpret the `GUIComponent`'s `topLeft` property as relative to the `camera`'s `CameraComponent3f`'s `frustrum`. For example:
 
 ```c++
 auto & gui = gameObject.getComponent<GUIComponent>();
@@ -44,7 +44,7 @@ gui.topLeft.x = 0.5;
 
 gui.camera = &cameraObject;
 
-auto & frustrum = cameraObject.getComponent<CameraComponent3d>().frustrum;
+auto & frustrum = cameraObject.getComponent<CameraComponent3f>().frustrum;
 frustrum.topLeft.x = 20;
 frustrum.size.x = 10;
 ```
@@ -81,7 +81,7 @@ The provided function must take a `void *` as parameter, and call `kengine::pack
 
 This file should contain a single JSON object, with `windowSize`, `tileSize` and `fullScreen` properties.
 
-`windowSize` and `tileSize` should each be JSON objects with an `x` and `y` field, defining the window resolution and the number of pixels that should be used for a `GameObject` with 1 as its `TransformComponent3d`'s `size`.
+`windowSize` and `tileSize` should each be JSON objects with an `x` and `y` field, defining the window resolution and the number of pixels that should be used for a `GameObject` with 1 as its `TransformComponent3f`'s `size`.
 
 `fullScreen` is a boolean that defines whether the window should be rendered in fullscreen or not.
 

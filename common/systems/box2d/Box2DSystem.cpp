@@ -44,7 +44,7 @@ namespace kengine {
                 { (float)(phys.movement.x * phys.speed), (float)(phys.movement.z * phys.speed) }
         );
 
-        const auto & transform = go.getComponent<TransformComponent3d>();
+        const auto & transform = go.getComponent<TransformComponent3f>();
         const auto & box = transform.boundingBox;
         const auto & pos = box.topLeft;
         const auto & size = box.size;
@@ -64,7 +64,7 @@ namespace kengine {
 
     void Box2DSystem::updateTransform(kengine::GameObject & go) noexcept {
         const auto & comp = go.getComponent<Box2DComponent>();
-        auto & box = go.getComponent<kengine::TransformComponent3d>().boundingBox;
+        auto & box = go.getComponent<kengine::TransformComponent3f>().boundingBox;
         const auto & position = comp.body->GetPosition();
         box.topLeft.x = position.x;
         box.topLeft.z = position.y;
@@ -78,10 +78,10 @@ namespace kengine {
 
     void Box2DSystem::handle(const kengine::packets::RegisterGameObject & p) noexcept  {
         auto & go = p.go;
-        if (!go.hasComponent<kengine::TransformComponent3d>() || !go.hasComponent<kengine::PhysicsComponent>())
+        if (!go.hasComponent<kengine::TransformComponent3f>() || !go.hasComponent<kengine::PhysicsComponent>())
             return;
 
-        const auto & box = go.getComponent<kengine::TransformComponent3d>().boundingBox;
+        const auto & box = go.getComponent<kengine::TransformComponent3f>().boundingBox;
 
         b2::BodyDef bodyDef;
         bodyDef.type = b2::dynamicBody;

@@ -14,8 +14,8 @@ namespace kengine {
         const std::string type = pmeta_nameof(PhysicsComponent);
         bool solid = true;
         bool fixed = false;
-        putils::Point3d movement;
-        double speed = 1;
+        putils::Vector3f movement;
+        float speed = 1;
 
         /*
          * Reflectible

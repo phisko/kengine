@@ -50,7 +50,7 @@ namespace kengine {
 									*_.bPtr = _.b;
 							}
 							else if (_.adjustableType == AdjustableComponent::Double) {
-								ImGui::InputDouble(putils::concat("##", _.name).c_str(), &_.d);
+								ImGui::InputFloat(putils::concat("##", _.name).c_str(), &_.d);
 								if (_.dPtr != nullptr)
 									*_.dPtr = _.d;
 							}

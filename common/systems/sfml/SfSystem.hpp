@@ -35,13 +35,13 @@ namespace kengine {
 		void attachDebug(kengine::GameObject & go);
 		void attachGUI(kengine::GameObject & go);
 		void attachNormal(kengine::GameObject & go);
-		void attachLayer(SfComponent & comp, const kengine::GraphicsComponent::Layer & layer, const putils::Rect3d & boundingBox);
+		void attachLayer(SfComponent & comp, const kengine::GraphicsComponent::Layer & layer, const putils::Rect3f & boundingBox);
 
     public:
         void handle(const packets::RegisterAppearance & p) noexcept;
 
     public:
-		void handle(const packets::ScreenSize::GridSizeQuery & p) const noexcept { sendTo(packets::ScreenSize::Response{ putils::Point2d{ _screenSize.x / _tileSize.x, _screenSize.y / _tileSize.y } }, *p.sender); }
+		void handle(const packets::ScreenSize::GridSizeQuery & p) const noexcept { sendTo(packets::ScreenSize::Response{ putils::Point2f{ _screenSize.x / _tileSize.x, _screenSize.y / _tileSize.y } }, *p.sender); }
 		void handle(const packets::ScreenSize::TileSizeQuery & p) const noexcept { sendTo(packets::ScreenSize::Response{ _tileSize }, *p.sender); }
 		void handle(const packets::ScreenSize::ScreenSizeQuery & p) const noexcept { sendTo(packets::ScreenSize::Response{ _screenSize }, *p.sender); }
 
@@ -59,32 +59,32 @@ namespace kengine {
         bool updateDebug(kengine::GameObject & go, pse::ViewItem & item);
         void updateObject(kengine::GameObject & go, pse::ViewItem & item, const GraphicsComponent::Layer & layer, bool fixedSize);
         void updateGUIElement(kengine::GameObject & go) noexcept;
-        void updateTransform(kengine::GameObject & go, pse::ViewItem & item, const kengine::TransformComponent3d & transform, const GraphicsComponent::Layer & layer, bool fixedSize) noexcept;
+        void updateTransform(kengine::GameObject & go, pse::ViewItem & item, const kengine::TransformComponent3f & transform, const GraphicsComponent::Layer & layer, bool fixedSize) noexcept;
 
 	private:
 		putils::json _config;
-		putils::Point2d _screenSize;
-		putils::Point2d _tileSize;
+		putils::Point2f _screenSize;
+		putils::Point2f _tileSize;
 		bool _fullScreen;
 
 		// Config parsers
 	private:
-		putils::Point2d parseSize(const std::string & propertyName, const putils::Point2d & _default);
+		putils::Point2f parseSize(const std::string & propertyName, const putils::Point2f & _default);
 		bool parseBool(const std::string & propertyName, bool _default);
 
 		// Helpers
     private:
-		sf::Vector2f toWorldPos(const putils::Point3d & pos) const {
+		sf::Vector2f toWorldPos(const putils::Point3f & pos) const {
 			return { (float)(pos.x * _tileSize.x), (float)(-pos.z * _tileSize.y) };
 		}
 
-		sf::Vector2f toWorldSize(const putils::Point3d & pos) const {
+		sf::Vector2f toWorldSize(const putils::Point3f & pos) const {
 			return { (float)(pos.x * _tileSize.x), (float)(pos.z * _tileSize.y) };
 		}
 
 	private:
-		kengine::EntityManager & _em;
 		pse::Engine _engine;
+		kengine::EntityManager & _em;
 
 		struct GUIElement {
 			std::shared_ptr<tgui::Widget> frame = nullptr;

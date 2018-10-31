@@ -31,7 +31,7 @@ int main(int, char ** av) {
 
     // Create a GameObject and attach Components to it
     auto & player = em.createEntity<kengine::GameObject>("player");
-    player.attachComponent<kengine::TransformComponent3d>();
+    player.attachComponent<kengine::TransformComponent3f>();
     player.attachComponent<kengine::GraphicsComponent>();
 
     // Attach a lua script to a GameObject
@@ -44,7 +44,7 @@ int main(int, char ** av) {
         lua.addScriptDirectory("scripts");
         lua.registerTypes<
                 kengine::GraphicsComponent,
-                kengine::TransformComponent3d, putils::Point<double, 3>, putils::Rect<double, 3>,
+                kengine::TransformComponent3f, putils::Point<double, 3>, putils::Rect<double, 3>,
                 kengine::LuaComponent,
                 kengine::packets::Log
         >();

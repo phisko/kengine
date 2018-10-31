@@ -8,16 +8,16 @@ namespace kengine {
 	public:
 		DebugGraphicsComponent() = default;
 
-		DebugGraphicsComponent(const std::string & text, unsigned int textSize, const std::string & font, const putils::Point3d & startPos, unsigned int color)
+		DebugGraphicsComponent(const std::string & text, unsigned int textSize, const std::string & font, const putils::Point3f & startPos, unsigned int color)
 			: text(text), textSize(textSize), font(font), startPos(startPos), color(color), debugType(Text) {}
 
-		DebugGraphicsComponent(const putils::Point3d & startPos, const putils::Point3d & endPos, double thickness, unsigned int color)
+		DebugGraphicsComponent(const putils::Point3f & startPos, const putils::Point3f & endPos, float thickness, unsigned int color)
 			: startPos(startPos), endPos(endPos), thickness(thickness), color(color), debugType(Line) {}
 
-		DebugGraphicsComponent(const putils::Point3d & center, double radius, unsigned int color)
+		DebugGraphicsComponent(const putils::Point3f & center, float radius, unsigned int color)
 			: startPos(center), radius(radius), color(color), debugType(Sphere) {}
 
-		DebugGraphicsComponent(const putils::Rect3d & box, unsigned int color)
+		DebugGraphicsComponent(const putils::Rect3f & box, unsigned int color)
 			: box(box), color(color), debugType(Box) {}
 
 		const std::string type = pmeta_nameof(DebugGraphicsComponent);
@@ -26,12 +26,12 @@ namespace kengine {
 		unsigned int textSize;
 		std::string font;
 
-		putils::Point3d startPos;
-		putils::Point3d endPos;
-		double radius;
-		double thickness;
+		putils::Point3f startPos;
+		putils::Point3f endPos;
+		float radius;
+		float thickness;
 		unsigned int color;
-		putils::Rect3d box;
+		putils::Rect3f box;
 
 		enum Type {
 			Text,

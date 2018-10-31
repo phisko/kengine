@@ -24,7 +24,7 @@ namespace kengine {
             std::vector<kengine::GameObject *> found;
 
             for (const auto go : _em.getGameObjects<kengine::PhysicsComponent>()) {
-                auto & box = go->getComponent<kengine::TransformComponent3d>().boundingBox;
+                auto & box = go->getComponent<kengine::TransformComponent3f>().boundingBox;
                 if (box.intersect(q.box))
                     found.push_back(go);
             }
@@ -39,7 +39,7 @@ namespace kengine {
 				if (_.fixed)
 					return;
 
-				auto & box = go.getComponent<kengine::TransformComponent3d>().boundingBox;
+				auto & box = go.getComponent<kengine::TransformComponent3f>().boundingBox;
 
 				const auto dest = getNewPos(box.topLeft, _.movement, _.speed);
 				if (dest == box.topLeft)
@@ -51,20 +51,20 @@ namespace kengine {
 			}}
 		}
 
-		putils::Point3d getNewPos(const putils::Point3d & pos, const putils::Point3d & movement, double speed) {
-			return putils::Point3d{
+		putils::Point3f getNewPos(const putils::Point3f & pos, const putils::Vector3f & movement, float speed) {
+			return {
 					pos.x + movement.x * time.getDeltaFrames() * speed,
 					pos.y + movement.y * time.getDeltaFrames() * speed,
 					pos.z + movement.z * time.getDeltaFrames() * speed,
 			};
 		}
 
-		void checkCollisions(kengine::GameObject & go, const putils::Rect3d & box) {
+		void checkCollisions(kengine::GameObject & go, const putils::Rect3f & box) {
 			for (const auto obj : _em.getGameObjects<kengine::PhysicsComponent>()) {
 				if (obj == &go)
 					continue;
 
-				const auto & other = obj->getComponent<kengine::TransformComponent3d>().boundingBox;
+				const auto & other = obj->getComponent<kengine::TransformComponent3f>().boundingBox;
 				if (box.intersect(other))
 					send(kengine::packets::Collision{ go, *obj });
 			}

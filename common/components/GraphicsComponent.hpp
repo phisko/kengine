@@ -18,14 +18,15 @@ namespace kengine {
 
 		struct Layer : public putils::Reflectible<Layer>, public putils::Serializable<Layer> {
 			Layer(const std::string & name = "", const std::string & appearance = "",
-				const putils::Rect3d & boundingBox = { {}, { 1, 1, 1 } }, double yaw = 0)
+				const putils::Rect3f & boundingBox = { {}, { 1, 1, 1 } }, float yaw = 0)
 				: name(name), appearance(appearance), boundingBox(boundingBox), yaw(yaw)
 			{}
 
 			std::string name;
 			std::string appearance;
-			putils::Rect3d boundingBox = { {}, { 1, 1, 1 } };
-			double yaw = 0;
+			putils::Rect3f boundingBox = { {}, { 1, 1, 1 } };
+			float yaw = 0;
+			bool mirrored = false;
 
 			pmeta_get_class_name(GraphicsComponentLayer);
 			pmeta_get_attributes(

@@ -13,7 +13,7 @@ namespace kengine {
                            const putils::Point<Precision, Dimensions> & size = { 1, 1 })
                 : boundingBox(pos, size) {
             if constexpr (Dimensions == 3)
-            if (size == putils::Point3d{ 1, 1, 0 })
+            if (size == putils::Point3f{ 1, 1, 0 })
                 boundingBox.size.z = 1;
         }
 

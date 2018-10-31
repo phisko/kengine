@@ -31,7 +31,7 @@ namespace kengine {
         public:
             putils::Timer::t_duration getDeltaTime() const { return deltaTime; }
             putils::Timer::t_duration getFixedDeltaTime() const { return fixedDeltaTime; }
-            double getDeltaFrames() const { return deltaTime / fixedDeltaTime; }
+            float getDeltaFrames() const { return deltaTime / fixedDeltaTime; }
 
             /*
              * Internals

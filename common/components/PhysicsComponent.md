@@ -28,7 +28,7 @@ Used to specify that the object will never move, letting the `PhysicsSystem` ski
 ##### movement
 
 ```cpp
-putils::Point3d movement;
+putils::Vector3f movement;
 ```
 Indicates the movement vector for the entity.
 

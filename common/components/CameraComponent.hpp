@@ -21,7 +21,7 @@ namespace kengine {
         Precision pitch = 0; // Radians
         Precision yaw = 0; // Radians
 
-		putils::Point2d getCoordinatesFromScreen(const putils::Point2d & screenCoordinates, const putils::Point2d & screenSize) const noexcept {
+		putils::Point2f getCoordinatesFromScreen(const putils::Point2f & screenCoordinates, const putils::Point2f & screenSize) const noexcept {
 			auto ret = screenCoordinates;
 
 			ret.x /= screenSize.x;
