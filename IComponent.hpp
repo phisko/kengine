@@ -8,7 +8,7 @@ namespace kengine {
     public:
         virtual ~IComponent() = default;
 
-        friend std::ostream & operator<<(std::ostream & s, const kengine::IComponent & obj) {
+        friend std::ostream & operator<<(std::ostream & s, const IComponent & obj) {
             s << obj.toString();
             return s;
         }

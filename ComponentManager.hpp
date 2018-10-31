@@ -1,21 +1,9 @@
 #pragma once
 
-#include "with.hpp"
 #include "Component.hpp"
 
 namespace kengine {
     class ComponentManager {
-    public:
-        template<class CT, typename ...Params>
-        CT & attachComponent(GameObject & parent, Params && ... params) const noexcept {
-            return parent.attachComponent<CT>(FWD(params)...);
-        };
-
-    public:
-        void detachComponent(GameObject & go, const IComponent & comp) const noexcept {
-            go.detachComponent(comp);
-        }
-
     public:
         template<typename T>
         const std::vector<GameObject *> & getGameObjects() noexcept {
@@ -35,7 +23,7 @@ namespace kengine {
 
     protected:
         void registerGameObject(GameObject & go) noexcept {
-			go.setManager(this);
+			go._manager = this;
             for (auto & [type, comp] : go._components)
                 registerComponent(go, *comp);
             _allEntities.unsafe.push_back(&go);
