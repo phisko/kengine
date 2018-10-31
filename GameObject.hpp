@@ -11,24 +11,21 @@
 
 #include "reflection/Serializable.hpp"
 
-#include "concat.hpp"
 #include "json.hpp"
-#include "to_string.hpp"
 #include "fwd.hpp"
 
 namespace kengine {
     class ComponentManager;
 	class EntityManager;
 
-    class GameObject : public putils::Mediator,
-                       public putils::Reflectible<GameObject>,
+    class GameObject : public putils::Reflectible<GameObject>,
                        public putils::Serializable<GameObject> {
     public:
-        GameObject(std::string_view name = "") : _name(name) {}
-
-        GameObject(GameObject && other) = default;
-        GameObject & operator=(GameObject && other) = default;
-        ~GameObject() = default;
+        GameObject(std::string_view name = "") : Serializable<GameObject>(
+			std::make_pair("name", &GameObject::_name),
+			std::make_pair("components", &GameObject::_components)
+		), _name(name)
+		{}
 
     public:
         template<typename CT>
@@ -79,34 +76,28 @@ namespace kengine {
         friend class EntityManager;
 
         ComponentManager * _manager = nullptr;
-        void setManager(ComponentManager * manager) {
-            _manager = manager;
-        }
 
     private:
         std::string _name;
-        std::unordered_map<pmeta::type_index, std::shared_ptr<IComponent>> _components;
+        std::unordered_map<pmeta::type_index, std::unique_ptr<IComponent>> _components;
         std::vector<pmeta::type_index> _types;
 
         /*
          * Reflectible
          */
 
-    public:
-        pmeta_get_class_name(GameObject);
+	public:
+		pmeta_get_class_name(GameObject);
 
-        pmeta_get_attributes(
-                pmeta_reflectible_attribute_private(&GameObject::_name),
-                pmeta_reflectible_attribute_private(&GameObject::_components)
-        );
+		pmeta_get_attributes(
+			pmeta_reflectible_attribute_private(&GameObject::_name)
+		);
 
-        pmeta_get_methods(
-                pmeta_reflectible_attribute(&GameObject::getName)
-        );
+		pmeta_get_methods();
 
-        pmeta_get_parents(
-                pmeta_reflectible_parent(putils::Mediator)
-        );
+		pmeta_get_parents(
+			pmeta_reflectible_parent(putils::Mediator)
+		);
     };
 }
 
