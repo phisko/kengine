@@ -1,13 +1,11 @@
 #pragma once
 
 #include <string>
-#include "SerializableComponent.hpp"
 #include "Point.hpp"
 #include "Observable.hpp"
 
 namespace kengine {
-    class GUIComponent : public putils::Observable<>,
-						 public kengine::SerializableComponent<GUIComponent>,
+    class GUIComponent : public putils::Observable<>, 
                          public putils::Reflectible<GUIComponent> {
     public:
 		GUIComponent() = default;

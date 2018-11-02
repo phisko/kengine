@@ -2,7 +2,7 @@
 
 #include "Point.hpp"
 
-namespace kengine { class GameObject; }
+namespace kengine { class Entity; }
 namespace putils { class BaseModule; }
 
 namespace kengine {
@@ -14,7 +14,7 @@ namespace kengine {
             };
 
             struct Response {
-                std::vector<kengine::GameObject *> objects;
+                std::vector<Entity *> objects;
             };
         }
     }

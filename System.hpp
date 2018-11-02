@@ -1,18 +1,20 @@
 #pragma once
 
 #include "ISystem.hpp"
-#include "common/packets/RegisterGameObject.hpp"
-#include "common/packets/RemoveGameObject.hpp"
+#include "EntityManager.hpp"
 
 #pragma warning(disable : 4250)
 
 namespace kengine {
-    class EntityManager;
-
     template<typename CRTP, typename ...DataPackets>
     class System : public ISystem, public putils::Module<CRTP, DataPackets...> {
     protected:
         using ISystem::ISystem;
+
+    public:
+		System(EntityManager & em) {
+			detail::components = &em.__getComponentMap();
+		}
 
     public:
         pmeta::type_index getType() const noexcept final {

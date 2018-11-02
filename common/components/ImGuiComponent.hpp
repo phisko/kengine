@@ -1,27 +1,30 @@
 #pragma once
 
 #include <functional>
-#include "SerializableComponent.hpp"
-#include "EntityManager.hpp"
+#include "reflection/Reflectible.hpp"
 
 struct ImGuiContext;
 extern ImGuiContext * GImGui;
 
 namespace kengine {
-	class ImGuiComponent : public kengine::SerializableComponent<ImGuiComponent> {
-	public:
+	struct ImGuiComponent {
 		ImGuiComponent(const std::function<void()> & func = nullptr) : display([func](auto context) {
 			setupImGuiContext(context);
 			func();
-		})
-		{}
+		}) {}
 
-	public:
-		std::function<void(void * context)> display;
+		void setFunc(const std::function<void()> & func) {
+			display = [func](auto context) {
+				setupImGuiContext(context);
+				func();
+			};
+		}
 
 		static void setupImGuiContext(void * context) {
 			GImGui = (decltype(GImGui))context;
 		}
+
+		std::function<void(void * context)> display;
 
 		/*
 		 * Reflectible

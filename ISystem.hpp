@@ -1,13 +1,6 @@
-//
-// Created by naliwe on 7/15/16.
-//
-
 #pragma once
 
-#include <vector>
 #include "meta/type.hpp"
-#include "Component.hpp"
-#include "GameObject.hpp"
 #include "Module.hpp"
 #include "Timer.hpp"
 
@@ -37,7 +30,7 @@ namespace kengine {
              * Internals
              */
 
-            friend class SystemManager;
+			friend class SystemManager;
 
         private:
             bool alwaysCall;

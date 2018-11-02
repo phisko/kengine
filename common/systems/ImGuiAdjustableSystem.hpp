@@ -9,26 +9,16 @@
 namespace kengine {
 	class ImGuiAdjustableSystem : public kengine::System<ImGuiAdjustableSystem> {
 	public:
-		ImGuiAdjustableSystem(kengine::EntityManager & em) : _em(em) {
-			onLoad();
-			_em.onLoad([this] { onLoad(); });
-		}
+		ImGuiAdjustableSystem(kengine::EntityManager & em) : System(em), _em(em) {
+			_em.createEntity([this](kengine::Entity & e) {
+				e.attach<kengine::ImGuiComponent>().setFunc([this] {
+					if (ImGui::Begin("Adjustables")) {
+						static char nameSearch[1024] = "";
+						ImGui::InputText("Name", nameSearch, sizeof(nameSearch));
+						ImGui::Separator();
 
-	private:
-		void onLoad() noexcept {
-			_em.createOrAttach<kengine::ImGuiComponent>("imgui-adjustables", [this] {
-				if (ImGui::Begin("Adjustables")) {
-					static char nameSearch[1024] = "";
-					ImGui::InputText("Name", nameSearch, sizeof(nameSearch));
-					ImGui::Separator();
-
-					auto objects = _em.getGameObjects<AdjustableComponent>();
-					std::sort(objects.begin(), objects.end(), [](kengine::GameObject * first, kengine::GameObject * second) {
-						return first->getComponent<AdjustableComponent>().name.compare(second->getComponent<AdjustableComponent>().name) < 0;
-					});
-					for (const auto go : objects) {
-
-						{ pmeta_with(go->getComponent<AdjustableComponent>()) {
+						auto objects = _em.getEntities<AdjustableComponent>();
+						for (const auto &[e, _] : objects) {
 							if (_.name.find(nameSearch) == std::string::npos)
 								continue;
 
@@ -43,29 +33,26 @@ namespace kengine {
 								_.s = buff;
 								if (_.sPtr != nullptr)
 									*_.sPtr = _.s;
-							}
-							else if (_.adjustableType == AdjustableComponent::Bool) {
+							} else if (_.adjustableType == AdjustableComponent::Bool) {
 								ImGui::Checkbox(putils::concat("##", _.name).c_str(), &_.b);
 								if (_.bPtr != nullptr)
 									*_.bPtr = _.b;
-							}
-							else if (_.adjustableType == AdjustableComponent::Double) {
+							} else if (_.adjustableType == AdjustableComponent::Double) {
 								ImGui::InputFloat(putils::concat("##", _.name).c_str(), &_.d);
 								if (_.dPtr != nullptr)
 									*_.dPtr = _.d;
-							}
-							else if (_.adjustableType == AdjustableComponent::Int) {
+							} else if (_.adjustableType == AdjustableComponent::Int) {
 								ImGui::InputInt(putils::concat("##", _.name).c_str(), &_.i);
 								if (_.iPtr != nullptr)
 									*_.iPtr = _.i;
 							}
 							ImGui::NextColumn();
-						}}
+						}
 					}
-				}
-				ImGui::End();
-			});
-		}
+					ImGui::End();
+				});
+		});
+	}
 
 		kengine::EntityManager & _em;
 	};

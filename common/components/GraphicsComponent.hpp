@@ -1,12 +1,10 @@
 #pragma once
 
 #include <string>
-#include "SerializableComponent.hpp"
 #include "Point.hpp"
 
 namespace kengine {
-    class GraphicsComponent : public kengine::SerializableComponent<GraphicsComponent>,
-                          public putils::Reflectible<GraphicsComponent> {
+    class GraphicsComponent : public putils::Reflectible<GraphicsComponent> {
     public:
         GraphicsComponent(const std::string & appearance = "") {
 			if (!appearance.empty())
@@ -78,5 +76,6 @@ namespace kengine {
 			pmeta_reflectible_attribute(&GraphicsComponent::getLayer),
 			pmeta_reflectible_attribute(&GraphicsComponent::hasLayer)
 		);
+		pmeta_get_parents();
     };
 }

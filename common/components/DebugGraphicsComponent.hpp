@@ -1,10 +1,10 @@
 #pragma once
 
 #include "EntityManager.hpp"
-#include "SerializableComponent.hpp"
+#include "reflection/Reflectible.hpp"
 
 namespace kengine {
-	class DebugGraphicsComponent : public kengine::SerializableComponent<DebugGraphicsComponent> {
+	class DebugGraphicsComponent {
 	public:
 		DebugGraphicsComponent() = default;
 
@@ -54,5 +54,7 @@ namespace kengine {
 			pmeta_reflectible_attribute(&DebugGraphicsComponent::box),
 			pmeta_reflectible_attribute(&DebugGraphicsComponent::debugType)
 		);
+		pmeta_get_methods();
+		pmeta_get_parents();
 	};
 }

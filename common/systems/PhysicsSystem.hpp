@@ -6,27 +6,26 @@
 #include "common/components/TransformComponent.hpp"
 #include "common/packets/Position.hpp"
 #include "common/packets/Collision.hpp"
-#include "with.hpp"
 
 namespace kengine {
     class PhysicsSystem : public kengine::System<PhysicsSystem, packets::Position::Query> {
     public:
-        PhysicsSystem(kengine::EntityManager & em) : _em(em) {}
+        PhysicsSystem(kengine::EntityManager & em) : System(em), _em(em) {}
 
     public:
         void execute() final {
-            for (const auto go : _em.getGameObjects<PhysicsComponent>())
-                updatePosition(*go);
+            for (auto & [e, phys] : _em.getEntities<PhysicsComponent>())
+                updatePosition(e, phys);
         }
 
     public:
         void handle(const packets::Position::Query & q) {
-            std::vector<kengine::GameObject *> found;
+            std::vector<Entity *> found;
 
-            for (const auto go : _em.getGameObjects<kengine::PhysicsComponent>()) {
-                auto & box = go->getComponent<kengine::TransformComponent3f>().boundingBox;
+            for (const auto & [e, phys, transform] : _em.getEntities<PhysicsComponent, TransformComponent3f>()) {
+                auto & box = transform.boundingBox;
                 if (box.intersect(q.box))
-                    found.push_back(go);
+                    found.push_back(&e);
             }
 
 			sendTo(packets::Position::Response{ found }, *q.sender);
@@ -34,21 +33,19 @@ namespace kengine {
 
 		// Helpers
 	private:
-		void updatePosition(kengine::GameObject & go) {
-			{ pmeta_with(go.getComponent<PhysicsComponent>()) {
-				if (_.fixed)
-					return;
+		void updatePosition(Entity & e, const PhysicsComponent & phys) {
+			if (phys.fixed)
+				return;
 
-				auto & box = go.getComponent<kengine::TransformComponent3f>().boundingBox;
+			auto & box = e.get<TransformComponent3f>().boundingBox;
 
-				const auto dest = getNewPos(box.topLeft, _.movement, _.speed);
-				if (dest == box.topLeft)
-					return;
-				box.topLeft = dest;
+			const auto dest = getNewPos(box.topLeft, phys.movement, phys.speed);
+			if (dest == box.topLeft)
+				return;
+			box.topLeft = dest;
 
-				if (_.solid)
-					checkCollisions(go, box);
-			}}
+			if (phys.solid)
+				checkCollisions(e, box);
 		}
 
 		putils::Point3f getNewPos(const putils::Point3f & pos, const putils::Vector3f & movement, float speed) {
@@ -59,18 +56,18 @@ namespace kengine {
 			};
 		}
 
-		void checkCollisions(kengine::GameObject & go, const putils::Rect3f & box) {
-			for (const auto obj : _em.getGameObjects<kengine::PhysicsComponent>()) {
-				if (obj == &go)
+		void checkCollisions(Entity & go, const putils::Rect3f & box) {
+			for (const auto & [obj, phys, transform] : _em.getEntities<PhysicsComponent, TransformComponent3f>()) {
+				if (&obj == &go)
 					continue;
 
-				const auto & other = obj->getComponent<kengine::TransformComponent3f>().boundingBox;
+				const auto & other = transform.boundingBox;
 				if (box.intersect(other))
-					send(kengine::packets::Collision{ go, *obj });
+					send(packets::Collision{ go, obj });
 			}
 		}
 
 	private:
-		kengine::EntityManager & _em;
+		EntityManager & _em;
 	};
 }

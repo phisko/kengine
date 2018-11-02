@@ -1,13 +1,10 @@
 #pragma once
 
-#include "SerializableComponent.hpp"
 #include "Point.hpp"
-#include "concat.hpp"
 
 namespace kengine {
     template<typename Precision, std::size_t Dimensions>
-    class CameraComponent : public putils::Reflectible<CameraComponent<Precision, Dimensions>>,
-                            public kengine::SerializableComponent<CameraComponent<Precision, Dimensions>> {
+    class CameraComponent : public putils::Reflectible<CameraComponent<Precision, Dimensions>> {
     public:
         CameraComponent(const putils::Point<Precision, Dimensions> & pos = { 0, 0 },
                         const putils::Point<Precision, Dimensions> & size = { 1, 1 })
@@ -31,8 +28,24 @@ namespace kengine {
 			ret.y *= frustrum.size.z;
 
 			const auto & offset = frustrum.topLeft;
-			ret.x += frustrum.topLeft.x;
-			ret.y += frustrum.topLeft.z;
+			ret.x += offset.x;
+			ret.y += offset.z;
+
+			return ret;
+		}
+
+		putils::Point2f getScreenCoordinates(const putils::Point3f & gamePos, const putils::Point2f & screenSize) const noexcept {
+			putils::Point2f ret(gamePos.x, gamePos.z);
+
+			const auto & offset = frustrum.topLeft;
+			ret.x -= offset.x;
+			ret.x -= offset.z;
+
+			ret.x *= screenSize.x;
+			ret.y *= screenSize.y;
+
+			ret.x /= frustrum.size.x;
+			ret.y /= frustrum.size.y;
 
 			return ret;
 		}

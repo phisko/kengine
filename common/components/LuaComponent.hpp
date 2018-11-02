@@ -2,12 +2,10 @@
 
 #include <string>
 #include "lua/sol.hpp"
-
-#include "SerializableComponent.hpp"
+#include "reflection/Reflectible.hpp"
 
 namespace kengine {
-    class LuaComponent : public putils::Reflectible<LuaComponent>,
-                         public SerializableComponent<LuaComponent> {
+    class LuaComponent : public putils::Reflectible<LuaComponent> {
     public:
         LuaComponent(const std::vector<std::string> & scripts = {})
                 : _scripts(scripts) {

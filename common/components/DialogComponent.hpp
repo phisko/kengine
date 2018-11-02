@@ -1,9 +1,9 @@
 #pragma once
 
-#include "SerializableComponent.hpp"
+#include "reflection/Reflectible.hpp"
 
 namespace kengine {
-	struct DialogComponent : public SerializableComponent<DialogComponent> {
+	struct DialogComponent {
 		struct Option {
 			std::string text;
 			std::function<void()> onClick = nullptr;
@@ -25,5 +25,7 @@ namespace kengine {
 			pmeta_reflectible_attribute(&DialogComponent::mainText),
 			pmeta_reflectible_attribute(&DialogComponent::options)
 		);
+		pmeta_get_methods();
+		pmeta_get_parents();
 	};
 }

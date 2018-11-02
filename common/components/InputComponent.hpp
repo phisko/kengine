@@ -1,10 +1,10 @@
 #pragma once
 
 #include <functional>
-#include "SerializableComponent.hpp"
+#include "reflection/Reflectible.hpp"
 
 namespace kengine {
-    struct InputComponent : SerializableComponent<InputComponent> {
+    struct InputComponent {
 		const std::string type = pmeta_nameof(InputComponent);
         std::function<void(int keycode, bool pressed)> onKey = nullptr;
         std::function<void(float x, float y)> onMouseMove = nullptr;

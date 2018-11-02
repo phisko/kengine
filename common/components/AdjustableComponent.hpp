@@ -1,9 +1,7 @@
 #pragma once
 
-#include "SerializableComponent.hpp"
-
 namespace kengine {
-	class AdjustableComponent : public kengine::SerializableComponent<AdjustableComponent> {
+	class AdjustableComponent {
 	public:
 		AdjustableComponent() = default;
 
@@ -29,8 +27,7 @@ namespace kengine {
 		float d;
 		int i;
 
-		enum EType
-		{
+		enum EType {
 			String,
 			Bool,
 			Double,
@@ -38,9 +35,5 @@ namespace kengine {
 		};
 
 		int adjustableType;
-
-	public:
-		pmeta_get_class_name(AdjustableComponent);
-		pmeta_get_attributes();
 	};
 }

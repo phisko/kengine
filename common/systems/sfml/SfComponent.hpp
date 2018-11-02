@@ -1,10 +1,9 @@
 #pragma once
 
 #include <putils/pse/Text.hpp>
-#include "Component.hpp"
 #include "pse/Sprite.hpp"
 
-class SfComponent : public kengine::Component<SfComponent> {
+class SfComponent {
 public:
 	struct Layer {
 		std::string name;
@@ -30,9 +29,6 @@ public:
     SfComponent(std::unique_ptr<pse::ViewItem>&& viewItem) {
 		viewItems.push_back({ "main", std::move(viewItem) });
     }
-
-public:
-    std::string toString() const final { return R"({"type":"sfml"})"; }
 
 public:
 	std::vector<Layer> viewItems;

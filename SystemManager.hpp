@@ -4,28 +4,19 @@
 #include <cmath>
 #include <vector>
 #include <memory>
-#include "System.hpp"
-#include "GameObject.hpp"
 #include "Mediator.hpp"
 #include "pluginManager/PluginManager.hpp"
 #include "Timer.hpp"
-#include "common/packets/RegisterGameObject.hpp"
-#include "common/packets/RemoveGameObject.hpp"
+#include "common/packets/RegisterEntity.hpp"
+#include "common/packets/RemoveEntity.hpp"
+#include "ISystem.hpp"
 
 namespace kengine {
-    class EntityManager;
+	class Entity;
 
     class SystemManager : public putils::Mediator {
     public:
-        SystemManager() = default;
-        ~SystemManager() = default;
-
-    public:
-        SystemManager(SystemManager const & o) = delete;
-        SystemManager & operator=(SystemManager const & o) = delete;
-
-    public:
-        void execute(const std::function<void()> & betweenSystems = []{}) noexcept {
+        void execute() noexcept {
             if (_first) {
                 _first = false;
                 resetTimers();
@@ -43,7 +34,6 @@ namespace kengine {
 					for (const auto & f : _afterSystem)
 						f();
 					_afterSystem.clear();
-					betweenSystems();
 				}
 			}
 		}
@@ -191,12 +181,12 @@ namespace kengine {
          */
 
     protected:
-        void registerGameObject(GameObject & gameObject) noexcept {
-            send(kengine::packets::RegisterGameObject{ gameObject });
+        void registerEntity(Entity & e) noexcept {
+            send(packets::RegisterEntity{ e });
         }
 
-        void removeGameObject(GameObject & gameObject) {
-            send(kengine::packets::RemoveGameObject{ gameObject });
+        void removeGameObject(Entity & e) {
+            send(packets::RemoveEntity{ e });
         }
 
     private:

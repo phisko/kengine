@@ -1,13 +1,11 @@
 #pragma once
 
-#include "SerializableComponent.hpp"
+#include "reflection/Reflectible.hpp"
 #include "Point.hpp"
-#include "concat.hpp"
 
 namespace kengine {
     template<typename Precision, std::size_t Dimensions>
-    class TransformComponent : public putils::Reflectible<TransformComponent<Precision, Dimensions>>,
-                               public kengine::SerializableComponent<TransformComponent<Precision, Dimensions>> {
+    class TransformComponent : public putils::Reflectible<TransformComponent<Precision, Dimensions>> {
     public:
         TransformComponent(const putils::Point<Precision, Dimensions> & pos = { 0, 0 },
                            const putils::Point<Precision, Dimensions> & size = { 1, 1 })
@@ -20,7 +18,6 @@ namespace kengine {
         TransformComponent(const putils::Rect<Precision, Dimensions> & rect)
                 : boundingBox(rect) {}
 
-        const std::string type = pmeta_nameof(TransformComponent);
         putils::Rect<Precision, Dimensions> boundingBox;
         Precision pitch = 0; // Radians
         Precision yaw = 0; // Radians
@@ -32,11 +29,12 @@ namespace kengine {
     public:
         pmeta_get_class_name(TransformComponent);
         pmeta_get_attributes(
-                pmeta_reflectible_attribute(&TransformComponent::type),
                 pmeta_reflectible_attribute(&TransformComponent::boundingBox),
                 pmeta_reflectible_attribute(&TransformComponent::pitch),
                 pmeta_reflectible_attribute(&TransformComponent::yaw)
         );
+		pmeta_get_methods();
+		pmeta_get_parents();
     };
 
     using TransformComponent2i = TransformComponent<int, 2>;

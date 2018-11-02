@@ -3,7 +3,6 @@
 #include "ScriptSystem.hpp"
 
 #include "lua/plua.hpp"
-#include "reflection/Reflectible.hpp"
 
 #include "EntityManager.hpp"
 
@@ -27,8 +26,8 @@ namespace kengine {
 		}
 
 		template<typename Ret, typename ...Args>
-		void registerGameObjectMember(const std::string & name, const std::function<Ret(Args...)> & func) {
-			_lua["GameObject"][name] = FWD(func);
+		void registerEntityMember(const std::string & name, const std::function<Ret(Args...)> & func) {
+			_lua["Entity"][name] = FWD(func);
 		}
 
 		template<typename T>
@@ -46,7 +45,7 @@ namespace kengine {
         }
 
     public:
-		void setSelf(kengine::GameObject & go) { _lua["self"] = &go; }
+		void setSelf(Entity & go) { _lua["self"] = &go; }
 		void unsetSelf() { _lua["self"] = sol::nil; }
 
     public:

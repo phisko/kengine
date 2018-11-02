@@ -6,8 +6,8 @@
 #include "components/GraphicsComponent.hpp"
 #include "packets/RegisterAppearance.hpp"
 #include "packets/Input.hpp"
-#include "packets/RemoveGameObject.hpp"
-#include "packets/RegisterGameObject.hpp"
+#include "packets/RemoveEntity.hpp"
+#include "packets/RegisterEntity.hpp"
 #include "packets/ScreenSize.hpp"
 
 #include "TGUI/TGUI.hpp"
@@ -19,7 +19,7 @@ namespace kengine {
     class EntityManager;
 
     class SfSystem : public kengine::System<SfSystem,
-            packets::RegisterGameObject, packets::RemoveGameObject,
+            packets::RegisterEntity, packets::RemoveEntity,
             packets::RegisterAppearance,
 			packets::ScreenSize::GridSizeQuery, packets::ScreenSize::TileSizeQuery, packets::ScreenSize::ScreenSizeQuery,
             packets::KeyStatus::Query, packets::MouseButtonStatus::Query, packets::MousePosition::Query> {
@@ -28,13 +28,16 @@ namespace kengine {
 
     public:
         void execute() final;
-        void handle(const kengine::packets::RegisterGameObject & p);
-        void handle(const kengine::packets::RemoveGameObject & p);
+        void handle(const packets::RegisterEntity & p);
+        void handle(const packets::RemoveEntity & p);
+
+		pse::Engine & getEngine() { return _engine; }
+		void setShouldClear(bool shouldClear) { _shouldClear = shouldClear; }
 
     private:
-		void attachDebug(kengine::GameObject & go);
-		void attachGUI(kengine::GameObject & go);
-		void attachNormal(kengine::GameObject & go);
+		void attachDebug(Entity & go);
+		void attachGUI(Entity & go);
+		void attachNormal(Entity & go);
 		void attachLayer(SfComponent & comp, const kengine::GraphicsComponent::Layer & layer, const putils::Rect3f & boundingBox);
 
     public:
@@ -56,16 +59,17 @@ namespace kengine {
         void handleEvents() noexcept;
         void updateCameras() noexcept;
         void updateDrawables();
-        bool updateDebug(kengine::GameObject & go, pse::ViewItem & item);
-        void updateObject(kengine::GameObject & go, pse::ViewItem & item, const GraphicsComponent::Layer & layer, bool fixedSize);
-        void updateGUIElement(kengine::GameObject & go) noexcept;
-        void updateTransform(kengine::GameObject & go, pse::ViewItem & item, const kengine::TransformComponent3f & transform, const GraphicsComponent::Layer & layer, bool fixedSize) noexcept;
+        bool updateDebug(Entity & go, pse::ViewItem & item);
+        void updateObject(Entity & go, pse::ViewItem & item, const GraphicsComponent::Layer & layer, bool fixedSize);
+        void updateGUIElement(Entity & go) noexcept;
+        void updateTransform(Entity & go, pse::ViewItem & item, const kengine::TransformComponent3f & transform, const GraphicsComponent::Layer & layer, bool fixedSize) noexcept;
 
 	private:
 		putils::json _config;
 		putils::Point2f _screenSize;
 		putils::Point2f _tileSize;
 		bool _fullScreen;
+		bool _shouldClear = true;
 
 		// Config parsers
 	private:
@@ -90,7 +94,7 @@ namespace kengine {
 			std::shared_ptr<tgui::Widget> frame = nullptr;
 			std::shared_ptr<tgui::Label> label = nullptr;
 		};
-		std::unordered_map<kengine::GameObject *, GUIElement> _guiElements;
+		std::unordered_map<Entity::ID, GUIElement> _guiElements;
 
 	private:
 		sf::Clock _deltaClock;
