@@ -17,36 +17,6 @@ namespace kengine {
 
 	template<typename Comp>
 	class Component {
-	public:
-		static inline Comp & get(size_t id) {
-			auto & meta = metadata();
-			assert("Invalid component id" && id < meta.array.size());
-			return meta.array[id].comp;
-		}
-
-		static inline size_t alloc() {
-			auto & meta = metadata();
-			assert("This should never happen" && meta.next <= meta.array.size());
-			if (meta.next == meta.array.size())
-				meta.array.emplace_back(Metadata::Link{ meta.nextInit++, Comp{} });
-
-			const auto id = meta.next;
-			meta.next = meta.array[id].next;
-			return id;
-		}
-
-		static inline void release(size_t id) {
-			auto & meta = metadata();
-			assert("Invalid component id" && id < meta.array.size());
-			meta.array[id].next = meta.next;
-			meta.next = id;
-		}
-
-		static inline size_t id() {
-			const auto & meta = metadata();
-			return meta.id;
-		}
-
 	private:
 		struct Metadata : detail::MetadataBase {
 			struct Link {
@@ -58,8 +28,39 @@ namespace kengine {
 			std::vector<Link> array;
 			size_t next = 0;
 			size_t id;
+
+			std::string debugname = Comp::get_class_name();
 		};
 
+	public:
+		static inline Comp & get(size_t id) { auto & meta = metadata();
+			assert("Invalid component id" && id < meta.array.size());
+			return meta.array[id].comp;
+		}
+
+		static inline size_t alloc() { auto & meta = metadata();
+			assert("This should never happen" && meta.next <= meta.array.size());
+			if (meta.next == meta.array.size()) {
+				Comp c;
+				meta.array.emplace_back(Metadata::Link{ meta.nextInit++, std::move(c) });
+			}
+
+			const auto id = meta.next;
+			meta.next = meta.array[id].next;
+			return id;
+		}
+
+		static inline void release(size_t id) { auto & meta = metadata();
+			assert("Invalid component id" && id < meta.array.size());
+			meta.array[id].next = meta.next;
+			meta.next = id;
+		}
+
+		static inline size_t id() { const auto & meta = metadata();
+			return meta.id;
+		}
+
+	private:
 		static inline Metadata & metadata() {
 			static Metadata * ret = nullptr;
 

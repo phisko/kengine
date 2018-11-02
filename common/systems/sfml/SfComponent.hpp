@@ -32,4 +32,6 @@ public:
 
 public:
 	std::vector<Layer> viewItems;
+
+	pmeta_get_class_name(SfComponent);
 };

@@ -35,5 +35,7 @@ namespace kengine {
 		};
 
 		int adjustableType;
+
+		pmeta_get_class_name(AdjustableComponent);
 	};
 }

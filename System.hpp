@@ -16,6 +16,8 @@ namespace kengine {
 			detail::components = &em.__getComponentMap();
 		}
 
+		System() = delete;
+
     public:
         pmeta::type_index getType() const noexcept final {
             static_assert(std::is_base_of<System, CRTP>::value,

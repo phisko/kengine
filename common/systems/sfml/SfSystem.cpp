@@ -73,7 +73,7 @@ namespace kengine {
 	}
 
 	SfSystem::SfSystem(kengine::EntityManager & em)
-		: putils::BaseModule(&em),
+		: putils::BaseModule(&em), System(em),
 		_config(parseConfig()),
 		_screenSize(parseSize("windowSize", { 1280, 720 })),
 		_tileSize(parseSize("tileSize", { 1, 1 })),

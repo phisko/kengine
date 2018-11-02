@@ -17,26 +17,24 @@ namespace kengine {
 
     private:
 		auto iteratorFor(size_t id) const {
-			const auto it = std::find_if(_entities.begin(), _entities.end(), [id](const auto & e) { return e.e.id == id; });
+			const auto it = std::find_if(_entities.begin(), _entities.end(), [id](const auto & e) { return e.id == id; });
 			assert("No such entity" && it != _entities.end());
 			return it;
 		}
 
 		auto iteratorFor(size_t id) {
-			const auto it = std::find_if(_entities.begin(), _entities.end(), [id](const auto & e) { return e.e.id == id; });
+			const auto it = std::find_if(_entities.begin(), _entities.end(), [id](const auto & e) { return e.id == id; });
 			assert("No such entity" && it != _entities.end());
 			return it;
 		}
 
 	public:
 		Entity & getEntity(size_t id) {
-			const auto it = iteratorFor(id);
-			return it->e;
+			return *iteratorFor(id);
 		}
 
 		const Entity & getEntity(size_t id) const {
-			const auto it = iteratorFor(id);
-			return it->e;
+			 return *iteratorFor(id);
 		}
 
     public:
@@ -50,38 +48,36 @@ namespace kengine {
 			--_count;
 		}
 
-
-	private:
-		struct Link {
-			size_t next;
-			Entity e;
-		};
-
 	private:
 		struct EntityCollection {
 			struct EntityIterator {
-				EntityIterator operator++() const { return EntityIterator{ vec, maxSize, index + 1 }; }
-
-				bool operator!=(const EntityIterator & rhs) const { return index != rhs.index; }
-
-				Entity & operator*() const {
-					return vec[index].e;
+				EntityIterator & operator++() {
+					++index;
+					return *this;
 				}
 
-				std::vector<Link> & vec;
+				bool operator!=(const EntityIterator & rhs) const {
+					return index != rhs.index;
+				}
+
+				Entity & operator*() const {
+					return vec[index];
+				}
+
+				std::vector<Entity> & vec;
 				size_t maxSize;
 				size_t index = 0;
 			};
 
 			auto begin() const {
-				return EntityIterator{ vec, count };
+				return EntityIterator{ vec, count, 0 };
 			}
 
 			auto end() const {
 				return EntityIterator{ vec, count, count };
 			}
 
-			std::vector<Link> & vec;
+			std::vector<Entity> & vec;
 			size_t count;
 		};
 
@@ -101,7 +97,7 @@ namespace kengine {
 						bool good = true;
 						pmeta_for_each(Comps, [&](auto && type) {
 							using CompType = pmeta_wrapped(type);
-							if (!vec[i].e.has<CompType>())
+							if (!vec[i].has<CompType>())
 								good = false;
 						});
 						if (good)
@@ -114,24 +110,36 @@ namespace kengine {
 				bool operator!=(const ComponentIterator & rhs) const { return index != rhs.index; }
 
 				std::tuple<Entity &, Comps &...> operator*() const {
-					auto & e = vec[index].e;
+					auto & e = vec[index];
 					return std::make_tuple(std::ref(e), std::ref(e.get<Comps>())...);
 				}
 
-				std::vector<Link> & vec;
+				std::vector<Entity> & vec;
 				size_t maxSize;
 				size_t index;
 			};
 
 			auto begin() const {
-				return ComponentIterator{ vec, count };
+				auto i = 0;
+				while (i < count) {
+					bool good = true;
+					pmeta_for_each(Comps, [&](auto && type) {
+						using CompType = pmeta_wrapped(type);
+						if (!vec[i].has<CompType>())
+							good = false;
+					});
+					if (good)
+						break;
+				}
+				
+				return ComponentIterator{ vec, count, i };
 			}
 
 			auto end() const {
 				return ComponentIterator{ vec, count, count };
 			}
 
-			std::vector<Link> & vec;
+			std::vector<Entity> & vec;
 			size_t count;
 		};
 
@@ -151,26 +159,18 @@ namespace kengine {
 		}
 
 	private:
-		Entity & alloc() { assert("This should never happen" && _nextLink <= _entities.size());
-			if (_nextLink == _entities.size())
-				_entities.emplace_back(Link{ ++_nextLink, Entity{ ++_nextId } });
-
-			++_count;
-
-			const auto index = _nextLink;
-			auto & link = _entities[index];
-			_nextLink = link.next;
-			return link.e;
+		Entity & alloc() {
+			if (_count == _entities.size())
+				_entities.emplace_back(Entity{ ++_nextId });
+			return _entities[_count++];
 		}
 
 	private:
-		std::vector<Link> _entities;
+		std::vector<Entity> _entities;
 		size_t _count = 0;
-		size_t _nextLink = 0;
 		size_t _nextId = 0;
 
 	private:
-		size_t _nextCompId = 0;
 		detail::GlobalCompMap _components;
 
 	public: // Reserved to systems
