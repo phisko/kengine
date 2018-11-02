@@ -10,7 +10,7 @@ namespace kengine {
 	namespace detail {
 		static constexpr size_t INVALID = (size_t)-1;
 
-		struct MetadataBase {};
+		struct MetadataBase { virtual ~MetadataBase() = default; };
 		using GlobalCompMap = std::unordered_map<pmeta::type_index, std::unique_ptr<MetadataBase>>;
 		static inline GlobalCompMap * components = nullptr;
 	}
@@ -56,8 +56,9 @@ namespace kengine {
 			meta.next = id;
 		}
 
-		static inline size_t id() { const auto & meta = metadata();
-			return meta.id;
+		static inline size_t id() {
+			static const size_t ret = metadata().id;
+			return ret;
 		}
 
 	private:
