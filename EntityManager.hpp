@@ -90,21 +90,22 @@ namespace kengine {
 		template<typename ... Comps>
 		struct ComponentCollection {
 			struct ComponentIterator {
-				ComponentIterator operator++() const {
-					auto i = index + 1;
+				ComponentIterator & operator++() {
+					++index;
 
-					while (i < maxSize) {
+					while (index < maxSize) {
 						bool good = true;
 						pmeta_for_each(Comps, [&](auto && type) {
 							using CompType = pmeta_wrapped(type);
-							if (!vec[i].has<CompType>())
+							if (!vec[index].has<CompType>())
 								good = false;
 						});
 						if (good)
 							break;
+						++index;
 					}
 
-					return ComponentIterator{ vec, maxSize, i };
+					return *this;
 				}
 
 				bool operator!=(const ComponentIterator & rhs) const { return index != rhs.index; }
@@ -120,7 +121,7 @@ namespace kengine {
 			};
 
 			auto begin() const {
-				auto i = 0;
+				size_t i = 0;
 				while (i < count) {
 					bool good = true;
 					pmeta_for_each(Comps, [&](auto && type) {
@@ -130,6 +131,7 @@ namespace kengine {
 					});
 					if (good)
 						break;
+					++i;
 				}
 				
 				return ComponentIterator{ vec, count, i };
