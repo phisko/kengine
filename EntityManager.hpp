@@ -8,10 +8,10 @@
 namespace kengine {
     class EntityManager : public SystemManager {
     public:
-        Entity & createEntity(const std::function<void(Entity &)> & postCreate = nullptr) {
+		template<typename Func> // Func: void(Entity &);
+        Entity & createEntity(Func && postCreate) {
 			auto & e = alloc();
-            if (postCreate != nullptr)
-                postCreate(e);
+			postCreate(e);
 			return e;
         }
 

@@ -42,7 +42,7 @@ namespace kengine {
 			assert("This should never happen" && meta.next <= meta.array.size());
 			if (meta.next == meta.array.size()) {
 				Comp c;
-				meta.array.emplace_back(Metadata::Link{ meta.nextInit++, std::move(c) });
+				meta.array.emplace_back(Metadata::Link{ ++meta.nextInit, std::move(c) });
 			}
 
 			const auto id = meta.next;

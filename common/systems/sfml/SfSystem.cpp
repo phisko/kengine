@@ -141,7 +141,7 @@ namespace kengine {
 
 		ImGui::SFML::Update(_engine.getRenderWindow(), _deltaClock.restart());
 
-		const auto & objects = _em.getEntities<ImGuiComponent>();
+		const auto objects = _em.getEntities<ImGuiComponent>();
 		for (const auto & [e, comp] : objects)
 			comp.display(GImGui);
 
