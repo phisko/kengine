@@ -1,10 +1,12 @@
 #pragma once
 
+#include <iostream>
 #include <cstddef>
 #include <unordered_map>
 #include <memory>
 #include <vector>
 #include "meta/type.hpp"
+#include "reflection/Reflectible.hpp"
 
 namespace kengine {
 	namespace detail {
@@ -27,9 +29,7 @@ namespace kengine {
 			size_t nextInit = 0;
 			std::vector<Link> array;
 			size_t next = 0;
-			size_t id;
-
-			std::string debugname = Comp::get_class_name();
+			size_t id = detail::INVALID;
 		};
 
 	public:
@@ -74,8 +74,11 @@ namespace kengine {
 					auto ptr = std::make_unique<Metadata>();
 					ret = static_cast<Metadata *>(ptr.get());
 					(*detail::components)[typeIndex] = std::move(ptr);
+					ret->id = detail::components->size() - 1;
+
+					if constexpr (putils::is_reflectible<Comp>::value)
+						std::cout << ret->id << ' ' << Comp::get_class_name() << '\n';
 				}
-				ret->id = detail::components->size() - 1;
 			}
 
 			return *ret;
