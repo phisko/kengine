@@ -38,11 +38,11 @@ namespace kengine {
 			return meta.array[id].comp;
 		}
 
-		static inline size_t alloc() { auto & meta = metadata();
+		template<typename ... Args>
+		static inline size_t alloc(Args && ... args) { auto & meta = metadata();
 			assert("This should never happen" && meta.next <= meta.array.size());
 			if (meta.next == meta.array.size()) {
-				Comp c;
-				meta.array.emplace_back(Metadata::Link{ ++meta.nextInit, std::move(c) });
+				meta.array.emplace_back(Metadata::Link{ ++meta.nextInit, Comp(FWD(args)...) });
 			}
 
 			const auto id = meta.next;

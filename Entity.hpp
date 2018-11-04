@@ -47,10 +47,16 @@ namespace kengine {
 			return componentIds[getIndex<T>()] != detail::INVALID;
 		}
 
-		template<typename T>
-		T & attach() {
-			componentIds[getIndex<T>()] = Component<T>::alloc();
+		template<typename T, typename ... Args>
+		T & attach(Args && ... args) {
+			componentIds[getIndex<T>()] = Component<T>::alloc(FWD(args)...);
 			return get<T>();
+		}
+
+		template<typename T>
+		Entity & operator+=(T && obj) {
+			attach<T>() = FWD(obj);
+			return *this;
 		}
 
 		template<typename T>
