@@ -6,9 +6,6 @@
 
 namespace kengine {
     class ISystem : public virtual putils::BaseModule {
-    protected:
-        ISystem() = default;
-
     public:
         virtual ~ISystem() = default;
 

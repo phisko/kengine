@@ -13,7 +13,6 @@ namespace kengine {
         CameraComponent(const putils::Rect<Precision, Dimensions> & rect)
                 : frustrum(rect) {}
 
-        const std::string type = pmeta_nameof(CameraComponent);
         putils::Rect<Precision, Dimensions> frustrum;
         Precision pitch = 0; // Radians
         Precision yaw = 0; // Radians
@@ -57,7 +56,6 @@ namespace kengine {
     public:
         pmeta_get_class_name(CameraComponent);
         pmeta_get_attributes(
-                pmeta_reflectible_attribute(&CameraComponent::type),
                 pmeta_reflectible_attribute(&CameraComponent::frustrum),
                 pmeta_reflectible_attribute(&CameraComponent::pitch),
                 pmeta_reflectible_attribute(&CameraComponent::yaw)

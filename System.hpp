@@ -8,9 +8,6 @@
 namespace kengine {
     template<typename CRTP, typename ...DataPackets>
     class System : public ISystem, public putils::Module<CRTP, DataPackets...> {
-    protected:
-        using ISystem::ISystem;
-
     public:
 		System(EntityManager & em) {
 			detail::components = &em.__getComponentMap();
