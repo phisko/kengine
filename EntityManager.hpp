@@ -16,6 +16,11 @@ namespace kengine {
 			return e;
         }
 
+		template<typename Func>
+		Entity & operator+=(Func && postCreate) {
+			return createEntity(FWD(postCreate));
+		}
+
     private:
 		auto iteratorFor(size_t id) const {
 			const auto it = std::find_if(_entities.begin(), _entities.end(), [id](const auto & e) { return e.id == id; });
