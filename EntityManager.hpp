@@ -12,6 +12,7 @@ namespace kengine {
         Entity & createEntity(Func && postCreate) {
 			auto & e = alloc();
 			postCreate(e);
+			SystemManager::registerEntity(e);
 			return e;
         }
 
@@ -44,6 +45,7 @@ namespace kengine {
 
 		void removeEntity(size_t id) { assert("Invalid id" && id < _count);
 			const auto it = iteratorFor(id);
+			SystemManager::removeEntity(*it);
 			std::iter_swap(it, _entities.begin() + _count);
 			--_count;
 		}

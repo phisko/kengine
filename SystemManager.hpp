@@ -185,7 +185,7 @@ namespace kengine {
             send(packets::RegisterEntity{ e });
         }
 
-        void removeGameObject(Entity & e) {
+        void removeEntity(Entity & e) {
             send(packets::RemoveEntity{ e });
         }
 
