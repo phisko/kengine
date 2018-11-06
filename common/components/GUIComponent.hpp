@@ -15,7 +15,6 @@ namespace kengine {
 		GUIComponent(const std::string & text, const putils::Rect3f & boundingBox, const std::function<void()> & onClick)
 			: text(text), boundingBox(boundingBox), onClick(onClick), guiType(Button) {}
 
-        const std::string type = pmeta_nameof(GUIComponent);
         std::function<void()> onClick = nullptr;
         std::string text;
         putils::Rect3f boundingBox;
@@ -48,7 +47,6 @@ namespace kengine {
     public:
         pmeta_get_class_name(GUIComponent);
         pmeta_get_attributes(
-                pmeta_reflectible_attribute(&GUIComponent::type),
                 pmeta_reflectible_attribute(&GUIComponent::onClick),
                 pmeta_reflectible_attribute(&GUIComponent::text),
                 pmeta_reflectible_attribute(&GUIComponent::boundingBox),

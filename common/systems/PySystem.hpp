@@ -9,9 +9,7 @@ namespace kengine {
     class PySystem : public kengine::ScriptSystem<PySystem, PyComponent> {
     public:
         PySystem(kengine::EntityManager & em) : ScriptSystem(em) {
-            addScriptDirectory("python");
             py::globals()["pk"] = _m;
-
 			ScriptSystem::init();
         }
 

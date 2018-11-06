@@ -13,9 +13,7 @@ namespace kengine {
     class LuaSystem : public kengine::ScriptSystem<LuaSystem, LuaComponent, kengine::packets::LuaState::Query> {
     public:
         LuaSystem(kengine::EntityManager & em) : ScriptSystem(em) {
-            addScriptDirectory("scripts");
             _lua.open_libraries();
-
 			ScriptSystem::init();
         }
 

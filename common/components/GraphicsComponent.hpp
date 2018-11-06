@@ -11,7 +11,6 @@ namespace kengine {
 				addLayer("main", appearance);
         }
 
-        const std::string type = pmeta_nameof(GraphicsComponent);
         bool repeated = false;
 
 		struct Layer : public putils::Reflectible<Layer>, public putils::Serializable<Layer> {
@@ -66,7 +65,6 @@ namespace kengine {
     public:
         pmeta_get_class_name(GraphicsComponent);
         pmeta_get_attributes(
-                pmeta_reflectible_attribute(&GraphicsComponent::type),
                 pmeta_reflectible_attribute(&GraphicsComponent::repeated),
                 pmeta_reflectible_attribute(&GraphicsComponent::layers)
         );
