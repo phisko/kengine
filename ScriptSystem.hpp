@@ -133,42 +133,9 @@ namespace kengine {
 			registerComponent<T>();
 		}
 
-	public:
-		template<typename String>
-		void addScriptDirectory(String && dir) {
-			putils::Directory d(dir);
-			_directories.emplace_back(FWD(dir));
-		}
-
-		template<typename String>
-		void removeScriptDirectory(String && dir) noexcept {
-			const auto it = std::find(_directories.begin(), _directories.end(), dir);
-			if (it != _directories.end())
-				_directories.erase(it);
-		}
-
 		// System methods
 	public:
 		void execute() final {
-			executeDirectories();
-			executeScriptedObjects();
-		}
-
-	private:
-		void executeDirectories() {
-			{ pmeta_with(static_cast<CRTP &>(*this)) {
-				for (const auto & dir : _directories) {
-					putils::Directory d(dir);
-
-					d.for_each([&_](const putils::Directory::File & f) {
-						if (!f.isDirectory)
-							_.executeScript(f.fullPath);
-					});
-				}
-			}}
-		}
-
-		void executeScriptedObjects() noexcept {
 			{ pmeta_with(static_cast<CRTP &>(*this)) {
 				for (const auto & [go, comp] : _em.getEntities<CompType>()) {
 					_.setSelf(go);
@@ -211,6 +178,5 @@ namespace kengine {
 
 	private:
 		EntityManager & _em;
-		std::vector<std::string> _directories;
 	};
 }
