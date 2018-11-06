@@ -28,23 +28,23 @@ namespace kengine {
 
 			const auto & offset = frustrum.topLeft;
 			ret.x += offset.x;
-			ret.y += offset.z;
+			ret.y -= offset.z;
 
 			return ret;
 		}
 
 		putils::Point2f getScreenCoordinates(const putils::Point3f & gamePos, const putils::Point2f & screenSize) const noexcept {
-			putils::Point2f ret(gamePos.x, gamePos.z);
+			putils::Point2f ret(gamePos.x, -gamePos.z);
 
 			const auto & offset = frustrum.topLeft;
 			ret.x -= offset.x;
-			ret.x -= offset.z;
+			ret.y += offset.z;
 
 			ret.x *= screenSize.x;
 			ret.y *= screenSize.y;
 
 			ret.x /= frustrum.size.x;
-			ret.y /= frustrum.size.y;
+			ret.y /= frustrum.size.z;
 
 			return ret;
 		}
