@@ -16,6 +16,9 @@ namespace kengine {
 
     class SystemManager : public putils::Mediator {
     public:
+		SystemManager(size_t threads = 0) : Mediator(threads) {}
+
+    public:
         void execute() noexcept {
             if (_first) {
                 _first = false;

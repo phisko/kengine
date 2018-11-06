@@ -1,12 +1,16 @@
 #pragma once
 
 #include <vector>
+#include "ThreadPool.hpp"
 #include "SystemManager.hpp"
 #include "Component.hpp"
 #include "Entity.hpp"
 
 namespace kengine {
     class EntityManager : public SystemManager {
+    public:
+		EntityManager(size_t threads = 0) : SystemManager(threads) {}
+
     public:
 		template<typename Func> // Func: void(Entity &);
         Entity & createEntity(Func && postCreate) {
@@ -48,10 +52,10 @@ namespace kengine {
 			removeEntity(e.id);
 		}
 
-		void removeEntity(size_t id) { assert("Invalid id" && id < _count);
+		void removeEntity(size_t id) {
 			const auto it = iteratorFor(id);
 			SystemManager::removeEntity(*it);
-			std::iter_swap(it, _entities.begin() + _count);
+			std::iter_swap(it, _entities.begin() + _count - 1);
 			--_count;
 		}
 
