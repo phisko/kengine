@@ -21,39 +21,15 @@ namespace kengine {
 	class Component {
 	private:
 		struct Metadata : detail::MetadataBase {
-			struct Link {
-				size_t next;
-				Comp comp;
-			};
-
-			size_t nextInit = 0;
-			std::vector<Link> array;
-			size_t next = 0;
+			std::vector<Comp> array;
 			size_t id = detail::INVALID;
 		};
 
 	public:
 		static inline Comp & get(size_t id) { auto & meta = metadata();
-			assert("Invalid component id" && id < meta.array.size());
-			return meta.array[id].comp;
-		}
-
-		template<typename ... Args>
-		static inline size_t alloc(Args && ... args) { auto & meta = metadata();
-			assert("This should never happen" && meta.next <= meta.array.size());
-			if (meta.next == meta.array.size()) {
-				meta.array.emplace_back(Metadata::Link{ ++meta.nextInit, Comp(FWD(args)...) });
-			}
-
-			const auto id = meta.next;
-			meta.next = meta.array[id].next;
-			return id;
-		}
-
-		static inline void release(size_t id) { auto & meta = metadata();
-			assert("Invalid component id" && id < meta.array.size());
-			meta.array[id].next = meta.next;
-			meta.next = id;
+			while (id >= meta.array.size())
+				meta.array.resize(meta.array.size() * 2);
+			return meta.array[id];
 		}
 
 		static inline size_t id() {
@@ -75,6 +51,7 @@ namespace kengine {
 					ret = static_cast<Metadata *>(ptr.get());
 					(*detail::components)[typeIndex] = std::move(ptr);
 					ret->id = detail::components->size() - 1;
+					ret->array.resize(64);
 
 					if constexpr (putils::is_reflectible<Comp>::value)
 						std::cout << ret->id << ' ' << Comp::get_class_name() << '\n';

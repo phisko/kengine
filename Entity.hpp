@@ -4,22 +4,13 @@
 #include "Component.hpp"
 #include "reflection/Reflectible.hpp"
 
-#ifndef KENGINE_COMPONENT_COUNT
-# define KENGINE_COMPONENT_COUNT 64
-#endif
-
-static constexpr auto Components = KENGINE_COMPONENT_COUNT;
-
 namespace kengine {
 	class Entity {
 	public:
 		using ID = size_t;
 		static constexpr auto INVALID_ID = detail::INVALID;
 
-	public:
-		Entity(size_t id = detail::INVALID) : id(id) {
-			std::fill_n(componentIds, Components, detail::INVALID);
-		}
+		Entity(size_t id = detail::INVALID) : id(id) {}
 
 		~Entity() = default;
 		Entity(const Entity &) = default;
@@ -30,26 +21,24 @@ namespace kengine {
 	public:
 		template<typename T>
 		T & get() {
-			const auto index = getIndex<T>();
-			assert("No such component" && index != detail::INVALID);
-			return Component<T>::get(componentIds[index]);
+			assert("No such component" && has<T>());
+			return Component<T>::get(id);
 		}
 
 		template<typename T>
 		const T & get() const {
-			const auto index = getIndex<T>();
-			assert("No such component" && index != detail::INVALID);
-			return Component<T>::get(componentIds[index]);
+			assert("No such component" && has<T>());
+			return Component<T>::get(id);
 		}
 
 		template<typename T>
 		bool has() const {
-			return componentIds[getIndex<T>()] != detail::INVALID;
+			return componentMask & getMask<T>();
 		}
 
 		template<typename T, typename ... Args>
 		T & attach(Args && ... args) {
-			componentIds[getIndex<T>()] = Component<T>::alloc(FWD(args)...);
+			componentMask |= getMask<T>();
 			return get<T>();
 		}
 
@@ -61,23 +50,20 @@ namespace kengine {
 
 		template<typename T>
 		void detach() {
-			const auto index = getIndex<T>();
-			assert("No such component" && index != detail::INVALID);
-			Component<T>::release(componentIds[index]);
-			componentIds[index] = detail::INVALID;
+			assert("No such component" && has<T>());
+			componentMask &= ~getMask<T>();
 		}
 
 		size_t id;
+		long long componentMask = 0;
 
 	private:
 		template<typename T>
-		size_t getIndex() const {
-			const auto index = Component<T>::id();
-			assert("You are using too many component types" && index < Components);
-			return index;
+		long long getMask() const {
+			static const auto id = Component<T>::id();
+			assert("You are using too many component types" && id < sizeof(componentMask) * 8);
+			return 1ll << id;
 		}
-
-		size_t componentIds[Components];
 
 	public:
 		pmeta_get_class_name(Entity);
