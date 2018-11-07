@@ -25,7 +25,7 @@ namespace kengine {
 
 		template<typename Ret, typename ...Args>
 		void registerEntityMember(const std::string & name, const std::function<Ret(Args...)> & func) {
-			_lua["Entity"][name] = FWD(func);
+			_lua["EntityView"][name] = FWD(func);
 		}
 
 		template<typename T>
@@ -43,7 +43,7 @@ namespace kengine {
         }
 
     public:
-		void setSelf(Entity & go) { _lua["self"] = &go; }
+		void setSelf(EntityView & go) { _lua["self"] = &go; }
 		void unsetSelf() { _lua["self"] = sol::nil; }
 
     public:

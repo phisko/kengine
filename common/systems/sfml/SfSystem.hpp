@@ -59,10 +59,10 @@ namespace kengine {
         void handleEvents() noexcept;
         void updateCameras() noexcept;
         void updateDrawables();
-        bool updateDebug(Entity & go, pse::ViewItem & item);
-        void updateObject(Entity & go, pse::ViewItem & item, const GraphicsComponent::Layer & layer, bool fixedSize);
-        void updateGUIElement(Entity & go) noexcept;
-        void updateTransform(Entity & go, pse::ViewItem & item, const kengine::TransformComponent3f & transform, const GraphicsComponent::Layer & layer, bool fixedSize) noexcept;
+        bool updateDebug(EntityView & go, pse::ViewItem & item);
+        void updateObject(EntityView & go, pse::ViewItem & item, const GraphicsComponent::Layer & layer, bool fixedSize);
+        void updateGUIElement(EntityView & go) noexcept;
+        void updateTransform(EntityView & go, pse::ViewItem & item, const kengine::TransformComponent3f & transform, const GraphicsComponent::Layer & layer, bool fixedSize) noexcept;
 
 	private:
 		putils::json _config;

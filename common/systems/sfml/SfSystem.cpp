@@ -154,10 +154,9 @@ namespace kengine {
 	void SfSystem::updateCameras() noexcept {
 		const auto cameras = _em.getEntities<CameraComponent3f, TransformComponent3f>();
 
-		if (cameras.count == 0)
+		for (const auto & [e, cam, transform] : cameras) {
 			_engine.removeView("default");
 
-		for (const auto & [e, cam, transform] : cameras) {
 			const auto name = putils::toString(e.id);
 			auto & view = _engine.getView(name);
 
@@ -185,7 +184,7 @@ namespace kengine {
 	}
 
 	void SfSystem::updateDrawables() {
-		std::vector<Entity *> toDetach;
+		std::vector<Entity::ID> toDetach;
 
 		for (const auto & [e, comp] : _em.getEntities<SfComponent>()) {
 			std::vector<const SfComponent::Layer *> toRemove;
@@ -224,17 +223,18 @@ namespace kengine {
 			}
 
 			if (items.empty())
-				toDetach.push_back(&e);
+				toDetach.push_back(e.id);
 		}
 
-		for (const auto e : toDetach) {
-			for (const auto & layer : e->get<SfComponent>().viewItems)
+		for (const auto id : toDetach) {
+			auto & e = _em.getEntity(id);
+			for (const auto & layer : e.get<SfComponent>().viewItems)
 				_engine.removeItem(*layer.item);
-			e->detach<SfComponent>();
+			e.detach<SfComponent>();
 		}
 	}
 
-	bool SfSystem::updateDebug(Entity & e, pse::ViewItem & item) {
+	bool SfSystem::updateDebug(EntityView & e, pse::ViewItem & item) {
 		if (!e.has<DebugGraphicsComponent>())
 			return false;
 
@@ -285,7 +285,7 @@ namespace kengine {
 		};
 	}
 
-	void SfSystem::updateObject(Entity & e, pse::ViewItem & item, const GraphicsComponent::Layer & layer, bool fixedSize) {
+	void SfSystem::updateObject(EntityView & e, pse::ViewItem & item, const GraphicsComponent::Layer & layer, bool fixedSize) {
 		const auto & transform = e.get<kengine::TransformComponent3f>();
 		updateTransform(e, item, transform, layer, fixedSize);
 
@@ -314,7 +314,7 @@ namespace kengine {
 			sprite.unrepeat();
 	}
 
-	void SfSystem::updateGUIElement(Entity & e) noexcept {
+	void SfSystem::updateGUIElement(EntityView & e) noexcept {
 		const auto & gui = e.get<kengine::GUIComponent>();
 		auto & element = _guiElements[e.id];
 		auto & win = _engine.getGui();
@@ -358,7 +358,7 @@ namespace kengine {
 		}
 	}
 
-	void SfSystem::updateTransform(Entity & e, pse::ViewItem & item, const TransformComponent3f & transform, const GraphicsComponent::Layer & layer, bool fixedSize) noexcept {
+	void SfSystem::updateTransform(EntityView & e, pse::ViewItem & item, const TransformComponent3f & transform, const GraphicsComponent::Layer & layer, bool fixedSize) noexcept {
 		const auto center = transform.boundingBox.getCenter();
 		const auto size = getLayerSize(transform.boundingBox.size, layer.boundingBox.size);
 		const putils::Point3f endPos{

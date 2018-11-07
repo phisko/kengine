@@ -1,5 +1,7 @@
 #pragma once
 
+#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 #include "ThreadPool.hpp"
 #include "SystemManager.hpp"
@@ -48,18 +50,37 @@ namespace kengine {
 		}
 
     public:
-		void removeEntity(const Entity & e) {
+		void removeEntity(const EntityView & e) {
 			removeEntity(e.id);
 		}
 
 		void removeEntity(size_t id) {
 			const auto it = iteratorFor(id);
 			SystemManager::removeEntity(*it);
-			std::iter_swap(it, _entities.begin() + _count - 1);
+			for (auto & collection : _entitiesByType) {
+				if (collection.mask == it->componentMask) {
+					const auto size = collection.entities.size();
+					if (size > 1) {
+						const auto tmp = std::find_if(collection.entities.begin(), collection.entities.end(),
+							[id](EntityView v) { return v.id == id; });
+						std::iter_swap(tmp, collection.entities.begin() + size - 1);
+					}
+					collection.entities.pop_back();
+					break;
+				}
+			}
+			it->componentMask = 0;
+			if (_count > 1)
+				std::iter_swap(it, _entities.begin() + _count - 1);
 			--_count;
 		}
 
 	private:
+		struct EntityType {
+			Entity::Mask mask;
+			std::vector<EntityView> entities;
+		};
+
 		struct EntityCollection {
 			struct EntityIterator {
 				EntityIterator & operator++() {
@@ -102,64 +123,70 @@ namespace kengine {
 		struct ComponentCollection {
 			struct ComponentIterator {
 				ComponentIterator & operator++() {
-					++index;
+					++currentEntity;
+					if (currentEntity < entitiesByType[currentType].entities.size())
+						return *this;
 
-					while (index < maxSize) {
+					currentEntity = 0;
+					for (++currentType; currentType < entitiesByType.size(); ++currentType) {
+						if (entitiesByType[currentType].entities.empty())
+							continue;
+
 						bool good = true;
 						pmeta_for_each(Comps, [&](auto && type) {
 							using CompType = pmeta_wrapped(type);
-							if (!vec[index].has<CompType>())
+							if (!(entitiesByType[currentType].mask & (1ll << Component<CompType>::id())))
 								good = false;
 						});
 						if (good)
 							break;
-						++index;
 					}
 
 					return *this;
 				}
 
-				bool operator!=(const ComponentIterator & rhs) const { return index != rhs.index; }
+				bool operator!=(const ComponentIterator & rhs) const { return currentType != rhs.currentType; }
 
-				std::tuple<Entity &, Comps &...> operator*() const {
-					auto & e = vec[index];
+				std::tuple<EntityView &, Comps &...> operator*() const {
+					auto & e = entitiesByType[currentType].entities[currentEntity];
 					return std::make_tuple(std::ref(e), std::ref(e.get<Comps>())...);
 				}
 
-				std::vector<Entity> & vec;
-				size_t maxSize;
-				size_t index;
+				std::vector<EntityType> & entitiesByType;
+				size_t currentType;
+				size_t currentEntity;
 			};
 
 			auto begin() const {
 				size_t i = 0;
-				while (i < count) {
+				for (; i < entitiesByType.size(); ++i) {
+					if (entitiesByType[i].entities.empty())
+						continue;
+
 					bool good = true;
 					pmeta_for_each(Comps, [&](auto && type) {
 						using CompType = pmeta_wrapped(type);
-						if (!vec[i].has<CompType>())
+						if (!(entitiesByType[i].mask & (1ll << Component<CompType>::id())))
 							good = false;
 					});
 					if (good)
 						break;
-					++i;
 				}
 				
-				return ComponentIterator{ vec, count, i };
+				return ComponentIterator{ entitiesByType, i, 0 };
 			}
 
 			auto end() const {
-				return ComponentIterator{ vec, count, count };
+				return ComponentIterator{ entitiesByType, entitiesByType.size(), 0 };
 			}
 
-			std::vector<Entity> & vec;
-			size_t count;
+			std::vector<EntityType> & entitiesByType;
 		};
 
     public:
 		template<typename ... Comps>
 		auto getEntities() {
-			return ComponentCollection<Comps...>{ _entities, _count };
+			return ComponentCollection<Comps...>{ _entitiesByType };
 		}
 
     public:
@@ -174,12 +201,45 @@ namespace kengine {
 	private:
 		Entity & alloc() {
 			if (_count == _entities.size())
-				_entities.emplace_back(Entity{ ++_nextId });
+				_entities.emplace_back(Entity{ ++_nextId, this });
 			return _entities[_count++];
+		}
+
+    private:
+		friend class Entity;
+		void updateMask(Entity e, Entity::Mask oldMask) {
+			int done = 0;
+			if (oldMask == 0ll) // Will not have to remove
+				++done;
+
+			for (auto & collection : _entitiesByType) {
+				if (collection.mask == oldMask) {
+					const auto size = collection.entities.size();
+					if (size > 1) {
+						const auto it = std::find_if(collection.entities.begin(), collection.entities.end(),
+							[id = e.id](EntityView other) { return other.id == id; });
+						std::iter_swap(it, collection.entities.begin() + size - 1);
+					}
+					collection.entities.pop_back();
+					++done;
+				}
+
+				if (collection.mask == e.componentMask) {
+					collection.entities.emplace_back(e);
+					++done;
+				}
+
+				if (done == 2)
+					break;
+			}
+
+			if (done == 1)
+				_entitiesByType.emplace_back(EntityType{ e.componentMask, { e }});
 		}
 
 	private:
 		std::vector<Entity> _entities;
+		std::vector<EntityType> _entitiesByType;
 		size_t _count = 0;
 		size_t _nextId = 0;
 
