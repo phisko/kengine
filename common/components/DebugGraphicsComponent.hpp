@@ -1,6 +1,5 @@
 #pragma once
 
-#include "EntityManager.hpp"
 #include "reflection/Reflectible.hpp"
 
 namespace kengine {
@@ -19,8 +18,6 @@ namespace kengine {
 
 		DebugGraphicsComponent(const putils::Rect3f & box, unsigned int color)
 			: box(box), color(color), debugType(Box) {}
-
-		const std::string type = pmeta_nameof(DebugGraphicsComponent);
 
 		std::string text;
 		unsigned int textSize;
@@ -44,7 +41,6 @@ namespace kengine {
 
 		pmeta_get_class_name(DebugGraphicsComponent);
 		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&DebugGraphicsComponent::type),
 			pmeta_reflectible_attribute(&DebugGraphicsComponent::text),
 			pmeta_reflectible_attribute(&DebugGraphicsComponent::startPos),
 			pmeta_reflectible_attribute(&DebugGraphicsComponent::endPos),

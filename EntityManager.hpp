@@ -57,10 +57,15 @@ namespace kengine {
 		void removeEntity(size_t id) {
 			const auto it = iteratorFor(id);
 			SystemManager::removeEntity(*it);
+
+			for (const auto & [type, meta] : _components)
+				meta->swap(id, _count - 1);
+
+			auto & lastMask = _entities[_count - 1].componentMask;
 			for (auto & collection : _entitiesByType) {
 				if (collection.mask == it->componentMask) {
 					const auto size = collection.entities.size();
-					if (size > 1) {
+					if (size > 1 && lastMask != it->componentMask) {
 						const auto tmp = std::find_if(collection.entities.begin(), collection.entities.end(),
 							[id](EntityView v) { return v.id == id; });
 						std::iter_swap(tmp, collection.entities.begin() + size - 1);
@@ -69,9 +74,11 @@ namespace kengine {
 					break;
 				}
 			}
-			it->componentMask = 0;
+
 			if (_count > 1)
-				std::iter_swap(it, _entities.begin() + _count - 1);
+				it->componentMask = lastMask;
+			lastMask = 0;
+
 			--_count;
 		}
 
@@ -135,7 +142,7 @@ namespace kengine {
 						bool good = true;
 						pmeta_for_each(Comps, [&](auto && type) {
 							using CompType = pmeta_wrapped(type);
-							if (!(entitiesByType[currentType].mask & (1ll << Component<CompType>::id())))
+							if (!entitiesByType[currentType].mask[Component<CompType>::id()])
 								good = false;
 						});
 						if (good)
@@ -166,7 +173,7 @@ namespace kengine {
 					bool good = true;
 					pmeta_for_each(Comps, [&](auto && type) {
 						using CompType = pmeta_wrapped(type);
-						if (!(entitiesByType[i].mask & (1ll << Component<CompType>::id())))
+						if (!entitiesByType[i].mask[Component<CompType>::id()])
 							good = false;
 					});
 					if (good)
@@ -201,7 +208,7 @@ namespace kengine {
 	private:
 		Entity & alloc() {
 			if (_count == _entities.size())
-				_entities.emplace_back(Entity{ ++_nextId, this });
+				_entities.emplace_back(Entity{ _entities.size(), this });
 			return _entities[_count++];
 		}
 
@@ -241,7 +248,6 @@ namespace kengine {
 		std::vector<Entity> _entities;
 		std::vector<EntityType> _entitiesByType;
 		size_t _count = 0;
-		size_t _nextId = 0;
 
 	private:
 		detail::GlobalCompMap _components;

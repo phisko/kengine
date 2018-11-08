@@ -1,8 +1,13 @@
 #pragma once
 
+#include <bitset>
 #include <cstddef>
 #include "Component.hpp"
 #include "reflection/Reflectible.hpp"
+
+#ifndef KENGINE_COMPONENT_COUNT
+# define KENGINE_COMPONENT_COUNT 64
+#endif
 
 namespace kengine {
 	class EntityManager;
@@ -10,7 +15,7 @@ namespace kengine {
 	class EntityView {
 	public:
 		using ID = size_t;
-		using Mask = long long;
+		using Mask = std::bitset<KENGINE_COMPONENT_COUNT>;
 		static constexpr auto INVALID_ID = detail::INVALID;
 		static constexpr auto MAX_COMPONENTS = sizeof(Mask) * 8;
 
@@ -34,7 +39,7 @@ namespace kengine {
 
 		template<typename T>
 		bool has() const {
-			return componentMask & getMask<T>();
+			return componentMask[getId<T>()];
 		}
 
 		ID id;
@@ -42,10 +47,10 @@ namespace kengine {
 
 	protected:
 		template<typename T>
-		Mask getMask() const {
+		size_t getId() const {
 			static const auto id = Component<T>::id();
 			assert("You are using too many component types" && id < MAX_COMPONENTS);
-			return 1ll << id;
+			return id;
 		}
 
 	public:
@@ -91,7 +96,7 @@ namespace kengine {
 template<typename T>
 T & kengine::Entity::attach() {
 	const auto oldMask = componentMask ;
-	componentMask |= getMask<T>();
+	componentMask.set(getId<T>(), true);
 	manager->updateMask(*this, oldMask);
 	return get<T>();
 }
@@ -100,7 +105,7 @@ template<typename T>
 void kengine::Entity::detach() {
 	assert("No such component" && has<T>());
 	const auto oldMask = componentMask;
-	componentMask &= ~getMask<T>();
+	componentMask.set(getId<T>(), false);
 	manager->updateMask(*this, oldMask);
 }
 
