@@ -78,7 +78,9 @@ namespace kengine {
 		_screenSize(parseSize("windowSize", { 1280, 720 })),
 		_tileSize(parseSize("tileSize", { 1, 1 })),
 		_fullScreen(parseBool("fullScreen", false)),
-		_engine((size_t)_screenSize.x, (size_t)_screenSize.y, "Kengine", _fullScreen ? sf::Style::Fullscreen : sf::Style::Default),
+		_engine((size_t)_screenSize.x, (size_t)_screenSize.y,
+			_config.find("name") != _config.end() ? _config["name"].get<std::string>() : "Kengine",
+			_fullScreen ? sf::Style::Fullscreen : sf::Style::Default),
 		_em(em) {
 		for (auto & e : _em.getEntities())
 			handle(kengine::packets::RegisterEntity{ e });
@@ -234,7 +236,7 @@ namespace kengine {
 		}
 	}
 
-	bool SfSystem::updateDebug(EntityView & e, pse::ViewItem & item) {
+	bool SfSystem::updateDebug(EntityView e, pse::ViewItem & item) {
 		if (!e.has<DebugGraphicsComponent>())
 			return false;
 
@@ -285,9 +287,9 @@ namespace kengine {
 		};
 	}
 
-	void SfSystem::updateObject(EntityView & e, pse::ViewItem & item, const GraphicsComponent::Layer & layer, bool fixedSize) {
+	void SfSystem::updateObject(EntityView e, pse::ViewItem & item, const GraphicsComponent::Layer & layer, bool fixedSize) {
 		const auto & transform = e.get<kengine::TransformComponent3f>();
-		updateTransform(e, item, transform, layer, fixedSize);
+		updateTransform(item, transform, layer, fixedSize);
 
 		const auto & graphics = e.get<kengine::GraphicsComponent>();
 		const auto & appearance = layer.appearance;
@@ -314,7 +316,7 @@ namespace kengine {
 			sprite.unrepeat();
 	}
 
-	void SfSystem::updateGUIElement(EntityView & e) noexcept {
+	void SfSystem::updateGUIElement(EntityView e) noexcept {
 		const auto & gui = e.get<kengine::GUIComponent>();
 		auto & element = _guiElements[e.id];
 		auto & win = _engine.getGui();
@@ -358,7 +360,7 @@ namespace kengine {
 		}
 	}
 
-	void SfSystem::updateTransform(EntityView & e, pse::ViewItem & item, const TransformComponent3f & transform, const GraphicsComponent::Layer & layer, bool fixedSize) noexcept {
+	void SfSystem::updateTransform(pse::ViewItem & item, const TransformComponent3f & transform, const GraphicsComponent::Layer & layer, bool fixedSize) noexcept {
 		const auto center = transform.boundingBox.getCenter();
 		const auto size = getLayerSize(transform.boundingBox.size, layer.boundingBox.size);
 		const putils::Point3f endPos{

@@ -19,7 +19,7 @@ namespace kengine {
 		static constexpr auto INVALID_ID = detail::INVALID;
 		static constexpr auto MAX_COMPONENTS = sizeof(Mask) * 8;
 
-		EntityView(size_t id) : id(id) {}
+		EntityView(size_t id, Mask componentMask = 0) : id(id), componentMask(componentMask) {}
 
 		~EntityView() = default;
 		EntityView(const EntityView &) = default;

@@ -14,7 +14,6 @@ namespace kengine {
 
 		struct MetadataBase {
 			virtual ~MetadataBase() = default;
-			virtual void swap(size_t index, size_t count) = 0;
 		};
 		using GlobalCompMap = std::unordered_map<pmeta::type_index, std::unique_ptr<MetadataBase>>;
 		static inline GlobalCompMap * components = nullptr;
@@ -26,10 +25,6 @@ namespace kengine {
 		struct Metadata : detail::MetadataBase {
 			std::vector<Comp> array;
 			size_t id = detail::INVALID;
-
-			void swap(size_t first, size_t second) final {
-				std::iter_swap(array.begin() + first, array.begin() + second);
-			}
 		};
 
 	public:

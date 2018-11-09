@@ -1,7 +1,7 @@
 #pragma once
 
+#include <execution>
 #include <unordered_map>
-#include <unordered_set>
 #include <vector>
 #include "ThreadPool.hpp"
 #include "SystemManager.hpp"
@@ -28,24 +28,24 @@ namespace kengine {
 		}
 
     private:
-		auto iteratorFor(size_t id) const {
-			const auto it = std::find_if(_entities.begin(), _entities.end(), [id](const auto & e) { return e.id == id; });
+		auto iteratorFor(Entity::ID id) const {
+			const auto it = std::find_if(std::execution::par_unseq, _entities.begin(), _entities.end(), [id](const auto & e) { return e.id == id; });
 			assert("No such entity" && it != _entities.end());
 			return it;
 		}
 
-		auto iteratorFor(size_t id) {
-			const auto it = std::find_if(_entities.begin(), _entities.end(), [id](const auto & e) { return e.id == id; });
+		auto iteratorFor(Entity::ID id) {
+			const auto it = std::find_if(std::execution::par_unseq, _entities.begin(), _entities.end(), [id](const auto & e) { return e.id == id; });
 			assert("No such entity" && it != _entities.end());
 			return it;
 		}
 
 	public:
-		Entity & getEntity(size_t id) {
+		Entity & getEntity(Entity::ID id) {
 			return *iteratorFor(id);
 		}
 
-		const Entity & getEntity(size_t id) const {
+		const Entity & getEntity(Entity::ID id) const {
 			 return *iteratorFor(id);
 		}
 
@@ -54,38 +54,51 @@ namespace kengine {
 			removeEntity(e.id);
 		}
 
-		void removeEntity(size_t id) {
+		void removeEntity(Entity::ID id) {
 			const auto it = iteratorFor(id);
 			SystemManager::removeEntity(*it);
 
-			for (const auto & [type, meta] : _components)
-				meta->swap(id, _count - 1);
-
-			auto & lastMask = _entities[_count - 1].componentMask;
-			for (auto & collection : _entitiesByType) {
+			for (auto & collection : _archetypes) {
 				if (collection.mask == it->componentMask) {
-					const auto size = collection.entities.size();
-					if (size > 1 && lastMask != it->componentMask) {
-						const auto tmp = std::find_if(collection.entities.begin(), collection.entities.end(),
-							[id](EntityView v) { return v.id == id; });
-						std::iter_swap(tmp, collection.entities.begin() + size - 1);
+					const auto tmp = std::find(std::execution::par_unseq, collection.entities.begin(), collection.entities.end(), id);
+					if (collection.entities.size() > 1) {
+						std::swap(*tmp, collection.entities.back());
+						collection.sorted = false;
 					}
 					collection.entities.pop_back();
 					break;
 				}
 			}
 
-			if (_count > 1)
-				it->componentMask = lastMask;
-			lastMask = 0;
-
+			it->componentMask = 0;
+			std::swap(*it, _entities.back());
 			--_count;
 		}
 
 	private:
-		struct EntityType {
+		struct Archetype {
 			Entity::Mask mask;
-			std::vector<EntityView> entities;
+			std::vector<Entity::ID> entities;
+			bool sorted = true;
+
+			template<typename ... Comps>
+			bool matches() {
+				if (entities.empty())
+					return false;
+
+				if (!sorted) {
+					std::sort(std::execution::par_unseq, entities.begin(), entities.end());
+					sorted = true;
+				}
+
+				bool good = true;
+				pmeta_for_each(Comps, [&](auto && type) {
+					using CompType = pmeta_wrapped(type);
+					if (!mask[Component<CompType>::id()])
+						good = false;
+				});
+				return good;
+			}
 		};
 
 		struct EntityCollection {
@@ -100,23 +113,23 @@ namespace kengine {
 				}
 
 				Entity & operator*() const {
-					return vec[index];
+					return entities[index];
 				}
 
-				std::vector<Entity> & vec;
+				std::vector<Entity> & entities;
 				size_t maxSize;
 				size_t index = 0;
 			};
 
 			auto begin() const {
-				return EntityIterator{ vec, count, 0 };
+				return EntityIterator{ entities, count, 0 };
 			}
 
 			auto end() const {
-				return EntityIterator{ vec, count, count };
+				return EntityIterator{ entities, count, count };
 			}
 
-			std::vector<Entity> & vec;
+			std::vector<Entity> & entities;
 			size_t count;
 		};
 
@@ -129,71 +142,59 @@ namespace kengine {
 		template<typename ... Comps>
 		struct ComponentCollection {
 			struct ComponentIterator {
+				using iterator_category = std::forward_iterator_tag;
+				using value_type = std::tuple<EntityView, Comps & ...>;
+				using reference = const value_type &;
+				using pointer = const value_type *;
+				using difference_type = size_t;
+
 				ComponentIterator & operator++() {
 					++currentEntity;
-					if (currentEntity < entitiesByType[currentType].entities.size())
+					if (currentEntity < (*archetypes)[currentType].entities.size())
 						return *this;
 
 					currentEntity = 0;
-					for (++currentType; currentType < entitiesByType.size(); ++currentType) {
-						if (entitiesByType[currentType].entities.empty())
-							continue;
-
-						bool good = true;
-						pmeta_for_each(Comps, [&](auto && type) {
-							using CompType = pmeta_wrapped(type);
-							if (!entitiesByType[currentType].mask[Component<CompType>::id()])
-								good = false;
-						});
-						if (good)
+					for (++currentType; currentType < archetypes->size(); ++currentType)
+						if ((*archetypes)[currentType].matches<Comps...>())
 							break;
-					}
 
 					return *this;
 				}
 
-				bool operator!=(const ComponentIterator & rhs) const { return currentType != rhs.currentType; }
+				bool operator==(const ComponentIterator & rhs) const { return currentType == rhs.currentType && currentEntity == rhs.currentEntity; }
+				bool operator!=(const ComponentIterator & rhs) const { return !(*this == rhs); }
 
-				std::tuple<EntityView &, Comps &...> operator*() const {
-					auto & e = entitiesByType[currentType].entities[currentEntity];
-					return std::make_tuple(std::ref(e), std::ref(e.get<Comps>())...);
+				std::tuple<EntityView, Comps &...> operator*() const {
+					auto & archetype = (*archetypes)[currentType];
+					EntityView e(archetype.entities[currentEntity], archetype.mask);
+					return std::make_tuple(e, std::ref(e.get<Comps>())...);
 				}
 
-				std::vector<EntityType> & entitiesByType;
+				std::vector<Archetype> * archetypes;
 				size_t currentType;
 				size_t currentEntity;
 			};
 
 			auto begin() const {
 				size_t i = 0;
-				for (; i < entitiesByType.size(); ++i) {
-					if (entitiesByType[i].entities.empty())
-						continue;
-
-					bool good = true;
-					pmeta_for_each(Comps, [&](auto && type) {
-						using CompType = pmeta_wrapped(type);
-						if (!entitiesByType[i].mask[Component<CompType>::id()])
-							good = false;
-					});
-					if (good)
+				for (; i < archetypes.size(); ++i)
+					if (archetypes[i].matches<Comps...>())
 						break;
-				}
 				
-				return ComponentIterator{ entitiesByType, i, 0 };
+				return ComponentIterator{ &archetypes, i, 0 };
 			}
 
 			auto end() const {
-				return ComponentIterator{ entitiesByType, entitiesByType.size(), 0 };
+				return ComponentIterator{ &archetypes, archetypes.size(), 0 };
 			}
 
-			std::vector<EntityType> & entitiesByType;
+			std::vector<Archetype> & archetypes;
 		};
 
     public:
 		template<typename ... Comps>
 		auto getEntities() {
-			return ComponentCollection<Comps...>{ _entitiesByType };
+			return ComponentCollection<Comps...>{ _archetypes };
 		}
 
     public:
@@ -219,20 +220,21 @@ namespace kengine {
 			if (oldMask == 0ll) // Will not have to remove
 				++done;
 
-			for (auto & collection : _entitiesByType) {
+			for (auto & collection : _archetypes) {
 				if (collection.mask == oldMask) {
 					const auto size = collection.entities.size();
 					if (size > 1) {
-						const auto it = std::find_if(collection.entities.begin(), collection.entities.end(),
-							[id = e.id](EntityView other) { return other.id == id; });
+						const auto it = std::find(std::execution::par_unseq, collection.entities.begin(), collection.entities.end(), e.id);
 						std::iter_swap(it, collection.entities.begin() + size - 1);
 					}
 					collection.entities.pop_back();
+					collection.sorted = false;
 					++done;
 				}
 
 				if (collection.mask == e.componentMask) {
-					collection.entities.emplace_back(e);
+					collection.entities.emplace_back(e.id);
+					collection.sorted = false;
 					++done;
 				}
 
@@ -241,12 +243,12 @@ namespace kengine {
 			}
 
 			if (done == 1)
-				_entitiesByType.emplace_back(EntityType{ e.componentMask, { e }});
+				_archetypes.emplace_back(Archetype{ e.componentMask, { e.id }});
 		}
 
 	private:
 		std::vector<Entity> _entities;
-		std::vector<EntityType> _entitiesByType;
+		std::vector<Archetype> _archetypes;
 		size_t _count = 0;
 
 	private:

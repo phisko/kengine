@@ -43,7 +43,7 @@ namespace kengine {
         }
 
     public:
-		void setSelf(EntityView & go) { _lua["self"] = &go; }
+		void setSelf(EntityView go) { _lua["self"] = go; }
 		void unsetSelf() { _lua["self"] = sol::nil; }
 
     public:
