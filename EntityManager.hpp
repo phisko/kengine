@@ -15,38 +15,25 @@ namespace kengine {
 
     public:
 		template<typename Func> // Func: void(Entity &);
-        Entity & createEntity(Func && postCreate) {
-			auto & e = alloc();
+        Entity createEntity(Func && postCreate) {
+			auto e = alloc();
 			postCreate(e);
 			SystemManager::registerEntity(e);
 			return e;
         }
 
 		template<typename Func>
-		Entity & operator+=(Func && postCreate) {
+		Entity operator+=(Func && postCreate) {
 			return createEntity(FWD(postCreate));
 		}
 
-    private:
-		auto iteratorFor(Entity::ID id) const {
-			const auto it = std::find_if(std::execution::par_unseq, _entities.begin(), _entities.end(), [id](const auto & e) { return e.id == id; });
-			assert("No such entity" && it != _entities.end());
-			return it;
-		}
-
-		auto iteratorFor(Entity::ID id) {
-			const auto it = std::find_if(std::execution::par_unseq, _entities.begin(), _entities.end(), [id](const auto & e) { return e.id == id; });
-			assert("No such entity" && it != _entities.end());
-			return it;
-		}
-
 	public:
-		Entity & getEntity(Entity::ID id) {
-			return *iteratorFor(id);
+		Entity getEntity(Entity::ID id) {
+			return Entity(id, _entities[id], this);
 		}
 
-		const Entity & getEntity(Entity::ID id) const {
-			 return *iteratorFor(id);
+		EntityView getEntity(Entity::ID id) const {
+			return EntityView(id, _entities[id]);
 		}
 
     public:
@@ -55,11 +42,12 @@ namespace kengine {
 		}
 
 		void removeEntity(Entity::ID id) {
-			const auto it = iteratorFor(id);
-			SystemManager::removeEntity(*it);
+			auto & mask = _entities[id];
+
+			SystemManager::removeEntity(EntityView(id, mask));
 
 			for (auto & collection : _archetypes) {
-				if (collection.mask == it->componentMask) {
+				if (collection.mask == mask) {
 					const auto tmp = std::find(std::execution::par_unseq, collection.entities.begin(), collection.entities.end(), id);
 					if (collection.entities.size() > 1) {
 						std::swap(*tmp, collection.entities.back());
@@ -70,9 +58,10 @@ namespace kengine {
 				}
 			}
 
-			it->componentMask = 0;
-			std::swap(*it, _entities.back());
-			--_count;
+			mask = 0;
+
+			_toReuse.emplace_back(id);
+			_toReuseSorted = false;
 		}
 
 	private:
@@ -94,7 +83,7 @@ namespace kengine {
 				bool good = true;
 				pmeta_for_each(Comps, [&](auto && type) {
 					using CompType = pmeta_wrapped(type);
-					if (!mask[Component<CompType>::id()])
+					if (!mask.test(Component<CompType>::id()))
 						good = false;
 				});
 				return good;
@@ -105,6 +94,8 @@ namespace kengine {
 			struct EntityIterator {
 				EntityIterator & operator++() {
 					++index;
+					while (index < entities.size() && entities[index] == 0)
+						++index;
 					return *this;
 				}
 
@@ -112,30 +103,33 @@ namespace kengine {
 					return index != rhs.index;
 				}
 
-				Entity & operator*() const {
-					return entities[index];
+				Entity operator*() const {
+					return Entity(index, entities[index], em);
 				}
 
-				std::vector<Entity> & entities;
-				size_t maxSize;
-				size_t index = 0;
+				const std::vector<Entity::Mask> & entities;
+				size_t index;
+				EntityManager * em;
 			};
 
 			auto begin() const {
-				return EntityIterator{ entities, count, 0 };
+				size_t i = 0;
+				while (i < entities.size() && entities[i] == 0)
+					++i;
+				return EntityIterator{ entities, i, &em };
 			}
 
 			auto end() const {
-				return EntityIterator{ entities, count, count };
+				return EntityIterator{ entities, entities.size(), &em };
 			}
 
-			std::vector<Entity> & entities;
-			size_t count;
+			const std::vector<Entity::Mask> & entities;
+			EntityManager & em;
 		};
 
 	public:
 		auto getEntities() {
-			return EntityCollection{ _entities, _count };
+			return EntityCollection{ _entities, *this };
 		}
 
 	private:
@@ -207,24 +201,37 @@ namespace kengine {
 		}
 
 	private:
-		Entity & alloc() {
-			if (_count == _entities.size())
-				_entities.emplace_back(Entity{ _entities.size(), this });
-			return _entities[_count++];
+		Entity alloc() {
+			if (_toReuse.empty()) {
+				const auto id = _entities.size();
+				_entities.emplace_back(0);
+				return Entity(id, 0, this);
+			}
+
+			if (!_toReuseSorted) {
+				std::sort(std::execution::par_unseq, _toReuse.begin(), _toReuse.end(), std::greater<Entity::ID>());
+				_toReuseSorted = true;
+			}
+
+			const auto id = _toReuse.back();
+			_toReuse.pop_back();
+			return Entity(id, 0, this);
 		}
 
     private:
 		friend class Entity;
-		void updateMask(Entity e, Entity::Mask oldMask) {
+		void updateMask(Entity::ID id, Entity::Mask newMask) {
+			const auto oldMask = _entities[id];
+
 			int done = 0;
-			if (oldMask == 0ll) // Will not have to remove
+			if (oldMask == 0) // Will not have to remove
 				++done;
 
 			for (auto & collection : _archetypes) {
 				if (collection.mask == oldMask) {
 					const auto size = collection.entities.size();
 					if (size > 1) {
-						const auto it = std::find(std::execution::par_unseq, collection.entities.begin(), collection.entities.end(), e.id);
+						const auto it = std::find(std::execution::par_unseq, collection.entities.begin(), collection.entities.end(), id);
 						std::iter_swap(it, collection.entities.begin() + size - 1);
 					}
 					collection.entities.pop_back();
@@ -232,8 +239,8 @@ namespace kengine {
 					++done;
 				}
 
-				if (collection.mask == e.componentMask) {
-					collection.entities.emplace_back(e.id);
+				if (collection.mask == newMask) {
+					collection.entities.emplace_back(id);
 					collection.sorted = false;
 					++done;
 				}
@@ -243,13 +250,16 @@ namespace kengine {
 			}
 
 			if (done == 1)
-				_archetypes.emplace_back(Archetype{ e.componentMask, { e.id }});
+				_archetypes.emplace_back(Archetype{ newMask, { id }});
+
+			_entities[id] = newMask;
 		}
 
 	private:
-		std::vector<Entity> _entities;
+		std::vector<Entity::Mask> _entities;
 		std::vector<Archetype> _archetypes;
-		size_t _count = 0;
+		std::vector<Entity::ID> _toReuse;
+		bool _toReuseSorted = true;
 
 	private:
 		detail::GlobalCompMap _components;

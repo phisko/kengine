@@ -1,11 +1,9 @@
 #pragma once
 
-namespace kengine {
-	class Entity;
+#include "Entity.hpp"
 
-    namespace packets {
-        struct RemoveEntity {
-            Entity & e;
-        };
-    }
+namespace kengine::packets {
+	struct RemoveEntity {
+		EntityView e;
+	};
 }

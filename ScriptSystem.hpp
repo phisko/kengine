@@ -15,9 +15,9 @@ namespace kengine {
 			auto & _ = static_cast<CRTP &>(*this);
 
 			_.registerFunction("createEntity",
-				std::function<Entity &(const std::function<void(Entity &)> &)>(
+				std::function<Entity(const std::function<void(Entity &)> &)>(
 					[this](const std::function<void(Entity &)> & f) {
-						return std::ref(_em.createEntity(FWD(f)));
+						return _em.createEntity(FWD(f));
 					}
 				)
 			);
@@ -34,8 +34,8 @@ namespace kengine {
 			);
 
 			_.registerFunction("getEntity",
-				std::function<Entity &(Entity::ID id)>(
-					[this](Entity::ID id) { return std::ref(_em.getEntity(id)); }
+				std::function<Entity(Entity::ID id)>(
+					[this](Entity::ID id) { return _em.getEntity(id); }
 				)
 			);
 

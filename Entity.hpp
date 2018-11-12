@@ -19,7 +19,7 @@ namespace kengine {
 		static constexpr auto INVALID_ID = detail::INVALID;
 		static constexpr auto MAX_COMPONENTS = sizeof(Mask) * 8;
 
-		EntityView(size_t id, Mask componentMask = 0) : id(id), componentMask(componentMask) {}
+		EntityView(ID id, Mask componentMask) : id(id), componentMask(componentMask) {}
 
 		~EntityView() = default;
 		EntityView(const EntityView &) = default;
@@ -39,7 +39,7 @@ namespace kengine {
 
 		template<typename T>
 		bool has() const {
-			return componentMask[getId<T>()];
+			return componentMask.test(getId<T>());
 		}
 
 		ID id;
@@ -65,7 +65,7 @@ namespace kengine {
 
 	class Entity : public EntityView {
 	public:
-		Entity(size_t id = detail::INVALID, EntityManager * manager = nullptr) : EntityView(id), manager(manager) {}
+		Entity(ID id = detail::INVALID, Mask componentMask = 0, EntityManager * manager = nullptr) : EntityView(id, componentMask), manager(manager) {}
 		~Entity() = default;
 		Entity(const Entity &) = default;
 		Entity & operator=(const Entity & rhs) {
@@ -95,17 +95,14 @@ namespace kengine {
 
 template<typename T>
 T & kengine::Entity::attach() {
-	const auto oldMask = componentMask ;
 	componentMask.set(getId<T>(), true);
-	manager->updateMask(*this, oldMask);
+	manager->updateMask(id, componentMask);
 	return get<T>();
 }
 
 template<typename T>
 void kengine::Entity::detach() {
 	assert("No such component" && has<T>());
-	const auto oldMask = componentMask;
 	componentMask.set(getId<T>(), false);
-	manager->updateMask(*this, oldMask);
+	manager->updateMask(id, componentMask);
 }
-

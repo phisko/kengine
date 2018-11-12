@@ -188,7 +188,7 @@ namespace kengine {
             send(packets::RegisterEntity{ e });
         }
 
-        void removeEntity(Entity & e) {
+        void removeEntity(EntityView e) {
             send(packets::RemoveEntity{ e });
         }
 
