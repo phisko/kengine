@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ScriptSystem.hpp"
-#include "Directory.hpp"
 #include "python.hpp"
 #include "components/PyComponent.hpp"
 

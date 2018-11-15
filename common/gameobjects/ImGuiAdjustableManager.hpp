@@ -1,5 +1,6 @@
 #pragma once
 
+#include <fstream>
 #include "EntityManager.hpp"
 #include "components/ImGuiComponent.hpp"
 #include "components/AdjustableComponent.hpp"

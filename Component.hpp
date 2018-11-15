@@ -1,12 +1,15 @@
 #pragma once
 
+#ifndef NDEBUG
 #include <iostream>
+#include "reflection/Reflectible.hpp"
+#endif
+
 #include <cstddef>
 #include <unordered_map>
 #include <memory>
 #include <vector>
 #include "meta/type.hpp"
-#include "reflection/Reflectible.hpp"
 
 namespace kengine {
 	namespace detail {
@@ -56,8 +59,10 @@ namespace kengine {
 					ret->id = detail::components->size() - 1;
 					ret->array.resize(64);
 
+#ifndef NDEBUG
 					if constexpr (putils::is_reflectible<Comp>::value)
 						std::cout << ret->id << ' ' << Comp::get_class_name() << '\n';
+#endif
 				}
 			}
 

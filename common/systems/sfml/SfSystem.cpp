@@ -1,5 +1,7 @@
 #include "SfSystem.hpp"
 
+#include <fstream>
+
 #include "EntityManager.hpp"
 #include "components/TransformComponent.hpp"
 #include "components/GUIComponent.hpp"
@@ -56,6 +58,7 @@ private:
 };
 
 
+#include "Export.hpp"
 EXPORT kengine::ISystem * getSystem(kengine::EntityManager & em) {
 	return new kengine::SfSystem(em);
 }
