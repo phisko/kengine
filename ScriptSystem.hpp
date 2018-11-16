@@ -92,7 +92,7 @@ namespace kengine {
 				)
 			);
 
-			registerType<Entity>();
+			registerType<EntityView>();
 		}
 
 	public:
@@ -151,28 +151,28 @@ namespace kengine {
 		void registerComponent() noexcept {
 			{ pmeta_with(static_cast<CRTP &>(*this)) {
 				_.registerEntityMember(putils::concat("get", T::get_class_name()),
-					std::function<T &(kengine::Entity &)>(
-						[](kengine::Entity & self) { return std::ref(self.get<T>()); }
+					std::function<T &(EntityView)>(
+						[](EntityView self) { return std::ref(self.get<T>()); }
 						)
 				);
 
 				_.registerEntityMember(putils::concat("has", T::get_class_name()),
-					std::function<bool(kengine::Entity &)>(
-						[](kengine::Entity & self) { return self.has<T>(); }
+					std::function<bool(EntityView)>(
+						[](EntityView self) { return self.has<T>(); }
 						)
 				);
 
-				_.registerEntityMember(putils::concat("attach", T::get_class_name()),
-					std::function<T &(kengine::Entity &)>(
-						[](kengine::Entity & self) { return std::ref(self.attach<T>()); }
-						)
-				);
+				// _.registerEntityMember(putils::concat("attach", T::get_class_name()),
+				// 	std::function<T &(kengine::Entity &)>(
+				// 		[](kengine::Entity & self) { return std::ref(self.attach<T>()); }
+				// 		)
+				// );
 
-				_.registerEntityMember(putils::concat("detach", T::get_class_name()),
-					std::function<void(kengine::Entity &)>(
-						[](kengine::Entity & self) { self.detach<T>(); }
-						)
-				);
+				// _.registerEntityMember(putils::concat("detach", T::get_class_name()),
+				// 	std::function<void(kengine::Entity &)>(
+				// 		[](kengine::Entity & self) { self.detach<T>(); }
+				// 		)
+				// );
 			}}
 		}
 

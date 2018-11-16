@@ -17,9 +17,8 @@ namespace kengine {
 		using ID = size_t;
 		using Mask = std::bitset<KENGINE_COMPONENT_COUNT>;
 		static constexpr auto INVALID_ID = detail::INVALID;
-		static constexpr auto MAX_COMPONENTS = sizeof(Mask) * 8;
 
-		EntityView(ID id, Mask componentMask) : id(id), componentMask(componentMask) {}
+		EntityView(ID id = INVALID_ID, Mask componentMask = 0) : id(id), componentMask(componentMask) {}
 
 		~EntityView() = default;
 		EntityView(const EntityView &) = default;
@@ -49,7 +48,7 @@ namespace kengine {
 		template<typename T>
 		size_t getId() const {
 			static const auto id = Component<T>::id();
-			assert("You are using too many component types" && id < MAX_COMPONENTS);
+			assert("You are using too many component types" && id < KENGINE_COMPONENT_COUNT);
 			return id;
 		}
 
