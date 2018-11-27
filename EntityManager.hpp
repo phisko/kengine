@@ -69,6 +69,8 @@ namespace kengine {
 			std::vector<Entity::ID> entities;
 			bool sorted = true;
 
+			Archetype(Entity::Mask mask, Entity::ID firstEntity) : mask(mask), entities({ firstEntity }) {}
+
 			template<typename ... Comps>
 			bool matches() {
 				if (entities.empty())
@@ -249,7 +251,7 @@ namespace kengine {
 			}
 
 			if (done == 1)
-				_archetypes.emplace_back(Archetype{ newMask, { id }});
+				_archetypes.emplace_back(newMask, id);
 
 			_entities[id] = newMask;
 		}
