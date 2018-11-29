@@ -33,3 +33,4 @@
 # Directories
 cmake/
 cmake-build-debug/
+*.TMP

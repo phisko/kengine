@@ -3,6 +3,7 @@ project(kengine)
 set(CMAKE_CXX_STANDARD 17)
 
 if (KENGINE_SFML)
+    set(TGUI TRUE)
     set(PUTILS_BUILD_PSE TRUE)
 endif ()
 
@@ -16,10 +17,12 @@ endif ()
 
 if(KENGINE_LUA)
     set(PUTILS_BUILD_LUA TRUE)
+	set(ADDITIONAL_LIBS ${ADDITIONAL_LIBS} lua)
 endif()
 
 if(KENGINE_PYTHON)
     set(PUTILS_BUILD_PYTHON TRUE)
+	set(ADDITIONAL_LIBS ${ADDITIONAL_LIBS} puthon)
 endif()
 
 set(PUTILS_BUILD_MEDIATOR TRUE)
@@ -37,7 +40,7 @@ elseif (WIN32)
 endif ()
 
 add_library(kengine INTERFACE)
-target_link_libraries(kengine INTERFACE mediator pluginManager)
+target_link_libraries(kengine INTERFACE mediator pluginManager ${ADDITIONAL_LIBS})
 target_include_directories(kengine INTERFACE . common)
 
 if (KENGINE_SFML)

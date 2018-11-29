@@ -1,15 +1,14 @@
 # [EntityManager](EntityManager.hpp)
 
-Manages [GameObjects](GameObject.md), [Components](Component.md) and [Systems](System.md).
+Manages [Entities](Entity.md), [Components](Component.md) and [Systems](System.md).
 
-An `EntityManager` is also a [Mediator](https://github.com/phiste/putils/blob/master/mediator/README.md), managing communication for `Systems`.
+An `EntityManager` is also a [Mediator](https://github.com/phisko/putils/blob/master/mediator/README.md), managing communication for `Systems`.
 
 ### Base classes
 
-An `EntityManager`'s role is split-up into three parts:
+An `EntityManager`'s role is split-up into two parts:
 
-* the `EntityManager` itself, which simply manages entities
-* a [ComponentManager](ComponentManager.md) base
+* the `EntityManager` itself, which manages entities and their components
 * a [SystemManager](SystemManager.md) base
 
 ### Members
@@ -17,65 +16,66 @@ An `EntityManager`'s role is split-up into three parts:
 ##### Constructor
 
 ```cpp
-EntityManager(std::unique_ptr<EntityFactory> &&factory = nullptr);
+EntityManager(size_t threads = 0);
 ```
-An `EntityManager` can be constructed with an `EntityFactory`, which will be used to `create` entities.
+An `EntityManager` can be constructed with a number of threads, which will be used for its [ThreadPool](https://github.com/phisko/putils/blob/master/ThreadPool.hpp).
 
 ##### createEntity
 
 ```cpp
-GameObject &createEntity(std::string_view type, std::string name,
-                        const std::function<void(GameObject &)> &postCreate = nullptr)
+template<typename Func> // Func: void(Entity);
+Entity &createEntity(Func && postCreate);
 ```
 
-Asks the underlying `EntityFactory` to create an entity of type `type`, with the given `name`.
+Creates a new `Entity`, calls `postCreate` on it, and registers it to the existing `Systems`.
 
-Once creation is complete, calls `postCreate` on the entity.
+##### operator+=
 
 ```cpp
-template<class GO, typename = std::enable_if_t<std::is_base_of<GameObject, GO>::value>>
-GO &createEntity(std::string const &name,
-        const std::function<void(GameObject &)> &postCreate = nullptr,
-        auto &&... params) noexcept
+template<typename Func> Func: void(Entity &)
+Entity operator+=(Func && postCreate);
 ```
 
-Creates a new entity of type `GO` by giving it `params` as constructor arguments.
+Equivalent to `createEntity`. Allows for syntax such as:
 
-Once creation is complete, calls `postCreate` on the entity.
+```cpp
+em += [](kengine::Entity & e) {
+  e += kengine::TransformComponent3f{};
+};
+```
 
 ##### removeEntity
 
 ```cpp
-void removeEntity(kengine::GameObject &go);
-void removeEntity(std::string_view name);
+void removeEntity(kengine::EntityView e);
+void removeEntity(Entity::ID id);
 ```
 
 ##### getEntity
 
 ```cpp
-GameObject &getEntity(std::string_view name);
+Entity &getEntity(Entity::ID id);
 ```
 
-##### hasEntity
+##### getEntities
 
 ```cpp
-bool hasEntity(std::string_view name) const noexcept;
+auto getEntities();
 ```
 
-##### getGameObjects
+Returns an iteratable collection over all `Entities`.
 
 ```cpp
-const std::vector<GameObject> &getGameObjects();
+template<typename ...Comps>
+auto getEntities<Comps...>();
 ```
 
-Returns all `GameObjects`.
+Returns and iteratable collection over all `Entities` which have each component listed in `Comp`.
 
+Dereferencing the iterator returns an `std::tuple<EntityView, Comps &...>`, meaning you can write the following:
 ```cpp
-template<typename T>
-const std::vector<GameObject> &getGameObjects<T>();
+for (const auto & [e, transform, lua] : em.getEntities<TransformComponent3f, LuaComponent>())
 ```
-
-Returns all `GameObjects` with a `T` component.
 
 ##### pause
 
@@ -83,7 +83,7 @@ Returns all `GameObjects` with a `T` component.
 void pause();
 ```
 
-Used to pause the game by setting the `speed` to 0. Calling `isPaused` from a [System](System.md) will return `true`, and `time.getDeltaFrames()` will always return 0. This means that most systems do not have to take any special measures to adapt to the game being paused, as long as they use `time.getDeltaFrames()` to adapt their behavior. The [PhysicsSystem](common/systems/PhysicsSystem.md), for instance, multiplies the `GameObjects`' movement by `time.getDeltaFrames()` to accomodate for dropped frames, and will therefore automatically stop moving them when the game is paused.
+Used to pause the game by setting the `speed` to 0. Calling `isPaused` from a [System](System.md) will return `true`, and `time.getDeltaFrames()` will always return 0. This means that most systems do not have to take any special measures to adapt to the game being paused, as long as they use `time.getDeltaFrames()` to adapt their behavior. The [PhysicsSystem](common/systems/PhysicsSystem.md), for instance, multiplies the `Entities`' movement by `time.getDeltaFrames()` to accomodate for dropped frames, and will therefore automatically stop moving them when the game is paused.
 
 ##### resume
 
@@ -108,72 +108,3 @@ double getSpeed() const;
 ```
 
 Returns the game's speed.
-
-##### CompLoader
-
-```cpp
-using CompLoader = std::function<void(kengine::GameObject &, const putils::json::Object &)>;
-```
-
-Defines a function used to load a `Component` type when unserializing `GameObjects`.
-
-##### registerCompLoader
-
-```cpp
-template<typename T>
-void registerCompLoader(const CompLoader & loader);
-```
-
-Lets users define a function to unserialize a specific `Component` type when re-loading the game. For the function to be called, the `Component` type must have a `type` field corresponding to its class name that gets serialized into the JSON object.
-
-##### save
-
-```cpp
-void save(const std::string & file);
-```
-
-Saves all `GameObjects` into `file` (in a JSON-like format).
-
-##### load
-
-```cpp
-void load(const std::string & file);
-```
-
-Removes all `GameObjects` in existence and loads those that were saved into `file`. After this is done, calls all functions registered through `onLoad`.
-
-##### onLoad
-
-```cpp
-void onLoad(const std::function<void()> & func);
-```
-
-Registers a function to be called after each call to `load`.
-
-##### addLink
-
-```cpp
-void addLink(const GameObject &parent, const GameObject &child);
-```
-
-Registers `parent` as `child`'s parent object. This process can be used by systems to store relations between `GameObjects`.
-
-##### removeLink
-
-```cpp
-void removeLink(const GameObject &child);
-```
-
-##### getParent
-
-```cpp
-const GameObject &getParent(const GameObject &go) const;
-```
-
-##### getFactory
-
-```cpp
-template<typename T>
-T &getFactory();
-```
-Returns the `EntityFactory` as a `T`.

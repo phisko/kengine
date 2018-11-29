@@ -1,21 +1,11 @@
-//
-// Created by naliwe on 7/15/16.
-//
-
 #pragma once
 
-#include <vector>
 #include "meta/type.hpp"
-#include "Component.hpp"
-#include "GameObject.hpp"
 #include "Module.hpp"
 #include "Timer.hpp"
 
 namespace kengine {
     class ISystem : public virtual putils::BaseModule {
-    protected:
-        ISystem() = default;
-
     public:
         virtual ~ISystem() = default;
 
@@ -31,13 +21,13 @@ namespace kengine {
         public:
             putils::Timer::t_duration getDeltaTime() const { return deltaTime; }
             putils::Timer::t_duration getFixedDeltaTime() const { return fixedDeltaTime; }
-            double getDeltaFrames() const { return deltaTime / fixedDeltaTime; }
+            float getDeltaFrames() const { return deltaTime / fixedDeltaTime; }
 
             /*
              * Internals
              */
 
-            friend class SystemManager;
+			friend class SystemManager;
 
         private:
             bool alwaysCall;

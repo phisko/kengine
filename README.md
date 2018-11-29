@@ -2,6 +2,14 @@
 
 The Koala engine is a type-safe and self-documenting implementation of an Entity-Component-System (ECS), with a focus on runtime extensibility and compile-time type safety and clarity.
 
+This new version features a greatly optimized memory architecture, better cache-efficiency, and a more advanced API.
+
+It has however (temporarily) lost a couple of features:
+* Entities no longer have names. If you really need to associate strings to your Entities you can create a `NameComponent` or something similar
+* Entities can no longer be serialized to `ostream`. I am currently working to re-implement this feature.
+* Because of the previous point, it is no longer possible to `save` and `load` the game state. I am currently working to re-implement this feature, in a manner that will be better optimized than the original
+(binary saving instead of JSON serialization)
+
 ![koala](koala.png)
 
 ## Installation
@@ -18,11 +26,11 @@ The engine requires a **C++17** compiler.
 
 ### Classes
 
-* [Component](Component.md): contains information about a certain property of an entity (for instance, a `TransformComponent` might hold an entity's position and size)
-* [GameObject](GameObject.md): represents an in-game entity. Is simply a container of `Components`
-* [System](System.md): holds game logic. A `PhysicsSystem` might control the movement of `GameObjects`, for instance.
-* [EntityManager](EntityManager.md): manages `GameObjects`, `Components` and `Systems`
-* [EntityFactory](EntityFactory.md): used to create `GameObjects` typed at run-time (by replacing template parameters by strings)
+* [Entity](Entity.md): represents an in-game entity. Is simply a container of `Components`
+* [System](System.md): holds game logic. A `PhysicsSystem` might control the movement of `Entities`, for instance.
+* [EntityManager](EntityManager.md): manages `Entities`, `Components` and `Systems`
+
+Note that there is no `Component` class. Any type can be used as a `Component`, and dynamically attached/detached to `Entities`.
 
 ### Samples
 
@@ -30,53 +38,58 @@ These are pre-built, extensible and pluggable elements that can be used in any p
 
 ##### Components
 
-* [LuaComponent](common/components/LuaComponent.md): defines the lua scripts to be run by the `LuaSystem` for a `GameObject`
-* [PyComponent](common/components/PyComponent.md): defines the Python scripts to be run by the `PySystem` for a `GameObject`
-* [InputComponent](common/components/InputComponent.md): lets `GameObjects` receive keyboard and mouse events
-* [ImGuiComponent](common/components/ImGuiComponent.md): lets `GameObjects` render debug elements using [ImGui](https://github.com/ocornut/imgui/)
-* [GraphicsComponent](common/components/GraphicsComponent.md): provides graphical information about a `GameObject`, such as its appearance, used by the `SfSystem`
-* [TransformComponent](common/components/TransformComponent.md): defines a `GameObject`'s position and size
-* [PhysicsComponent](common/components/PhysicsComponent.md): defines a `GameObject`'s movement
-* [PathfinderComponent](common/components/PathfinderComponent.md): defines a `GameObject`'s pathfinding information
+General purpose gamedev:
+* [TransformComponent](common/components/TransformComponent.md): defines a `Entity`'s position and size
+* [PhysicsComponent](common/components/PhysicsComponent.md): defines a `Entity`'s movement
+
+Behaviors:
+* [BehaviorComponent](common/components/BehaviorComponent.md): defines a function to be called each frame for a `Entity`
+* [LuaComponent](common/components/LuaComponent.md): defines the lua scripts to be run by the `LuaSystem` for a `Entity`
+* [PyComponent](common/components/PyComponent.md): defines the Python scripts to be run by the `PySystem` for a `Entity`
+* [CollisionComponent](common/components/CollisionComponent.md): defines a function to be called when a `Entity` collides with another
+
+Debug tools:
+* [AdjustableComponent](common/components/AdjustableComponent.md): lets users modify variables through a GUI (such as the [ImGuiAdjustableManager](common/gameobjects/ImGuiAdjustableManager.md))
+* [ImGuiComponent](common/components/ImGuiComponent.md): lets `Entities` render debug elements using [ImGui](https://github.com/ocornut/imgui/)
+* [DebugGraphicsComponent](common/components/DebugGraphicsComponent.hpp): lets a `Entity` be used to draw debug information (such as lines, rectangles or spheres)
+
+Graphics and gamedev:
+* [GraphicsComponent](common/components/GraphicsComponent.md): provides graphical information about a `Entity`, such as its appearance, used by the `SfSystem`
+* [CameraComponent](common/components/CameraComponent.hpp): lets `Entities` be used as in-game cameras, to define a frustrum and position. Follows the same conventions as `TransformComponent`
+* [InputComponent](common/components/InputComponent.md): lets `Entities` receive keyboard and mouse events
+* [GUIComponent](common/components/GUIComponent.md): lets `Entities` be used as GUI elements such as buttons, lists...)
 
 ##### Systems
 
+* [BehaviorSystem](common/systems/BehaviorSystem.md): executes behaviors attached to `Entities`
+* [CollisionSystem](common/systems/CollisionSystem.md): transfers collision notifications to `Entities`
 * [LogSystem](common/systems/LogSystem.md): logs messages
-* [LuaSystem](common/systems/LuaSystem.md): executes lua scripts, either global or attached to an entity
-* [PySystem](common/systems/PySystem.md): executes Python scripts, either global or attached to an entity
+* [LuaSystem](common/systems/LuaSystem.md): executes lua scripts attached to an entity
+* [PySystem](common/systems/PySystem.md): executes Python scripts attached to an entity
 * [PhysicsSystem](common/systems/PhysicsSystem.md): moves entities in a framerate-independent way
-* [CollisionSystem](common/systems/CollisionSystem.md): transfers collision notifications to `GameObjects`
-* [Box2DSystem](common/systems/box2d/Box2DSystem.md): performs the same duties as the `PhysicsSystem`, but using the **Box2D** library
-* [PathfinderSystem](common/systems/PathfinderSystem.md): uses an AStar algorithm to move entities towards their destination
 * [SfSystem](common/systems/sfml/SfSystem.md): displays entities in an SFML render window
-* [OgreSystem](common/systems/ogre/OgreSystem.md): displays entities in an OGRE render window. OGRE must be installed separately.
 
 ##### DataPackets
 
 * [Log](common/packets/Log.hpp): received by the `LogSystem`, used to log a message
-* [Collision](common/packets/Collision.hpp): sent by the `PhysicsSystem`, indicates a collision between two `GameObjects`
+* [Collision](common/packets/Collision.hpp): sent by the `PhysicsSystem`, indicates a collision between two `Entities`
 * [RegisterAppearance](common/packets/RegisterAppearance.hpp): received by the `SfSystem`, maps an abstract appearance to a concrete texture file.
 
 These are datapackets sent from one `System` to another to communicate.
-
-### Usage
-
-For a quick start, look at [this](https://github.com/phiste/flappy_koala) example project, or any of the examples below.
 
 ### Example
 
 Here is a list of simple, half-a-day implementation of games:
 
-* [Flappy bird clone](https://github.com/phiste/flappy_koala)
-* [Tunnel game, dodging cubes](https://github.com/phiste/koala_tunnel)
-* [Tower defense "game", not much at stake though](https://github.com/phiste/koala_defense)
-* [Shoot'em up game, using both scripts and C++ systems](https://github.com/phiste/shmup)
+* [Bots painting a canvas](https://github.com/phisko/painter)
 
+Old API, deprecated:
+* [Flappy bird clone](https://github.com/phisko/flappy_koala)
+* [Tunnel game, dodging cubes](https://github.com/phisko/koala_tunnel)
+* [Tower defense "game", not much at stake though](https://github.com/phisko/koala_defense)
+* [Shoot'em up game](https://github.com/phisko/shmup)
 
-
-A more advanced, work-in-progress POC game using the engine with 3D graphics is available [here](https://github.com/phiste/hackemup).
-
-Below is a commented main function that creates an entity and attaches some components to it, as well as some lua scripts (one of which is attached to the entity, while the other is run as a "system"). These should let you get an idea of what is possible using the kengine's support for reflection and runtime extensibility, as well as the compile-time clarity and type-safety that were the two motivations behind the project.
+Below is a commented main function that creates an entity and attaches some components to it, as well as a lua script. This should let you get an idea of what is possible using the kengine's support for reflection and runtime extensibility, as well as the compile-time clarity and type-safety that were the two motivations behind the project.
 
 ##### main.cpp
 
@@ -86,53 +99,62 @@ Below is a commented main function that creates an entity and attaches some comp
 #include "go_to_bin_dir.hpp"
 
 #include "EntityManager.hpp"
-#include "GameObject.hpp"
+#include "Entity.hpp"
 
-#include "common/systems/LuaSystem.hpp"
-#include "common/systems/LogSystem.hpp"
-#include "common/components/GraphicsComponent.hpp"
-#include "common/components/TransformComponent.hpp"
+#include "systems/LuaSystem.hpp"
+#include "components/GraphicsComponent.hpp"
+#include "components/TransformComponent.hpp"
 
-int main(int, char **av)
-{
+// Simple system that outputs the transform and lua components of each entity that has them
+class DebugSystem : public kengine::System<DebugSystem> {
+public:
+	DebugSystem(kengine::EntityManager & em) : System<DebugSystem>(em), _em(em) {}
+
+	void execute() final {
+		for (const auto & [e, transform, lua] : _em.getEntities<kengine::TransformComponent3f, kengine::LuaComponent>()) {
+			std::cout << "Entity " << e.id << '\n';
+
+			std::cout << "\tTransform: " << transform.boundingBox << '\n';
+
+			std::cout << "\tScripts:" << '\n';
+			for (const auto & script : lua.getScripts())
+				std::cout << "\t\t[" << script << "]\n";
+
+			std::cout << '\n';
+		}
+	}
+
+private:
+	kengine::EntityManager & _em;
+};
+
+int main(int, char **av) {
     // Go to the executable's directory to be next to resources and scripts
     putils::goToBinDir(av[0]);
 
     // Create an EntityManager
-    kengine::EntityManager em(std::make_unique<kengine::ExtensibleFactory>());
+    kengine::EntityManager em; // Optionally, pass a number of threads as parameter (kengine::EntityManager em(4);)
 
     // Load the specified systems, and any plugin placed in the executable's directory
     //      If you specify 'KENGINE_SFML' as TRUE in your CMakeLists.txt, this will load the SfSystem
-    em.loadSystems<kengine::LuaSystem, kengine::LogSystem>(".");
+    em.loadSystems<DebugSystem, kengine::LuaSystem>(".");
 
     // To add a new system, simply add a DLL with a
     //      `ISystem *getSystem(kengine::EntityManager &em)`
-    // function to the executable directory
+    // To add a new system, simply add a DLL with a
 
+    // Create an Entity and attach Components to it
+    em += [](kengine::Entity e) {
+		e += kengine::TransformComponent3f({ 42.f, 0.f, 42.f }); // Parameter is a Point3f for position
+		e += kengine::LuaComponent({ "scripts/unit.lua" }); // Parameter is a vector of scripts
+    };
 
-    // Get the factory and register any desired types
-    auto &factory = em.getFactory<kengine::ExtensibleFactory>();
-    factory.registerTypes<kengine::GameObject>();
-
-    // Create a GameObject and attach Components to it
-    auto &player = em.createEntity<kengine::GameObject>("player");
-    player.attachComponent<kengine::TransformComponent3d>();
-    player.attachComponent<kengine::GraphicsComponent>();
-
-    // Attach a lua script to a GameObject
-    auto &luaComp = player.attachComponent<kengine::LuaComponent>();
-    luaComp.attachScript("scripts/unit/unit.lua");
-
-    // Register types to be used in lua and add a directory of scripts to be executed
-    try
-    {
+	// Register types to be used in lua
+    try {
         auto &lua = em.getSystem<kengine::LuaSystem>();
-        lua.addScriptDirectory("scripts"); // The LuaSystem automatically opens the "scripts" directory, this is just an example
         lua.registerTypes<
-                kengine::GraphicsComponent,
-                kengine::TransformComponent3d, putils::Point<double, 3>, putils::Rect<double, 3>,
-                kengine::LuaComponent,
-                kengine::packets::Log
+                kengine::TransformComponent3f, putils::Point<float, 3>, putils::Rect<float, 3>,
+                kengine::LuaComponent
         >();
     }
     catch (const std::out_of_range &) {} // If the LuaSystem wasn't found, ignore
@@ -145,57 +167,12 @@ int main(int, char **av)
 }
 ```
 
-##### scripts/test.lua
+##### scripts/unit.lua
 
 ```lua
--- send a datapacket from Lua
-local log = Log.new()
-log.msg = "Log from lua"
-sendLog(log)
+-- Simply modify component
 
--- create an entity from Lua
-local new = createEntity("GameObject", "bob",
-    function (go)
-        print("Created " .. go:getName())
-    end
-)
-
--- get an entity
-local otherRef = getEntity("bob")
-
--- attach a component
-local meta = new:attachGraphicsComponent()
-meta.appearance = "human"
-
-local transform = new:attachTransformComponent()
-transform.boundingBox.topLeft.x = 42
-
--- serialize
-print(new)
-
--- iterate over all entities
-for i, e in ipairs(getGameObjects()) do
-    print(e)
-end
-
--- iterate over specific entities
-for i, e in ipairs(getGameObjectsWithGraphicsComponent()) do
-    local comp = e:getTransformComponent()
-    print(comp)
-end
-
--- remove an Entity
-removeEntity(new:getName())
-```
-
-##### scripts/unit/unit.lua
-
-```lua
--- huhuhu, modifying components test
-
-local pos = self:getTransformComponent().boundingBox.topLeft
-if (pos.x >= 10) then
-    pos.x = 0
-    print("[scripts/unit/unit.lua] Moving ", self:getName(), " back to x = 0")
-end
+local transform = self:getTransformComponent()
+local pos = transform.boundingBox.topLeft
+pos.x = pos.x + 1
 ```

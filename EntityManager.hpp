@@ -1,327 +1,271 @@
 #pragma once
 
-#include <unordered_set>
-#include <string_view>
-#include <string>
+#include <execution>
 #include <unordered_map>
-#include <memory>
-#include <type_traits>
+#include <vector>
 #include "SystemManager.hpp"
-#include "ComponentManager.hpp"
-#include "EntityFactory.hpp"
+#include "Component.hpp"
+#include "Entity.hpp"
 
 namespace kengine {
-    class EntityManager : public SystemManager, public ComponentManager {
+    class EntityManager : public SystemManager {
     public:
-        EntityManager(std::unique_ptr<EntityFactory> && factory = std::make_unique<ExtensibleFactory>())
-                : _factory(std::move(factory)) {}
-
-        ~EntityManager() = default;
+		EntityManager(size_t threads = 0) : SystemManager(threads) {}
 
     public:
-        GameObject & createEntity(const std::string & type, const std::string & name,
-                                  const std::function<void(GameObject &)> & postCreate = nullptr) {
-            auto e = _factory->make(type, name);
-
-            if (postCreate != nullptr)
-                postCreate(*e);
-
-            return addEntity(name, std::move(e));
+		template<typename Func> // Func: void(Entity &);
+        Entity createEntity(Func && postCreate) {
+			auto e = alloc();
+			postCreate(e);
+			SystemManager::registerEntity(e);
+			return e;
         }
 
-        GameObject & createEntity(const std::string & type, const std::function<void(GameObject &)> & postCreate = nullptr) {
-            const auto it = _ids.find(type);
-            if (it == _ids.end()) {
-                _ids.emplace(type, 0);
-                return createEntity(type, putils::concat(type, 0), postCreate);
-            }
-            return createEntity(type, putils::concat(type, ++it->second), postCreate);
-        }
-
-        template<class GO, typename ...Params>
-        GO & createEntity(const std::string & name,
-                          const std::function<void(GameObject &)> & postCreate = nullptr,
-                          Params && ...params) {
-            static_assert(std::is_base_of<GameObject, GO>::value,
-                          "Attempt to create something that's not a GameObject");
-
-            auto entity = std::make_unique<GO>(name, FWD(params)...);
-
-            if (postCreate != nullptr)
-                postCreate(static_cast<GameObject &>(*entity));
-
-            return static_cast<GO &>(addEntity(name, std::move(entity)));
-        }
-
-        template<typename GO, typename ...Params>
-        GO & createEntity(const std::function<void(GameObject &)> & postCreate = nullptr, Params && ...params) {
-            static_assert(putils::is_reflectible<GO>::value, "createEntity must be given an explicit name if the type parameter is not reflectible.");
-
-            const auto type = GO::get_class_name();
-            const auto it = _ids.find(type);
-            if (it == _ids.end()) {
-                _ids.emplace(type, 0);
-                return createEntity<GO>(putils::concat(type, 0), postCreate, FWD(params)...);
-            }
-            return createEntity<GO>(putils::concat(type, ++it->second), postCreate, FWD(params)...);
-        }
-
-    private:
-        GameObject & addEntity(const std::string & name, std::unique_ptr<GameObject> && obj) {
-            auto & ret = *obj;
-			_toAdd.push_back(std::move(obj));
-			_futureEntities[name] = &ret;
-            return ret;
-        }
-
-    public:
-        void removeEntity(kengine::GameObject & go) noexcept {
-            _toRemove.insert(&go);
-        }
-
-        void removeEntity(const std::string & name) noexcept {
-            const auto p = _entities.find(name);
-            if (p == _entities.end())
-                return;
-            _toRemove.insert(p->second.get());
-        }
-
-	public:
-		GameObject & getEntity(const std::string & name) {
-			const auto it = _futureEntities.find(name);
-			if (it != _futureEntities.end())
-				return *it->second;
-			return *_entities.at(name);
+		template<typename Func>
+		Entity operator+=(Func && postCreate) {
+			return createEntity(FWD(postCreate));
 		}
 
-        bool hasEntity(const std::string & name) const noexcept { return _entities.find(name) != _entities.end(); }
+	public:
+		Entity getEntity(Entity::ID id) {
+			return Entity(id, _entities[id], this);
+		}
+
+		EntityView getEntity(Entity::ID id) const {
+			return EntityView(id, _entities[id]);
+		}
 
     public:
-        void addLink(const GameObject & parent, const GameObject & child) { _entityHierarchy[&child] = &parent; }
+		void removeEntity(EntityView e) {
+			removeEntity(e.id);
+		}
 
-        void removeLink(const GameObject & child) { _entityHierarchy.erase(&child); }
+		void removeEntity(Entity::ID id) {
+			auto & mask = _entities[id];
 
-        const GameObject & getParent(const GameObject & go) const { return *_entityHierarchy.at(&go); }
+			SystemManager::removeEntity(EntityView(id, mask));
+
+			for (auto & collection : _archetypes) {
+				if (collection.mask == mask) {
+					const auto tmp = std::find(std::execution::par_unseq, collection.entities.begin(), collection.entities.end(), id);
+					if (collection.entities.size() > 1) {
+						std::swap(*tmp, collection.entities.back());
+						collection.sorted = false;
+					}
+					collection.entities.pop_back();
+					break;
+				}
+			}
+
+			mask = 0;
+
+			_toReuse.emplace_back(id);
+			_toReuseSorted = false;
+		}
+
+	private:
+		struct Archetype {
+			Entity::Mask mask;
+			std::vector<Entity::ID> entities;
+			bool sorted = true;
+
+			Archetype(Entity::Mask mask, Entity::ID firstEntity) : mask(mask), entities({ firstEntity }) {}
+
+			template<typename ... Comps>
+			bool matches() {
+				if (entities.empty())
+					return false;
+
+				if (!sorted) {
+					std::sort(std::execution::par_unseq, entities.begin(), entities.end());
+					sorted = true;
+				}
+
+				bool good = true;
+				pmeta_for_each(Comps, [&](auto && type) {
+					using CompType = pmeta_wrapped(type);
+					if (!mask.test(Component<CompType>::id()))
+						good = false;
+				});
+				return good;
+			}
+		};
+
+		struct EntityCollection {
+			struct EntityIterator {
+				EntityIterator & operator++() {
+					++index;
+					while (index < entities.size() && entities[index] == 0)
+						++index;
+					return *this;
+				}
+
+				bool operator!=(const EntityIterator & rhs) const {
+					return index != rhs.index;
+				}
+
+				Entity operator*() const {
+					return Entity(index, entities[index], em);
+				}
+
+				const std::vector<Entity::Mask> & entities;
+				size_t index;
+				EntityManager * em;
+			};
+
+			auto begin() const {
+				size_t i = 0;
+				while (i < entities.size() && entities[i] == 0)
+					++i;
+				return EntityIterator{ entities, i, &em };
+			}
+
+			auto end() const {
+				return EntityIterator{ entities, entities.size(), &em };
+			}
+
+			const std::vector<Entity::Mask> & entities;
+			EntityManager & em;
+		};
+
+	public:
+		auto getEntities() {
+			return EntityCollection{ _entities, *this };
+		}
+
+	private:
+		template<typename ... Comps>
+		struct ComponentCollection {
+			struct ComponentIterator {
+				using iterator_category = std::forward_iterator_tag;
+				using value_type = std::tuple<EntityView, Comps & ...>;
+				using reference = const value_type &;
+				using pointer = const value_type *;
+				using difference_type = size_t;
+
+				ComponentIterator & operator++() {
+					++currentEntity;
+					if (currentEntity < (*archetypes)[currentType].entities.size())
+						return *this;
+
+					currentEntity = 0;
+					for (++currentType; currentType < archetypes->size(); ++currentType)
+						if ((*archetypes)[currentType].matches<Comps...>())
+							break;
+
+					return *this;
+				}
+
+				bool operator==(const ComponentIterator & rhs) const { return currentType == rhs.currentType && currentEntity == rhs.currentEntity; }
+				bool operator!=(const ComponentIterator & rhs) const { return !(*this == rhs); }
+
+				std::tuple<EntityView, Comps &...> operator*() const {
+					auto & archetype = (*archetypes)[currentType];
+					EntityView e(archetype.entities[currentEntity], archetype.mask);
+					return std::make_tuple(e, std::ref(e.get<Comps>())...);
+				}
+
+				std::vector<Archetype> * archetypes;
+				size_t currentType;
+				size_t currentEntity;
+			};
+
+			auto begin() const {
+				size_t i = 0;
+				for (; i < archetypes.size(); ++i)
+					if (archetypes[i].matches<Comps...>())
+						break;
+				
+				return ComponentIterator{ &archetypes, i, 0 };
+			}
+
+			auto end() const {
+				return ComponentIterator{ &archetypes, archetypes.size(), 0 };
+			}
+
+			std::vector<Archetype> & archetypes;
+		};
 
     public:
-        template<typename T>
-        T & getFactory() { return static_cast<T &>(*_factory); }
-
-        template<typename T>
-        const T & getFactory() const { return static_cast<const T &>(*_factory); }
+		template<typename ... Comps>
+		auto getEntities() {
+			return ComponentCollection<Comps...>{ _archetypes };
+		}
 
     public:
         template<typename RegisterWith, typename ...Types>
         void registerTypes() {
             if constexpr (!std::is_same<RegisterWith, nullptr_t>::value) {
-                try {
-                    auto & s = getSystem<RegisterWith>();
-                    s.template registerTypes<Types...>();
-                }
-                catch (const std::out_of_range &) {}
+				auto & s = getSystem<RegisterWith>();
+				s.template registerTypes<Types...>();
             }
+		}
 
-			try {
-				auto & factory = getFactory<kengine::ExtensibleFactory>();
-				pmeta_for_each(Types, [this pmeta_comma &factory](auto && t) {
-					using Type = pmeta_wrapped(t);
-					if constexpr (std::is_base_of<kengine::GameObject, Type>::value)
-						factory.registerType<Type>();
-					else if constexpr (kengine::is_component<Type>::value)
-						registerCompLoader<Type>();
-				});
+	private:
+		Entity alloc() {
+			if (_toReuse.empty()) {
+				const auto id = _entities.size();
+				_entities.emplace_back(0);
+				return Entity(id, 0, this);
 			}
-			catch (const std::out_of_range &) {}
-		}
 
-    public:
-        void execute(const std::function<void()> & betweenSystems = []{}) noexcept {
-			updateEntities();
-            SystemManager::execute([this, &betweenSystems] {
-				updateEntities();
-                betweenSystems();
-            });
-        }
-
-    public:
-		bool isEntityEnabled(GameObject & go) noexcept { return _disabled.find(&go) == _disabled.end(); }
-		bool isEntityEnabled(const std::string & name) noexcept { return isEntityEnabled(getEntity(name)); }
-
-		void disableEntity(GameObject & go) noexcept {
-			_toDisable.emplace(&go);
-		}
-
-		void disableEntity(const std::string & name) { disableEntity(getEntity(name)); }
-
-		void enableEntity(GameObject & go) noexcept {
-			ComponentManager::registerGameObject(go);
-			SystemManager::registerGameObject(go);
-			_disabled.erase(&go);
-		}
-
-		void enableEntity(const std::string & name) { enableEntity(getEntity(name)); }
-
-    public:
-		using CompLoader = std::function<void(kengine::GameObject &, const putils::json::Object &)>;
-
-		template<typename T>
-		void registerCompLoader(const CompLoader & loader) {
-			_loaders[T::get_class_name()] = loader;
-		}
-
-		template<typename T>
-		void registerCompLoader() {
-			if constexpr (kengine::is_component<T>::value)
-				_loaders[T::get_class_name()] = [](kengine::GameObject & go, const putils::json::Object & json) {
-				auto & comp = go.attachComponent<T>();
-				putils::parse(comp, json.value);
-			};
-		}
-
-		void onLoad(const std::function<void()> & func) {
-			_onLoad.push_back(func);
-		}
-
-		void save(const std::string & file) {
-			std::ofstream f(file, std::ofstream::trunc);
-
-			if (!f)
-				return;
-
-			for (const auto & go : getGameObjects())
-				f << *go;
-		}
-
-		void load(const std::string & file) {
-			std::ifstream f(file);
-
-			if (!f)
-				return;
-
-			try {
-				for (const auto &[name, go] : _entities)
-					removeEntity(*go);
-
-				while (f && !f.eof()) {
-					auto obj = putils::json::lex(f);
-					const auto & name = obj["name"].value;
-					createEntity<kengine::GameObject>(obj["name"].value, [this, &obj](kengine::GameObject & go) { loadComponents(obj, go); });
-				}
+			if (!_toReuseSorted) {
+				std::sort(std::execution::par_unseq, _toReuse.begin(), _toReuse.end(), std::greater<Entity::ID>());
+				_toReuseSorted = true;
 			}
-			catch (const std::exception & e) {}
 
-			_justLoaded = true;
+			const auto id = _toReuse.back();
+			_toReuse.pop_back();
+			return Entity(id, 0, this);
 		}
 
     private:
-		void loadComponents(const putils::json::Object & obj, kengine::GameObject & go) {
-			for (const auto &[type, comp] : obj["components"].fields) {
-				const auto it = comp.fields.find("type");
-				if (it == comp.fields.end())
-					continue;
+		friend class Entity;
+		void updateMask(Entity::ID id, Entity::Mask newMask) {
+			const auto oldMask = _entities[id];
 
-				const auto loader = _loaders.find(it->second);
-				if (loader != _loaders.end())
-					loader->second(go, comp);
-			}
-		}
+			int done = 0;
+			if (oldMask == 0) // Will not have to remove
+				++done;
 
-    private:
-		void updateEntities() noexcept {
-			doRemove();
-			updateEntitiesByType();
-			doAdd();
-			doDisable();
-			updateEntitiesByType();
-
-			if (_justLoaded) {
-				for (const auto & func : _onLoad) {
-					try {
-						func();
+			for (auto & collection : _archetypes) {
+				if (collection.mask == oldMask) {
+					const auto size = collection.entities.size();
+					if (size > 1) {
+						const auto it = std::find(std::execution::par_unseq, collection.entities.begin(), collection.entities.end(), id);
+						std::iter_swap(it, collection.entities.begin() + size - 1);
 					}
-					catch (const std::exception & e) { std::cerr << e.what() << std::endl; }
+					collection.entities.pop_back();
+					collection.sorted = false;
+					++done;
 				}
-				_justLoaded = false;
+
+				if (collection.mask == newMask) {
+					collection.entities.emplace_back(id);
+					collection.sorted = false;
+					++done;
+				}
+
+				if (done == 2)
+					break;
 			}
 
-			updateEntitiesByType();
+			if (done == 1)
+				_archetypes.emplace_back(newMask, id);
+
+			_entities[id] = newMask;
 		}
 
 	private:
-		void doAdd() noexcept {
-			for (auto && go : _toAdd) {
-				const auto name = go->getName();
-				const auto it = _entities.find(name);
-				if (it != _entities.end()) {
-					ComponentManager::removeGameObject(*it->second);
-					SystemManager::removeGameObject(*it->second);
-				}
-				auto & obj = *go;
-				_entities[name] = std::move(go);
-
-				SystemManager::registerGameObject(obj);
-				ComponentManager::registerGameObject(obj);
-			}
-			_toAdd.clear();
-			_futureEntities.clear();
-		}
-
-        void doRemove() noexcept {
-            while (!_toRemove.empty()) {
-                const auto tmp = _toRemove;
-                _toRemove.clear();
-
-                for (const auto go : tmp) {
-                    SystemManager::removeGameObject(*go);
-                    ComponentManager::removeGameObject(*go);
-					const auto it = _entities.find(go->getName());
-					if (it != _entities.end())
-						_entities.erase(it);
-                }
-
-                for (const auto go : tmp)
-                    _toRemove.erase(go);
-            }
-        }
-
-    private:
-		void doDisable() noexcept {
-			while (!_toDisable.empty()) {
-				const auto tmp = _toDisable;
-				_toDisable.clear();
-
-				for (const auto go : tmp) {
-					SystemManager::removeGameObject(*go);
-					ComponentManager::removeGameObject(*go);
-					_disabled.emplace(go);
-				}
-
-				for (const auto go : tmp)
-					_toDisable.erase(go);
-			}
-		}
+		std::vector<Entity::Mask> _entities;
+		std::vector<Archetype> _archetypes;
+		std::vector<Entity::ID> _toReuse;
+		bool _toReuseSorted = true;
 
 	private:
-		std::unordered_map<std::string, CompLoader> _loaders;
-		std::vector<std::function<void()>> _onLoad;
-		bool _justLoaded = false;
+		detail::GlobalCompMap _components;
 
-    private:
-        std::unique_ptr<EntityFactory> _factory;
-        std::unordered_map<std::string, std::size_t> _ids;
-
-    private:
-        std::unordered_map<std::string, std::unique_ptr<GameObject>> _entities;
-
-        std::vector<std::unique_ptr<GameObject>> _toAdd;
-        std::unordered_map<std::string, GameObject *> _futureEntities;
-
-        std::unordered_set<GameObject *> _toRemove;
-
-        std::unordered_map<const GameObject *, const GameObject *> _entityHierarchy;
-
-    private:
-        std::unordered_set<GameObject *> _toDisable;
-        std::unordered_set<GameObject *> _disabled;
-    };
+	public: // Reserved to systems
+		detail::GlobalCompMap & __getComponentMap() { return _components; }
+	};
 }

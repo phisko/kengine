@@ -2,291 +2,169 @@
 
 #include "System.hpp"
 #include "EntityManager.hpp"
+#include "with.hpp"
 
 namespace kengine {
 	template<typename CRTP, typename CompType, typename ...Datapackets>
 	class ScriptSystem : public kengine::System<CRTP, Datapackets...> {
 	public:
-		ScriptSystem(kengine::EntityManager & em) : _em(em) {}
+		ScriptSystem(EntityManager & em) : System(em), _em(em) {}
 
 	public:
 		void init() noexcept {
-			auto & crtp = static_cast<CRTP &>(*this);
-			crtp.registerFunction("getGameObjects",
-				std::function<const std::vector<kengine::GameObject *> &()>(
-					[this] { return std::ref(_em.getGameObjects()); }
-				)
-			);
+			auto & _ = static_cast<CRTP &>(*this);
 
-			crtp.registerFunction("createEntity",
-				std::function<kengine::GameObject &(const std::string &, const std::string &, const std::function<void(kengine::GameObject &)> &)>(
-					[this](const std::string & type, const std::string & name, auto && f) {
-						return std::ref(_em.createEntity(type, name, FWD(f)));
+			_.registerFunction("createEntity",
+				std::function<Entity(const std::function<void(Entity &)> &)>(
+					[this](const std::function<void(Entity &)> & f) {
+						return _em.createEntity(FWD(f));
 					}
 				)
 			);
 
-			crtp.registerFunction("createNamelessEntity",
-				std::function<kengine::GameObject &(const std::string &, const std::function<void(kengine::GameObject &)> &)>(
-					[this](const std::string & type, auto && f) {
-						return std::ref(_em.createEntity(type, FWD(f)));
-					}
+			_.registerFunction("removeEntity",
+				std::function<void(Entity &)>(
+					[this](Entity & go) { _em.removeEntity(go); }
+				)
+			);
+			_.registerFunction("removeEntityById",
+				std::function<void(Entity::ID id)>(
+					[this](Entity::ID id) { _em.removeEntity(id); }
 				)
 			);
 
-			crtp.registerFunction("removeEntity",
-				std::function<void(kengine::GameObject &)>(
-					[this](kengine::GameObject & go) { _em.removeEntity(go); }
-				)
-			);
-            crtp.registerFunction("removeEntityByName",
-				std::function<void(const std::string &)>(
-					[this](const std::string & name) { _em.removeEntity(name); }
+			_.registerFunction("getEntity",
+				std::function<Entity(Entity::ID id)>(
+					[this](Entity::ID id) { return _em.getEntity(id); }
 				)
 			);
 
-			crtp.registerFunction("enableEntity",
-				std::function<void(kengine::GameObject &)>(
-					[this](kengine::GameObject & go) { _em.enableEntity(go); }
+			_.registerFunction("getDeltaTime",
+				std::function<float()>(
+					[this] { return this->time.getDeltaTime().count(); }
 				)
 			);
-			crtp.registerFunction("enableEntityByName",
-				std::function<void(const std::string &)>(
-					[this](const std::string & name) { _em.enableEntity(name); }
+			_.registerFunction("getFixedDeltaTime",
+				std::function<float()>(
+					[this] { return this->time.getFixedDeltaTime().count(); }
 				)
 			);
-
-			crtp.registerFunction("disableEntity",
-				std::function<void(kengine::GameObject &)>(
-					[this](kengine::GameObject & go) { _em.disableEntity(go); }
-				)
-			);
-			crtp.registerFunction("disableEntityByName",
-				std::function<void(const std::string &)>(
-					[this](const std::string & name) { _em.disableEntity(name); }
-				)
-			);
-
-			crtp.registerFunction("isEntityEnabled",
-				std::function<bool(kengine::GameObject &)>(
-					[this](kengine::GameObject & go) { return _em.isEntityEnabled(go); }
-				)
-			);
-			crtp.registerFunction("isEntityEnabledByName",
-				std::function<bool(const std::string &)>(
-					[this](const std::string & name) { return _em.isEntityEnabled(name); }
-				)
-			);
-
-            crtp.registerFunction("getEntity",
-				std::function<kengine::GameObject &(const std::string &)>(
-					[this](const std::string & name) { return std::ref(_em.getEntity(name)); }
-				)
-			);
-            crtp.registerFunction("hasEntity",
-				std::function<bool(const std::string &)>(
-					[this](const std::string & name) { return _em.hasEntity(name); }
-				)
-			);
-
-            crtp.registerFunction("getDeltaTime",
-				std::function<putils::Timer::t_duration()>(
-					[this] { return this->time.getDeltaTime(); }
-				)
-			);
-            crtp.registerFunction("getFixedDeltaTime",
-				std::function<putils::Timer::t_duration()>(
-					[this] { return this->time.getFixedDeltaTime(); }
-				)
-			);
-            crtp.registerFunction("getDeltaFrames",
-				std::function<double()>(
+			_.registerFunction("getDeltaFrames",
+				std::function<float()>(
 					[this] { return this->time.getDeltaFrames(); }
-				)
+					)
 			);
 
-            crtp.registerFunction("stopRunning",
+			_.registerFunction("stopRunning",
 				std::function<void()>(
 					[this] { _em.running = false; }
 				)
 			);
-            crtp.registerFunction("setSpeed",
-				std::function<void(double)>(
-					[this](double speed) { _em.setSpeed(speed); }
+			_.registerFunction("setSpeed",
+				std::function<void(float)>(
+					[this](float speed) { _em.setSpeed(speed); }
 				)
 			);
-            crtp.registerFunction("getSpeed",
-				std::function<double()>(
+			_.registerFunction("getSpeed",
+				std::function<float()>(
 					[this] { return _em.getSpeed(); }
 				)
 			);
-            crtp.registerFunction("isPaused",
+			_.registerFunction("isPaused",
 				std::function<bool()>(
 					[this] { return this->isPaused(); }
 				)
 			);
-            crtp.registerFunction("pause",
+			_.registerFunction("pause",
 				std::function<void()>(
 					[this] { _em.pause(); }
 				)
 			);
-            crtp.registerFunction("resume",
+			_.registerFunction("resume",
 				std::function<void()>(
 					[this] { _em.resume(); }
 				)
 			);
 
-            crtp.registerFunction("save",
-				std::function<void(const std::string &)>(
-					[this](const std::string & file) { _em.save(file); }
-				)
-			);
-            crtp.registerFunction("load",
-				std::function<void(const std::string &)>(
-					[this](const std::string & file) { _em.load(file); }
-				)
-			);
-
-            crtp.registerFunction("onLoad",
+			_.registerFunction("runAfterSystem",
 				std::function<void(const std::function<void()> &)>(
-					[this](const std::function<void()> & func) { _em.onLoad(func); }
+					[this](const std::function<void()> & func) { _em.runAfterSystem(func); }
 				)
 			);
 
-            registerType<kengine::GameObject>();
+			registerType<EntityView>();
 		}
 
 	public:
-        template<typename ...Types>
-        void registerTypes() noexcept {
-            pmeta::tuple_for_each(std::make_tuple(pmeta::type<Types>()...),
-                                  [this](auto && t) {
-                                      using Type = pmeta_wrapped(t);
-                                      registerType<Type>();
-                                  }
-            );
-        }
-
-        template<typename T>
-        void registerType() noexcept {
-			auto & crtp = static_cast<CRTP &>(*this);
-
-#ifdef _WIN32
-            crtp.registerTypeInternal<T>();
-#else
-            crtp.template registerTypeInternal<T>();
-#endif
-
-            const auto sender = putils::concat("send", T::get_class_name());
-#ifdef _WIN32
-			crtp.registerFunction(sender,
-				std::function<void(const T &)>(
-					[this](const T & packet) { this->send(packet); }
-				)
-			);
-#else
-			crtp.template registerFunction(sender,
-				std::function<void(const T &)>(
-					[this](const T & packet) { this->send(packet); }
-				)
-			);
-#endif
-
-            if constexpr (kengine::is_component<T>::value)
-                registerComponent<T>();
-        }
-
-	public:
-		template<typename String>
-		void addScriptDirectory(String && dir) noexcept {
-			try {
-				putils::Directory d(dir);
-				_directories.emplace_back(FWD(dir));
-			} catch (const std::runtime_error & e) {
-				std::cerr << e.what() << std::endl;
+		template<typename ...Types>
+		void registerTypes() noexcept {
+			pmeta::tuple_for_each(std::make_tuple(pmeta::type<Types>()...),
+				[this](auto && t) {
+				using Type = pmeta_wrapped(t);
+				registerType<Type>();
 			}
+			);
 		}
 
-        // System methods
-    public:
-        void execute() final {
-            executeDirectories();
-            executeScriptedObjects();
-        }
-
-	private:
-        void executeDirectories() noexcept {
-			auto & crtp = static_cast<CRTP &>(*this);
-            for (const auto & dir : _directories) {
-                try {
-                    putils::Directory d(dir);
-
-                    d.for_each([this, &crtp](const putils::Directory::File & f) {
-							if (!f.isDirectory)
-								crtp.executeScript(f.fullPath);
-						}
-                    );
-                } catch (const std::runtime_error & e) {
-                    std::cerr << e.what() << std::endl;
-                }
-            }
-        }
-
-		void executeScriptedObjects() noexcept {
-			auto & crtp = static_cast<CRTP &>(*this);
-
-			for (const auto go : _em.getGameObjects<CompType>()) {
+		template<typename T>
+		void registerType() noexcept {
+			{ pmeta_with(static_cast<CRTP &>(*this)) {
 #ifdef _WIN32
-				const auto & comp = go->getComponent<CompType>();
+				_.registerTypeInternal<T>();
 #else
-				const auto & comp = go->template getComponent<CompType>();
+				_.template registerTypeInternal<T>();
 #endif
-				crtp.setSelf(*go);
-				for (const auto & s : comp.getScripts())
-					crtp.executeScript(s);
-			}
-			crtp.unsetSelf();
+
+				const auto sender = putils::concat("send", T::get_class_name());
+#ifdef _WIN32
+				_.registerFunction(sender,
+					std::function<void(const T &)>(
+						[this](const T & packet) { this->send(packet); }
+						)
+				);
+#else
+				_.template registerFunction(sender,
+					std::function<void(const T &)>(
+						[this](const T & packet) { this->send(packet); }
+						)
+				);
+#endif
+			}}
+			registerComponent<T>();
+		}
+
+		// System methods
+	public:
+		void execute() final {
+			{ pmeta_with(static_cast<CRTP &>(*this)) {
+				for (const auto & [go, comp] : _em.getEntities<CompType>()) {
+					_.setSelf(go);
+					for (const auto & s : comp.getScripts())
+						_.executeScript(s);
+				}
+				_.unsetSelf();
+			}}
 		}
 
 	private:
 		template<typename T>
 		void registerComponent() noexcept {
-			auto & crtp = static_cast<CRTP &>(*this);
+			{ pmeta_with(static_cast<CRTP &>(*this)) {
+				_.registerEntityMember(putils::concat("get", T::get_class_name()),
+					std::function<T &(EntityView)>(
+						[](EntityView self) { return std::ref(self.get<T>()); }
+						)
+				);
 
-			crtp.registerFunction(putils::concat("getGameObjectsWith", T::get_class_name()),
-				std::function<const std::vector<kengine::GameObject *> &()>(
-					[this] { return std::ref(_em.getGameObjects<T>()); }
-				)
-			);
-
-			crtp.registerGameObjectMember(putils::concat("get", T::get_class_name()),
-				std::function<T &(kengine::GameObject &)>(
-					[](kengine::GameObject & self) { return std::ref(self.getComponent<T>()); }
-				)
-			);
-
-			crtp.registerGameObjectMember(putils::concat("has", T::get_class_name()),
-				std::function<bool(kengine::GameObject &)>(
-					[](kengine::GameObject & self) { return self.hasComponent<T>(); }
-				)
-			);
-
-			crtp.registerGameObjectMember(putils::concat("attach", T::get_class_name()),
-				std::function<T &(kengine::GameObject &)>(
-					[](kengine::GameObject & self) { return std::ref(self.attachComponent<T>()); }
-				)
-			);
-
-			crtp.registerGameObjectMember(putils::concat("detach", T::get_class_name()),
-				std::function<void(kengine::GameObject &)>(
-					[](kengine::GameObject & self) { self.detachComponent<T>(); }
-				)
-			);
+				_.registerEntityMember(putils::concat("has", T::get_class_name()),
+					std::function<bool(EntityView)>(
+						[](EntityView self) { return self.has<T>(); }
+						)
+				);
+			}}
 		}
 
-
 	private:
-		kengine::EntityManager & _em;
-        std::vector<std::string> _directories;
+		EntityManager & _em;
 	};
 }

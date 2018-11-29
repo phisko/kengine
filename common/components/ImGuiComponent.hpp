@@ -1,22 +1,30 @@
 #pragma once
 
 #include <functional>
-#include "Component.hpp"
+#include "reflection/Reflectible.hpp"
 
 struct ImGuiContext;
 extern ImGuiContext * GImGui;
 
 namespace kengine {
-	class ImGuiComponent : public kengine::SerializableComponent<ImGuiComponent> {
-	public:
-		ImGuiComponent(const std::function<void(void *)> & display = nullptr) : display(display) {}
+	struct ImGuiComponent {
+		ImGuiComponent(const std::function<void()> & func = nullptr) : display([func](auto context) {
+			setupImGuiContext(context);
+			func();
+		}) {}
 
-	public:
-		std::function<void(void * context)> display;
+		void setFunc(const std::function<void()> & func) {
+			display = [func](auto context) {
+				setupImGuiContext(context);
+				func();
+			};
+		}
 
 		static void setupImGuiContext(void * context) {
 			GImGui = (decltype(GImGui))context;
 		}
+
+		std::function<void(void * context)> display;
 
 		/*
 		 * Reflectible
@@ -26,7 +34,9 @@ namespace kengine {
 		pmeta_get_attributes(
 			pmeta_reflectible_attribute(&ImGuiComponent::display)
 		);
-		pmeta_get_methods();
+		pmeta_get_methods(
+			pmeta_reflectible_attribute(&ImGuiComponent::setupImGuiContext)
+		);
 		pmeta_get_parents();
 	};
 }

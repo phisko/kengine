@@ -2,16 +2,17 @@
 
 #include <string>
 #include "lua/sol.hpp"
-
-#include "SerializableComponent.hpp"
+#include "reflection/Reflectible.hpp"
 
 namespace kengine {
-    class LuaComponent : public putils::Reflectible<LuaComponent>,
-                         public SerializableComponent<LuaComponent> {
+    class LuaComponent : public putils::Reflectible<LuaComponent> {
     public:
-        LuaComponent(const std::vector<std::string> & scripts = {})
-                : _scripts(scripts) {
-        }
+        LuaComponent(const std::vector<std::string> & scripts = {}) : _scripts(scripts) {}
+
+		LuaComponent(const LuaComponent &) = default;
+		LuaComponent & operator=(const LuaComponent &) = default;
+		LuaComponent(LuaComponent &&) = default;
+		LuaComponent & operator=(LuaComponent &&) = default;
 
     public:
         sol::table meta;
@@ -27,7 +28,6 @@ namespace kengine {
         const std::vector<std::string> & getScripts() const noexcept { return _scripts; }
 
     private:
-        const std::string type = pmeta_nameof(LuaComponent);
         std::vector<std::string> _scripts;
 
         /*
@@ -36,7 +36,6 @@ namespace kengine {
     public:
         pmeta_get_class_name(LuaComponent);
         pmeta_get_attributes(
-                pmeta_reflectible_attribute(&LuaComponent::type),
                 pmeta_reflectible_attribute_private(&LuaComponent::_scripts),
                 pmeta_reflectible_attribute(&LuaComponent::meta)
         );

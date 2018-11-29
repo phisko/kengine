@@ -1,15 +1,16 @@
 #pragma once
 
 #include <string>
-#include "SerializableComponent.hpp"
 
 namespace kengine {
-    class PyComponent : public putils::Reflectible<PyComponent>,
-                         public SerializableComponent<PyComponent> {
+    class PyComponent : public putils::Reflectible<PyComponent> {
     public:
-        PyComponent(const std::vector<std::string> & scripts = {})
-                : _scripts(scripts) {
-        }
+        PyComponent(const std::vector<std::string> & scripts = {}) : _scripts(scripts) {}
+
+		PyComponent(const PyComponent &) = default;
+		PyComponent & operator=(const PyComponent &) = default;
+		PyComponent(PyComponent &&) = default;
+		PyComponent & operator=(PyComponent &&) = default;
 
     public:
         void attachScript(const std::string & file) noexcept { _scripts.push_back(file); }
@@ -22,7 +23,6 @@ namespace kengine {
         const std::vector<std::string> & getScripts() const noexcept { return _scripts; }
 
     private:
-        const std::string type = pmeta_nameof(PyComponent);
         std::vector<std::string> _scripts;
 
         /*
@@ -31,7 +31,6 @@ namespace kengine {
     public:
         pmeta_get_class_name(PyComponent);
         pmeta_get_attributes(
-                pmeta_reflectible_attribute(&PyComponent::type),
                 pmeta_reflectible_attribute_private(&PyComponent::_scripts)
         );
         pmeta_get_methods(

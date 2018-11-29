@@ -10,65 +10,64 @@
 namespace kengine {
     class PhysicsSystem : public kengine::System<PhysicsSystem, packets::Position::Query> {
     public:
-        PhysicsSystem(kengine::EntityManager & em) : _em(em) {}
+        PhysicsSystem(kengine::EntityManager & em) : System(em), _em(em) {}
 
     public:
         void execute() final {
-            for (const auto go : _em.getGameObjects<PhysicsComponent>())
-                updatePosition(*go);
+            for (auto & [e, phys] : _em.getEntities<PhysicsComponent>())
+                updatePosition(e, phys);
         }
 
     public:
         void handle(const packets::Position::Query & q) {
-            std::vector<kengine::GameObject *> found;
+            std::vector<Entity *> found;
 
-            for (const auto go : _em.getGameObjects<kengine::PhysicsComponent>()) {
-                auto & box = go->getComponent<kengine::TransformComponent3d>().boundingBox;
+            for (const auto & [e, phys, transform] : _em.getEntities<PhysicsComponent, TransformComponent3f>()) {
+                auto & box = transform.boundingBox;
                 if (box.intersect(q.box))
-                    found.push_back(go);
+                    found.push_back(&e);
             }
 
-            sendTo( packets::Position::Response { found }, *q.sender);
-        }
+			sendTo(packets::Position::Response{ found }, *q.sender);
+		}
 
-        // Helpers
-    private:
-        void updatePosition(kengine::GameObject & go) {
-            const auto & phys = go.getComponent<PhysicsComponent>();
-            if (phys.fixed)
-                return;
+		// Helpers
+	private:
+		void updatePosition(Entity & e, const PhysicsComponent & phys) {
+			if (phys.fixed)
+				return;
 
-            auto & box = go.getComponent<kengine::TransformComponent3d>().boundingBox;
+			auto & box = e.get<TransformComponent3f>().boundingBox;
 
-            const auto dest = getNewPos(box.topLeft, phys.movement, phys.speed);
-            if (dest == box.topLeft)
-                return;
-            box.topLeft = dest;
+			const auto dest = getNewPos(box.topLeft, phys.movement, phys.speed);
+			if (dest == box.topLeft)
+				return;
+			box.topLeft = dest;
 
-            if (phys.solid)
-                checkCollisions(go, box);
-        }
+			if (phys.solid)
+				checkCollisions(e, box);
+		}
 
-        putils::Point3d getNewPos(const putils::Point3d & pos, const putils::Point3d & movement, double speed) {
-            return putils::Point3d {
-                    pos.x + movement.x * time.getDeltaFrames() * speed,
-                    pos.y + movement.y * time.getDeltaFrames() * speed,
-                    pos.z + movement.z * time.getDeltaFrames() * speed,
-            };
-        }
+		putils::Point3f getNewPos(const putils::Point3f & pos, const putils::Vector3f & movement, float speed) {
+			return {
+					pos.x + movement.x * time.getDeltaFrames() * speed,
+					pos.y + movement.y * time.getDeltaFrames() * speed,
+					pos.z + movement.z * time.getDeltaFrames() * speed,
+			};
+		}
 
-        void checkCollisions(kengine::GameObject & go, const putils::Rect3d & box) {
-            for (const auto obj : _em.getGameObjects<kengine::PhysicsComponent>()) {
-                if (obj == &go)
-                    continue;
+		void checkCollisions(Entity & go, const putils::Rect3f & box) {
+			for (const auto & [obj, phys, transform] : _em.getEntities<PhysicsComponent, TransformComponent3f>()) {
+				if (&obj == &go)
+					continue;
 
-                const auto & other = obj->getComponent<kengine::TransformComponent3d>().boundingBox;
-                if (box.intersect(other))
-                    send(kengine::packets::Collision{ go, *obj });
-            }
-        }
+				const auto & other = transform.boundingBox;
+				if (box.intersect(other))
+					send(packets::Collision{ go, obj });
+			}
+		}
 
-    private:
-        kengine::EntityManager & _em;
-    };
+	private:
+		EntityManager & _em;
+	};
 }

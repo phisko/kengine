@@ -4,28 +4,22 @@
 #include <cmath>
 #include <vector>
 #include <memory>
-#include "System.hpp"
-#include "GameObject.hpp"
 #include "Mediator.hpp"
 #include "pluginManager/PluginManager.hpp"
 #include "Timer.hpp"
-#include "common/packets/RegisterGameObject.hpp"
-#include "common/packets/RemoveGameObject.hpp"
+#include "common/packets/RegisterEntity.hpp"
+#include "common/packets/RemoveEntity.hpp"
+#include "ISystem.hpp"
 
 namespace kengine {
-    class EntityManager;
+	class Entity;
 
     class SystemManager : public putils::Mediator {
     public:
-        SystemManager() = default;
-        ~SystemManager() = default;
+		SystemManager(size_t threads = 0) : Mediator(threads) {}
 
     public:
-        SystemManager(SystemManager const & o) = delete;
-        SystemManager & operator=(SystemManager const & o) = delete;
-
-    public:
-        void execute(const std::function<void()> & betweenSystems = []{}) noexcept {
+        void execute() noexcept {
             if (_first) {
                 _first = false;
                 resetTimers();
@@ -37,16 +31,18 @@ namespace kengine {
                 auto & time = s->time;
                 auto & timer = time.timer;
 
-                if (time.alwaysCall || timer.isDone()) {
-                    updateTime(*s);
-                    try {
-                        s->execute();
-                        betweenSystems();
-                    }
-                    catch (const std::exception & e) { std::cerr << e.what() << std::endl; }
-                }
-            }
-        }
+				if (time.alwaysCall || timer.isDone()) {
+					updateTime(*s);
+					s->execute();
+					for (const auto & f : _afterSystem)
+						f();
+					_afterSystem.clear();
+				}
+			}
+		}
+		
+    public:
+		void runAfterSystem(const std::function<void()> & func) { _afterSystem.push_back(func); }
 
     private:
         void updateSystemList() noexcept {
@@ -178,8 +174,8 @@ namespace kengine {
         }
 
     public:
-        void setSpeed(double speed) noexcept { _speed = speed; }
-        double getSpeed() const noexcept { return _speed; }
+        void setSpeed(float speed) noexcept { _speed = speed; }
+        float getSpeed() const noexcept { return _speed; }
         void pause() noexcept { _speed = 0; }
         void resume() noexcept { _speed = 1; }
 
@@ -188,18 +184,20 @@ namespace kengine {
          */
 
     protected:
-        void registerGameObject(GameObject & gameObject) noexcept {
-            send(kengine::packets::RegisterGameObject{ gameObject });
+        void registerEntity(Entity & e) noexcept {
+            send(packets::RegisterEntity{ e });
         }
 
-        void removeGameObject(GameObject & gameObject) {
-            send(kengine::packets::RemoveGameObject{ gameObject });
+        void removeEntity(EntityView e) {
+            send(packets::RemoveEntity{ e });
         }
 
     private:
-        double _speed = 1;
+        float _speed = 1;
         std::vector<std::pair<pmeta::type_index, std::unique_ptr<ISystem>>> _toAdd;
         std::vector<pmeta::type_index> _toRemove;
         std::unordered_map<pmeta::type_index, std::unique_ptr<ISystem>> _systems;
+
+		std::vector<std::function<void()>> _afterSystem;
     };
 }
