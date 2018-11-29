@@ -29,6 +29,21 @@ Entity &createEntity(Func && postCreate);
 
 Creates a new `Entity`, calls `postCreate` on it, and registers it to the existing `Systems`.
 
+##### operator+=
+
+```cpp
+template<typename Func> Func: void(Entity &)
+Entity operator+=(Func && postCreate);
+```
+
+Equivalent to `createEntity`. Allows for syntax such as:
+
+```cpp
+em += [](kengine::Entity & e) {
+  e += kengine::TransformComponent3f{};
+};
+```
+
 ##### removeEntity
 
 ```cpp
