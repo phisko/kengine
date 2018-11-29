@@ -15,26 +15,16 @@ class System;
 
 A `System` is defined by its sub-type (see `CRTP`) and the list of `DataPackets` types it would like to receive.
 
+##### RegisterEntity and RegisterEntity
+
+If a `System` would like to be notified for each new `Entity` that is created, it can receive the [RegisterEntity](common/packets/RegisterEntity.hpp) and/or [RemoveEntity](common/packets/RemoveEntity.hpp) datapackets.
+
 ##### execute
 
 ```cpp
 virtual void execute() = 0;
 ```
 Runs the system's game logic. Called each frame.
-
-##### registerGameObject
-
-```cpp
-virtual void registerGameObject(GameObject &go) {}
-```
-Automatically called for each new `GameObject`.
-
-##### removeGameObject
-
-```cpp
-virtual void removeGameObject(GameObject &go) {}
-```
-Automatically called for each `GameObject` that is removed.
 
 ##### getFrameRate
 

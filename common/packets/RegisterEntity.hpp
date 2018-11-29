@@ -1,11 +1,11 @@
 #pragma once
 
-namespace kengine {
-	class Entity;
+#include "Entity.hpp"
 
+namespace kengine {
     namespace packets {
         struct RegisterEntity {
-            Entity & e;
+            Entity e;
         };
     }
 }

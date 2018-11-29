@@ -456,8 +456,7 @@ namespace kengine {
 	}
 
 	void SfSystem::handle(const packets::RegisterEntity & p) {
-		auto & e = p.e;
-
+		const auto e = p.e;
 		if (e.has<SfComponent>() || e.has<GraphicsComponent>())
 			attachNormal(e);
 		if (e.has<DebugGraphicsComponent>())
@@ -466,7 +465,7 @@ namespace kengine {
 			attachGUI(e);
 	}
 
-	void SfSystem::attachDebug(Entity & e) {
+	void SfSystem::attachDebug(Entity e) {
 		const auto & debug = e.get<DebugGraphicsComponent>();
 
 		auto & comp = e.has<SfComponent>() ?
@@ -503,7 +502,7 @@ namespace kengine {
 		}
 	}
 
-	void SfSystem::attachGUI(Entity & e) {
+	void SfSystem::attachGUI(Entity e) {
 		static auto theme = _config.find("theme") != _config.end() ? tgui::Theme::create(_config["theme"]) : nullptr;
 		auto & gui = e.get<GUIComponent>();
 
@@ -543,7 +542,7 @@ namespace kengine {
 		}
 	}
 
-	void SfSystem::attachNormal(Entity & e) {
+	void SfSystem::attachNormal(Entity e) {
 		pmeta_with(e.get<GraphicsComponent>()) {
 			auto & comp = e.attach<SfComponent>();
 

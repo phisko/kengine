@@ -36,7 +36,7 @@ namespace kengine {
 		}
 
     public:
-		void removeEntity(const EntityView & e) {
+		void removeEntity(EntityView e) {
 			removeEntity(e.id);
 		}
 

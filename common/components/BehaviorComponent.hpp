@@ -1,9 +1,10 @@
 #pragma once
 
-#include "SerializableComponent.hpp"
+#include <functional>
+#include "reflection/Reflectible.hpp"
 
 namespace kengine {
-	class BehaviorComponent : public kengine::SerializableComponent<BehaviorComponent>
+	class BehaviorComponent
 	{
 	public:
 		BehaviorComponent(const std::function<void()> & func = nullptr) : func(func) {}
@@ -14,5 +15,7 @@ namespace kengine {
 		pmeta_get_attributes(
 			pmeta_reflectible_attribute(&BehaviorComponent::func)
 		);
+		pmeta_get_methods();
+		pmeta_get_parents();
 	};
 }

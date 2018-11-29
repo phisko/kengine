@@ -35,9 +35,9 @@ namespace kengine {
 		void setShouldClear(bool shouldClear) { _shouldClear = shouldClear; }
 
     private:
-		void attachDebug(Entity & go);
-		void attachGUI(Entity & go);
-		void attachNormal(Entity & go);
+		void attachDebug(Entity go);
+		void attachGUI(Entity go);
+		void attachNormal(Entity go);
 		void attachLayer(SfComponent & comp, const kengine::GraphicsComponent::Layer & layer, const putils::Rect3f & boundingBox);
 
     public:

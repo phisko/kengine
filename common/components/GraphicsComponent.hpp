@@ -39,7 +39,7 @@ namespace kengine {
 		std::vector<Layer> layers;
 
 		Layer & addLayer(const std::string & name, const std::string & appearance) {
-			layers.push_back({ name, appearance });
+			layers.emplace_back(name, appearance);
 			return layers.back();
 		}
 

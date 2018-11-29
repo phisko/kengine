@@ -161,18 +161,6 @@ namespace kengine {
 						[](EntityView self) { return self.has<T>(); }
 						)
 				);
-
-				// _.registerEntityMember(putils::concat("attach", T::get_class_name()),
-				// 	std::function<T &(kengine::Entity &)>(
-				// 		[](kengine::Entity & self) { return std::ref(self.attach<T>()); }
-				// 		)
-				// );
-
-				// _.registerEntityMember(putils::concat("detach", T::get_class_name()),
-				// 	std::function<void(kengine::Entity &)>(
-				// 		[](kengine::Entity & self) { self.detach<T>(); }
-				// 		)
-				// );
 			}}
 		}
 
