@@ -153,8 +153,8 @@ int main(int, char **av) {
     try {
         auto &lua = em.getSystem<kengine::LuaSystem>();
         lua.registerTypes<
-                kengine::TransformComponent3f, putils::Point<float, 3>, putils::Rect<float, 3>,
-                kengine::LuaComponent
+			kengine::TransformComponent3f, putils::Point<float, 3>, putils::Rect<float, 3>,
+			kengine::LuaComponent
         >();
     }
     catch (const std::out_of_range &) {} // If the LuaSystem wasn't found, ignore
