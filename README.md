@@ -108,21 +108,21 @@ Below is a commented main function that creates an entity and attaches some comp
 // Simple system that outputs the transform and lua components of each entity that has them
 class DebugSystem : public kengine::System<DebugSystem> {
 public:
-	DebugSystem(kengine::EntityManager & em) : System<DebugSystem>(em), _em(em) {}
+    DebugSystem(kengine::EntityManager & em) : System<DebugSystem>(em), _em(em) {}
 
-	void execute() final {
-		for (const auto & [e, transform, lua] : _em.getEntities<kengine::TransformComponent3f, kengine::LuaComponent>()) {
-			std::cout << "Entity " << e.id << '\n';
+    void execute() final {
+        for (const auto & [e, transform, lua] : _em.getEntities<kengine::TransformComponent3f, kengine::LuaComponent>()) {
+            std::cout << "Entity " << e.id << '\n';
 
-			std::cout << "\tTransform: " << transform.boundingBox << '\n';
+            std::cout << "\tTransform: " << transform.boundingBox << '\n';
 
-			std::cout << "\tScripts:" << '\n';
-			for (const auto & script : lua.getScripts())
-				std::cout << "\t\t[" << script << "]\n";
+            std::cout << "\tScripts:" << '\n';
+            for (const auto & script : lua.getScripts())
+                std::cout << "\t\t[" << script << "]\n";
 
-			std::cout << '\n';
-		}
-	}
+            std::cout << '\n';
+        }
+    }
 
 private:
 	kengine::EntityManager & _em;
@@ -145,16 +145,16 @@ int main(int, char **av) {
 
     // Create an Entity and attach Components to it
     em += [](kengine::Entity e) {
-		e += kengine::TransformComponent3f({ 42.f, 0.f, 42.f }); // Parameter is a Point3f for position
-		e += kengine::LuaComponent({ "scripts/unit.lua" }); // Parameter is a vector of scripts
+        e += kengine::TransformComponent3f({ 42.f, 0.f, 42.f }); // Parameter is a Point3f for position
+        e += kengine::LuaComponent({ "scripts/unit.lua" }); // Parameter is a vector of scripts
     };
 
 	// Register types to be used in lua
     try {
         auto &lua = em.getSystem<kengine::LuaSystem>();
         lua.registerTypes<
-                kengine::TransformComponent3f, putils::Point<float, 3>, putils::Rect<float, 3>,
-                kengine::LuaComponent
+            kengine::TransformComponent3f, putils::Point<float, 3>, putils::Rect<float, 3>,
+            kengine::LuaComponent
         >();
     }
     catch (const std::out_of_range &) {} // If the LuaSystem wasn't found, ignore

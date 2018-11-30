@@ -43,3 +43,19 @@ template<typename T>
 T &getSystem();
 ```
 Gets the `System` of type `T`.
+
+##### runTask
+```cpp
+template<typename F> // F: void()
+void runTask(F && f);
+```
+
+Runs `f` in a thread pool.
+
+##### completeTasks
+
+```cpp
+void completeTasks();
+```
+
+Waits for the thread pool to complete its tasks.
