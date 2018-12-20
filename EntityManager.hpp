@@ -1,6 +1,5 @@
 #pragma once
 
-#include <execution>
 #include <unordered_map>
 #include <vector>
 #include "SystemManager.hpp"
@@ -47,7 +46,7 @@ namespace kengine {
 
 			for (auto & collection : _archetypes) {
 				if (collection.mask == mask) {
-					const auto tmp = std::find(std::execution::par_unseq, collection.entities.begin(), collection.entities.end(), id);
+					const auto tmp = std::find(collection.entities.begin(), collection.entities.end(), id);
 					if (collection.entities.size() > 1) {
 						std::swap(*tmp, collection.entities.back());
 						collection.sorted = false;
@@ -77,7 +76,7 @@ namespace kengine {
 					return false;
 
 				if (!sorted) {
-					std::sort(std::execution::par_unseq, entities.begin(), entities.end());
+					std::sort(entities.begin(), entities.end());
 					sorted = true;
 				}
 
@@ -210,7 +209,7 @@ namespace kengine {
 			}
 
 			if (!_toReuseSorted) {
-				std::sort(std::execution::par_unseq, _toReuse.begin(), _toReuse.end(), std::greater<Entity::ID>());
+				std::sort(_toReuse.begin(), _toReuse.end(), std::greater<Entity::ID>());
 				_toReuseSorted = true;
 			}
 
@@ -232,7 +231,7 @@ namespace kengine {
 				if (collection.mask == oldMask) {
 					const auto size = collection.entities.size();
 					if (size > 1) {
-						const auto it = std::find(std::execution::par_unseq, collection.entities.begin(), collection.entities.end(), id);
+						const auto it = std::find(collection.entities.begin(), collection.entities.end(), id);
 						std::iter_swap(it, collection.entities.begin() + size - 1);
 					}
 					collection.entities.pop_back();
