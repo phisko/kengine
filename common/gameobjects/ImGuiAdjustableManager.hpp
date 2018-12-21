@@ -18,9 +18,6 @@ namespace kengine {
 			for (const auto & [e, comp] : em.getEntities<AdjustableComponent>()) {
 				f << comp.name << separator;
 				switch (comp.adjustableType) {
-				case AdjustableComponent::String:
-					f << comp.s;
-					break;
 				case AdjustableComponent::Int:
 					f << comp.i;
 					break;
@@ -59,10 +56,6 @@ namespace kengine {
 				};
 
 				switch (comp.adjustableType) {
-				case AdjustableComponent::String:
-					comp.s = val;
-					assignPtr(comp.sPtr, comp.s);
-					break;
 				case AdjustableComponent::Int:
 					comp.i = putils::parse<int>(val);
 					assignPtr(comp.iPtr, comp.i);
@@ -169,17 +162,6 @@ namespace kengine {
 			ImGui::NextColumn();
 
 			switch (comp.adjustableType) {
-			case AdjustableComponent::String: {
-				char buff[1024];
-				const auto ret = comp.s.copy(buff, sizeof(buff));
-				buff[ret] = 0;
-
-				ImGui::InputText(putils::concat("##", comp.name).c_str(), buff, sizeof(buff));
-				comp.s = buff;
-				if (comp.sPtr != nullptr)
-					*comp.sPtr = comp.s;
-				break;
-			}
 			case AdjustableComponent::Bool: {
 				ImGui::Checkbox(putils::concat("##", comp.name).c_str(), &comp.b);
 				if (comp.bPtr != nullptr)
@@ -227,7 +209,7 @@ namespace kengine {
 						std::vector<AdjustableComponent *> comps;
 
 						for (const auto &[e, _] : em.getEntities<AdjustableComponent>()) {
-							if (_.name.find(nameSearch) == std::string::npos)
+							if (_.name.find(nameSearch) == (size_t)-1)
 								continue;
 							comps.emplace_back(&_);
 						}
