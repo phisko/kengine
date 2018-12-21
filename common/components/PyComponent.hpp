@@ -9,9 +9,14 @@
 #endif
 
 #define PUTILS_STRING_LENGTH KENGINE_MAX_PYTHON_SCRIPT_PATH
-
 #include "string.hpp"
+#undef PUTILS_STRING_LENGTH
+
+#define PUTILS_VECTOR_CLASS putils::string<KENGINE_MAX_PYTHON_SCRIPT_PATH>
+#define PUTILS_VECTOR_LENGTH KENGINE_MAX_PYTHON_SCRIPTS
 #include "vector.hpp"
+#undef PUTILS_VECTOR_CLASS 
+#undef PUTILS_VECTOR_LENGTH 
 
 namespace kengine {
     class PyComponent : public putils::Reflectible<PyComponent> {

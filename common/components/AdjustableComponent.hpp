@@ -6,10 +6,15 @@
 
 #define PUTILS_STRING_LENGTH KENGINE_ADJUSTABLE_NAME_MAX_LENGTH
 #include "string.hpp"
+#undef PUTILS_STRING_LENGTH
+
 #include "reflection/Reflectible.hpp"
 
 namespace kengine {
 	class AdjustableComponent {
+	public:
+		using string = putils::string<KENGINE_ADJUSTABLE_NAME_MAX_LENGTH>;
+
 	public:
 		AdjustableComponent() = default;
 
@@ -21,7 +26,7 @@ namespace kengine {
 		AdjustableComponent(const char * name, float d) : name(name), d(d), adjustableType(Double) {}
 		AdjustableComponent(const char * name, int i) : name(name), i(i), adjustableType(Int) {}
 
-		putils::string<KENGINE_ADJUSTABLE_NAME_MAX_LENGTH> name;
+		string name;
 
 		bool * bPtr = nullptr;
 		float * dPtr = nullptr;

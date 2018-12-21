@@ -1,13 +1,24 @@
 #pragma once
 
+#ifndef KENGINE_DEBUG_GRAPHICS_TEXT_MAX_LENGTH
+# define KENGINE_DEBUG_GRAPHICS_TEXT_MAX_LENGTH 64
+#endif
+
+#define PUTILS_STRING_LENGTH KENGINE_DEBUG_GRAPHICS_TEXT_MAX_LENGTH
+#include "string.hpp"
+#undef PUTILS_STRING_LENGTH
+
 #include "reflection/Reflectible.hpp"
 
 namespace kengine {
 	class DebugGraphicsComponent {
 	public:
+		using string = putils::string<KENGINE_DEBUG_GRAPHICS_TEXT_MAX_LENGTH>;
+
+	public:
 		DebugGraphicsComponent() = default;
 
-		DebugGraphicsComponent(const std::string & text, unsigned int textSize, const std::string & font, const putils::Point3f & startPos, unsigned int color)
+		DebugGraphicsComponent(const char * text, unsigned int textSize, const char * font, const putils::Point3f & startPos, unsigned int color)
 			: text(text), textSize(textSize), font(font), startPos(startPos), color(color), debugType(Text) {}
 
 		DebugGraphicsComponent(const putils::Point3f & startPos, const putils::Point3f & endPos, float thickness, unsigned int color)
@@ -19,9 +30,9 @@ namespace kengine {
 		DebugGraphicsComponent(const putils::Rect3f & box, unsigned int color)
 			: box(box), color(color), debugType(Box) {}
 
-		std::string text;
+		string text;
 		unsigned int textSize;
-		std::string font;
+		string font;
 
 		putils::Point3f startPos;
 		putils::Point3f endPos;

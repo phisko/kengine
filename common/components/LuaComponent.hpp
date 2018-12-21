@@ -10,10 +10,13 @@
 
 #define PUTILS_STRING_LENGTH KENGINE_MAX_LUA_SCRIPT_PATH
 #include "string.hpp"
+#undef PUTILS_STRING_LENGTH
 
 #define PUTILS_VECTOR_LENGTH KENGINE_MAX_LUA_SCRIPTS
 #define PUTILS_VECTOR_CLASS putils::string<KENGINE_MAX_LUA_SCRIPT_PATH>
 #include "vector.hpp"
+#undef PUTILS_VECTOR_LENGTH 
+#undef PUTILS_VECTOR_CLASS
 
 #include "lua/sol.hpp"
 #include "reflection/Reflectible.hpp"
