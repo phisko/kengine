@@ -338,9 +338,9 @@ namespace kengine {
 					_.removeItemByIndex(i);
 				size_t i = 0;
 				for (; i < _.getItemCount(); ++i)
-					_.changeItemByIndex(i, gui.list.items[i]);
+					_.changeItemByIndex(i, gui.list.items[i].c_str());
 				for (; i < gui.list.items.size(); ++i)
-					_.addItem(gui.list.items[i]);
+					_.addItem(gui.list.items[i].c_str());
 			}
 		}
 
@@ -354,7 +354,7 @@ namespace kengine {
 			element.frame->setSize(tgui::bindWidth(win) * gui.boundingBox.size.x, tgui::bindHeight(win) * gui.boundingBox.size.z);
 
 			if (element.label != nullptr) {
-				element.label->setText(gui.text);
+				element.label->setText(gui.text.c_str());
 				if (gui.onClick != nullptr) {
 					element.label->disconnectAll("clicked");
 					element.label->connect("clicked", gui.onClick);
@@ -518,7 +518,7 @@ namespace kengine {
 		} else if (gui.guiType == GUIComponent::List) {
 			element.frame = theme != nullptr ? theme->load("ListBox") : tgui::ListBox::create();
 			if (gui.list.onItemClick != nullptr)
-				static_cast<tgui::ListBox &>(*element.frame).connect("ItemSelected", gui.list.onItemClick);
+				static_cast<tgui::ListBox &>(*element.frame).connect("ItemSelected", [&gui](const std::string & param) { gui.list.onItemClick(param.c_str()); });
 		}
 
 		if (element.frame != nullptr) {
@@ -530,7 +530,7 @@ namespace kengine {
 
 			if (gui.guiType == GUIComponent::Button || gui.guiType == GUIComponent::Text || gui.guiType == GUIComponent::ProgressBar) {
 				element.label = theme != nullptr ? theme->load("Label") : tgui::Label::create();
-				element.label->setText(gui.text);
+				element.label->setText(gui.text.c_str());
 				element.label->setPosition(tgui::bindPosition(element.frame));
 				element.label->setSize(tgui::bindSize(element.frame));
 				element.label->setHorizontalAlignment(tgui::Label::HorizontalAlignment::Center);
