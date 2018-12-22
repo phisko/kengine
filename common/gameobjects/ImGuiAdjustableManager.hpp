@@ -13,8 +13,9 @@ namespace kengine {
 		static constexpr auto separator = ';';
 
 		static void save(kengine::EntityManager & em) {
-			std::ofstream f(saveFile, std::ofstream::trunc);
+			em.save();
 
+			std::ofstream f(saveFile, std::ofstream::trunc);
 			for (const auto & [e, comp] : em.getEntities<AdjustableComponent>()) {
 				f << comp.name << separator;
 				switch (comp.adjustableType) {
@@ -35,6 +36,8 @@ namespace kengine {
 		}
 
 		static void load(kengine::EntityManager & em) {
+			em.runAfterSystem([&em] { em.load(); });
+
 			std::unordered_map<std::string, std::string> lines; {
 				std::ifstream f(saveFile);
 				for (std::string line; std::getline(f, line);) {

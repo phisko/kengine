@@ -17,6 +17,9 @@ namespace kengine {
 
         bool isPaused() const noexcept { return time.getDeltaFrames() == 0; }
 
+		virtual void onSave() noexcept {}
+		virtual void onLoad() noexcept {}
+
         struct {
         public:
             putils::Timer::t_duration getDeltaTime() const { return deltaTime; }

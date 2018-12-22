@@ -2,14 +2,17 @@
 
 #ifndef NDEBUG
 #include <iostream>
-#include "reflection/Reflectible.hpp"
 #endif
 
+#include <fstream>
 #include <cstddef>
 #include <unordered_map>
 #include <memory>
 #include <vector>
 #include "meta/type.hpp"
+#include "reflection/Reflectible.hpp"
+#include "not_serializable.hpp"
+#include "string.hpp"
 
 namespace kengine {
 	namespace detail {
@@ -17,6 +20,9 @@ namespace kengine {
 
 		struct MetadataBase {
 			virtual ~MetadataBase() = default;
+			virtual bool save() const = 0;
+			virtual bool load() = 0;
+			virtual size_t getId() const = 0;
 		};
 		using GlobalCompMap = std::unordered_map<pmeta::type_index, std::unique_ptr<MetadataBase>>;
 		static inline GlobalCompMap * components = nullptr;
@@ -28,20 +34,46 @@ namespace kengine {
 		struct Metadata : detail::MetadataBase {
 			std::vector<Comp> array;
 			size_t id = detail::INVALID;
+
+			bool save() const final {
+				if constexpr (putils::is_reflectible<Comp>::value && !std::is_base_of<kengine::not_serializable, Comp>::value) {
+					putils::string<64> file("%s.bin", Comp::get_class_name());
+					std::ofstream f(file.c_str());
+					const auto size = array.size();
+					f.write((const char *)&size, sizeof(size));
+					f.write((const char *)array.data(), size * sizeof(Comp));
+					return true;
+				}
+				return false;
+			}
+
+			bool load() final {
+				if constexpr (putils::is_reflectible<Comp>::value && !std::is_base_of<kengine::not_serializable, Comp>::value) {
+					putils::string<64> file("%s.bin", Comp::get_class_name());
+					std::ifstream f(file.c_str());
+					size_t size;
+					f.read((char *)&size, sizeof(size));
+					array.resize(size);
+					f.read((char *)array.data(), size * sizeof(Comp));
+					return true;
+				}
+				return false;
+			}
+
+			size_t getId() const final { return id;  }
 		};
 
 	public:
-		static inline Comp & get(size_t id) { auto & meta = metadata();
+		static Comp & get(size_t id) { auto & meta = metadata();
 			while (id >= meta.array.size())
 				meta.array.resize(meta.array.size() * 2);
 			return meta.array[id];
 		}
 
-		static inline size_t id() {
+		static size_t id() {
 			static const size_t ret = metadata().id;
 			return ret;
 		}
-
 
 	private:
 		static inline Metadata & metadata() {

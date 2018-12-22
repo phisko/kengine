@@ -62,6 +62,51 @@ namespace kengine {
 			_toReuseSorted = false;
 		}
 
+    public:
+		void load() {
+			SystemManager::load();
+
+			for (size_t i = 0; i < _entities.size(); ++i)
+				removeEntity(i);
+
+			std::ifstream f("entities.bin");
+			size_t size;
+			f.read((char *)&size, sizeof(size));
+			_entities.resize(size);
+			f.read((char *)_entities.data(), size * sizeof(Entity::Mask));
+
+			for (size_t i = 0; i < _entities.size(); ++i) {
+				const auto mask = _entities[i];
+				updateMask(i, mask, true);
+
+				Entity e{ i, mask, this };
+				SystemManager::registerEntity(e);
+			}
+
+			for (const auto &[_, meta] : _components)
+				meta->load();
+		}
+
+		void save() {
+			SystemManager::save();
+
+			std::vector<bool> serializable;
+
+			serializable.resize(_components.size());
+			for (const auto &[_, meta] : _components)
+				serializable[meta->getId()] = meta->save();
+
+			std::ofstream f("entities.bin");
+			const auto size = _entities.size();
+			f.write((const char *)&size, sizeof(size));
+			for (Entity::Mask mask : _entities) {
+				for (size_t i = 0; i < serializable.size(); ++i)
+					mask[i] = mask[i] & serializable[i];
+				f.write((const char *)&mask, sizeof(mask));
+			}
+		}
+
+
 	private:
 		struct Archetype {
 			Entity::Mask mask;
@@ -220,8 +265,8 @@ namespace kengine {
 
     private:
 		friend class Entity;
-		void updateMask(Entity::ID id, Entity::Mask newMask) {
-			const auto oldMask = _entities[id];
+		void updateMask(Entity::ID id, Entity::Mask newMask, bool ignoreOldMask = false) {
+			const auto oldMask = ignoreOldMask ? 0 : _entities[id];
 
 			int done = 0;
 			if (oldMask == 0) // Will not have to remove

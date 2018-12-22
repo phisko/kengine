@@ -179,6 +179,24 @@ namespace kengine {
         void pause() noexcept { _speed = 0; }
         void resume() noexcept { _speed = 1; }
 
+    public:
+		void load() {
+			for (const auto & [_, sys] : _systems)
+				sys->onLoad();
+			for (const auto & f : _onLoad)
+				f();
+		}
+
+		void save() {
+			for (const auto & [_, sys] : _systems)
+				sys->onSave();
+			for (const auto & f : _onSave)
+				f();
+		}
+
+		void onLoad(const std::function<void()> & func) { _onLoad.push_back(func); }
+		void onSave(const std::function<void()> & func) { _onSave.push_back(func); }
+
         /*
          * Internal
          */
@@ -198,6 +216,8 @@ namespace kengine {
         std::vector<pmeta::type_index> _toRemove;
         std::unordered_map<pmeta::type_index, std::unique_ptr<ISystem>> _systems;
 
+		std::vector<std::function<void()>> _onLoad;
+		std::vector<std::function<void()>> _onSave;
 		std::vector<std::function<void()>> _afterSystem;
     };
 }
