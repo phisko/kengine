@@ -64,8 +64,6 @@ namespace kengine {
 
     public:
 		void load() {
-			SystemManager::load();
-
 			for (size_t i = 0; i < _entities.size(); ++i)
 				removeEntity(i);
 
@@ -85,6 +83,8 @@ namespace kengine {
 
 			for (const auto &[_, meta] : _components)
 				meta->load();
+
+			SystemManager::load();
 		}
 
 		void save() {
