@@ -2,10 +2,10 @@
 
 #include <functional>
 #include "reflection/Reflectible.hpp"
+#include "not_serializable.hpp"
 
 namespace kengine {
-	class BehaviorComponent
-	{
+	class BehaviorComponent : not_serializable {
 	public:
 		BehaviorComponent(const std::function<void()> & func = nullptr) : func(func) {}
 

@@ -2,12 +2,13 @@
 
 #include <functional>
 #include "reflection/Reflectible.hpp"
+#include "not_serializable.hpp"
 
 struct ImGuiContext;
 extern ImGuiContext * GImGui;
 
 namespace kengine {
-	struct ImGuiComponent {
+	struct ImGuiComponent : kengine::not_serializable {
 		ImGuiComponent(const std::function<void()> & func = nullptr) : display([func](auto context) {
 			setupImGuiContext(context);
 			func();
