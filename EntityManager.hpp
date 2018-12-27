@@ -75,10 +75,14 @@ namespace kengine {
 
 			for (size_t i = 0; i < _entities.size(); ++i) {
 				const auto mask = _entities[i];
-				updateMask(i, mask, true);
-
-				Entity e{ i, mask, this };
-				SystemManager::registerEntity(e);
+				if (mask != 0) {
+					updateMask(i, mask, true);
+					Entity e{ i, mask, this };
+					SystemManager::registerEntity(e);
+				} else {
+					_toReuse.emplace_back(i);
+					_toReuseSorted = false;
+				}
 			}
 
 			for (const auto &[_, meta] : _components)
