@@ -35,7 +35,7 @@ namespace kengine {
 		}
 
     public:
-        void executeScript(const std::string & fileName) noexcept {
+        void executeScript(const char * fileName) noexcept {
 			_lua.script_file(fileName);
         }
 

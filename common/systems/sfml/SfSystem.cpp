@@ -299,7 +299,7 @@ namespace kengine {
 		auto & sprite = static_cast<pse::Sprite &>(item);
 
 		try {
-			sprite.setTexture(appearance);
+			sprite.setTexture(appearance.str());
 		}
 		catch (const std::exception & e) {
 			std::cerr << "[SfSystem] Failed to set appearance: " << e.what() << std::endl;
@@ -476,7 +476,7 @@ namespace kengine {
 
 		switch (debug.debugType) {
 			case DebugGraphicsComponent::Text: {
-				v = std::make_unique<pse::Text>(debug.text.c_str(), toWorldPos(debug.startPos), sf::Color(debug.color), debug.textSize, debug.font);
+				v = std::make_unique<pse::Text>(debug.text.c_str(), toWorldPos(debug.startPos), sf::Color(debug.color), debug.textSize, debug.font.str());
 				break;
 			}
 			case DebugGraphicsComponent::Line: {
@@ -554,11 +554,11 @@ namespace kengine {
 
 	void SfSystem::attachLayer(SfComponent & comp, const GraphicsComponent::Layer & layer, const putils::Rect3f & boundingBox) {
 		try {
-			auto v = getResource(layer.appearance);
+			auto v = getResource(layer.appearance.str());
 			v->setPosition(toWorldPos(boundingBox.topLeft + layer.boundingBox.topLeft));
 			v->setSize(toWorldSize(getLayerSize(boundingBox.size, layer.boundingBox.size)));
 			_engine.addItem(*v, (std::size_t)(boundingBox.topLeft.y + layer.boundingBox.topLeft.y));
-			comp.viewItems.push_back({ layer.name, std::move(v) });
+			comp.viewItems.push_back({ layer.name.str(), std::move(v) });
 		} catch (const std::exception &) {
 			send(kengine::packets::Log{ putils::concat("[SfSystem] Unknown appearance: ", layer.appearance) });
 		}

@@ -140,7 +140,7 @@ namespace kengine {
 				for (const auto & [go, comp] : _em.getEntities<CompType>()) {
 					_.setSelf(go);
 					for (const auto & s : comp.getScripts())
-						_.executeScript(s);
+						_.executeScript(s.c_str());
 				}
 				_.unsetSelf();
 			}}

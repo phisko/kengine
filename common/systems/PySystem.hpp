@@ -46,7 +46,7 @@ namespace kengine {
 		}
 
     public:
-		void executeScript(const std::string & fileName) noexcept {
+		void executeScript(const char * fileName) noexcept {
 			py::eval_file(fileName, py::globals());
 		}
 
