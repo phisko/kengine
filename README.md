@@ -7,8 +7,9 @@ This new version features a greatly optimized memory architecture, better cache-
 It has however (temporarily) lost a couple of features:
 * Entities no longer have names. If you really need to associate strings to your Entities you can create a `NameComponent` or something similar
 * Entities can no longer be serialized to `ostream`. I am currently working to re-implement this feature.
-* Because of the previous point, it is no longer possible to `save` and `load` the game state. I am currently working to re-implement this feature, in a manner that will be better optimized than the original
-(binary saving instead of JSON serialization)
+~~* Because of the previous point, it is no longer possible to `save` and `load` the game state. I am currently working to re-implement this feature, in a manner that will be better optimized than the original
+(binary saving instead of JSON serialization)~~
+* Saves now work (in binary format, using a separate save file for each component pool and another file for the list of entities and their masks) but have not been merged into the `master` branch yet. If you desperately need them ASAP, either use the `develop` branch or open an issue and I'll merge it.
 
 ![koala](koala.png)
 
