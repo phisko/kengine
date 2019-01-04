@@ -64,8 +64,14 @@ namespace kengine {
 
     public:
 		void load() {
+			_archetypes.clear();
+			_toReuse.clear();
+
 			for (size_t i = 0; i < _entities.size(); ++i)
-				removeEntity(i);
+				SystemManager::removeEntity(EntityView(i, _entities[i]));
+
+			for (const auto &[_, meta] : _components)
+				meta->load();
 
 			std::ifstream f("entities.bin");
 			size_t size;
@@ -79,14 +85,9 @@ namespace kengine {
 					updateMask(i, mask, true);
 					Entity e{ i, mask, this };
 					SystemManager::registerEntity(e);
-				} else {
+				} else
 					_toReuse.emplace_back(i);
-					_toReuseSorted = false;
-				}
 			}
-
-			for (const auto &[_, meta] : _components)
-				meta->load();
 
 			SystemManager::load();
 		}
@@ -132,8 +133,7 @@ namespace kengine {
 				bool good = true;
 				pmeta_for_each(Comps, [&](auto && type) {
 					using CompType = pmeta_wrapped(type);
-					if (!mask.test(Component<CompType>::id()))
-						good = false;
+					good &= mask.test(Component<CompType>::id());
 				});
 				return good;
 			}
@@ -258,12 +258,13 @@ namespace kengine {
 			}
 
 			if (!_toReuseSorted) {
-				std::sort(_toReuse.begin(), _toReuse.end(), std::greater<Entity::ID>());
+				std::sort(_toReuse.begin(), _toReuse.end());
 				_toReuseSorted = true;
 			}
 
 			const auto id = _toReuse.back();
 			_toReuse.pop_back();
+			assert(id < _entities.size());
 			return Entity(id, 0, this);
 		}
 

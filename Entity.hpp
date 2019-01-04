@@ -48,7 +48,7 @@ namespace kengine {
 		template<typename T>
 		size_t getId() const {
 			static const auto id = Component<T>::id();
-			assert("You are using too many component types" && id < KENGINE_COMPONENT_COUNT);
+			assert("You are using too many component types." && id < KENGINE_COMPONENT_COUNT);
 			return id;
 		}
 
