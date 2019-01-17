@@ -4,7 +4,7 @@
 #include "reflection/Reflectible.hpp"
 
 namespace kengine {
-    struct InputComponent {
+    struct InputComponent : kengine::not_serializable {
         std::function<void(int keycode, bool pressed)> onKey = nullptr;
         std::function<void(float x, float y)> onMouseMove = nullptr;
         std::function<void(int button, float x, float y, bool pressed)> onMouseButton = nullptr;
