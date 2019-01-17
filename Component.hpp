@@ -39,6 +39,10 @@ namespace kengine {
 				if constexpr (putils::is_reflectible<Comp>::value && !std::is_base_of<kengine::not_serializable, Comp>::value) {
 					putils::string<64> file("%s.bin", Comp::get_class_name());
 					std::ofstream f(file.c_str());
+
+					if (!f)
+						return false;
+
 					const auto size = array.size();
 					f.write((const char *)&size, sizeof(size));
 					f.write((const char *)array.data(), size * sizeof(Comp));
@@ -48,9 +52,12 @@ namespace kengine {
 			}
 
 			bool load() final {
-				if constexpr (putils::is_reflectible<Comp>::value && !std::is_base_of<kengine::not_serializable, Comp>::value) {
+				if constexpr (putils::has_member_get_class_name<Comp>::value && !std::is_base_of<kengine::not_serializable, Comp>::value) {
 					putils::string<64> file("%s.bin", Comp::get_class_name());
 					std::ifstream f(file.c_str());
+					if (!f)
+						return false;
+
 					size_t size;
 					f.read((char *)&size, sizeof(size));
 					array.resize(size);
