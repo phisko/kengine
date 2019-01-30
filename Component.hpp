@@ -25,7 +25,7 @@ namespace kengine {
 			virtual size_t getId() const = 0;
 		};
 		using GlobalCompMap = std::unordered_map<pmeta::type_index, std::unique_ptr<MetadataBase>>;
-		static inline GlobalCompMap * components = nullptr;
+		extern GlobalCompMap * components;
 	}
 
 	template<typename Comp>
@@ -71,7 +71,7 @@ namespace kengine {
 		};
 
 	public:
-		static Comp & get(size_t id) { auto & meta = metadata();
+		static Comp & get(size_t id) { static auto & meta = metadata();
 			while (id >= meta.array.size())
 				meta.array.resize(meta.array.size() * 2);
 			return meta.array[id];

@@ -39,9 +39,9 @@ elseif (WIN32)
     set(type STATIC)
 endif ()
 
-add_library(kengine INTERFACE)
-target_link_libraries(kengine INTERFACE mediator pluginManager ${ADDITIONAL_LIBS})
-target_include_directories(kengine INTERFACE . common)
+add_library(kengine ${type} Component.cpp)
+target_link_libraries(kengine PUBLIC mediator pluginManager ${ADDITIONAL_LIBS})
+target_include_directories(kengine PUBLIC . common)
 
 if (KENGINE_SFML)
     add_subdirectory(common/systems/sfml)
