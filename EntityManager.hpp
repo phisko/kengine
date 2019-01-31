@@ -143,7 +143,7 @@ namespace kengine {
 			struct EntityIterator {
 				EntityIterator & operator++() {
 					++index;
-					while (index < entities.size() && entities[index] == 0)
+					while (index < em._entities.size() && em._entities[index] == 0)
 						++index;
 					return *this;
 				}
@@ -153,32 +153,41 @@ namespace kengine {
 				}
 
 				Entity operator*() const {
-					return Entity(index, entities[index], em);
+					return Entity(index, em._entities[index], &em);
 				}
 
-				const std::vector<Entity::Mask> & entities;
 				size_t index;
-				EntityManager * em;
+				EntityManager & em;
 			};
 
 			auto begin() const {
 				size_t i = 0;
-				while (i < entities.size() && entities[i] == 0)
+				while (i < em._entities.size() && em._entities[i] == 0)
 					++i;
-				return EntityIterator{ entities, i, &em };
+				return EntityIterator{ i, em };
 			}
 
 			auto end() const {
-				return EntityIterator{ entities, entities.size(), &em };
+				return EntityIterator{ em._entities.size(), em };
 			}
 
-			const std::vector<Entity::Mask> & entities;
+			EntityCollection(EntityManager & em) : em(em) {
+				++em._updatesLocked;
+			}
+
+			~EntityCollection() {
+				assert(em._updatesLocked != 0);
+				--em._updatesLocked;
+				if (em._updatesLocked == 0)
+					em.doAllUpdates();
+			}
+
 			EntityManager & em;
 		};
 
 	public:
 		auto getEntities() {
-			return EntityCollection{ _entities, *this };
+			return EntityCollection{ *this };
 		}
 
 	private:
@@ -193,12 +202,12 @@ namespace kengine {
 
 				ComponentIterator & operator++() {
 					++currentEntity;
-					if (currentEntity < (*archetypes)[currentType].entities.size())
+					if (currentEntity < archetypes[currentType].entities.size())
 						return *this;
 
 					currentEntity = 0;
-					for (++currentType; currentType < archetypes->size(); ++currentType)
-						if ((*archetypes)[currentType].matches<Comps...>())
+					for (++currentType; currentType < archetypes.size(); ++currentType)
+						if (archetypes[currentType].matches<Comps...>())
 							break;
 
 					return *this;
@@ -208,36 +217,47 @@ namespace kengine {
 				bool operator!=(const ComponentIterator & rhs) const { return !(*this == rhs); }
 
 				std::tuple<EntityView, Comps &...> operator*() const {
-					auto & archetype = (*archetypes)[currentType];
+					auto & archetype = archetypes[currentType];
 					EntityView e(archetype.entities[currentEntity], archetype.mask);
 					return std::make_tuple(e, std::ref(e.get<Comps>())...);
 				}
 
-				std::vector<Archetype> * archetypes;
+				std::vector<Archetype> & archetypes;
 				size_t currentType;
 				size_t currentEntity;
 			};
 
 			auto begin() const {
 				size_t i = 0;
-				for (; i < archetypes.size(); ++i)
-					if (archetypes[i].matches<Comps...>())
+				for (; i < em._archetypes.size(); ++i)
+					if (em._archetypes[i].matches<Comps...>())
 						break;
 				
-				return ComponentIterator{ &archetypes, i, 0 };
+				return ComponentIterator{ em._archetypes, i, 0 };
 			}
 
 			auto end() const {
-				return ComponentIterator{ &archetypes, archetypes.size(), 0 };
+				return ComponentIterator{ em._archetypes, em._archetypes.size(), 0 };
 			}
 
-			std::vector<Archetype> & archetypes;
+			ComponentCollection(EntityManager & em) : em(em) {
+				++em._updatesLocked;
+			}
+
+			~ComponentCollection() {
+				assert(em._updatesLocked != 0);
+				--em._updatesLocked;
+				if (em._updatesLocked == 0)
+					em.doAllUpdates();
+			}
+
+			EntityManager & em;
 		};
 
     public:
 		template<typename ... Comps>
 		auto getEntities() {
-			return ComponentCollection<Comps...>{ _archetypes };
+			return ComponentCollection<Comps...>{ *this };
 		}
 
     public:
@@ -271,6 +291,19 @@ namespace kengine {
     private:
 		friend class Entity;
 		void updateMask(Entity::ID id, Entity::Mask newMask, bool ignoreOldMask = false) {
+			if (_updatesLocked == 0)
+				doUpdateMask(id, newMask, ignoreOldMask);
+			else
+				_updates.push_back({ id, newMask, ignoreOldMask });
+		}
+
+		void doAllUpdates() {
+			for (const auto & update : _updates)
+				doUpdateMask(update.id, update.newMask, update.ignoreOldMask);
+			_updates.clear();
+		}
+
+		void doUpdateMask(Entity::ID id, Entity::Mask newMask, bool ignoreOldMask) {
 			const auto oldMask = ignoreOldMask ? 0 : _entities[id];
 
 			int done = 0;
@@ -310,6 +343,14 @@ namespace kengine {
 		std::vector<Archetype> _archetypes;
 		std::vector<Entity::ID> _toReuse;
 		bool _toReuseSorted = true;
+
+		struct Update {
+			Entity::ID id;
+			Entity::Mask newMask;
+			bool ignoreOldMask;
+		};
+		std::vector<Update> _updates;
+		std::atomic<size_t> _updatesLocked = 0;
 
 	private:
 		detail::GlobalCompMap _components;
