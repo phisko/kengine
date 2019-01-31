@@ -16,8 +16,8 @@ namespace kengine {
         Entity createEntity(Func && postCreate) {
 			auto e = alloc();
 			postCreate(e);
-			SystemManager::registerEntity(e);
-			return e;
+			SystemManager::registerEntity(getEntity(e.id));
+			return getEntity(e.id);
         }
 
 		template<typename Func>
