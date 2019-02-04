@@ -104,7 +104,6 @@ namespace kengine {
             time.lastCall = putils::Timer::t_clock::now();
             time.timer.setDuration(time.fixedDeltaTime);
 
-            addModule(*system);
             const auto type = system->getType();
 
             auto & ret = *system;
