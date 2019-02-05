@@ -1,0 +1,37 @@
+#pragma once
+
+#include "opengl/Program.hpp"
+
+namespace kengine {
+	class EntityManager;
+	struct DirLightComponent;
+	struct SpotLightComponent;
+}
+
+namespace kengine::Shaders {
+	class ShadowMap : public putils::gl::Program {
+	public:
+		ShadowMap(kengine::EntityManager & em);
+
+		void init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) override;
+		void run(const glm::mat4 & view, const glm::mat4 & proj, const glm::vec3 & camPos, size_t screenWidth, size_t screenHeight) override {}
+		void run(DirLightComponent & light, const putils::Point3f & pos, size_t screenWidth, size_t screenHeight);
+		void run(SpotLightComponent & light, const putils::Point3f & pos, size_t screenWidth, size_t screenHeight);
+
+	private:
+		template<typename T>
+		void runImpl(T & light, const putils::Point3f & pos, size_t screenWidth, size_t screenHeight);
+
+	public:
+		GLint proj;
+		GLint view;
+		GLint model;
+
+		pmeta_get_attributes(
+			pmeta_reflectible_attribute(&ShadowMap::proj),
+			pmeta_reflectible_attribute(&ShadowMap::view),
+			pmeta_reflectible_attribute(&ShadowMap::model)
+		);
+	};
+
+}

@@ -40,19 +40,18 @@ elseif (WIN32)
 endif ()
 
 add_library(kengine ${type} Component.cpp)
-target_link_libraries(kengine PUBLIC mediator pluginManager ${ADDITIONAL_LIBS})
-target_include_directories(kengine PUBLIC . common)
 
 if (KENGINE_SFML)
     add_subdirectory(common/systems/sfml)
 endif ()
 
-if (KENGINE_OGRE)
-    add_subdirectory(common/systems/ogre)
-endif ()
-
-if (KENGINE_B2D)
-    add_subdirectory(common/systems/box2d)
+if (KENGINE_OPENGL)
+    add_subdirectory(common/systems/opengl)
 endif ()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} PARENT_SCOPE)
+
+target_link_libraries(kengine PUBLIC
+    mediator pluginManager ${ADDITIONAL_LIBS}
+)
+target_include_directories(kengine PUBLIC . common ${ADDITIONAL_INCLUDE_PATHS})

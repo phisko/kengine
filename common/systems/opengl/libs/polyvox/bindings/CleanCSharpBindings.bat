@@ -1,0 +1,1 @@
+del /f *.cs *.cxx

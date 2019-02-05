@@ -1,0 +1,65 @@
+Discussed on forums
+===================
+Implement RLE compressor, and use it for blocks in memory and saving to disk.
+Replace shared_ptr's with intrinsic_ptrs?
+Make decimator work with cubic mesh
+Raycaster.
+
+Short term
+==========
+Sort awkward use of 'offset'
+Replace float with uchar for material.
+Mesh smoothing (surface nets?)
+Mesh filters/modifiers - A 'translate' modifier?
+
+
+For Version 1.0
+===============
+Implement Memory Pool
+Clean up normal code - make normal generation a seperate pass.
+Implement mesh smoothing.
+Refine interface to mesh generateion - flags structure?
+Refine interface to volumes and iterators.
+Implement block volume tidy() funtion.
+Remove hard-coded region size.
+Seperate namespaces - PolyVoxCore, PolyVoxUtil, PolyVoxImpl
+Move getChangedRegionGeometry() out of PolyVon and into Thermite?
+Remove/refactor IndexedSurfacePatch? Incorporate into RegionGeometry?
+Change vertex format to ints?
+Check licensing, #regions, etc.
+Decimated version of marching cubes should use less memory.
+Unit test - compare output to reference implementation
+Sort awkward use of 'offset' in decimated marching cubes.
+Use of LinearVolume instead of arrays.
+Add API docs
+Add manual
+Finish OpenGL sample.
+VolumeChangeTracker can be more conservitive regarding when neighbouring regions are modified.
+
+For Version 2.0
+===============
+Detect detatched regions.
+Handle mesh generation for detatched regions.
+Generate ambient lighting from volume?
+Utility function for closing outside surfaces?
+Consider how seperate surface should be generated for a single region.
+Consider transparent materials like glass.
+Allow writing meshes into volumes?
+
+Documentation
+=============
+Define the following terms:
+-Voxel
+-Cell
+-Volume
+-Region
+-Block
+
+Packaging
+=========
+Create components for the NSIS installer (Library, bindings, examples, documentation) - Half done
+Add License
+Add images for installer (and icons)
+Set LZMA compression
+Find a way to include both debug and release builds?
+The .lib files should be part of the 'development' configuration?

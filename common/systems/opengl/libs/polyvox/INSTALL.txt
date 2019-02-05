@@ -1,0 +1,136 @@
+****************
+Building PolyVox
+****************
+
+.. warning ::
+	Before reading this information, be aware that *you may not actually need to build PolyVox in order to use it*. PolyVox is a header-only library and in many cases it is sufficient to simply copy the ``include/PolyVox`` folder into your source tree. This folder contains all the PolyVox header files, and you can probably then include them directly with ``#include "PolyVox/SomeHeaderHere.h"`` without even needing to change your compiler search paths.
+	
+	That said, you *will* need to read the instructions below if you want to build the examples, tests, bindings or documentation which may be helpful in getting you started with PolyVox.
+
+Requirements
+============
+
+To build PolyVox you need:
+
+* `CMake <http://cmake.org>`_ (tested on version 2.8.12.2, later versions should also work)
+* A C++ compiler with support for some C++11 features (tested on GCC 4.8 and VC 2013)
+
+With the following optional packages:
+
+* `Qt version 5.2 of later <https://www.qt.io/>`_ for building the tests and the example applications
+	* ``qcollectiongenerator`` which comes with Qt Assistant is used for bundling the docs for installation
+* `Doxygen <http://doxygen.org>`_ for building the documentation. Version 1.5.7 is needed to build the Qt Assistant docs. 1.7.0 or greater is recommended
+* `Python <http://python.org>`_, `Sphinx <http://sphinx.pocoo.org>`_ and `PyParsing <http://pyparsing.wikispaces.com/>`_ for generating the PolyVox manual in HTML
+	* Version 2 required - see note below.
+* `Python development libraries <http://python.org>`_, `SWIG <http://swig.org/>`_ for generating the Python bindings
+	* Version 3 required - see note below.
+	
+.. note ::
+	Currently we use different versions of Python for generating the documentation (version 2) vs. building the bindings (version 3). However, it is unlikely that you as a user will want to build the documentation as it is available online, or you can view the source *.rst files directly. But if you do want to build both the documentation and the bindings yourself then you will need both versions of Python installed.
+
+Linux
+=====
+
+Navigate to the PolyVox source directory (the directory containing ``INSTALL.txt`` etc.) with and then enter the build directory with::
+
+	cd build
+
+CMake
+-----
+
+Now, we use CMake to generate the makefiles with::
+
+	cmake ..
+
+The ``..`` tells CMake to look in the parent directory for the source. 
+
+By default this will set it to be installed in ``/usr/local`` so if you want to install it elsewhere, set the ``CMAKE_INSTALL_PREFIX`` variable to the path you want to install to.
+
+You can set CMake variables by passing ``-D<variable>:<type>=<value>`` to the ``cmake`` command (the ``:<type>`` part is optional but recommended). For example, to set the install prefix, pass::
+
+	-DCMAKE_INSTALL_PREFIX:PATH=/whatever/you/want
+
+The other available settings for PolyVox are:
+
+``ENABLE_EXAMPLES`` (``ON`` or ``OFF``)
+	Build the example applications that come with PolyVox. Defaults to ``ON``.
+
+``ENABLE_TESTS`` (``ON`` or ``OFF``)
+	Build the test applications that come with PolyVox. Running the tests is detailed in the next section. Defaults to ``ON``.
+
+``ENABLE_BINDINGS`` (``ON`` or ``OFF``)
+	Should the Python bindings to PolyVox be built. This requires the Python development libraries and SWIG to be installed. Defaults to ``ON``.
+
+``CMAKE_BUILD_TYPE`` (``Debug``, ``Release``, ``RelWithDebInfo`` or ``MinSizeRel``)
+	String option to set the type of build. This will automatically set some compilation flags such as the optimisation level or define ``NDEBUG``.
+	
+	For development work against the library
+		Use ``Debug`` or ``RelWithDebInfo``
+	
+	For your final version
+		Use ``Release``
+	
+	For building packages (e.g. for Linux distributions)
+		Use ``RelWithDebInfo``
+
+Building and installing
+-----------------------
+
+Once this has completed successfully, simply run::
+
+	make install
+
+and all should work.
+
+Testing
+-------
+
+To run the tests you do not need to have run ``make install``. Simply run::
+
+	make
+	make test
+
+API Documentation
+-----------------
+
+If you want to generate the API documentation, you'll need Doxygen installed. If you saw ``API Docs available: YES`` at the end of the CMake output then you're all set. To generate the docs, just run::
+
+	make doc
+
+and the documentation can be browsed in plain HTML form at ``<build directory>/library/doc/html/index.html``.
+
+On top of this, if ``qcollectiongenerator`` is installed, PolyVox can also compile and install this documentation as a *Qt Help Collection* file to ``<prefix>/share/doc/packages/polyvox/qthelp/polyvox.qhc`` (this file is in the build directory as ``<build directory>/library/doc/qthelp/polyvox.qhc``). To view this file you need Qt Assistant installed. You can open it with::
+
+	assistant -collectionFile library/doc/qthelp/polyvox.qhc
+
+This allows indexed searching of the documentation and easier browsing.
+
+Manual
+------
+
+As well as the API documentation, PolyVox also provides a user manual. This is written using `Sphinx <http://sphinx.pocoo.org>`_ and so to convert the documentation sources to HTML requires Sphinx and Python to be installed. If these are installed and found then you will see ``Build manual: YES`` in the CMake summary output. If this is the case then just run::
+
+	make manual
+
+and the HTML manual will be available at ``<build directory>/documentation/index.html``.
+
+If you have Sphinx installed but you do not get the confirmation in the CMake output, you may need to set ``SPHINXBUILD_EXECUTABLE`` to the location of your ``sphinx-build`` executable.
+
+If you do not have Python and Sphinx installed and do not want to install them then the manual is just plain text (``.rst`` files) which are readable in their plain form in the ``documentation`` directory of the source distribution.
+
+Windows
+=======
+
+The earlier information about the dependencies, CMake configuration variables and buildable targets is still valid for Windows, so look at the Linux build information in the section above. Then see the notes below on using the CMake GUI.
+
+CMake
+-----
+
+You need CMake installed so get the binary distribution from `CMake.org <http://cmake.org/cmake/resources/software.html>`_. Install it and run the CMake GUI.
+
+Point the source directory to the PolyVox root directory (the directory holding the 'INSTALL.txt' file) and the build directory to the ``build`` subdirectory. Then, click the ``Configure`` button. Click through the dialog box that appears and once you've clicked ``Finish`` you should see text appearing in the bottom text area. Once this has finished, some options will appear in the top area. The purpose of these options in detailed in the Linux→CMake section above. Once you have set these options to what you please, click ``Configure`` again. If it completes without errors then you can click ``Generate`` which will generate your compilers project files in the build directory.
+
+Building
+--------
+
+Open the project files in your IDE and build the project as you normally would.

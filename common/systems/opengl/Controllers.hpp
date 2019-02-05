@@ -1,0 +1,142 @@
+#pragma once
+
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+#include "components/LightComponent.hpp"
+
+namespace kengine {
+	static auto MouseController(GLFWwindow * window) {
+		return [window](kengine::Entity e) {
+			auto & comp = e.attach<kengine::InputComponent>();
+			comp.onKey = [window](int key, bool pressed) {
+				if (!pressed)
+					return;
+				if (key == GLFW_KEY_ENTER) {
+					if (glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED) {
+						glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+						ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
+					} else {
+						glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+						ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NoMouse;
+					}
+				}
+			};
+		};
+	}
+
+	static auto LightsDebugger(kengine::EntityManager & em) {
+		return [&](kengine::Entity e) {
+			e += kengine::ImGuiComponent([&] {
+				if (ImGui::Begin("Lights")) {
+					bool first = true;
+					if (ImGui::CollapsingHeader("Directional"))
+						for (const auto &[e, light] : em.getEntities<DirLightComponent>()) {
+							if (!first)
+								ImGui::Separator();
+							first = false;
+							ImGui::InputFloat3(putils::string<64>("Dir##Directional") + e.id, &light.direction.x);
+							ImGui::InputFloat3(putils::string<64>("Color##Directional") + e.id, &light.color.x);
+							ImGui::InputFloat(putils::string<64>("Ambient##Directional") + e.id, &light.ambientStrength);
+							ImGui::InputFloat(putils::string<64>("Diffuse##Directional") + e.id, &light.diffuseStrength);
+							ImGui::InputFloat(putils::string<64>("Specular##Directional") + e.id, &light.specularStrength);
+						}
+
+					first = true;
+					if (ImGui::CollapsingHeader("Points")) {
+						if (ImGui::Button("Add")) {
+							em += [](kengine::Entity e) {
+								e += kengine::TransformComponent3f{};
+
+								auto & light = e.attach<PointLightComponent>();
+								light.diffuseStrength = 1.f;
+								light.specularStrength = 5.f;
+							};
+						}
+
+						for (const auto &[e, light, transform] : em.getEntities<PointLightComponent, kengine::TransformComponent3f>()) {
+							if (!first)
+								ImGui::Separator();
+							first = false;
+							ImGui::InputFloat3(putils::string<64>("Pos##Point") + e.id, transform.boundingBox.topLeft.raw);
+							ImGui::InputFloat3(putils::string<64>("Color##Point") + e.id, &light.color.x);
+							ImGui::InputFloat(putils::string<64>("Diffuse##Point") + e.id, &light.diffuseStrength);
+							ImGui::InputFloat(putils::string<64>("Specular##Point") + e.id, &light.specularStrength);
+						}
+					}
+
+					first = true;
+					if (ImGui::CollapsingHeader("Spots")) {
+						if (ImGui::Button("Add")) {
+							em += [](kengine::Entity e) {
+								e += kengine::TransformComponent3f{};
+
+								auto & light = e.attach<SpotLightComponent>();
+								light.diffuseStrength = 1.f;
+								light.specularStrength = 5.f;
+							};
+						}
+
+						for (const auto &[e, light, transform] : em.getEntities<SpotLightComponent, kengine::TransformComponent3f>()) {
+							if (!first)
+								ImGui::Separator();
+							first = false;
+							ImGui::InputFloat3(putils::string<64>("Pos##Spot") + e.id, transform.boundingBox.topLeft.raw);
+							ImGui::InputFloat3(putils::string<64>("Dir##Spot") + e.id, &light.direction.x);
+							ImGui::InputFloat3(putils::string<64>("Color##Spot") + e.id, &light.color.x);
+							ImGui::InputFloat(putils::string<64>("Diffuse##Spot") + e.id, &light.diffuseStrength);
+							ImGui::InputFloat(putils::string<64>("Specular##Spot") + e.id, &light.specularStrength);
+							ImGui::InputFloat(putils::string<64>("Cutoff##Spot") + e.id, &light.cutOff);
+							ImGui::InputFloat(putils::string<64>("Outer cutoff##Spot") + e.id, &light.outerCutOff);
+						}
+					}
+				}
+				ImGui::End();
+			});
+		};
+	}
+
+	static int TEXTURE_TO_DEBUG = -1;
+	template<typename VertexData>
+	static auto TextureDebugger(kengine::EntityManager & em, const GBuffer<VertexData> & gBuffer) {
+		return [&](kengine::Entity e) {
+			e += kengine::ImGuiComponent([&] {
+				if (ImGui::BeginMainMenuBar()) {
+					if (ImGui::BeginMenu("Textures")) {
+						if (ImGui::MenuItem("Disable"))
+							TEXTURE_TO_DEBUG = -1;
+
+						if (ImGui::MenuItem("GBuffer position"))
+							TEXTURE_TO_DEBUG = gBuffer.textures[0];
+						if (ImGui::MenuItem("GBuffer normal"))
+							TEXTURE_TO_DEBUG = gBuffer.textures[1];
+
+						int i = 2;
+						putils::for_each_attribute(VertexData::get_attributes(), [&](auto name, auto member) {
+							if (ImGui::MenuItem(putils::string<64>("GBuffer %s", name)))
+								TEXTURE_TO_DEBUG = gBuffer.textures[i];
+							++i;
+						});
+
+						for (const auto &[e, comp] : em.getEntities<kengine::GBufferShaderComponent>())
+							for (const auto & texture : comp.shader->texturesToDebug)
+								if (ImGui::MenuItem(texture.name.c_str()))
+									TEXTURE_TO_DEBUG = texture.id;
+
+						for (const auto &[e, comp] : em.getEntities<kengine::LightingShaderComponent>())
+							for (const auto & texture : comp.shader->texturesToDebug)
+								if (ImGui::MenuItem(texture.name.c_str()))
+									TEXTURE_TO_DEBUG = texture.id;
+
+						for (const auto &[e, comp] : em.getEntities<kengine::PostProcessShaderComponent>())
+							for (const auto & texture : comp.shader->texturesToDebug)
+								if (ImGui::MenuItem(texture.name.c_str()))
+									TEXTURE_TO_DEBUG = texture.id;
+
+						ImGui::EndMenu();
+					}
+				}
+				ImGui::EndMainMenuBar();
+			});
+		};
+	}
+}

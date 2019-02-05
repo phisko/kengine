@@ -1,0 +1,135 @@
+Changes for PolyVox version 0.3
+===============================
+This release has focused on... (some introduction here).
+
+*** Quick braindump of some changes ***
+
+ * SimpleVolume is now PagedVolume (slightly slower but can go larger).
+ * MarchingCubesSurfaceExtractor class is now a free function extractMarchingCubesSurface()
+ * Meshes are more templatized (e.g. on IndexType) and extracted meshes are encoded to save space. A 'decode' function is provided for these (or you can do it on the GPU).
+ * Generally more templatization - you will want to use a lot of the 'auto' keyword to stay sane.
+ * MarchingCubesController class gives more control over extraction process, but defaults should be fine for primative voxel types.
+ * Requires VS2013 on Windows (GCC 4.7/Clang should be ok).
+ * Support for 'WrapModes' when accessing outside volumes but I think these have bought a performance impact.
+ * Documentation is as poor (or wrong) as ever but all tests and examples work.
+ * New Array class is much faster
+
+*** End of braindump ***
+
+
+This line was added just for testing.
+
+Voxel access
+------------
+The getVoxelAt() and setVoxelAt() functions have been deprecated and replaced by getVoxel() and setVoxel(). These new functions provide more control over how edge cases are handled and can potentially be faster as well. Please see the 'Volumes' section of the user manual for more information about how voxel access should be performed. 
+
+LargeVolume
+-----------
+Behaviour and interface of the LargeVolume has changed significantly and code which uses it will certainly need to be updated. Plese see the LargeVolume API docs for full details of how it now works.
+
+It is now possible to provide custom compressors for the data which is stored in a LargeVolume. Two compressor implementation are provided with PolyVox - RLECompressor which is suitable for cubic-style terrain, and MinizCompressor which uses the 'miniz' zlib implementation for smooth terrain or general purpose use. Users can provide their own implementation of the compressor interface if they wish.
+
+Note that the setCompressionEnabled() functionality has been removed and a compressor must always be provided when constructing the volume. The ability to disable compression was of questionable benefit and was complicating the logic in the code.
+
+The LargeVolume also supports custom paging code which can be supplied by providing a subclass of Pager and implementing the relevant methods. This replaces the dataRequiredHandler() and dataOverflowHandler() functions. 
+
+These changes regarding compression and paging have also affected the LargeVolume constructors(s). Please see the API docs to see how they look now.
+
+Error Handling
+--------------
+PolyVox now has it's own POLYVOX_ASSERT() macro rather than using the standard assert(). This has some advantages such as allowing a message to be printed and providing file/line information, and it is also possible to enable/disable it independantly of whether you are making a debug or release build.
+
+A simple logging system has also been added, and the output can be redirected by user code.
+
+Please see the 'Error Handling' section of the user manual for more information about these changes.
+
+Volume wrap modes
+-----------------
+This release has seen a overhaul of the way PolyVox handles voxel positions which are outside of the volume. It used to be the case that you could specify a border value which would be returned whenever an out-of-volume access was performed, but this was not flexible enough for all use cases. You can now choose between different wrapping modes (border, clamp, etc) and apply them to both the volume itself or to samplers. If you have multiple samplers pointing at the same volume then you can choose to have different wrap modes for each of them.
+
+Within the Volume class the getVoxelAt() and setBorderValue() functions have been deprecated. Please see the 'Volumes' section of the user manual for more information about how voxel access should now be performed.
+
+Various algorithms have also been updated to allow wrap modes to be specified when executing them.
+
+Region class
+------------
+The Region class has been tidied up and enhanced with new functionality. It now contains functions for growing and shrinking regions, as well as 'accumulate()' functions which ensure the Region contains a given point. The concept of an invalid region has also been introduced - this is one whose lower corner is greater than it's upper corner.
+
+Vector class
+------------
+The Vector class has been tidied up. Most notably it now makes use of an 'OperationType' which is used for internal calculations and some results. The documentation has also been updated.
+
+Deprecated functionality
+------------------------
+Vector::operator<() has been deprecated. It was only present to allow Vectors to be used as the key to an std::map, but it makes more sense for this to be specified seperatly as a std::map comparison function. This is now done in the OpenGLExample (search for VectorCompare).
+
+getVoxelAt() and setBorderValue() have been deprecated in the Volume class. See the section of this file on 'Volume wrap modes' for details.
+
+Removed functionality
+--------------------
+Functionality deprecated for the previous release has now been removed. This includes:
+
+ - Region::getWidth() and related functions. You should now use Region::getWidthInVoxels() or Region::getWidthInCells.
+ - The MeshDecimator. We don't have a direct replacement for this so you should consider an alternative such as downsampling the volume or using an external mesh processing library.
+ - The SimpleInterface. This was primarily for the bindings, and we are making other efforts to get those working.
+ - Serialisation. You should implement any required serialisation yourself.
+ - This had a number of problems and was a little too high-level for PolyVox. You should implement change tracking yourself.
+
+
+Changes for PolyVox version 0.2
+===============================
+This is the first revision for which we have produced a changelog, as we are now trying to streamline our development and release process. Hence this changelog entry is not going to be as structured as we hope they will be in the future. We're writing it from memory, rather than having carefully kept track of all the relevant changes as we made them.
+
+Deprecated functionality
+------------------------
+The following functionality is considered deprecated in this release of PolyVox and will probably be removed in future versions.
+
+MeshDecimator: The mesh decimator was intended to reduce the amount of triangles in generated meshes but it has always had problems. It's far too slow and not very robust. For cubic meshes it is no longer needed anyway as the CubicSurfaceExtractor has built in decimation which is much more effective. For smooth (marching cubes) meshes there is no single alternative. You can consider downsampling the volume before you run the surface extractor (see the SmoothLODExample), and in the future we may add support for an external mesh processing library.
+
+SimpleInterface: This was added so that people could create volumes without knowing about templates, and also to provide a target which was easier to wrap with SWIG. But overall we'd rather focus on getting the real SWIG bindings to work. The SimpleInterface is also extremely limited in the functionality it provides.
+
+Serialisation: This is a difficult one. The current serialisation is rather old and only deals with loading/saving a whole volume at a time. It would make much more sense if it could serialise regions instead of whole volumes, and if it could handle compression. It would then be useful for serialising the data which is paged into and out of the LargeVolume, as well as other uses. Both these changes would likely require breaking the current format and interface. It is likely that serialisation will return to PolyVox in the future, but for now we would suggest just implementing your own.
+
+VolumeChangeTracker: The idea behind this was was to provide a utility class to help the user keep track of which regions have been modified so they know when they need the surface extractor to be run again. But overall we'd rather keep such higher level functionality in user code as there are multiple ways it can be implemented. The current implementation is also old and does not support very large/infinite volumes, for example.
+
+Refactor of basic voxel types
+-----------------------------
+Previous versions of PolyVox provided classes representing voxel data, such as MaterialDensityPair88. These classes were required to expose certain functions such as getDensity() and getMaterial(). This is no longer the case as now even primitive data types such as floats and ints can be used as voxels. You can also create new classes to represent voxel data and it is entirely up to you what kind of properties they have.
+
+As an example, imagine you might want to store lighting values in a volume and propagate them according to some algorithm you devise. In this case the voxel data has no concept of densities or materials and there is no need to provide them. Algorithms which conceptually operate on densities (such as the MarchingCubesSurfaceExtractor) will not be able to operate on your lighting data but this would not make sense anyway.
+
+Because algorithms now know nothing about the structure of the underlying voxels, some utility functions/classes are required. The principle is similar to the std::sort algorithm, which knows nothing about the type of data it is operating on but is told how to compare any two values via a comparator function object. In this sense, it will be useful to have an understanding of how algorithms such as std::sort are used.
+
+We have continued to provide the Density, Material, and MaterialDensityPair classes to ease the transition into the new system, but really they should just be considered as examples of how you might create your own voxel types.
+
+Some algorithms assume that basic mathematical operations can be applied to voxel types. For example, the LowPassFilter needs to compute the average of a set of voxels, and to do this it needs to be possible to add voxels together and divide by an integer. Obviously these operations are provided by primitive types, but it means that if you want to use the LowPassfilter on custom voxel types then these types need to provide operator+=, operator/=, etc. These have been added to the Density and MaterialDensityPair classes, but not to the Material class. This reflects the fact that applying a low pass filter to a material volume does not make conceptual sense.
+
+Changes to build system
+-----------------------
+In order to make the build system easier to use, a number of CMake variables were changed to be more consistent. See :doc:`install` for details on the new variable naming.
+
+Changes to CubicSurfaceExtractor
+--------------------------------
+The behaviour of the CubicSurfaceExtractor has been changed such that it no longer handles some edge cases. Because each generated quad lies between two voxels it can be unclear which region should 'own' a quad when the two voxels are from different regions. The previous version of the CubicSurfaceExtractor would attempt to handle this automatically, but as a result it was possible to get two quads existing at the same position in space. This can cause problems with transparency and with physics, as well as making it harder to decide which regions need to be updated when a voxel is changed.
+
+The new system simplifies the behaviour of this surface extractor but does require a bit of care on the part of the user. You should be clear on the rules controlling when quads are generated and to which regions they will belong. To aid with this we have significantly improved the API documentation for the CubicSurfaceExtractor so be sure to have a look.
+
+Changes to Raycast
+------------------
+The raycasting functionality was previously in a class (Raycast) but now it is provided by standalone functions. This is basically because there is no need for it to be a class, and it complicated usage. The new functions are called 'raycastWithDirection' and 'raycastWithEndpoints' which helps remove the previous ambiguity regarding the meaning of the two vectors which are passed as parameters.
+
+The callback functionality (called for each processed voxel to determine whether to continue and also perform additional processing) is no longer implemented as an std::function. Instead the standard STL approach is used, in  which a function or function object is used a a template parameter. This is faster than the std::function solution and should also be easier to integrate with other languages.
+
+Usage of the new raycasting is demonstrated by a unit test.
+
+Changes to AmbientOcclusionCalculator
+-------------------------------------
+The AmbientOcclusionCalculator has also been unclassed and is now called calculateAmbientOcclusion. The unit test has been updated to demonstrate the new usage.
+
+Changes to A* pathfinder
+------------------------
+The A* pathfinder has always had different (but equally valid) results when building in Visual Studio vs. GCC. This is now fixed and results are consistent between platforms.
+
+Copy and move semantics
+-----------------------
+All volume classes now have protected copy constructors and assignment operators to prevent you from accidentally copying them (which is expensive). Look at the VolumeResampler if you really do want to copy some volume data.

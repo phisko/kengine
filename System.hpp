@@ -1,5 +1,9 @@
 #pragma once
 
+#ifndef PI
+# define PI 3.14159265359f
+#endif
+
 #include "ISystem.hpp"
 #include "EntityManager.hpp"
 
