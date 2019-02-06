@@ -195,19 +195,19 @@ namespace kengine {
 		struct ComponentCollection {
 			struct ComponentIterator {
 				using iterator_category = std::forward_iterator_tag;
-				using value_type = std::tuple<EntityView, Comps & ...>;
+				using value_type = std::tuple<Entity, Comps & ...>;
 				using reference = const value_type &;
 				using pointer = const value_type *;
 				using difference_type = size_t;
 
 				ComponentIterator & operator++() {
 					++currentEntity;
-					if (currentEntity < archetypes[currentType].entities.size())
+					if (currentEntity < em._archetypes[currentType].entities.size())
 						return *this;
 
 					currentEntity = 0;
-					for (++currentType; currentType < archetypes.size(); ++currentType)
-						if (archetypes[currentType].matches<Comps...>())
+					for (++currentType; currentType < em._archetypes.size(); ++currentType)
+						if (em._archetypes[currentType].matches<Comps...>())
 							break;
 
 					return *this;
@@ -216,13 +216,13 @@ namespace kengine {
 				bool operator==(const ComponentIterator & rhs) const { return currentType == rhs.currentType && currentEntity == rhs.currentEntity; }
 				bool operator!=(const ComponentIterator & rhs) const { return !(*this == rhs); }
 
-				std::tuple<EntityView, Comps &...> operator*() const {
-					auto & archetype = archetypes[currentType];
-					EntityView e(archetype.entities[currentEntity], archetype.mask);
+				std::tuple<Entity, Comps &...> operator*() const {
+					auto & archetype = em._archetypes[currentType];
+					Entity e(archetype.entities[currentEntity], archetype.mask, &em);
 					return std::make_tuple(e, std::ref(e.get<Comps>())...);
 				}
 
-				std::vector<Archetype> & archetypes;
+				kengine::EntityManager & em;
 				size_t currentType;
 				size_t currentEntity;
 			};
@@ -233,11 +233,11 @@ namespace kengine {
 					if (em._archetypes[i].matches<Comps...>())
 						break;
 				
-				return ComponentIterator{ em._archetypes, i, 0 };
+				return ComponentIterator{ em, i, 0 };
 			}
 
 			auto end() const {
-				return ComponentIterator{ em._archetypes, em._archetypes.size(), 0 };
+				return ComponentIterator{ em, em._archetypes.size(), 0 };
 			}
 
 			ComponentCollection(EntityManager & em) : em(em) {
