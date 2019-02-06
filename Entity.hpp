@@ -94,8 +94,10 @@ namespace kengine {
 
 template<typename T>
 T & kengine::Entity::attach() {
-	componentMask.set(getId<T>(), true);
-	manager->updateMask(id, componentMask);
+	if (!has<T>()) {
+		componentMask.set(getId<T>(), true);
+		manager->updateMask(id, componentMask);
+	}
 	return get<T>();
 }
 
