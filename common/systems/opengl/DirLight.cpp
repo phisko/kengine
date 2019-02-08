@@ -53,16 +53,16 @@ namespace kengine::Shaders {
 
 		use();
 		putils::gl::setUniform(viewPos, camPos);
-		for (const auto &[e, light] : _em.getEntities<DirLightComponent>()) {
+		for (auto &[e, light] : _em.getEntities<DirLightComponent>()) {
 			const putils::Point3f pPos = { camPos.x, camPos.y, camPos.z };
 
-			_shadowMap.run(light, pPos, screenWidth, screenHeight);
+			_shadowMap.run(e, light, pPos, screenWidth, screenHeight);
 			use();
 
 			setLight(light);
 
 			glActiveTexture(GL_TEXTURE0 + _shadowMapTextureID);
-			glBindTexture(GL_TEXTURE_2D, light.depthMapTexture);
+			glBindTexture(GL_TEXTURE_2D, e.get<DepthMapComponent>().texture);
 			putils::gl::setUniform(lightSpaceMatrix, getLightSpaceMatrix(light, pPos, screenWidth, screenHeight));
 
 			putils::gl::setUniform(runSSAO, RUN_SSAO ? 1u : 0u);

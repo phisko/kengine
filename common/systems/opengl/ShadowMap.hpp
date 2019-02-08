@@ -1,6 +1,7 @@
 #pragma once
 
 #include "opengl/Program.hpp"
+#include "Entity.hpp"
 
 namespace kengine {
 	class EntityManager;
@@ -9,18 +10,23 @@ namespace kengine {
 }
 
 namespace kengine::Shaders {
+	struct DepthMapComponent {
+		GLuint fbo = -1;
+		GLuint texture;
+	};
+
 	class ShadowMap : public putils::gl::Program {
 	public:
 		ShadowMap(kengine::EntityManager & em);
 
 		void init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) override;
 		void run(const glm::mat4 & view, const glm::mat4 & proj, const glm::vec3 & camPos, size_t screenWidth, size_t screenHeight) override {}
-		void run(DirLightComponent & light, const putils::Point3f & pos, size_t screenWidth, size_t screenHeight);
-		void run(SpotLightComponent & light, const putils::Point3f & pos, size_t screenWidth, size_t screenHeight);
+		void run(kengine::Entity & e, DirLightComponent & light, const putils::Point3f & pos, size_t screenWidth, size_t screenHeight);
+		void run(kengine::Entity & e, SpotLightComponent & light, const putils::Point3f & pos, size_t screenWidth, size_t screenHeight);
 
 	private:
 		template<typename T>
-		void runImpl(T & light, const putils::Point3f & pos, size_t screenWidth, size_t screenHeight);
+		void runImpl(kengine::Entity & e, T & light, const putils::Point3f & pos, size_t screenWidth, size_t screenHeight);
 
 	public:
 		GLint proj;

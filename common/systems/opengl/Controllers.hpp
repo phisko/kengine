@@ -3,6 +3,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include "components/LightComponent.hpp"
+#include "packets/GBuffer.hpp"
 
 namespace kengine {
 	static auto MouseController(GLFWwindow * window) {
@@ -96,8 +97,7 @@ namespace kengine {
 	}
 
 	static int TEXTURE_TO_DEBUG = -1;
-	template<typename VertexData>
-	static auto TextureDebugger(kengine::EntityManager & em, const GBuffer<VertexData> & gBuffer) {
+	static auto TextureDebugger(kengine::EntityManager & em, const GBuffer & gBuffer, const packets::VertexDataAttributeIterator & iterator) {
 		return [&](kengine::Entity e) {
 			e += kengine::ImGuiComponent([&] {
 				if (ImGui::BeginMainMenuBar()) {
@@ -111,7 +111,7 @@ namespace kengine {
 							TEXTURE_TO_DEBUG = gBuffer.textures[1];
 
 						int i = 2;
-						putils::for_each_attribute(VertexData::get_attributes(), [&](auto name, auto member) {
+						iterator.func([&](auto name) {
 							if (ImGui::MenuItem(putils::string<64>("GBuffer %s", name)))
 								TEXTURE_TO_DEBUG = gBuffer.textures[i];
 							++i;

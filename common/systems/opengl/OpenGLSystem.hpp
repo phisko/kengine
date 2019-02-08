@@ -2,36 +2,14 @@
 
 #include <PolyVox/RawVolume.h>
 
+#include "packets/GBuffer.hpp"
+
 #include "System.hpp"
 #include "opengl/Program.hpp"
 #include "GBuffer.hpp"
 
 namespace kengine {
-	struct VertexData {
-		float color[3] = { 0.f, 0.f, 0.f };
-
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&VertexData::color)
-		);
-
-		bool operator==(size_t i) const {
-			return color[0] == 0.f && color[1] == 0.f && color[2] == 0.f;
-		}
-
-		bool operator>(size_t i) const {
-			return color[0] != 0.f || color[1] != 0.f || color[2] != 0.f;
-		}
-
-		bool operator==(const VertexData & rhs) const {
-			return color[0] == rhs.color[0] && color[1] == rhs.color[1] && color[2] == rhs.color[2];
-		}
-	};
-
-	// Mesh
-
-	struct MeshComponent {
-		kengine::Entity::ID meshInfo = kengine::Entity::INVALID_ID;
-	};
+	struct MeshLoaderComponent;
 
 	struct MeshInfoComponent {
 		GLuint vertexArrayObject = -1;
@@ -51,11 +29,9 @@ namespace kengine {
 			if (vertexArrayObject != -1)
 				glDeleteVertexArrays(1, &vertexArrayObject);
 		}
-
-		float zOffset = 0.f;
 	};
 
-	class OpenGLSystem : public kengine::System<OpenGLSystem, kengine::packets::RegisterEntity> {
+	class OpenGLSystem : public kengine::System<OpenGLSystem, kengine::packets::RegisterEntity, kengine::packets::GBufferSize, kengine::packets::VertexDataAttributeIterator> {
 	public:
 		OpenGLSystem(kengine::EntityManager & em);
 		~OpenGLSystem();
@@ -64,10 +40,11 @@ namespace kengine {
 		void onLoad() noexcept final;
 
 		void handle(kengine::packets::RegisterEntity p);
+		void handle(kengine::packets::GBufferSize p);
+		void handle(kengine::packets::VertexDataAttributeIterator p);
 
 	private:
-		void registerMeshInfos() noexcept;
-		kengine::Entity::ID createObject(PolyVox::RawVolume<VertexData> & volData);
+		void createObject(kengine::Entity e, const kengine::MeshLoaderComponent & meshLoader);
 
 		void handleInput() noexcept;
 		void addShaders() noexcept;
@@ -84,12 +61,7 @@ namespace kengine {
 		kengine::EntityManager & _em;
 
 	private:
-		GBuffer<VertexData> _gBuffer;
-
-	private:
-		kengine::Entity::ID _sphereMeshInfo = kengine::Entity::INVALID_ID;
-		kengine::Entity::ID _lightMeshInfo = kengine::Entity::INVALID_ID;
-
-	private:
+		GBuffer _gBuffer;
+		kengine::packets::VertexDataAttributeIterator _gBufferIterator;
 	};
 }

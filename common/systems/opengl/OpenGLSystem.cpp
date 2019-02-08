@@ -1,10 +1,6 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include <PolyVox/CubicSurfaceExtractor.h>
-#include <PolyVox/MarchingCubesSurfaceExtractor.h>
-#include <PolyVox/Mesh.h>
-
 #include "imgui.h"
 #include "examples/imgui_impl_glfw.h"
 #include "examples/imgui_impl_opengl3.h"
@@ -12,6 +8,8 @@
 #include "EntityManager.hpp"
 #include "systems/LuaSystem.hpp"
 
+#include "components/MeshLoaderComponent.hpp"
+#include "components/MeshComponent.hpp"
 #include "components/ImGuiComponent.hpp"
 #include "components/AdjustableComponent.hpp"
 #include "components/InputComponent.hpp"
@@ -33,6 +31,8 @@
 #include "GodRays.hpp"
 
 #include "Export.hpp"
+
+static glm::vec3 toVec(const putils::Point3f & p) { return { p.x, p.y, p.z }; }
 
 EXPORT kengine::ISystem * getSystem(kengine::EntityManager & em) {
 	return new kengine::OpenGLSystem(em);
@@ -155,9 +155,13 @@ namespace kengine {
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
 
-		glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
+#ifndef NDEBUG
+		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+#endif
+
+		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
 		window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Painter", nullptr, nullptr);
 		glfwMakeContextCurrent(window);
@@ -179,10 +183,21 @@ namespace kengine {
 		glewExperimental = true;
 		assert(glewInit() == GLEW_OK);
 
-		_gBuffer.init(GBUFFER_WIDTH, GBUFFER_HEIGHT);
+#ifndef NDEBUG
+		glEnable(GL_DEBUG_OUTPUT);
+		glDebugMessageCallback([](GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar * message, const void * userParam) {
+			if (severity != GL_DEBUG_SEVERITY_NOTIFICATION)
+				fprintf(stderr, "GL: severity = 0x%x, message = %s\n",
+					severity, message);
+			assert(type != GL_DEBUG_TYPE_ERROR);
+		}, nullptr);
+#endif
 	}
 
 	void OpenGLSystem::handle(kengine::packets::RegisterEntity p) {
+		if (!_gBuffer.isInit())
+			return;
+
 		if (p.e.has<kengine::GBufferShaderComponent>())
 			initShader(*p.e.get<kengine::GBufferShaderComponent>().shader);
 
@@ -191,17 +206,21 @@ namespace kengine {
 
 		if (p.e.has<kengine::PostProcessShaderComponent>())
 			initShader(*p.e.get<kengine::PostProcessShaderComponent>().shader);
+	}
 
-		if (p.e.has<MeshInfoComponent>()) {
-			const auto & meshInfo = p.e.get<MeshInfoComponent>();
+	void OpenGLSystem::handle(kengine::packets::GBufferSize p) {
+		_gBuffer.init(GBUFFER_WIDTH, GBUFFER_HEIGHT, p.nbAttributes);
 
-			for (const auto &[e, comp] : _em.getEntities<kengine::GBufferShaderComponent>())
-				meshInfo.vertexRegisterFunc(*comp.shader);
-			for (const auto &[e, comp] : _em.getEntities<kengine::LightingShaderComponent>())
-				meshInfo.vertexRegisterFunc(*comp.shader);
-			for (const auto &[e, comp] : _em.getEntities<kengine::PostProcessShaderComponent>())
-				meshInfo.vertexRegisterFunc(*comp.shader);
-		}
+		for (const auto & [e, shader] : _em.getEntities<kengine::GBufferShaderComponent>())
+			initShader(*shader.shader);
+		for (const auto & [e, shader] : _em.getEntities<kengine::LightingShaderComponent>())
+			initShader(*shader.shader);
+		for (const auto & [e, shader] : _em.getEntities<kengine::PostProcessShaderComponent>())
+			initShader(*shader.shader);
+	}
+
+	void OpenGLSystem::handle(kengine::packets::VertexDataAttributeIterator p) {
+		_gBufferIterator = p;
 	}
 
 	void OpenGLSystem::initShader(putils::gl::Program & p) {
@@ -210,6 +229,7 @@ namespace kengine {
 
 		for (const auto &[e, meshInfo] : _em.getEntities<MeshInfoComponent>()) {
 			glBindVertexArray(meshInfo.vertexArrayObject);
+			glBindBuffer(GL_ARRAY_BUFFER, meshInfo.vertexBuffer);
 			meshInfo.vertexRegisterFunc(p);
 		}
 	}
@@ -230,25 +250,6 @@ namespace kengine {
 	static auto GLFW_TIME = 0;
 	void OpenGLSystem::onLoad() noexcept {
 		addShaders();
-		registerMeshInfos();
-
-		_em += [this](kengine::Entity e) {
-			e += MeshComponent{ _sphereMeshInfo };
-			auto & pos = e.attach<kengine::TransformComponent3f>().boundingBox.topLeft;
-			pos = { 0.f, 0.f, 0.f };
-
-			e += kengine::ImGuiComponent([&pos] {
-				if (ImGui::Begin("Variables"))
-					ImGui::InputFloat3("Sphere pos", pos.raw);
-				ImGui::End();
-			});
-		};
-
-		_em += [this](kengine::Entity e) {
-			e += MeshComponent{ _lightMeshInfo };
-			auto & pos = e.attach<kengine::TransformComponent3f>().boundingBox.topLeft;
-			pos = { 0.f, 11.f, 0.f };
-		};
 
 #ifndef NDEBUG
 		_em += [](kengine::Entity e) {
@@ -263,101 +264,64 @@ namespace kengine {
 			});
 		};
 		_em += LightsDebugger(_em);
-		_em += TextureDebugger(_em, _gBuffer);
+		_em += TextureDebugger(_em, _gBuffer, _gBufferIterator);
 		_em += MouseController(window);
 #endif
 	}
 
-	static void createSphereInVolume(PolyVox::RawVolume<VertexData> & volData, float radius) {
-		const auto & region = volData.getEnclosingRegion();
-		const auto volCenter = region.getCentre();
+	void OpenGLSystem::createObject(kengine::Entity e, const kengine::MeshLoaderComponent & meshLoader) {
+		const auto meshData = meshLoader.func();
 
-		for (int z = region.getLowerZ(); z < region.getUpperZ(); ++z) {
-			for (int y = region.getLowerY(); y < region.getUpperY(); ++y) {
-				for (int x = region.getLowerX(); x < region.getUpperX(); ++x) {
-					const decltype(volCenter) currentPos{ x, y, z };
-					const auto distToCenter = (currentPos - volCenter).length();
+		auto & meshInfo = e.attach<MeshInfoComponent>();
 
-					if (distToCenter <= radius)
-						volData.setVoxel(x, y, z, { { 1.f, 1.f, 1.f } });
-					else
-						volData.setVoxel(x, y, z, {});
-				}
-			}
-		}
-	}
+		glGenVertexArrays(1, &meshInfo.vertexArrayObject);
+		glBindVertexArray(meshInfo.vertexArrayObject);
 
-	void OpenGLSystem::registerMeshInfos() noexcept {
-		static constexpr auto VOLUME_SIZE = 32;
-		static constexpr auto SPHERE_RADIUS = 8.f;
+		glGenBuffers(1, &meshInfo.vertexBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, meshInfo.vertexBuffer);
+		glBufferData(GL_ARRAY_BUFFER, meshData.vertices.nbElements * meshData.vertices.elementSize, meshData.vertices.data, GL_STATIC_DRAW);
 
-		{
-			PolyVox::RawVolume<VertexData> volData{ PolyVox::Region{
-				{ 0, 0, 0 },
-				{ VOLUME_SIZE - 1, VOLUME_SIZE - 1, VOLUME_SIZE - 1 }
-			} };
-			createSphereInVolume(volData, SPHERE_RADIUS);
-			_sphereMeshInfo = createObject(volData);
+		glGenBuffers(1, &meshInfo.indexBuffer);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshInfo.indexBuffer);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, meshData.indices.nbElements * meshData.indices.elementSize, meshData.indices.data, GL_STATIC_DRAW);
+
+		meshInfo.vertexRegisterFunc = meshLoader.vertexRegisterFunc;
+
+		if (_gBuffer.isInit()) {
+			for (const auto &[e, comp] : _em.getEntities<kengine::GBufferShaderComponent>())
+				meshLoader.vertexRegisterFunc(*comp.shader);
+			for (const auto &[e, comp] : _em.getEntities<kengine::LightingShaderComponent>())
+				meshLoader.vertexRegisterFunc(*comp.shader);
+			for (const auto &[e, comp] : _em.getEntities<kengine::PostProcessShaderComponent>())
+				meshLoader.vertexRegisterFunc(*comp.shader);
 		}
 
-		{
-			PolyVox::RawVolume<VertexData> volData{ PolyVox::Region{
-				{ 0, 0, 0 },
-				{ VOLUME_SIZE - 1, VOLUME_SIZE - 1, VOLUME_SIZE - 1 }
-			} };
-			createSphereInVolume(volData, 1.f);
-			_lightMeshInfo = createObject(volData);
-		}
-	}
+		meshInfo.nbIndices = meshData.indices.nbElements;
+		meshInfo.indexType = meshData.indexType;
 
-	kengine::Entity::ID OpenGLSystem::createObject(PolyVox::RawVolume<VertexData> & volData) {
-		const auto encodedMesh = PolyVox::extractCubicMesh(&volData, volData.getEnclosingRegion());
-		const auto mesh = PolyVox::decodeMesh(encodedMesh);
-		using MeshType = decltype(mesh);
-		using VertexType = MeshType::VertexType;
-		using IndexType = MeshType::IndexType;
+		meshInfo.translation = toVec(meshData.offsetToCentre);
 
-		kengine::Entity::ID ret;
-
-		const auto & centre = volData.getEnclosingRegion().getCentre();
-		_em += [this, &ret, &mesh, &centre](kengine::Entity e) {
-			ret = e.id;
-
-			auto & meshInfo = e.attach<MeshInfoComponent>();
-
-			glGenVertexArrays(1, &meshInfo.vertexArrayObject);
-			glBindVertexArray(meshInfo.vertexArrayObject);
-
-			glGenBuffers(1, &meshInfo.vertexBuffer);
-			glBindBuffer(GL_ARRAY_BUFFER, meshInfo.vertexBuffer);
-			glBufferData(GL_ARRAY_BUFFER, mesh.getNoOfVertices() * sizeof(VertexType), mesh.getRawVertexData(), GL_STATIC_DRAW);
-
-			glGenBuffers(1, &meshInfo.indexBuffer);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshInfo.indexBuffer);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.getNoOfIndices() * sizeof(IndexType), mesh.getRawIndexData(), GL_STATIC_DRAW);
-
-			meshInfo.vertexRegisterFunc = [](putils::gl::Program & p) { p.setPolyvoxVertexType<VertexType>(); };
-
-			meshInfo.nbIndices = mesh.getNoOfIndices();
-			meshInfo.indexType = sizeof(IndexType) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
-			static_assert(sizeof(IndexType) == 2 || sizeof(IndexType) == 4);
-
-			meshInfo.translation = { centre.getX(), centre.getY(), centre.getZ() };
-		};
-
-		return ret;
+		e.detach<kengine::MeshLoaderComponent>();
 	}
 
 	void OpenGLSystem::execute() noexcept {
+		if (!_gBuffer.isInit())
+			return;
+
 		using namespace std::chrono;
 
-		if (glfwWindowShouldClose(window) || glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+		if (glfwWindowShouldClose(window)) {
 			_em.running = false;
 			return;
 		}
 
+		for (const auto & [e, meshLoader] : _em.getEntities<kengine::MeshLoaderComponent>())
+			createObject(e, meshLoader);
+
+#ifndef NDEBUG
 		const auto START = system_clock::now();
 		auto start = START;
+#endif
 
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
@@ -366,15 +330,19 @@ namespace kengine {
 			comp.display(GImGui);
 		ImGui::Render();
 
+#ifndef NDEBUG
 		auto end = system_clock::now();
-		IMGUI_TIME = duration_cast<milliseconds>(end - start).count();
+		IMGUI_TIME = (int)duration_cast<milliseconds>(end - start).count();
 		start = end;
+#endif
 
 		doOpenGL();
 
+#ifndef NDEBUG
 		end = system_clock::now();
-		KENGINE_TIME = duration_cast<milliseconds>(end - start).count();
+		KENGINE_TIME = (int)duration_cast<milliseconds>(end - start).count();
 		start = end;
+#endif
 
 		handleInput();
 
@@ -382,12 +350,12 @@ namespace kengine {
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 
+#ifndef NDEBUG
 		end = system_clock::now();
-		GLFW_TIME = duration_cast<milliseconds>(end - start).count();
-		TOTAL_TIME = duration_cast<milliseconds>(end - START).count();
+		GLFW_TIME = (int)duration_cast<milliseconds>(end - start).count();
+		TOTAL_TIME = (int)duration_cast<milliseconds>(end - START).count();
+#endif
 	}
-
-	static glm::vec3 toVec(const putils::Point3f & p) { return { p.x, p.y, p.z }; }
 
 	void OpenGLSystem::doOpenGL() noexcept {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -398,8 +366,8 @@ namespace kengine {
 				const auto & pos = transform.boundingBox.topLeft;
 				const auto & size = transform.boundingBox.size;
 				glViewport(
-					pos.x * SCREEN_WIDTH, pos.y * SCREEN_HEIGHT,
-					(pos.x + size.x) * SCREEN_WIDTH, (pos.y + size.y) * SCREEN_HEIGHT
+					(int)pos.x * SCREEN_WIDTH, (int)pos.y * SCREEN_HEIGHT,
+					(GLsizei)(pos.x + size.x) * SCREEN_WIDTH, (GLsizei)(pos.y + size.y) * SCREEN_HEIGHT
 				);
 			}
 
@@ -453,13 +421,13 @@ namespace kengine {
 	}
 
 	void OpenGLSystem::drawObjects(GLint modelMatrixLocation) const noexcept {
-		for (const auto &[e, mesh, transform] : _em.getEntities<MeshComponent, kengine::TransformComponent3f>()) {
+		for (const auto &[e, mesh, transform] : _em.getEntities<kengine::MeshComponent, kengine::TransformComponent3f>()) {
 			const auto & meshInfo = _em.getEntity(mesh.meshInfo).get<MeshInfoComponent>();
 
 			glm::mat4 model(1.f);
 			const auto & centre = transform.boundingBox.topLeft;
-			model = glm::translate(model, { centre.x, centre.y, centre.z });
-			model = glm::scale(model, { transform.boundingBox.size.x, transform.boundingBox.size.y, transform.boundingBox.size.z });
+			model = glm::translate(model, toVec(centre));
+			model = glm::scale(model, toVec(transform.boundingBox.size));
 			model = glm::rotate(model,
 				transform.yaw,
 				{ 0.f, 1.f, 0.f }

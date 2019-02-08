@@ -30,9 +30,9 @@ namespace kengine::Shaders {
 
 		use();
 		putils::gl::setUniform(viewPos, camPos);
-		for (const auto &[e, light, transform] : _em.getEntities<SpotLightComponent, kengine::TransformComponent3f>()) {
+		for (auto &[e, light, transform] : _em.getEntities<SpotLightComponent, kengine::TransformComponent3f>()) {
 			const auto & centre = transform.boundingBox.topLeft;
-			_shadowMap.run(light, centre, screenWidth, screenHeight);
+			_shadowMap.run(e, light, centre, screenWidth, screenHeight);
 			use();
 
 			glm::mat4 model(1.f);
@@ -51,7 +51,7 @@ namespace kengine::Shaders {
 			setLight(light, centre);
 
 			glActiveTexture(GL_TEXTURE0 + _shadowMapTextureID);
-			glBindTexture(GL_TEXTURE_2D, light.depthMapTexture);
+			glBindTexture(GL_TEXTURE_2D, e.get<DepthMapComponent>().texture);
 			putils::gl::setUniform(lightSpaceMatrix, getLightSpaceMatrix(light, centre, screenWidth, screenHeight));
 
 			shapes::drawSphere();

@@ -14,15 +14,17 @@ namespace kengine::Shaders {
 		putils::gl::setUniform(view, glm::mat4(1.f));
 	}
 
-	void ShadowCube::run(PointLightComponent & light, const putils::Point3f & pos, float radius, size_t screenWidth, size_t screenHeight) {
+	void ShadowCube::run(kengine::Entity & e, PointLightComponent & light, const putils::Point3f & pos, float radius, size_t screenWidth, size_t screenHeight) {
 		static constexpr auto SHADOW_MAP_SIZE = 1024;
 
-		if (light.depthMapFBO == -1) {
-			glGenFramebuffers(1, &light.depthMapFBO);
-			BindFramebuffer __f(light.depthMapFBO);
+		if (!e.has<DepthCubeComponent>()) {
+			auto & depthCube = e.attach<DepthCubeComponent>();
 
-			glGenTextures(1, &light.depthMapTexture);
-			glBindTexture(GL_TEXTURE_CUBE_MAP, light.depthMapTexture);
+			glGenFramebuffers(1, &depthCube.fbo);
+			BindFramebuffer __f(depthCube.fbo);
+
+			glGenTextures(1, &depthCube.texture);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, depthCube.texture);
 			for (size_t i = 0; i < 6; ++i)
 				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -31,7 +33,7 @@ namespace kengine::Shaders {
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-			glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, light.depthMapTexture, 0);
+			glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCube.texture, 0);
 			glDrawBuffer(GL_NONE);
 			glReadBuffer(GL_NONE);
 		}
@@ -39,7 +41,8 @@ namespace kengine::Shaders {
 		glViewport(0, 0, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
 		glCullFace(GL_FRONT);
 
-		BindFramebuffer __f(light.depthMapFBO);
+		const auto & depthCube = e.get<DepthCubeComponent>();
+		BindFramebuffer __f(depthCube.fbo);
 		DepthMask __d;
 		Enable __e(GL_DEPTH_TEST);
 

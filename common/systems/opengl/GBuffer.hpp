@@ -1,22 +1,27 @@
 #pragma once
 
+#include <vector>
 #include <GL/glew.h>
 #include <GL/GL.h>
 
 namespace kengine {
-	template<typename VertexData>
 	class GBuffer {
 	public:
-		void init(size_t width, size_t height) {
-			putils::vector<GLenum, lengthof(textures)> attachments;
+		void init(size_t width, size_t height, size_t nbAttributes) {
+			if (!textures.empty())
+				return; // Already init
+
+			textures.resize(2 + nbAttributes);
+
+			std::vector<GLenum> attachments;
 
 			glGenFramebuffers(1, &_fbo);
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fbo);
 
-			glGenTextures(lengthof(textures), textures);
+			glGenTextures(textures.size(), textures.data());
 			glGenTextures(1, &_depthTexture);
 
-			for (size_t i = 0; i < lengthof(textures); ++i) {
+			for (size_t i = 0; i < textures.size(); ++i) {
 				glBindTexture(GL_TEXTURE_2D, textures[i]);
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -33,7 +38,7 @@ namespace kengine {
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, _depthTexture, 0);
 
-			glDrawBuffers(attachments.size(), attachments.begin());
+			glDrawBuffers(attachments.size(), attachments.data());
 
 			assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
 
@@ -47,16 +52,18 @@ namespace kengine {
 		void bindForReading() {
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, _fbo);
 
-			for (unsigned int i = 0; i < lengthof(textures); ++i) {
+			for (unsigned int i = 0; i < textures.size(); ++i) {
 				glActiveTexture(GL_TEXTURE0 + i);
 				glBindTexture(GL_TEXTURE_2D, textures[i]);
 			}
 		}
 
-		auto getTextureCount() const { return lengthof(textures); }
+		auto getTextureCount() const { return textures.size(); }
 		auto getFBO() const { return _fbo; }
 
-		GLuint textures[2 + pmeta_typeof(VertexData::get_attributes())::size];
+		std::vector<GLuint> textures;
+
+		bool isInit() const { return !textures.empty(); }
 
 	private:
 		GLuint _fbo;

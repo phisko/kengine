@@ -41,15 +41,18 @@ namespace kengine::Shaders {
 	}
 
 	template<typename T>
-	void ShadowMap::runImpl(T & light, const putils::Point3f & pos, size_t screenWidth, size_t screenHeight) {
+	void ShadowMap::runImpl(kengine::Entity & e, T & light, const putils::Point3f & pos, size_t screenWidth, size_t screenHeight) {
 		static constexpr auto SHADOW_MAP_SIZE = 8192;
 
-		if (light.depthMapFBO == -1)
-			createShadowMap(light.depthMapFBO, light.depthMapTexture, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
+		if (!e.has<DepthMapComponent>()) {
+			auto & depthMap = e.attach<DepthMapComponent>();
+			createShadowMap(depthMap.fbo, depthMap.texture, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
+		}
 
 		glViewport(0, 0, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
 
-		BindFramebuffer __f(light.depthMapFBO);
+		const auto & depthMap = e.get<DepthMapComponent>();
+		BindFramebuffer __f(depthMap.fbo);
 		DepthMask __d;
 		Enable __e(GL_DEPTH_TEST);
 
@@ -62,11 +65,11 @@ namespace kengine::Shaders {
 		glViewport(0, 0, screenWidth, screenHeight);
 	}
 
-	void ShadowMap::run(DirLightComponent & light, const putils::Point3f & pos, size_t screenWidth, size_t screenHeight) {
-		runImpl(light, pos, screenWidth, screenHeight);
+	void ShadowMap::run(kengine::Entity & e, DirLightComponent & light, const putils::Point3f & pos, size_t screenWidth, size_t screenHeight) {
+		runImpl(e, light, pos, screenWidth, screenHeight);
 	}
 
-	void ShadowMap::run(SpotLightComponent & light, const putils::Point3f & pos, size_t screenWidth, size_t screenHeight) {
-		runImpl(light, pos, screenWidth, screenHeight);
+	void ShadowMap::run(kengine::Entity & e, SpotLightComponent & light, const putils::Point3f & pos, size_t screenWidth, size_t screenHeight) {
+		runImpl(e, light, pos, screenWidth, screenHeight);
 	}
 }
