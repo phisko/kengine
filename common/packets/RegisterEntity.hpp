@@ -5,7 +5,7 @@
 namespace kengine {
     namespace packets {
         struct RegisterEntity {
-            Entity e;
+            Entity & e;
         };
     }
 }

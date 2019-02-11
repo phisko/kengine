@@ -20,15 +20,6 @@ namespace kengine {
 		GLenum indexType = GL_UNSIGNED_INT;
 
 		std::function<void(putils::gl::Program & p)> vertexRegisterFunc = nullptr;
-
-		~MeshInfoComponent() {
-			if (vertexBuffer != -1)
-				glDeleteBuffers(1, &vertexBuffer);
-			if (indexBuffer != -1)
-				glDeleteBuffers(1, &indexBuffer);
-			if (vertexArrayObject != -1)
-				glDeleteVertexArrays(1, &vertexArrayObject);
-		}
 	};
 
 	class OpenGLSystem : public kengine::System<OpenGLSystem, kengine::packets::RegisterEntity, kengine::packets::GBufferSize, kengine::packets::VertexDataAttributeIterator> {
@@ -44,7 +35,7 @@ namespace kengine {
 		void handle(kengine::packets::VertexDataAttributeIterator p);
 
 	private:
-		void createObject(kengine::Entity e, const kengine::MeshLoaderComponent & meshLoader);
+		void createObject(kengine::Entity & e, const kengine::MeshLoaderComponent & meshLoader);
 
 		void handleInput() noexcept;
 		void addShaders() noexcept;

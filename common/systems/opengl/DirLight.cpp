@@ -17,7 +17,7 @@ namespace kengine::Shaders {
 		_ssao(ssao),
 		_ssaoBlur(ssaoBlur)
 	{
-		em += [](kengine::Entity e) { e += kengine::AdjustableComponent("[Render/SSAO] Active", &RUN_SSAO); };
+		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/SSAO] Active", &RUN_SSAO); };
 	}
 
 	void DirLight::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {

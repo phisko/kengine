@@ -21,15 +21,15 @@ namespace kengine::Shaders {
 	GodRays::GodRays(kengine::EntityManager & em, GodRaysFirstPass & firstPass)
 		: _em(em), _firstPass(firstPass)
 	{
-		em += [](kengine::Entity e) { e += kengine::AdjustableComponent("[Render/God Rays] Sphere size", &SPHERE_SIZE); };
-		em += [](kengine::Entity e) { e += kengine::AdjustableComponent("[Render/God Rays] Sun dist", &SUN_DIST); };
-		em += [](kengine::Entity e) { e += kengine::AdjustableComponent("[Render/God Rays] Sun size", &SUN_SIZE); };
+		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/God Rays] Sphere size", &SPHERE_SIZE); };
+		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/God Rays] Sun dist", &SUN_DIST); };
+		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/God Rays] Sun size", &SUN_SIZE); };
 
-		em += [](kengine::Entity e) { e += kengine::AdjustableComponent("[Render/God Rays] Exposure", &EXPOSURE); };
-		em += [](kengine::Entity e) { e += kengine::AdjustableComponent("[Render/God Rays] Decay", &DECAY); };
-		em += [](kengine::Entity e) { e += kengine::AdjustableComponent("[Render/God Rays] Density", &DENSITY); };
-		em += [](kengine::Entity e) { e += kengine::AdjustableComponent("[Render/God Rays] Weight", &WEIGHT); };
-		em += [](kengine::Entity e) { e += kengine::AdjustableComponent("[Render/God Rays] Num samples", &NUM_SAMPLES); };
+		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/God Rays] Exposure", &EXPOSURE); };
+		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/God Rays] Decay", &DECAY); };
+		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/God Rays] Density", &DENSITY); };
+		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/God Rays] Weight", &WEIGHT); };
+		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/God Rays] Num samples", &NUM_SAMPLES); };
 	}
 
 

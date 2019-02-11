@@ -94,59 +94,59 @@ namespace kengine {
 
 		onLoad();
 
-		_em += [](kengine::Entity e) { e += kengine::AdjustableComponent("[Render/Planes] Near", &NEAR_PLANE); };
-		_em += [](kengine::Entity e) { e += kengine::AdjustableComponent("[Render/Planes] Far", &FAR_PLANE); };
+		_em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/Planes] Near", &NEAR_PLANE); };
+		_em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/Planes] Far", &FAR_PLANE); };
 	}
 
 	void OpenGLSystem::addShaders() noexcept {
 		{ // GBuffer
-			_em += [](kengine::Entity e) { e += kengine::makeGBufferShaderComponent<Shaders::Geometry>(); };
+			_em += [](kengine::Entity & e) { e += kengine::makeGBufferShaderComponent<Shaders::Geometry>(); };
 		}
 
 		{ // Lighting
 			Shaders::ShadowMap * shadowMap = nullptr;
-			_em += [&](kengine::Entity e) {
+			_em += [&](kengine::Entity & e) {
 				auto & comp = e.attach<kengine::LightingShaderComponent>();
 				comp.shader = std::make_unique<Shaders::ShadowMap>(_em);
 				shadowMap = (Shaders::ShadowMap *)comp.shader.get();
 			};
 
 			Shaders::ShadowCube * shadowCube = nullptr;
-			_em += [&](kengine::Entity e) {
+			_em += [&](kengine::Entity & e) {
 				auto & comp = e.attach<kengine::LightingShaderComponent>();
 				comp.shader = std::make_unique<Shaders::ShadowCube>();
 				shadowCube = (Shaders::ShadowCube *)comp.shader.get();
 			};
 
 			Shaders::SSAO * ssao = nullptr;
-			_em += [&](kengine::Entity e) {
+			_em += [&](kengine::Entity & e) {
 				auto & comp = e.attach<kengine::LightingShaderComponent>();
 				comp.shader = std::make_unique<Shaders::SSAO>(_em);
 				ssao = (Shaders::SSAO *)comp.shader.get();
 			};
 
 			Shaders::SSAOBlur * ssaoBlur = nullptr;
-			_em += [&](kengine::Entity e) {
+			_em += [&](kengine::Entity & e) {
 				auto & comp = e.attach<kengine::LightingShaderComponent>();
 				comp.shader = std::make_unique<Shaders::SSAOBlur>();
 				ssaoBlur = (Shaders::SSAOBlur *)comp.shader.get();
 			};
 
-			_em += [=](kengine::Entity e) { e += kengine::makeLightingShaderComponent<Shaders::SpotLight>(_em, *shadowMap); };
-			_em += [=](kengine::Entity e) { e += kengine::makeLightingShaderComponent<Shaders::DirLight>(_em, *shadowMap, *ssao, *ssaoBlur); };
-			_em += [=](kengine::Entity e) { e += kengine::makeLightingShaderComponent<Shaders::PointLight>(_em, *shadowCube); };
+			_em += [=](kengine::Entity & e) { e += kengine::makeLightingShaderComponent<Shaders::SpotLight>(_em, *shadowMap); };
+			_em += [=](kengine::Entity & e) { e += kengine::makeLightingShaderComponent<Shaders::DirLight>(_em, *shadowMap, *ssao, *ssaoBlur); };
+			_em += [=](kengine::Entity & e) { e += kengine::makeLightingShaderComponent<Shaders::PointLight>(_em, *shadowCube); };
 
 			Shaders::GodRaysFirstPass * firstPass = nullptr;
-			_em += [&](kengine::Entity e) {
+			_em += [&](kengine::Entity & e) {
 				auto & comp = e.attach<kengine::LightingShaderComponent>();
 				comp.shader = std::make_unique<Shaders::GodRaysFirstPass>(_em);
 				firstPass = (Shaders::GodRaysFirstPass *)comp.shader.get();
 			};
-			_em += [=](kengine::Entity e) { e += kengine::makeLightingShaderComponent<Shaders::GodRays>(_em, *firstPass); };
+			_em += [=](kengine::Entity & e) { e += kengine::makeLightingShaderComponent<Shaders::GodRays>(_em, *firstPass); };
 		}
 
 		{ // Post process
-			_em += [=](kengine::Entity e) { e += kengine::makePostProcessShaderComponent<Shaders::LightSphere>(_em); };
+			_em += [=](kengine::Entity & e) { e += kengine::makePostProcessShaderComponent<Shaders::LightSphere>(_em); };
 		}
 	}
 
@@ -252,7 +252,7 @@ namespace kengine {
 		addShaders();
 
 #ifndef NDEBUG
-		_em += [](kengine::Entity e) {
+		_em += [](kengine::Entity & e) {
 			e += kengine::ImGuiComponent([] {
 				if (ImGui::Begin("Render time")) {
 					ImGui::Text("Total: %d", TOTAL_TIME);
@@ -269,25 +269,31 @@ namespace kengine {
 #endif
 	}
 
-	void OpenGLSystem::createObject(kengine::Entity e, const kengine::MeshLoaderComponent & meshLoader) {
+	void OpenGLSystem::createObject(kengine::Entity & e, const kengine::MeshLoaderComponent & meshLoader) {
 		const auto meshData = meshLoader.func();
 
 		auto & meshInfo = e.attach<MeshInfoComponent>();
 
-		glGenVertexArrays(1, &meshInfo.vertexArrayObject);
+		bool shouldRegister = false;
+		if (meshInfo.vertexArrayObject == -1) {
+			glGenVertexArrays(1, &meshInfo.vertexArrayObject);
+			shouldRegister = true;
+		}
 		glBindVertexArray(meshInfo.vertexArrayObject);
 
-		glGenBuffers(1, &meshInfo.vertexBuffer);
+		if (meshInfo.vertexBuffer == -1)
+			glGenBuffers(1, &meshInfo.vertexBuffer);
 		glBindBuffer(GL_ARRAY_BUFFER, meshInfo.vertexBuffer);
 		glBufferData(GL_ARRAY_BUFFER, meshData.vertices.nbElements * meshData.vertices.elementSize, meshData.vertices.data, GL_STATIC_DRAW);
 
-		glGenBuffers(1, &meshInfo.indexBuffer);
+		if (meshInfo.indexBuffer == -1)
+			glGenBuffers(1, &meshInfo.indexBuffer);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshInfo.indexBuffer);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, meshData.indices.nbElements * meshData.indices.elementSize, meshData.indices.data, GL_STATIC_DRAW);
 
 		meshInfo.vertexRegisterFunc = meshLoader.vertexRegisterFunc;
 
-		if (_gBuffer.isInit()) {
+		if (_gBuffer.isInit() && shouldRegister) {
 			for (const auto &[e, comp] : _em.getEntities<kengine::GBufferShaderComponent>())
 				meshLoader.vertexRegisterFunc(*comp.shader);
 			for (const auto &[e, comp] : _em.getEntities<kengine::LightingShaderComponent>())
@@ -315,7 +321,7 @@ namespace kengine {
 			return;
 		}
 
-		for (const auto & [e, meshLoader] : _em.getEntities<kengine::MeshLoaderComponent>())
+		for (auto & [e, meshLoader] : _em.getEntities<kengine::MeshLoaderComponent>())
 			createObject(e, meshLoader);
 
 #ifndef NDEBUG

@@ -14,9 +14,9 @@ static auto SUN_SIZE = 100.f;
 
 namespace kengine::Shaders {
 	LightSphere::LightSphere(kengine::EntityManager & em) : _em(em) {
-		em += [](kengine::Entity e) { e += kengine::AdjustableComponent("[Render/Lights] Sphere size", &SPHERE_SIZE); };
-		em += [](kengine::Entity e) { e += kengine::AdjustableComponent("[Render/Lights] Sun size", &SUN_SIZE); };
-		em += [](kengine::Entity e) { e += kengine::AdjustableComponent("[Render/Lights] Sun dist", &SUN_DIST); };
+		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/Lights] Sphere size", &SPHERE_SIZE); };
+		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/Lights] Sun size", &SUN_SIZE); };
+		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/Lights] Sun dist", &SUN_DIST); };
 	}
 
 	void LightSphere::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {

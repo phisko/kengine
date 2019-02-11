@@ -7,7 +7,7 @@
 
 namespace kengine {
 	static auto MouseController(GLFWwindow * window) {
-		return [window](kengine::Entity e) {
+		return [window](kengine::Entity & e) {
 			auto & comp = e.attach<kengine::InputComponent>();
 			comp.onKey = [window](int key, bool pressed) {
 				if (!pressed)
@@ -26,7 +26,7 @@ namespace kengine {
 	}
 
 	static auto LightsDebugger(kengine::EntityManager & em) {
-		return [&](kengine::Entity e) {
+		return [&](kengine::Entity & e) {
 			e += kengine::ImGuiComponent([&] {
 				if (ImGui::Begin("Lights")) {
 					bool first = true;
@@ -45,7 +45,7 @@ namespace kengine {
 					first = true;
 					if (ImGui::CollapsingHeader("Points")) {
 						if (ImGui::Button("Add")) {
-							em += [](kengine::Entity e) {
+							em += [](kengine::Entity & e) {
 								e += kengine::TransformComponent3f{};
 
 								auto & light = e.attach<PointLightComponent>();
@@ -68,7 +68,7 @@ namespace kengine {
 					first = true;
 					if (ImGui::CollapsingHeader("Spots")) {
 						if (ImGui::Button("Add")) {
-							em += [](kengine::Entity e) {
+							em += [](kengine::Entity & e) {
 								e += kengine::TransformComponent3f{};
 
 								auto & light = e.attach<SpotLightComponent>();
@@ -98,7 +98,7 @@ namespace kengine {
 
 	static int TEXTURE_TO_DEBUG = -1;
 	static auto TextureDebugger(kengine::EntityManager & em, const GBuffer & gBuffer, const packets::VertexDataAttributeIterator & iterator) {
-		return [&](kengine::Entity e) {
+		return [&](kengine::Entity & e) {
 			e += kengine::ImGuiComponent([&] {
 				if (ImGui::BeginMainMenuBar()) {
 					if (ImGui::BeginMenu("Textures")) {

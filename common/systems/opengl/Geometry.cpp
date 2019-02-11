@@ -14,7 +14,7 @@ namespace kengine::Shaders {
 
 		DepthMask __d;
 		Enable __t(GL_DEPTH_TEST);
-		Enable __c(GL_CULL_FACE);
+		// Enable __c(GL_CULL_FACE);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

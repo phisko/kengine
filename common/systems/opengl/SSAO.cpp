@@ -25,9 +25,9 @@ namespace kengine::Shaders {
 	SSAO::SSAO(kengine::EntityManager & em)
 		: putils::gl::Program(true)
 	{
-		em += [](kengine::Entity e) { e += kengine::AdjustableComponent("[Render/SSAO] Radius", &RADIUS_VALUE); };
-		em += [](kengine::Entity e) { e += kengine::AdjustableComponent("[Render/SSAO] Farclip", &FARCLIP_VALUE); };
-		em += [](kengine::Entity e) { e += kengine::AdjustableComponent("[Render/SSAO] Bias", &BIAS_VALUE); };
+		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/SSAO] Radius", &RADIUS_VALUE); };
+		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/SSAO] Farclip", &FARCLIP_VALUE); };
+		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/SSAO] Bias", &BIAS_VALUE); };
 	}
 
 

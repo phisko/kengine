@@ -16,8 +16,8 @@ namespace kengine {
         Entity createEntity(Func && postCreate) {
 			auto e = alloc();
 			postCreate(e);
-			SystemManager::registerEntity(getEntity(e.id));
-			return getEntity(e.id);
+			SystemManager::registerEntity(e);
+			return e;
         }
 
 		template<typename Func>
@@ -40,26 +40,10 @@ namespace kengine {
 		}
 
 		void removeEntity(Entity::ID id) {
-			auto & mask = _entities[id];
-
-			SystemManager::removeEntity(EntityView(id, mask));
-
-			for (auto & collection : _archetypes) {
-				if (collection.mask == mask) {
-					const auto tmp = std::find(collection.entities.begin(), collection.entities.end(), id);
-					if (collection.entities.size() > 1) {
-						std::swap(*tmp, collection.entities.back());
-						collection.sorted = false;
-					}
-					collection.entities.pop_back();
-					break;
-				}
-			}
-
-			mask = 0;
-
-			_toReuse.emplace_back(id);
-			_toReuseSorted = false;
+			if (_updatesLocked)
+				_removals.push_back({ id });
+			else 
+				doRemove(id);
 		}
 
     public:
@@ -301,6 +285,10 @@ namespace kengine {
 			for (const auto & update : _updates)
 				doUpdateMask(update.id, update.newMask, update.ignoreOldMask);
 			_updates.clear();
+
+			for (const auto removal : _removals)
+				doRemove(removal.id);
+			_removals.clear();
 		}
 
 		void doUpdateMask(Entity::ID id, Entity::Mask newMask, bool ignoreOldMask) {
@@ -338,6 +326,30 @@ namespace kengine {
 			_entities[id] = newMask;
 		}
 
+		void doRemove(Entity::ID id) {
+			auto & mask = _entities[id];
+
+			SystemManager::removeEntity(EntityView(id, mask));
+
+			for (auto & collection : _archetypes) {
+				if (collection.mask == mask) {
+					const auto tmp = std::find(collection.entities.begin(), collection.entities.end(), id);
+					if (collection.entities.size() > 1) {
+						std::swap(*tmp, collection.entities.back());
+						collection.sorted = false;
+					}
+					collection.entities.pop_back();
+					break;
+				}
+			}
+
+			mask = 0;
+
+			_toReuse.emplace_back(id);
+			_toReuseSorted = false;
+		}
+
+
 	private:
 		std::vector<Entity::Mask> _entities;
 		std::vector<Archetype> _archetypes;
@@ -350,6 +362,11 @@ namespace kengine {
 			bool ignoreOldMask;
 		};
 		std::vector<Update> _updates;
+
+		struct Removal {
+			Entity::ID id;
+		};
+		std::vector<Removal> _removals;
 		std::atomic<size_t> _updatesLocked = 0;
 
 	private:
