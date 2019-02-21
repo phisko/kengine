@@ -63,7 +63,7 @@ namespace kengine::Shaders {
 
 			glActiveTexture(GL_TEXTURE0 + _shadowMapTextureID);
 			glBindTexture(GL_TEXTURE_2D, e.get<DepthMapComponent>().texture);
-			putils::gl::setUniform(lightSpaceMatrix, getLightSpaceMatrix(light, pPos, screenWidth, screenHeight));
+			putils::gl::setUniform(lightSpaceMatrix, getLightSpaceMatrix(light, camPos, screenWidth, screenHeight));
 
 			putils::gl::setUniform(runSSAO, RUN_SSAO ? 1u : 0u);
 			if (RUN_SSAO) {
