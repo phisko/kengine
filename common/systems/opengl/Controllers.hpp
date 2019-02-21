@@ -25,6 +25,27 @@ namespace kengine {
 		};
 	}
 
+	static auto ShadersController(kengine::EntityManager & em) {
+		return [&](kengine::Entity & e) {
+			e += kengine::ImGuiComponent([&] {
+				if (ImGui::Begin("Shaders")) {
+					if (ImGui::CollapsingHeader("GBuffer"))
+						for (auto & [e, comp] : em.getEntities<kengine::GBufferShaderComponent>())
+							ImGui::Checkbox(comp.shader->getName().c_str(), &comp.enabled);
+
+					if (ImGui::CollapsingHeader("Lighting"))
+						for (auto & [e, comp] : em.getEntities<kengine::LightingShaderComponent>())
+							ImGui::Checkbox(comp.shader->getName().c_str(), &comp.enabled);
+
+					if (ImGui::CollapsingHeader("Post process"))
+						for (auto & [e, comp] : em.getEntities<kengine::PostProcessShaderComponent>())
+							ImGui::Checkbox(comp.shader->getName().c_str(), &comp.enabled);
+				}
+				ImGui::End();
+			});
+		};
+	}
+
 	static auto LightsDebugger(kengine::EntityManager & em) {
 		return [&](kengine::Entity & e) {
 			e += kengine::ImGuiComponent([&] {
@@ -35,6 +56,8 @@ namespace kengine {
 							if (!first)
 								ImGui::Separator();
 							first = false;
+							if (ImGui::Button(putils::string<64>("Remove##Directional") + e.id))
+								em.removeEntity(e);
 							ImGui::InputFloat3(putils::string<64>("Dir##Directional") + e.id, &light.direction.x);
 							ImGui::InputFloat3(putils::string<64>("Color##Directional") + e.id, &light.color.x);
 							ImGui::InputFloat(putils::string<64>("Ambient##Directional") + e.id, &light.ambientStrength);
@@ -58,6 +81,8 @@ namespace kengine {
 							if (!first)
 								ImGui::Separator();
 							first = false;
+							if (ImGui::Button(putils::string<64>("Remove##Point") + e.id))
+								em.removeEntity(e);
 							ImGui::InputFloat3(putils::string<64>("Pos##Point") + e.id, transform.boundingBox.topLeft.raw);
 							ImGui::InputFloat3(putils::string<64>("Color##Point") + e.id, &light.color.x);
 							ImGui::InputFloat(putils::string<64>("Diffuse##Point") + e.id, &light.diffuseStrength);
@@ -81,6 +106,8 @@ namespace kengine {
 							if (!first)
 								ImGui::Separator();
 							first = false;
+							if (ImGui::Button(putils::string<64>("Remove##Spot") + e.id))
+								em.removeEntity(e);
 							ImGui::InputFloat3(putils::string<64>("Pos##Spot") + e.id, transform.boundingBox.topLeft.raw);
 							ImGui::InputFloat3(putils::string<64>("Dir##Spot") + e.id, &light.direction.x);
 							ImGui::InputFloat3(putils::string<64>("Color##Spot") + e.id, &light.color.x);

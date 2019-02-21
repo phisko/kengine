@@ -5,7 +5,9 @@
 #include "EntityManager.hpp"
 
 namespace kengine::Shaders {
-	ShadowMap::ShadowMap(kengine::EntityManager & em) {
+	ShadowMap::ShadowMap(kengine::EntityManager & em)
+		: Program(false, pmeta_nameof(ShadowMap))
+	{
 		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/Lights] Shadow map near plane", &SHADOW_MAP_NEAR_PLANE); };
 		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/Lights] Shadow map far plane", &SHADOW_MAP_FAR_PLANE); };
 		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/Lights] Directional light shadow distance", &DIRECTIONAL_LIGHT_SHADOW_DISTANCE); };

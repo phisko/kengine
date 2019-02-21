@@ -18,17 +18,7 @@ uniform float attenuationQuadratic;
 
 out vec4 outputColor;
 
-uniform samplerCube shadowMap;
-uniform float farPlane;
-
-float calcShadow(vec3 worldPos) {
-    vec3 lightDir = worldPos - position;
-    float sampledDistance = texture(shadowMap, lightDir).r * farPlane;
-    float dist = length(lightDir);
-
-    float bias = 0.05;
-    return dist - bias > sampledDistance ? 1.0 : 0.0;
-}
+float calcShadow(vec3 worldPos, vec3 normal, vec3 lightDir);
 
 vec3 calcPointLight(vec3 worldPos, vec3 normal) {
     vec3 viewDir = normalize(viewPos - worldPos);
@@ -45,7 +35,7 @@ vec3 calcPointLight(vec3 worldPos, vec3 normal) {
     float diffuse = diffuseStrength * diff;
     float specular = specularStrength * spec;
 
-    float shadow = calcShadow(worldPos);
+    float shadow = calcShadow(worldPos, normal, lightDir);
     return color * (1.0 - shadow) * (diffuse + specular) * attenuation;
 }
 

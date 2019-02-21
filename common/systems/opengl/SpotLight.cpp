@@ -12,7 +12,7 @@ namespace kengine::Shaders {
 	void SpotLight::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
 		initWithShaders<SpotLight>(putils::make_vector(
 			ShaderDescription{ "shaders/3d.vert", GL_VERTEX_SHADER },
-			ShaderDescription{ "shaders/shadow.frag", GL_FRAGMENT_SHADER },
+			ShaderDescription{ "shaders/shadowMap.frag", GL_FRAGMENT_SHADER },
 			ShaderDescription{ "shaders/spotLight.frag", GL_FRAGMENT_SHADER }
 		));
 

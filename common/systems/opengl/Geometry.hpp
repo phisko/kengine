@@ -5,6 +5,8 @@
 namespace kengine::Shaders {
 	class Geometry : public putils::gl::Program {
 	public:
+		Geometry() : Program(false, pmeta_nameof(Geometry)) {}
+
 		void init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) override;
 		void run(const glm::mat4 & view, const glm::mat4 & proj, const glm::vec3 & camPos, size_t screenWidth, size_t screenHeight) override;
 

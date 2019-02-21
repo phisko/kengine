@@ -13,7 +13,7 @@ namespace kengine::Shaders {
 	class PointLight : public putils::gl::Program {
 	public:
 		PointLight(kengine::EntityManager & em, ShadowCube & shadowCube)
-			: Program(true),
+			: Program(true, pmeta_nameof(PointLight)),
 			_em(em),
 			_shadowCube(shadowCube)
 		{}

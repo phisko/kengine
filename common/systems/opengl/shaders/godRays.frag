@@ -5,6 +5,7 @@ uniform sampler2D gposition;
 uniform float SCATTERING;
 uniform float NB_STEPS;
 uniform float DEFAULT_STEP_LENGTH;
+uniform float INTENSITY;
 
 uniform mat4 inverseView;
 uniform mat4 inverseProj;
@@ -18,6 +19,7 @@ out vec4 outColor;
 #define PI 3.1415926535897932384626433832795
 
 vec2 getShadowMapValue(vec3 worldPos);
+vec3 getLightDirection(vec3 worldPos);
 
 float computeScattering(float lightDotView) {
     float result = 1.0 - SCATTERING * SCATTERING;
@@ -26,22 +28,22 @@ float computeScattering(float lightDotView) {
 }
 
 void main() {	
-    vec3 lightDir = -direction;
-
     vec2 size = textureSize(gposition, 0);
    	vec2 texCoord = gl_FragCoord.xy / size;
     vec4 worldPos = texture(gposition, texCoord);
 
+    vec3 lightDir = getLightDirection(worldPos.xyz);
+
     vec3 rayDir;
     float stepLength;
-    if (worldPos.w == 0.0) {
+    if (worldPos.w == 0.0) { // "Empty" pixel, cast rays up to arbitrary distance
         vec2 normalizedScreenPos = texCoord * 2.0 - vec2(1.0, 1.0);
         vec4 pixelPos = inverseView * inverseProj * vec4(normalizedScreenPos.x, normalizedScreenPos.y, -1.0, 1.0);
         pixelPos.xyz *= pixelPos.w;
         rayDir = normalize(pixelPos.xyz - viewPos);
         stepLength = DEFAULT_STEP_LENGTH;
     }
-    else {
+    else { // "Full" pixel, cast rays up to it
         vec3 rayVector = worldPos.xyz - viewPos;
         rayDir = normalize(rayVector);
         stepLength = length(rayVector) / NB_STEPS;
@@ -64,7 +66,7 @@ void main() {
     for (int i = 0; i < NB_STEPS; ++i) {
         vec2 shadow = getShadowMapValue(currentPos);
         if (shadow.x < 0.0 || shadow.x > shadow.y) {
-            accumFog += computeScattering(dot(rayDir, lightDir)) * color;
+            accumFog += computeScattering(dot(rayDir, lightDir)) * color * INTENSITY;
             currentPos += rayStep;
         }
     }

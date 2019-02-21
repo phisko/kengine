@@ -45,6 +45,8 @@ namespace kengine::Shaders {
 	// Fills a texture that can then be used by directional light to know per-pixel AO
 	class SSAOBlur : public putils::gl::Program {
 	public:
+		SSAOBlur() : Program(false, pmeta_nameof(SSAOBlur)) {}
+
 		void init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) override;
 
 		void run(size_t ssaoTexture);

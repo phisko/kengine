@@ -23,7 +23,7 @@ static auto FARCLIP_VALUE = 0.1f;
 static auto BIAS_VALUE = .3f;
 namespace kengine::Shaders {
 	SSAO::SSAO(kengine::EntityManager & em)
-		: putils::gl::Program(true)
+		: putils::gl::Program(true, pmeta_nameof(SSAO))
 	{
 		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/SSAO] Radius", &RADIUS_VALUE); };
 		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/SSAO] Farclip", &FARCLIP_VALUE); };

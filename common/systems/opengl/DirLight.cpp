@@ -11,7 +11,7 @@
 static bool RUN_SSAO = false;
 namespace kengine::Shaders {
 	DirLight::DirLight(kengine::EntityManager & em, ShadowMap & shadowMap, SSAO & ssao, SSAOBlur & ssaoBlur)
-		: Program(true),
+		: Program(true, pmeta_nameof(DirLight)),
 		_em(em),
 		_shadowMap(shadowMap),
 		_ssao(ssao),
@@ -23,7 +23,7 @@ namespace kengine::Shaders {
 	void DirLight::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
 		initWithShaders<DirLight>(putils::make_vector(
 			ShaderDescription{ "shaders/3d.vert", GL_VERTEX_SHADER },
-			ShaderDescription{ "shaders/shadow.frag", GL_FRAGMENT_SHADER },
+			ShaderDescription{ "shaders/shadowMap.frag", GL_FRAGMENT_SHADER },
 			ShaderDescription{ "shaders/dirLight.frag", GL_FRAGMENT_SHADER }
 		));
 

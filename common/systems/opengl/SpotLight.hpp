@@ -13,7 +13,7 @@ namespace kengine::Shaders {
 	class SpotLight : public putils::gl::Program {
 	public:
 		SpotLight(kengine::EntityManager & em, ShadowMap & shadowMap)
-			: Program(true),
+			: Program(true, pmeta_nameof(SpotLight)),
 			_em(em),
 			_shadowMap(shadowMap)
 		{}

@@ -12,6 +12,8 @@ namespace kengine::Shaders {
 
 	class ShadowCube : public putils::gl::Program {
 	public:
+		ShadowCube() : Program(false, pmeta_nameof(ShadowCube)) {}
+
 		void init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) override;
 
 		void run(kengine::Entity & e, PointLightComponent & light, const putils::Point3f & pos, float radius, size_t screenWidth, size_t screenHeight);

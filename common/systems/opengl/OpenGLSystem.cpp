@@ -27,7 +27,9 @@
 #include "DirLight.hpp"
 #include "PointLight.hpp"
 #include "LightSphere.hpp"
-#include "GodRays.hpp"
+#include "GodRaysDirLight.hpp"
+#include "GodRaysPointLight.hpp"
+#include "GodRaysSpotLight.hpp"
 
 #include "Export.hpp"
 
@@ -137,7 +139,9 @@ namespace kengine {
 		}
 
 		{ // Post process
-			_em += [=](kengine::Entity & e) { e += kengine::makePostProcessShaderComponent<Shaders::GodRays>(_em); };
+			_em += [=](kengine::Entity & e) { e += kengine::makePostProcessShaderComponent<Shaders::GodRaysDirLight>(_em); };
+			_em += [=](kengine::Entity & e) { e += kengine::makePostProcessShaderComponent<Shaders::GodRaysPointLight>(_em); };
+			_em += [=](kengine::Entity & e) { e += kengine::makePostProcessShaderComponent<Shaders::GodRaysSpotLight>(_em); };
 			_em += [=](kengine::Entity & e) { e += kengine::makePostProcessShaderComponent<Shaders::LightSphere>(_em); };
 		}
 	}
@@ -258,6 +262,7 @@ namespace kengine {
 				ImGui::End();
 			});
 		};
+		_em += ShadersController(_em);
 		_em += LightsDebugger(_em);
 		_em += TextureDebugger(_em, _gBuffer, _gBufferIterator);
 		_em += MouseController(window);
@@ -395,15 +400,18 @@ namespace kengine {
 			_gBuffer.bindForWriting();
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			for (const auto &[e, comp] : _em.getEntities<kengine::GBufferShaderComponent>())
-				comp.shader->run(view, proj, camPos, SCREEN_WIDTH, SCREEN_HEIGHT);
+				if (comp.enabled)
+					comp.shader->run(view, proj, camPos, SCREEN_WIDTH, SCREEN_HEIGHT);
 			_gBuffer.bindForReading();
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			for (const auto &[e, comp] : _em.getEntities<kengine::LightingShaderComponent>())
-				comp.shader->run(view, proj, camPos, SCREEN_WIDTH, SCREEN_HEIGHT);
+				if (comp.enabled)
+					comp.shader->run(view, proj, camPos, SCREEN_WIDTH, SCREEN_HEIGHT);
 
 			for (const auto &[e, comp] : _em.getEntities<kengine::PostProcessShaderComponent>())
-				comp.shader->run(view, proj, camPos, SCREEN_WIDTH, SCREEN_HEIGHT);
+				if (comp.enabled)
+					comp.shader->run(view, proj, camPos, SCREEN_WIDTH, SCREEN_HEIGHT);
 
 			if (TEXTURE_TO_DEBUG != -1)
 				debugTexture(TEXTURE_TO_DEBUG);

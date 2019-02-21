@@ -7,6 +7,7 @@ namespace putils::gl { class Program; }
 namespace kengine {
 	struct ShaderComponent {
 		std::unique_ptr<putils::gl::Program> shader;
+		bool enabled = true;
 	};
 
 	struct GBufferShaderComponent : ShaderComponent {};

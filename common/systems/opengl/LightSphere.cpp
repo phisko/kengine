@@ -13,7 +13,9 @@ static auto SUN_DIST = 500.f;
 static auto SUN_SIZE = 100.f;
 
 namespace kengine::Shaders {
-	LightSphere::LightSphere(kengine::EntityManager & em) : _em(em) {
+	LightSphere::LightSphere(kengine::EntityManager & em) 
+		: Program(false, pmeta_nameof(LightSphere)),
+		_em(em) {
 		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/Lights] Sphere size", &SPHERE_SIZE); };
 		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/Lights] Sun size", &SUN_SIZE); };
 		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/Lights] Sun dist", &SUN_DIST); };

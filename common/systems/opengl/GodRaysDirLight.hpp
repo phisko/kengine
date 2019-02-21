@@ -10,9 +10,9 @@ namespace kengine {
 namespace kengine::Shaders {
 	struct DepthMapComponent;
 
-	class GodRays : public putils::gl::Program {
+	class GodRaysDirLight : public putils::gl::Program {
 	public:
-		GodRays(kengine::EntityManager & em);
+		GodRaysDirLight(kengine::EntityManager & em);
 
 		void init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) override;
 		void run(const glm::mat4 & view, const glm::mat4 & proj, const glm::vec3 & camPos, size_t screenWidth, size_t screenHeight) override;
@@ -28,6 +28,7 @@ namespace kengine::Shaders {
 		GLint SCATTERING;
 		GLint NB_STEPS;
 		GLint DEFAULT_STEP_LENGTH;
+		GLint INTENSITY;
 
 		GLint inverseView;
 		GLint inverseProj;
@@ -40,19 +41,20 @@ namespace kengine::Shaders {
 		GLint lightSpaceMatrix;
 
 		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&GodRays::SCATTERING),
-			pmeta_reflectible_attribute(&GodRays::NB_STEPS),
-			pmeta_reflectible_attribute(&GodRays::DEFAULT_STEP_LENGTH),
+			pmeta_reflectible_attribute(&GodRaysDirLight::SCATTERING),
+			pmeta_reflectible_attribute(&GodRaysDirLight::NB_STEPS),
+			pmeta_reflectible_attribute(&GodRaysDirLight::DEFAULT_STEP_LENGTH),
+			pmeta_reflectible_attribute(&GodRaysDirLight::INTENSITY),
 
-			pmeta_reflectible_attribute(&GodRays::inverseView),
-			pmeta_reflectible_attribute(&GodRays::inverseProj),
-			pmeta_reflectible_attribute(&GodRays::viewPos),
+			pmeta_reflectible_attribute(&GodRaysDirLight::inverseView),
+			pmeta_reflectible_attribute(&GodRaysDirLight::inverseProj),
+			pmeta_reflectible_attribute(&GodRaysDirLight::viewPos),
 
-			pmeta_reflectible_attribute(&GodRays::color),
-			pmeta_reflectible_attribute(&GodRays::direction),
+			pmeta_reflectible_attribute(&GodRaysDirLight::color),
+			pmeta_reflectible_attribute(&GodRaysDirLight::direction),
 
-			pmeta_reflectible_attribute(&GodRays::shadowMap),
-			pmeta_reflectible_attribute(&GodRays::lightSpaceMatrix)
+			pmeta_reflectible_attribute(&GodRaysDirLight::shadowMap),
+			pmeta_reflectible_attribute(&GodRaysDirLight::lightSpaceMatrix)
 		);
 	};
 }

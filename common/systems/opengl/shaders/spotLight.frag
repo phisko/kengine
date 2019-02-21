@@ -45,7 +45,6 @@ vec3 calcSpotLight(vec3 worldPos, vec3 normal) {
 
     float shadow = calcShadow(worldPos, normal, lightDir);
     return color * (1.0 - shadow) * (diffuse + specular) * attenuation * intensity;
-    // return vec3(shadow);
 }
 
 void main() {
@@ -54,5 +53,5 @@ void main() {
    	vec3 objectColor = texture(gcolor, texCoord).xyz;
    	vec3 normal = texture(gnormal, texCoord).xyz;
 
-   	outputColor = vec4(objectColor, 1.0) * vec4(calcSpotLight(worldPos, normal), 1.0); // + vec4(1.0);
+   	outputColor = vec4(objectColor, 1.0) * vec4(calcSpotLight(worldPos, normal), 1.0);
 }
