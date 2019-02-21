@@ -34,7 +34,6 @@ namespace kengine::Shaders {
 		glBlitFramebuffer(0, 0, screenWidth, screenHeight, 0, 0, screenWidth, screenHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-		DepthMask __d;
 		Enable __e(GL_DEPTH_TEST);
 		Enable __c(GL_CULL_FACE);
 

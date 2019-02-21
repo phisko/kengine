@@ -52,7 +52,7 @@ namespace kengine::Shaders {
 
 			glActiveTexture(GL_TEXTURE0 + _shadowMapTextureID);
 			glBindTexture(GL_TEXTURE_2D, e.get<DepthMapComponent>().texture);
-			putils::gl::setUniform(lightSpaceMatrix, getLightSpaceMatrix(light, centre, screenWidth, screenHeight));
+			putils::gl::setUniform(lightSpaceMatrix, getLightSpaceMatrix(light, { centre.x, centre.y, centre.z }, screenWidth, screenHeight));
 
 			shapes::drawSphere();
 		}

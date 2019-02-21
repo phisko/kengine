@@ -1,96 +1,76 @@
 #include "GodRays.hpp"
 #include "Shapes.hpp"
 #include "EntityManager.hpp"
-#include "GodRaysFirstPass.hpp"
+#include "ShadowMap.hpp"
 #include "components/LightComponent.hpp"
 #include "components/AdjustableComponent.hpp"
 #include "components/TransformComponent.hpp"
 #include "RAII.hpp"
 
-static auto EXPOSURE = .002f;
-static auto DECAY = .99f;
-static auto DENSITY = 1.f;
-static auto WEIGHT = 5.f;
-static auto NUM_SAMPLES = 100.f;
-
-static auto SPHERE_SIZE = .25f;
-static auto SUN_DIST = 500.f;
-static auto SUN_SIZE = 100.f;
+static auto SCATTERING_ADJUST = .1f;
+static auto NB_STEPS_ADJUST = 100.f;
+static auto DEFAULT_STEP_LENGTH_ADJUST = 10.f;
 
 namespace kengine::Shaders {
-	GodRays::GodRays(kengine::EntityManager & em, GodRaysFirstPass & firstPass)
-		: _em(em), _firstPass(firstPass)
+	GodRays::GodRays(kengine::EntityManager & em) : Program(true), _em(em)
 	{
-		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/God Rays] Sphere size", &SPHERE_SIZE); };
-		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/God Rays] Sun dist", &SUN_DIST); };
-		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/God Rays] Sun size", &SUN_SIZE); };
-
-		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/God Rays] Exposure", &EXPOSURE); };
-		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/God Rays] Decay", &DECAY); };
-		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/God Rays] Density", &DENSITY); };
-		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/God Rays] Weight", &WEIGHT); };
-		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/God Rays] Num samples", &NUM_SAMPLES); };
+		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/God Rays] Scattering", &SCATTERING_ADJUST); };
+		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/God Rays] Nb steps", &NB_STEPS_ADJUST); };
+		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/God Rays] Default step length", &DEFAULT_STEP_LENGTH_ADJUST); };
 	}
-
 
 	void GodRays::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
 		initWithShaders<GodRays>(putils::make_vector(
 			ShaderDescription{ "shaders/quad.vert", GL_VERTEX_SHADER },
-			ShaderDescription{ "shaders/godRays.frag", GL_FRAGMENT_SHADER }
+			ShaderDescription{ "shaders/godRays.frag", GL_FRAGMENT_SHADER },
+			ShaderDescription{ "shaders/shadow.frag", GL_FRAGMENT_SHADER }
 		));
 
-		_firstPassTextureID = firstTextureID;
-		putils::gl::setUniform(firstPass, _firstPassTextureID);
+		_shadowMapTextureID = firstTextureID;
+		putils::gl::setUniform(shadowMap, _shadowMapTextureID);
 	}
 
 	void GodRays::run(const glm::mat4 & view, const glm::mat4 & proj, const glm::vec3 & camPos, size_t screenWidth, size_t screenHeight) {
 		use();
-		putils::gl::setUniform(exposure, EXPOSURE);
-		putils::gl::setUniform(decay, DECAY);
-		putils::gl::setUniform(density, DENSITY);
-		putils::gl::setUniform(weight, WEIGHT);
-		putils::gl::setUniform(numSamples, NUM_SAMPLES);
 
-		glActiveTexture(GL_TEXTURE0 + _firstPassTextureID);
-		glBindTexture(GL_TEXTURE_2D, _firstPass.getTexture());
+		putils::gl::setUniform(this->inverseView, glm::inverse(view));
+		putils::gl::setUniform(this->inverseProj, glm::inverse(proj));
+		putils::gl::setUniform(this->viewPos, camPos);
 
-		for (const auto &[e, light] : _em.getEntities<DirLightComponent>())
-			drawLight(camPos - light.direction * SUN_DIST, SUN_SIZE, light.color, view, proj, screenWidth, screenHeight);
+		for (const auto &[e, light, depthMap] : _em.getEntities<DirLightComponent, DepthMapComponent>())
+			drawLight(camPos, light, depthMap, screenWidth, screenHeight);
 
-		for (const auto & [e, light, transform] : _em.getEntities<PointLightComponent, kengine::TransformComponent3f>()) {
-			const auto & pos = transform.boundingBox.topLeft;
-			drawLight({ pos.x, pos.y, pos.z }, SPHERE_SIZE, light.color, view, proj, screenWidth, screenHeight);
-		}
+		// for (const auto & [e, light, transform] : _em.getEntities<PointLightComponent, kengine::TransformComponent3f>()) {
+		// 	const auto & pos = transform.boundingBox.topLeft;
+		// 	drawLight({ pos.x, pos.y, pos.z }, SPHERE_SIZE, light.color, view, proj, screenWidth, screenHeight);
+		// }
 
-		for (const auto & [e, light, transform] : _em.getEntities<SpotLightComponent, kengine::TransformComponent3f>()) {
-			const auto & pos = transform.boundingBox.topLeft;
+		// for (const auto & [e, light, transform] : _em.getEntities<SpotLightComponent, kengine::TransformComponent3f>()) {
+		// 	const auto & pos = transform.boundingBox.topLeft;
 
-			const bool isFacingLight = glm::dot({ pos.x, pos.y, pos.z }, camPos) < 0;
-			if (isFacingLight)
-				drawLight({ pos.x, pos.y, pos.z }, SPHERE_SIZE, light.color, view, proj, screenWidth, screenHeight);
-		}
+		// 	const bool isFacingLight = glm::dot({ pos.x, pos.y, pos.z }, camPos) < 0;
+		// 	if (isFacingLight)
+		// 		drawLight({ pos.x, pos.y, pos.z }, SPHERE_SIZE, light.color, view, proj, screenWidth, screenHeight);
+		// }
 	}
 
-	static glm::vec2 getPosOnScreen(const glm::vec3 & pos, const glm::mat4 & proj, const glm::mat4 & view, size_t screenWidth, size_t screenHeight) {
-		const auto newPos = proj * view * glm::vec4(pos, 1.f);
-		const auto afterPerspective = glm::vec3(newPos.x, newPos.y, newPos.z) / newPos.w;
-		return { (afterPerspective.x + 1.f) / 2.f, (afterPerspective.y + 1.f) / 2.f };
-	}
-
-	void GodRays::drawLight(const glm::vec3 & lightPos, float size, const glm::vec3 & color, const glm::mat4 & view, const glm::mat4 & proj, size_t screenWidth, size_t screenHeight) {
-		glm::mat4 model(1.f);
-		model = glm::translate(model, lightPos);
-		model = glm::scale(model, glm::vec3(size));
-
-		_firstPass.run(view, proj, model, color);
-
+	void GodRays::drawLight(const glm::vec3 & camPos, const DirLightComponent & light, const DepthMapComponent & depthMap, size_t screenWidth, size_t screenHeight) {
 		Enable _(GL_BLEND);
 		glBlendEquation(GL_FUNC_ADD);
 		glBlendFunc(GL_ONE, GL_ONE);
 
 		use();
-		const auto lightPosOnScreen = getPosOnScreen(lightPos, proj, view, screenWidth, screenHeight);
-		putils::gl::setUniform(lightPositionOnScreen, glm::vec2{ lightPosOnScreen.x, lightPosOnScreen.y });
+		putils::gl::setUniform(SCATTERING, SCATTERING_ADJUST);
+		putils::gl::setUniform(NB_STEPS, NB_STEPS_ADJUST);
+		putils::gl::setUniform(DEFAULT_STEP_LENGTH, DEFAULT_STEP_LENGTH_ADJUST);
+
+		putils::gl::setUniform(color, light.color);
+		putils::gl::setUniform(direction, light.direction);
+
+		glActiveTexture(GL_TEXTURE0 + _shadowMapTextureID);
+		glBindTexture(GL_TEXTURE_2D, depthMap.texture);
+		putils::gl::setUniform(lightSpaceMatrix, getLightSpaceMatrix(light, camPos, screenWidth, screenHeight));
+
 		shapes::drawQuad();
 	}
 }

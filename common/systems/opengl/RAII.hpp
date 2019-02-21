@@ -14,8 +14,3 @@ struct Enable {
 
 	GLenum feature;
 };
-
-struct DepthMask {
-	DepthMask() { glDepthMask(GL_TRUE); }
-	~DepthMask() { glDepthMask(GL_FALSE); }
-};

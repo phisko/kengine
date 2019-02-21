@@ -12,11 +12,8 @@ namespace kengine::Shaders {
 	void Geometry::run(const glm::mat4 & view, const glm::mat4 & proj, const glm::vec3 & camPos, size_t screenWidth, size_t screenHeight) {
 		use();
 
-		DepthMask __d;
 		Enable __t(GL_DEPTH_TEST);
 		// Enable __c(GL_CULL_FACE);
-
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		putils::gl::setUniform(this->view, view);
 		putils::gl::setUniform(this->proj, proj);

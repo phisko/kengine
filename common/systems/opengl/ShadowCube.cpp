@@ -43,7 +43,6 @@ namespace kengine::Shaders {
 
 		const auto & depthCube = e.get<DepthCubeComponent>();
 		BindFramebuffer __f(depthCube.fbo);
-		DepthMask __d;
 		Enable __e(GL_DEPTH_TEST);
 
 		use();

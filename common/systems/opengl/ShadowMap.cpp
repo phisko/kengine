@@ -53,12 +53,11 @@ namespace kengine::Shaders {
 
 		const auto & depthMap = e.get<DepthMapComponent>();
 		BindFramebuffer __f(depthMap.fbo);
-		DepthMask __d;
 		Enable __e(GL_DEPTH_TEST);
 
 		use();
 		glClear(GL_DEPTH_BUFFER_BIT);
-		putils::gl::setUniform(view, getLightSpaceMatrix(light, pos, screenWidth, screenHeight));
+		putils::gl::setUniform(view, getLightSpaceMatrix(light, { pos.x, pos.y, pos.z }, screenWidth, screenHeight));
 		glCullFace(GL_FRONT);
 		drawObjects(model);
 		glCullFace(GL_BACK);

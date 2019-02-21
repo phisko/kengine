@@ -27,7 +27,6 @@
 #include "DirLight.hpp"
 #include "PointLight.hpp"
 #include "LightSphere.hpp"
-#include "GodRaysFirstPass.hpp"
 #include "GodRays.hpp"
 
 #include "Export.hpp"
@@ -135,17 +134,10 @@ namespace kengine {
 			_em += [=](kengine::Entity & e) { e += kengine::makeLightingShaderComponent<Shaders::SpotLight>(_em, *shadowMap); };
 			_em += [=](kengine::Entity & e) { e += kengine::makeLightingShaderComponent<Shaders::DirLight>(_em, *shadowMap, *ssao, *ssaoBlur); };
 			_em += [=](kengine::Entity & e) { e += kengine::makeLightingShaderComponent<Shaders::PointLight>(_em, *shadowCube); };
-
-			Shaders::GodRaysFirstPass * firstPass = nullptr;
-			_em += [&](kengine::Entity & e) {
-				auto & comp = e.attach<kengine::LightingShaderComponent>();
-				comp.shader = std::make_unique<Shaders::GodRaysFirstPass>(_em);
-				firstPass = (Shaders::GodRaysFirstPass *)comp.shader.get();
-			};
-			_em += [=](kengine::Entity & e) { e += kengine::makeLightingShaderComponent<Shaders::GodRays>(_em, *firstPass); };
 		}
 
 		{ // Post process
+			_em += [=](kengine::Entity & e) { e += kengine::makePostProcessShaderComponent<Shaders::GodRays>(_em); };
 			_em += [=](kengine::Entity & e) { e += kengine::makePostProcessShaderComponent<Shaders::LightSphere>(_em); };
 		}
 	}
@@ -209,6 +201,9 @@ namespace kengine {
 	}
 
 	void OpenGLSystem::handle(kengine::packets::GBufferSize p) {
+		if (_gBuffer.isInit())
+			return;
+
 		_gBuffer.init(GBUFFER_WIDTH, GBUFFER_HEIGHT, p.nbAttributes);
 
 		for (const auto & [e, shader] : _em.getEntities<kengine::GBufferShaderComponent>())
@@ -398,6 +393,7 @@ namespace kengine {
 			);
 
 			_gBuffer.bindForWriting();
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			for (const auto &[e, comp] : _em.getEntities<kengine::GBufferShaderComponent>())
 				comp.shader->run(view, proj, camPos, SCREEN_WIDTH, SCREEN_HEIGHT);
 			_gBuffer.bindForReading();

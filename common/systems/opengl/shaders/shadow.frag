@@ -3,6 +3,16 @@
 uniform sampler2D shadowMap;
 uniform mat4 lightSpaceMatrix;
 
+vec2 getShadowMapValue(vec3 worldPos) {
+    vec4 worldPosLightSpace = lightSpaceMatrix * vec4(worldPos, 1.0);
+    vec3 projCoords = worldPosLightSpace.xyz / worldPosLightSpace.w;
+    projCoords = projCoords * 0.5 + 0.5; // transform to [0,1] range
+
+    float objectDepth = projCoords.z;
+    float shadowMapValue = texture(shadowMap, projCoords.xy).r;
+    return vec2(shadowMapValue, objectDepth);
+}
+
 float calcShadow(vec3 worldPos, vec3 normal, vec3 lightDir) {
     vec4 worldPosLightSpace = lightSpaceMatrix * vec4(worldPos, 1.0);
     vec3 projCoords = worldPosLightSpace.xyz / worldPosLightSpace.w;

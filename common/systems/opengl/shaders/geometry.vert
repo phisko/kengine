@@ -8,14 +8,14 @@ uniform mat4 view;
 uniform mat4 model;
 uniform vec3 viewPos;
 
-out vec3 WorldPosition;
+out vec4 WorldPosition;
 out vec3 EyeRelativePos;
 out vec3 Color;
 
 void main() {
-	WorldPosition = (model * vec4(position, 1.0)).xyz;
-	EyeRelativePos = WorldPosition - viewPos;
+	WorldPosition = model * vec4(position, 1.0);
+	EyeRelativePos = WorldPosition.xyz - viewPos;
 	Color = color;
 
-	gl_Position = proj * view * vec4(WorldPosition, 1.0);
+	gl_Position = proj * view * WorldPosition;
 }
