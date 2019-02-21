@@ -43,25 +43,25 @@ namespace kengine {
 			dir;
 	}
 
-	static inline auto DIRECTIONAL_LIGHT_SHADOW_DISTANCE = 100.f;
+	static auto DIRECTIONAL_LIGHT_SHADOW_DISTANCE = 100.f;
 
-	static glm::mat4 getLightSpaceMatrix(DirLightComponent & light, const putils::Point3f & pos, size_t, size_t) {
-		light.direction = getCorrectDirection(light.direction);
+	static glm::mat4 getLightSpaceMatrix(const DirLightComponent & light, const glm::vec3 & pos, size_t screenWidth, size_t screenHeight) {
+		const auto dir = getCorrectDirection(light.direction);
 		const auto dist = DIRECTIONAL_LIGHT_SHADOW_DISTANCE;
 		const auto lightProjection = glm::ortho(pos.x - dist, pos.x + dist, pos.y - dist, pos.y + dist, pos.z - dist, pos.z + dist);
-		const auto lightView = glm::lookAt(glm::vec3(0.f), light.direction, glm::vec3(0.f, 1.f, 0.f));
+		const auto lightView = glm::lookAt(glm::vec3(0.f), dir, glm::vec3(0.f, 1.f, 0.f));
 		return lightProjection * lightView;
 	}
 
 	static auto SHADOW_MAP_NEAR_PLANE = 0.f;
 	static auto SHADOW_MAP_FAR_PLANE = 1000.f;
 
-	static glm::mat4 getLightSpaceMatrix(SpotLightComponent & light, const putils::Point3f & pos, size_t screenWidth, size_t screenHeight) {
+	static glm::mat4 getLightSpaceMatrix(const SpotLightComponent & light, const glm::vec3 & pos, size_t screenWidth, size_t screenHeight) {
 		const auto lightProjection = glm::perspective(45.f, (float)screenWidth / (float)screenHeight, SHADOW_MAP_NEAR_PLANE, SHADOW_MAP_FAR_PLANE);
 
-		light.direction = getCorrectDirection(light.direction);
+		const auto dir = getCorrectDirection(light.direction);
 		const glm::vec3 vPos(pos.x, pos.y, pos.z);
-		const auto lightView = glm::lookAt(vPos, vPos + light.direction, glm::vec3(0.f, 1.f, 0.f));
+		const auto lightView = glm::lookAt(vPos, vPos + dir, glm::vec3(0.f, 1.f, 0.f));
 
 		return lightProjection * lightView;
 	}
