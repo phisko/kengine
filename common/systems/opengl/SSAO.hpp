@@ -12,7 +12,7 @@ namespace kengine::Shaders {
 
 		void init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) override;
 
-		void run(const glm::mat4 & view, const glm::mat4 & projection);
+		void run(const glm::mat4 & view, const glm::mat4 & projection, size_t screenWidth, size_t screenHeight);
 		void run(const glm::mat4 & view, const glm::mat4 & proj, const glm::vec3 & camPos, size_t screenWidth, size_t screenHeight) override {}
 
 		auto getTexture() const { return _colorBuffer; }
@@ -20,6 +20,7 @@ namespace kengine::Shaders {
 	public:
 		GLint view;
 		GLint proj;
+		GLint screenSize;
 
 		GLint RADIUS;
 		GLint FARCLIP;
@@ -28,6 +29,7 @@ namespace kengine::Shaders {
 		pmeta_get_attributes(
 			pmeta_reflectible_attribute(&SSAO::view),
 			pmeta_reflectible_attribute(&SSAO::proj),
+			pmeta_reflectible_attribute(&SSAO::screenSize),
 
 			pmeta_reflectible_attribute(&SSAO::RADIUS),
 			pmeta_reflectible_attribute(&SSAO::FARCLIP),
@@ -49,16 +51,18 @@ namespace kengine::Shaders {
 
 		void init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) override;
 
-		void run(size_t ssaoTexture);
+		void run(size_t ssaoTexture, size_t screenWidth, size_t screenHeight);
 		void run(const glm::mat4 & view, const glm::mat4 & proj, const glm::vec3 & camPos, size_t screenWidth, size_t screenHeight) override {}
 
 		auto getTexture() const { return _colorBuffer; }
 
 	public:
 		GLint ssao;
+		GLint screenSize;
 
 		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&SSAOBlur::ssao)
+			pmeta_reflectible_attribute(&SSAOBlur::ssao),
+			pmeta_reflectible_attribute(&SSAOBlur::screenSize)
 		);
 
 	private:

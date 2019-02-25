@@ -6,6 +6,7 @@ uniform sampler2D noise;
 
 uniform mat4 view;
 uniform mat4 proj;
+uniform vec2 screenSize;
 uniform vec3 samples[64];
 
 out float outColor;
@@ -16,8 +17,7 @@ uniform float FARCLIP;
 uniform float BIAS;
 
 void main() {
-    vec2 size = textureSize(gposition, 0);
-   	vec2 texCoord = gl_FragCoord.xy / size;
+   	vec2 texCoord = gl_FragCoord.xy / screenSize;
 
     vec3 worldPos = (proj * view * texture(gposition, texCoord)).xyz;
     float depth = worldPos.z * FARCLIP;

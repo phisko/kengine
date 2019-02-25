@@ -27,6 +27,7 @@ namespace kengine::Shaders {
 		GLint model;
 
 		GLint viewPos;
+		GLint screenSize;
 
 		GLint color;
 		GLint position;
@@ -47,6 +48,7 @@ namespace kengine::Shaders {
 			pmeta_reflectible_attribute(&PointLight::model),
 
 			pmeta_reflectible_attribute(&PointLight::viewPos),
+			pmeta_reflectible_attribute(&PointLight::screenSize),
 
 			pmeta_reflectible_attribute(&PointLight::color),
 			pmeta_reflectible_attribute(&PointLight::position),

@@ -40,8 +40,8 @@ namespace kengine::Shaders {
 
 	void DirLight::run(const glm::mat4 & view, const glm::mat4 & proj, const glm::vec3 & camPos, size_t screenWidth, size_t screenHeight) {
 		if (RUN_SSAO) {
-			_ssao.run(view, proj);
-			_ssaoBlur.run(_ssao.getTexture());
+			_ssao.run(view, proj, screenWidth, screenHeight);
+			_ssaoBlur.run(_ssao.getTexture(), screenWidth, screenHeight);
 		}
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -53,6 +53,7 @@ namespace kengine::Shaders {
 
 		use();
 		putils::gl::setUniform(viewPos, camPos);
+		putils::gl::setUniform(screenSize, glm::vec2(screenWidth, screenHeight));
 		for (auto &[e, light] : _em.getEntities<DirLightComponent>()) {
 			const putils::Point3f pPos = { camPos.x, camPos.y, camPos.z };
 

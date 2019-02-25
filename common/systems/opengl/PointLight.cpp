@@ -31,6 +31,7 @@ namespace kengine::Shaders {
 
 		use();
 		putils::gl::setUniform(viewPos, camPos);
+		putils::gl::setUniform(screenSize, glm::vec2(screenWidth, screenHeight));
 
 		for (auto & [e, light, transform] : _em.getEntities<PointLightComponent, kengine::TransformComponent3f>()) {
 			const auto radius = getRadius(light);

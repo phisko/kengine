@@ -42,6 +42,7 @@ EXPORT kengine::ISystem * getSystem(kengine::EntityManager & em) {
 namespace kengine {
 	static auto SCREEN_WIDTH = 1280;
 	static auto SCREEN_HEIGHT = 720;
+	static auto SCREEN_CHANGED = false;
 
 	static auto GBUFFER_WIDTH = SCREEN_WIDTH;
 	static auto GBUFFER_HEIGHT = SCREEN_HEIGHT;
@@ -165,6 +166,7 @@ namespace kengine {
 		glfwSetWindowSizeCallback(window, [](auto window, int width, int height) {
 			SCREEN_WIDTH = width;
 			SCREEN_HEIGHT = height;
+			SCREEN_CHANGED = true;
 			glViewport(0, 0, width, height);
 		});
 
@@ -314,6 +316,11 @@ namespace kengine {
 		if (!_gBuffer.isInit())
 			return;
 
+		if (SCREEN_CHANGED) {
+			_gBuffer.resize(SCREEN_WIDTH, SCREEN_HEIGHT);
+			SCREEN_CHANGED = false;
+		}
+
 		using namespace std::chrono;
 
 		if (glfwWindowShouldClose(window)) {
@@ -373,7 +380,7 @@ namespace kengine {
 				const auto & size = transform.boundingBox.size;
 				glViewport(
 					(int)pos.x * SCREEN_WIDTH, (int)pos.y * SCREEN_HEIGHT,
-					(GLsizei)(pos.x + size.x) * SCREEN_WIDTH, (GLsizei)(pos.y + size.y) * SCREEN_HEIGHT
+					(GLsizei)size.x * SCREEN_WIDTH, (GLsizei)size.y * SCREEN_HEIGHT
 				);
 			}
 
@@ -427,7 +434,7 @@ namespace kengine {
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, readFBO);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 		glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
-		glBlitFramebuffer(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+		glBlitFramebuffer(0, 0, GBUFFER_WIDTH, GBUFFER_HEIGHT, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 	}
 
 	void OpenGLSystem::drawObjects(GLint modelMatrixLocation) const noexcept {

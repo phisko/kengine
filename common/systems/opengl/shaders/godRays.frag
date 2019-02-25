@@ -10,6 +10,7 @@ uniform float INTENSITY;
 uniform mat4 inverseView;
 uniform mat4 inverseProj;
 uniform vec3 viewPos;
+uniform vec2 screenSize;
 
 uniform vec3 color;
 uniform vec3 direction;
@@ -28,8 +29,7 @@ float computeScattering(float lightDotView) {
 }
 
 void main() {	
-    vec2 size = textureSize(gposition, 0);
-   	vec2 texCoord = gl_FragCoord.xy / size;
+   	vec2 texCoord = gl_FragCoord.xy / screenSize;
     vec4 worldPos = texture(gposition, texCoord);
 
     vec3 lightDir = getLightDirection(worldPos.xyz);

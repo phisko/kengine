@@ -45,6 +45,18 @@ namespace kengine {
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 		}
 
+		void resize(size_t screenWidth, size_t screenHeight) {
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fbo);
+
+			for (const auto texture : textures) {
+				glBindTexture(GL_TEXTURE_2D, texture);
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, screenWidth, screenHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
+			}
+
+			glBindTexture(GL_TEXTURE_2D, _depthTexture);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, screenWidth, screenHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+		}
+
 		void bindForWriting() {
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fbo);
 		}

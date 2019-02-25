@@ -53,13 +53,14 @@ namespace kengine::Shaders {
 		}
 	}
 
-	void SSAO::run(const glm::mat4 & view, const glm::mat4 & projection) {
+	void SSAO::run(const glm::mat4 & view, const glm::mat4 & projection, size_t screenWidth, size_t screenHeight) {
 		BindFramebuffer __f(_fbo);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		use();
 		putils::gl::setUniform(this->view, view);
 		putils::gl::setUniform(this->proj, projection);
+		putils::gl::setUniform(this->screenSize, glm::vec2(screenWidth, screenHeight));
 
 		putils::gl::setUniform(RADIUS, RADIUS_VALUE);
 		putils::gl::setUniform(FARCLIP, FARCLIP_VALUE);
@@ -81,13 +82,14 @@ namespace kengine::Shaders {
 		putils::gl::setUniform(ssao, _ssaoTextureID);
 	}
 
-	void SSAOBlur::run(size_t ssaoTexture) {
+	void SSAOBlur::run(size_t ssaoTexture, size_t screenWidth, size_t screenHeight) {
 		BindFramebuffer __f(_fbo);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		use();
 		glActiveTexture(GL_TEXTURE0 + _ssaoTextureID);
 		glBindTexture(GL_TEXTURE_2D, ssaoTexture);
+		putils::gl::setUniform(this->screenSize, glm::vec2(screenWidth, screenHeight));
 
 		shapes::drawQuad();
 	}

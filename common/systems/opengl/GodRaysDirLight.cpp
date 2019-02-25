@@ -52,6 +52,7 @@ namespace kengine::Shaders {
 		putils::gl::setUniform(this->inverseView, glm::inverse(view));
 		putils::gl::setUniform(this->inverseProj, glm::inverse(proj));
 		putils::gl::setUniform(this->viewPos, camPos);
+		putils::gl::setUniform(this->screenSize, glm::vec2(screenWidth, screenHeight));
 
 		for (const auto &[e, light, depthMap] : _em.getEntities<DirLightComponent, DepthMapComponent>())
 			drawLight(camPos, light, depthMap, screenWidth, screenHeight);

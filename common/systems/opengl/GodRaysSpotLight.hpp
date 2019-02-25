@@ -33,6 +33,7 @@ namespace kengine::Shaders {
 		GLint inverseView;
 		GLint inverseProj;
 		GLint viewPos;
+		GLint screenSize;
 
 		GLint color;
 		GLint position;
@@ -49,6 +50,7 @@ namespace kengine::Shaders {
 			pmeta_reflectible_attribute(&GodRaysSpotLight::inverseView),
 			pmeta_reflectible_attribute(&GodRaysSpotLight::inverseProj),
 			pmeta_reflectible_attribute(&GodRaysSpotLight::viewPos),
+			pmeta_reflectible_attribute(&GodRaysSpotLight::screenSize),
 
 			pmeta_reflectible_attribute(&GodRaysSpotLight::color),
 			pmeta_reflectible_attribute(&GodRaysSpotLight::position),

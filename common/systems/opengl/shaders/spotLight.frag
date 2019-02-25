@@ -5,6 +5,7 @@ uniform sampler2D gnormal;
 uniform sampler2D gcolor;
 
 uniform vec3 viewPos;
+uniform vec2 screenSize;
 
 uniform vec3 color;
 uniform vec3 position;
@@ -48,7 +49,7 @@ vec3 calcSpotLight(vec3 worldPos, vec3 normal) {
 }
 
 void main() {
-   	vec2 texCoord = gl_FragCoord.xy / textureSize(gposition, 0);
+   	vec2 texCoord = gl_FragCoord.xy / screenSize;
    	vec3 worldPos = texture(gposition, texCoord).xyz;
    	vec3 objectColor = texture(gcolor, texCoord).xyz;
    	vec3 normal = texture(gnormal, texCoord).xyz;

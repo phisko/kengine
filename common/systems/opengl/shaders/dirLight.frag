@@ -8,6 +8,7 @@ uniform sampler2D ssao;
 uniform int runSSAO;
 
 uniform vec3 viewPos;
+uniform vec2 screenSize;
 
 uniform vec3 color;
 uniform vec3 direction;
@@ -38,7 +39,7 @@ vec3 calcDirLight(vec3 worldPos, vec3 normal, float ambientOcclusion) {
 }
 
 void main() {
-   	vec2 texCoord = gl_FragCoord.xy / textureSize(gposition, 0);
+   	vec2 texCoord = gl_FragCoord.xy / screenSize;
    	vec3 worldPos = texture(gposition, texCoord).xyz;
    	vec3 objectColor = texture(gcolor, texCoord).xyz;
    	vec3 normal = texture(gnormal, texCoord).xyz;

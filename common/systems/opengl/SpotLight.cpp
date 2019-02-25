@@ -30,6 +30,7 @@ namespace kengine::Shaders {
 
 		use();
 		putils::gl::setUniform(viewPos, camPos);
+		putils::gl::setUniform(screenSize, glm::vec2(screenWidth, screenHeight));
 		for (auto &[e, light, transform] : _em.getEntities<SpotLightComponent, kengine::TransformComponent3f>()) {
 			const auto & centre = transform.boundingBox.topLeft;
 			_shadowMap.run(e, light, centre, screenWidth, screenHeight);

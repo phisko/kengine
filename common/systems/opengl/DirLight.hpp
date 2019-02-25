@@ -30,6 +30,7 @@ namespace kengine::Shaders {
 		GLint runSSAO;
 
 		GLint viewPos;
+		GLint screenSize;
 
 		GLint color;
 		GLint direction;
@@ -50,6 +51,7 @@ namespace kengine::Shaders {
 			pmeta_reflectible_attribute(&DirLight::runSSAO),
 
 			pmeta_reflectible_attribute(&DirLight::viewPos),
+			pmeta_reflectible_attribute(&DirLight::screenSize),
 
 			pmeta_reflectible_attribute(&DirLight::color),
 			pmeta_reflectible_attribute(&DirLight::direction),
