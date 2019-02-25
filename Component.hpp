@@ -36,7 +36,7 @@ namespace kengine {
 			size_t id = detail::INVALID;
 
 			bool save() const final {
-				if constexpr (putils::is_reflectible<Comp>::value && !std::is_base_of<kengine::not_serializable, Comp>::value) {
+				if constexpr (putils::has_member_get_class_name<Comp>::value && !std::is_base_of<kengine::not_serializable, Comp>::value) {
 					putils::string<64> file("%s.bin", Comp::get_class_name());
 					std::ofstream f(file.c_str());
 
