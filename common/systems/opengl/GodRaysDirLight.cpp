@@ -17,6 +17,11 @@ namespace kengine::Shaders {
 		: Program(true, pmeta_nameof(GodRaysDirLight)),
 		_em(em)
 	{
+		static bool done = false;
+		if (done)
+			return;
+		done = true;
+
 		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/God Rays] Scattering", &SCATTERING_ADJUST); };
 		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/God Rays] Nb steps", &NB_STEPS_ADJUST); };
 		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/God Rays] Default step length", &DEFAULT_STEP_LENGTH_ADJUST); };
