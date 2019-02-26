@@ -1,7 +1,12 @@
 set(name opengl)
 
+set(BUILD_UTILS FALSE)
 add_subdirectory(libs/glew/build/cmake)
+
 add_subdirectory(libs/glm/glm)
+
+set(GLFW_BUILD_EXAMPLES FALSE)
+set(GLFW_BUILD_TESTS FALSE)
 add_subdirectory(libs/glfw)
 
 file(GLOB src
