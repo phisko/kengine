@@ -201,7 +201,7 @@ namespace kengine {
 				bool operator!=(const ComponentIterator & rhs) const { return !(*this == rhs); }
 
 				std::tuple<Entity, Comps &...> operator*() const {
-					auto & archetype = em._archetypes[currentType];
+					const auto & archetype = em._archetypes[currentType];
 					Entity e(archetype.entities[currentEntity], archetype.mask, &em);
 					return std::make_tuple(e, std::ref(e.get<Comps>())...);
 				}
@@ -268,6 +268,12 @@ namespace kengine {
 
 			const auto id = _toReuse.back();
 			_toReuse.pop_back();
+
+#ifndef NDEBUG
+			for (const auto & archetype : _archetypes)
+				assert(std::find(archetype.entities.begin(), archetype.entities.end(), id) == archetype.entities.end());
+#endif
+
 			assert(id < _entities.size());
 			return Entity(id, 0, this);
 		}
@@ -277,8 +283,16 @@ namespace kengine {
 		void updateMask(Entity::ID id, Entity::Mask newMask, bool ignoreOldMask = false) {
 			if (_updatesLocked == 0)
 				doUpdateMask(id, newMask, ignoreOldMask);
-			else
+			else {
+				for (auto & update : _updates)
+					if (update.id == id) {
+						update.newMask |= newMask;
+						update.ignoreOldMask |= ignoreOldMask;
+						return;
+					}
+				// assert(update.id != id && "There is already an update pending for this entity");
 				_updates.push_back({ id, newMask, ignoreOldMask });
+			}
 		}
 
 		void doAllUpdates() {
