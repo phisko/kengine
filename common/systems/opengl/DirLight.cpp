@@ -17,11 +17,6 @@ namespace kengine::Shaders {
 		_ssao(ssao),
 		_ssaoBlur(ssaoBlur)
 	{
-		static bool done = false;
-		if (done)
-			return;
-		done = true;
-
 		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/SSAO] Active", &RUN_SSAO); };
 	}
 

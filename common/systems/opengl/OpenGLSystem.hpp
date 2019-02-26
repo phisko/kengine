@@ -11,7 +11,7 @@
 namespace kengine {
 	struct MeshLoaderComponent;
 
-	struct MeshInfoComponent {
+	struct MeshInfoComponent : kengine::not_serializable {
 		GLuint vertexArrayObject = -1;
 		GLuint vertexBuffer = -1;
 		GLuint indexBuffer = -1;
@@ -20,6 +20,8 @@ namespace kengine {
 		GLenum indexType = GL_UNSIGNED_INT;
 
 		std::function<void(putils::gl::Program & p)> vertexRegisterFunc = nullptr;
+
+		pmeta_get_class_name(MeshInfoComponent);
 	};
 
 	class OpenGLSystem : public kengine::System<OpenGLSystem, kengine::packets::RegisterEntity, kengine::packets::GBufferSize, kengine::packets::VertexDataAttributeIterator> {

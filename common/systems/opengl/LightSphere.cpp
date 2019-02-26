@@ -16,11 +16,6 @@ namespace kengine::Shaders {
 	LightSphere::LightSphere(kengine::EntityManager & em) 
 		: Program(false, pmeta_nameof(LightSphere)),
 		_em(em) {
-		static bool done = false;
-		if (done)
-			return;
-		done = true;
-
 		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/Lights] Sphere size", &SPHERE_SIZE); };
 		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/Lights] Sun size", &SUN_SIZE); };
 		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/Lights] Sun dist", &SUN_DIST); };

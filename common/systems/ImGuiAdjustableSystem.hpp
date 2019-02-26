@@ -18,56 +18,8 @@
 #endif
 
 namespace kengine {
-
 	class ImGuiAdjustableSystem : public kengine::System<ImGuiAdjustableSystem, kengine::packets::RegisterEntity> {
 		using string = AdjustableComponent::string;
-
-	public:
-		ImGuiAdjustableSystem(kengine::EntityManager & em);
-
-		void onLoad() noexcept final {
-			for (auto & [e, comp] : _em.getEntities<AdjustableComponent>()) {
-				const auto it = _pointerSaves.find(comp.name);
-				if (it == _pointerSaves.end()) {
-					_em.removeEntity(e);
-					continue;
-				}
-
-				comp.bPtr = it->second.bPtr;
-				comp.iPtr = it->second.iPtr;
-				comp.dPtr = it->second.dPtr;
-			}
-
-			load(_em);
-		}
-
-		void onSave() noexcept final {
-			save(_em);
-		}
-
-		void handle(const packets::RegisterEntity & p) {
-			if (!p.e.has<AdjustableComponent>())
-				return;
-
-			const auto & comp = p.e.get<AdjustableComponent>();
-			auto & save = _pointerSaves[comp.name];
-			save.bPtr = comp.bPtr;
-			save.iPtr = comp.iPtr;
-			save.dPtr = comp.dPtr;
-		}
-
-	private:
-		kengine::EntityManager & _em;
-		struct PointerSave {
-			bool * bPtr;
-			int * iPtr;
-			float * dPtr;
-		};
-		std::unordered_map<string, PointerSave> _pointerSaves;
-
-	private:
-		static constexpr auto saveFile = "adjust.cnf";
-		static constexpr auto separator = ';';
 
 		static auto ImGuiAdjustableManager(EntityManager & em) {
 			return [&em](Entity & e) {
@@ -121,6 +73,55 @@ namespace kengine {
 			};
 		}
 
+	public:
+		ImGuiAdjustableSystem(kengine::EntityManager & em) : System(em), _em(em) { em += ImGuiAdjustableManager(em); }
+
+		void onLoad() noexcept final {
+			_em += ImGuiAdjustableManager(_em);
+
+			for (auto & [e, comp] : _em.getEntities<AdjustableComponent>()) {
+				const auto it = _pointerSaves.find(comp.name);
+				if (it == _pointerSaves.end()) {
+					_em.removeEntity(e);
+					continue;
+				}
+
+				comp.bPtr = it->second.bPtr;
+				comp.iPtr = it->second.iPtr;
+				comp.dPtr = it->second.dPtr;
+			}
+
+			load(_em);
+		}
+
+		void onSave() noexcept final {
+			save(_em);
+		}
+
+		void handle(const packets::RegisterEntity & p) {
+			if (!p.e.has<AdjustableComponent>())
+				return;
+
+			const auto & comp = p.e.get<AdjustableComponent>();
+			auto & save = _pointerSaves[comp.name];
+			save.bPtr = comp.bPtr;
+			save.iPtr = comp.iPtr;
+			save.dPtr = comp.dPtr;
+		}
+
+	private:
+		kengine::EntityManager & _em;
+		struct PointerSave {
+			bool * bPtr;
+			int * iPtr;
+			float * dPtr;
+		};
+		std::unordered_map<string, PointerSave> _pointerSaves;
+
+	private:
+		static constexpr auto saveFile = "adjust.cnf";
+		static constexpr auto separator = ';';
+
 		static void save(kengine::EntityManager & em) {
 			std::ofstream f(saveFile, std::ofstream::trunc);
 			for (auto &[e, comp] : em.getEntities<AdjustableComponent>()) {
@@ -143,8 +144,6 @@ namespace kengine {
 		}
 
 		static void load(kengine::EntityManager & em) {
-			em += ImGuiAdjustableManager(em);
-
 			std::unordered_map<string, string> lines; {
 				std::ifstream f(saveFile);
 				for (std::string line; std::getline(f, line);) {
@@ -296,8 +295,4 @@ namespace kengine {
 			ImGui::Columns();
 		}
 	};
-	
-	inline ImGuiAdjustableSystem::ImGuiAdjustableSystem(kengine::EntityManager & em) : System(em), _em(em) {
-		em += ImGuiAdjustableManager(em);
-	}
 }
