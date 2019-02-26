@@ -99,7 +99,7 @@ namespace kengine {
 					ret->array.resize(64);
 
 #ifndef NDEBUG
-					if constexpr (putils::is_reflectible<Comp>::value)
+					if constexpr (putils::has_member_get_class_name<Comp>::value)
 						std::cout << ret->id << ' ' << Comp::get_class_name() << '\n';
 #endif
 				}
