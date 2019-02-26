@@ -26,12 +26,10 @@ namespace kengine {
 		ImGuiAdjustableSystem(kengine::EntityManager & em);
 
 		void onLoad() noexcept final {
-			putils::vector<Entity::ID, 64> toRemove;
-
 			for (auto & [e, comp] : _em.getEntities<AdjustableComponent>()) {
 				const auto it = _pointerSaves.find(comp.name);
 				if (it == _pointerSaves.end()) {
-					toRemove.push_back(e.id);
+					_em.removeEntity(e);
 					continue;
 				}
 
@@ -39,9 +37,6 @@ namespace kengine {
 				comp.iPtr = it->second.iPtr;
 				comp.dPtr = it->second.dPtr;
 			}
-
-			for (const auto id : toRemove)
-				_em.removeEntity(id);
 
 			load(_em);
 		}
