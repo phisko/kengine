@@ -11,7 +11,7 @@
 #include "reflection/Reflectible.hpp"
 
 namespace kengine {
-	class AdjustableComponent : kengine::not_serializable {
+	class AdjustableComponent {
 	public:
 		using string = putils::string<KENGINE_ADJUSTABLE_NAME_MAX_LENGTH>;
 

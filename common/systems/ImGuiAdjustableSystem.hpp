@@ -139,12 +139,6 @@ namespace kengine {
 					assert("Unknown adjustable type" && false);
 				}
 				f << '\n';
-
-#ifndef NDEBUG
-				comp.bPtr = nullptr;
-				comp.iPtr = nullptr;
-				comp.dPtr = nullptr;
-#endif
 			}
 		}
 
