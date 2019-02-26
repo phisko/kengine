@@ -10,9 +10,15 @@ namespace kengine {
 		bool enabled = true;
 	};
 
-	struct GBufferShaderComponent : ShaderComponent {};
-	struct LightingShaderComponent : ShaderComponent {};
-	struct PostProcessShaderComponent : ShaderComponent {};
+	struct GBufferShaderComponent : ShaderComponent, kengine::not_serializable {
+		pmeta_get_class_name(GBufferShaderComponent);
+	};
+	struct LightingShaderComponent : ShaderComponent, kengine::not_serializable {
+		pmeta_get_class_name(LightingShaderComponent);
+	};
+	struct PostProcessShaderComponent : ShaderComponent, kengine::not_serializable {
+		pmeta_get_class_name(PostProcessShaderComponent);
+	};
 
 	template<typename T, typename ...Args>
 	static inline GBufferShaderComponent makeGBufferShaderComponent(Args && ... args) {
