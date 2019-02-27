@@ -25,6 +25,9 @@ if(KENGINE_PYTHON)
 	set(ADDITIONAL_LIBS ${ADDITIONAL_LIBS} puthon)
 endif()
 
+if (KENGINE_NO_SHADER_DEBUG)
+    set(PUTILS_NO_SHADER_DEBUG TRUE)
+endif()
 set(PUTILS_BUILD_MEDIATOR TRUE)
 add_subdirectory(putils)
 
