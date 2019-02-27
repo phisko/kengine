@@ -34,6 +34,8 @@ namespace PolyVox
 {
 	namespace Impl
 	{
+		inline Logger*& getLoggerInstance() { return PolyVox::getLoggerInstance(); }
+
 		// Used for building the log messages - convert a list of variables into a string.
 		// Based on second approach here: http://stackoverflow.com/a/25386444/2337254
 		template< typename ... Args >
