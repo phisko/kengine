@@ -33,7 +33,7 @@ namespace kengine {
 
         bool repeated = false;
 
-		struct Layer : public putils::Reflectible<Layer>, public putils::Serializable<Layer> {
+		struct Layer : public putils::Reflectible<Layer> {
 			string name;
 			string appearance;
 			putils::Rect3f boundingBox = { {}, { 1, 1, 1 } };
