@@ -4,6 +4,7 @@
 #include "ShadowMap.hpp"
 #include "EntityManager.hpp"
 #include "RAII.hpp"
+#include "LightHelper.hpp"
 
 #include "components/LightComponent.hpp"
 #include "components/AdjustableComponent.hpp"
@@ -64,7 +65,7 @@ namespace kengine::Shaders {
 
 			glActiveTexture(GL_TEXTURE0 + _shadowMapTextureID);
 			glBindTexture(GL_TEXTURE_2D, e.get<DepthMapComponent>().texture);
-			putils::gl::setUniform(lightSpaceMatrix, getLightSpaceMatrix(light, camPos, screenWidth, screenHeight));
+			putils::gl::setUniform(lightSpaceMatrix, LightHelper::getLightSpaceMatrix(light, camPos, screenWidth, screenHeight));
 
 			putils::gl::setUniform(runSSAO, RUN_SSAO ? 1u : 0u);
 			if (RUN_SSAO) {

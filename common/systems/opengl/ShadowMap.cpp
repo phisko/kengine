@@ -1,8 +1,16 @@
 #include "ShadowMap.hpp"
 #include "RAII.hpp"
+#include "EntityManager.hpp"
+#include "LightHelper.hpp"
+
 #include "components/AdjustableComponent.hpp"
 #include "components/LightComponent.hpp"
-#include "EntityManager.hpp"
+
+namespace kengine {
+	float SHADOW_MAP_NEAR_PLANE = 0.f;
+	float SHADOW_MAP_FAR_PLANE = 1000.f;
+	float DIRECTIONAL_LIGHT_SHADOW_DISTANCE = 200.f;
+}
 
 namespace kengine::Shaders {
 	ShadowMap::ShadowMap(kengine::EntityManager & em)
@@ -59,7 +67,7 @@ namespace kengine::Shaders {
 
 		use();
 		glClear(GL_DEPTH_BUFFER_BIT);
-		putils::gl::setUniform(view, getLightSpaceMatrix(light, { pos.x, pos.y, pos.z }, screenWidth, screenHeight));
+		putils::gl::setUniform(view, LightHelper::getLightSpaceMatrix(light, { pos.x, pos.y, pos.z }, screenWidth, screenHeight));
 		glCullFace(GL_FRONT);
 		drawObjects(model);
 		glCullFace(GL_BACK);

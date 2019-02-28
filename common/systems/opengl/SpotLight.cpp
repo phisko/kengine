@@ -4,6 +4,7 @@
 #include "Shapes.hpp"
 #include "EntityManager.hpp"
 #include "RAII.hpp"
+#include "LightHelper.hpp"
 
 #include "components/TransformComponent.hpp"
 #include "components/LightComponent.hpp"
@@ -38,7 +39,7 @@ namespace kengine::Shaders {
 
 			glm::mat4 model(1.f);
 			model = glm::translate(model, { centre.x, centre.y, centre.z });
-			const auto radius = getRadius(light);
+			const auto radius = LightHelper::getRadius(light);
 			model = glm::scale(model, { radius, radius, radius });
 			putils::gl::setUniform(this->proj, proj);
 			putils::gl::setUniform(this->view, view);
@@ -53,7 +54,7 @@ namespace kengine::Shaders {
 
 			glActiveTexture(GL_TEXTURE0 + _shadowMapTextureID);
 			glBindTexture(GL_TEXTURE_2D, e.get<DepthMapComponent>().texture);
-			putils::gl::setUniform(lightSpaceMatrix, getLightSpaceMatrix(light, { centre.x, centre.y, centre.z }, screenWidth, screenHeight));
+			putils::gl::setUniform(lightSpaceMatrix, LightHelper::getLightSpaceMatrix(light, { centre.x, centre.y, centre.z }, screenWidth, screenHeight));
 
 			shapes::drawSphere();
 		}

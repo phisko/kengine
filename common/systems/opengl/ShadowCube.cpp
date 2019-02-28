@@ -1,5 +1,7 @@
 #include "ShadowCube.hpp"
 #include "RAII.hpp"
+#include "LightHelper.hpp"
+
 #include "components/LightComponent.hpp"
 
 namespace kengine::Shaders {

@@ -2,9 +2,11 @@
 #include "Shapes.hpp"
 #include "EntityManager.hpp"
 #include "ShadowMap.hpp"
+#include "RAII.hpp"
+#include "LightHelper.hpp"
+
 #include "components/LightComponent.hpp"
 #include "components/TransformComponent.hpp"
-#include "RAII.hpp"
 
 extern float SCATTERING_ADJUST;
 extern float NB_STEPS_ADJUST;
@@ -58,7 +60,7 @@ namespace kengine::Shaders {
 		putils::gl::setUniform(position, pos);
 
 		glBindTexture(GL_TEXTURE_2D, depthMap.texture);
-		putils::gl::setUniform(lightSpaceMatrix, getLightSpaceMatrix(light, camPos, screenWidth, screenHeight));
+		putils::gl::setUniform(lightSpaceMatrix, LightHelper::getLightSpaceMatrix(light, camPos, screenWidth, screenHeight));
 
 		shapes::drawQuad();
 	}

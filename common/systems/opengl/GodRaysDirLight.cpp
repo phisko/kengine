@@ -4,8 +4,8 @@
 #include "ShadowMap.hpp"
 #include "components/LightComponent.hpp"
 #include "components/AdjustableComponent.hpp"
-#include "components/TransformComponent.hpp"
 #include "RAII.hpp"
+#include "LightHelper.hpp"
 
 auto SCATTERING_ADJUST = 0.f;
 auto NB_STEPS_ADJUST = 50.f;
@@ -63,7 +63,7 @@ namespace kengine::Shaders {
 		putils::gl::setUniform(direction, light.direction);
 
 		glBindTexture(GL_TEXTURE_2D, depthMap.texture);
-		putils::gl::setUniform(lightSpaceMatrix, getLightSpaceMatrix(light, camPos, screenWidth, screenHeight));
+		putils::gl::setUniform(lightSpaceMatrix, LightHelper::getLightSpaceMatrix(light, camPos, screenWidth, screenHeight));
 
 		shapes::drawQuad();
 	}

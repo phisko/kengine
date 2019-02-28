@@ -4,6 +4,7 @@
 #include "Shapes.hpp"
 #include "EntityManager.hpp"
 #include "RAII.hpp"
+#include "LightHelper.hpp"
 
 #include "components/TransformComponent.hpp"
 #include "components/LightComponent.hpp"
@@ -34,7 +35,7 @@ namespace kengine::Shaders {
 		putils::gl::setUniform(screenSize, glm::vec2(screenWidth, screenHeight));
 
 		for (auto & [e, light, transform] : _em.getEntities<PointLightComponent, kengine::TransformComponent3f>()) {
-			const auto radius = getRadius(light);
+			const auto radius = LightHelper::getRadius(light);
 			const auto & centre = transform.boundingBox.topLeft;
 
 			_shadowCube.run(e, light, centre, radius, screenWidth, screenHeight);
