@@ -33,6 +33,10 @@ The engine requires a **C++17** compiler.
 
 Note that there is no `Component` class. Any type can be used as a `Component`, and dynamically attached/detached to `Entities`.
 
+### Reflection
+
+Many parts of the engine (such as the scripting systems or the OpenGL system) make use of `putils`' [reflection API](https://github.com/phisko/putils/blob/master/reflection/Reflectible.md). Most of the components in the following samples are thus defined as reflectible.
+
 ### Samples
 
 These are pre-built, extensible and pluggable elements that can be used in any project, or to bootstrap a project.
