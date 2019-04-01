@@ -14,8 +14,8 @@ namespace kengine::LightHelper {
 	glm::mat4 getLightSpaceMatrix(const DirLightComponent & light, const glm::vec3 & pos, size_t screenWidth, size_t screenHeight) {
 		const auto dir = getCorrectDirection(light.direction);
 		const auto dist = DIRECTIONAL_LIGHT_SHADOW_DISTANCE;
-		const auto lightProjection = glm::ortho(pos.x - dist, pos.x + dist, pos.y - dist, pos.y + dist, pos.z - dist, pos.z + dist);
-		const auto lightView = glm::lookAt(glm::vec3(0.f), dir, glm::vec3(0.f, 1.f, 0.f));
+		const auto lightProjection = glm::ortho(-dist, dist, -dist, dist, -dist, dist);
+		const auto lightView = glm::lookAt(pos, pos + dir, glm::vec3(0.f, 1.f, 0.f));
 		return lightProjection * lightView;
 	}
 
@@ -23,8 +23,7 @@ namespace kengine::LightHelper {
 		const auto lightProjection = glm::perspective(45.f, (float)screenWidth / (float)screenHeight, SHADOW_MAP_NEAR_PLANE, SHADOW_MAP_FAR_PLANE);
 
 		const auto dir = getCorrectDirection(light.direction);
-		const glm::vec3 vPos(pos.x, pos.y, pos.z);
-		const auto lightView = glm::lookAt(vPos, vPos + dir, glm::vec3(0.f, 1.f, 0.f));
+		const auto lightView = glm::lookAt(pos, pos + dir, glm::vec3(0.f, 1.f, 0.f));
 
 		return lightProjection * lightView;
 	}

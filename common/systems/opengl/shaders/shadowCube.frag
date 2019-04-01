@@ -1,7 +1,6 @@
 #version 330
 
 uniform samplerCube shadowMap;
-uniform mat4 lightSpaceMatrix;
 uniform vec3 position;
 uniform float farPlane;
 

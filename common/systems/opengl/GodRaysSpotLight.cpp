@@ -60,7 +60,7 @@ namespace kengine::Shaders {
 		putils::gl::setUniform(position, pos);
 
 		glBindTexture(GL_TEXTURE_2D, depthMap.texture);
-		putils::gl::setUniform(lightSpaceMatrix, LightHelper::getLightSpaceMatrix(light, camPos, screenWidth, screenHeight));
+		putils::gl::setUniform(lightSpaceMatrix, LightHelper::getLightSpaceMatrix(light, glm::vec3(pos.x, pos.y, pos.z), screenWidth, screenHeight));
 
 		shapes::drawQuad();
 	}
