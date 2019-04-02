@@ -2,6 +2,7 @@
 #include "RAII.hpp"
 #include "EntityManager.hpp"
 #include "LightHelper.hpp"
+#include "shaders/shaders.hpp"
 
 #include "components/AdjustableComponent.hpp"
 #include "components/LightComponent.hpp"
@@ -23,7 +24,7 @@ namespace kengine::Shaders {
 
 	void ShadowMap::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
 		initWithShaders<ShadowMap>(putils::make_vector(
-			ShaderDescription{ "shaders/3d.vert", GL_VERTEX_SHADER }
+			ShaderDescription{ src::ProjViewModel::vert, GL_VERTEX_SHADER }
 		));
 
 		putils::gl::setUniform(proj, glm::mat4(1.f));

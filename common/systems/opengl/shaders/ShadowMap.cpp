@@ -1,3 +1,6 @@
+namespace kengine::Shaders::src {
+    namespace ShadowMap {
+        const char * frag = R"(
 #version 330
 
 uniform sampler2D shadowMap;
@@ -40,4 +43,6 @@ float calcShadow(vec3 worldPos, vec3 normal, vec3 lightDir) {
 
     return shadow;
 }
-
+        )";
+    }
+}

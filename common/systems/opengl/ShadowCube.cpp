@@ -1,15 +1,16 @@
 #include "ShadowCube.hpp"
 #include "RAII.hpp"
 #include "LightHelper.hpp"
+#include "shaders/shaders.hpp"
 
 #include "components/LightComponent.hpp"
 
 namespace kengine::Shaders {
 	void ShadowCube::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
 		initWithShaders<ShadowCube>(putils::make_vector(
-			ShaderDescription{ "shaders/3d.vert", GL_VERTEX_SHADER },
-			ShaderDescription{ "shaders/depthCube.geom", GL_GEOMETRY_SHADER },
-			ShaderDescription{ "shaders/depthCube.frag", GL_FRAGMENT_SHADER }
+			ShaderDescription{ src::ProjViewModel::vert, GL_VERTEX_SHADER },
+			ShaderDescription{ src::DepthCube::geom, GL_GEOMETRY_SHADER },
+			ShaderDescription{ src::DepthCube::frag, GL_FRAGMENT_SHADER }
 		));
 
 		putils::gl::setUniform(proj, glm::mat4(1.f));

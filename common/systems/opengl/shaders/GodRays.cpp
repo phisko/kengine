@@ -1,3 +1,6 @@
+namespace kengine::Shaders::src {
+    namespace GodRays {
+        const char * frag = R"(
 #version 330
 
 uniform sampler2D gposition;
@@ -73,4 +76,7 @@ void main() {
     accumFog /= NB_STEPS;
 
     outColor = vec4(accumFog, 1.0);
+}
+        )";
+    }
 }

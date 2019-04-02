@@ -5,6 +5,7 @@
 #include "Shapes.hpp"
 #include "EntityManager.hpp"
 #include "components/AdjustableComponent.hpp"
+#include "shaders/shaders.hpp"
 
 static void initTexture(GLuint & fbo, GLuint & texture, size_t width, size_t height) {
 	glGenFramebuffers(1, &fbo);
@@ -33,8 +34,8 @@ namespace kengine::Shaders {
 
 	void SSAO::init(::size_t firstTextureID, ::size_t screenWidth, ::size_t screenHeight, GLuint gBufferFBO) {
 		initWithShaders<SSAO>(putils::make_vector(
-			ShaderDescription{ "shaders/quad.vert", GL_VERTEX_SHADER },
-			ShaderDescription{ "shaders/ssao.frag", GL_FRAGMENT_SHADER }
+			ShaderDescription{ src::Quad::vert, GL_VERTEX_SHADER },
+			ShaderDescription{ src::SSAO::frag, GL_FRAGMENT_SHADER }
 		));
 
 		initTexture(_fbo, _colorBuffer, screenWidth, screenHeight);
@@ -71,8 +72,8 @@ namespace kengine::Shaders {
 
 	void SSAOBlur::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
 		initWithShaders<SSAOBlur>(putils::make_vector(
-			ShaderDescription{ "shaders/quad.vert", GL_VERTEX_SHADER },
-			ShaderDescription{ "shaders/ssaoBlur.frag", GL_FRAGMENT_SHADER }
+			ShaderDescription{ src::Quad::vert, GL_VERTEX_SHADER },
+			ShaderDescription{ src::SSAO::Blur::frag, GL_FRAGMENT_SHADER }
 		));
 
 		initTexture(_fbo, _colorBuffer, screenWidth, screenHeight);

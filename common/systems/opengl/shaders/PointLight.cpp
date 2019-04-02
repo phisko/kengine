@@ -1,3 +1,6 @@
+namespace kengine::Shaders::src {
+    namespace PointLight {
+        const char * frag = R"(
 #version 330
 
 uniform sampler2D gposition;
@@ -47,4 +50,19 @@ void main() {
    	vec3 normal = texture(gnormal, texCoord).xyz;
 
    	outputColor = vec4(objectColor, 1.0) * vec4(calcPointLight(worldPos, normal), 1.0);
+}
+        )";
+
+        namespace GetDirection {
+            const char * frag = R"(
+#version 330
+
+uniform vec3 position;
+
+vec3 getLightDirection(vec3 worldPos) {
+    return normalize(position - worldPos);
+}
+            )";
+        }
+    }
 }

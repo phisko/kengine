@@ -3,6 +3,7 @@
 
 #include "Shapes.hpp"
 #include "RAII.hpp"
+#include "shaders/shaders.hpp"
 
 #include "components/LightComponent.hpp"
 #include "components/TransformComponent.hpp"
@@ -23,8 +24,8 @@ namespace kengine::Shaders {
 
 	void LightSphere::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
 		initWithShaders<LightSphere>(putils::make_vector(
-			ShaderDescription{ "shaders/3d.vert", GL_VERTEX_SHADER },
-			ShaderDescription{ "shaders/color.frag", GL_FRAGMENT_SHADER }
+			ShaderDescription{ src::ProjViewModel::vert, GL_VERTEX_SHADER },
+			ShaderDescription{ src::Color::frag, GL_FRAGMENT_SHADER }
 		));
 
 		_gBufferFBO = gBufferFBO;

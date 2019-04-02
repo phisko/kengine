@@ -1,11 +1,12 @@
 #include "Geometry.hpp"
 #include "RAII.hpp"
+#include "shaders/shaders.hpp"
 
 namespace kengine::Shaders {
 	void Geometry::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
 		initWithShaders<Geometry>(putils::make_vector(
-			ShaderDescription{ "shaders/geometry.vert", GL_VERTEX_SHADER },
-			ShaderDescription{ "shaders/geometry.frag", GL_FRAGMENT_SHADER }
+			ShaderDescription{ src::Geometry::vert, GL_VERTEX_SHADER },
+			ShaderDescription{ src::Geometry::frag, GL_FRAGMENT_SHADER }
 		));
 	}
 

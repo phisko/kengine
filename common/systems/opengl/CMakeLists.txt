@@ -8,11 +8,15 @@ set(GLFW_BUILD_TESTS FALSE)
 add_subdirectory(libs/glfw)
 
 add_subdirectory(libs/glm/glm)
+
+set(ASSIMP_BUILD_ASSIMP_TOOLS FALSE)
+set(ASSIMP_BUILD_TESTS FALSE)
 add_subdirectory(libs/assimp)
 
 file(GLOB src
 	libs/soil/src/*
 	*.cpp *.hpp
+    shaders/*.cpp shaders/*.hpp
 )
 
 set(IMGUI_DIR ../../../putils/pse/imgui)

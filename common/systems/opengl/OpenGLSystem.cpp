@@ -40,8 +40,6 @@ EXPORT kengine::ISystem * getSystem(kengine::EntityManager & em) {
 }
 
 namespace kengine {
-	static auto OBJECTS_DRAWN = 0;
-
 	static auto SCREEN_WIDTH = 1280;
 	static auto SCREEN_HEIGHT = 720;
 	static auto SCREEN_CHANGED = false;
@@ -264,10 +262,6 @@ namespace kengine {
 					ImGui::Text("GLFW: %d", GLFW_TIME);
 				}
 				ImGui::End();
-
-				if (ImGui::Begin("Object count"))
-					ImGui::Text("%d", OBJECTS_DRAWN);
-				ImGui::End();
 			});
 		};
 		_em += ShadersController(_em);
@@ -444,10 +438,7 @@ namespace kengine {
 	}
 
 	void OpenGLSystem::drawObjects(GLint modelMatrixLocation) const noexcept {
-		OBJECTS_DRAWN = 0;
 		for (const auto &[e, mesh, transform] : _em.getEntities<kengine::MeshComponent, kengine::TransformComponent3f>()) {
-			++OBJECTS_DRAWN;
-
 			const auto & meshInfo = _em.getEntity(mesh.meshInfo).get<MeshInfoComponent>();
 
 			glm::mat4 model(1.f);

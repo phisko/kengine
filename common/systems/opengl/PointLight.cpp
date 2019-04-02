@@ -5,6 +5,7 @@
 #include "EntityManager.hpp"
 #include "RAII.hpp"
 #include "LightHelper.hpp"
+#include "shaders/shaders.hpp"
 
 #include "components/TransformComponent.hpp"
 #include "components/LightComponent.hpp"
@@ -12,9 +13,9 @@
 namespace kengine::Shaders {
 	void PointLight::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
 		initWithShaders<PointLight>(putils::make_vector(
-			ShaderDescription{ "shaders/3d.vert", GL_VERTEX_SHADER },
-			ShaderDescription{ "shaders/pointLight.frag", GL_FRAGMENT_SHADER },
-			ShaderDescription{ "shaders/shadowCube.frag", GL_FRAGMENT_SHADER }
+			ShaderDescription{ src::ProjViewModel::vert, GL_VERTEX_SHADER },
+			ShaderDescription{ src::PointLight::frag, GL_FRAGMENT_SHADER },
+			ShaderDescription{ src::ShadowCube::frag, GL_FRAGMENT_SHADER }
 		));
 
 		use();

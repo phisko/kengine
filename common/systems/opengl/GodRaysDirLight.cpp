@@ -6,6 +6,7 @@
 #include "components/AdjustableComponent.hpp"
 #include "RAII.hpp"
 #include "LightHelper.hpp"
+#include "shaders/shaders.hpp"
 
 auto SCATTERING_ADJUST = 0.f;
 auto NB_STEPS_ADJUST = 50.f;
@@ -25,10 +26,10 @@ namespace kengine::Shaders {
 
 	void GodRaysDirLight::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
 		initWithShaders<GodRaysDirLight>(putils::make_vector(
-			ShaderDescription{ "shaders/quad.vert", GL_VERTEX_SHADER },
-			ShaderDescription{ "shaders/godRays.frag", GL_FRAGMENT_SHADER },
-			ShaderDescription{ "shaders/getDirLightDirection.frag", GL_FRAGMENT_SHADER },
-			ShaderDescription{ "shaders/shadowMap.frag", GL_FRAGMENT_SHADER }
+			ShaderDescription{ src::Quad::vert, GL_VERTEX_SHADER },
+			ShaderDescription{ src::GodRays::frag, GL_FRAGMENT_SHADER },
+			ShaderDescription{ src::DirLight::GetDirection::frag, GL_FRAGMENT_SHADER },
+			ShaderDescription{ src::ShadowMap::frag, GL_FRAGMENT_SHADER }
 		));
 
 		_shadowMapTextureID = firstTextureID;

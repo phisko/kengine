@@ -5,6 +5,7 @@
 #include "EntityManager.hpp"
 #include "RAII.hpp"
 #include "LightHelper.hpp"
+#include "shaders/shaders.hpp"
 
 #include "components/LightComponent.hpp"
 #include "components/AdjustableComponent.hpp"
@@ -23,9 +24,9 @@ namespace kengine::Shaders {
 
 	void DirLight::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
 		initWithShaders<DirLight>(putils::make_vector(
-			ShaderDescription{ "shaders/3d.vert", GL_VERTEX_SHADER },
-			ShaderDescription{ "shaders/shadowMap.frag", GL_FRAGMENT_SHADER },
-			ShaderDescription{ "shaders/dirLight.frag", GL_FRAGMENT_SHADER }
+			ShaderDescription{ src::ProjViewModel::vert, GL_VERTEX_SHADER },
+			ShaderDescription{ src::ShadowMap::frag, GL_FRAGMENT_SHADER },
+			ShaderDescription{ src::DirLight::frag, GL_FRAGMENT_SHADER }
 		));
 
 		_shadowMapTextureID = firstTextureID;

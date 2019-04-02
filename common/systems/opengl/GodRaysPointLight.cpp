@@ -4,6 +4,7 @@
 #include "ShadowCube.hpp"
 #include "RAII.hpp"
 #include "LightHelper.hpp"
+#include "shaders/shaders.hpp"
 
 #include "components/LightComponent.hpp"
 #include "components/TransformComponent.hpp"
@@ -22,10 +23,10 @@ namespace kengine::Shaders {
 
 	void GodRaysPointLight::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
 		initWithShaders<GodRaysPointLight>(putils::make_vector(
-			ShaderDescription{ "shaders/quad.vert", GL_VERTEX_SHADER },
-			ShaderDescription{ "shaders/godRays.frag", GL_FRAGMENT_SHADER },
-			ShaderDescription{ "shaders/getPointLightDirection.frag", GL_FRAGMENT_SHADER },
-			ShaderDescription{ "shaders/shadowCube.frag", GL_FRAGMENT_SHADER }
+			ShaderDescription{ src::Quad::vert, GL_VERTEX_SHADER },
+			ShaderDescription{ src::GodRays::frag, GL_FRAGMENT_SHADER },
+			ShaderDescription{ src::PointLight::GetDirection::frag, GL_FRAGMENT_SHADER },
+			ShaderDescription{ src::ShadowCube::frag, GL_FRAGMENT_SHADER }
 		));
 
 		_shadowMapTextureID = firstTextureID;

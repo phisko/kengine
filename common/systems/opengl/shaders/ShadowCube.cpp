@@ -1,3 +1,6 @@
+namespace kengine::Shaders::src {
+    namespace ShadowCube {
+        const char * frag = R"(
 #version 330
 
 uniform samplerCube shadowMap;
@@ -18,4 +21,7 @@ float calcShadow(vec3 worldPos, vec3 normal, vec3 lightDir) {
 
     float bias = 0.05;
     return objectDepth - bias > shadowMapValue ? 1.0 : 0.0;
+}
+        )";
+    }
 }
