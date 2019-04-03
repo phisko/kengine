@@ -37,7 +37,8 @@ namespace kengine {
 			string name;
 			string appearance;
 			putils::Rect3f boundingBox = { {}, { 1, 1, 1 } };
-			float yaw = 0;
+			float pitch = 0.f;
+			float yaw = 0.f;
 			bool mirrored = false;
 
 			pmeta_get_class_name(GraphicsComponentLayer);
@@ -45,6 +46,7 @@ namespace kengine {
 				pmeta_reflectible_attribute(&Layer::name),
 				pmeta_reflectible_attribute(&Layer::appearance),
 				pmeta_reflectible_attribute(&Layer::boundingBox),
+				pmeta_reflectible_attribute(&Layer::pitch),
 				pmeta_reflectible_attribute(&Layer::yaw)
 			);
 			pmeta_get_methods();
