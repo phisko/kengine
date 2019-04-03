@@ -16,6 +16,8 @@ namespace kengine {
 			DataInfo indices;
 			int indexType; // GLenum (GL_UNSIGNED_SHORT / GL_UNSIGNED_INT / ...)
 			putils::Vector3f offsetToCentre;
+			float pitch = 0.f;
+			float yaw = 0.f;
 		};
 
 		std::function<MeshData()> func;

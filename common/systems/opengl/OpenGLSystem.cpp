@@ -308,6 +308,8 @@ namespace kengine {
 		meshInfo.indexType = meshData.indexType;
 
 		meshInfo.translation = toVec(meshData.offsetToCentre);
+		meshInfo.pitch = meshData.pitch;
+		meshInfo.yaw = meshData.yaw;
 
 		e.detach<kengine::MeshLoaderComponent>();
 	}
@@ -445,10 +447,17 @@ namespace kengine {
 			const auto & centre = transform.boundingBox.topLeft;
 			model = glm::translate(model, toVec(centre));
 			model = glm::scale(model, toVec(transform.boundingBox.size));
+
 			model = glm::rotate(model,
-				transform.yaw,
+				transform.pitch + meshInfo.pitch,
+				{ 1.f, 0.f, 0.f }
+			);
+
+			model = glm::rotate(model,
+				transform.yaw + meshInfo.yaw,
 				{ 0.f, 1.f, 0.f }
 			);
+
 			model = glm::translate(model, -meshInfo.translation); // Re-center
 
 			putils::gl::setUniform(modelMatrixLocation, model);

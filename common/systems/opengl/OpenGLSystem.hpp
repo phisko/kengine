@@ -17,6 +17,8 @@ namespace kengine {
 		GLuint indexBuffer = -1;
 		size_t nbIndices = 0;
 		glm::vec3 translation = { 0.f, 0.f, 0.f };
+		float pitch = 0.f;
+		float yaw = 0.f;
 		GLenum indexType = GL_UNSIGNED_INT;
 
 		std::function<void(putils::gl::Program & p)> vertexRegisterFunc = nullptr;
