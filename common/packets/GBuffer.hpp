@@ -7,20 +7,20 @@ namespace kengine::packets {
 
 	struct VertexDataAttributeIterator {
 		using AttributeFunc = const std::function<void(const char *)> &;
-		std::function<void(AttributeFunc func)> func;
+		std::function<void(AttributeFunc func)> func = nullptr;
 	};
 }
 
 namespace kengine {
-	template<typename VertexData>
-	void initGBufferWithVertexType(kengine::ISystem & s) {
-		s.send(packets::GBufferSize{ VertexData::get_attributes().size });
+	template<typename Textures>
+	void initGBuffer(kengine::ISystem & s) {
 		s.send(packets::VertexDataAttributeIterator{
 			[](auto func) {
-				putils::for_each_attribute(VertexData::get_attributes(), [&](auto name, auto member) {
+				putils::for_each_attribute(Textures::get_attributes(), [&](auto name, auto member) {
 					func(name);
 				});
 			}
 		});
+		s.send(packets::GBufferSize{ Textures::get_attributes().size });
 	}
 }

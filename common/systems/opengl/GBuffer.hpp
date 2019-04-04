@@ -3,6 +3,7 @@
 #include <vector>
 #include <GL/glew.h>
 #include <GL/GL.h>
+#include "packets/GBuffer.hpp"
 
 namespace kengine {
 	class GBuffer {
@@ -11,7 +12,7 @@ namespace kengine {
 			if (!textures.empty())
 				return; // Already init
 
-			textures.resize(2 + nbAttributes);
+			textures.resize(nbAttributes);
 
 			std::vector<GLenum> attachments;
 

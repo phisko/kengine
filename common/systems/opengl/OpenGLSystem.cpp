@@ -233,6 +233,13 @@ namespace kengine {
 			glBindBuffer(GL_ARRAY_BUFFER, meshInfo.vertexBuffer);
 			meshInfo.vertexRegisterFunc(p);
 		}
+
+		assert(_gBufferIterator.func != nullptr);
+
+		int texture = 0;
+		_gBufferIterator.func([&](const char * name) {
+			p.addGBufferTexture(name, texture++);
+		});
 	}
 
 
@@ -250,7 +257,9 @@ namespace kengine {
 	static auto IMGUI_TIME = 0;
 	static auto GLFW_TIME = 0;
 	void OpenGLSystem::onLoad() noexcept {
+#ifndef KENGINE_OPENGL_NO_DEFAULT_SHADERS
 		addShaders();
+#endif
 
 #ifndef NDEBUG
 		_em += [](kengine::Entity & e) {
