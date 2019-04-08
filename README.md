@@ -44,22 +44,22 @@ These are pre-built, extensible and pluggable elements that can be used in any p
 ##### Components
 
 General purpose gamedev:
-* [TransformComponent](common/components/TransformComponent.md): defines a `Entity`'s position and size
-* [PhysicsComponent](common/components/PhysicsComponent.md): defines a `Entity`'s movement
+* [TransformComponent](common/components/TransformComponent.md): defines an `Entity`'s position and size
+* [PhysicsComponent](common/components/PhysicsComponent.md): defines an `Entity`'s movement
 
 Behaviors:
-* [BehaviorComponent](common/components/BehaviorComponent.md): defines a function to be called each frame for a `Entity`
-* [LuaComponent](common/components/LuaComponent.md): defines the lua scripts to be run by the `LuaSystem` for a `Entity`
-* [PyComponent](common/components/PyComponent.md): defines the Python scripts to be run by the `PySystem` for a `Entity`
-* [CollisionComponent](common/components/CollisionComponent.md): defines a function to be called when a `Entity` collides with another
+* [BehaviorComponent](common/components/BehaviorComponent.md): defines a function to be called each frame for an `Entity`
+* [LuaComponent](common/components/LuaComponent.md): defines the lua scripts to be run by the `LuaSystem` for an `Entity`
+* [PyComponent](common/components/PyComponent.md): defines the Python scripts to be run by the `PySystem` for an `Entity`
+* [CollisionComponent](common/components/CollisionComponent.md): defines a function to be called when an `Entity` collides with another
 
 Debug tools:
 * [AdjustableComponent](common/components/AdjustableComponent.md): lets users modify variables through a GUI (such as the [ImGuiAdjustableManager](common/gameobjects/ImGuiAdjustableManager.md))
 * [ImGuiComponent](common/components/ImGuiComponent.md): lets `Entities` render debug elements using [ImGui](https://github.com/ocornut/imgui/)
-* [DebugGraphicsComponent](common/components/DebugGraphicsComponent.hpp): lets a `Entity` be used to draw debug information (such as lines, rectangles or spheres)
+* [DebugGraphicsComponent](common/components/DebugGraphicsComponent.hpp): lets an `Entity` be used to draw debug information (such as lines, rectangles or spheres)
 
 Graphics and gamedev:
-* [GraphicsComponent](common/components/GraphicsComponent.md): provides graphical information about a `Entity`, such as its appearance, used by the `SfSystem`
+* [GraphicsComponent](common/components/GraphicsComponent.md): provides graphical information about an `Entity`, such as its appearance, used by the `SfSystem`
 * [CameraComponent](common/components/CameraComponent.hpp): lets `Entities` be used as in-game cameras, to define a frustrum and position. Follows the same conventions as `TransformComponent`
 * [InputComponent](common/components/InputComponent.md): lets `Entities` receive keyboard and mouse events
 * [GUIComponent](common/components/GUIComponent.md): lets `Entities` be used as GUI elements such as buttons, lists...)
