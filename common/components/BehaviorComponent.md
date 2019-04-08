@@ -1,6 +1,6 @@
 # [BehaviorComponent](BehaviorComponent.hpp)
 
-`Component` providing a function to execute for a `GameObject`.
+`Component` providing a function to execute for an `Entity`.
 
 Inherits from [putils::Reflectible](https://github.com/phiste/putils/blob/master/reflection/Reflectible.md).
 
@@ -12,4 +12,4 @@ Inherits from [putils::Reflectible](https://github.com/phiste/putils/blob/master
 std::function<void()> func = nullptr;
 ```
 
-Function to execute for `GameObject`.
+Function to execute.
