@@ -34,11 +34,13 @@ set(ADDITIONAL_INCLUDE_PATHS ${ADDITIONAL_INCLUDE_PATHS}
     ${CMAKE_CURRENT_LIST_DIR}/libs/glew/include
 	${CMAKE_CURRENT_LIST_DIR}/libs/glm
     ${CMAKE_CURRENT_LIST_DIR}/libs/assimp/include
+    ${CMAKE_CURRENT_BINARY_DIR}/libs/assimp/include
 )
 set(ADDITIONAL_INCLUDE_PATHS ${ADDITIONAL_INCLUDE_PATHS}
 	${CMAKE_CURRENT_LIST_DIR}/libs/polyvox/include
     ${CMAKE_CURRENT_LIST_DIR}/libs/glew/include
 	${CMAKE_CURRENT_LIST_DIR}/libs/glm
+    ${CMAKE_CURRENT_LIST_DIR}/libs/assimp/include
     ${CMAKE_CURRENT_LIST_DIR}/libs/assimp/include
 	PARENT_SCOPE
 )
