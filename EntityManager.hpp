@@ -280,19 +280,45 @@ namespace kengine {
 
     private:
 		friend class Entity;
+		void addComponent(Entity::ID id, size_t component, Entity::Mask updatedMaskForCheck) {
+			auto currentMask = _entities[id];
+			for (auto & update : _updates)
+				if (update.id == id) {
+					update.newMask[component] = true;
+					// Commented out for now as objects in ComponentCollections may have obsolete masks
+					// assert(update.newMask == updatedMaskForCheck);
+					return;
+				}
+
+			auto updatedMask = currentMask;
+			updatedMask[component] = true;
+			assert(updatedMask == updatedMaskForCheck);
+
+			updateMask(id, updatedMask);
+		}
+		
+		void removeComponent(Entity::ID id, size_t component, Entity::Mask updatedMaskForCheck) {
+			auto currentMask = _entities[id];
+			for (auto & update : _updates)
+				if (update.id == id) {
+					update.newMask[component] = false;
+					// Commented out for now as objects in ComponentCollections may have obsolete masks
+					// assert(update.newMask == updatedMaskForCheck);
+					return;
+				}
+
+			auto updatedMask = currentMask;
+			updatedMask[component] = false;
+			assert(updatedMask == updatedMaskForCheck);
+
+			updateMask(id, updatedMask);
+		}
+
 		void updateMask(Entity::ID id, Entity::Mask newMask, bool ignoreOldMask = false) {
 			if (_updatesLocked == 0)
 				doUpdateMask(id, newMask, ignoreOldMask);
-			else {
-				for (auto & update : _updates)
-					if (update.id == id) {
-						update.newMask |= newMask;
-						update.ignoreOldMask |= ignoreOldMask;
-						return;
-					}
-				// assert(update.id != id && "There is already an update pending for this entity");
+			else
 				_updates.push_back({ id, newMask, ignoreOldMask });
-			}
 		}
 
 		void doAllUpdates() {
