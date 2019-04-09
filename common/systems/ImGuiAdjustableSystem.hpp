@@ -26,6 +26,16 @@ namespace kengine {
 				e += ImGuiComponent([&em] {
 					if (ImGui::Begin("Adjustables")) {
 						static char nameSearch[1024] = "";
+
+						ImGui::Columns(2);
+						if (ImGui::Button("Save"))
+							save(em);
+						ImGui::NextColumn();
+						if (ImGui::Button("Load"))
+							load(em);
+						ImGui::Columns();
+
+						ImGui::Separator();
 						ImGui::InputText("Name", nameSearch, sizeof(nameSearch));
 						ImGui::Separator();
 
@@ -75,6 +85,14 @@ namespace kengine {
 
 	public:
 		ImGuiAdjustableSystem(kengine::EntityManager & em) : System(em), _em(em) { em += ImGuiAdjustableManager(em); }
+
+		void execute() noexcept final {
+			static bool first = true;
+			if (first) {
+				load(_em);
+				first = false;
+			}
+		}
 
 		void onLoad() noexcept final {
 			_em += ImGuiAdjustableManager(_em);
