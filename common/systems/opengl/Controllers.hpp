@@ -132,12 +132,7 @@ namespace kengine {
 						if (ImGui::MenuItem("Disable"))
 							TEXTURE_TO_DEBUG = -1;
 
-						if (ImGui::MenuItem("GBuffer position"))
-							TEXTURE_TO_DEBUG = gBuffer.textures[0];
-						if (ImGui::MenuItem("GBuffer normal"))
-							TEXTURE_TO_DEBUG = gBuffer.textures[1];
-
-						int i = 2;
+						int i = 0;
 						iterator.func([&](auto name) {
 							if (ImGui::MenuItem(putils::string<64>("GBuffer %s", name)))
 								TEXTURE_TO_DEBUG = gBuffer.textures[i];
