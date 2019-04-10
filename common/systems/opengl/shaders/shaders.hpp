@@ -40,11 +40,6 @@ namespace kengine::Shaders::src {
 		extern const char * frag;
 	}
 
-	namespace Geometry {
-		extern const char * vert;
-		extern const char * frag;
-	}
-
 	namespace GodRays {
 		extern const char * frag;
 	}

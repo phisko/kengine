@@ -6,9 +6,6 @@ namespace kengine::Shaders::src {
 uniform sampler2D gposition;
 uniform sampler2D gnormal;
 uniform sampler2D gcolor;
-uniform sampler2D ssao;
-
-uniform int runSSAO;
 
 uniform vec3 viewPos;
 uniform vec2 screenSize;
@@ -24,7 +21,7 @@ out vec4 outputColor;
 
 float calcShadow(vec3 worldPos, vec3 normal, vec3 lightDir);
 
-vec3 calcDirLight(vec3 worldPos, vec3 normal, float ambientOcclusion) {
+vec3 calcDirLight(vec3 worldPos, vec3 normal) {
     vec3 viewDir = normalize(viewPos - worldPos);
     vec3 lightDir = normalize(-direction);
     // diffuse shading
@@ -33,7 +30,7 @@ vec3 calcDirLight(vec3 worldPos, vec3 normal, float ambientOcclusion) {
     vec3 reflectDir = reflect(-lightDir, normal);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
     // combine results
-    float ambient = ambientStrength * ambientOcclusion;
+    float ambient = ambientStrength; 
     float diffuse = diffuseStrength * diff;
     float specular = specularStrength * spec;
 
@@ -46,11 +43,8 @@ void main() {
    	vec3 worldPos = texture(gposition, texCoord).xyz;
    	vec3 objectColor = texture(gcolor, texCoord).xyz;
    	vec3 normal = texture(gnormal, texCoord).xyz;
-    float ambientOcclusion = texture(ssao, texCoord).r;
-    if (runSSAO == 0)
-        ambientOcclusion = 1.0;
 
-   	outputColor = vec4(objectColor, 1.0) * vec4(calcDirLight(worldPos, normal, ambientOcclusion), 1.0);
+   	outputColor = vec4(objectColor, 1.0) * vec4(calcDirLight(worldPos, normal), 1.0);
 }
         )";
 

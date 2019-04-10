@@ -8,8 +8,9 @@
 #include "EntityManager.hpp"
 #include "systems/LuaSystem.hpp"
 
-#include "components/MeshLoaderComponent.hpp"
-#include "components/MeshComponent.hpp"
+#include "components/ModelLoaderComponent.hpp"
+#include "components/ModelComponent.hpp"
+#include "components/ModelInfoComponent.hpp"
 #include "components/ImGuiComponent.hpp"
 #include "components/AdjustableComponent.hpp"
 #include "components/InputComponent.hpp"
@@ -20,7 +21,6 @@
 #include "OpenGLSystem.hpp"
 #include "Controllers.hpp"
 
-#include "Geometry.hpp"
 #include "ShadowMap.hpp"
 #include "ShadowCube.hpp"
 #include "SpotLight.hpp"
@@ -101,10 +101,6 @@ namespace kengine {
 	}
 
 	void OpenGLSystem::addShaders() noexcept {
-		{ // GBuffer
-			_em += [](kengine::Entity & e) { e += kengine::makeGBufferShaderComponent<Shaders::Geometry>(); };
-		}
-
 		{ // Lighting
 			Shaders::ShadowMap * shadowMap = nullptr;
 			_em += [&](kengine::Entity & e) {
@@ -120,22 +116,8 @@ namespace kengine {
 				shadowCube = (Shaders::ShadowCube *)comp.shader.get();
 			};
 
-			Shaders::SSAO * ssao = nullptr;
-			_em += [&](kengine::Entity & e) {
-				auto & comp = e.attach<kengine::LightingShaderComponent>();
-				comp.shader = std::make_unique<Shaders::SSAO>(_em);
-				ssao = (Shaders::SSAO *)comp.shader.get();
-			};
-
-			Shaders::SSAOBlur * ssaoBlur = nullptr;
-			_em += [&](kengine::Entity & e) {
-				auto & comp = e.attach<kengine::LightingShaderComponent>();
-				comp.shader = std::make_unique<Shaders::SSAOBlur>();
-				ssaoBlur = (Shaders::SSAOBlur *)comp.shader.get();
-			};
-
 			_em += [=](kengine::Entity & e) { e += kengine::makeLightingShaderComponent<Shaders::SpotLight>(_em, *shadowMap); };
-			_em += [=](kengine::Entity & e) { e += kengine::makeLightingShaderComponent<Shaders::DirLight>(_em, *shadowMap, *ssao, *ssaoBlur); };
+			_em += [=](kengine::Entity & e) { e += kengine::makeLightingShaderComponent<Shaders::DirLight>(_em, *shadowMap); };
 			_em += [=](kengine::Entity & e) { e += kengine::makeLightingShaderComponent<Shaders::PointLight>(_em, *shadowCube); };
 		}
 
@@ -228,10 +210,12 @@ namespace kengine {
 		p.init(_gBuffer.getTextureCount(), SCREEN_WIDTH, SCREEN_HEIGHT, _gBuffer.getFBO());
 		p.drawObjects = [this](GLint modelLocation) { drawObjects(modelLocation); };
 
-		for (const auto &[e, meshInfo] : _em.getEntities<MeshInfoComponent>()) {
-			glBindVertexArray(meshInfo.vertexArrayObject);
-			glBindBuffer(GL_ARRAY_BUFFER, meshInfo.vertexBuffer);
-			meshInfo.vertexRegisterFunc(p);
+		for (const auto &[e, modelInfo] : _em.getEntities<ModelInfoComponent>()) {
+			for (const auto & mesh : modelInfo.meshes) {
+				glBindVertexArray(mesh.vertexArrayObject);
+				glBindBuffer(GL_ARRAY_BUFFER, mesh.vertexBuffer);
+				modelInfo.vertexRegisterFunc(p);
+			}
 		}
 
 		assert(_gBufferIterator.func != nullptr);
@@ -280,47 +264,43 @@ namespace kengine {
 #endif
 	}
 
-	void OpenGLSystem::createObject(kengine::Entity & e, const kengine::MeshLoaderComponent & meshLoader) {
-		const auto meshData = meshLoader.func();
+	void OpenGLSystem::createObject(kengine::Entity & e, const kengine::ModelLoaderComponent & modelLoader) {
+		const auto modelData = modelLoader.func();
 
-		auto & meshInfo = e.attach<MeshInfoComponent>();
+		auto & modelInfo = e.attach<ModelInfoComponent>();
+		modelInfo.translation = toVec(modelData.offsetToCentre);
+		modelInfo.pitch = modelData.pitch;
+		modelInfo.yaw = modelData.yaw;
+		modelInfo.vertexRegisterFunc = modelLoader.vertexRegisterFunc;
 
-		bool shouldRegister = false;
-		if (meshInfo.vertexArrayObject == -1) {
+		for (const auto & meshData : modelData.meshes) {
+			ModelInfoComponent::Mesh meshInfo;
 			glGenVertexArrays(1, &meshInfo.vertexArrayObject);
-			shouldRegister = true;
-		}
-		glBindVertexArray(meshInfo.vertexArrayObject);
+			glBindVertexArray(meshInfo.vertexArrayObject);
 
-		if (meshInfo.vertexBuffer == -1)
 			glGenBuffers(1, &meshInfo.vertexBuffer);
-		glBindBuffer(GL_ARRAY_BUFFER, meshInfo.vertexBuffer);
-		glBufferData(GL_ARRAY_BUFFER, meshData.vertices.nbElements * meshData.vertices.elementSize, meshData.vertices.data, GL_STATIC_DRAW);
+			glBindBuffer(GL_ARRAY_BUFFER, meshInfo.vertexBuffer);
+			glBufferData(GL_ARRAY_BUFFER, meshData.vertices.nbElements * meshData.vertices.elementSize, meshData.vertices.data, GL_STATIC_DRAW);
 
-		if (meshInfo.indexBuffer == -1)
 			glGenBuffers(1, &meshInfo.indexBuffer);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshInfo.indexBuffer);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, meshData.indices.nbElements * meshData.indices.elementSize, meshData.indices.data, GL_STATIC_DRAW);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshInfo.indexBuffer);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, meshData.indices.nbElements * meshData.indices.elementSize, meshData.indices.data, GL_STATIC_DRAW);
 
-		meshInfo.vertexRegisterFunc = meshLoader.vertexRegisterFunc;
+			if (_gBuffer.isInit()) {
+				for (const auto &[_, comp] : _em.getEntities<kengine::GBufferShaderComponent>())
+					modelLoader.vertexRegisterFunc(*comp.shader);
+				for (const auto &[_, comp] : _em.getEntities<kengine::LightingShaderComponent>())
+					modelLoader.vertexRegisterFunc(*comp.shader);
+				for (const auto &[_, comp] : _em.getEntities<kengine::PostProcessShaderComponent>())
+					modelLoader.vertexRegisterFunc(*comp.shader);
+			}
 
-		if (_gBuffer.isInit() && shouldRegister) {
-			for (const auto &[e, comp] : _em.getEntities<kengine::GBufferShaderComponent>())
-				meshLoader.vertexRegisterFunc(*comp.shader);
-			for (const auto &[e, comp] : _em.getEntities<kengine::LightingShaderComponent>())
-				meshLoader.vertexRegisterFunc(*comp.shader);
-			for (const auto &[e, comp] : _em.getEntities<kengine::PostProcessShaderComponent>())
-				meshLoader.vertexRegisterFunc(*comp.shader);
+			meshInfo.nbIndices = meshData.indices.nbElements;
+			meshInfo.indexType = meshData.indexType;
+
+			modelInfo.meshes.push_back(meshInfo);
 		}
-
-		meshInfo.nbIndices = meshData.indices.nbElements;
-		meshInfo.indexType = meshData.indexType;
-
-		meshInfo.translation = toVec(meshData.offsetToCentre);
-		meshInfo.pitch = meshData.pitch;
-		meshInfo.yaw = meshData.yaw;
-
-		e.detach<kengine::MeshLoaderComponent>();
+		e.detach<kengine::ModelLoaderComponent>();
 	}
 
 	void OpenGLSystem::execute() noexcept {
@@ -339,7 +319,7 @@ namespace kengine {
 			return;
 		}
 
-		for (auto & [e, meshLoader] : _em.getEntities<kengine::MeshLoaderComponent>())
+		for (auto & [e, meshLoader] : _em.getEntities<kengine::ModelLoaderComponent>())
 			createObject(e, meshLoader);
 
 #ifndef NDEBUG
@@ -448,9 +428,20 @@ namespace kengine {
 		glBlitFramebuffer(0, 0, GBUFFER_WIDTH, GBUFFER_HEIGHT, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 	}
 
+	static void drawModel(const kengine::ModelInfoComponent & modelInfo) {
+		for (const auto & meshInfo : modelInfo.meshes) {
+			glBindVertexArray(meshInfo.vertexArrayObject);
+			glBindBuffer(GL_ARRAY_BUFFER, meshInfo.vertexBuffer);
+			glDrawElements(GL_TRIANGLES, meshInfo.nbIndices, meshInfo.indexType, nullptr);
+		}
+	}
+
 	void OpenGLSystem::drawObjects(GLint modelMatrixLocation) const noexcept {
-		for (const auto &[e, mesh, transform] : _em.getEntities<kengine::MeshComponent, kengine::TransformComponent3f>()) {
-			const auto & meshInfo = _em.getEntity(mesh.meshInfo).get<MeshInfoComponent>();
+		for (const auto &[e, model, transform] : _em.getEntities<kengine::ModelComponent, kengine::TransformComponent3f>()) {
+			const auto & modelInfoEntity = _em.getEntity(model.modelInfo);
+			if (!modelInfoEntity.has<ModelInfoComponent>())
+				continue;
+			const auto & modelInfo = modelInfoEntity.get<ModelInfoComponent>();
 
 			glm::mat4 model(1.f);
 			const auto & centre = transform.boundingBox.topLeft;
@@ -458,21 +449,20 @@ namespace kengine {
 			model = glm::scale(model, toVec(transform.boundingBox.size));
 
 			model = glm::rotate(model,
-				transform.pitch + meshInfo.pitch,
+				transform.pitch + modelInfo.pitch,
 				{ 1.f, 0.f, 0.f }
 			);
 
 			model = glm::rotate(model,
-				transform.yaw + meshInfo.yaw,
+				transform.yaw + modelInfo.yaw,
 				{ 0.f, 1.f, 0.f }
 			);
 
-			model = glm::translate(model, -meshInfo.translation); // Re-center
+			model = glm::translate(model, -modelInfo.translation); // Re-center
 
 			putils::gl::setUniform(modelMatrixLocation, model);
 
-			glBindVertexArray(meshInfo.vertexArrayObject);
-			glDrawElements(GL_TRIANGLES, meshInfo.nbIndices, meshInfo.indexType, nullptr);
+			drawModel(modelInfo);
 		}
 	}
 

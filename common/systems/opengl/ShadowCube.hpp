@@ -8,6 +8,7 @@ namespace kengine::Shaders {
 	struct DepthCubeComponent {
 		GLuint fbo = -1;
 		GLuint texture;
+		pmeta_get_class_name(DepthCubeComponent);
 	};
 
 	class ShadowCube : public putils::gl::Program {

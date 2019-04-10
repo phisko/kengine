@@ -1,7 +1,6 @@
 #pragma once
 
 #include "opengl/Program.hpp"
-#include "SSAO.hpp"
 
 namespace kengine {
 	class EntityManager;
@@ -13,10 +12,13 @@ namespace kengine::Shaders {
 
 	class DirLight : public putils::gl::Program {
 	public:
-		DirLight(kengine::EntityManager & em, ShadowMap & shadowMap, SSAO & ssao, SSAOBlur & ssaoBlur);
+		DirLight(kengine::EntityManager & em, ShadowMap & shadowMap);
 
 		void init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) override;
 		void run(const glm::mat4 & view, const glm::mat4 & proj, const glm::vec3 & camPos, size_t screenWidth, size_t screenHeight) override;
+
+	private:
+		void setLight(const DirLightComponent & light); 
 
 	public:
 		GLint proj;
@@ -25,9 +27,6 @@ namespace kengine::Shaders {
 
 		GLint lightSpaceMatrix;
 		GLint shadowMap;
-		GLint ssao;
-
-		GLint runSSAO;
 
 		GLint viewPos;
 		GLint screenSize;
@@ -46,9 +45,6 @@ namespace kengine::Shaders {
 
 			pmeta_reflectible_attribute(&DirLight::lightSpaceMatrix),
 			pmeta_reflectible_attribute(&DirLight::shadowMap),
-			pmeta_reflectible_attribute(&DirLight::ssao),
-
-			pmeta_reflectible_attribute(&DirLight::runSSAO),
 
 			pmeta_reflectible_attribute(&DirLight::viewPos),
 			pmeta_reflectible_attribute(&DirLight::screenSize),
@@ -65,12 +61,5 @@ namespace kengine::Shaders {
 		kengine::EntityManager & _em;
 		ShadowMap & _shadowMap;
 		size_t _shadowMapTextureID;
-		size_t _ssaoTextureID;
-
-	private:
-		SSAO & _ssao;
-		SSAOBlur & _ssaoBlur;
-
-		void setLight(const DirLightComponent & light); 
 	};
 }

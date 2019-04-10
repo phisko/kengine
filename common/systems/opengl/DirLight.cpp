@@ -10,17 +10,12 @@
 #include "components/LightComponent.hpp"
 #include "components/AdjustableComponent.hpp"
 
-static bool RUN_SSAO = false;
 namespace kengine::Shaders {
-	DirLight::DirLight(kengine::EntityManager & em, ShadowMap & shadowMap, SSAO & ssao, SSAOBlur & ssaoBlur)
+	DirLight::DirLight(kengine::EntityManager & em, ShadowMap & shadowMap)
 		: Program(true, pmeta_nameof(DirLight)),
 		_em(em),
-		_shadowMap(shadowMap),
-		_ssao(ssao),
-		_ssaoBlur(ssaoBlur)
-	{
-		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/SSAO] Active", &RUN_SSAO); };
-	}
+		_shadowMap(shadowMap)
+	{}
 
 	void DirLight::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
 		initWithShaders<DirLight>(putils::make_vector(
@@ -32,20 +27,12 @@ namespace kengine::Shaders {
 		_shadowMapTextureID = firstTextureID;
 		putils::gl::setUniform(this->shadowMap, _shadowMapTextureID);
 
-		_ssaoTextureID = _shadowMapTextureID + 1;
-		putils::gl::setUniform(ssao, _ssaoTextureID);
-
 		putils::gl::setUniform(proj, glm::mat4(1.f));
 		putils::gl::setUniform(view, glm::mat4(1.f));
 		putils::gl::setUniform(model, glm::mat4(1.f));
 	}
 
 	void DirLight::run(const glm::mat4 & view, const glm::mat4 & proj, const glm::vec3 & camPos, size_t screenWidth, size_t screenHeight) {
-		if (RUN_SSAO) {
-			_ssao.run(view, proj, screenWidth, screenHeight);
-			_ssaoBlur.run(_ssao.getTexture(), screenWidth, screenHeight);
-		}
-
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		Enable __c(GL_CULL_FACE);
@@ -67,12 +54,6 @@ namespace kengine::Shaders {
 			glActiveTexture(GL_TEXTURE0 + _shadowMapTextureID);
 			glBindTexture(GL_TEXTURE_2D, e.get<DepthMapComponent>().texture);
 			putils::gl::setUniform(lightSpaceMatrix, LightHelper::getLightSpaceMatrix(light, camPos, screenWidth, screenHeight));
-
-			putils::gl::setUniform(runSSAO, RUN_SSAO ? 1u : 0u);
-			if (RUN_SSAO) {
-				glActiveTexture(GL_TEXTURE0 + _ssaoTextureID);
-				glBindTexture(GL_TEXTURE_2D, _ssaoBlur.getTexture());
-			}
 
 			shapes::drawQuad();
 		}

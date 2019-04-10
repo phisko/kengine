@@ -13,6 +13,7 @@ namespace kengine::Shaders {
 	struct DepthMapComponent {
 		GLuint fbo = -1;
 		GLuint texture;
+		pmeta_get_class_name(DepthMapComponent);
 	};
 
 	class ShadowMap : public putils::gl::Program {
