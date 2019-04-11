@@ -1,7 +1,11 @@
 # [PhysicsComponent](PhysicsComponent.hpp)
 
+`Component` that specifies movement information about an `Entity`.
 
-`Component` that specifies the movement information to be used by the [PhysicsSystem](../systems/PhysicsSystem.md).
+### Specs
+
+* [Reflectible](https://github.com/phiste/putils/blob/master/reflection/Reflectible.md)
+* Serializable
 
 ### Members
 
@@ -16,14 +20,14 @@ PhysicsComponent(bool solid = true, bool fixed = false);
 ```cpp
 bool solid = true;
 ```
-Defines whether objects should trigger [Collisions](../packets/Collision.hpp) when colliding with other objects.
+Defines whether objects should collide with other objects.
 
 ##### fixed
 
 ```cpp
 bool fixed = false;
 ```
-Used to specify that the object will never move, letting the `PhysicsSystem` skip the object.
+Used to specify that the object will never move.
 
 ##### movement
 

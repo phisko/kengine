@@ -17,8 +17,8 @@ namespace kengine {
 
         bool isPaused() const noexcept { return time.getDeltaFrames() == 0; }
 
-		virtual void onSave() noexcept {}
-		virtual void onLoad() noexcept {}
+		virtual void onSave(const char * directory) noexcept {}
+		virtual void onLoad(const char * directory) noexcept {}
 
         struct {
         public:

@@ -3,12 +3,12 @@
 #include "reflection/Reflectible.hpp"
 
 namespace kengine {
-	class CollisionComponent {
+	class CollisionComponent : kengine::not_serializable {
 	public:
 		CollisionComponent(const std::function<void(kengine::GameObject &, kengine::GameObject &)> & onCollide = nullptr)
 			: onCollide(onCollide) {}
 
-		std::function<void(kengine::GameObject &, kengine::GameObject &)> onCollide = nullptr;
+		std::function<void(kengine::Entity & other)> onCollide = nullptr;
 
 	public:
 		pmeta_get_class_name(CollisionComponent);

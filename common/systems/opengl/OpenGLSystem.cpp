@@ -94,7 +94,7 @@ namespace kengine {
 	{
 		initOpenGL();
 
-		onLoad();
+		onLoad("");
 
 		_em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/Planes] Near", &NEAR_PLANE); };
 		_em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/Planes] Far", &FAR_PLANE); };
@@ -142,7 +142,7 @@ namespace kengine {
 
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
-		window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Painter", nullptr, nullptr);
+		window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Kengine", nullptr, nullptr);
 		glfwMakeContextCurrent(window);
 		glfwSetWindowAspectRatio(window, SCREEN_WIDTH, SCREEN_HEIGHT);
 		glfwSetWindowSizeCallback(window, [](auto window, int width, int height) {
@@ -240,7 +240,7 @@ namespace kengine {
 	static auto KENGINE_TIME = 0;
 	static auto IMGUI_TIME = 0;
 	static auto GLFW_TIME = 0;
-	void OpenGLSystem::onLoad() noexcept {
+	void OpenGLSystem::onLoad(const char *) noexcept {
 #ifndef KENGINE_OPENGL_NO_DEFAULT_SHADERS
 		addShaders();
 #endif

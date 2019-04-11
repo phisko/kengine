@@ -1,5 +1,17 @@
 #pragma once
 
+#ifndef KENGINE_DEFAULT_ADJUSTABLE_SAVE_PATH
+# define KENGINE_DEFAULT_ADJUSTABLE_SAVE_PATH "."
+#endif
+
+#ifndef KENGINE_ADJUSTABLE_SAVE_FILE
+# define KENGINE_ADJUSTABLE_SAVE_FILE "adjust.cnf"
+#endif
+
+#ifndef KENGINE_ADJUSTABLE_SEPARATOR
+# define KENGINE_ADJUSTABLE_SEPARATOR ';'
+#endif
+
 #include "System.hpp"
 
 #include <unordered_map>
@@ -29,10 +41,10 @@ namespace kengine {
 
 						ImGui::Columns(2);
 						if (ImGui::Button("Save"))
-							save(em);
+							save(em, KENGINE_DEFAULT_ADJUSTABLE_SAVE_PATH);
 						ImGui::NextColumn();
 						if (ImGui::Button("Load"))
-							load(em);
+							load(em, KENGINE_DEFAULT_ADJUSTABLE_SAVE_PATH);
 						ImGui::Columns();
 
 						ImGui::Separator();
@@ -89,12 +101,12 @@ namespace kengine {
 		void execute() noexcept final {
 			static bool first = true;
 			if (first) {
-				load(_em);
+				load(_em, KENGINE_DEFAULT_ADJUSTABLE_SAVE_PATH);
 				first = false;
 			}
 		}
 
-		void onLoad() noexcept final {
+		void onLoad(const char * directory) noexcept final {
 			_em += ImGuiAdjustableManager(_em);
 
 			for (auto & [e, comp] : _em.getEntities<AdjustableComponent>()) {
@@ -109,11 +121,11 @@ namespace kengine {
 				comp.dPtr = it->second.dPtr;
 			}
 
-			load(_em);
+			load(_em, directory);
 		}
 
-		void onSave() noexcept final {
-			save(_em);
+		void onSave(const char * directory) noexcept final {
+			save(_em, directory);
 		}
 
 		void handle(const packets::RegisterEntity & p) {
@@ -137,13 +149,11 @@ namespace kengine {
 		std::unordered_map<string, PointerSave> _pointerSaves;
 
 	private:
-		static constexpr auto saveFile = "adjust.cnf";
-		static constexpr auto separator = ';';
-
-		static void save(kengine::EntityManager & em) {
-			std::ofstream f(saveFile, std::ofstream::trunc);
+		static void save(kengine::EntityManager & em, const char * directory) {
+			std::ofstream f(putils::string<KENGINE_MAX_SAVE_PATH_LENGTH>("%s/%s", directory, KENGINE_ADJUSTABLE_SAVE_FILE), std::ofstream::trunc);
+			assert(f);
 			for (auto &[e, comp] : em.getEntities<AdjustableComponent>()) {
-				f << comp.name << separator;
+				f << comp.name << KENGINE_ADJUSTABLE_SEPARATOR;
 				switch (comp.adjustableType) {
 				case AdjustableComponent::Int:
 					f << comp.i;
@@ -161,11 +171,13 @@ namespace kengine {
 			}
 		}
 
-		static void load(kengine::EntityManager & em) {
+		static void load(kengine::EntityManager & em, const char * directory) {
 			std::unordered_map<string, string> lines; {
-				std::ifstream f(saveFile);
+				std::ifstream f(putils::string<KENGINE_MAX_SAVE_PATH_LENGTH>("%s/%s", directory, KENGINE_ADJUSTABLE_SAVE_FILE));
+				if (!f)
+					return;
 				for (std::string line; std::getline(f, line);) {
-					const auto index = line.find(separator);
+					const auto index = line.find(KENGINE_ADJUSTABLE_SEPARATOR);
 					lines[line.substr(0, index)] = line.substr(index + 1);
 				}
 			}

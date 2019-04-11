@@ -30,10 +30,10 @@ namespace kengine {
 	class MagicaVoxelSystem : public kengine::System<MagicaVoxelSystem, kengine::packets::RegisterEntity> {
 	public:
 		MagicaVoxelSystem(kengine::EntityManager & em) : System(em), _em(em) {
-			onLoad();
+			onLoad("");
 		}
 
-		void onLoad() noexcept override {
+		void onLoad(const char *) noexcept override {
 			for (auto & p : _meshes) {
 				const auto oldId = p.second.id;
 

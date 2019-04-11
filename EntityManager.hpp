@@ -1,5 +1,9 @@
 #pragma once
 
+#ifndef KENGINE_MAX_SAVE_PATH_LENGTH
+# define KENGINE_MAX_SAVE_PATH_LENGTH 64
+#endif
+
 #include <unordered_map>
 #include <vector>
 #include "SystemManager.hpp"
@@ -47,7 +51,7 @@ namespace kengine {
 		}
 
     public:
-		void load() {
+		void load(const char * directory = ".") {
 			_archetypes.clear();
 			_toReuse.clear();
 
@@ -55,9 +59,10 @@ namespace kengine {
 				SystemManager::removeEntity(EntityView(i, _entities[i]));
 
 			for (const auto &[_, meta] : _components)
-				meta->load();
+				meta->load(directory);
 
-			std::ifstream f("entities.bin");
+			std::ifstream f(putils::string<KENGINE_MAX_SAVE_PATH_LENGTH>("%s/entities.bin", directory));
+			assert(f);
 			size_t size;
 			f.read((char *)&size, sizeof(size));
 			_entities.resize(size);
@@ -73,19 +78,20 @@ namespace kengine {
 					_toReuse.emplace_back(i);
 			}
 
-			SystemManager::load();
+			SystemManager::load(directory);
 		}
 
-		void save() {
-			SystemManager::save();
+		void save(const char * directory = ".") const {
+			SystemManager::save(directory);
 
 			std::vector<bool> serializable;
 
 			serializable.resize(_components.size());
 			for (const auto &[_, meta] : _components)
-				serializable[meta->getId()] = meta->save();
+				serializable[meta->getId()] = meta->save(directory);
 
-			std::ofstream f("entities.bin");
+			std::ofstream f(putils::string<KENGINE_MAX_SAVE_PATH_LENGTH>("%s/entities.bin", directory));
+			assert(f);
 			const auto size = _entities.size();
 			f.write((const char *)&size, sizeof(size));
 			for (Entity::Mask mask : _entities) {

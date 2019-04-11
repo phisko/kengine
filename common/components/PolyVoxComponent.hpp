@@ -1,9 +1,13 @@
 #pragma once
 
+#ifndef KENGINE_POLYVOX_CHUNK_SIDE
+# define KENGINE_POLYVOX_CHUNK_SIDE 16
+#endif
+
 #include <PolyVox/RawVolume.h>
 
 struct PolyVoxModelComponent : kengine::not_serializable {
-	// Coupled with MeshComponent, indicates that this entity's mesh should be processed by PolyVoxShader
+	// Coupled with ModelComponent, indicates that this entity's model should be processed by PolyVoxShader
 	pmeta_get_class_name(PolyVoxModelComponent);
 };
 
@@ -28,7 +32,7 @@ struct PolyVoxComponent : kengine::not_serializable {
 		}
 	};
 
-	static constexpr auto CHUNK_SIDE = 16;
+	static constexpr auto CHUNK_SIDE = KENGINE_POLYVOX_CHUNK_SIDE;
 
 	PolyVox::RawVolume<VertexData> volume{ { { 0, 0, 0 }, { CHUNK_SIDE, CHUNK_SIDE, CHUNK_SIDE } } };
 	bool changed = true;
@@ -52,4 +56,3 @@ struct PolyVoxComponent : kengine::not_serializable {
 
 	pmeta_get_class_name(PolyVoxComponent);
 };
-

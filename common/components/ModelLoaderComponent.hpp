@@ -4,7 +4,7 @@
 #include "opengl/Program.hpp"
 
 namespace kengine {
-	struct ModelLoaderComponent {
+	struct ModelLoaderComponent : kengine::not_serializable {
 		struct ModelData {
 			struct MeshData {
 				struct DataInfo {
@@ -23,6 +23,16 @@ namespace kengine {
 			float pitch = 0.f;
 			float yaw = 0.f;
 		};
+
+		ModelLoaderComponent(const std::function<ModelData()> & func, const std::function<void(putils::gl::Program & p)> & vertexRegisterFunc)
+			: func(func), vertexRegisterFunc(vertexRegisterFunc)
+		{}
+
+		ModelLoaderComponent() = default;
+		ModelLoaderComponent(const ModelLoaderComponent &) = default;
+		ModelLoaderComponent & operator=(const ModelLoaderComponent &) = default;
+		ModelLoaderComponent(ModelLoaderComponent &&) = default;
+		ModelLoaderComponent & operator=(ModelLoaderComponent &&) = default;
 
 		std::function<ModelData()> func;
 		std::function<void(putils::gl::Program & p)> vertexRegisterFunc;

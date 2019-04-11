@@ -1,5 +1,9 @@
 #pragma once
 
+#ifndef KENGINE_MAX_SAVE_PATH_LENGTH
+# define KENGINE_MAX_SAVE_PATH_LENGTH 64
+#endif
+
 #ifndef NDEBUG
 #include <iostream>
 #endif
@@ -20,8 +24,8 @@ namespace kengine {
 
 		struct MetadataBase {
 			virtual ~MetadataBase() = default;
-			virtual bool save() const = 0;
-			virtual bool load() = 0;
+			virtual bool save(const char * directory) const = 0;
+			virtual bool load(const char * directory) = 0;
 			virtual size_t getId() const = 0;
 		};
 		using GlobalCompMap = std::unordered_map<pmeta::type_index, std::unique_ptr<MetadataBase>>;
@@ -35,9 +39,9 @@ namespace kengine {
 			std::vector<Comp> array;
 			size_t id = detail::INVALID;
 
-			bool save() const final {
+			bool save(const char * directory) const final {
 				if constexpr (putils::has_member_get_class_name<Comp>::value && !std::is_base_of<kengine::not_serializable, Comp>::value) {
-					putils::string<64> file("%s.bin", Comp::get_class_name());
+					putils::string<KENGINE_MAX_SAVE_PATH_LENGTH> file("%s/%s.bin", directory, Comp::get_class_name());
 					std::ofstream f(file.c_str());
 
 					if (!f)
@@ -51,9 +55,9 @@ namespace kengine {
 				return false;
 			}
 
-			bool load() final {
+			bool load(const char * directory) final {
 				if constexpr (putils::has_member_get_class_name<Comp>::value && !std::is_base_of<kengine::not_serializable, Comp>::value) {
-					putils::string<64> file("%s.bin", Comp::get_class_name());
+					putils::string<KENGINE_MAX_SAVE_PATH_LENGTH> file("%s/%s.bin", directory, Comp::get_class_name());
 					std::ifstream f(file.c_str());
 					if (!f)
 						return false;

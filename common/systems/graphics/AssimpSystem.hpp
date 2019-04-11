@@ -179,16 +179,13 @@ namespace kengine {
 	class AssImpSystem : public kengine::System<AssImpSystem, kengine::packets::RegisterEntity> {
 	public:
 		AssImpSystem(kengine::EntityManager & em) : System(em), _em(em) {
-			onLoad();
+			onLoad("");
 		}
 
-		void onLoad() noexcept override {
+		void onLoad(const char *) noexcept override {
 			_em += [this](kengine::Entity & e) {
 				e += kengine::makeGBufferShaderComponent<TexturedShader>(_em);
 			};
-		}
-
-		void execute() noexcept override {
 		}
 
 		void handle(kengine::packets::RegisterEntity p) {

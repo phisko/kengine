@@ -17,7 +17,7 @@ namespace kengine {
 		~OpenGLSystem();
 
 		void execute() noexcept final;
-		void onLoad() noexcept final;
+		void onLoad(const char *) noexcept final;
 
 		void handle(kengine::packets::RegisterEntity p);
 		void handle(kengine::packets::GBufferSize p);

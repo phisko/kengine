@@ -23,7 +23,7 @@
 
 namespace kengine {
     class GUIComponent : public putils::Observable<>, 
-                         public putils::Reflectible<GUIComponent> {
+                         public kengine::not_serializable {
     public:
 		using string = putils::string<KENGINE_GUI_TEXT_MAX_LENGTH>;
 		using item_vector = putils::vector<string, KENGINE_GUI_LIST_MAX_ITEMS>;

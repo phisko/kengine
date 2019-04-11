@@ -2,7 +2,10 @@
 
 `Component` providing graphical information about an `Entity`.
 
-Inherits from [putils::Reflectible](https://github.com/phiste/putils/blob/master/reflection/Reflectible.md).
+### Specs
+
+* [Reflectible](https://github.com/phiste/putils/blob/master/reflection/Reflectible.md)
+* Serializable
 
 ### Members
 
@@ -11,15 +14,20 @@ Inherits from [putils::Reflectible](https://github.com/phiste/putils/blob/master
 Represents one of the possibly many layers used to draw an `Entity`. A `Layer` stores:
 
 * a `name`, for indexing
-* an `appearance`, the path to the texture to be drawn
+* an `appearance`, the path to the texture (or 3D model or whatever the rendering `System` might need) to be drawn
 * a `boundingBox`, the relative position and size compared to the `Entity`'s `TransformComponent`
+* a `pitch`
 * a `yaw`
 * a `mirrored` boolean
+
+The maximum length of the layer's name and appearance (stored as [putils::strings](https://github.com/phiste/putils/blob/master/string.hpp)) defaults to 64, and can be adjusted by defining the `KENGINE_GRAPHICS_STRING_MAX_LENGTH` macro.
+
+The maximum number of layers defaults to 8 and can be adjusted by defining the `KENGINE_GRAPHICS_MAX_LAYERS` macro.
 
 ##### Constructor
 
 ```cpp
-GraphicsComponent(const std::string & appearance = "");
+GraphicsComponent(const char * appearance = "");
 ```
 
 Adds a *"main"* layer with the specified appearance.
@@ -27,23 +35,23 @@ Adds a *"main"* layer with the specified appearance.
 ##### addLayer
 
 ```cpp
-Layer & addLayer(const std::string & name, const std::string & appearance);
+Layer & addLayer(const char * name, const char * appearance);
 ```
 
 ##### removeLayer
 
 ```cpp
-void removeLayer(const std::string & name);
+void removeLayer(const char * name);
 ```
 
 ##### hasLayer
 
 ```cpp
-bool hasLayer(const std::string & name);
+bool hasLayer(const char * name);
 ```
 
 ##### getLayer
 
 ```cpp
-Layer & getLayer(const std::string & name);
+Layer & getLayer(const char * name);
 ```

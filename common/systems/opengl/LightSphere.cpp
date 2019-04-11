@@ -14,6 +14,8 @@ static auto SUN_DIST = 500.f;
 static auto SUN_SIZE = 100.f;
 
 namespace kengine::Shaders {
+	static glm::vec3 toVec(const putils::Point3f & p) { return { p.x, p.y, p.z }; }
+
 	LightSphere::LightSphere(kengine::EntityManager & em) 
 		: Program(false, pmeta_nameof(LightSphere)),
 		_em(em) {
@@ -45,18 +47,18 @@ namespace kengine::Shaders {
 		putils::gl::setUniform(this->view, view);
 
 		for (const auto & [e, light] : _em.getEntities<DirLightComponent>())
-			drawLight(light, camPos - light.direction * SUN_DIST, SUN_SIZE);
+			drawLight(light, camPos - toVec(light.direction) * SUN_DIST, SUN_SIZE);
 
 		for (const auto & [e, light, transform] : _em.getEntities<PointLightComponent, kengine::TransformComponent3f>()) {
 			const auto & pos = transform.boundingBox.topLeft;
-			drawLight(light, { pos.x, pos.y, pos.z }, SPHERE_SIZE);
+			drawLight(light, toVec(pos), SPHERE_SIZE);
 		}
 
 		for (const auto & [e, light, transform] : _em.getEntities<SpotLightComponent, kengine::TransformComponent3f>()) {
 			const auto & pos = transform.boundingBox.topLeft;
-			const bool isFacingLight = glm::dot({ pos.x, pos.y, pos.z }, camPos) < 0;
+			const bool isFacingLight = glm::dot(toVec(pos), camPos) < 0;
 			if (isFacingLight)
-				drawLight(light, { pos.x, pos.y, pos.z }, SPHERE_SIZE);
+				drawLight(light, toVec(pos), SPHERE_SIZE);
 		}
 	}
 
@@ -69,5 +71,4 @@ namespace kengine::Shaders {
 
 		shapes::drawSphere();
 	}
-
 }
