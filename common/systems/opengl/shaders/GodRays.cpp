@@ -68,10 +68,9 @@ void main() {
 
     for (int i = 0; i < NB_STEPS; ++i) {
         vec2 shadow = getShadowMapValue(currentPos);
-        if (shadow.x < 0.0 || shadow.x > shadow.y) {
+        if (shadow.x < 0.0 || shadow.x > shadow.y)
             accumFog += computeScattering(dot(rayDir, lightDir)) * color * INTENSITY;
-            currentPos += rayStep;
-        }
+		currentPos += rayStep;
     }
     accumFog /= NB_STEPS;
 

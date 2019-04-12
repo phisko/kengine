@@ -10,7 +10,7 @@
 namespace kengine {
 	float SHADOW_MAP_NEAR_PLANE = 0.f;
 	float SHADOW_MAP_FAR_PLANE = 1000.f;
-	float DIRECTIONAL_LIGHT_SHADOW_DISTANCE = 200.f;
+	float DIRECTIONAL_LIGHT_SHADOW_DISTANCE = 1000.f;
 }
 
 namespace kengine::Shaders {

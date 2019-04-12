@@ -8,10 +8,10 @@
 #include "LightHelper.hpp"
 #include "shaders/shaders.hpp"
 
-auto SCATTERING_ADJUST = 0.f;
-auto NB_STEPS_ADJUST = 50.f;
-auto DEFAULT_STEP_LENGTH_ADJUST = 5.f;
-auto INTENSITY_ADJUST = 1.f;
+auto SCATTERING_ADJUST = .1f;
+auto NB_STEPS_ADJUST = 10.f;
+auto DEFAULT_STEP_LENGTH_ADJUST = 10.f;
+auto INTENSITY_ADJUST = 2.5f;
 
 namespace kengine::Shaders {
 	GodRaysDirLight::GodRaysDirLight(kengine::EntityManager & em)
