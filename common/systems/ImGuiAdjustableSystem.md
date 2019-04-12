@@ -15,3 +15,5 @@ The name of the CSV file defaults to "adjust.cnf" and can be adjusted by definin
 The maximum number of sections in an adjustable's name defaults to 8 and can be adjusted by defining the `KENGINE_MAX_ADJUSTABLE_SECTIONS` macro.
 
 The maximum number of adjustables defaults to 256 and can be adjusted by defining the `KENGINE_MAX_ADJUSTABLES` macro.
+
+The precision of floating point adjustables defaults to 5 and can be adjusted by defining the `KENGINE_ADJUSTABLE_FLOAT_PRECISION` macro.

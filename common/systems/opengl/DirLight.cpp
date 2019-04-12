@@ -10,6 +10,11 @@
 #include "components/LightComponent.hpp"
 #include "components/AdjustableComponent.hpp"
 
+namespace kengine {
+	extern float SHADOW_MAP_MIN_BIAS;
+	extern float SHADOW_MAP_MAX_BIAS;
+}
+
 namespace kengine::Shaders {
 	DirLight::DirLight(kengine::EntityManager & em, ShadowMap & shadowMap)
 		: Program(true, pmeta_nameof(DirLight)),
@@ -35,14 +40,18 @@ namespace kengine::Shaders {
 	void DirLight::run(const glm::mat4 & view, const glm::mat4 & proj, const glm::vec3 & camPos, size_t screenWidth, size_t screenHeight) {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-		Enable __c(GL_CULL_FACE);
 		Enable __b(GL_BLEND);
 		glBlendEquation(GL_FUNC_ADD);
 		glBlendFunc(GL_ONE, GL_ONE);
 
 		use();
+
 		putils::gl::setUniform(viewPos, camPos);
 		putils::gl::setUniform(screenSize, glm::vec2(screenWidth, screenHeight));
+
+		putils::gl::setUniform(shadow_map_min_bias, SHADOW_MAP_MIN_BIAS);
+		putils::gl::setUniform(shadow_map_max_bias, SHADOW_MAP_MAX_BIAS);
+
 		for (auto &[e, light] : _em.getEntities<DirLightComponent>()) {
 			const putils::Point3f pPos = { camPos.x, camPos.y, camPos.z };
 

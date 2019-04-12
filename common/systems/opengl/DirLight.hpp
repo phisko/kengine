@@ -38,6 +38,9 @@ namespace kengine::Shaders {
 		GLint diffuseStrength;
 		GLint specularStrength;
 
+		GLint shadow_map_min_bias;
+		GLint shadow_map_max_bias;
+
 		pmeta_get_attributes(
 			pmeta_reflectible_attribute(&DirLight::proj),
 			pmeta_reflectible_attribute(&DirLight::view),
@@ -54,7 +57,10 @@ namespace kengine::Shaders {
 
 			pmeta_reflectible_attribute(&DirLight::ambientStrength),
 			pmeta_reflectible_attribute(&DirLight::diffuseStrength),
-			pmeta_reflectible_attribute(&DirLight::specularStrength)
+			pmeta_reflectible_attribute(&DirLight::specularStrength),
+
+			pmeta_reflectible_attribute(&DirLight::shadow_map_min_bias),
+			pmeta_reflectible_attribute(&DirLight::shadow_map_max_bias)
 		);
 
 	private:

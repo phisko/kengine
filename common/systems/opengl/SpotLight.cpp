@@ -10,6 +10,11 @@
 #include "components/TransformComponent.hpp"
 #include "components/LightComponent.hpp"
 
+namespace kengine {
+	extern float SHADOW_MAP_MIN_BIAS;
+	extern float SHADOW_MAP_MAX_BIAS;
+}
+
 namespace kengine::Shaders {
 	void SpotLight::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
 		initWithShaders<SpotLight>(putils::make_vector(
@@ -33,6 +38,10 @@ namespace kengine::Shaders {
 		use();
 		putils::gl::setUniform(viewPos, camPos);
 		putils::gl::setUniform(screenSize, glm::vec2(screenWidth, screenHeight));
+
+		putils::gl::setUniform(shadow_map_min_bias, SHADOW_MAP_MIN_BIAS);
+		putils::gl::setUniform(shadow_map_max_bias, SHADOW_MAP_MAX_BIAS);
+
 		for (auto &[e, light, transform] : _em.getEntities<SpotLightComponent, kengine::TransformComponent3f>()) {
 			const auto & centre = transform.boundingBox.topLeft;
 			_shadowMap.run(e, light, centre, screenWidth, screenHeight);

@@ -21,6 +21,8 @@ Unless the `KENGINE_OPENGL_NO_DEFAULT_SHADERS` macro is defined, the following s
 
 * [LightSphere](LightSphere.hpp), draws spheres where lights are
 
+The shadow map resolution defaults to 8192 (this seems like a lot, but I've only tested this on a single machine so far) and can be adjusted by defining the `KENGINE_SHADOW_MAP_SIZE` macro.
+
 ### Functionality
 
 ##### Rendering

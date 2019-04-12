@@ -12,6 +12,10 @@
 # define KENGINE_ADJUSTABLE_SEPARATOR ';'
 #endif
 
+#ifndef KENGINE_ADJUSTABLE_FLOAT_PRECISION
+# define KENGINE_ADJUSTABLE_FLOAT_PRECISION 5
+#endif
+
 #include "System.hpp"
 
 #include <unordered_map>
@@ -308,7 +312,7 @@ namespace kengine {
 				break;
 			}
 			case AdjustableComponent::Double: {
-				ImGui::InputFloat((string("##") + comp.name).c_str(), &comp.d);
+				ImGui::InputFloat((string("##") + comp.name).c_str(), &comp.d, 0.f, 0.f, KENGINE_ADJUSTABLE_FLOAT_PRECISION);
 				if (comp.dPtr != nullptr)
 					*comp.dPtr = comp.d;
 				break;

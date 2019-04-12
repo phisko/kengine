@@ -46,6 +46,9 @@ namespace kengine::Shaders {
 		GLint attenuationLinear;
 		GLint attenuationQuadratic;
 
+		GLint shadow_map_min_bias;
+		GLint shadow_map_max_bias;
+
 		pmeta_get_attributes(
 			pmeta_reflectible_attribute(&SpotLight::proj),
 			pmeta_reflectible_attribute(&SpotLight::view),
@@ -69,7 +72,10 @@ namespace kengine::Shaders {
 
 			pmeta_reflectible_attribute(&SpotLight::attenuationConstant),
 			pmeta_reflectible_attribute(&SpotLight::attenuationLinear),
-			pmeta_reflectible_attribute(&SpotLight::attenuationQuadratic)
+			pmeta_reflectible_attribute(&SpotLight::attenuationQuadratic),
+
+			pmeta_reflectible_attribute(&SpotLight::shadow_map_min_bias),
+			pmeta_reflectible_attribute(&SpotLight::shadow_map_max_bias)
 		);
 
 	private:

@@ -5,6 +5,8 @@ namespace kengine::Shaders::src {
 
 uniform sampler2D shadowMap;
 uniform mat4 lightSpaceMatrix;
+uniform float shadow_map_min_bias;
+uniform float shadow_map_max_bias;
 
 vec2 getShadowMapValue(vec3 worldPos) {
     vec4 worldPosLightSpace = lightSpaceMatrix * vec4(worldPos, 1.0);
@@ -25,8 +27,7 @@ float calcShadow(vec3 worldPos, vec3 normal, vec3 lightDir) {
     float closestDepth = texture(shadowMap, projCoords.xy).r;
 
     // calculate bias (based on depth map resolution and slope)
-    // float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
-    float bias = 0;
+    float bias = max(shadow_map_max_bias * (1.0 - dot(normal, lightDir)), shadow_map_min_bias);
 
     float shadow = 0.0;
     vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
