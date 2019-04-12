@@ -440,12 +440,22 @@ namespace kengine {
 			model = glm::scale(model, toVec(transform.boundingBox.size));
 
 			model = glm::rotate(model,
-				transform.pitch + modelInfo.pitch,
+				transform.pitch,
 				{ 1.f, 0.f, 0.f }
 			);
 
 			model = glm::rotate(model,
-				transform.yaw + modelInfo.yaw,
+				transform.yaw,
+				{ 0.f, 1.f, 0.f }
+			);
+
+			model = glm::rotate(model,
+				modelInfo.pitch,
+				{ 1.f, 0.f, 0.f }
+			);
+
+			model = glm::rotate(model,
+				modelInfo.yaw,
 				{ 0.f, 1.f, 0.f }
 			);
 
