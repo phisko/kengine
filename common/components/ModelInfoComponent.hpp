@@ -24,7 +24,7 @@ namespace kengine {
 		float pitch = 0.f;
 		float yaw = 0.f;
 
-		std::function<void(putils::gl::Program & p)> vertexRegisterFunc = nullptr;
+		std::function<void()> vertexRegisterFunc = nullptr;
 
 		pmeta_get_class_name(ModelInfoComponent);
 	};

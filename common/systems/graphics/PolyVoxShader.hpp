@@ -86,9 +86,8 @@ namespace kengine {
 		static inline const char * vert = R"(
 #version 330
 
-in vec3 position;
-in vec3 normal;
-in vec3 color;
+layout (location = 0) in vec3 position;
+layout (location = 2) in vec3 color;
 
 uniform mat4 proj;
 uniform mat4 view;
@@ -97,13 +96,11 @@ uniform vec3 viewPos;
 
 out vec4 WorldPosition;
 out vec3 EyeRelativePos;
-out vec3 Normal;
 out vec3 Color;
 
 void main() {
 	WorldPosition = model * vec4(position, 1.0);
 	EyeRelativePos = WorldPosition.xyz - viewPos;
-	Normal = normal;
 	Color = color;
 
 	gl_Position = proj * view * WorldPosition;
@@ -115,7 +112,6 @@ void main() {
 
 in vec4 WorldPosition;
 in vec3 EyeRelativePos;
-in vec3 Normal;
 in vec3 Color;
 
 layout (location = 0) out vec4 gposition;

@@ -200,6 +200,12 @@ namespace kengine {
 			initShader(*shader.shader);
 		for (const auto & [e, shader] : _em.getEntities<kengine::PostProcessShaderComponent>())
 			initShader(*shader.shader);
+
+		for (const auto & [e, modelInfo] : _em.getEntities<kengine::ModelInfoComponent>())
+			for (const auto & meshInfo : modelInfo.meshes) {
+				glBindBuffer(GL_ARRAY_BUFFER, meshInfo.vertexBuffer);
+				modelInfo.vertexRegisterFunc();
+			}
 	}
 
 	void OpenGLSystem::handle(kengine::packets::VertexDataAttributeIterator p) {
@@ -210,16 +216,7 @@ namespace kengine {
 		p.init(_gBuffer.getTextureCount(), SCREEN_WIDTH, SCREEN_HEIGHT, _gBuffer.getFBO());
 		p.drawObjects = [this](GLint modelLocation) { drawObjects(modelLocation); };
 
-		for (const auto &[e, modelInfo] : _em.getEntities<ModelInfoComponent>()) {
-			for (const auto & mesh : modelInfo.meshes) {
-				glBindVertexArray(mesh.vertexArrayObject);
-				glBindBuffer(GL_ARRAY_BUFFER, mesh.vertexBuffer);
-				modelInfo.vertexRegisterFunc(p);
-			}
-		}
-
 		assert(_gBufferIterator.func != nullptr);
-
 		int texture = 0;
 		_gBufferIterator.func([&](const char * name) {
 			p.addGBufferTexture(name, texture++);
@@ -286,14 +283,8 @@ namespace kengine {
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshInfo.indexBuffer);
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, meshData.indices.nbElements * meshData.indices.elementSize, meshData.indices.data, GL_STATIC_DRAW);
 
-			if (_gBuffer.isInit()) {
-				for (const auto &[_, comp] : _em.getEntities<kengine::GBufferShaderComponent>())
-					modelLoader.vertexRegisterFunc(*comp.shader);
-				for (const auto &[_, comp] : _em.getEntities<kengine::LightingShaderComponent>())
-					modelLoader.vertexRegisterFunc(*comp.shader);
-				for (const auto &[_, comp] : _em.getEntities<kengine::PostProcessShaderComponent>())
-					modelLoader.vertexRegisterFunc(*comp.shader);
-			}
+			if (_gBuffer.isInit())
+				modelLoader.vertexRegisterFunc();
 
 			meshInfo.nbIndices = meshData.indices.nbElements;
 			meshInfo.indexType = meshData.indexType;

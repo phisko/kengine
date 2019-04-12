@@ -65,7 +65,7 @@ namespace kengine {
 
 				e += kengine::ModelLoaderComponent{
 					ExtractPolyVoxMeshData(e.id, _em),
-					[](putils::gl::Program & p) { p.setPolyvoxVertexType<PolyVoxMeshContainerComponent::MeshType::VertexType>(); }
+					[]() { putils::gl::setPolyvoxVertexType<PolyVoxMeshContainerComponent::MeshType::VertexType>(); }
 				};
 
 				poly.changed = false;

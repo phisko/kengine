@@ -3,7 +3,7 @@ namespace kengine::Shaders::src {
         const char * vert = R"(
 #version 330
 
-in vec3 position;
+layout (location = 0) in vec3 position;
 
 uniform mat4 proj;
 uniform mat4 view;

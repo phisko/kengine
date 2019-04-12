@@ -40,7 +40,7 @@ namespace kengine {
 				_em += [&p](kengine::Entity & e) {
 					e += kengine::ModelLoaderComponent{
 						loadVoxFile(p.first.c_str(), p.second.mesh, p.second.pitch, p.second.yaw, p.second.offset),
-						[](putils::gl::Program & p) { p.setPolyvoxVertexType<MeshType::VertexType>(); }
+						[]() { putils::gl::setPolyvoxVertexType<MeshType::VertexType>(); }
 					};
 					p.second.id = e.id;
 				};
@@ -76,7 +76,7 @@ namespace kengine {
 			_em += [&meshData, file](kengine::Entity & e) {
 				e += kengine::ModelLoaderComponent{
 					loadVoxFile(file.c_str(), meshData.mesh, meshData.pitch, meshData.yaw),
-					[](putils::gl::Program & p) { p.setPolyvoxVertexType<MeshType::VertexType>(); }
+					[]() { putils::gl::setPolyvoxVertexType<MeshType::VertexType>(); }
 				};
 				meshData.id = e.id;
 			};

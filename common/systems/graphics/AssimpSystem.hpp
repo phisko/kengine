@@ -214,7 +214,7 @@ namespace kengine {
 				auto & textures = e.attach<kengine::ModelInfoTexturesComponent>();
 				e += kengine::ModelLoaderComponent{
 					AssImp::loadFile(file.c_str(), modelData, textures),
-					[](putils::gl::Program & p) { p.setVertexType<AssImp::ModelEntity::Mesh::Vertex>(); }
+					[]() { putils::gl::setVertexType<AssImp::ModelEntity::Mesh::Vertex>(); }
 				};
 			};
 

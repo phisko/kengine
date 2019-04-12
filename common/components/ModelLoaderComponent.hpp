@@ -24,7 +24,7 @@ namespace kengine {
 			float yaw = 0.f;
 		};
 
-		ModelLoaderComponent(const std::function<ModelData()> & func, const std::function<void(putils::gl::Program & p)> & vertexRegisterFunc)
+		ModelLoaderComponent(const std::function<ModelData()> & func, const std::function<void()> & vertexRegisterFunc)
 			: func(func), vertexRegisterFunc(vertexRegisterFunc)
 		{}
 
@@ -35,7 +35,7 @@ namespace kengine {
 		ModelLoaderComponent & operator=(ModelLoaderComponent &&) = default;
 
 		std::function<ModelData()> func;
-		std::function<void(putils::gl::Program & p)> vertexRegisterFunc;
+		std::function<void()> vertexRegisterFunc;
 
 		pmeta_get_class_name(ModelLoaderComponent);
 	};

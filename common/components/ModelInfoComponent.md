@@ -43,7 +43,7 @@ Indicates transformations to apply in addition to that of the `Entity`'s `Transf
 ##### vertexRegisterFunc
 
 ```cpp
-std::function<void(putils::gl::Program & p)> vertexRegisterFunc;
+std::function<void()> vertexRegisterFunc;
 ```
 
-Function to register a vertex type with shaders, by calling their `setVertexType` or `setPolyVoxVertexType` functions.
+Function to set the OpenGL vertex array buffer attributes, which can be done by calling `putils::gl::setVertexType` or `putils::gl::setPolyVoxVertexType` functions.
