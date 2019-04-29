@@ -74,7 +74,6 @@ namespace kengine {
 
 				putils::gl::setUniform(this->model, model);
 
-				assert(skeleton.boneMats.size() == KENGINE_SKELETON_MAX_BONES);
 				glUniformMatrix4fv(bones, KENGINE_SKELETON_MAX_BONES, GL_FALSE, glm::value_ptr(*skeleton.boneMats.begin()));
 
 				for (unsigned int i = 0; i < modelInfo.meshes.size(); ++i) {

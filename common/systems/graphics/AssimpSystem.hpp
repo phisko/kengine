@@ -71,13 +71,6 @@ namespace kengine {
 			return tmp;
 		}
 
-		// static aiMatrix4x4 toAiMat(const glm::mat4 & mat) {
-		// 	return aiMatrix4x4(mat[0][0], mat[1][0], mat[2][0], mat[3][0],
-		// 		mat[0][1], mat[1][1], mat[2][1], mat[3][1],
-		// 		mat[0][2], mat[1][2], mat[2][2], mat[3][2],
-		// 		mat[0][3], mat[1][3], mat[2][3], mat[3][3]);
-		// }
-
 		static glm::mat4 toglmWeird(const aiMatrix4x4 & mat) {
 			glm::mat4 tmp;
 			tmp[0][0] = mat.a1;
@@ -181,55 +174,12 @@ namespace kengine {
 			return func(startValue, endValue, factor);
 		}
 
-		static unsigned int findPosition(const aiNodeAnim * animNode, float time) {
-			for (unsigned int i = 0; i < animNode->mNumPositionKeys - 1; i++)
-				if (time < (float)animNode->mPositionKeys[i + 1].mTime)
-					return i;
-			return 0;
-		}
-
 		static glm::vec3 calculateInterpolatedPosition(const AssImpSkeletonComponent::Bone & bone, float time, int currentAnim) {
-			const auto animNode = bone.animNodes[currentAnim];
-			if (animNode->mNumPositionKeys == 1)
-				return toglm(animNode->mPositionKeys[0].mValue);
-
-			const auto positionIndex = findPosition(animNode, time);
-			const auto nextPositionIndex = (positionIndex + 1);
-
-			const float deltaTime = animNode->mPositionKeys[nextPositionIndex].mTime - animNode->mPositionKeys[positionIndex].mTime;
-			const float factor = (time - (float)animNode->mPositionKeys[positionIndex].mTime) / deltaTime;
-
-			const auto startPosition = toglm(animNode->mPositionKeys[positionIndex].mValue);
-			const auto endPosition = toglm(animNode->mPositionKeys[nextPositionIndex].mValue);
-
-			return glm::mix(startPosition, endPosition, factor);
-			// return calculateInterpolatedValue(bone.animNodes[currentAnim]->mPositionKeys, bone.animNodes[currentAnim]->mNumPositionKeys, time, [](const glm::vec3 & v1, const glm::vec3 & v2, float f) { return glm::mix(v1, v2, f); });
+			return calculateInterpolatedValue(bone.animNodes[currentAnim]->mPositionKeys, bone.animNodes[currentAnim]->mNumPositionKeys, time, [](const glm::vec3 & v1, const glm::vec3 & v2, float f) { return glm::mix(v1, v2, f); });
 		}
-
-		static unsigned int findRotation(const aiNodeAnim * animNode, float time) {
-			for (unsigned int i = 0; i < animNode->mNumRotationKeys - 1; i++)
-				if (time < (float)animNode->mRotationKeys[i + 1].mTime)
-					return i;
-			return 0;
-		}
-
 
 		static glm::quat calculateInterpolatedRotation(const AssImpSkeletonComponent::Bone & bone, float time, int currentAnim) {
-			const auto animNode = bone.animNodes[currentAnim];
-			if (animNode->mNumRotationKeys == 1)
-				return toglm(animNode->mRotationKeys[0].mValue);
-
-			const auto rotationIndex = findRotation(animNode, time);
-			const auto nextRotationIndex = (rotationIndex + 1);
-
-			const float deltaTime = animNode->mRotationKeys[nextRotationIndex].mTime - animNode->mRotationKeys[rotationIndex].mTime;
-			const float factor = (time - (float)animNode->mRotationKeys[rotationIndex].mTime) / deltaTime;
-
-			const glm::quat startRotationQ = toglm(animNode->mRotationKeys[rotationIndex].mValue);
-			const glm::quat endRotationQ = toglm(animNode->mRotationKeys[nextRotationIndex].mValue);
-
-			return glm::slerp(startRotationQ, endRotationQ, factor);
-			// return calculateInterpolatedValue(bone.animNodes[currentAnim]->mRotationKeys, bone.animNodes[currentAnim]->mNumRotationKeys, time, glm::slerp<float, glm::defaultp>);
+			return calculateInterpolatedValue(bone.animNodes[currentAnim]->mRotationKeys, bone.animNodes[currentAnim]->mNumRotationKeys, time, glm::slerp<float, glm::defaultp>);
 		}
 
 		static glm::vec3 calculateInterpolatedScale(const AssImpSkeletonComponent::Bone & bone, float time, int currentAnim) {
@@ -244,13 +194,12 @@ namespace kengine {
 
 			const auto pos = calculateInterpolatedPosition(bone, time, currentAnim);
 			const auto rot = calculateInterpolatedRotation(bone, time, currentAnim);
-			// const auto scale = calculateInterpolatedScale(bone, time, currentAnim);
-			// const auto scale = glm::vec3(1.f);
+			const auto scale = calculateInterpolatedScale(bone, time, currentAnim);
 
 			glm::mat4 mat(1.f);
 			mat = glm::translate(mat, pos);
 			mat *= glm::mat4_cast(rot);
-			// mat = glm::scale(mat, scale);
+			mat = glm::scale(mat, scale);
 
 			bone.node->mTransformation = toAiMat(mat);
 		}
