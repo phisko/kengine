@@ -43,17 +43,12 @@ namespace kengine {
 				model = glm::scale(model, toVec(transform.boundingBox.size));
 
 				model = glm::rotate(model,
-					transform.pitch,
-					{ 1.f, 0.f, 0.f }
-				);
-
-				model = glm::rotate(model,
 					transform.yaw,
 					{ 0.f, 1.f, 0.f }
 				);
 
 				model = glm::rotate(model,
-					modelInfo.pitch,
+					transform.pitch,
 					{ 1.f, 0.f, 0.f }
 				);
 
@@ -62,7 +57,13 @@ namespace kengine {
 					{ 0.f, 1.f, 0.f }
 				);
 
+				model = glm::rotate(model,
+					modelInfo.pitch,
+					{ 1.f, 0.f, 0.f }
+				);
+
 				model = glm::translate(model, -modelInfo.translation); // Re-center
+				model = glm::scale(model, modelInfo.scale);
 
 				putils::gl::setUniform(this->model, model);
 
