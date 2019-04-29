@@ -21,6 +21,7 @@ namespace kengine {
 		std::vector<Mesh> meshes;
 
 		glm::vec3 translation = { 0.f, 0.f, 0.f };
+		glm::vec3 scale = { 1.f, 1.f, 1.f };
 		float pitch = 0.f;
 		float yaw = 0.f;
 
