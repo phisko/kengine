@@ -20,6 +20,7 @@ namespace kengine {
 
 			std::vector<MeshData> meshes;
 			putils::Vector3f offsetToCentre;
+			putils::Vector3f scale = { 1.f, 1.f, 1.f };
 			float pitch = 0.f;
 			float yaw = 0.f;
 		};
