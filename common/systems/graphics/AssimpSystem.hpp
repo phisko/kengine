@@ -4,19 +4,108 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#ifndef KENGINE_BONE_INFO_PER_VERTEX
+# define KENGINE_BONE_INFO_PER_VERTEX 4
+#endif
+
 #include "System.hpp"
 #include "EntityManager.hpp"
 #include "components/GraphicsComponent.hpp"
 #include "components/ModelLoaderComponent.hpp"
+#include "components/ShaderComponent.hpp"
+#include "components/ImGuiComponent.hpp"
 #include "TexturedShader.hpp"
 
 #include "file_extension.hpp"
+#include "imgui.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#ifndef KENGINE_BONE_NAME_MAX_LENGTH
+# define KENGINE_BONE_NAME_MAX_LENGTH 64
+#endif
+
+#ifndef KENGINE_BONE_MAX_PARENTS
+# define KENGINE_BONE_MAX_PARENTS 64
+#endif
+
+#ifndef KENGINE_TEXTURE_PATH_MAX_LENGTH
+# define KENGINE_TEXTURE_PATH_MAX_LENGTH 256
+#endif
+
+#ifndef KENGINE_MODEL_PATH_MAX_LENGTH
+# define KENGINE_MODEL_PATH_MAX_LENGTH 256
+#endif
+
 namespace kengine {
 	namespace AssImp {
+		static aiMatrix4x4 toAiMat(const glm::mat4 & mat) {
+			return aiMatrix4x4(mat[0][0], mat[0][1], mat[0][2], mat[0][3],
+				mat[1][0], mat[1][1], mat[1][2], mat[1][3],
+				mat[2][0], mat[2][1], mat[2][2], mat[2][3],
+				mat[3][0], mat[3][1], mat[3][2], mat[3][3]);
+		}
+
+		static glm::mat4 toglm(const aiMatrix4x4 & mat) {
+			glm::mat4 tmp;
+			tmp[0][0] = mat.a1;
+			tmp[1][0] = mat.b1;
+			tmp[2][0] = mat.c1;
+			tmp[3][0] = mat.d1;
+
+			tmp[0][1] = mat.a2;
+			tmp[1][1] = mat.b2;
+			tmp[2][1] = mat.c2;
+			tmp[3][1] = mat.d2;
+
+			tmp[0][2] = mat.a3;
+			tmp[1][2] = mat.b3;
+			tmp[2][2] = mat.c3;
+			tmp[3][2] = mat.d3;
+
+			tmp[0][3] = mat.a4;
+			tmp[1][3] = mat.b4;
+			tmp[2][3] = mat.c4;
+			tmp[3][3] = mat.d4;
+			return tmp;
+		}
+
+		// static aiMatrix4x4 toAiMat(const glm::mat4 & mat) {
+		// 	return aiMatrix4x4(mat[0][0], mat[1][0], mat[2][0], mat[3][0],
+		// 		mat[0][1], mat[1][1], mat[2][1], mat[3][1],
+		// 		mat[0][2], mat[1][2], mat[2][2], mat[3][2],
+		// 		mat[0][3], mat[1][3], mat[2][3], mat[3][3]);
+		// }
+
+		static glm::mat4 toglmWeird(const aiMatrix4x4 & mat) {
+			glm::mat4 tmp;
+			tmp[0][0] = mat.a1;
+			tmp[0][1] = mat.b1;
+			tmp[0][2] = mat.c1;
+			tmp[0][3] = mat.d1;
+
+			tmp[1][0] = mat.a2;
+			tmp[1][1] = mat.b2;
+			tmp[1][2] = mat.c2;
+			tmp[1][3] = mat.d2;
+
+			tmp[2][0] = mat.a3;
+			tmp[2][1] = mat.b3;
+			tmp[2][2] = mat.c3;
+			tmp[2][3] = mat.d3;
+
+			tmp[3][0] = mat.a4;
+			tmp[3][1] = mat.b4;
+			tmp[3][2] = mat.c4;
+			tmp[3][3] = mat.d4;
+			return tmp;
+		}
+
+		static glm::vec3 toglm(const aiVector3D & vec) { return { vec.x, vec.y, vec.z }; }
+
+		static glm::quat toglm(const aiQuaternion & quat) { return { quat.w, quat.x, quat.y, quat.z }; }
+
 		struct ModelEntity {
 			struct Mesh {
 				struct Vertex {
@@ -24,10 +113,16 @@ namespace kengine {
 					float normal[3];
 					float texCoords[2];
 
+					float boneWeights[KENGINE_BONE_INFO_PER_VERTEX] = { 0.f };
+					unsigned int boneIDs[KENGINE_BONE_INFO_PER_VERTEX];
+
 					pmeta_get_attributes(
 						pmeta_reflectible_attribute(&Vertex::position),
 						pmeta_reflectible_attribute(&Vertex::normal),
-						pmeta_reflectible_attribute(&Vertex::texCoords)
+						pmeta_reflectible_attribute(&Vertex::texCoords),
+
+						pmeta_reflectible_attribute(&Vertex::boneWeights),
+						pmeta_reflectible_attribute(&Vertex::boneIDs)
 					);
 				};
 
@@ -35,16 +130,168 @@ namespace kengine {
 				std::vector<unsigned int> indices;
 			};
 
+			Assimp::Importer importer;
 			std::vector<Mesh> meshes;
+			float pitch;
+			float yaw;
+			putils::Vector3f offset;
+			putils::Vector3f scale;
 			kengine::Entity::ID id;
 		};
 
-		static std::unordered_map<putils::string<64>, ModelEntity> models;
+		struct AssImpSkeletonComponent : kengine::not_serializable {
+			struct Bone {
+				putils::string<KENGINE_BONE_NAME_MAX_LENGTH> name;
+				aiNode * node = nullptr;
+				std::vector<const aiNodeAnim *> animNodes;
+				const Bone * parent = nullptr;
+				glm::mat4 offset;
+			};
+			putils::vector<Bone, KENGINE_SKELETON_MAX_BONES> bones;
+
+			glm::mat4 globalInverseTransform;
+
+			pmeta_get_class_name(AssImpSkeletonComponent);
+		};
+
+		template<typename T>
+		static unsigned int findPreviousIndex(T * arr, unsigned int size, float time) {
+			for (unsigned i = 0; i < size - 1; ++i) {
+				if (time < (float)arr[i + 1].mTime)
+					return i;
+			}
+			return 0;
+		}
+
+		template<typename T, typename Func>
+		static auto calculateInterpolatedValue(T * arr, unsigned int size, float time, Func func) {
+			if (size == 1)
+				return toglm(arr[0].mValue);
+
+			const auto index = findPreviousIndex(arr, size, time);
+			const auto & value = arr[index];
+			const auto & nextValue = arr[index + 1];
+
+			const auto deltaTime = (float)nextValue.mTime - (float)value.mTime;
+			const auto factor = (time - (float)value.mTime) / (float)deltaTime;
+
+			const auto startValue = toglm(value.mValue);
+			const auto endValue = toglm(nextValue.mValue);
+
+			return func(startValue, endValue, factor);
+		}
+
+		static unsigned int findPosition(const aiNodeAnim * animNode, float time) {
+			for (unsigned int i = 0; i < animNode->mNumPositionKeys - 1; i++)
+				if (time < (float)animNode->mPositionKeys[i + 1].mTime)
+					return i;
+			return 0;
+		}
+
+		static glm::vec3 calculateInterpolatedPosition(const AssImpSkeletonComponent::Bone & bone, float time, int currentAnim) {
+			const auto animNode = bone.animNodes[currentAnim];
+			if (animNode->mNumPositionKeys == 1)
+				return toglm(animNode->mPositionKeys[0].mValue);
+
+			const auto positionIndex = findPosition(animNode, time);
+			const auto nextPositionIndex = (positionIndex + 1);
+
+			const float deltaTime = animNode->mPositionKeys[nextPositionIndex].mTime - animNode->mPositionKeys[positionIndex].mTime;
+			const float factor = (time - (float)animNode->mPositionKeys[positionIndex].mTime) / deltaTime;
+
+			const auto startPosition = toglm(animNode->mPositionKeys[positionIndex].mValue);
+			const auto endPosition = toglm(animNode->mPositionKeys[nextPositionIndex].mValue);
+
+			return glm::mix(startPosition, endPosition, factor);
+			// return calculateInterpolatedValue(bone.animNodes[currentAnim]->mPositionKeys, bone.animNodes[currentAnim]->mNumPositionKeys, time, [](const glm::vec3 & v1, const glm::vec3 & v2, float f) { return glm::mix(v1, v2, f); });
+		}
+
+		static unsigned int findRotation(const aiNodeAnim * animNode, float time) {
+			for (unsigned int i = 0; i < animNode->mNumRotationKeys - 1; i++)
+				if (time < (float)animNode->mRotationKeys[i + 1].mTime)
+					return i;
+			return 0;
+		}
+
+
+		static glm::quat calculateInterpolatedRotation(const AssImpSkeletonComponent::Bone & bone, float time, int currentAnim) {
+			const auto animNode = bone.animNodes[currentAnim];
+			if (animNode->mNumRotationKeys == 1)
+				return toglm(animNode->mRotationKeys[0].mValue);
+
+			const auto rotationIndex = findRotation(animNode, time);
+			const auto nextRotationIndex = (rotationIndex + 1);
+
+			const float deltaTime = animNode->mRotationKeys[nextRotationIndex].mTime - animNode->mRotationKeys[rotationIndex].mTime;
+			const float factor = (time - (float)animNode->mRotationKeys[rotationIndex].mTime) / deltaTime;
+
+			const glm::quat startRotationQ = toglm(animNode->mRotationKeys[rotationIndex].mValue);
+			const glm::quat endRotationQ = toglm(animNode->mRotationKeys[nextRotationIndex].mValue);
+
+			return glm::slerp(startRotationQ, endRotationQ, factor);
+			// return calculateInterpolatedValue(bone.animNodes[currentAnim]->mRotationKeys, bone.animNodes[currentAnim]->mNumRotationKeys, time, glm::slerp<float, glm::defaultp>);
+		}
+
+		static glm::vec3 calculateInterpolatedScale(const AssImpSkeletonComponent::Bone & bone, float time, int currentAnim) {
+			return calculateInterpolatedValue(bone.animNodes[currentAnim]->mScalingKeys, bone.animNodes[currentAnim]->mNumScalingKeys, time, [](const glm::vec3 & v1, const glm::vec3 & v2, float f) { return glm::mix(v1, v2, f); });
+		}
+
+		static void updateKeyframeTransform(AssImpSkeletonComponent::Bone & bone, float time, int currentAnim) {
+			if (bone.animNodes[currentAnim] == nullptr) {
+				bone.node->mTransformation = toAiMat(glm::mat4(1.f));
+				return;
+			}
+
+			const auto pos = calculateInterpolatedPosition(bone, time, currentAnim);
+			const auto rot = calculateInterpolatedRotation(bone, time, currentAnim);
+			// const auto scale = calculateInterpolatedScale(bone, time, currentAnim);
+			// const auto scale = glm::vec3(1.f);
+
+			glm::mat4 mat(1.f);
+			mat = glm::translate(mat, pos);
+			mat *= glm::mat4_cast(rot);
+			// mat = glm::scale(mat, scale);
+
+			bone.node->mTransformation = toAiMat(mat);
+		}
+
+		static glm::mat4 getParentTransforms(const AssImpSkeletonComponent::Bone & bone) {
+			glm::mat4 totalTransform(1.f);
+
+			if (bone.parent == nullptr)
+				return totalTransform;
+
+			putils::vector<glm::mat4, KENGINE_BONE_MAX_PARENTS> mats;
+			// for (auto node = bone.node->mParent; node != nullptr; node = node->mParent)
+			// 	mats.push_back(toglm(node->mTransformation));
+			for (auto b = bone.parent; b != nullptr; b = b->parent)
+			   mats.push_back(toglm(b->node->mTransformation));
+
+			for (int i = mats.size() - 1; i >= 0; --i)
+				totalTransform *= mats[i];
+			return totalTransform;
+		}
+
+		static void updateBoneMats(const AssImpSkeletonComponent & skeleton, SkeletonComponent & comp) {
+			comp.boneMats.clear();
+			for (unsigned int i = 0; i < KENGINE_SKELETON_MAX_BONES; ++i) {
+				if (i >= skeleton.bones.size()) {
+					comp.boneMats.push_back(glm::mat4(1.f));
+					continue;
+				}
+
+				const auto & bone = skeleton.bones[i];
+				const glm::mat4 transform = getParentTransforms(bone) * toglm(bone.node->mTransformation);
+				comp.boneMats.push_back(skeleton.globalInverseTransform * transform * bone.offset);
+			}
+		}
+
+		static std::unordered_map<putils::string<KENGINE_MODEL_PATH_MAX_LENGTH>, ModelEntity> models;
 
 		static unsigned int textureFromFile(const char * file, const char * directory) {
-			static std::unordered_map<putils::string<64>, unsigned int> textures;
+			static std::unordered_map<putils::string<KENGINE_TEXTURE_PATH_MAX_LENGTH>, unsigned int> textures;
 
-			putils::string<64> fullPath("%s/%s", directory, file);
+			const putils::string<KENGINE_TEXTURE_PATH_MAX_LENGTH> fullPath("%s/%s", directory, file);
 
 			{
 				const auto it = textures.find(fullPath);
@@ -55,7 +302,8 @@ namespace kengine {
 			unsigned int textureID;
 			glGenTextures(1, &textureID);
 			int width, height, components;
-			unsigned char * data = stbi_load(fullPath, &width, &height, &components, 0);
+			unsigned char * data = stbi_load(fullPath.c_str(), &width, &height, &components, 0);
+			assert(data != nullptr);
 			if (data != nullptr) {
 				GLenum format;
 
@@ -122,6 +370,40 @@ namespace kengine {
 				ret.vertices.push_back(vertex);
 			}
 
+			// for each bone
+			for (unsigned int i = 0; i < mesh->mNumBones; ++i) {
+				const auto bone = mesh->mBones[i];
+				// for each weight (vertex it has an influence on)
+				for (unsigned int j = 0; j < bone->mNumWeights; ++j) {
+					const auto & weight = bone->mWeights[j];
+					auto & vertex = ret.vertices[weight.mVertexId];
+
+					// add this bone to the vertex
+#ifndef NDEBUG
+					bool found = false;
+#endif
+					for (unsigned int k = 0; k < KENGINE_BONE_INFO_PER_VERTEX; ++k)
+						if (vertex.boneWeights[k] == 0.f) {
+#ifndef NDEBUG
+							found = true;
+#endif
+							vertex.boneWeights[k] = weight.mWeight;
+							vertex.boneIDs[k] = i;
+							break;
+						}
+#ifndef NDEBUG
+					assert(found); // too many bones have info for a single vertex
+#endif
+				}
+			}
+
+			// For models with no skeleton
+			for (auto & vertex : ret.vertices)
+				if (vertex.boneWeights[0] == 0.f) {
+					vertex.boneWeights[0] = 1.f;
+					vertex.boneIDs[0] = 0;
+				}
+
 			for (unsigned int i = 0; i < mesh->mNumFaces; ++i)
 				for (unsigned int j = 0; j < mesh->mFaces[i].mNumIndices; ++j)
 					ret.indices.push_back(mesh->mFaces[i].mIndices[j]);
@@ -148,20 +430,93 @@ namespace kengine {
 				processNode(modelData, textures, directory, node->mChildren[i], scene);
 		}
 
-		auto loadFile(const char * file, ModelEntity & model, kengine::ModelInfoTexturesComponent & textures) {
-			const putils::string<64> f(file);
+		static void addNode(std::vector<aiNode *> & allNodes, aiNode * node) {
+			allNodes.push_back(node);
+			for (unsigned int i = 0; i < node->mNumChildren; ++i)
+				addNode(allNodes, node->mChildren[i]);
+		}
 
-			return [f, &model, &textures] {
-				Assimp::Importer importer;
-				const aiScene * scene = importer.ReadFile(f.c_str(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_OptimizeMeshes);
+		static const AssImpSkeletonComponent::Bone * findBone(const AssImpSkeletonComponent & skeleton, const char * name) {
+			for (const auto & bone : skeleton.bones)
+				if (bone.name == name)
+					return &bone;
+			return nullptr;
+		}
+
+		static aiNode * findNode(const std::vector<aiNode *> & allNodes, const char * name) {
+			for (const auto node : allNodes)
+				if (strcmp(node->mName.data, name) == 0)
+					return node;
+			assert(false);
+			return nullptr;
+		}
+
+		static aiNodeAnim * findNodeAnim(const std::vector<aiNodeAnim *> & allNodes, const char * name) {
+			for (const auto node : allNodes)
+				if (strcmp(node->mNodeName.data, name) == 0)
+					return node;
+			return nullptr;
+		}
+
+		static void addAnim(aiAnimation * aiAnim, AssImpSkeletonComponent & skeleton, SkeletonInfoComponent & skeletonInfo) {
+			SkeletonInfoComponent::Anim anim;
+			anim.name = aiAnim->mName.data;
+			anim.totalTime = (float)(aiAnim->mDuration / aiAnim->mTicksPerSecond != 0 ? aiAnim->mTicksPerSecond : 25);
+			skeletonInfo.allAnims.push_back(anim);
+
+			std::vector<aiNodeAnim *> allNodeAnims;
+			for (unsigned int i = 0; i < aiAnim->mNumChannels; ++i)
+				allNodeAnims.push_back(aiAnim->mChannels[i]);
+
+			for (auto & bone : skeleton.bones)
+				bone.animNodes.push_back(findNodeAnim(allNodeAnims, bone.name));
+		}
+
+		auto loadFile(const char * file, kengine::EntityManager & em) {
+			const putils::string<KENGINE_MODEL_PATH_MAX_LENGTH> f(file);
+
+			return [f, &em] {
+				auto & model = models[f];
+
+				auto & e = em.getEntity(model.id);
+				auto & textures = e.attach<kengine::ModelInfoTexturesComponent>();
+				auto & skeleton = e.attach<AssImp::AssImpSkeletonComponent>();
+				auto & skeletonInfo = e.attach<SkeletonInfoComponent>();
+
+				const auto scene = model.importer.ReadFile(f.c_str(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals /*| aiProcess_OptimizeMeshes*/ | aiProcess_JoinIdenticalVertices);
 				if (scene == nullptr || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || scene->mRootNode == nullptr) {
-					std::cerr << importer.GetErrorString() << '\n';
+					std::cerr << model.importer.GetErrorString() << '\n';
 					assert(false);
 				}
 
 				const auto dir = putils::get_directory<64>(f.begin());
-
 				processNode(model, textures, dir.c_str(), scene->mRootNode, scene);
+
+				std::vector<aiNode *> allNodes;
+				addNode(allNodes, scene->mRootNode);
+
+				for (unsigned int i = 0; i < scene->mNumMeshes; ++i) {
+					const auto mesh = scene->mMeshes[i];
+
+					for (unsigned int i = 0; i < mesh->mNumBones; ++i) {
+						const auto aiBone = mesh->mBones[i];
+						AssImpSkeletonComponent::Bone bone;
+						bone.name = aiBone->mName.data;
+						bone.node = findNode(allNodes, bone.name);
+						bone.offset = toglmWeird(aiBone->mOffsetMatrix);
+						skeleton.bones.push_back(bone);
+					}
+				}
+
+				for (auto & bone : skeleton.bones)
+					bone.parent = findBone(skeleton, bone.node->mParent->mName.data);
+
+				skeleton.globalInverseTransform = glm::inverse(toglm(scene->mRootNode->mTransformation));
+
+				for (unsigned int i = 0; i < scene->mNumAnimations; ++i) {
+					const auto aiAnim = scene->mAnimations[i];
+					addAnim(aiAnim, skeleton, skeletonInfo);
+				}
 
 				kengine::ModelLoaderComponent::ModelData ret;
 				for (const auto & mesh : model.meshes) {
@@ -171,6 +526,12 @@ namespace kengine {
 					meshData.indexType = GL_UNSIGNED_INT;
 					ret.meshes.push_back(meshData);
 				}
+
+				ret.pitch = model.pitch;
+				ret.yaw = model.yaw;
+				ret.offsetToCentre = model.offset;
+				ret.scale = model.scale;
+
 				return ret;
 			};
 		}
@@ -185,6 +546,28 @@ namespace kengine {
 		void onLoad(const char *) noexcept override {
 			_em += [this](kengine::Entity & e) {
 				e += kengine::makeGBufferShaderComponent<TexturedShader>(_em);
+			};
+
+			_em += [this](kengine::Entity & e) {
+				e += ImGuiComponent([this] {
+					if (ImGui::Begin("Animations")) {
+						for (auto & [obj, model, skeleton] : _em.getEntities<ModelComponent, SkeletonComponent>()) {
+							const auto & modelInfo = _em.getEntity(model.modelInfo);
+							const auto & skeletonInfo = modelInfo.get<SkeletonInfoComponent>();
+							if (skeletonInfo.allAnims.empty())
+								continue;
+
+							const char * tab[64];
+							const auto minLength = std::min(skeletonInfo.allAnims.size(), lengthof(tab));
+							for (unsigned int i = 0; i < minLength; ++i)
+								tab[i] = skeletonInfo.allAnims[i].name.data();
+							int currentAnim = skeleton.currentAnim;
+							ImGui::Combo(putils::string<64>("%d", obj.id), &currentAnim, tab, minLength);
+							skeleton.currentAnim = currentAnim;
+						}
+					}
+					ImGui::End();
+				});
 			};
 		}
 
@@ -201,24 +584,52 @@ namespace kengine {
 				return;
 
 			p.e += TexturedModelComponent{};
+			p.e += SkeletonComponent{};
 
-			const auto it = AssImp::models.find(file);
+			const auto it = AssImp::models.find(file.c_str());
 			if (it != AssImp::models.end()) {
 				p.e += kengine::ModelComponent{ it->second.id };
 				return;
 			}
 
-			auto & modelData = AssImp::models[file];
-			_em += [&modelData, file](kengine::Entity & e) {
+			auto & modelData = AssImp::models[file.c_str()];
+			modelData.pitch = layer.pitch;
+			modelData.yaw = layer.yaw;
+			modelData.offset = layer.boundingBox.topLeft;
+			modelData.scale = layer.boundingBox.size;
+			_em += [&](kengine::Entity & e) {
 				modelData.id = e.id;
-				auto & textures = e.attach<kengine::ModelInfoTexturesComponent>();
 				e += kengine::ModelLoaderComponent{
-					AssImp::loadFile(file.c_str(), modelData, textures),
+					AssImp::loadFile(file.c_str(), _em),
 					[]() { putils::gl::setVertexType<AssImp::ModelEntity::Mesh::Vertex>(); }
 				};
 			};
 
 			p.e += kengine::ModelComponent{ modelData.id };
+		}
+
+		void execute() override {
+			for (auto & [e, model, skeleton] : _em.getEntities<ModelComponent, SkeletonComponent>()) {
+				auto & modelInfo = _em.getEntity(model.modelInfo);
+				if (!modelInfo.has<AssImp::AssImpSkeletonComponent>())
+					continue;
+
+				auto & assimp = modelInfo.get<AssImp::AssImpSkeletonComponent>();
+				const auto & skeletonInfo = modelInfo.get<SkeletonInfoComponent>();
+
+				if (skeleton.currentAnim >= skeletonInfo.allAnims.size()) {
+					for (auto & bone : assimp.bones)
+						bone.node->mTransformation = AssImp::toAiMat(glm::mat4(1.f));
+				}
+				else {
+					for (auto & bone : assimp.bones)
+						updateKeyframeTransform(bone, skeleton.currentTime, skeleton.currentAnim);
+					skeleton.currentTime += time.getDeltaTime().count();
+					skeleton.currentTime = fmodf(skeleton.currentTime, skeletonInfo.allAnims[skeleton.currentAnim].totalTime);
+				}
+
+				updateBoneMats(assimp, skeleton);
+			}
 		}
 
 	private:

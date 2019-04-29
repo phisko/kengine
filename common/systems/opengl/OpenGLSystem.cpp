@@ -17,6 +17,7 @@
 #include "components/TransformComponent.hpp"
 #include "components/CameraComponent.hpp"
 #include "components/ShaderComponent.hpp"
+#include "components/TexturedModelComponent.hpp"
 
 #include "OpenGLSystem.hpp"
 #include "Controllers.hpp"
@@ -266,6 +267,7 @@ namespace kengine {
 
 		auto & modelInfo = e.attach<ModelInfoComponent>();
 		modelInfo.translation = toVec(modelData.offsetToCentre);
+		modelInfo.scale = toVec(modelData.scale);
 		modelInfo.pitch = modelData.pitch;
 		modelInfo.yaw = modelData.yaw;
 		modelInfo.vertexRegisterFunc = modelLoader.vertexRegisterFunc;
@@ -429,6 +431,9 @@ namespace kengine {
 
 	void OpenGLSystem::drawObjects(GLint modelMatrixLocation) const noexcept {
 		for (const auto &[e, model, transform] : _em.getEntities<kengine::ModelComponent, kengine::TransformComponent3f>()) {
+			if (e.has<SkeletonComponent>())
+				continue; // For now I don't support shadows from animated models
+
 			const auto & modelInfoEntity = _em.getEntity(model.modelInfo);
 			if (!modelInfoEntity.has<ModelInfoComponent>())
 				continue;
@@ -440,17 +445,12 @@ namespace kengine {
 			model = glm::scale(model, toVec(transform.boundingBox.size));
 
 			model = glm::rotate(model,
-				transform.pitch,
-				{ 1.f, 0.f, 0.f }
-			);
-
-			model = glm::rotate(model,
 				transform.yaw,
 				{ 0.f, 1.f, 0.f }
 			);
 
 			model = glm::rotate(model,
-				modelInfo.pitch,
+				transform.pitch,
 				{ 1.f, 0.f, 0.f }
 			);
 
@@ -459,7 +459,13 @@ namespace kengine {
 				{ 0.f, 1.f, 0.f }
 			);
 
+			model = glm::rotate(model,
+				modelInfo.pitch,
+				{ 1.f, 0.f, 0.f }
+			);
+
 			model = glm::translate(model, -modelInfo.translation); // Re-center
+			model = glm::scale(model, modelInfo.scale);
 
 			putils::gl::setUniform(modelMatrixLocation, model);
 

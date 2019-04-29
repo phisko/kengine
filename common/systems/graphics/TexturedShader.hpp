@@ -1,5 +1,8 @@
 #pragma once
 
+#define MACRO_AS_STRING_IMPL(macro) #macro
+#define MACRO_AS_STRING(macro) MACRO_AS_STRING_IMPL(macro)
+
 #include "components/TransformComponent.hpp"
 #include "components/ModelComponent.hpp"
 #include "components/TexturedModelComponent.hpp"
@@ -34,7 +37,7 @@ namespace kengine {
 			putils::gl::setUniform(this->view, view);
 			putils::gl::setUniform(this->proj, proj);
 
-			for (const auto &[e, textured, modelComp, transform] : _em.getEntities<TexturedModelComponent, kengine::ModelComponent, kengine::TransformComponent3f>()) {
+			for (const auto &[e, textured, modelComp, transform, skeleton] : _em.getEntities<TexturedModelComponent, kengine::ModelComponent, kengine::TransformComponent3f, SkeletonComponent>()) {
 				const auto & modelInfoEntity = _em.getEntity(modelComp.modelInfo);
 				if (!modelInfoEntity.has<kengine::ModelInfoComponent>())
 					continue;
@@ -47,17 +50,12 @@ namespace kengine {
 				model = glm::scale(model, toVec(transform.boundingBox.size));
 
 				model = glm::rotate(model,
-					transform.pitch,
-					{ 1.f, 0.f, 0.f }
-				);
-
-				model = glm::rotate(model,
 					transform.yaw,
 					{ 0.f, 1.f, 0.f }
 				);
 
 				model = glm::rotate(model,
-					modelInfo.pitch,
+					transform.pitch,
 					{ 1.f, 0.f, 0.f }
 				);
 
@@ -66,9 +64,18 @@ namespace kengine {
 					{ 0.f, 1.f, 0.f }
 				);
 
+				model = glm::rotate(model,
+					modelInfo.pitch,
+					{ 1.f, 0.f, 0.f }
+				);
+
 				model = glm::translate(model, -modelInfo.translation); // Re-center
+				model = glm::scale(model, modelInfo.scale);
 
 				putils::gl::setUniform(this->model, model);
+
+				assert(skeleton.boneMats.size() == KENGINE_SKELETON_MAX_BONES);
+				glUniformMatrix4fv(bones, KENGINE_SKELETON_MAX_BONES, GL_FALSE, glm::value_ptr(*skeleton.boneMats.begin()));
 
 				for (unsigned int i = 0; i < modelInfo.meshes.size(); ++i) {
 					const auto & meshInfo = modelInfo.meshes[i];
@@ -99,6 +106,7 @@ namespace kengine {
 		GLint proj;
 		GLint texture_diffuse;
 		GLint texture_specular;
+		GLint bones;
 
 		pmeta_get_attributes(
 			pmeta_reflectible_attribute(&TexturedShader::model),
@@ -106,7 +114,9 @@ namespace kengine {
 			pmeta_reflectible_attribute(&TexturedShader::proj),
 
 			pmeta_reflectible_attribute(&TexturedShader::texture_diffuse),
-			pmeta_reflectible_attribute(&TexturedShader::texture_specular)
+			pmeta_reflectible_attribute(&TexturedShader::texture_specular),
+
+			pmeta_reflectible_attribute(&TexturedShader::bones)
 		);
 
 	private:
@@ -115,25 +125,37 @@ namespace kengine {
 		size_t _specularTextureID;
 
 	private:
+		static_assert(KENGINE_BONE_INFO_PER_VERTEX == 4, "This shader assumes only 4 bones per vertex");
+
 		static inline const char * vert = R"(
 #version 330
 
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec2 texCoords;
+layout (location = 3) in vec4 boneWeights;
+layout (location = 4) in ivec4 boneIDs;
 
 uniform mat4 proj;
 uniform mat4 view;
 uniform mat4 model;
+
+const int MAX_BONES = )" MACRO_AS_STRING(KENGINE_SKELETON_MAX_BONES) R"(;
+uniform mat4 bones[MAX_BONES];
 
 out vec4 WorldPosition;
 out vec3 Normal;
 out vec2 TexCoords;
 
 void main() {
-	WorldPosition = model * vec4(position, 1.0);
-	TexCoords = texCoords;
+	mat4 boneMatrix = bones[boneIDs[0]] * boneWeights[0];
+	boneMatrix += bones[boneIDs[1]] * boneWeights[1];
+	boneMatrix += bones[boneIDs[2]] * boneWeights[2];
+	boneMatrix += bones[boneIDs[3]] * boneWeights[3];
+
+	WorldPosition = model * boneMatrix * vec4(position, 1.0);
 	Normal = normal;
+	TexCoords = texCoords;
 
 	gl_Position = proj * view * WorldPosition;
 }
