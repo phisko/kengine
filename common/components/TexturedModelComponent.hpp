@@ -16,6 +16,7 @@ struct TexturedModelComponent : kengine::not_serializable {
 struct SkeletonComponent : kengine::not_serializable {
 	unsigned int currentAnim = 0; // Index into SkeletonInfoComponent.allAnims
 	float currentTime = 0.f;
+	float speed = 1.f;
 
 	struct Mesh {
 		putils::vector<glm::mat4, KENGINE_SKELETON_MAX_BONES> boneMats;

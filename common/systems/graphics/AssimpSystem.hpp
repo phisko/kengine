@@ -473,7 +473,11 @@ namespace kengine {
 							for (unsigned int i = 0; i < minLength; ++i)
 								tab[i] = skeletonInfo.allAnims[i].name.data();
 							int currentAnim = skeleton.currentAnim;
+							ImGui::Columns(2);
 							ImGui::Combo(putils::string<64>("%d", obj.id), &currentAnim, tab, minLength);
+							ImGui::NextColumn();
+							ImGui::InputFloat(putils::string<64>("Speed##%d", obj.id), &skeleton.speed);
+							ImGui::Columns();
 							skeleton.currentAnim = currentAnim;
 						}
 					}
@@ -520,6 +524,8 @@ namespace kengine {
 		}
 
 		void execute() override {
+			const auto deltaTime = time.getDeltaTime().count();
+
 			for (auto & [e, model, skeleton] : _em.getEntities<ModelComponent, SkeletonComponent>()) {
 				auto & modelInfo = _em.getEntity(model.modelInfo);
 				if (!modelInfo.has<AssImp::AssImpSkeletonComponent>())
@@ -545,7 +551,7 @@ namespace kengine {
 						for (auto & bone : input.bones)
 							updateKeyframeTransform(bone, skeleton.currentTime * currentAnim.ticksPerSecond, skeleton.currentAnim);
 
-						skeleton.currentTime += time.getDeltaTime().count();
+						skeleton.currentTime += deltaTime * skeleton.speed;
 						skeleton.currentTime = fmodf(skeleton.currentTime, currentAnim.totalTime);
 					}
 
