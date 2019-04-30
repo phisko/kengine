@@ -7,6 +7,7 @@
 #include "components/ModelComponent.hpp"
 #include "components/TexturedModelComponent.hpp"
 #include "components/ModelInfoComponent.hpp"
+#include "components/SkeletonComponent.hpp"
 #include "opengl/Program.hpp"
 
 namespace kengine {
@@ -73,6 +74,17 @@ namespace kengine {
 				model = glm::scale(model, modelInfo.scale);
 
 				putils::gl::setUniform(this->model, model);
+
+				if (skeleton.meshes.empty()) {
+					static putils::vector<glm::mat4, KENGINE_SKELETON_MAX_BONES> defaultMats;
+					static bool first = true;
+					if (first) {
+						for (unsigned int i = 0; i < KENGINE_SKELETON_MAX_BONES; ++i)
+							defaultMats.push_back(glm::mat4(1.f));
+						first = false;
+					}
+					glUniformMatrix4fv(bones, KENGINE_SKELETON_MAX_BONES, GL_FALSE, glm::value_ptr(*defaultMats.begin()));
+				}
 
 				for (unsigned int i = 0; i < modelInfo.meshes.size(); ++i) {
 					const auto & meshInfo = modelInfo.meshes[i];

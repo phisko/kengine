@@ -14,6 +14,7 @@
 #include "components/ModelLoaderComponent.hpp"
 #include "components/ShaderComponent.hpp"
 #include "components/ImGuiComponent.hpp"
+#include "components/AnimationComponent.hpp"
 #include "TexturedShader.hpp"
 
 #include "file_extension.hpp"
@@ -45,10 +46,6 @@ namespace kengine {
 				mat[0][1], mat[1][1], mat[2][1], mat[3][1],
 				mat[0][2], mat[1][2], mat[2][2], mat[3][2],
 				mat[0][3], mat[1][3], mat[2][3], mat[3][3]);
-			// return aiMatrix4x4(mat[0][0], mat[0][1], mat[0][2], mat[0][3],
-			// 	mat[1][0], mat[1][1], mat[1][2], mat[1][3],
-			// 	mat[2][0], mat[2][1], mat[2][2], mat[2][3],
-			// 	mat[3][0], mat[3][1], mat[3][2], mat[3][3]);
 		}
 
 		static glm::mat4 toglm(const aiMatrix4x4 & mat) {
@@ -368,12 +365,12 @@ namespace kengine {
 			return nullptr;
 		}
 
-		static void addAnim(aiAnimation * aiAnim, AssImpSkeletonComponent & skeleton, SkeletonInfoComponent & skeletonInfo) {
-			SkeletonInfoComponent::Anim anim;
+		static void addAnim(aiAnimation * aiAnim, AssImpSkeletonComponent & skeleton, AnimListComponent & animList) {
+			AnimListComponent::Anim anim;
 			anim.name = aiAnim->mName.data;
 			anim.ticksPerSecond = (float)(aiAnim->mTicksPerSecond != 0 ? aiAnim->mTicksPerSecond : 25.0);
 			anim.totalTime = (float)aiAnim->mDuration / anim.ticksPerSecond;
-			skeletonInfo.allAnims.push_back(anim);
+			animList.allAnims.push_back(anim);
 
 			std::vector<aiNodeAnim *> allNodeAnims;
 			for (unsigned int i = 0; i < aiAnim->mNumChannels; ++i)
@@ -393,7 +390,7 @@ namespace kengine {
 				auto & e = em.getEntity(model.id);
 				auto & textures = e.attach<kengine::ModelInfoTexturesComponent>();
 				auto & skeleton = e.attach<AssImp::AssImpSkeletonComponent>();
-				auto & skeletonInfo = e.attach<SkeletonInfoComponent>();
+				auto & animList = e.attach<AnimListComponent>();
 
 				const auto scene = model.importer.ReadFile(f.c_str(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals /*| aiProcess_OptimizeMeshes*/ | aiProcess_JoinIdenticalVertices);
 				if (scene == nullptr || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || scene->mRootNode == nullptr) {
@@ -426,7 +423,7 @@ namespace kengine {
 
 				for (unsigned int i = 0; i < scene->mNumAnimations; ++i) {
 					const auto aiAnim = scene->mAnimations[i];
-					addAnim(aiAnim, skeleton, skeletonInfo);
+					addAnim(aiAnim, skeleton, animList);
 				}
 
 				kengine::ModelLoaderComponent::ModelData ret;
@@ -462,23 +459,23 @@ namespace kengine {
 			_em += [this](kengine::Entity & e) {
 				e += ImGuiComponent([this] {
 					if (ImGui::Begin("Animations")) {
-						for (auto & [obj, model, skeleton] : _em.getEntities<ModelComponent, SkeletonComponent>()) {
+						for (auto & [obj, model, anim] : _em.getEntities<ModelComponent, AnimationComponent>()) {
 							const auto & modelInfo = _em.getEntity(model.modelInfo);
-							const auto & skeletonInfo = modelInfo.get<SkeletonInfoComponent>();
-							if (skeletonInfo.allAnims.empty())
+							const auto & animList = modelInfo.get<AnimListComponent>();
+							if (animList.allAnims.empty())
 								continue;
 
 							const char * tab[64];
-							const auto minLength = std::min(skeletonInfo.allAnims.size(), lengthof(tab));
+							const auto minLength = std::min(animList.allAnims.size(), lengthof(tab));
 							for (unsigned int i = 0; i < minLength; ++i)
-								tab[i] = skeletonInfo.allAnims[i].name.data();
-							int currentAnim = skeleton.currentAnim;
+								tab[i] = animList.allAnims[i].name.data();
+							int currentAnim = anim.currentAnim;
 							ImGui::Columns(2);
 							ImGui::Combo(putils::string<64>("%d", obj.id), &currentAnim, tab, minLength);
 							ImGui::NextColumn();
-							ImGui::InputFloat(putils::string<64>("Speed##%d", obj.id), &skeleton.speed);
+							ImGui::InputFloat(putils::string<64>("Speed##%d", obj.id), &anim.speed);
 							ImGui::Columns();
-							skeleton.currentAnim = currentAnim;
+							anim.currentAnim = currentAnim;
 						}
 					}
 					ImGui::End();
@@ -526,13 +523,13 @@ namespace kengine {
 		void execute() override {
 			const auto deltaTime = time.getDeltaTime().count();
 
-			for (auto & [e, model, skeleton] : _em.getEntities<ModelComponent, SkeletonComponent>()) {
+			for (auto & [e, model, skeleton, anim] : _em.getEntities<ModelComponent, SkeletonComponent, AnimationComponent>()) {
 				auto & modelInfo = _em.getEntity(model.modelInfo);
 				if (!modelInfo.has<AssImp::AssImpSkeletonComponent>())
 					continue;
 
 				auto & assimp = modelInfo.get<AssImp::AssImpSkeletonComponent>();
-				const auto & skeletonInfo = modelInfo.get<SkeletonInfoComponent>();
+				const auto & animList = modelInfo.get<AnimListComponent>();
 
 				if (skeleton.meshes.empty())
 					skeleton.meshes.resize(assimp.meshes.size());
@@ -541,18 +538,18 @@ namespace kengine {
 					auto & input = assimp.meshes[i];
 					auto & output = skeleton.meshes[i];
 
-					if (skeleton.currentAnim >= skeletonInfo.allAnims.size()) {
+					if (anim.currentAnim >= animList.allAnims.size()) {
 						for (auto & bone : input.bones)
 							bone.node->mTransformation = AssImp::toAiMat(glm::mat4(1.f));
 					}
 					else {
-						const auto & currentAnim = skeletonInfo.allAnims[skeleton.currentAnim];
+						const auto & currentAnim = animList.allAnims[anim.currentAnim];
 
 						for (auto & bone : input.bones)
-							updateKeyframeTransform(bone, skeleton.currentTime * currentAnim.ticksPerSecond, skeleton.currentAnim);
+							updateKeyframeTransform(bone, anim.currentTime * currentAnim.ticksPerSecond, anim.currentAnim);
 
-						skeleton.currentTime += deltaTime * skeleton.speed;
-						skeleton.currentTime = fmodf(skeleton.currentTime, currentAnim.totalTime);
+						anim.currentTime += deltaTime * anim.speed;
+						anim.currentTime = fmodf(anim.currentTime, currentAnim.totalTime);
 					}
 
 					updateBoneMats(input, output, assimp.globalInverseTransform);

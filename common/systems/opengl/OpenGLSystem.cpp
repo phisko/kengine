@@ -17,7 +17,7 @@
 #include "components/TransformComponent.hpp"
 #include "components/CameraComponent.hpp"
 #include "components/ShaderComponent.hpp"
-#include "components/TexturedModelComponent.hpp"
+#include "components/SkeletonComponent.hpp"
 
 #include "OpenGLSystem.hpp"
 #include "Controllers.hpp"
