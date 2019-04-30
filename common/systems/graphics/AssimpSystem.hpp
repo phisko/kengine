@@ -41,58 +41,22 @@
 namespace kengine {
 	namespace AssImp {
 		static aiMatrix4x4 toAiMat(const glm::mat4 & mat) {
-			return aiMatrix4x4(mat[0][0], mat[0][1], mat[0][2], mat[0][3],
-				mat[1][0], mat[1][1], mat[1][2], mat[1][3],
-				mat[2][0], mat[2][1], mat[2][2], mat[2][3],
-				mat[3][0], mat[3][1], mat[3][2], mat[3][3]);
+			return aiMatrix4x4(mat[0][0], mat[1][0], mat[2][0], mat[3][0],
+				mat[0][1], mat[1][1], mat[2][1], mat[3][1],
+				mat[0][2], mat[1][2], mat[2][2], mat[3][2],
+				mat[0][3], mat[1][3], mat[2][3], mat[3][3]);
+			// return aiMatrix4x4(mat[0][0], mat[0][1], mat[0][2], mat[0][3],
+			// 	mat[1][0], mat[1][1], mat[1][2], mat[1][3],
+			// 	mat[2][0], mat[2][1], mat[2][2], mat[2][3],
+			// 	mat[3][0], mat[3][1], mat[3][2], mat[3][3]);
 		}
 
 		static glm::mat4 toglm(const aiMatrix4x4 & mat) {
-			glm::mat4 tmp;
-			tmp[0][0] = mat.a1;
-			tmp[1][0] = mat.b1;
-			tmp[2][0] = mat.c1;
-			tmp[3][0] = mat.d1;
-
-			tmp[0][1] = mat.a2;
-			tmp[1][1] = mat.b2;
-			tmp[2][1] = mat.c2;
-			tmp[3][1] = mat.d2;
-
-			tmp[0][2] = mat.a3;
-			tmp[1][2] = mat.b3;
-			tmp[2][2] = mat.c3;
-			tmp[3][2] = mat.d3;
-
-			tmp[0][3] = mat.a4;
-			tmp[1][3] = mat.b4;
-			tmp[2][3] = mat.c4;
-			tmp[3][3] = mat.d4;
-			return tmp;
+			return glm::make_mat4(&mat.a1);
 		}
 
 		static glm::mat4 toglmWeird(const aiMatrix4x4 & mat) {
-			glm::mat4 tmp;
-			tmp[0][0] = mat.a1;
-			tmp[0][1] = mat.b1;
-			tmp[0][2] = mat.c1;
-			tmp[0][3] = mat.d1;
-
-			tmp[1][0] = mat.a2;
-			tmp[1][1] = mat.b2;
-			tmp[1][2] = mat.c2;
-			tmp[1][3] = mat.d2;
-
-			tmp[2][0] = mat.a3;
-			tmp[2][1] = mat.b3;
-			tmp[2][2] = mat.c3;
-			tmp[2][3] = mat.d3;
-
-			tmp[3][0] = mat.a4;
-			tmp[3][1] = mat.b4;
-			tmp[3][2] = mat.c4;
-			tmp[3][3] = mat.d4;
-			return tmp;
+			return glm::transpose(toglm(mat));
 		}
 
 		static glm::vec3 toglm(const aiVector3D & vec) { return { vec.x, vec.y, vec.z }; }
@@ -107,7 +71,7 @@ namespace kengine {
 					float texCoords[2];
 
 					float boneWeights[KENGINE_BONE_INFO_PER_VERTEX] = { 0.f };
-					unsigned int boneIDs[KENGINE_BONE_INFO_PER_VERTEX];
+					unsigned int boneIDs[KENGINE_BONE_INFO_PER_VERTEX] = { 0 };
 
 					pmeta_get_attributes(
 						pmeta_reflectible_attribute(&Vertex::position),
@@ -133,15 +97,17 @@ namespace kengine {
 		};
 
 		struct AssImpSkeletonComponent : kengine::not_serializable {
-			struct Bone {
-				putils::string<KENGINE_BONE_NAME_MAX_LENGTH> name;
-				aiNode * node = nullptr;
-				std::vector<const aiNodeAnim *> animNodes;
-				const Bone * parent = nullptr;
-				glm::mat4 offset;
+			struct Mesh {
+				struct Bone {
+					putils::string<KENGINE_BONE_NAME_MAX_LENGTH> name;
+					aiNode * node = nullptr;
+					std::vector<const aiNodeAnim *> animNodes;
+					glm::mat4 offset;
+				};
+				putils::vector<Bone, KENGINE_SKELETON_MAX_BONES> bones;
 			};
-			putils::vector<Bone, KENGINE_SKELETON_MAX_BONES> bones;
 
+			std::vector<Mesh> meshes;
 			glm::mat4 globalInverseTransform;
 
 			pmeta_get_class_name(AssImpSkeletonComponent);
@@ -174,19 +140,19 @@ namespace kengine {
 			return func(startValue, endValue, factor);
 		}
 
-		static glm::vec3 calculateInterpolatedPosition(const AssImpSkeletonComponent::Bone & bone, float time, int currentAnim) {
+		static glm::vec3 calculateInterpolatedPosition(const AssImpSkeletonComponent::Mesh::Bone & bone, float time, int currentAnim) {
 			return calculateInterpolatedValue(bone.animNodes[currentAnim]->mPositionKeys, bone.animNodes[currentAnim]->mNumPositionKeys, time, [](const glm::vec3 & v1, const glm::vec3 & v2, float f) { return glm::mix(v1, v2, f); });
 		}
 
-		static glm::quat calculateInterpolatedRotation(const AssImpSkeletonComponent::Bone & bone, float time, int currentAnim) {
+		static glm::quat calculateInterpolatedRotation(const AssImpSkeletonComponent::Mesh::Bone & bone, float time, int currentAnim) {
 			return calculateInterpolatedValue(bone.animNodes[currentAnim]->mRotationKeys, bone.animNodes[currentAnim]->mNumRotationKeys, time, glm::slerp<float, glm::defaultp>);
 		}
 
-		static glm::vec3 calculateInterpolatedScale(const AssImpSkeletonComponent::Bone & bone, float time, int currentAnim) {
+		static glm::vec3 calculateInterpolatedScale(const AssImpSkeletonComponent::Mesh::Bone & bone, float time, int currentAnim) {
 			return calculateInterpolatedValue(bone.animNodes[currentAnim]->mScalingKeys, bone.animNodes[currentAnim]->mNumScalingKeys, time, [](const glm::vec3 & v1, const glm::vec3 & v2, float f) { return glm::mix(v1, v2, f); });
 		}
 
-		static void updateKeyframeTransform(AssImpSkeletonComponent::Bone & bone, float time, int currentAnim) {
+		static void updateKeyframeTransform(AssImpSkeletonComponent::Mesh::Bone & bone, float time, int currentAnim) {
 			if (bone.animNodes[currentAnim] == nullptr) {
 				bone.node->mTransformation = toAiMat(glm::mat4(1.f));
 				return;
@@ -204,24 +170,19 @@ namespace kengine {
 			bone.node->mTransformation = toAiMat(mat);
 		}
 
-		static glm::mat4 getParentTransforms(const AssImpSkeletonComponent::Bone & bone) {
+		static glm::mat4 getTransformWithParents(const AssImpSkeletonComponent::Mesh::Bone & bone) {
 			glm::mat4 totalTransform(1.f);
 
-			if (bone.parent == nullptr)
-				return totalTransform;
-
 			putils::vector<glm::mat4, KENGINE_BONE_MAX_PARENTS> mats;
-			// for (auto node = bone.node->mParent; node != nullptr; node = node->mParent)
-			// 	mats.push_back(toglm(node->mTransformation));
-			for (auto b = bone.parent; b != nullptr; b = b->parent)
-			   mats.push_back(toglm(b->node->mTransformation));
+			for (auto node = bone.node; node != nullptr; node = node->mParent)
+				mats.push_back(toglmWeird(node->mTransformation));
 
 			for (int i = mats.size() - 1; i >= 0; --i)
 				totalTransform *= mats[i];
 			return totalTransform;
 		}
 
-		static void updateBoneMats(const AssImpSkeletonComponent & skeleton, SkeletonComponent & comp) {
+		static void updateBoneMats(const AssImpSkeletonComponent::Mesh & skeleton, SkeletonComponent::Mesh & comp, const glm::mat4 & globalInverseTransform) {
 			comp.boneMats.clear();
 			for (unsigned int i = 0; i < KENGINE_SKELETON_MAX_BONES; ++i) {
 				if (i >= skeleton.bones.size()) {
@@ -230,8 +191,8 @@ namespace kengine {
 				}
 
 				const auto & bone = skeleton.bones[i];
-				const glm::mat4 transform = getParentTransforms(bone) * toglm(bone.node->mTransformation);
-				comp.boneMats.push_back(skeleton.globalInverseTransform * transform * bone.offset);
+				const glm::mat4 transform = getTransformWithParents(bone);
+				comp.boneMats.push_back(/*globalInverseTransform **/ transform * bone.offset);
 			}
 		}
 
@@ -385,7 +346,7 @@ namespace kengine {
 				addNode(allNodes, node->mChildren[i]);
 		}
 
-		static const AssImpSkeletonComponent::Bone * findBone(const AssImpSkeletonComponent & skeleton, const char * name) {
+		static const AssImpSkeletonComponent::Mesh::Bone * findBone(const AssImpSkeletonComponent::Mesh & skeleton, const char * name) {
 			for (const auto & bone : skeleton.bones)
 				if (bone.name == name)
 					return &bone;
@@ -410,15 +371,17 @@ namespace kengine {
 		static void addAnim(aiAnimation * aiAnim, AssImpSkeletonComponent & skeleton, SkeletonInfoComponent & skeletonInfo) {
 			SkeletonInfoComponent::Anim anim;
 			anim.name = aiAnim->mName.data;
-			anim.totalTime = (float)(aiAnim->mDuration / aiAnim->mTicksPerSecond != 0 ? aiAnim->mTicksPerSecond : 25);
+			anim.ticksPerSecond = (float)(aiAnim->mTicksPerSecond != 0 ? aiAnim->mTicksPerSecond : 25.0);
+			anim.totalTime = (float)aiAnim->mDuration / anim.ticksPerSecond;
 			skeletonInfo.allAnims.push_back(anim);
 
 			std::vector<aiNodeAnim *> allNodeAnims;
 			for (unsigned int i = 0; i < aiAnim->mNumChannels; ++i)
 				allNodeAnims.push_back(aiAnim->mChannels[i]);
 
-			for (auto & bone : skeleton.bones)
-				bone.animNodes.push_back(findNodeAnim(allNodeAnims, bone.name));
+			for (auto & mesh : skeleton.meshes)
+				for (auto & bone : mesh.bones)
+					bone.animNodes.push_back(findNodeAnim(allNodeAnims, bone.name));
 		}
 
 		auto loadFile(const char * file, kengine::EntityManager & em) {
@@ -447,20 +410,19 @@ namespace kengine {
 				for (unsigned int i = 0; i < scene->mNumMeshes; ++i) {
 					const auto mesh = scene->mMeshes[i];
 
+					AssImpSkeletonComponent::Mesh meshBones;
 					for (unsigned int i = 0; i < mesh->mNumBones; ++i) {
 						const auto aiBone = mesh->mBones[i];
-						AssImpSkeletonComponent::Bone bone;
+						AssImpSkeletonComponent::Mesh::Bone bone;
 						bone.name = aiBone->mName.data;
 						bone.node = findNode(allNodes, bone.name);
 						bone.offset = toglmWeird(aiBone->mOffsetMatrix);
-						skeleton.bones.push_back(bone);
+						meshBones.bones.push_back(bone);
 					}
+					skeleton.meshes.emplace_back(std::move(meshBones));
 				}
 
-				for (auto & bone : skeleton.bones)
-					bone.parent = findBone(skeleton, bone.node->mParent->mName.data);
-
-				skeleton.globalInverseTransform = glm::inverse(toglm(scene->mRootNode->mTransformation));
+				skeleton.globalInverseTransform = glm::inverse(toglmWeird(scene->mRootNode->mTransformation));
 
 				for (unsigned int i = 0; i < scene->mNumAnimations; ++i) {
 					const auto aiAnim = scene->mAnimations[i];
@@ -566,18 +528,29 @@ namespace kengine {
 				auto & assimp = modelInfo.get<AssImp::AssImpSkeletonComponent>();
 				const auto & skeletonInfo = modelInfo.get<SkeletonInfoComponent>();
 
-				if (skeleton.currentAnim >= skeletonInfo.allAnims.size()) {
-					for (auto & bone : assimp.bones)
-						bone.node->mTransformation = AssImp::toAiMat(glm::mat4(1.f));
-				}
-				else {
-					for (auto & bone : assimp.bones)
-						updateKeyframeTransform(bone, skeleton.currentTime, skeleton.currentAnim);
-					skeleton.currentTime += time.getDeltaTime().count();
-					skeleton.currentTime = fmodf(skeleton.currentTime, skeletonInfo.allAnims[skeleton.currentAnim].totalTime);
-				}
+				if (skeleton.meshes.empty())
+					skeleton.meshes.resize(assimp.meshes.size());
 
-				updateBoneMats(assimp, skeleton);
+				for (unsigned int i = 0; i < skeleton.meshes.size(); ++i) {
+					auto & input = assimp.meshes[i];
+					auto & output = skeleton.meshes[i];
+
+					if (skeleton.currentAnim >= skeletonInfo.allAnims.size()) {
+						for (auto & bone : input.bones)
+							bone.node->mTransformation = AssImp::toAiMat(glm::mat4(1.f));
+					}
+					else {
+						const auto & currentAnim = skeletonInfo.allAnims[skeleton.currentAnim];
+
+						for (auto & bone : input.bones)
+							updateKeyframeTransform(bone, skeleton.currentTime * currentAnim.ticksPerSecond, skeleton.currentAnim);
+
+						skeleton.currentTime += time.getDeltaTime().count();
+						skeleton.currentTime = fmodf(skeleton.currentTime, currentAnim.totalTime);
+					}
+
+					updateBoneMats(input, output, assimp.globalInverseTransform);
+				}
 			}
 		}
 

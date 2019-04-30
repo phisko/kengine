@@ -74,11 +74,12 @@ namespace kengine {
 
 				putils::gl::setUniform(this->model, model);
 
-				glUniformMatrix4fv(bones, KENGINE_SKELETON_MAX_BONES, GL_FALSE, glm::value_ptr(*skeleton.boneMats.begin()));
-
 				for (unsigned int i = 0; i < modelInfo.meshes.size(); ++i) {
 					const auto & meshInfo = modelInfo.meshes[i];
 					const auto & meshTextures = textures.meshes[i];
+
+					if (!skeleton.meshes.empty())
+						glUniformMatrix4fv(bones, KENGINE_SKELETON_MAX_BONES, GL_FALSE, glm::value_ptr(*skeleton.meshes[i].boneMats.begin()));
 
 					assert(!meshTextures.diffuse.empty());
 					glActiveTexture(GL_TEXTURE0 + _diffuseTextureID);
@@ -153,7 +154,7 @@ void main() {
 	boneMatrix += bones[boneIDs[3]] * boneWeights[3];
 
 	WorldPosition = model * boneMatrix * vec4(position, 1.0);
-	Normal = normal;
+	Normal = (boneMatrix * vec4(normal, 0.0)).xyz;
 	TexCoords = texCoords;
 
 	gl_Position = proj * view * WorldPosition;
