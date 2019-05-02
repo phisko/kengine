@@ -1,5 +1,6 @@
 #pragma once
 
+#include <assert.h>
 #include <bitset>
 #include <cstddef>
 #include "Component.hpp"

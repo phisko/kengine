@@ -27,7 +27,7 @@
 #include "components/ShaderComponent.hpp"
 #include "components/ImGuiComponent.hpp"
 
-#include "AssImpDefines.h"
+#include "AssImpHelper.hpp"
 
 namespace kengine {
 	namespace AssImp {

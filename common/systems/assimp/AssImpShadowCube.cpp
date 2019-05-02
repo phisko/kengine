@@ -12,6 +12,8 @@
 #include "systems/opengl/shaders/shaders.hpp"
 #include "TexturedShaderSrc.hpp"
 
+#include "AssImpHelper.hpp"
+
 namespace kengine {
 	void AssImpShadowCube::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
 		initWithShaders<AssImpShadowCube>(putils::make_vector(
