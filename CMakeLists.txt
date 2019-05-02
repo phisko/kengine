@@ -34,6 +34,8 @@ add_subdirectory(putils)
 file(GLOB src_files
         *.cpp
         *.hpp
+        common/*/*.cpp
+        common/*/*.hpp
         )
 
 if (UNIX)
@@ -46,11 +48,18 @@ add_library(kengine ${type} Component.cpp)
 
 if (KENGINE_SFML)
     add_subdirectory(common/systems/sfml)
+    target_link_libraries(kengine PUBLIC kengine_sfml)
 endif ()
 
 if (KENGINE_OPENGL)
     add_subdirectory(common/systems/opengl)
+    target_link_libraries(kengine PUBLIC kengine_opengl)
 endif ()
+
+if (KENGINE_ASSIMP)
+    add_subdirectory(common/systems/assimp)
+    target_link_libraries(kengine PUBLIC kengine_assimp)
+endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} PARENT_SCOPE)
 

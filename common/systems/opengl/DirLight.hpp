@@ -8,11 +8,9 @@ namespace kengine {
 }
 
 namespace kengine::Shaders {
-	class ShadowMap;
-
 	class DirLight : public putils::gl::Program {
 	public:
-		DirLight(kengine::EntityManager & em, ShadowMap & shadowMap);
+		DirLight(kengine::EntityManager & em);
 
 		void init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) override;
 		void run(const glm::mat4 & view, const glm::mat4 & proj, const glm::vec3 & camPos, size_t screenWidth, size_t screenHeight) override;
@@ -65,7 +63,6 @@ namespace kengine::Shaders {
 
 	private:
 		kengine::EntityManager & _em;
-		ShadowMap & _shadowMap;
 		size_t _shadowMapTextureID;
 	};
 }

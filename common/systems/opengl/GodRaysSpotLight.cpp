@@ -2,12 +2,13 @@
 #include "Shapes.hpp"
 #include "EntityManager.hpp"
 #include "ShadowMap.hpp"
-#include "RAII.hpp"
-#include "LightHelper.hpp"
 #include "shaders/shaders.hpp"
 
 #include "components/LightComponent.hpp"
 #include "components/TransformComponent.hpp"
+
+#include "helpers/LightHelper.hpp"
+#include "helpers/ShaderHelper.hpp"
 
 extern float SCATTERING_ADJUST;
 extern float NB_STEPS_ADJUST;
@@ -36,7 +37,7 @@ namespace kengine::Shaders {
 	void GodRaysSpotLight::run(const glm::mat4 & view, const glm::mat4 & proj, const glm::vec3 & camPos, size_t screenWidth, size_t screenHeight) {
 		use();
 
-		Enable _(GL_BLEND);
+		ShaderHelper::Enable _(GL_BLEND);
 		glBlendEquation(GL_FUNC_ADD);
 		glBlendFunc(GL_ONE, GL_ONE);
 

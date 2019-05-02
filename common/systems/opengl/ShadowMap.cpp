@@ -1,15 +1,15 @@
-#ifndef KENGINE_SHADOW_MAP_SIZE
-# define KENGINE_SHADOW_MAP_SIZE 8192
-#endif
 
 #include "ShadowMap.hpp"
-#include "RAII.hpp"
 #include "EntityManager.hpp"
-#include "LightHelper.hpp"
 #include "shaders/shaders.hpp"
 
 #include "components/AdjustableComponent.hpp"
 #include "components/LightComponent.hpp"
+#include "components/SkeletonComponent.hpp"
+#include "components/ModelComponent.hpp"
+
+#include "helpers/ShaderHelper.hpp"
+#include "helpers/LightHelper.hpp"
 
 namespace kengine {
 	float SHADOW_MAP_NEAR_PLANE = .1f;
@@ -21,7 +21,7 @@ namespace kengine {
 
 namespace kengine::Shaders {
 	ShadowMap::ShadowMap(kengine::EntityManager & em)
-		: Program(false, pmeta_nameof(ShadowMap))
+		: ShadowMapShader(false, pmeta_nameof(ShadowMap)), _em(em)
 	{
 		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/Lights] Shadow map near plane", &SHADOW_MAP_NEAR_PLANE); };
 		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/Lights] Shadow map far plane", &SHADOW_MAP_FAR_PLANE); };
@@ -40,7 +40,7 @@ namespace kengine::Shaders {
 
 	static void createShadowMap(GLuint & depthMapFBO, GLuint & depthMapTexture, size_t width, size_t height) {
 		glGenFramebuffers(1, &depthMapFBO);
-		BindFramebuffer __f(depthMapFBO);
+		ShaderHelper::BindFramebuffer __f(depthMapFBO);
 
 		glGenTextures(1, &depthMapTexture);
 		glBindTexture(GL_TEXTURE_2D, depthMapTexture);
@@ -69,14 +69,26 @@ namespace kengine::Shaders {
 		glViewport(0, 0, KENGINE_SHADOW_MAP_SIZE, KENGINE_SHADOW_MAP_SIZE);
 
 		const auto & depthMap = e.get<DepthMapComponent>();
-		BindFramebuffer __f(depthMap.fbo);
-		Enable __e(GL_DEPTH_TEST);
+		ShaderHelper::BindFramebuffer __f(depthMap.fbo);
+		ShaderHelper::Enable __e(GL_DEPTH_TEST);
 
 		use();
-		glClear(GL_DEPTH_BUFFER_BIT);
 		putils::gl::setUniform(view, LightHelper::getLightSpaceMatrix(light, { pos.x, pos.y, pos.z }, screenWidth, screenHeight));
 		glCullFace(GL_FRONT);
-		drawObjects(model);
+
+		for (const auto &[e, model, transform] : _em.getEntities<ModelComponent, TransformComponent3f>()) {
+			if (e.has<SkeletonComponent>())
+				continue;
+
+			const auto & modelInfoEntity = _em.getEntity(model.modelInfo);
+			if (!modelInfoEntity.has<ModelInfoComponent>())
+				continue;
+			const auto & modelInfo = modelInfoEntity.get<ModelInfoComponent>();
+
+			putils::gl::setUniform(this->model, ShaderHelper::getModelMatrix(modelInfo, transform));
+			ShaderHelper::drawModel(modelInfo);
+		}
+
 		glCullFace(GL_BACK);
 		glViewport(0, 0, screenWidth, screenHeight);
 	}

@@ -33,8 +33,6 @@ namespace kengine {
 
 		void initShader(putils::gl::Program & p);
 
-		void drawObjects(GLint modelMatrixLocation) const noexcept;
-
 		void debugTexture(GLint texture);
 
 	private:

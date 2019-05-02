@@ -3,12 +3,13 @@
 #include "ShadowMap.hpp"
 #include "Shapes.hpp"
 #include "EntityManager.hpp"
-#include "RAII.hpp"
-#include "LightHelper.hpp"
 #include "shaders/shaders.hpp"
 
 #include "components/TransformComponent.hpp"
 #include "components/LightComponent.hpp"
+
+#include "helpers/LightHelper.hpp"
+#include "helpers/ShaderHelper.hpp"
 
 namespace kengine {
 	extern float SHADOW_MAP_MIN_BIAS;
@@ -30,8 +31,8 @@ namespace kengine::Shaders {
 	void SpotLight::run(const glm::mat4 & view, const glm::mat4 & proj, const glm::vec3 & camPos, size_t screenWidth, size_t screenHeight) {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-		Enable __c(GL_CULL_FACE);
-		Enable __b(GL_BLEND);
+		ShaderHelper::Enable __c(GL_CULL_FACE);
+		ShaderHelper::Enable __b(GL_BLEND);
 		glBlendEquation(GL_FUNC_ADD);
 		glBlendFunc(GL_ONE, GL_ONE);
 
@@ -44,7 +45,12 @@ namespace kengine::Shaders {
 
 		for (auto &[e, light, transform] : _em.getEntities<SpotLightComponent, kengine::TransformComponent3f>()) {
 			const auto & centre = transform.boundingBox.topLeft;
-			_shadowMap.run(e, light, centre, screenWidth, screenHeight);
+
+			for (const auto & [shadowMapEntity, shader, comp] : _em.getEntities<LightingShaderComponent, ShadowMapShaderComponent>()) {
+				auto & shadowMap = static_cast<ShadowMapShader &>(*shader.shader);
+				shadowMap.run(e, light, centre, screenWidth, screenHeight);
+			}
+
 			use();
 
 			glm::mat4 model(1.f);

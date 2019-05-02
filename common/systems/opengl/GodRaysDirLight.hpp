@@ -5,11 +5,10 @@
 namespace kengine {
 	class EntityManager;
 	struct DirLightComponent;
+	struct DepthMapComponent;
 }
 
 namespace kengine::Shaders {
-	struct DepthMapComponent;
-
 	class GodRaysDirLight : public putils::gl::Program {
 	public:
 		GodRaysDirLight(kengine::EntityManager & em);

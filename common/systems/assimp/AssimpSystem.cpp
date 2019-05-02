@@ -1,21 +1,9 @@
-#pragma once
+#include "AssimpSystem.hpp"
+#include "EntityManager.hpp"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-
-#ifndef KENGINE_BONE_INFO_PER_VERTEX
-# define KENGINE_BONE_INFO_PER_VERTEX 4
-#endif
-
-#include "System.hpp"
-#include "EntityManager.hpp"
-#include "components/GraphicsComponent.hpp"
-#include "components/ModelLoaderComponent.hpp"
-#include "components/ShaderComponent.hpp"
-#include "components/ImGuiComponent.hpp"
-#include "components/AnimationComponent.hpp"
-#include "TexturedShader.hpp"
 
 #include "file_extension.hpp"
 #include "imgui.h"
@@ -23,21 +11,23 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-#ifndef KENGINE_BONE_NAME_MAX_LENGTH
-# define KENGINE_BONE_NAME_MAX_LENGTH 64
-#endif
+#include "TexturedShader.hpp"
+#include "AssImpShadowMap.hpp"
+#include "AssImpShadowCube.hpp"
 
-#ifndef KENGINE_BONE_MAX_PARENTS
-# define KENGINE_BONE_MAX_PARENTS 64
-#endif
+#include "components/GraphicsComponent.hpp"
+#include "components/ModelLoaderComponent.hpp"
+#include "components/ModelInfoComponent.hpp"
+#include "components/ModelComponent.hpp"
+#include "components/TexturedModelComponent.hpp"
 
-#ifndef KENGINE_TEXTURE_PATH_MAX_LENGTH
-# define KENGINE_TEXTURE_PATH_MAX_LENGTH 256
-#endif
+#include "components/AnimationComponent.hpp"
+#include "components/SkeletonComponent.hpp"
 
-#ifndef KENGINE_MODEL_PATH_MAX_LENGTH
-# define KENGINE_MODEL_PATH_MAX_LENGTH 256
-#endif
+#include "components/ShaderComponent.hpp"
+#include "components/ImGuiComponent.hpp"
+
+#include "AssImpDefines.h"
 
 namespace kengine {
 	namespace AssImp {
@@ -67,8 +57,8 @@ namespace kengine {
 					float normal[3];
 					float texCoords[2];
 
-					float boneWeights[KENGINE_BONE_INFO_PER_VERTEX] = { 0.f };
-					unsigned int boneIDs[KENGINE_BONE_INFO_PER_VERTEX] = { 0 };
+					float boneWeights[KENGINE_ASSIMP_BONE_INFO_PER_VERTEX] = { 0.f };
+					unsigned int boneIDs[KENGINE_ASSIMP_BONE_INFO_PER_VERTEX] = { 0 };
 
 					pmeta_get_attributes(
 						pmeta_reflectible_attribute(&Vertex::position),
@@ -96,7 +86,7 @@ namespace kengine {
 		struct AssImpSkeletonComponent : kengine::not_serializable {
 			struct Mesh {
 				struct Bone {
-					putils::string<KENGINE_BONE_NAME_MAX_LENGTH> name;
+					putils::string<KENGINE_ASSIMP_BONE_NAME_MAX_LENGTH> name;
 					aiNode * node = nullptr;
 					std::vector<const aiNodeAnim *> animNodes;
 					glm::mat4 offset;
@@ -170,7 +160,7 @@ namespace kengine {
 		static glm::mat4 getTransformWithParents(const AssImpSkeletonComponent::Mesh::Bone & bone) {
 			glm::mat4 totalTransform(1.f);
 
-			putils::vector<glm::mat4, KENGINE_BONE_MAX_PARENTS> mats;
+			putils::vector<glm::mat4, KENGINE_ASSIMP_BONE_MAX_PARENTS> mats;
 			for (auto node = bone.node; node != nullptr; node = node->mParent)
 				mats.push_back(toglmWeird(node->mTransformation));
 
@@ -193,12 +183,12 @@ namespace kengine {
 			}
 		}
 
-		static std::unordered_map<putils::string<KENGINE_MODEL_PATH_MAX_LENGTH>, ModelEntity> models;
+		static std::unordered_map<putils::string<KENGINE_ASSIMP_MODEL_PATH_MAX_LENGTH>, ModelEntity> models;
 
 		static unsigned int textureFromFile(const char * file, const char * directory) {
-			static std::unordered_map<putils::string<KENGINE_TEXTURE_PATH_MAX_LENGTH>, unsigned int> textures;
+			static std::unordered_map<putils::string<KENGINE_ASSIMP_TEXTURE_PATH_MAX_LENGTH>, unsigned int> textures;
 
-			const putils::string<KENGINE_TEXTURE_PATH_MAX_LENGTH> fullPath("%s/%s", directory, file);
+			const putils::string<KENGINE_ASSIMP_TEXTURE_PATH_MAX_LENGTH> fullPath("%s/%s", directory, file);
 
 			{
 				const auto it = textures.find(fullPath);
@@ -269,7 +259,8 @@ namespace kengine {
 				if (mesh->mTextureCoords[0] != nullptr) {
 					vertex.texCoords[0] = mesh->mTextureCoords[0][i].x;
 					vertex.texCoords[1] = mesh->mTextureCoords[0][i].y;
-				} else {
+				}
+				else {
 					vertex.texCoords[0] = 0.f;
 					vertex.texCoords[1] = 0.f;
 				}
@@ -289,7 +280,7 @@ namespace kengine {
 #ifndef NDEBUG
 					bool found = false;
 #endif
-					for (unsigned int k = 0; k < KENGINE_BONE_INFO_PER_VERTEX; ++k)
+					for (unsigned int k = 0; k < KENGINE_ASSIMP_BONE_INFO_PER_VERTEX; ++k)
 						if (vertex.boneWeights[k] == 0.f) {
 #ifndef NDEBUG
 							found = true;
@@ -320,7 +311,8 @@ namespace kengine {
 				const auto material = scene->mMaterials[mesh->mMaterialIndex];
 				loadMaterialTextures(meshTextures.diffuse, directory, material, aiTextureType_DIFFUSE);
 				loadMaterialTextures(meshTextures.specular, directory, material, aiTextureType_SPECULAR);
-			} else
+			}
+			else
 				assert(false);
 			textures.meshes.push_back(std::move(meshTextures));
 
@@ -382,7 +374,7 @@ namespace kengine {
 		}
 
 		auto loadFile(const char * file, kengine::EntityManager & em) {
-			const putils::string<KENGINE_MODEL_PATH_MAX_LENGTH> f(file);
+			const putils::string<KENGINE_ASSIMP_MODEL_PATH_MAX_LENGTH> f(file);
 
 			return [f, &em] {
 				auto & model = models[f];
@@ -445,119 +437,123 @@ namespace kengine {
 		}
 	}
 
-	class AssImpSystem : public kengine::System<AssImpSystem, kengine::packets::RegisterEntity> {
-	public:
-		AssImpSystem(kengine::EntityManager & em) : System(em), _em(em) {
-			onLoad("");
-		}
+	AssImpSystem::AssImpSystem(kengine::EntityManager & em) : System(em), _em(em) {
+		onLoad("");
+	}
 
-		void onLoad(const char *) noexcept override {
-			_em += [this](kengine::Entity & e) {
-				e += kengine::makeGBufferShaderComponent<TexturedShader>(_em);
-			};
+	void AssImpSystem::onLoad(const char *) noexcept {
+		_em += [this](kengine::Entity & e) {
+			e += kengine::makeGBufferShaderComponent<TexturedShader>(_em);
+		};
 
-			_em += [this](kengine::Entity & e) {
-				e += ImGuiComponent([this] {
-					if (ImGui::Begin("Animations")) {
-						for (auto & [obj, model, anim] : _em.getEntities<ModelComponent, AnimationComponent>()) {
-							const auto & modelInfo = _em.getEntity(model.modelInfo);
-							const auto & animList = modelInfo.get<AnimListComponent>();
-							if (animList.allAnims.empty())
-								continue;
+		_em += [this](kengine::Entity & e) {
+			e += kengine::makeLightingShaderComponent<AssImpShadowMap>(_em);
+			e += kengine::ShadowMapShaderComponent{};
+		};
 
-							const char * tab[64];
-							const auto minLength = std::min(animList.allAnims.size(), lengthof(tab));
-							for (unsigned int i = 0; i < minLength; ++i)
-								tab[i] = animList.allAnims[i].name.data();
-							int currentAnim = anim.currentAnim;
-							ImGui::Columns(2);
-							ImGui::Combo(putils::string<64>("%d", obj.id), &currentAnim, tab, minLength);
-							ImGui::NextColumn();
-							ImGui::InputFloat(putils::string<64>("Speed##%d", obj.id), &anim.speed);
-							ImGui::Columns();
-							anim.currentAnim = currentAnim;
-						}
+		_em += [&](kengine::Entity & e) {
+			e += kengine::makeLightingShaderComponent<AssImpShadowCube>(_em);
+			e += kengine::ShadowCubeShaderComponent{};
+		};
+
+		_em += [this](kengine::Entity & e) {
+			e += ImGuiComponent([this] {
+				if (ImGui::Begin("Animations")) {
+					for (auto &[obj, model, anim] : _em.getEntities<ModelComponent, AnimationComponent>()) {
+						const auto & modelInfo = _em.getEntity(model.modelInfo);
+						const auto & animList = modelInfo.get<AnimListComponent>();
+						if (animList.allAnims.empty())
+							continue;
+
+						const char * tab[64];
+						const auto minLength = std::min(animList.allAnims.size(), lengthof(tab));
+						for (unsigned int i = 0; i < minLength; ++i)
+							tab[i] = animList.allAnims[i].name.data();
+						int currentAnim = anim.currentAnim;
+						ImGui::Columns(2);
+						ImGui::Combo(putils::string<64>("%d", obj.id), &currentAnim, tab, minLength);
+						ImGui::NextColumn();
+						ImGui::InputFloat(putils::string<64>("Speed##%d", obj.id), &anim.speed);
+						ImGui::Columns();
+						anim.currentAnim = currentAnim;
 					}
-					ImGui::End();
-				});
-			};
-		}
-
-		void handle(kengine::packets::RegisterEntity p) {
-			if (!p.e.has<kengine::GraphicsComponent>())
-				return;
-
-			auto & graphics = p.e.get<kengine::GraphicsComponent>();
-			const auto & layer = graphics.getLayer("main");
-			const auto & file = layer.appearance;
-
-			Assimp::Importer importer;
-			if (!importer.IsExtensionSupported(putils::file_extension(file.c_str())))
-				return;
-
-			p.e += TexturedModelComponent{};
-			p.e += SkeletonComponent{};
-
-			const auto it = AssImp::models.find(file.c_str());
-			if (it != AssImp::models.end()) {
-				p.e += kengine::ModelComponent{ it->second.id };
-				return;
-			}
-
-			auto & modelData = AssImp::models[file.c_str()];
-			modelData.pitch = layer.pitch;
-			modelData.yaw = layer.yaw;
-			modelData.offset = layer.boundingBox.topLeft;
-			modelData.scale = layer.boundingBox.size;
-			_em += [&](kengine::Entity & e) {
-				modelData.id = e.id;
-				e += kengine::ModelLoaderComponent{
-					AssImp::loadFile(file.c_str(), _em),
-					[]() { putils::gl::setVertexType<AssImp::ModelEntity::Mesh::Vertex>(); }
-				};
-			};
-
-			p.e += kengine::ModelComponent{ modelData.id };
-		}
-
-		void execute() override {
-			const auto deltaTime = time.getDeltaTime().count();
-
-			for (auto & [e, model, skeleton, anim] : _em.getEntities<ModelComponent, SkeletonComponent, AnimationComponent>()) {
-				auto & modelInfo = _em.getEntity(model.modelInfo);
-				if (!modelInfo.has<AssImp::AssImpSkeletonComponent>())
-					continue;
-
-				auto & assimp = modelInfo.get<AssImp::AssImpSkeletonComponent>();
-				const auto & animList = modelInfo.get<AnimListComponent>();
-
-				if (skeleton.meshes.empty())
-					skeleton.meshes.resize(assimp.meshes.size());
-
-				for (unsigned int i = 0; i < skeleton.meshes.size(); ++i) {
-					auto & input = assimp.meshes[i];
-					auto & output = skeleton.meshes[i];
-
-					if (anim.currentAnim >= animList.allAnims.size()) {
-						for (auto & bone : input.bones)
-							bone.node->mTransformation = AssImp::toAiMat(glm::mat4(1.f));
-					}
-					else {
-						const auto & currentAnim = animList.allAnims[anim.currentAnim];
-
-						for (auto & bone : input.bones)
-							updateKeyframeTransform(bone, anim.currentTime * currentAnim.ticksPerSecond, anim.currentAnim);
-
-						anim.currentTime += deltaTime * anim.speed;
-						anim.currentTime = fmodf(anim.currentTime, currentAnim.totalTime);
-					}
-
-					updateBoneMats(input, output, assimp.globalInverseTransform);
 				}
-			}
+				ImGui::End();
+			});
+		};
+	}
+
+	void AssImpSystem::handle(kengine::packets::RegisterEntity p) {
+		if (!p.e.has<kengine::GraphicsComponent>())
+			return;
+
+		auto & graphics = p.e.get<kengine::GraphicsComponent>();
+		const auto & layer = graphics.getLayer("main");
+		const auto & file = layer.appearance;
+
+		Assimp::Importer importer;
+		if (!importer.IsExtensionSupported(putils::file_extension(file.c_str())))
+			return;
+
+		p.e += TexturedModelComponent{};
+		p.e += SkeletonComponent{};
+
+		const auto it = AssImp::models.find(file.c_str());
+		if (it != AssImp::models.end()) {
+			p.e += kengine::ModelComponent{ it->second.id };
+			return;
 		}
 
-	private:
-		kengine::EntityManager & _em;
-	};
+		auto & modelData = AssImp::models[file.c_str()];
+		modelData.pitch = layer.pitch;
+		modelData.yaw = layer.yaw;
+		modelData.offset = layer.boundingBox.topLeft;
+		modelData.scale = layer.boundingBox.size;
+		_em += [&](kengine::Entity & e) {
+			modelData.id = e.id;
+			e += kengine::ModelLoaderComponent{
+				AssImp::loadFile(file.c_str(), _em),
+				[]() { putils::gl::setVertexType<AssImp::ModelEntity::Mesh::Vertex>(); }
+			};
+		};
+
+		p.e += kengine::ModelComponent{ modelData.id };
+	}
+
+	void AssImpSystem::execute() {
+		const auto deltaTime = time.getDeltaTime().count();
+
+		for (auto &[e, model, skeleton, anim] : _em.getEntities<ModelComponent, SkeletonComponent, AnimationComponent>()) {
+			auto & modelInfo = _em.getEntity(model.modelInfo);
+			if (!modelInfo.has<AssImp::AssImpSkeletonComponent>())
+				continue;
+
+			auto & assimp = modelInfo.get<AssImp::AssImpSkeletonComponent>();
+			const auto & animList = modelInfo.get<AnimListComponent>();
+
+			if (skeleton.meshes.empty())
+				skeleton.meshes.resize(assimp.meshes.size());
+
+			for (unsigned int i = 0; i < skeleton.meshes.size(); ++i) {
+				auto & input = assimp.meshes[i];
+				auto & output = skeleton.meshes[i];
+
+				if (anim.currentAnim >= animList.allAnims.size()) {
+					for (auto & bone : input.bones)
+						bone.node->mTransformation = AssImp::toAiMat(glm::mat4(1.f));
+				}
+				else {
+					const auto & currentAnim = animList.allAnims[anim.currentAnim];
+
+					for (auto & bone : input.bones)
+						updateKeyframeTransform(bone, anim.currentTime * currentAnim.ticksPerSecond, anim.currentAnim);
+
+					anim.currentTime += deltaTime * anim.speed;
+					anim.currentTime = fmodf(anim.currentTime, currentAnim.totalTime);
+				}
+
+				updateBoneMats(input, output, assimp.globalInverseTransform);
+			}
+		}
+	}
 }

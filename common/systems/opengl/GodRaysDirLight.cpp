@@ -4,9 +4,12 @@
 #include "ShadowMap.hpp"
 #include "components/LightComponent.hpp"
 #include "components/AdjustableComponent.hpp"
-#include "RAII.hpp"
-#include "LightHelper.hpp"
 #include "shaders/shaders.hpp"
+
+#include "components/ShaderComponent.hpp"
+
+#include "helpers/LightHelper.hpp"
+#include "helpers/ShaderHelper.hpp"
 
 auto SCATTERING_ADJUST = .1f;
 auto NB_STEPS_ADJUST = 10.f;
@@ -39,7 +42,7 @@ namespace kengine::Shaders {
 	void GodRaysDirLight::run(const glm::mat4 & view, const glm::mat4 & proj, const glm::vec3 & camPos, size_t screenWidth, size_t screenHeight) {
 		use();
 
-		Enable _(GL_BLEND);
+		ShaderHelper::Enable _(GL_BLEND);
 		glBlendEquation(GL_FUNC_ADD);
 		glBlendFunc(GL_ONE, GL_ONE);
 

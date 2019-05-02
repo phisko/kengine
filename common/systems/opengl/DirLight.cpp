@@ -1,14 +1,15 @@
 #include "DirLight.hpp"
 
 #include "Shapes.hpp"
-#include "ShadowMap.hpp"
 #include "EntityManager.hpp"
-#include "RAII.hpp"
-#include "LightHelper.hpp"
+#include "helpers/LightHelper.hpp"
 #include "shaders/shaders.hpp"
 
 #include "components/LightComponent.hpp"
 #include "components/AdjustableComponent.hpp"
+#include "components/ShaderComponent.hpp"
+
+#include "helpers/ShaderHelper.hpp"
 
 namespace kengine {
 	extern float SHADOW_MAP_MIN_BIAS;
@@ -16,10 +17,9 @@ namespace kengine {
 }
 
 namespace kengine::Shaders {
-	DirLight::DirLight(kengine::EntityManager & em, ShadowMap & shadowMap)
+	DirLight::DirLight(kengine::EntityManager & em)
 		: Program(true, pmeta_nameof(DirLight)),
-		_em(em),
-		_shadowMap(shadowMap)
+		_em(em)
 	{}
 
 	void DirLight::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
@@ -40,7 +40,7 @@ namespace kengine::Shaders {
 	void DirLight::run(const glm::mat4 & view, const glm::mat4 & proj, const glm::vec3 & camPos, size_t screenWidth, size_t screenHeight) {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-		Enable __b(GL_BLEND);
+		ShaderHelper::Enable __b(GL_BLEND);
 		glBlendEquation(GL_FUNC_ADD);
 		glBlendFunc(GL_ONE, GL_ONE);
 
@@ -55,7 +55,11 @@ namespace kengine::Shaders {
 		for (auto &[e, light] : _em.getEntities<DirLightComponent>()) {
 			const putils::Point3f pPos = { camPos.x, camPos.y, camPos.z };
 
-			_shadowMap.run(e, light, pPos, screenWidth, screenHeight);
+			for (const auto & [shadowMapEntity, shader, comp] : _em.getEntities<LightingShaderComponent, ShadowMapShaderComponent>()) {
+				auto & shadowMap = static_cast<ShadowMapShader &>(*shader.shader);
+				shadowMap.run(e, light, pPos, screenWidth, screenHeight);
+			}
+
 			use();
 
 			setLight(light);

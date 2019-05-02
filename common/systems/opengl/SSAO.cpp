@@ -1,11 +1,13 @@
 #include <random>
 #include "SSAO.hpp"
 #include "string.hpp"
-#include "RAII.hpp"
 #include "Shapes.hpp"
 #include "EntityManager.hpp"
-#include "components/AdjustableComponent.hpp"
 #include "shaders/shaders.hpp"
+
+#include "components/AdjustableComponent.hpp"
+
+#include "helpers/ShaderHelper.hpp"
 
 static void initTexture(GLuint & fbo, GLuint & texture, size_t width, size_t height) {
 	glGenFramebuffers(1, &fbo);
@@ -55,7 +57,7 @@ namespace kengine::Shaders {
 	}
 
 	void SSAO::run(const glm::mat4 & view, const glm::mat4 & projection, size_t screenWidth, size_t screenHeight) {
-		BindFramebuffer __f(_fbo);
+		ShaderHelper::BindFramebuffer __f(_fbo);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		use();
@@ -84,7 +86,7 @@ namespace kengine::Shaders {
 	}
 
 	void SSAOBlur::run(size_t ssaoTexture, size_t screenWidth, size_t screenHeight) {
-		BindFramebuffer __f(_fbo);
+		ShaderHelper::BindFramebuffer __f(_fbo);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		use();

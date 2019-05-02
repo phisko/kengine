@@ -3,12 +3,14 @@
 #include "ShadowCube.hpp"
 #include "Shapes.hpp"
 #include "EntityManager.hpp"
-#include "RAII.hpp"
-#include "LightHelper.hpp"
 #include "shaders/shaders.hpp"
 
 #include "components/TransformComponent.hpp"
 #include "components/LightComponent.hpp"
+#include "components/ShaderComponent.hpp"
+
+#include "helpers/LightHelper.hpp"
+#include "helpers/ShaderHelper.hpp"
 
 namespace kengine::Shaders {
 	void PointLight::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
@@ -26,8 +28,8 @@ namespace kengine::Shaders {
 	void PointLight::run(const glm::mat4 & view, const glm::mat4 & proj, const glm::vec3 & camPos, size_t screenWidth, size_t screenHeight) {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-		Enable __c(GL_CULL_FACE);
-		Enable __b(GL_BLEND);
+		ShaderHelper::Enable __c(GL_CULL_FACE);
+		ShaderHelper::Enable __b(GL_BLEND);
 		glBlendEquation(GL_FUNC_ADD);
 		glBlendFunc(GL_ONE, GL_ONE);
 
@@ -39,7 +41,11 @@ namespace kengine::Shaders {
 			const auto radius = LightHelper::getRadius(light);
 			const auto & centre = transform.boundingBox.topLeft;
 
-			_shadowCube.run(e, light, centre, radius, screenWidth, screenHeight);
+			for (const auto & [shadowCubeEntity, shader, comp] : _em.getEntities<LightingShaderComponent, ShadowCubeShaderComponent>()) {
+				auto & shadowCube = static_cast<ShadowCubeShader &>(*shader.shader);
+				shadowCube.run(e, light, centre, radius, screenWidth, screenHeight);
+			}
+
 			use();
 
 			putils::gl::setUniform(this->proj, proj);

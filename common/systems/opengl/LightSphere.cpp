@@ -2,12 +2,13 @@
 #include "EntityManager.hpp"
 
 #include "Shapes.hpp"
-#include "RAII.hpp"
 #include "shaders/shaders.hpp"
 
 #include "components/LightComponent.hpp"
 #include "components/TransformComponent.hpp"
 #include "components/AdjustableComponent.hpp"
+
+#include "helpers/ShaderHelper.hpp"
 
 static auto SPHERE_SIZE = .25f;
 static auto SUN_DIST = 500.f;
@@ -39,8 +40,8 @@ namespace kengine::Shaders {
 		glBlitFramebuffer(0, 0, screenWidth, screenHeight, 0, 0, screenWidth, screenHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-		Enable __e(GL_DEPTH_TEST);
-		Enable __c(GL_CULL_FACE);
+		ShaderHelper::Enable __e(GL_DEPTH_TEST);
+		ShaderHelper::Enable __c(GL_CULL_FACE);
 
 		use();
 		putils::gl::setUniform(this->proj, proj);

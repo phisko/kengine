@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Entity.hpp"
+
 namespace kengine {
 	struct ModelComponent {
 		// Entity which had a ModelLoaderComponent

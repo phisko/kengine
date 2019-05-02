@@ -19,6 +19,8 @@
 #include "components/ShaderComponent.hpp"
 #include "components/SkeletonComponent.hpp"
 
+#include "helpers/ShaderHelper.hpp"
+
 #include "OpenGLSystem.hpp"
 #include "Controllers.hpp"
 
@@ -33,12 +35,6 @@
 #include "GodRaysSpotLight.hpp"
 
 #include "Export.hpp"
-
-static glm::vec3 toVec(const putils::Point3f & p) { return { p.x, p.y, p.z }; }
-
-EXPORT kengine::ISystem * getSystem(kengine::EntityManager & em) {
-	return new kengine::OpenGLSystem(em);
-}
 
 namespace kengine {
 	static auto SCREEN_WIDTH = 1280;
@@ -103,23 +99,19 @@ namespace kengine {
 
 	void OpenGLSystem::addShaders() noexcept {
 		{ // Lighting
-			Shaders::ShadowMap * shadowMap = nullptr;
 			_em += [&](kengine::Entity & e) {
-				auto & comp = e.attach<kengine::LightingShaderComponent>();
-				comp.shader = std::make_unique<Shaders::ShadowMap>(_em);
-				shadowMap = (Shaders::ShadowMap *)comp.shader.get();
+				e += kengine::makeLightingShaderComponent<Shaders::ShadowMap>(_em);
+				e += kengine::ShadowMapShaderComponent{};
 			};
 
-			Shaders::ShadowCube * shadowCube = nullptr;
 			_em += [&](kengine::Entity & e) {
-				auto & comp = e.attach<kengine::LightingShaderComponent>();
-				comp.shader = std::make_unique<Shaders::ShadowCube>();
-				shadowCube = (Shaders::ShadowCube *)comp.shader.get();
+				e += kengine::makeLightingShaderComponent<Shaders::ShadowCube>(_em);
+				e += kengine::ShadowCubeShaderComponent{};
 			};
 
-			_em += [=](kengine::Entity & e) { e += kengine::makeLightingShaderComponent<Shaders::SpotLight>(_em, *shadowMap); };
-			_em += [=](kengine::Entity & e) { e += kengine::makeLightingShaderComponent<Shaders::DirLight>(_em, *shadowMap); };
-			_em += [=](kengine::Entity & e) { e += kengine::makeLightingShaderComponent<Shaders::PointLight>(_em, *shadowCube); };
+			_em += [=](kengine::Entity & e) { e += kengine::makeLightingShaderComponent<Shaders::SpotLight>(_em); };
+			_em += [=](kengine::Entity & e) { e += kengine::makeLightingShaderComponent<Shaders::DirLight>(_em); };
+			_em += [=](kengine::Entity & e) { e += kengine::makeLightingShaderComponent<Shaders::PointLight>(_em); };
 		}
 
 		{ // Post process
@@ -215,7 +207,6 @@ namespace kengine {
 
 	void OpenGLSystem::initShader(putils::gl::Program & p) {
 		p.init(_gBuffer.getTextureCount(), SCREEN_WIDTH, SCREEN_HEIGHT, _gBuffer.getFBO());
-		p.drawObjects = [this](GLint modelLocation) { drawObjects(modelLocation); };
 
 		assert(_gBufferIterator.func != nullptr);
 		int texture = 0;
@@ -266,8 +257,8 @@ namespace kengine {
 		const auto modelData = modelLoader.func();
 
 		auto & modelInfo = e.attach<ModelInfoComponent>();
-		modelInfo.translation = toVec(modelData.offsetToCentre);
-		modelInfo.scale = toVec(modelData.scale);
+		modelInfo.translation = ShaderHelper::toVec(modelData.offsetToCentre);
+		modelInfo.scale = ShaderHelper::toVec(modelData.scale);
 		modelInfo.pitch = modelData.pitch;
 		modelInfo.yaw = modelData.yaw;
 		modelInfo.vertexRegisterFunc = modelLoader.vertexRegisterFunc;
@@ -368,7 +359,7 @@ namespace kengine {
 				);
 			}
 
-			const auto camPos = toVec(cam.frustrum.topLeft);
+			const auto camPos = ShaderHelper::toVec(cam.frustrum.topLeft);
 
 			const auto view = [&] {
 				const auto front = glm::normalize(glm::vec3{
@@ -388,19 +379,29 @@ namespace kengine {
 				NEAR_PLANE, FAR_PLANE
 			);
 
+			for (const auto &[e, depthMap] : _em.getEntities<DepthMapComponent>()) {
+				ShaderHelper::BindFramebuffer b(depthMap.fbo);
+				glClear(GL_DEPTH_BUFFER_BIT);
+			}
+
+			for (const auto &[e, depthCube] : _em.getEntities<DepthCubeComponent>()) {
+				ShaderHelper::BindFramebuffer b(depthCube.fbo);
+				glClear(GL_DEPTH_BUFFER_BIT);
+			}
+
 			_gBuffer.bindForWriting();
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			for (const auto &[e, comp] : _em.getEntities<kengine::GBufferShaderComponent>())
+			for (const auto &[e, comp] : _em.getEntities<GBufferShaderComponent>())
 				if (comp.enabled)
 					comp.shader->run(view, proj, camPos, SCREEN_WIDTH, SCREEN_HEIGHT);
 			_gBuffer.bindForReading();
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			for (const auto &[e, comp] : _em.getEntities<kengine::LightingShaderComponent>())
+			for (const auto &[e, comp] : _em.getEntities<LightingShaderComponent>())
 				if (comp.enabled)
 					comp.shader->run(view, proj, camPos, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-			for (const auto &[e, comp] : _em.getEntities<kengine::PostProcessShaderComponent>())
+			for (const auto &[e, comp] : _em.getEntities<PostProcessShaderComponent>())
 				if (comp.enabled)
 					comp.shader->run(view, proj, camPos, SCREEN_WIDTH, SCREEN_HEIGHT);
 
@@ -419,58 +420,6 @@ namespace kengine {
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 		glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
 		glBlitFramebuffer(0, 0, GBUFFER_WIDTH, GBUFFER_HEIGHT, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-	}
-
-	static void drawModel(const kengine::ModelInfoComponent & modelInfo) {
-		for (const auto & meshInfo : modelInfo.meshes) {
-			glBindVertexArray(meshInfo.vertexArrayObject);
-			glBindBuffer(GL_ARRAY_BUFFER, meshInfo.vertexBuffer);
-			glDrawElements(GL_TRIANGLES, meshInfo.nbIndices, meshInfo.indexType, nullptr);
-		}
-	}
-
-	void OpenGLSystem::drawObjects(GLint modelMatrixLocation) const noexcept {
-		for (const auto &[e, model, transform] : _em.getEntities<kengine::ModelComponent, kengine::TransformComponent3f>()) {
-			if (e.has<SkeletonComponent>())
-				continue; // For now I don't support shadows from animated models
-
-			const auto & modelInfoEntity = _em.getEntity(model.modelInfo);
-			if (!modelInfoEntity.has<ModelInfoComponent>())
-				continue;
-			const auto & modelInfo = modelInfoEntity.get<ModelInfoComponent>();
-
-			glm::mat4 model(1.f);
-			const auto & centre = transform.boundingBox.topLeft;
-			model = glm::translate(model, toVec(centre));
-			model = glm::scale(model, toVec(transform.boundingBox.size));
-
-			model = glm::rotate(model,
-				transform.yaw,
-				{ 0.f, 1.f, 0.f }
-			);
-
-			model = glm::rotate(model,
-				transform.pitch,
-				{ 1.f, 0.f, 0.f }
-			);
-
-			model = glm::rotate(model,
-				modelInfo.yaw,
-				{ 0.f, 1.f, 0.f }
-			);
-
-			model = glm::rotate(model,
-				modelInfo.pitch,
-				{ 1.f, 0.f, 0.f }
-			);
-
-			model = glm::translate(model, -modelInfo.translation); // Re-center
-			model = glm::scale(model, modelInfo.scale);
-
-			putils::gl::setUniform(modelMatrixLocation, model);
-
-			drawModel(modelInfo);
-		}
 	}
 
 	void OpenGLSystem::handleInput() noexcept {

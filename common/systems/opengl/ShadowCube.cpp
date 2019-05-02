@@ -1,9 +1,12 @@
 #include "ShadowCube.hpp"
-#include "RAII.hpp"
-#include "LightHelper.hpp"
 #include "shaders/shaders.hpp"
 
 #include "components/LightComponent.hpp"
+#include "components/SkeletonComponent.hpp"
+#include "components/ModelComponent.hpp"
+
+#include "helpers/ShaderHelper.hpp"
+#include "helpers/LightHelper.hpp"
 
 namespace kengine::Shaders {
 	void ShadowCube::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
@@ -18,18 +21,16 @@ namespace kengine::Shaders {
 	}
 
 	void ShadowCube::run(kengine::Entity & e, PointLightComponent & light, const putils::Point3f & pos, float radius, size_t screenWidth, size_t screenHeight) {
-		static constexpr auto SHADOW_MAP_SIZE = 1024;
-
 		if (!e.has<DepthCubeComponent>()) {
 			auto & depthCube = e.attach<DepthCubeComponent>();
 
 			glGenFramebuffers(1, &depthCube.fbo);
-			BindFramebuffer __f(depthCube.fbo);
+			ShaderHelper::BindFramebuffer __f(depthCube.fbo);
 
 			glGenTextures(1, &depthCube.texture);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, depthCube.texture);
 			for (size_t i = 0; i < 6; ++i)
-				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, KENGINE_SHADOW_CUBE_SIZE, KENGINE_SHADOW_CUBE_SIZE, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -41,16 +42,14 @@ namespace kengine::Shaders {
 			glReadBuffer(GL_NONE);
 		}
 
-		glViewport(0, 0, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
+		glViewport(0, 0, KENGINE_SHADOW_CUBE_SIZE, KENGINE_SHADOW_CUBE_SIZE);
 		glCullFace(GL_FRONT);
 
 		const auto & depthCube = e.get<DepthCubeComponent>();
-		BindFramebuffer __f(depthCube.fbo);
-		Enable __e(GL_DEPTH_TEST);
+		ShaderHelper::BindFramebuffer __f(depthCube.fbo);
+		ShaderHelper::Enable __e(GL_DEPTH_TEST);
 
 		use();
-
-		glClear(GL_DEPTH_BUFFER_BIT);
 
 		static struct {
 			GLint shadowMatrixUniform;
@@ -66,7 +65,7 @@ namespace kengine::Shaders {
 		};
 
 		const glm::vec3 vPos(pos.x, pos.y, pos.z);
-		const auto proj = glm::perspective(glm::radians(90.f), (float)SHADOW_MAP_SIZE / (float)SHADOW_MAP_SIZE, SHADOW_MAP_NEAR_PLANE, SHADOW_MAP_FAR_PLANE);
+		const auto proj = glm::perspective(glm::radians(90.f), (float)KENGINE_SHADOW_CUBE_SIZE / (float)KENGINE_SHADOW_CUBE_SIZE, SHADOW_MAP_NEAR_PLANE, SHADOW_MAP_FAR_PLANE);
 		for (unsigned int i = 0; i < 6; ++i) {
 			if (directions[i].shadowMatrixUniform == -1) {
 				const putils::string<64> shadowMatrix("shadowMatrices[%d]", i);
@@ -78,7 +77,20 @@ namespace kengine::Shaders {
 
 		putils::gl::setUniform(lightPos, vPos);
 		putils::gl::setUniform(farPlane, radius);
-		drawObjects(model);
+
+		for (const auto &[e, model, transform] : _em.getEntities<ModelComponent, TransformComponent3f>()) {
+			if (e.has<SkeletonComponent>())
+				continue;
+
+			const auto & modelInfoEntity = _em.getEntity(model.modelInfo);
+			if (!modelInfoEntity.has<ModelInfoComponent>())
+				continue;
+			const auto & modelInfo = modelInfoEntity.get<ModelInfoComponent>();
+
+			putils::gl::setUniform(this->model, ShaderHelper::getModelMatrix(modelInfo, transform));
+			ShaderHelper::drawModel(modelInfo);
+		}
+
 		glViewport(0, 0, screenWidth, screenHeight);
 		glCullFace(GL_BACK);
 	}

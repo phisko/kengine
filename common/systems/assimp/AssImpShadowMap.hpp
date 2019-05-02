@@ -1,20 +1,16 @@
 #pragma once
 
-#include "opengl/Program.hpp"
-#include "Entity.hpp"
-
 #include "components/ShaderComponent.hpp"
 
 namespace kengine {
 	class EntityManager;
-	struct DirLightComponent;
-	struct SpotLightComponent;
-}
 
-namespace kengine::Shaders {
-	class ShadowMap : public ShadowMapShader {
+	class AssImpShadowMap : public ShadowMapShader {
 	public:
-		ShadowMap(kengine::EntityManager & em);
+		AssImpShadowMap(kengine::EntityManager & em)
+			: ShadowMapShader(false, pmeta_nameof(AssImpShadowMap)),
+			_em(em)
+		{}
 
 		void init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) override;
 		void run(const glm::mat4 & view, const glm::mat4 & proj, const glm::vec3 & camPos, size_t screenWidth, size_t screenHeight) override {}
@@ -32,11 +28,14 @@ namespace kengine::Shaders {
 		GLint view;
 		GLint model;
 
+		GLint bones;
+
 		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&ShadowMap::proj),
-			pmeta_reflectible_attribute(&ShadowMap::view),
-			pmeta_reflectible_attribute(&ShadowMap::model)
+			pmeta_reflectible_attribute(&AssImpShadowMap::proj),
+			pmeta_reflectible_attribute(&AssImpShadowMap::view),
+			pmeta_reflectible_attribute(&AssImpShadowMap::model),
+
+			pmeta_reflectible_attribute(&AssImpShadowMap::bones)
 		);
 	};
-
 }

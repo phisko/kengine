@@ -12,10 +12,9 @@ namespace kengine::Shaders {
 
 	class SpotLight : public putils::gl::Program {
 	public:
-		SpotLight(kengine::EntityManager & em, ShadowMap & shadowMap)
+		SpotLight(kengine::EntityManager & em)
 			: Program(true, pmeta_nameof(SpotLight)),
-			_em(em),
-			_shadowMap(shadowMap)
+			_em(em)
 		{}
 
 		void init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) override;
@@ -80,7 +79,6 @@ namespace kengine::Shaders {
 
 	private:
 		kengine::EntityManager & _em;
-		ShadowMap & _shadowMap;
 		size_t _shadowMapTextureID;
 
 		void setLight(const SpotLightComponent & light, const putils::Point3f & pos); 

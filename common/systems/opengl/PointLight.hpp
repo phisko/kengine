@@ -12,10 +12,8 @@ namespace kengine::Shaders {
 
 	class PointLight : public putils::gl::Program {
 	public:
-		PointLight(kengine::EntityManager & em, ShadowCube & shadowCube)
-			: Program(true, pmeta_nameof(PointLight)),
-			_em(em),
-			_shadowCube(shadowCube)
+		PointLight(kengine::EntityManager & em)
+			: Program(true, pmeta_nameof(PointLight)), _em(em)
 		{}
 
 		void init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) override;
@@ -65,7 +63,6 @@ namespace kengine::Shaders {
 		);
 	private:
 		kengine::EntityManager & _em;
-		ShadowCube & _shadowCube;
 		size_t _shadowMapTextureID;
 
 		void setLight(const PointLightComponent & light, const putils::Point3f & pos, float radius); 
