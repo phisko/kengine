@@ -13,10 +13,15 @@ namespace kengine {
 	// so long as you are careful to declare the reflectible attributes in the same order
 	// (as that order will define their GLSL locations)
 	struct GBufferTextures {
-		float position[4];
-		float normal[4];
-		float color[4];
-		float entityID[4];
+		// This format is not optimized, as the entity id could fit in with the normal or color
+		// However, this has not caused any performance issues so far, and this being a learning project
+		// for me I'd rather keep things clear and simple.
+		// If this is a no-no for you, please open an issue on github and I'll change things around
+
+		float position[4]; // x, y, z, depth
+		float normal[4]; // x, y, z, ignore
+		float color[4]; // r, g, b, ignore
+		float entityID[4]; // id, ignore, ignore, ignore
 
 		pmeta_get_attributes(
 			pmeta_reflectible_attribute(&GBufferTextures::position),
