@@ -1,7 +1,5 @@
 #pragma once
 
-#include <PolyVox/RawVolume.h>
-
 #include "packets/GBuffer.hpp"
 
 #include "System.hpp"

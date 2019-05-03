@@ -19,19 +19,25 @@ namespace kengine {
 		GLint model;
 		GLint view;
 		GLint proj;
+
+		GLint bones;
+
 		GLint texture_diffuse;
 		GLint texture_specular;
-		GLint bones;
+
+		GLint entityID;
 
 		pmeta_get_attributes(
 			pmeta_reflectible_attribute(&TexturedShader::model),
 			pmeta_reflectible_attribute(&TexturedShader::view),
 			pmeta_reflectible_attribute(&TexturedShader::proj),
 
+			pmeta_reflectible_attribute(&TexturedShader::bones),
+
 			pmeta_reflectible_attribute(&TexturedShader::texture_diffuse),
 			pmeta_reflectible_attribute(&TexturedShader::texture_specular),
 
-			pmeta_reflectible_attribute(&TexturedShader::bones)
+			pmeta_reflectible_attribute(&TexturedShader::entityID)
 		);
 
 	private:

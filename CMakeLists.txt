@@ -61,6 +61,11 @@ if (KENGINE_ASSIMP)
     target_link_libraries(kengine PUBLIC kengine_assimp)
 endif()
 
+if (KENGINE_POLYVOX)
+    add_subdirectory(common/systems/polyvox)
+    target_link_libraries(kengine PUBLIC kengine_polyvox)
+endif()
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} PARENT_SCOPE)
 
 target_link_libraries(kengine PUBLIC

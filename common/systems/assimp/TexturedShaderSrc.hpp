@@ -50,14 +50,18 @@ in vec2 TexCoords;
 layout (location = 0) out vec4 gposition;
 layout (location = 1) out vec3 gnormal;
 layout (location = 2) out vec3 gcolor;
+layout (location = 3) out float gentityID;
 
 uniform sampler2D texture_diffuse;
 uniform sampler2D texture_specular;
+
+uniform float entityID;
 
 void main() {
 	gposition = WorldPosition;
 	gnormal = Normal;
 	gcolor = texture(texture_diffuse, TexCoords).xyz;
+	gentityID = entityID;
 }
 	)";
 		}

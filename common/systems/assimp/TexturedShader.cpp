@@ -36,6 +36,8 @@ namespace kengine {
 		putils::gl::setUniform(this->proj, proj);
 
 		for (const auto &[e, textured, modelComp, transform, skeleton] : _em.getEntities<TexturedModelComponent, kengine::ModelComponent, kengine::TransformComponent3f, SkeletonComponent>()) {
+			putils::gl::setUniform(this->entityID, (float)e.id);
+
 			AssImpHelper::Locations locations;
 			locations.model = this->model;
 			locations.bones = this->bones;

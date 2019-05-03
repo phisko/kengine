@@ -33,6 +33,7 @@
 #include "GodRaysDirLight.hpp"
 #include "GodRaysPointLight.hpp"
 #include "GodRaysSpotLight.hpp"
+#include "Highlight.hpp"
 
 #include "Export.hpp"
 
@@ -119,6 +120,7 @@ namespace kengine {
 			_em += [=](kengine::Entity & e) { e += kengine::makePostProcessShaderComponent<Shaders::GodRaysPointLight>(_em); };
 			_em += [=](kengine::Entity & e) { e += kengine::makePostProcessShaderComponent<Shaders::GodRaysSpotLight>(_em); };
 			_em += [=](kengine::Entity & e) { e += kengine::makePostProcessShaderComponent<Shaders::LightSphere>(_em); };
+			_em += [=](kengine::Entity & e) { e += kengine::makePostProcessShaderComponent<Shaders::Highlight>(_em); };
 		}
 	}
 
