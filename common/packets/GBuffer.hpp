@@ -13,14 +13,14 @@ namespace kengine::packets {
 
 namespace kengine {
 	template<typename Textures>
-	void initGBuffer(kengine::ISystem & s) {
-		s.send(packets::VertexDataAttributeIterator{
+	void initGBuffer(kengine::EntityManager & em) {
+		em.send(packets::VertexDataAttributeIterator{
 			[](auto func) {
 				putils::for_each_attribute(Textures::get_attributes(), [&](auto name, auto member) {
 					func(name);
 				});
 			}
 		});
-		s.send(packets::GBufferSize{ Textures::get_attributes().size });
+		em.send(packets::GBufferSize{ Textures::get_attributes().size });
 	}
 }
