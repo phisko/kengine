@@ -12,13 +12,17 @@
 ##### Constructor
 
 ```cpp
-ImGuiComponent(const std::function<void()> & func);
+template<typename Func> // Func: void()
+ImGuiComponent(Func && func);
 ```
 
 ##### setFunc
 
 ```cpp
-void setFunc(const std::function<void()> & func);
+template<typename Func> // Func: void()
+void setFunc(Func && func);
 ```
 
 This wraps `func` with a call used to set up the ImGui context.
+
+`func` is stored as a [putils::function](putils/function.hpp). Its maximum size defaults to 64 and can be adjusted by defining the `KENGINE_IMGUI_FUNCTION_SIZE` macro.
