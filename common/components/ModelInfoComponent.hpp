@@ -25,7 +25,7 @@ namespace kengine {
 		float pitch = 0.f;
 		float yaw = 0.f;
 
-		std::function<void()> vertexRegisterFunc = nullptr;
+		void (*vertexRegisterFunc)() = nullptr;
 
 		pmeta_get_class_name(ModelInfoComponent);
 	};

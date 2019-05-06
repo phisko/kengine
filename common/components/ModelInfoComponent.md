@@ -43,7 +43,7 @@ Indicates transformations to apply in addition to that of the `Entity`'s `Transf
 ##### vertexRegisterFunc
 
 ```cpp
-std::function<void()> vertexRegisterFunc;
+void (*vertexRegisterFunc)();
 ```
 
 Function to set the OpenGL vertex array buffer attributes, which can be done by calling `putils::gl::setVertexType` or `putils::gl::setPolyVoxVertexType` functions.
