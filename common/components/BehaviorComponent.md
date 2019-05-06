@@ -1,6 +1,6 @@
 # [BehaviorComponent](BehaviorComponent.hpp)
 
-`Component` providing a function to execute for a `GameObject`.
+`Component` providing a function to execute for an `Entity`.
 
 ### Specs
 
@@ -12,7 +12,7 @@
 ##### func
 
 ```cpp
-std::function<void()> func = nullptr;
+putils::function<void(), KENGINE_BEHAVIOR_FUNCTION_SIZE> func = nullptr;
 ```
 
-Function to execute.
+Function to execute. Its maximum size defaults to 64 and can be adjusted by defining the `KENGINE_BEHAVIOR_FUNCTION_SIZE` macro.
