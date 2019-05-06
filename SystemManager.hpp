@@ -1,5 +1,9 @@
 #pragma once
 
+#ifndef KENGINE_AFTER_SYSTEM_FUNCTION_SIZE
+# define KENGINE_AFTER_SYSTEM_FUNCTION_SIZE 64
+#endif
+
 #include <utility>
 #include <cmath>
 #include <vector>
@@ -42,7 +46,8 @@ namespace kengine {
 		}
 		
     public:
-		void runAfterSystem(const std::function<void()> & func) { _afterSystem.push_back(func); }
+		template<typename Func>
+		void runAfterSystem(Func && func) { _afterSystem.push_back(FWD(func)); }
 
     private:
         void updateSystemList() noexcept {
@@ -217,6 +222,6 @@ namespace kengine {
 
 		std::vector<std::function<void(const char * directory)>> _onLoad;
 		std::vector<std::function<void(const char * directory)>> _onSave;
-		std::vector<std::function<void()>> _afterSystem;
+		std::vector<putils::function<void(), KENGINE_AFTER_SYSTEM_FUNCTION_SIZE>> _afterSystem;
     };
 }

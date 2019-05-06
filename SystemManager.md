@@ -65,7 +65,10 @@ Waits for the thread pool to complete its tasks.
 ##### runAfterSystem
 
 ```cpp
-void runAfterSystem(const std::function<void()> & func);
+template<typename Func> // Func: void()
+void runAfterSystem(Func && func);
 ```
 
 Lets `Systems` provide a function to be called after `execute` returns. This can be useful to call functions which could invalidate a state (such as `load`).
+
+`func` is stored as a [putils::function](putils/function.hpp). Its maximum size defaults to 64 and can be adjusted by defining the `KENGINE_AFTER_SYSTEM_FUNCTION_SIZE` macro.
