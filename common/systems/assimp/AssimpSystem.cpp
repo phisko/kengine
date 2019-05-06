@@ -373,9 +373,7 @@ namespace kengine {
 					bone.animNodes.push_back(findNodeAnim(allNodeAnims, bone.name));
 		}
 
-		auto loadFile(const char * file, kengine::EntityManager & em) {
-			const putils::string<KENGINE_ASSIMP_MODEL_PATH_MAX_LENGTH> f(file);
-
+		auto loadFile(const char * f, kengine::EntityManager & em) {
 			return [f, &em] {
 				auto & model = models[f];
 
@@ -384,13 +382,13 @@ namespace kengine {
 				auto & skeleton = e.attach<AssImp::AssImpSkeletonComponent>();
 				auto & animList = e.attach<AnimListComponent>();
 
-				const auto scene = model.importer.ReadFile(f.c_str(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals /*| aiProcess_OptimizeMeshes*/ | aiProcess_JoinIdenticalVertices);
+				const auto scene = model.importer.ReadFile(f, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals /*| aiProcess_OptimizeMeshes*/ | aiProcess_JoinIdenticalVertices);
 				if (scene == nullptr || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || scene->mRootNode == nullptr) {
 					std::cerr << model.importer.GetErrorString() << '\n';
 					assert(false);
 				}
 
-				const auto dir = putils::get_directory<64>(f.begin());
+				const auto dir = putils::get_directory<64>(f);
 				processNode(model, textures, dir.c_str(), scene->mRootNode, scene);
 
 				std::vector<aiNode *> allNodes;
@@ -457,7 +455,7 @@ namespace kengine {
 		};
 
 		_em += [this](kengine::Entity & e) {
-			e += ImGuiComponent([this] {
+			const auto func = [this] {
 				if (ImGui::Begin("Animations")) {
 					for (auto &[obj, model, anim] : _em.getEntities<ModelComponent, AnimationComponent>()) {
 						const auto & modelInfo = _em.getEntity(model.modelInfo);
@@ -479,7 +477,9 @@ namespace kengine {
 					}
 				}
 				ImGui::End();
-			});
+			};
+			static_assert(sizeof(func) < KENGINE_IMGUI_FUNCTION_SIZE);
+			e += ImGuiComponent(std::move(func));
 		};
 	}
 
@@ -498,13 +498,15 @@ namespace kengine {
 		p.e += TexturedModelComponent{};
 		p.e += SkeletonComponent{};
 
-		const auto it = AssImp::models.find(file.c_str());
+		auto it = AssImp::models.find(file.c_str());
 		if (it != AssImp::models.end()) {
 			p.e += kengine::ModelComponent{ it->second.id };
 			return;
 		}
 
 		auto & modelData = AssImp::models[file.c_str()];
+		it = AssImp::models.find(file.c_str());
+
 		modelData.pitch = layer.pitch;
 		modelData.yaw = layer.yaw;
 		modelData.offset = layer.boundingBox.topLeft;
@@ -512,7 +514,7 @@ namespace kengine {
 		_em += [&](kengine::Entity & e) {
 			modelData.id = e.id;
 			e += kengine::ModelLoaderComponent{
-				AssImp::loadFile(file.c_str(), _em),
+				AssImp::loadFile(it->first.c_str(), _em),
 				[]() { putils::gl::setVertexType<AssImp::ModelEntity::Mesh::Vertex>(); }
 			};
 		};
