@@ -38,13 +38,15 @@ Represents a model, comprised of several meshes.
 ##### func
 
 ```cpp
-std::function<ModelData()> func;
+putils::function<ModelData(), KENGINE_MODEL_LOADER_FUNCTION_SIZE> func;
 ```
+
+Its maximum size defaults to 64 and can be adjusted by defining the `KENGINE_MODEL_LOADER_FUNCTION_SIZE` macro.
 
 ##### vertexRegisterFunc
 
 ```cpp
-std::function<void()> vertexRegisterFunc;
+void (*vertexRegisterFunc)();
 ```
 
 Function to set the OpenGL vertex array buffer attributes, which can be done by calling `putils::gl::setVertexType` or `putils::gl::setPolyVoxVertexType` functions.

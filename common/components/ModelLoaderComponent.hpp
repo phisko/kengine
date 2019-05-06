@@ -1,10 +1,16 @@
 #pragma once
 
+#ifndef KENGINE_MODEL_LOADER_FUNCTION_SIZE
+# define KENGINE_MODEL_LOADER_FUNCTION_SIZE 64
+#endif
+
 #include "Point.hpp"
 #include "opengl/Program.hpp"
+#include "function.hpp"
 
 namespace kengine {
 	struct ModelLoaderComponent : kengine::not_serializable {
+
 		struct ModelData {
 			struct MeshData {
 				struct DataInfo {
@@ -25,8 +31,16 @@ namespace kengine {
 			float yaw = 0.f;
 		};
 
-		ModelLoaderComponent(const std::function<ModelData()> & func, const std::function<void()> & vertexRegisterFunc)
-			: func(func), vertexRegisterFunc(vertexRegisterFunc)
+		using function = putils::function<ModelData(), KENGINE_MODEL_LOADER_FUNCTION_SIZE>;
+		function func;
+		using VertexRegisterFunc = void(*)();
+		VertexRegisterFunc vertexRegisterFunc;
+
+		pmeta_get_class_name(ModelLoaderComponent);
+
+		template<typename Func>
+		ModelLoaderComponent(Func && func, VertexRegisterFunc vertexRegisterFunc)
+			: func(FWD(func)), vertexRegisterFunc(vertexRegisterFunc)
 		{}
 
 		ModelLoaderComponent() = default;
@@ -34,10 +48,5 @@ namespace kengine {
 		ModelLoaderComponent & operator=(const ModelLoaderComponent &) = default;
 		ModelLoaderComponent(ModelLoaderComponent &&) = default;
 		ModelLoaderComponent & operator=(ModelLoaderComponent &&) = default;
-
-		std::function<ModelData()> func;
-		std::function<void()> vertexRegisterFunc;
-
-		pmeta_get_class_name(ModelLoaderComponent);
 	};
 }
