@@ -52,30 +52,45 @@ namespace kengine {
 			int key;
 			bool pressed;
 		};
+
 		static putils::vector<KeyInfo, 128> keys;
+
+		static putils::Point2f lastPos;
+		struct ClickInfo {
+			putils::Point2f pos;
+			int button;
+			bool pressed;
+		};
+		static putils::vector<ClickInfo, 128> clicks;
 		static putils::vector<putils::Point2f, 128> positions;
 		static putils::vector<float, 128> scrolls;
+
+		static void click(GLFWwindow * window, int button, int action, int mods) {
+			if (clicks.full())
+				return;
+			if (action == GLFW_PRESS)
+				clicks.push_back(ClickInfo{ lastPos, button, true });
+			else if (action == GLFW_RELEASE)
+				clicks.push_back(ClickInfo{ lastPos, button, false });
+		}
 
 		static void move(GLFWwindow * window, double xpos, double ypos) {
 			if (positions.full())
 				return;
-
-			if (glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED)
-				positions.push_back(putils::Point2f{ (float)xpos, (float)ypos });
+			positions.push_back(putils::Point2f{ (float)xpos, (float)ypos });
+			lastPos.x = (float)xpos;
+			lastPos.y = (float)ypos;
 		}
 
 		static void scroll(GLFWwindow * window, double xoffset, double yoffset) {
 			if (scrolls.full())
 				return;
-
-			if (glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED)
-				scrolls.push_back((float)yoffset);
+			scrolls.push_back((float)yoffset);
 		}
 
 		static void key(GLFWwindow * window, int key, int scancode, int action, int mods) {
 			if (keys.full())
 				return;
-
 			if (action == GLFW_PRESS)
 				keys.push_back(KeyInfo{ key, true });
 			else if (action == GLFW_RELEASE)
@@ -147,6 +162,7 @@ namespace kengine {
 			glViewport(0, 0, width, height);
 		});
 
+		glfwSetMouseButtonCallback(window, Input::click);
 		glfwSetCursorPosCallback(window, Input::move);
 		glfwSetScrollCallback(window, Input::scroll);
 		glfwSetKeyCallback(window, Input::key);
@@ -205,6 +221,10 @@ namespace kengine {
 
 	void OpenGLSystem::handle(kengine::packets::VertexDataAttributeIterator p) {
 		_gBufferIterator = p;
+	}
+
+	void OpenGLSystem::handle(kengine::packets::GetGBufferTexture p) {
+		_gBuffer.getTexture(p.textureIndex, p.buff, p.buffSize);
 	}
 
 	void OpenGLSystem::initShader(putils::gl::Program & p) {
@@ -431,17 +451,21 @@ namespace kengine {
 					if (comp.onKey != nullptr)
 						comp.onKey(e.key, e.pressed);
 
-			if (!ImGui::GetIO().WantCaptureMouse)
-			{
-				for (const auto & pos : Input::positions)
-					if (comp.onMouseMove != nullptr)
+			if (!ImGui::GetIO().WantCaptureMouse) {
+				if (comp.onMouseButton != nullptr)
+					for (const auto & click : Input::clicks)
+						comp.onMouseButton(click.button, click.pos.x, click.pos.y, click.pressed);
+
+				if (comp.onMouseMove != nullptr)
+					for (const auto & pos : Input::positions)
 						comp.onMouseMove(pos.x, pos.y);
-				for (const auto delta : Input::scrolls)
-					if (comp.onMouseWheel != nullptr)
+				if (comp.onMouseWheel != nullptr)
+					for (const auto delta : Input::scrolls)
 						comp.onMouseWheel(delta, 0.f, 0.f);
 			}
 		}
 		Input::keys.clear();
+		Input::clicks.clear();
 		Input::positions.clear();
 		Input::scrolls.clear();
 	}

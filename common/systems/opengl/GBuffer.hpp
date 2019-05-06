@@ -74,6 +74,11 @@ namespace kengine {
 		auto getTextureCount() const { return textures.size(); }
 		auto getFBO() const { return _fbo; }
 
+		void getTexture(size_t textureIndex, float * buff, size_t buffSize) {
+			glBindTexture(GL_TEXTURE_2D, textures[textureIndex]);
+			glGetnTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, buffSize * sizeof(float), buff);
+		}
+
 		std::vector<GLuint> textures;
 
 		bool isInit() const { return !textures.empty(); }

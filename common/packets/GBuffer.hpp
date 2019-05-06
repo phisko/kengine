@@ -9,6 +9,12 @@ namespace kengine::packets {
 		using AttributeFunc = const std::function<void(const char *)> &;
 		std::function<void(AttributeFunc func)> func = nullptr;
 	};
+
+	struct GetGBufferTexture {
+		size_t textureIndex;
+		float * buff;
+		size_t buffSize;
+	};
 }
 
 namespace kengine {

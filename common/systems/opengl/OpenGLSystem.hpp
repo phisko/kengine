@@ -33,7 +33,9 @@ namespace kengine {
 
 	struct ModelLoaderComponent;
 
-	class OpenGLSystem : public kengine::System<OpenGLSystem, kengine::packets::RegisterEntity, kengine::packets::GBufferSize, kengine::packets::VertexDataAttributeIterator> {
+	class OpenGLSystem : public kengine::System<OpenGLSystem, kengine::packets::RegisterEntity,
+		kengine::packets::GBufferSize, kengine::packets::VertexDataAttributeIterator,
+		kengine::packets::GetGBufferTexture> {
 	public:
 		OpenGLSystem(kengine::EntityManager & em);
 		~OpenGLSystem();
@@ -44,6 +46,7 @@ namespace kengine {
 		void handle(kengine::packets::RegisterEntity p);
 		void handle(kengine::packets::GBufferSize p);
 		void handle(kengine::packets::VertexDataAttributeIterator p);
+		void handle(kengine::packets::GetGBufferTexture p);
 
 	private:
 		void createObject(kengine::Entity & e, const kengine::ModelLoaderComponent & meshLoader);
