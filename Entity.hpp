@@ -76,7 +76,7 @@ namespace kengine {
 
 		template<typename T>
 		Entity & operator+=(T && comp) {
-			attach<T>() = FWD(comp);
+			attach<std::decay_t<T>>() = FWD(comp);
 			return *this;
 		}
 
