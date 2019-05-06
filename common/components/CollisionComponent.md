@@ -12,5 +12,7 @@
 ##### onCollide
 
 ```cpp
-std::function<void(kengine::Entity & other)> onCollide;
+putils::function<void(kengine::Entity & self, kengine::Entity & other), KENGINE_COLLISION_FUNCTION_SIZE> onCollide;
 ```
+
+Its maximum size defaults to 64 and can be adjusted by defining the `KENGINE_COLLISION_FUNCTION_SIZE` macro.
