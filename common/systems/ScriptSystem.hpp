@@ -92,7 +92,7 @@ namespace kengine {
 				)
 			);
 
-			registerType<EntityView>();
+			registerType<Entity>();
 		}
 
 	public:
@@ -137,7 +137,7 @@ namespace kengine {
 	public:
 		void execute() final {
 			{ pmeta_with(static_cast<CRTP &>(*this)) {
-				for (const auto & [go, comp] : _em.getEntities<CompType>()) {
+				for (auto & [go, comp] : _em.getEntities<CompType>()) {
 					_.setSelf(go);
 					for (const auto & s : comp.getScripts())
 						_.executeScript(s.c_str());
@@ -151,14 +151,26 @@ namespace kengine {
 		void registerComponent() noexcept {
 			{ pmeta_with(static_cast<CRTP &>(*this)) {
 				_.registerEntityMember(putils::concat("get", T::get_class_name()),
-					std::function<T &(EntityView)>(
-						[](EntityView self) { return std::ref(self.get<T>()); }
+					std::function<T &(Entity &)>(
+						[](Entity & self) { return std::ref(self.get<T>()); }
 						)
 				);
 
 				_.registerEntityMember(putils::concat("has", T::get_class_name()),
-					std::function<bool(EntityView)>(
-						[](EntityView self) { return self.has<T>(); }
+					std::function<bool(Entity &)>(
+						[](Entity & self) { return self.has<T>(); }
+						)
+				);
+
+				_.registerEntityMember(putils::concat("attach", T::get_class_name()),
+					std::function<T &(Entity &)>(
+						[](Entity & self) { return std::ref(self.attach<T>()); }
+						)
+				);
+
+				_.registerEntityMember(putils::concat("detach", T::get_class_name()),
+					std::function<void(Entity &)>(
+						[](Entity & self) { self.detach<T>(); }
 						)
 				);
 			}}

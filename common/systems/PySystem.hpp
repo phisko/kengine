@@ -10,7 +10,6 @@ namespace kengine {
         PySystem(EntityManager & em) : ScriptSystem(em) {
             py::globals()["pk"] = _m;
 			ScriptSystem::init();
-			_m.attr("self") = &_self;
         }
 
     public:
@@ -32,15 +31,14 @@ namespace kengine {
 
 		template<typename T>
 		void registerTypeInternal() {
-			if constexpr (std::is_same<T, EntityView>::value || std::is_same<T, Entity>::value) {
-				_go = new py::class_<EntityView>(_m, EntityView::get_class_name(), py::dynamic_attr());
-				putils::for_each_attribute(EntityView::get_attributes(), [this](auto name, auto member) {
+			if constexpr (std::is_same<T, Entity>::value) {
+				_go = new py::class_<Entity>(_m, Entity::get_class_name(), py::dynamic_attr());
+				putils::for_each_attribute(Entity::get_attributes(), [this](auto name, auto member) {
 					_go->def_readwrite(name, member);
 				});
-				putils::for_each_attribute(EntityView::get_methods(), [this](auto name, auto member) {
+				putils::for_each_attribute(Entity::get_methods(), [this](auto name, auto member) {
 					_go->def(name, member);
 				});
-				// _go->def("__str__", [](EntityView obj) { return putils::to_string(obj); });
 			} else
 				putils::python::registerType<T>(_m);
 		}
@@ -51,13 +49,12 @@ namespace kengine {
 		}
 
 	public:
-		void setSelf(EntityView go) { _self = go;  }
+		void setSelf(Entity & go) { _m.attr("self") = &go; }
 		void unsetSelf() const {}
 
 	private:
 		py::scoped_interpreter _guard;
 		py::module _m{ "pk" };
-		py::class_<EntityView> * _go;
-		EntityView _self { Entity::INVALID_ID, 0 };
+		py::class_<Entity> * _go;
 	};
 }

@@ -15,7 +15,6 @@ namespace kengine {
         LuaSystem(EntityManager & em) : ScriptSystem(em) {
             _lua.open_libraries();
 			ScriptSystem::init();
-			_lua["self"] = &_self;
         }
 
     public:
@@ -26,7 +25,7 @@ namespace kengine {
 
 		template<typename Ret, typename ...Args>
 		void registerEntityMember(const std::string & name, const std::function<Ret(Args...)> & func) {
-			_lua[EntityView::get_class_name()][name] = FWD(func);
+			_lua[Entity::get_class_name()][name] = FWD(func);
 		}
 
 		template<typename T>
@@ -40,7 +39,7 @@ namespace kengine {
         }
 
     public:
-		void setSelf(EntityView go) { _self = go; }
+		void setSelf(Entity & go) { _lua["self"] = &go; }
 		void unsetSelf() const {}
 
     public:
@@ -53,6 +52,5 @@ namespace kengine {
 
     private:
         sol::state & _lua = *(new sol::state);
-		EntityView _self{ Entity::INVALID_ID, 0 };
     };
 }
