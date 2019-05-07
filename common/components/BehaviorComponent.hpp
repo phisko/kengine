@@ -16,7 +16,7 @@ namespace kengine {
 		BehaviorComponent() = default;
 
 		template<typename Func>
-		BehaviorComponent(Func && func) : func(FWD(func)) {}
+		BehaviorComponent(const Func & func) : func(func) {}
 
 		function func = nullptr;
 
