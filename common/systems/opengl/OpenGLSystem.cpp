@@ -6,7 +6,6 @@
 #include "examples/imgui_impl_opengl3.h"
 
 #include "EntityManager.hpp"
-#include "systems/LuaSystem.hpp"
 
 #include "components/ModelLoaderComponent.hpp"
 #include "components/ModelComponent.hpp"
