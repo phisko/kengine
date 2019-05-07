@@ -1,5 +1,13 @@
 #pragma once
 
+#ifndef KENGINE_ANIMATION_NAME_LENGTH
+# define KENGINE_ANIMATION_NAME_LENGTH 64
+#endif
+
+#ifndef KENGINE_ANIMATION_FILE_PATH_LENGTH
+# define KENGINE_ANIMATION_FILE_PATH_LENGTH 128
+#endif
+
 #include <vector>
 #include "string.hpp"
 
@@ -14,7 +22,7 @@ namespace kengine {
 
 	struct AnimListComponent : kengine::not_serializable {
 		struct Anim {
-			putils::string<64> name;
+			putils::string<KENGINE_ANIMATION_NAME_LENGTH> name;
 			float totalTime;
 			float ticksPerSecond;
 		};
@@ -23,4 +31,8 @@ namespace kengine {
 		pmeta_get_class_name(AnimListComponent);
 	};
 
+	struct AnimFilesComponent {
+		std::vector<putils::string<KENGINE_ANIMATION_FILE_PATH_LENGTH>> files;
+		pmeta_get_class_name(AnimFilesComponent);
+	};
 }
