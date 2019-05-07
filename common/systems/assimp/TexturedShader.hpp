@@ -22,6 +22,7 @@ namespace kengine {
 
 		GLint bones;
 
+		GLint hasTexture;
 		GLint texture_diffuse;
 		GLint texture_specular;
 
@@ -34,6 +35,7 @@ namespace kengine {
 
 			pmeta_reflectible_attribute(&TexturedShader::bones),
 
+			pmeta_reflectible_attribute(&TexturedShader::hasTexture),
 			pmeta_reflectible_attribute(&TexturedShader::texture_diffuse),
 			pmeta_reflectible_attribute(&TexturedShader::texture_specular),
 

@@ -32,6 +32,7 @@ namespace kengine {
 		struct Locations {
 			GLint model;
 			GLint bones;
+			GLint hasTexture;
 			size_t diffuseTextureID;
 			size_t specularTextureID;
 		};

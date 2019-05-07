@@ -12,8 +12,10 @@ namespace kengine {
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec2 texCoords;
-layout (location = 3) in vec4 boneWeights;
-layout (location = 4) in ivec4 boneIDs;
+layout (location = 3) in vec3 color;
+
+layout (location = 4) in vec4 boneWeights;
+layout (location = 5) in ivec4 boneIDs;
 
 uniform mat4 proj;
 uniform mat4 view;
@@ -25,6 +27,7 @@ uniform mat4 bones[MAX_BONES];
 out vec4 WorldPosition;
 out vec3 Normal;
 out vec2 TexCoords;
+out vec3 Color;
 
 void main() {
 	mat4 boneMatrix = bones[boneIDs[0]] * boneWeights[0];
@@ -35,6 +38,7 @@ void main() {
 	WorldPosition = model * boneMatrix * vec4(position, 1.0);
 	Normal = (boneMatrix * vec4(normal, 0.0)).xyz;
 	TexCoords = texCoords;
+	Color = color;
 
 	gl_Position = proj * view * WorldPosition;
 }
@@ -46,12 +50,14 @@ void main() {
 in vec4 WorldPosition;
 in vec3 Normal;
 in vec2 TexCoords;
+in vec3 Color;
 
 layout (location = 0) out vec4 gposition;
 layout (location = 1) out vec3 gnormal;
 layout (location = 2) out vec3 gcolor;
 layout (location = 3) out float gentityID;
 
+uniform int hasTexture;
 uniform sampler2D texture_diffuse;
 uniform sampler2D texture_specular;
 
@@ -60,8 +66,12 @@ uniform float entityID;
 void main() {
 	gposition = WorldPosition;
 	gnormal = Normal;
-	gcolor = texture(texture_diffuse, TexCoords).xyz;
 	gentityID = entityID;
+
+	if (hasTexture == 0)
+		gcolor = Color;
+	else
+		gcolor = texture(texture_diffuse, TexCoords).xyz;
 }
 	)";
 		}

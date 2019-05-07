@@ -56,6 +56,7 @@ namespace kengine {
 					float position[3];
 					float normal[3];
 					float texCoords[2];
+					float color[3];
 
 					float boneWeights[KENGINE_ASSIMP_BONE_INFO_PER_VERTEX] = { 0.f };
 					unsigned int boneIDs[KENGINE_ASSIMP_BONE_INFO_PER_VERTEX] = { 0 };
@@ -64,6 +65,7 @@ namespace kengine {
 						pmeta_reflectible_attribute(&Vertex::position),
 						pmeta_reflectible_attribute(&Vertex::normal),
 						pmeta_reflectible_attribute(&Vertex::texCoords),
+						pmeta_reflectible_attribute(&Vertex::color),
 
 						pmeta_reflectible_attribute(&Vertex::boneWeights),
 						pmeta_reflectible_attribute(&Vertex::boneIDs)
@@ -265,6 +267,12 @@ namespace kengine {
 					vertex.texCoords[1] = 0.f;
 				}
 
+				if (mesh->mColors[0] != nullptr) {
+					vertex.color[0] = mesh->mColors[0][i].r;
+					vertex.color[1] = mesh->mColors[0][i].g;
+					vertex.color[2] = mesh->mColors[0][i].b;
+				}
+
 				ret.vertices.push_back(vertex);
 			}
 
@@ -357,9 +365,9 @@ namespace kengine {
 			return nullptr;
 		}
 
-		static void addAnim(aiAnimation * aiAnim, AssImpSkeletonComponent & skeleton, AnimListComponent & animList) {
+		static void addAnim(const char * animFile, aiAnimation * aiAnim, AssImpSkeletonComponent & skeleton, AnimListComponent & animList) {
 			AnimListComponent::Anim anim;
-			anim.name = aiAnim->mName.data;
+			anim.name.set("%s/%s", animFile, aiAnim->mName.data);
 			anim.ticksPerSecond = (float)(aiAnim->mTicksPerSecond != 0 ? aiAnim->mTicksPerSecond : 25.0);
 			anim.totalTime = (float)aiAnim->mDuration / anim.ticksPerSecond;
 			animList.allAnims.push_back(anim);
@@ -373,8 +381,8 @@ namespace kengine {
 					bone.animNodes.push_back(findNodeAnim(allNodeAnims, bone.name));
 		}
 
-		auto loadFile(const char * f, kengine::EntityManager & em) {
-			return [f, &em] {
+		auto loadFile(const char * f, kengine::EntityManager & em, kengine::Entity::ID objectID) {
+			return [f, &em, objectID] {
 				auto & model = models[f];
 
 				auto & e = em.getEntity(model.id);
@@ -411,9 +419,24 @@ namespace kengine {
 
 				skeleton.globalInverseTransform = glm::inverse(toglmWeird(scene->mRootNode->mTransformation));
 
-				for (unsigned int i = 0; i < scene->mNumAnimations; ++i) {
-					const auto aiAnim = scene->mAnimations[i];
-					addAnim(aiAnim, skeleton, animList);
+				for (unsigned int i = 0; i < scene->mNumAnimations; ++i)
+					addAnim(f, scene->mAnimations[i], skeleton, animList);
+
+				const auto & object = em.getEntity(objectID);
+				if (object.has<AnimFilesComponent>()) {
+					const auto & files = object.get<AnimFilesComponent>();
+					for (const auto & f : files.files) {
+						auto & model = models[f.c_str()];
+
+						const auto scene = model.importer.ReadFile(f.c_str(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals /*| aiProcess_OptimizeMeshes*/ | aiProcess_JoinIdenticalVertices);
+						if (scene == nullptr || scene->mRootNode == nullptr) {
+							std::cerr << model.importer.GetErrorString() << '\n';
+							assert(false);
+						}
+
+						for (unsigned int i = 0; i < scene->mNumAnimations; ++i)
+							addAnim(f.c_str(), scene->mAnimations[i], skeleton, animList);
+					}
 				}
 
 				kengine::ModelLoaderComponent::ModelData ret;
@@ -514,7 +537,7 @@ namespace kengine {
 		_em += [&](kengine::Entity & e) {
 			modelData.id = e.id;
 			e += kengine::ModelLoaderComponent{
-				AssImp::loadFile(it->first.c_str(), _em),
+				AssImp::loadFile(it->first.c_str(), _em, p.e.id),
 				[]() { putils::gl::setVertexType<AssImp::ModelEntity::Mesh::Vertex>(); }
 			};
 		};

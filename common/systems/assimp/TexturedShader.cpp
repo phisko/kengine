@@ -41,6 +41,7 @@ namespace kengine {
 			AssImpHelper::Locations locations;
 			locations.model = this->model;
 			locations.bones = this->bones;
+			locations.hasTexture = this->hasTexture;
 			locations.diffuseTextureID = _diffuseTextureID;
 			locations.specularTextureID = _specularTextureID;
 

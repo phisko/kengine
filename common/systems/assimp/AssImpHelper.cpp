@@ -33,15 +33,17 @@ namespace kengine {
 
 				if (useTextures) {
 					const auto & meshTextures = textures.meshes[i];
-					assert(!meshTextures.diffuse.empty());
-					glActiveTexture(GL_TEXTURE0 + locations.diffuseTextureID);
-					glBindTexture(GL_TEXTURE_2D, meshTextures.diffuse[0]);
+					if (!meshTextures.diffuse.empty()) {
+						glActiveTexture(GL_TEXTURE0 + locations.diffuseTextureID);
+						glBindTexture(GL_TEXTURE_2D, meshTextures.diffuse[0]);
+					}
+					putils::gl::setUniform(locations.hasTexture, meshTextures.diffuse.empty() ? 0 : 1);
 
 					glActiveTexture(GL_TEXTURE0 + locations.specularTextureID);
-					if (meshTextures.specular.empty())
-						glBindTexture(GL_TEXTURE_2D, meshTextures.diffuse[0]);
-					else
+					if (!meshTextures.specular.empty())
 						glBindTexture(GL_TEXTURE_2D, meshTextures.specular[0]);
+					else if (!meshTextures.diffuse.empty())
+						glBindTexture(GL_TEXTURE_2D, meshTextures.diffuse[0]);
 				}
 
 				const auto & meshInfo = modelInfo.meshes[i];
