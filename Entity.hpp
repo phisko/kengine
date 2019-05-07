@@ -68,11 +68,7 @@ namespace kengine {
 		Entity(ID id = detail::INVALID, Mask componentMask = 0, EntityManager * manager = nullptr) : EntityView(id, componentMask), manager(manager) {}
 		~Entity() = default;
 		Entity(const Entity &) = default;
-		Entity & operator=(const Entity & rhs) {
-			id = rhs.id;
-			componentMask = rhs.componentMask;
-			return *this;
-		}
+		Entity & operator=(const Entity & rhs) = default;
 
 		template<typename T>
 		Entity & operator+=(T && comp) {
