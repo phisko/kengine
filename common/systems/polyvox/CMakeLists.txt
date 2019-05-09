@@ -4,8 +4,7 @@
 
 set(name kengine_polyvox)
 
-file(GLOB src
-        *.cpp *.hpp)
+file(GLOB src *.cpp)
 
 if (UNIX)
     set(type SHARED)

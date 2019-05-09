@@ -31,12 +31,7 @@ endif()
 set(PUTILS_BUILD_MEDIATOR TRUE)
 add_subdirectory(putils)
 
-file(GLOB src_files
-        *.cpp
-        *.hpp
-        common/*/*.cpp
-        common/*/*.hpp
-        )
+file(GLOB src_files *.cpp)
 
 if (UNIX)
     set(type SHARED)
@@ -44,7 +39,7 @@ elseif (WIN32)
     set(type STATIC)
 endif ()
 
-add_library(kengine ${type} Component.cpp)
+add_library(kengine ${type} ${src_files})
 
 if (KENGINE_SFML)
     add_subdirectory(common/systems/sfml)

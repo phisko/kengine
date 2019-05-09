@@ -10,9 +10,9 @@ add_subdirectory(libs/glfw)
 add_subdirectory(libs/glm/glm)
 
 file(GLOB src
-	libs/soil/src/*
-	*.cpp *.hpp
-    shaders/*.cpp shaders/*.hpp
+	libs/soil/src/*.cpp
+	*.cpp
+	shaders/*.cpp
 )
 
 if (UNIX)

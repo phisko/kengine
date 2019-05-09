@@ -8,8 +8,7 @@ add_subdirectory(libs/assimp)
 
 set(name kengine_assimp)
 
-file(GLOB src
-        *.cpp *.hpp)
+file(GLOB src *.cpp)
 
 if (UNIX)
     set(type SHARED)
