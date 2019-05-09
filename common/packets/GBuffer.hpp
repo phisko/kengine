@@ -10,7 +10,7 @@ namespace kengine::packets {
 		std::function<void(AttributeFunc func)> func = nullptr;
 	};
 
-	struct GetGBufferTexture {
+	struct GetGBufferTexture { // WARNING: texture is flipped vertically (you'll want to do `y = (height - y)` before indexing)
 		size_t textureIndex;
 		float * buff;
 		size_t buffSize;
