@@ -53,7 +53,9 @@ namespace kengine {
 		virtual void run(kengine::Entity & e, DirLightComponent & light, const putils::Point3f & pos, size_t screenWidth, size_t screenHeight) = 0;
 		virtual void run(kengine::Entity & e, SpotLightComponent & light, const putils::Point3f & pos, size_t screenWidth, size_t screenHeight) = 0;
 	};
-	struct ShadowMapShaderComponent : kengine::not_serializable {};
+	struct ShadowMapShaderComponent : kengine::not_serializable {
+		pmeta_get_class_name(ShadowMapShaderComponent);
+	};
 
 	struct DepthCubeComponent {
 		GLuint fbo = -1;
@@ -65,5 +67,7 @@ namespace kengine {
 		ShadowCubeShader(bool usesGBuffer = false, const char * name = "") : Program(usesGBuffer, name) {}
 		virtual void run(kengine::Entity & e, PointLightComponent & light, const putils::Point3f & pos, float radius, size_t screenWidth, size_t screenHeight) = 0;
 	};
-	struct ShadowCubeShaderComponent : kengine::not_serializable {};
+	struct ShadowCubeShaderComponent : kengine::not_serializable {
+		pmeta_get_class_name(ShadowCubeShaderComponent);
+	};
 }
