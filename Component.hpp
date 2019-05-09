@@ -105,6 +105,8 @@ namespace kengine {
 #ifndef NDEBUG
 					if constexpr (putils::has_member_get_class_name<Comp>::value)
 						std::cout << ret->id << ' ' << Comp::get_class_name() << '\n';
+					else
+						std::cout << ret->id << ' ' << typeid(Comp).name() << '\n';
 #endif
 				}
 			}
