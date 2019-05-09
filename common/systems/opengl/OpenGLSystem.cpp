@@ -198,7 +198,7 @@ namespace kengine {
 			initShader(*p.e.get<kengine::PostProcessShaderComponent>().shader);
 	}
 
-	void OpenGLSystem::handle(kengine::packets::GBufferSize p) {
+	void OpenGLSystem::handle(kengine::packets::DefineGBufferSize p) {
 		if (_gBuffer.isInit())
 			return;
 
@@ -220,6 +220,10 @@ namespace kengine {
 
 	void OpenGLSystem::handle(kengine::packets::VertexDataAttributeIterator p) {
 		_gBufferIterator = p;
+	}
+
+	void OpenGLSystem::handle(kengine::packets::GetGBufferSize p) {
+		p.size = _gBuffer.getSize();
 	}
 
 	void OpenGLSystem::handle(kengine::packets::GetGBufferTexture p) {

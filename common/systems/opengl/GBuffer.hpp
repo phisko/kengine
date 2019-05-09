@@ -3,6 +3,7 @@
 #include <vector>
 #include <GL/glew.h>
 #include <GL/GL.h>
+#include "Point.hpp"
 #include "packets/GBuffer.hpp"
 
 namespace kengine {
@@ -11,6 +12,8 @@ namespace kengine {
 		void init(size_t width, size_t height, size_t nbAttributes) {
 			if (!textures.empty())
 				return; // Already init
+
+			_size = { width, height };
 
 			textures.resize(nbAttributes);
 
@@ -47,6 +50,8 @@ namespace kengine {
 		}
 
 		void resize(size_t screenWidth, size_t screenHeight) {
+			_size = { screenWidth, screenHeight };
+
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fbo);
 
 			for (const auto texture : textures) {
@@ -74,6 +79,8 @@ namespace kengine {
 		auto getTextureCount() const { return textures.size(); }
 		auto getFBO() const { return _fbo; }
 
+		const putils::Point2ui & getSize() const { return _size; }
+
 		void getTexture(size_t textureIndex, float * buff, size_t buffSize) {
 			glBindTexture(GL_TEXTURE_2D, textures[textureIndex]);
 			glGetnTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, buffSize * sizeof(float), buff);
@@ -86,5 +93,6 @@ namespace kengine {
 	private:
 		GLuint _fbo;
 		GLuint _depthTexture;
+		putils::Point2ui _size;
 	};
 }

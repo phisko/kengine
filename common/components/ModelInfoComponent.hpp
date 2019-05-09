@@ -34,6 +34,9 @@ namespace kengine {
 		struct MeshTextures {
 			std::vector<unsigned int> diffuse;
 			std::vector<unsigned int> specular;
+
+			putils::Point3f diffuseColor;
+			putils::Point3f specularColor;
 		};
 
 		std::vector<MeshTextures> meshes; // Must match those in ModelInfoComponent

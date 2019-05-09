@@ -37,6 +37,9 @@ namespace kengine {
 						glActiveTexture(GL_TEXTURE0 + locations.diffuseTextureID);
 						glBindTexture(GL_TEXTURE_2D, meshTextures.diffuse[0]);
 					}
+					else
+						putils::gl::setUniform(locations.diffuseColor, meshTextures.diffuseColor);
+
 					putils::gl::setUniform(locations.hasTexture, meshTextures.diffuse.empty() ? 0 : 1);
 
 					glActiveTexture(GL_TEXTURE0 + locations.specularTextureID);
@@ -44,6 +47,8 @@ namespace kengine {
 						glBindTexture(GL_TEXTURE_2D, meshTextures.specular[0]);
 					else if (!meshTextures.diffuse.empty())
 						glBindTexture(GL_TEXTURE_2D, meshTextures.diffuse[0]);
+					else
+						putils::gl::setUniform(locations.specularColor, meshTextures.specularColor);
 				}
 
 				const auto & meshInfo = modelInfo.meshes[i];

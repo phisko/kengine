@@ -25,6 +25,8 @@ namespace kengine {
 		GLint hasTexture;
 		GLint texture_diffuse;
 		GLint texture_specular;
+		GLint diffuseColor;
+		GLint specularColor;
 
 		GLint entityID;
 
@@ -38,6 +40,8 @@ namespace kengine {
 			pmeta_reflectible_attribute(&TexturedShader::hasTexture),
 			pmeta_reflectible_attribute(&TexturedShader::texture_diffuse),
 			pmeta_reflectible_attribute(&TexturedShader::texture_specular),
+			pmeta_reflectible_attribute(&TexturedShader::diffuseColor),
+			pmeta_reflectible_attribute(&TexturedShader::specularColor),
 
 			pmeta_reflectible_attribute(&TexturedShader::entityID)
 		);

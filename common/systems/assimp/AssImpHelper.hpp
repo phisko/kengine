@@ -32,9 +32,13 @@ namespace kengine {
 		struct Locations {
 			GLint model;
 			GLint bones;
+
 			GLint hasTexture;
 			size_t diffuseTextureID;
 			size_t specularTextureID;
+
+			GLint diffuseColor;
+			GLint specularColor;
 		};
 
 		void drawModel(kengine::EntityManager & em, const kengine::ModelComponent & model, const kengine::TransformComponent3f & transform, const kengine::SkeletonComponent & skeleton, bool useTextures, const Locations & locations);

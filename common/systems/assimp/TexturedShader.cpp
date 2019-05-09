@@ -44,6 +44,8 @@ namespace kengine {
 			locations.hasTexture = this->hasTexture;
 			locations.diffuseTextureID = _diffuseTextureID;
 			locations.specularTextureID = _specularTextureID;
+			locations.specularColor = this->specularColor;
+			locations.diffuseColor = this->diffuseColor;
 
 			AssImpHelper::drawModel(_em, modelComp, transform, skeleton, true, locations);
 		}

@@ -1,19 +1,23 @@
 #pragma once
 
 namespace kengine::packets {
-	struct GBufferSize {
-		size_t nbAttributes;
-	};
-
-	struct VertexDataAttributeIterator {
-		using AttributeFunc = const std::function<void(const char *)> &;
-		std::function<void(AttributeFunc func)> func = nullptr;
+	struct GetGBufferSize {
+		putils::Point2ui & size;
 	};
 
 	struct GetGBufferTexture { // WARNING: texture is flipped vertically (you'll want to do `y = (height - y)` before indexing)
 		size_t textureIndex;
 		float * buff;
 		size_t buffSize;
+	};
+
+	struct DefineGBufferSize {
+		size_t nbAttributes;
+	};
+
+	struct VertexDataAttributeIterator {
+		using AttributeFunc = const std::function<void(const char *)> &;
+		std::function<void(AttributeFunc func)> func = nullptr;
 	};
 }
 
@@ -27,6 +31,6 @@ namespace kengine {
 				});
 			}
 		});
-		em.send(packets::GBufferSize{ Textures::get_attributes().size });
+		em.send(packets::DefineGBufferSize{ Textures::get_attributes().size });
 	}
 }

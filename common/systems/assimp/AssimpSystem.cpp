@@ -27,6 +27,8 @@
 #include "components/ShaderComponent.hpp"
 #include "components/ImGuiComponent.hpp"
 
+#include "packets/GBuffer.hpp"
+
 #include "AssImpHelper.hpp"
 
 namespace kengine {
@@ -56,8 +58,6 @@ namespace kengine {
 					float position[3];
 					float normal[3];
 					float texCoords[2];
-					float color[3];
-
 					float boneWeights[KENGINE_ASSIMP_BONE_INFO_PER_VERTEX] = { 0.f };
 					unsigned int boneIDs[KENGINE_ASSIMP_BONE_INFO_PER_VERTEX] = { 0 };
 
@@ -65,7 +65,6 @@ namespace kengine {
 						pmeta_reflectible_attribute(&Vertex::position),
 						pmeta_reflectible_attribute(&Vertex::normal),
 						pmeta_reflectible_attribute(&Vertex::texCoords),
-						pmeta_reflectible_attribute(&Vertex::color),
 
 						pmeta_reflectible_attribute(&Vertex::boneWeights),
 						pmeta_reflectible_attribute(&Vertex::boneIDs)
@@ -267,12 +266,6 @@ namespace kengine {
 					vertex.texCoords[1] = 0.f;
 				}
 
-				if (mesh->mColors[0] != nullptr) {
-					vertex.color[0] = mesh->mColors[0][i].r;
-					vertex.color[1] = mesh->mColors[0][i].g;
-					vertex.color[2] = mesh->mColors[0][i].b;
-				}
-
 				ret.vertices.push_back(vertex);
 			}
 
@@ -319,6 +312,12 @@ namespace kengine {
 				const auto material = scene->mMaterials[mesh->mMaterialIndex];
 				loadMaterialTextures(meshTextures.diffuse, directory, material, aiTextureType_DIFFUSE);
 				loadMaterialTextures(meshTextures.specular, directory, material, aiTextureType_SPECULAR);
+
+				aiColor3D color{ 0.f, 0.f, 0.f };
+				material->Get(AI_MATKEY_COLOR_DIFFUSE, color);
+				meshTextures.diffuseColor = { color.r, color.g, color.b };
+				material->Get(AI_MATKEY_COLOR_SPECULAR, color);
+				meshTextures.specularColor = { color.r, color.g, color.b };
 			}
 			else
 				assert(false);
@@ -477,33 +476,30 @@ namespace kengine {
 			e += kengine::ShadowCubeShaderComponent{};
 		};
 
-		_em += [this](kengine::Entity & e) {
-			const auto func = [this] {
-				if (ImGui::Begin("Animations")) {
-					for (auto &[obj, model, anim] : _em.getEntities<ModelComponent, AnimationComponent>()) {
-						const auto & modelInfo = _em.getEntity(model.modelInfo);
-						const auto & animList = modelInfo.get<AnimListComponent>();
-						if (animList.allAnims.empty())
-							continue;
+	}
 
-						const char * tab[64];
-						const auto minLength = std::min(animList.allAnims.size(), lengthof(tab));
-						for (unsigned int i = 0; i < minLength; ++i)
-							tab[i] = animList.allAnims[i].name.data();
-						int currentAnim = anim.currentAnim;
-						ImGui::Columns(2);
-						ImGui::Combo(putils::string<64>("%d", obj.id), &currentAnim, tab, minLength);
-						ImGui::NextColumn();
-						ImGui::InputFloat(putils::string<64>("Speed##%d", obj.id), &anim.speed);
-						ImGui::Columns();
-						anim.currentAnim = currentAnim;
-					}
-				}
-				ImGui::End();
-			};
-			static_assert(sizeof(func) < KENGINE_IMGUI_FUNCTION_SIZE);
-			e += ImGuiComponent(std::move(func));
-		};
+#ifndef KENGINE_ASSIMP_MAX_WINDOW_WIDTH
+# define KENGINE_ASSIMP_MAX_WINDOW_WIDTH 1920
+#endif
+
+#ifndef KENGINE_ASSIMP_MAX_WINDOW_HEIGHT
+# define KENGINE_ASSIMP_MAX_WINDOW_HEIGHT 1080
+#endif
+
+	void AssImpSystem::handle(kengine::packets::GetEntityInPixel p) {
+		static constexpr auto GBUFFER_TEXTURE_COMPONENTS = 4;
+		static constexpr auto GBUFFER_ENTITY_LOCATION = 3;
+		static constexpr auto textureSize = KENGINE_ASSIMP_MAX_WINDOW_WIDTH * KENGINE_ASSIMP_MAX_WINDOW_HEIGHT * GBUFFER_TEXTURE_COMPONENTS;
+		static float texture[textureSize];
+
+		putils::Point2ui gBufferSize;
+		send(kengine::packets::GetGBufferSize{ gBufferSize });
+		send(kengine::packets::GetGBufferTexture{ GBUFFER_ENTITY_LOCATION, texture, textureSize });
+
+		const auto index = (p.pixel.x + (gBufferSize.y - p.pixel.y) * gBufferSize.x) * GBUFFER_TEXTURE_COMPONENTS;
+		p.id = (Entity::ID)texture[index];
+		if (p.id == 0)
+			p.id = kengine::Entity::INVALID_ID;
 	}
 
 	void AssImpSystem::handle(kengine::packets::RegisterEntity p) {
