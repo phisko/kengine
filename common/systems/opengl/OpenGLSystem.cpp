@@ -230,6 +230,10 @@ namespace kengine {
 		_gBuffer.getTexture(p.textureIndex, p.buff, p.buffSize);
 	}
 
+	void OpenGLSystem::handle(kengine::packets::AddImGuiTool p) {
+		Controllers::controllers.push_back({ p.name, &p.enabled });
+	}
+
 	void OpenGLSystem::initShader(putils::gl::Program & p) {
 		p.init(_gBuffer.getTextureCount(), SCREEN_WIDTH, SCREEN_HEIGHT, _gBuffer.getFBO());
 
@@ -271,10 +275,12 @@ namespace kengine {
 				ImGui::End();
 			});
 		};
-		_em += ShadersController(_em);
-		_em += LightsDebugger(_em);
-		_em += TextureDebugger(_em, _gBuffer, _gBufferIterator);
-		_em += MouseController(window);
+
+		_em += Controllers::ToolsController();
+		_em += Controllers::ShaderController(_em);
+		_em += Controllers::LightController(_em);
+		_em += Controllers::TextureDebugger(_em, _gBuffer, _gBufferIterator);
+		_em += Controllers::MouseController(window);
 #endif
 	}
 
@@ -334,16 +340,15 @@ namespace kengine {
 #ifndef NDEBUG
 		const auto START = system_clock::now();
 		auto start = START;
-#endif
 
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
+
 		for (const auto &[e, comp] : _em.getEntities<kengine::ImGuiComponent>())
 			comp.display(GImGui);
 		ImGui::Render();
 
-#ifndef NDEBUG
 		auto end = system_clock::now();
 		IMGUI_TIME = (int)duration_cast<milliseconds>(end - start).count();
 		start = end;
@@ -430,8 +435,10 @@ namespace kengine {
 				if (comp.enabled)
 					comp.shader->run(view, proj, camPos, SCREEN_WIDTH, SCREEN_HEIGHT);
 
-			if (TEXTURE_TO_DEBUG != -1)
-				debugTexture(TEXTURE_TO_DEBUG);
+#ifndef NDEBUG
+			if (Controllers::TEXTURE_TO_DEBUG != -1)
+				debugTexture(Controllers::TEXTURE_TO_DEBUG);
+#endif
 		}
 	}
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "packets/GBuffer.hpp"
+#include "packets/AddImGuiTool.hpp"
 
 #include "System.hpp"
 #include "opengl/Program.hpp"
@@ -35,7 +36,11 @@ namespace kengine {
 
 	class OpenGLSystem : public kengine::System<OpenGLSystem, kengine::packets::RegisterEntity,
 		kengine::packets::DefineGBufferSize, kengine::packets::VertexDataAttributeIterator,
-		kengine::packets::GetGBufferSize, kengine::packets::GetGBufferTexture> {
+		kengine::packets::GetGBufferSize, kengine::packets::GetGBufferTexture
+#ifndef NDEBUG
+		, kengine::packets::AddImGuiTool
+#endif
+	> {
 	public:
 		OpenGLSystem(kengine::EntityManager & em);
 		~OpenGLSystem();
@@ -48,6 +53,10 @@ namespace kengine {
 		void handle(kengine::packets::VertexDataAttributeIterator p);
 		void handle(kengine::packets::GetGBufferSize p);
 		void handle(kengine::packets::GetGBufferTexture p);
+
+#ifndef NDEBUG
+		void handle(kengine::packets::AddImGuiTool p);
+#endif
 
 	private:
 		void createObject(kengine::Entity & e, const kengine::ModelLoaderComponent & meshLoader);
