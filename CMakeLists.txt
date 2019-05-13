@@ -7,14 +7,6 @@ if (KENGINE_SFML)
     set(PUTILS_BUILD_PSE TRUE)
 endif ()
 
-if (KENGINE_OGRE)
-    set(PUTILS_BUILD_POGRE TRUE)
-endif ()
-
-if (KENGINE_TEST)
-    set(PUTILS_TEST TRUE)
-endif ()
-
 if(KENGINE_LUA)
     set(PUTILS_BUILD_LUA TRUE)
 	set(ADDITIONAL_LIBS ${ADDITIONAL_LIBS} lua)
