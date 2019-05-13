@@ -14,12 +14,7 @@ namespace kengine {
 			bool * enabled;
 		};
 
-		static bool shaderManagerEnabled = false;
-		static bool lightManagerEnabled = false;
-		static std::vector<Controller> controllers = {
-			{ "Shader manager", &shaderManagerEnabled },
-			{ "Light manager", &lightManagerEnabled },
-		};
+		static std::vector<Controller> controllers;
 
 		static auto ToolsController() {
 			return [](kengine::Entity & e) {
@@ -58,12 +53,15 @@ namespace kengine {
 		}
 
 		static auto ShaderController(kengine::EntityManager & em) {
+			static bool display = false;
+			controllers.push_back({ "Shader controller", &display });
+
 			return [&](kengine::Entity & e) {
 				e += kengine::ImGuiComponent([&] {
-					if (!shaderManagerEnabled)
+					if (!display)
 						return;
 
-					if (ImGui::Begin("Shaders")) {
+					if (ImGui::Begin("Shaders", &display)) {
 						if (ImGui::CollapsingHeader("GBuffer"))
 							for (auto &[e, comp] : em.getEntities<kengine::GBufferShaderComponent>())
 								ImGui::Checkbox(comp.shader->getName().c_str(), &comp.enabled);
@@ -82,12 +80,15 @@ namespace kengine {
 		}
 
 		static auto LightController(kengine::EntityManager & em) {
+			static bool display = false;
+			controllers.push_back({ "Light controller", &display });
+
 			return [&](kengine::Entity & e) {
 				e += kengine::ImGuiComponent([&] {
-					if (!lightManagerEnabled)
+					if (!display)
 						return;
 
-					if (ImGui::Begin("Lights")) {
+					if (ImGui::Begin("Lights", &display)) {
 						bool first = true;
 						if (ImGui::CollapsingHeader("Directional"))
 							for (const auto &[e, light] : em.getEntities<DirLightComponent>()) {

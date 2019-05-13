@@ -31,7 +31,7 @@ endif()
 set(PUTILS_BUILD_MEDIATOR TRUE)
 add_subdirectory(putils)
 
-file(GLOB src_files *.cpp)
+file(GLOB src_files *.cpp common/systems/*.cpp)
 
 if (UNIX)
     set(type SHARED)

@@ -269,7 +269,7 @@ namespace kengine {
 
 #ifndef NDEBUG
 		_em += [](kengine::Entity & e) {
-			static bool display = true;
+			static bool display = false;
 			Controllers::controllers.push_back({ "Render time", &display });
 
 			e += kengine::ImGuiComponent([] {
