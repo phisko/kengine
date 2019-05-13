@@ -36,6 +36,7 @@ General purpose gamedev:
 * [TransformComponent](common/components/TransformComponent.md): defines a `Entity`'s position and size
 * [PhysicsComponent](common/components/PhysicsComponent.md): defines a `Entity`'s movement
 * [InputComponent](common/components/InputComponent.md): lets `Entities` receive keyboard and mouse events
+* [SelectedComponent](common/components/SelectedComponent.hpp): indicates that an `Entity` has been selected
 
 Behaviors:
 * [BehaviorComponent](common/components/BehaviorComponent.md): defines a function to be called each frame for a `Entity`
@@ -52,6 +53,9 @@ Graphics:
 * [GraphicsComponent](common/components/GraphicsComponent.md): provides graphical information about a `Entity`, such as its appearance
 * [CameraComponent](common/components/CameraComponent.hpp): lets `Entities` be used as in-game cameras, to define a frustrum and position. Follows the same conventions as `TransformComponent`
 * [GUIComponent](common/components/GUIComponent.md): lets `Entities` be used as GUI elements such as buttons, lists...)
+
+3D Graphics:
+* [HighlightComponent](common/components/HighlightComponent.md): indicates that an `Entity` should be highlighted
 * [LightComponent](common/components/LightComponent.md): lets `Entities` be used as in-game light sources (directional lights, point lights or spot lights)
 * [ModelLoaderComponent](common/components/ModelLoaderComponent.md): provides a function to load an OpenGL model which will be stored in a `ModelInfoComponent` attached to the `Entity` by the `OpenGLSystem`. This `Entity` can then be referenced by other `ModelComponents` to indicate they wish to use this 3D model
 * [ModelInfoComponent](common/components/ModelInfoComponent.md): holds OpenGL handles to a 3D model. Used by low-level 3D `Systems`
@@ -61,26 +65,57 @@ Graphics:
 * [PolyVoxModelComponent](common/components/PolyVoxModelComponent.md): specifies that an `Entity`'s `ModelComponent` points to a `PolyVox` model (and should thus be drawn by the `PolyVoxSystem`'s shader)
 * [TexturedModelComponent](common/components/TexturedModelComponent.md): specifies that an `Entity`'s `ModelComponent` points to a textured model (and should thus be drawn by a textured shader, such as that of the `AssImpSystem`)
 
+Skeletal animation:
+* [AnimationComponent](common/components/AnimationComponent.md): provides skeletal animation information for `Entities`.
+* [SkeletonComponent](common/components/SkeletonComponent.hpp): provides bone information for an `Entity`'s skeletal animation
+
 ##### Systems
 
+General purpose gamedev:
+* [PhysicsSystem](common/systems/PhysicsSystem.md): moves entities in a framerate-independent way
+
+Behaviors:
 * [BehaviorSystem](common/systems/BehaviorSystem.md): executes behaviors attached to `Entities`
-* [CollisionSystem](common/systems/CollisionSystem.md): transfers collision notifications to `Entities`
-* [ImGuiAdjustableSystem](common/systems/ImGuiAdjustableSystem.md): displays an ImGui window to edit `AdjustableComponents`
-* [LogSystem](common/systems/LogSystem.md): logs messages
 * [LuaSystem](common/systems/LuaSystem.md): executes lua scripts attached to an entity
 * [PySystem](common/systems/PySystem.md): executes Python scripts attached to an entity
-* [PhysicsSystem](common/systems/PhysicsSystem.md): moves entities in a framerate-independent way
-* [SfSystem](common/systems/sfml/SfSystem.md): displays entities in an SFML render window
-* [OpenGLSystem](common/systems/opengl/OpenGLSystem.md): displays entities in an OpenGL render window
+* [CollisionSystem](common/systems/CollisionSystem.md): transfers collision notifications to `Entities`
 
-All these systems are header-only, except for the `SfSystem` and the `OpenGLSystem`, which are plugins. To build them, set `KENGINE_SFML` and `KENGINE_OPENGL` to `true` in your `CMakeLists.txt`, respectively.
+Debug tools:
+* [ImGuiAdjustableSystem](common/systems/ImGuiAdjustableSystem.md): displays an ImGui window to edit `AdjustableComponents`
+* [ImGuiEntityEditorSystem](common/systems/ImGuiEntityEditorSystem.md): displays ImGui windows to edit `Entities` with a `SelectedComponent`
+* [ImGuiEntitySelectorSystem](common/systems/ImGuiEntitySelectorSystem.md): displays an ImGui window that lets users search for and select `Entities`
+* [LogSystem](common/systems/LogSystem.md): logs messages
+
+Graphics:
+* [SfSystem](common/systems/sfml/SfSystem.md): displays entities in an SFML render window
+
+3D Graphics:
+* [OpenGLSystem](common/systems/opengl/OpenGLSystem.md): displays entities in an OpenGL render window
+* [AssimpSystem](common/systems/assimp/AssimpSystem.md): loads 3D models using the assimp library and provides shaders to render them
+* [PolyVoxSystem](common/systems/polyvox/PolyVoxSystem.md): generates 3D models based on `PolyVoxComponents` and provides shaders to render them
+* [MagicaVoxelSystem](common/systems/polyvox/PolyVoxSystem.md): loads 3D models in the MagicaVoxel ".vox" format, which can then be drawn by the `PolyVoxSystem`'s shader
+
+Some of these systems make use of libraries which you may not want to compile, and are therefore optional. To enable them, set the corresponding CMake variable to `true` in your `CMakeLists.txt`:
+
+| System         | Variable        |
+|----------------|-----------------|
+| SfSystem       | KENGINE_SFML    |
+| OpenGLSystem   | KENGINE_OPENGL  |
+| AssimpSystem   | KENGINE_ASSIMP  |
+| PolyVoxSystem  | KENGINE_POLYVOX |
+| MagicaVoxelSystem | KENGINE_POLYVOX |
+| lua library    | KENGINE_LUA     |
+| python library | KENGINE_PYTHON  |
 
 ##### DataPackets
 
-* [Log](common/packets/Log.hpp): received by the `LogSystem`, used to log a message
+* [AddImGuiTool](common/packets/AddImGuiTool.hpp): received by the graphics system, adds an entry to the "Tools" section of the ImGui main menu bar
 * [Collision](common/packets/Collision.hpp): sent by the `PhysicsSystem`, indicates a collision between two `Entities`
-* [RegisterAppearance](common/packets/RegisterAppearance.hpp): received by the `SfSystem`, maps an abstract appearance to a concrete texture file.
+* [EntityInPixel](common/packets/EntityInPixel.hpp): handled by the `OpenGLSystem`, returns the ID of the entity seen in the requested pixel
 * [GBuffer](common/packets/GBuffer.hpp): received by the `OpenGLSystem`, specifies the layout of the GBuffer (used in deferred shading)
+* [Log](common/packets/Log.hpp): received by the `LogSystem`, used to log a message
+* [RegisterAppearance](common/packets/RegisterAppearance.hpp): received by the `SfSystem`, maps an abstract appearance to a concrete texture file.
+* [RegisterComponentEditor](common/packets/RegisterComponentEditor.hpp): registers function pointers to dynamically query about a given `Component`
 
 These are datapackets sent from one `System` to another to communicate.
 
