@@ -39,8 +39,8 @@ auto ImGuiEntityEditor(kengine::EntityManager & em, const std::vector<kengine::p
 							if (strstr(p.name, nameSearch) && p.has(selected))
 								if (ImGui::Button(putils::string<64>(p.name) + "##remove"))
 									p.remove(selected);
-					ImGui::End();
 				}
+				ImGui::End();
 				if (!open)
 					selected.detach<kengine::SelectedComponent>();
 			}
