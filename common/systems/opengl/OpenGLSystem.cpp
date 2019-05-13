@@ -231,7 +231,11 @@ namespace kengine {
 	}
 
 	void OpenGLSystem::handle(kengine::packets::AddImGuiTool p) {
+		for (const auto & controller : Controllers::controllers)
+			if (strcmp(controller.name, p.name) == 0)
+				return;
 		Controllers::controllers.push_back({ p.name, &p.enabled });
+		p.enabled = false;
 	}
 
 	void OpenGLSystem::initShader(putils::gl::Program & p) {
@@ -265,7 +269,13 @@ namespace kengine {
 
 #ifndef NDEBUG
 		_em += [](kengine::Entity & e) {
+			static bool display = true;
+			Controllers::controllers.push_back({ "Render time", &display });
+
 			e += kengine::ImGuiComponent([] {
+				if (!display)
+					return;
+
 				if (ImGui::Begin("Render time")) {
 					ImGui::Text("Total: %d", TOTAL_TIME);
 					ImGui::Text("Kengine: %d", KENGINE_TIME);
