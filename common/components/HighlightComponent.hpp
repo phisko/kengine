@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Point.hpp"
+
 namespace kengine {
 	struct HighlightComponent {
 		putils::Vector3f colorNormalized;

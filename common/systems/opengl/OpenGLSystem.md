@@ -20,8 +20,20 @@ Unless the `KENGINE_OPENGL_NO_DEFAULT_SHADERS` macro is defined, the following s
 * [GodRaysPointLight](GodRaysPointLight.hpp), performs volumetric lighting for [PointLightComponents](../../components/LightComponent.hpp)
 
 * [LightSphere](LightSphere.hpp), draws spheres where lights are
+* [Highlight](Highlight.hpp), highlights `Entities` with a [HighlightComponent](../../components/HighlightComponent.md)
 
 The shadow map resolution defaults to 8192 (this seems like a lot, but I've only tested this on a single machine so far) and can be adjusted by defining the `KENGINE_SHADOW_MAP_SIZE` macro.
+
+### Data packets
+
+The `Entity` seen in a pixel can be queried using the [GetEntityInPixel](../../packets/EntityInPixel.hpp) datapacket.
+
+The size of the GBuffer textures can be queried by using the `GetGBufferSize`(../../packets/GBuffer.hpp) datapacket.
+
+The content of a GBuffer texture can be queried by using the [GetGBufferTexture](../../packets/GBuffer.hpp) datapacket. Take note that each pixel in a texture is formatted as 4 `floats`.
+WARNING: textures are flipped vertically (you'll want to do `y = (height - y)` before indexing into them).
+
+Sending the [AddImGuiTool](../../packets/AddImGuiTool.hpp) datapacket will add an entry into the "Tools" section of the ImGui main menu bar, letting users define custom tools windows.
 
 ### Functionality
 
@@ -41,16 +53,20 @@ struct GBufferTextures {
 	float position[4];
 	float normal[4];
 	float color[4];
+	float entityID[4];
 
 	pmeta_get_attributes(
 		pmeta_reflectible_attribute(&GBufferTextures::position),
 		pmeta_reflectible_attribute(&GBufferTextures::normal),
-		pmeta_reflectible_attribute(&GBufferTextures::color)
+		pmeta_reflectible_attribute(&GBufferTextures::color),
+		pmeta_reflectible_attribute(&GBufferTextures::entityID)
 	);
 };
 ```
 
 These GBuffer textures will then be registered with all [ShaderComponents](../../components/ShaderComponent.md).
+
+The default shaders provided with this system assume you make use of a type with the same properties as that described above (defined in [kengine::GBufferTextures](OpenGLSystem.hpp)). If you wish to use additional textures in your GBuffer, you can either copy this structure or inherit from it, so long as you are careful to declare the reflectible attributes in the same order (as that order will define their GLSL locations).
 
 ##### Model construction
 

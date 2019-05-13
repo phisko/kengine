@@ -475,31 +475,6 @@ namespace kengine {
 			e += kengine::makeLightingShaderComponent<AssImpShadowCube>(_em);
 			e += kengine::ShadowCubeShaderComponent{};
 		};
-
-	}
-
-#ifndef KENGINE_ASSIMP_MAX_WINDOW_WIDTH
-# define KENGINE_ASSIMP_MAX_WINDOW_WIDTH 1920
-#endif
-
-#ifndef KENGINE_ASSIMP_MAX_WINDOW_HEIGHT
-# define KENGINE_ASSIMP_MAX_WINDOW_HEIGHT 1080
-#endif
-
-	void AssImpSystem::handle(kengine::packets::GetEntityInPixel p) {
-		static constexpr auto GBUFFER_TEXTURE_COMPONENTS = 4;
-		static constexpr auto GBUFFER_ENTITY_LOCATION = 3;
-		static constexpr auto textureSize = KENGINE_ASSIMP_MAX_WINDOW_WIDTH * KENGINE_ASSIMP_MAX_WINDOW_HEIGHT * GBUFFER_TEXTURE_COMPONENTS;
-		static float texture[textureSize];
-
-		putils::Point2ui gBufferSize;
-		send(kengine::packets::GetGBufferSize{ gBufferSize });
-		send(kengine::packets::GetGBufferTexture{ GBUFFER_ENTITY_LOCATION, texture, textureSize });
-
-		const auto index = (p.pixel.x + (gBufferSize.y - p.pixel.y) * gBufferSize.x) * GBUFFER_TEXTURE_COMPONENTS;
-		p.id = (Entity::ID)texture[index];
-		if (p.id == 0)
-			p.id = kengine::Entity::INVALID_ID;
 	}
 
 	void AssImpSystem::handle(kengine::packets::RegisterEntity p) {

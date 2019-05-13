@@ -489,4 +489,32 @@ namespace kengine {
 		Input::positions.clear();
 		Input::scrolls.clear();
 	}
+
+#ifndef KENGINE_OPENGL_MAX_WINDOW_WIDTH
+# define KENGINE_OPENGL_MAX_WINDOW_WIDTH 1920
+#endif
+
+#ifndef KENGINE_OPENGL_MAX_WINDOW_HEIGHT
+# define KENGINE_OPENGL_MAX_WINDOW_HEIGHT 1080
+#endif
+
+	static size_t getScreenSize() {
+		const auto mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+		return mode->width * mode->height;
+	}
+
+	void OpenGLSystem::handle(kengine::packets::GetEntityInPixel p) {
+		static constexpr auto GBUFFER_TEXTURE_COMPONENTS = 4;
+		static constexpr auto GBUFFER_ENTITY_LOCATION = 3;
+		static const auto textureSize = getScreenSize() * GBUFFER_TEXTURE_COMPONENTS;
+		static float * texture = new float[textureSize];
+
+		_gBuffer.getTexture(GBUFFER_ENTITY_LOCATION, texture, textureSize);
+
+		const putils::Point2ui gBufferSize = _gBuffer.getSize();
+		const auto index = (p.pixel.x + (gBufferSize.y - p.pixel.y) * gBufferSize.x) * GBUFFER_TEXTURE_COMPONENTS;
+		p.id = (Entity::ID)texture[index];
+		if (p.id == 0)
+			p.id = kengine::Entity::INVALID_ID;
+	}
 }

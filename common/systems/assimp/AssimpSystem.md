@@ -13,5 +13,7 @@ struct Vertex {
 	float position[3];
 	float normal[3];
 	float texCoords[2];
+	float boneWeights[KENGINE_ASSIMP_BONE_INFO_PER_VERTEX];
+	unsigned int boneIDs[KENGINE_ASSIMP_BONE_INFO_PER_VERTEX];
 };
 ```

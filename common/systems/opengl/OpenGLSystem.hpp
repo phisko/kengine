@@ -1,5 +1,6 @@
 #pragma once
 
+#include "packets/EntityInPixel.hpp"
 #include "packets/GBuffer.hpp"
 #include "packets/AddImGuiTool.hpp"
 
@@ -36,7 +37,8 @@ namespace kengine {
 
 	class OpenGLSystem : public kengine::System<OpenGLSystem, kengine::packets::RegisterEntity,
 		kengine::packets::DefineGBufferSize, kengine::packets::VertexDataAttributeIterator,
-		kengine::packets::GetGBufferSize, kengine::packets::GetGBufferTexture
+		kengine::packets::GetGBufferSize, kengine::packets::GetGBufferTexture,
+		kengine::packets::GetEntityInPixel
 #ifndef NDEBUG
 		, kengine::packets::AddImGuiTool
 #endif
@@ -53,6 +55,7 @@ namespace kengine {
 		void handle(kengine::packets::VertexDataAttributeIterator p);
 		void handle(kengine::packets::GetGBufferSize p);
 		void handle(kengine::packets::GetGBufferTexture p);
+		void handle(kengine::packets::GetEntityInPixel p);
 
 #ifndef NDEBUG
 		void handle(kengine::packets::AddImGuiTool p);

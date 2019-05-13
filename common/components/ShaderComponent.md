@@ -37,3 +37,11 @@ Pointer to the shader [Program](../../putils/opengl/Program.md).
 ```cpp
 bool enabled;
 ```
+
+# [ShadowMapShaderComponent](ShaderComponent.hpp)
+
+Used to tag an `Entity` whose `ShaderComponent` actually points to a `ShadowMapShader` (which should be processed to fill "light entities'" shadow maps).
+
+# [ShadowCubeShaderComponent](ShaderComponent.hpp)
+
+Used to tag an `Entity` whose `ShaderComponent` actually points to a `ShadowCubeShader` (which should be processed to fill "light entities'" shadow cubes).
