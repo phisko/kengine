@@ -37,12 +37,12 @@ namespace kengine {
 		string font;
 
 		putils::Point3f colorNormalized;
-		putils::Rect3f offset;
+		putils::Rect3f offset{ {}, { 1.f, 1.f, 1.f } };
 		// text size: offset.size.x
 		// circle radius: offset.size.x
 		// line thickness: offset.size.y
 
-		int debugType;
+		int debugType = Type::Box;
 
 		pmeta_get_class_name(DebugGraphicsComponent);
 		pmeta_get_attributes(
