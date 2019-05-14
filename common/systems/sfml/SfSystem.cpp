@@ -276,11 +276,7 @@ namespace kengine {
 			case DebugGraphicsComponent::Box: {
 				auto & box = static_cast<pse::Shape<sf::RectangleShape> &>(item).get();
 				box.setPosition(toWorldPos(transform.boundingBox.topLeft + debug.offset.topLeft));
-				box.setSize(toWorldSize({
-					transform.boundingBox.size.x * debug.offset.size.x,
-					transform.boundingBox.size.y * debug.offset.size.y,
-					transform.boundingBox.size.z * debug.offset.size.z,
-				}));
+				box.setSize(toWorldSize(transform.boundingBox.size * debug.offset.size));
 				box.setFillColor(toSfColor(debug.colorNormalized));
 				break;
 			}
@@ -293,11 +289,7 @@ namespace kengine {
 	}
 
 	static putils::Point3f getLayerSize(const putils::Point3f & transformSize, const putils::Point3f & layerSize) {
-		return {
-			transformSize.x * layerSize.x,
-			transformSize.y * layerSize.y,
-			transformSize.z * layerSize.z
-		};
+		return transformSize * layerSize;
 	}
 
 	void SfSystem::updateObject(EntityView e, pse::ViewItem & item, const GraphicsComponent::Layer & layer, bool fixedSize) {
