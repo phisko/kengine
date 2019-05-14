@@ -5,24 +5,22 @@
 #include "components/TransformComponent.hpp"
 #include "components/GraphicsComponent.hpp"
 #include "packets/RegisterAppearance.hpp"
-#include "packets/Input.hpp"
 #include "packets/RemoveEntity.hpp"
 #include "packets/RegisterEntity.hpp"
-#include "packets/ScreenSize.hpp"
 
 #include "TGUI/TGUI.hpp"
 #include "TGUI/Widget.hpp"
 #include "pse/Engine.hpp"
 #include "SfComponent.hpp"
 
+#include "json.hpp"
+
 namespace kengine {
     class EntityManager;
 
     class SfSystem : public kengine::System<SfSystem,
             packets::RegisterEntity, packets::RemoveEntity,
-            packets::RegisterAppearance,
-			packets::ScreenSize::GridSizeQuery, packets::ScreenSize::TileSizeQuery, packets::ScreenSize::ScreenSizeQuery,
-            packets::KeyStatus::Query, packets::MouseButtonStatus::Query, packets::MousePosition::Query> {
+            packets::RegisterAppearance> {
     public:
         SfSystem(kengine::EntityManager & em);
 
@@ -42,16 +40,6 @@ namespace kengine {
 
     public:
         void handle(const packets::RegisterAppearance & p) noexcept;
-
-    public:
-		void handle(const packets::ScreenSize::GridSizeQuery & p) const noexcept { sendTo(packets::ScreenSize::Response{ putils::Point2f{ _screenSize.x / _tileSize.x, _screenSize.y / _tileSize.y } }, *p.sender); }
-		void handle(const packets::ScreenSize::TileSizeQuery & p) const noexcept { sendTo(packets::ScreenSize::Response{ _tileSize }, *p.sender); }
-		void handle(const packets::ScreenSize::ScreenSizeQuery & p) const noexcept { sendTo(packets::ScreenSize::Response{ _screenSize }, *p.sender); }
-
-    public:
-        void handle(const packets::KeyStatus::Query & p) const noexcept;
-        void handle(const packets::MouseButtonStatus::Query & p) const noexcept;
-        void handle(const packets::MousePosition::Query & p) noexcept;
 
     private:
         std::unique_ptr<pse::Sprite> getResource(const std::string & appearance);

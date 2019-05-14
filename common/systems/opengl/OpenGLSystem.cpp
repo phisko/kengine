@@ -33,6 +33,7 @@
 #include "GodRaysPointLight.hpp"
 #include "GodRaysSpotLight.hpp"
 #include "Highlight.hpp"
+#include "Debug.hpp"
 
 #include "Export.hpp"
 
@@ -113,6 +114,10 @@ namespace kengine {
 	}
 
 	void OpenGLSystem::addShaders() noexcept {
+		{ // GBuffer
+			_em += [=](kengine::Entity & e) { e += kengine::makeGBufferShaderComponent<Shaders::Debug>(_em); };
+		}
+
 		{ // Lighting
 			_em += [&](kengine::Entity & e) {
 				e += kengine::makeLightingShaderComponent<Shaders::ShadowMap>(_em);
