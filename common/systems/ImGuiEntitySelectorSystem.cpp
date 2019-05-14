@@ -65,6 +65,9 @@ static auto ImGuiEntitySelector(kengine::EntityManager & em, const std::vector<k
 			if (ImGui::Begin("Entity selector", &display)) {
 				static char nameSearch[1024];
 				ImGui::InputText("Search", nameSearch, sizeof(nameSearch));
+				ImGui::SameLine();
+				if (ImGui::Button("New"))
+					em += [](kengine::Entity & e) { e += kengine::SelectedComponent{}; };
 				ImGui::Separator();
 
 				for (auto & e : em.getEntities())
