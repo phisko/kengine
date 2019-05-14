@@ -253,7 +253,7 @@ namespace kengine {
 			case DebugGraphicsComponent::Text: {
 				auto & text = static_cast<pse::Text &>(item);
 				text.setString(debug.text.c_str());
-				text.setTextSize(debug.offset.size.x);
+				text.setTextSize((unsigned int)debug.offset.size.x);
 				text.setPosition(toWorldPos(transform.boundingBox.topLeft + debug.offset.topLeft));
 				text.setColor(toSfColor(debug.colorNormalized));
 				break;
@@ -487,7 +487,7 @@ namespace kengine {
 
 		switch (debug.debugType) {
 			case DebugGraphicsComponent::Text: {
-				v = std::make_unique<pse::Text>(debug.text.c_str(), toWorldPos(transform.boundingBox.topLeft + debug.offset.topLeft), toSfColor(debug.colorNormalized), debug.offset.size.x, debug.font.str());
+				v = std::make_unique<pse::Text>(debug.text.c_str(), toWorldPos(transform.boundingBox.topLeft + debug.offset.topLeft), toSfColor(debug.colorNormalized), (unsigned int)debug.offset.size.x, debug.font.str());
 				break;
 			}
 			case DebugGraphicsComponent::Line: {
