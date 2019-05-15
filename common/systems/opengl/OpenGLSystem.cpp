@@ -176,7 +176,8 @@ namespace kengine {
 		ImGui_ImplOpenGL3_Init();
 
 		glewExperimental = true;
-		assert(glewInit() == GLEW_OK);
+		const bool ret = glewInit();
+		assert(ret == GLEW_OK);
 
 #ifndef NDEBUG
 		glEnable(GL_DEBUG_OUTPUT);
@@ -235,6 +236,7 @@ namespace kengine {
 		_gBuffer.getTexture(p.textureIndex, p.buff, p.buffSize);
 	}
 
+#ifndef NDEBUG
 	void OpenGLSystem::handle(kengine::packets::AddImGuiTool p) {
 		for (const auto & controller : Controllers::controllers)
 			if (strcmp(controller.name, p.name) == 0)
@@ -242,6 +244,7 @@ namespace kengine {
 		Controllers::controllers.push_back({ p.name, &p.enabled });
 		p.enabled = false;
 	}
+#endif
 
 	void OpenGLSystem::initShader(putils::gl::Program & p) {
 		p.init(_gBuffer.getTextureCount(), SCREEN_WIDTH, SCREEN_HEIGHT, _gBuffer.getFBO());
@@ -379,7 +382,9 @@ namespace kengine {
 
 		handleInput();
 
+#ifndef NDEBUG
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+#endif
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 
