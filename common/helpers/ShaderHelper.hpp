@@ -61,6 +61,9 @@ namespace kengine {
 				{ 1.f, 0.f, 0.f }
 			);
 
+			model = glm::translate(model, -modelInfo.translation); // Re-center
+			model = glm::scale(model, modelInfo.scale);
+
 			model = glm::rotate(model,
 				modelInfo.yaw,
 				{ 0.f, 1.f, 0.f }
@@ -70,9 +73,6 @@ namespace kengine {
 				modelInfo.pitch,
 				{ 1.f, 0.f, 0.f }
 			);
-
-			model = glm::translate(model, -modelInfo.translation); // Re-center
-			model = glm::scale(model, modelInfo.scale);
 
 			return model;
 		}
