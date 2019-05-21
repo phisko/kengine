@@ -37,6 +37,7 @@ namespace kengine {
 		float pitch;
 		float yaw;
 		putils::Vector3f offset;
+		putils::Vector3f scale;
 		kengine::Entity::ID id;
 	};
 
@@ -176,11 +177,13 @@ namespace kengine {
 		assert(header.versionNumber == 150);
 	}
 
-	static std::function<ModelLoaderComponent::ModelData()> loadVoxFile(const char * file, MeshType & mesh, float pitch = 0.f, float yaw = 0.f, const putils::Vector3f & offsetFromCentre = {}) {
-		const putils::string<64> f(file);
+	static auto loadVoxFile(const char * f, MeshEntity & meshEntity) {
+		return [&meshEntity, f] {
+#ifndef NDEBUG
+			std::cout << "[MagicaVoxel] Loading " << f << "...";
+#endif
 
-		return [&mesh, f, pitch, yaw, offsetFromCentre] {
-			std::ifstream stream(f.c_str(), std::ios::binary);
+			std::ifstream stream(f, std::ios::binary);
 			assert(stream);
 			checkHeader(stream);
 
@@ -218,19 +221,24 @@ namespace kengine {
 				volume.setVoxel(voxel.x, voxel.y, voxel.z, voxelValue);
 			}
 
-			mesh = detailMagicaVoxel::buildMesh(volume);
+			meshEntity.mesh = detailMagicaVoxel::buildMesh(volume);
 
 			kengine::ModelLoaderComponent::ModelData ret;
 
 			kengine::ModelLoaderComponent::ModelData::MeshData meshData;
-			meshData.vertices = { mesh.getNoOfVertices(), sizeof(pmeta_typeof(mesh)::VertexType), mesh.getRawVertexData() };
-			meshData.indices = { mesh.getNoOfIndices(), sizeof(pmeta_typeof(mesh)::IndexType), mesh.getRawIndexData() };
-			meshData.indexType = sizeof(pmeta_typeof(mesh)::IndexType) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
+			meshData.vertices = { meshEntity.mesh.getNoOfVertices(), sizeof(pmeta_typeof(meshEntity.mesh)::VertexType), meshEntity.mesh.getRawVertexData() };
+			meshData.indices = { meshEntity.mesh.getNoOfIndices(), sizeof(pmeta_typeof(meshEntity.mesh)::IndexType), meshEntity.mesh.getRawIndexData() };
+			meshData.indexType = sizeof(pmeta_typeof(meshEntity.mesh)::IndexType) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
 			ret.meshes.push_back(meshData);
 
-			ret.pitch = pitch;
-			ret.yaw = yaw;
-			ret.offsetToCentre = offsetFromCentre;
+			ret.pitch = meshEntity.pitch;
+			ret.yaw = meshEntity.yaw;
+			ret.offsetToCentre = meshEntity.offset;
+			ret.scale = meshEntity.scale;
+
+#ifndef NDEBUG
+			std::cout << " Done.\n";
+#endif
 
 			return ret;
 		};
@@ -246,7 +254,7 @@ namespace kengine {
 
 			_em += [&p](kengine::Entity & e) {
 				e += kengine::ModelLoaderComponent{
-					loadVoxFile(p.first.c_str(), p.second.mesh, p.second.pitch, p.second.yaw, p.second.offset),
+					loadVoxFile(p.first.c_str(), p.second),
 					[]() { putils::gl::setPolyvoxVertexType<MeshType::VertexType>(); }
 				};
 				p.second.id = e.id;
@@ -271,21 +279,26 @@ namespace kengine {
 
 		p.e += PolyVoxModelComponent{};
 
-		const auto it = _meshes.find(file);
-		if (it != _meshes.end()) {
-			p.e += kengine::ModelComponent{ it->second.id };
-			return;
+		{
+			const auto it = _meshes.find(file);
+			if (it != _meshes.end()) {
+				p.e += kengine::ModelComponent{ it->second.id };
+				return;
+			}
 		}
 
-		auto & meshData = _meshes[file];
+		const auto [it, _] = _meshes.emplace(file, MeshEntity{});
+		auto & meshData = it->second;
 		meshData.pitch = layer.pitch;
 		meshData.yaw = layer.yaw;
-		_em += [&meshData, file](kengine::Entity & e) {
+		meshData.offset = layer.boundingBox.topLeft;
+		meshData.scale = layer.boundingBox.size;
+		_em += [it](kengine::Entity & e) {
 			e += kengine::ModelLoaderComponent{
-				loadVoxFile(file.c_str(), meshData.mesh, meshData.pitch, meshData.yaw),
+				loadVoxFile(it->first.c_str(), it->second),
 				[]() { putils::gl::setPolyvoxVertexType<MeshType::VertexType>(); }
 			};
-			meshData.id = e.id;
+			it->second.id = e.id;
 		};
 
 		p.e += kengine::ModelComponent{ meshData.id };
