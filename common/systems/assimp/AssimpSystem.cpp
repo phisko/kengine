@@ -389,6 +389,10 @@ namespace kengine {
 				auto & skeleton = e.attach<AssImp::AssImpSkeletonComponent>();
 				auto & animList = e.attach<AnimListComponent>();
 
+#ifndef NDEBUG
+				std::cout << "[AssImp] Loading " << f << "...";
+#endif
+
 				const auto scene = model.importer.ReadFile(f, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals /*| aiProcess_OptimizeMeshes*/ | aiProcess_JoinIdenticalVertices);
 				if (scene == nullptr || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || scene->mRootNode == nullptr) {
 					std::cerr << model.importer.GetErrorString() << '\n';
@@ -451,6 +455,10 @@ namespace kengine {
 				ret.yaw = model.yaw;
 				ret.offsetToCentre = model.offset;
 				ret.scale = model.scale;
+
+#ifndef NDEBUG
+				std::cout << " Done\n";
+#endif
 
 				return ret;
 			};
