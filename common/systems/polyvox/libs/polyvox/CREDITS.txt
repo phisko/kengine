@@ -1,0 +1,7 @@
+David Williams - Lead programmer.
+Matthew Williams - Linux port, build system, support and maintenance.
+Oliver Schneider - Very large Volumes
+
+Acknowledgements
+----------------
+PolyVox uses the 'miniz' for data compression. 'miniz' is public domain software and does not affect the license of PolyVox or of code using PolyVox. More details here: http://code.google.com/p/miniz/

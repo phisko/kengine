@@ -1,15 +1,22 @@
 #pragma once
 
-#ifndef NDEBUG
-#include <iostream>
-#include "reflection/Reflectible.hpp"
+#ifndef KENGINE_MAX_SAVE_PATH_LENGTH
+# define KENGINE_MAX_SAVE_PATH_LENGTH 64
 #endif
 
+#ifndef NDEBUG
+#include <iostream>
+#endif
+
+#include <fstream>
 #include <cstddef>
 #include <unordered_map>
 #include <memory>
 #include <vector>
 #include "meta/type.hpp"
+#include "reflection/Reflectible.hpp"
+#include "not_serializable.hpp"
+#include "string.hpp"
 
 namespace kengine {
 	namespace detail {
@@ -17,9 +24,12 @@ namespace kengine {
 
 		struct MetadataBase {
 			virtual ~MetadataBase() = default;
+			virtual bool save(const char * directory) const = 0;
+			virtual bool load(const char * directory) = 0;
+			virtual size_t getId() const = 0;
 		};
 		using GlobalCompMap = std::unordered_map<pmeta::type_index, std::unique_ptr<MetadataBase>>;
-		static inline GlobalCompMap * components = nullptr;
+		extern GlobalCompMap * components;
 	}
 
 	template<typename Comp>
@@ -28,20 +38,53 @@ namespace kengine {
 		struct Metadata : detail::MetadataBase {
 			std::vector<Comp> array;
 			size_t id = detail::INVALID;
+
+			bool save(const char * directory) const final {
+				if constexpr (putils::has_member_get_class_name<Comp>::value && !std::is_base_of<kengine::not_serializable, Comp>::value) {
+					putils::string<KENGINE_MAX_SAVE_PATH_LENGTH> file("%s/%s.bin", directory, Comp::get_class_name());
+					std::ofstream f(file.c_str());
+
+					if (!f)
+						return false;
+
+					const auto size = array.size();
+					f.write((const char *)&size, sizeof(size));
+					f.write((const char *)array.data(), size * sizeof(Comp));
+					return true;
+				}
+				return false;
+			}
+
+			bool load(const char * directory) final {
+				if constexpr (putils::has_member_get_class_name<Comp>::value && !std::is_base_of<kengine::not_serializable, Comp>::value) {
+					putils::string<KENGINE_MAX_SAVE_PATH_LENGTH> file("%s/%s.bin", directory, Comp::get_class_name());
+					std::ifstream f(file.c_str());
+					if (!f)
+						return false;
+
+					size_t size;
+					f.read((char *)&size, sizeof(size));
+					array.resize(size);
+					f.read((char *)array.data(), size * sizeof(Comp));
+					return true;
+				}
+				return false;
+			}
+
+			size_t getId() const final { return id;  }
 		};
 
 	public:
-		static inline Comp & get(size_t id) { auto & meta = metadata();
+		static Comp & get(size_t id) { static auto & meta = metadata();
 			while (id >= meta.array.size())
 				meta.array.resize(meta.array.size() * 2);
 			return meta.array[id];
 		}
 
-		static inline size_t id() {
+		static size_t id() {
 			static const size_t ret = metadata().id;
 			return ret;
 		}
-
 
 	private:
 		static inline Metadata & metadata() {
@@ -60,8 +103,10 @@ namespace kengine {
 					ret->array.resize(64);
 
 #ifndef NDEBUG
-					if constexpr (putils::is_reflectible<Comp>::value)
+					if constexpr (putils::has_member_get_class_name<Comp>::value)
 						std::cout << ret->id << ' ' << Comp::get_class_name() << '\n';
+					else
+						std::cout << ret->id << ' ' << typeid(Comp).name() << '\n';
 #endif
 				}
 			}

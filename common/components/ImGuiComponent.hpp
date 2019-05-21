@@ -1,19 +1,30 @@
 #pragma once
 
-#include <functional>
+#ifndef KENGINE_IMGUI_FUNCTION_SIZE
+# define KENGINE_IMGUI_FUNCTION_SIZE 64
+#endif
+
+#include "function.hpp"
 #include "reflection/Reflectible.hpp"
+#include "not_serializable.hpp"
 
 struct ImGuiContext;
 extern ImGuiContext * GImGui;
 
 namespace kengine {
-	struct ImGuiComponent {
-		ImGuiComponent(const std::function<void()> & func = nullptr) : display([func](auto context) {
+	struct ImGuiComponent : kengine::not_serializable {
+		using function = putils::function<void(void * context), KENGINE_IMGUI_FUNCTION_SIZE>;
+
+		ImGuiComponent() = default;
+
+		template<typename Func>
+		ImGuiComponent(const Func & func) : display([func](auto context) {
 			setupImGuiContext(context);
 			func();
 		}) {}
 
-		void setFunc(const std::function<void()> & func) {
+		template<typename Func>
+		void setFunc(Func && func) {
 			display = [func](auto context) {
 				setupImGuiContext(context);
 				func();
@@ -24,7 +35,7 @@ namespace kengine {
 			GImGui = (decltype(GImGui))context;
 		}
 
-		std::function<void(void * context)> display;
+		function display = nullptr;
 
 		/*
 		 * Reflectible

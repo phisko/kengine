@@ -2,14 +2,17 @@
 
 `Component` providing a function to execute for an `Entity`.
 
-Inherits from [putils::Reflectible](https://github.com/phiste/putils/blob/master/reflection/Reflectible.md).
+### Specs
+
+* [Reflectible](https://github.com/phiste/putils/blob/master/reflection/Reflectible.md)
+* Not serializable
 
 ### Members
 
 ##### func
 
 ```cpp
-std::function<void()> func = nullptr;
+putils::function<void(), KENGINE_BEHAVIOR_FUNCTION_SIZE> func = nullptr;
 ```
 
-Function to execute.
+Function to execute. Its maximum size defaults to 64 and can be adjusted by defining the `KENGINE_BEHAVIOR_FUNCTION_SIZE` macro.

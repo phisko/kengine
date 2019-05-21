@@ -1,5 +1,6 @@
 #pragma once
 
+#include <assert.h>
 #include <bitset>
 #include <cstddef>
 #include "Component.hpp"
@@ -48,7 +49,7 @@ namespace kengine {
 		template<typename T>
 		size_t getId() const {
 			static const auto id = Component<T>::id();
-			assert("You are using too many component types" && id < KENGINE_COMPONENT_COUNT);
+			assert("You are using too many component types." && id < KENGINE_COMPONENT_COUNT);
 			return id;
 		}
 
@@ -67,15 +68,11 @@ namespace kengine {
 		Entity(ID id = detail::INVALID, Mask componentMask = 0, EntityManager * manager = nullptr) : EntityView(id, componentMask), manager(manager) {}
 		~Entity() = default;
 		Entity(const Entity &) = default;
-		Entity & operator=(const Entity & rhs) {
-			id = rhs.id;
-			componentMask = rhs.componentMask;
-			return *this;
-		}
+		Entity & operator=(const Entity & rhs) = default;
 
 		template<typename T>
 		Entity & operator+=(T && comp) {
-			attach<T>() = FWD(comp);
+			attach<std::decay_t<T>>() = FWD(comp);
 			return *this;
 		}
 
@@ -94,14 +91,18 @@ namespace kengine {
 
 template<typename T>
 T & kengine::Entity::attach() {
-	componentMask.set(getId<T>(), true);
-	manager->updateMask(id, componentMask);
+	if (!has<T>()) {
+		const auto component = getId<T>();
+		componentMask.set(component, true);
+		manager->addComponent(id, component, componentMask);
+	}
 	return get<T>();
 }
 
 template<typename T>
 void kengine::Entity::detach() {
 	assert("No such component" && has<T>());
-	componentMask.set(getId<T>(), false);
-	manager->updateMask(id, componentMask);
+	const auto component = getId<T>();
+	componentMask.set(component, false);
+	manager->removeComponent(id, component, componentMask);
 }

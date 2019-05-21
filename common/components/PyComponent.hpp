@@ -1,11 +1,31 @@
 #pragma once
 
-#include <string>
+#ifndef KENGINE_MAX_PYTHON_SCRIPT_PATH
+# define KENGINE_MAX_PYTHON_SCRIPT_PATH 64
+#endif
+
+#ifndef KENGINE_MAX_PYTHON_SCRIPTS
+# define KENGINE_MAX_PYTHON_SCRIPTS 8
+#endif
+
+#define PUTILS_STRING_LENGTH KENGINE_MAX_PYTHON_SCRIPT_PATH
+#include "string.hpp"
+#undef PUTILS_STRING_LENGTH
+
+#define PUTILS_VECTOR_CLASS putils::string<KENGINE_MAX_PYTHON_SCRIPT_PATH>
+#define PUTILS_VECTOR_LENGTH KENGINE_MAX_PYTHON_SCRIPTS
+#include "vector.hpp"
+#undef PUTILS_VECTOR_CLASS 
+#undef PUTILS_VECTOR_LENGTH 
 
 namespace kengine {
     class PyComponent : public putils::Reflectible<PyComponent> {
     public:
-        PyComponent(const std::vector<std::string> & scripts = {}) : _scripts(scripts) {}
+		using script = putils::string<KENGINE_MAX_PYTHON_SCRIPT_PATH>;
+		using script_vector = putils::vector<script, KENGINE_MAX_PYTHON_SCRIPTS>;
+
+    public:
+        PyComponent(const script_vector & scripts = {}) : _scripts(scripts) {}
 
 		PyComponent(const PyComponent &) = default;
 		PyComponent & operator=(const PyComponent &) = default;
@@ -13,17 +33,17 @@ namespace kengine {
 		PyComponent & operator=(PyComponent &&) = default;
 
     public:
-        void attachScript(const std::string & file) noexcept { _scripts.push_back(file); }
+        void attachScript(const char * file) noexcept { _scripts.push_back(file); }
 
-        void removeScript(const std::string & file) noexcept {
+        void removeScript(const char * file) noexcept {
             _scripts.erase(std::find(_scripts.begin(), _scripts.end(), file));
         }
 
     public:
-        const std::vector<std::string> & getScripts() const noexcept { return _scripts; }
+        const script_vector & getScripts() const noexcept { return _scripts; }
 
     private:
-        std::vector<std::string> _scripts;
+        script_vector _scripts;
 
         /*
          * Reflectible

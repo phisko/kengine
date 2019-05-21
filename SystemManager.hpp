@@ -1,5 +1,9 @@
 #pragma once
 
+#ifndef KENGINE_AFTER_SYSTEM_FUNCTION_SIZE
+# define KENGINE_AFTER_SYSTEM_FUNCTION_SIZE 64
+#endif
+
 #include <utility>
 #include <cmath>
 #include <vector>
@@ -42,7 +46,8 @@ namespace kengine {
 		}
 		
     public:
-		void runAfterSystem(const std::function<void()> & func) { _afterSystem.push_back(func); }
+		template<typename Func>
+		void runAfterSystem(Func && func) { _afterSystem.push_back(FWD(func)); }
 
     private:
         void updateSystemList() noexcept {
@@ -104,7 +109,6 @@ namespace kengine {
             time.lastCall = putils::Timer::t_clock::now();
             time.timer.setDuration(time.fixedDeltaTime);
 
-            addModule(*system);
             const auto type = system->getType();
 
             auto & ret = *system;
@@ -179,6 +183,24 @@ namespace kengine {
         void pause() noexcept { _speed = 0; }
         void resume() noexcept { _speed = 1; }
 
+    public:
+		void load(const char * directory) {
+			for (const auto & [_, sys] : _systems)
+				sys->onLoad(directory);
+			for (const auto & f : _onLoad)
+				f(directory);
+		}
+
+		void save(const char * directory) const {
+			for (const auto & [_, sys] : _systems)
+				sys->onSave(directory);
+			for (const auto & f : _onSave)
+				f(directory);
+		}
+
+		void onLoad(const std::function<void(const char * directory)> & func) { _onLoad.push_back(func); }
+		void onSave(const std::function<void(const char * directory)> & func) { _onSave.push_back(func); }
+
         /*
          * Internal
          */
@@ -198,6 +220,8 @@ namespace kengine {
         std::vector<pmeta::type_index> _toRemove;
         std::unordered_map<pmeta::type_index, std::unique_ptr<ISystem>> _systems;
 
-		std::vector<std::function<void()>> _afterSystem;
+		std::vector<std::function<void(const char * directory)>> _onLoad;
+		std::vector<std::function<void(const char * directory)>> _onSave;
+		std::vector<putils::function<void(), KENGINE_AFTER_SYSTEM_FUNCTION_SIZE>> _afterSystem;
     };
 }

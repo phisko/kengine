@@ -239,55 +239,57 @@ namespace kengine {
 		}
 	}
 
+	static sf::Color toSfColor(const putils::Point3f & colorNormalized) {
+		return sf::Color((int)colorNormalized.x * 255, (int)colorNormalized.y * 255, (int)colorNormalized.z * 255);
+	}
+
 	bool SfSystem::updateDebug(EntityView e, pse::ViewItem & item) {
 		if (!e.has<DebugGraphicsComponent>())
 			return false;
 
 		const auto & debug = e.get<DebugGraphicsComponent>();
+		const auto & transform = e.get<TransformComponent3f>();
 		switch (debug.debugType) {
 			case DebugGraphicsComponent::Text: {
 				auto & text = static_cast<pse::Text &>(item);
-				text.setString(debug.text);
-				text.setTextSize(debug.textSize);
-				text.setPosition(toWorldPos(debug.startPos));
-				text.setColor(sf::Color(debug.color));
+				text.setString(debug.text.c_str());
+				text.setTextSize((unsigned int)debug.offset.size.x);
+				text.setPosition(toWorldPos(transform.boundingBox.topLeft + debug.offset.topLeft));
+				text.setColor(toSfColor(debug.colorNormalized));
 				break;
 			}
 			case DebugGraphicsComponent::Line: {
+				const auto start = transform.boundingBox.topLeft + debug.offset.topLeft;
 				static_cast<pse::Shape<sfLine> &>(item).get().set(
-					toWorldPos(debug.startPos), toWorldPos(debug.endPos), debug.thickness, sf::Color(debug.color)
+					toWorldPos(start), toWorldPos(start + debug.offset.size), debug.offset.size.y, toSfColor(debug.colorNormalized)
 				);
 				break;
 			}
 			case DebugGraphicsComponent::Sphere: {
 				auto & circle = static_cast<pse::Shape<sf::CircleShape> &>(item).get();
-				circle.setPosition(toWorldPos(debug.startPos));
-				circle.setRadius(debug.radius * _tileSize.x);
+				circle.setPosition(toWorldPos(transform.boundingBox.topLeft + debug.offset.topLeft));
+				circle.setRadius(transform.boundingBox.size.x * debug.offset.size.x * _tileSize.x);
 				circle.setOrigin(circle.getRadius(), circle.getRadius());
-				circle.setFillColor(sf::Color(debug.color));
+				circle.setFillColor(toSfColor(debug.colorNormalized));
 				break;
 			}
 			case DebugGraphicsComponent::Box: {
 				auto & box = static_cast<pse::Shape<sf::RectangleShape> &>(item).get();
-				box.setPosition(toWorldPos(debug.box.topLeft));
-				box.setSize(toWorldSize(debug.box.size));
-				box.setFillColor(sf::Color(debug.color));
+				box.setPosition(toWorldPos(transform.boundingBox.topLeft + debug.offset.topLeft));
+				box.setSize(toWorldSize(transform.boundingBox.size * debug.offset.size));
+				box.setFillColor(toSfColor(debug.colorNormalized));
 				break;
 			}
 			default:
 				throw std::logic_error("[SfSystem] Unknown debug type");
 		}
 
-		_engine.setItemHeight(item, (size_t)debug.startPos.y);
+		_engine.setItemHeight(item, (size_t)(transform.boundingBox.topLeft.y + debug.offset.topLeft.y));
 		return true;
 	}
 
 	static putils::Point3f getLayerSize(const putils::Point3f & transformSize, const putils::Point3f & layerSize) {
-		return {
-			transformSize.x * layerSize.x,
-			transformSize.y * layerSize.y,
-			transformSize.z * layerSize.z
-		};
+		return transformSize * layerSize;
 	}
 
 	void SfSystem::updateObject(EntityView e, pse::ViewItem & item, const GraphicsComponent::Layer & layer, bool fixedSize) {
@@ -299,7 +301,7 @@ namespace kengine {
 		auto & sprite = static_cast<pse::Sprite &>(item);
 
 		try {
-			sprite.setTexture(appearance);
+			sprite.setTexture(appearance.str());
 		}
 		catch (const std::exception & e) {
 			std::cerr << "[SfSystem] Failed to set appearance: " << e.what() << std::endl;
@@ -338,9 +340,9 @@ namespace kengine {
 					_.removeItemByIndex(i);
 				size_t i = 0;
 				for (; i < _.getItemCount(); ++i)
-					_.changeItemByIndex(i, gui.list.items[i]);
+					_.changeItemByIndex(i, gui.list.items[i].c_str());
 				for (; i < gui.list.items.size(); ++i)
-					_.addItem(gui.list.items[i]);
+					_.addItem(gui.list.items[i].c_str());
 			}
 		}
 
@@ -354,7 +356,7 @@ namespace kengine {
 			element.frame->setSize(tgui::bindWidth(win) * gui.boundingBox.size.x, tgui::bindHeight(win) * gui.boundingBox.size.z);
 
 			if (element.label != nullptr) {
-				element.label->setText(gui.text);
+				element.label->setText(gui.text.c_str());
 				if (gui.onClick != nullptr) {
 					element.label->disconnectAll("clicked");
 					element.label->connect("clicked", gui.onClick);
@@ -467,6 +469,7 @@ namespace kengine {
 
 	void SfSystem::attachDebug(Entity e) {
 		const auto & debug = e.get<DebugGraphicsComponent>();
+		const auto & transform = e.get<TransformComponent3f>();
 
 		auto & comp = e.has<SfComponent>() ?
 			e.get<SfComponent>() :
@@ -476,16 +479,17 @@ namespace kengine {
 
 		switch (debug.debugType) {
 			case DebugGraphicsComponent::Text: {
-				v = std::make_unique<pse::Text>(debug.text, toWorldPos(debug.startPos), sf::Color(debug.color), debug.textSize, debug.font);
+				v = std::make_unique<pse::Text>(debug.text.c_str(), toWorldPos(transform.boundingBox.topLeft + debug.offset.topLeft), toSfColor(debug.colorNormalized), (unsigned int)debug.offset.size.x, debug.font.str());
 				break;
 			}
 			case DebugGraphicsComponent::Line: {
-				v = std::make_unique<pse::Shape<sfLine>>(toWorldPos(debug.startPos), toWorldPos(debug.endPos), (float)debug.thickness, sf::Color(debug.color));
+				const auto start = transform.boundingBox.topLeft + debug.offset.topLeft;
+				v = std::make_unique<pse::Shape<sfLine>>(toWorldPos(start), toWorldPos(start + debug.offset.size), (float)debug.offset.size.y, toSfColor(debug.colorNormalized));
 				break;
 			}
 			case DebugGraphicsComponent::Sphere: {
-				v = std::make_unique<pse::Shape<sf::CircleShape>>((float)debug.radius);
-				static_cast<pse::Shape<sf::CircleShape> &>(*v).get().setFillColor(sf::Color(debug.color));
+				v = std::make_unique<pse::Shape<sf::CircleShape>>(transform.boundingBox.size.x * debug.offset.size.x * _tileSize.x);
+				static_cast<pse::Shape<sf::CircleShape> &>(*v).get().setFillColor(toSfColor(debug.colorNormalized));
 				break;
 			}
 			case DebugGraphicsComponent::Box: {
@@ -493,11 +497,11 @@ namespace kengine {
 				break;
 			}
 			default:
-				throw std::logic_error("[SfSystem] Unknown debug type");
+				assert(false && "[SfSystem] Unknown debug type");
 		}
 
 		if (v != nullptr) {
-			_engine.addItem(*v, (std::size_t)debug.startPos.y);
+			_engine.addItem(*v, (std::size_t)(transform.boundingBox.topLeft.y + debug.offset.topLeft.y));
 			comp.viewItems.push_back({ "__debug__", std::move(v) });
 		}
 	}
@@ -518,7 +522,7 @@ namespace kengine {
 		} else if (gui.guiType == GUIComponent::List) {
 			element.frame = theme != nullptr ? theme->load("ListBox") : tgui::ListBox::create();
 			if (gui.list.onItemClick != nullptr)
-				static_cast<tgui::ListBox &>(*element.frame).connect("ItemSelected", gui.list.onItemClick);
+				static_cast<tgui::ListBox &>(*element.frame).connect("ItemSelected", [&gui](const std::string & param) { gui.list.onItemClick(param.c_str()); });
 		}
 
 		if (element.frame != nullptr) {
@@ -530,7 +534,7 @@ namespace kengine {
 
 			if (gui.guiType == GUIComponent::Button || gui.guiType == GUIComponent::Text || gui.guiType == GUIComponent::ProgressBar) {
 				element.label = theme != nullptr ? theme->load("Label") : tgui::Label::create();
-				element.label->setText(gui.text);
+				element.label->setText(gui.text.c_str());
 				element.label->setPosition(tgui::bindPosition(element.frame));
 				element.label->setSize(tgui::bindSize(element.frame));
 				element.label->setHorizontalAlignment(tgui::Label::HorizontalAlignment::Center);
@@ -554,11 +558,11 @@ namespace kengine {
 
 	void SfSystem::attachLayer(SfComponent & comp, const GraphicsComponent::Layer & layer, const putils::Rect3f & boundingBox) {
 		try {
-			auto v = getResource(layer.appearance);
+			auto v = getResource(layer.appearance.str());
 			v->setPosition(toWorldPos(boundingBox.topLeft + layer.boundingBox.topLeft));
 			v->setSize(toWorldSize(getLayerSize(boundingBox.size, layer.boundingBox.size)));
 			_engine.addItem(*v, (std::size_t)(boundingBox.topLeft.y + layer.boundingBox.topLeft.y));
-			comp.viewItems.push_back({ layer.name, std::move(v) });
+			comp.viewItems.push_back({ layer.name.str(), std::move(v) });
 		} catch (const std::exception &) {
 			send(kengine::packets::Log{ putils::concat("[SfSystem] Unknown appearance: ", layer.appearance) });
 		}
@@ -591,19 +595,6 @@ namespace kengine {
 
 	void SfSystem::handle(const kengine::packets::RegisterAppearance & p) noexcept {
 		_appearances[p.appearance] = p.resource;
-	}
-
-	void SfSystem::handle(const packets::KeyStatus::Query & p) const noexcept {
-		sendTo(packets::KeyStatus::Response{ sf::Keyboard::isKeyPressed(p.key) }, *p.sender);
-	}
-
-	void SfSystem::handle(const packets::MouseButtonStatus::Query & p) const noexcept {
-		sendTo(packets::MouseButtonStatus::Response{ sf::Mouse::isButtonPressed(p.button) }, *p.sender);
-	}
-
-	void SfSystem::handle(const packets::MousePosition::Query & p) noexcept {
-		const auto pos = sf::Mouse::getPosition(_engine.getRenderWindow());
-		sendTo(packets::MousePosition::Response{ { pos.x, pos.y } }, *p.sender);
 	}
 
 	/*

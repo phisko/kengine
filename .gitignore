@@ -5,6 +5,7 @@
 *.lo
 *.o
 *.obj
+*.swp
 
 # Precompiled Headers
 *.gch
@@ -31,6 +32,5 @@
 *.app
 
 # Directories
-cmake/
 cmake-build-debug/
 *.TMP

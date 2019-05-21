@@ -1,0 +1,53 @@
+#pragma once
+
+namespace kengine::Shaders::src {
+	namespace ProjViewModel {
+		extern const char * vert;
+	}
+	namespace Quad {
+		extern const char * vert;
+	}
+
+	namespace ShadowMap {
+		extern const char * frag;
+	}
+	namespace ShadowCube {
+		extern const char * frag;
+	}
+
+	namespace DepthCube {
+		extern const char * geom;
+		extern const char * frag;
+	}
+
+	namespace DirLight {
+		extern const char * frag;
+		namespace GetDirection {
+			extern const char * frag;
+		}
+	}
+	namespace PointLight {
+		extern const char * frag;
+		namespace GetDirection {
+			extern const char * frag;
+		}
+	}
+	namespace SpotLight {
+		extern const char * frag;
+	}
+
+	namespace Color {
+		extern const char * frag;
+	}
+
+	namespace GodRays {
+		extern const char * frag;
+	}
+
+	namespace SSAO {
+		extern const char * frag;
+		namespace Blur {
+			extern const char * frag;
+		}
+	}
+}

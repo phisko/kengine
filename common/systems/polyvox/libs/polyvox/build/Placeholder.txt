@@ -1,0 +1,1 @@
+You should ignore this placeholder file. It exists because it is not currently possible to add an empty folder to Git. This file can be deleted once such functionality is added.

@@ -54,7 +54,7 @@ void removeEntity(Entity::ID id);
 ##### getEntity
 
 ```cpp
-Entity &getEntity(Entity::ID id);
+Entity getEntity(Entity::ID id);
 ```
 
 ##### getEntities
@@ -70,11 +70,13 @@ template<typename ...Comps>
 auto getEntities<Comps...>();
 ```
 
-Returns and iteratable collection over all `Entities` which have each component listed in `Comp`.
+Returns and iteratable collection over all `Entities` which have each component listed in `Comps`.
 
-Dereferencing the iterator returns an `std::tuple<EntityView, Comps &...>`, meaning you can write the following:
+Dereferencing the iterator returns an `std::tuple<Entity, Comps &...>`, which means you can write the following:
 ```cpp
-for (const auto & [e, transform, lua] : em.getEntities<TransformComponent3f, LuaComponent>())
+for (const auto & [e, transform, lua] : em.getEntities<TransformComponent3f, LuaComponent>()) {
+  // do stuff
+}
 ```
 
 ##### pause
@@ -108,3 +110,21 @@ double getSpeed() const;
 ```
 
 Returns the game's speed.
+
+##### save
+
+```cpp
+void save(const char * directory) const;
+```
+
+Saves all `Entities` and `Components` to a series of binary files (one for the list of `Entities`, and one for each type of `Component`) in `directory`.
+
+To specify that a `Component` should not be serialized, it should inherit from `kengine::not_serializable`.
+
+##### load
+
+```cpp
+void load(const char * directory);
+```
+
+Loads all `Entities` and `Components` from the binary files found in `directory`.

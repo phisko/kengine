@@ -1,8 +1,6 @@
 # [TransformComponent](TransformComponent.hpp)
 
-`Component` providing a `GameObject`'s position and size. Template parameters are the type used for the coordinates (`Precision`) and the number of `Dimensions` (2 or 3).
-
-Inherits from [putils::Reflectible](https://github.com/phiste/putils/blob/master/reflection/Reflectible.md).
+`Component` providing an `Entity`'s position and size. Template parameters are the type used for the coordinates (`Precision`) and the number of `Dimensions` (2 or 3).
 
 Some specializations are pre-defined:
 
@@ -17,13 +15,20 @@ using TransformComponent2f = TransformComponent<float, 2>;
 using TransformComponent3f = TransformComponent<float, 3>;
 ```
 
+All the `Systems` provided with the *kengine* use `TransformComponent3f`.
+
+### Specs
+
+* [Reflectible](https://github.com/phiste/putils/blob/master/reflection/Reflectible.md)
+* Serializable
+
 ### Members
 
 ##### Constructor
 
 ```cpp
-TransformComponent(const putils::Point<Precision, 3> &pos = { 0, 0, 0 },
-                   const putils::Point<Precision, 3> &size = { 1, 1, 1 });
+TransformComponent(const putils::Point<Precision, Dimensions> &pos = { 0, 0, 0 },
+                   const putils::Point<Precision, Dimensions> &size = { 1, 1, 1 });
 ```
 
 ##### boundingBox
@@ -31,7 +36,7 @@ TransformComponent(const putils::Point<Precision, 3> &pos = { 0, 0, 0 },
 ```cpp
 putils::Rect<Precision, Dimensions> boundingBox;
 ```
-The `GameObject`'s position is stored as `boundingBox.topLeft`, and its size as `boundingBox.size`.
+The `Entity`'s position is stored as `boundingBox.topLeft`, and its size as `boundingBox.size`.
 
 ##### pitch, yaw
 

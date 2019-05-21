@@ -1,15 +1,24 @@
 #pragma once
 
-#include <functional>
+#ifndef KENGINE_BEHAVIOR_FUNCTION_SIZE
+# define KENGINE_BEHAVIOR_FUNCTION_SIZE 64
+#endif
+
+#include "function.hpp"
 #include "reflection/Reflectible.hpp"
+#include "not_serializable.hpp"
 
 namespace kengine {
-	class BehaviorComponent
-	{
+	class BehaviorComponent : not_serializable {
 	public:
-		BehaviorComponent(const std::function<void()> & func = nullptr) : func(func) {}
+		using function = putils::function<void(), KENGINE_BEHAVIOR_FUNCTION_SIZE>;
 
-		std::function<void()> func = nullptr;
+		BehaviorComponent() = default;
+
+		template<typename Func>
+		BehaviorComponent(const Func & func) : func(func) {}
+
+		function func = nullptr;
 
 		pmeta_get_class_name(BehaviorComponent);
 		pmeta_get_attributes(

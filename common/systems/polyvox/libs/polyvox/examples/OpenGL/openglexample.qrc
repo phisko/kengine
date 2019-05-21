@@ -1,0 +1,6 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+	<file>openglexample.vert</file>
+	<file>openglexample.frag</file>
+</qresource>
+</RCC>

@@ -1,5 +1,9 @@
 #pragma once
 
+#ifndef PI
+# define PI 3.14159265359f
+#endif
+
 #include "ISystem.hpp"
 #include "EntityManager.hpp"
 
@@ -9,7 +13,7 @@ namespace kengine {
     template<typename CRTP, typename ...DataPackets>
     class System : public ISystem, public putils::Module<CRTP, DataPackets...> {
     public:
-		System(EntityManager & em) {
+		System(EntityManager & em) : Module(&em) {
 			detail::components = &em.__getComponentMap();
 		}
 
