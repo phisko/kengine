@@ -145,7 +145,9 @@ These are helper functions to factorize typical manipulations of `Components`.
 ## ComponentFunctions
 
 ```
-This is an advanced feature and understanding this is absolutely not required to make use of the engine, although those of you looking to make the most of runtime extensibility and compile-time type-safety should be interested in this.
+This is an advanced feature and understanding this is absolutely not required to make use of the engine,
+although those of you looking to make the most of runtime extensibility and compile-time type-safety
+should be interested in this.
 ```
 
 One of the main goals of this engine is to be as runtime-extensible as possible, while also allowing developers to perform type-based metaprogramming for things such as serialization or object inspection.
