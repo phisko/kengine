@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- This file defines a collection of Qt Help files as well as some amount of the build process -->
+<QHelpCollectionProject version="1.0">
+	<assistant>
+		<title>PolyVox Documentation</title>
+		<homePage>qthelp://com.volumesoffun.polyvox/api/index.html</homePage>
+		<startPage>qthelp://com.volumesoffun.polyvox/api/index.html</startPage>
+		<!-- Disable the documentation manager so that there's no option to add more docs to this shell instance -->
+		<enableDocumentationManager>false</enableDocumentationManager>
+		<cacheDirectory>volumesoffun/polyvox</cacheDirectory>
+	</assistant>
+	<docFiles>
+		<!-- This section says that polyvox.qch will be created from index.qhp when qcollectiongenerator is run -->
+		<generate>
+			<file>
+				<input>../html/index.qhp</input>
+				<output>polyvox.qch</output>
+			</file>
+		</generate>
+		<!-- We then add the Qt Compressed Help file to the collection -->
+		<register>
+			<file>polyvox.qch</file>
+		</register>
+	</docFiles>
+</QHelpCollectionProject>

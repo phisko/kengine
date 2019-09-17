@@ -1,0 +1,59 @@
+/**
+\mainpage PolyVox Framework
+
+The PolyVox documentation.\n
+
+See the <a href="../manual/index.html">manual</a> for help and tutorials.
+
+
+\author David Williams
+
+\namespace PolyVox
+\brief Main namespace
+*/
+
+/**
+\page tutorial Tutorial
+
+This is a basic tutorial covering the essentials of using %PolyVox.
+
+\note This is a work in progress. For now, the best example is the OpenGL example distributed with %PolyVox in the example/OpenGL/ folder.
+
+\code
+#include <Block.h>
+
+int main(int argc, char *argv[])
+{
+	//blah blah
+}
+\endcode
+*/
+
+/**
+\page cmake Finding %PolyVox with CMake
+
+CMakeLists.txt:
+\verbatim
+# Tell CMake the name of you project
+project(MyApp)
+
+# Ask CMake to find PolyVox for you
+find_package(PolyVox REQUIRED)
+
+# Tell your compiler where to look for the PolyVox headers
+include_directories(${PolyVox_INCLUDE_DIRS})
+
+# Create your executable
+add_executable(myapp main.cpp)
+
+# Link it to PolyVox
+target_link_libraries(myapp ${PolyVox_LIBRARIES})
+\endverbatim
+
+Then call cmake with 
+\verbatim
+mkdir build && cd build
+cmake ..
+\endverbatim
+You may also need to pass an argument to cmake if it can't find %PolyVox. Pass <tt>-DCMAKE_PREFIX_PATH=/path/to/polyvox/root/</tt>.
+*/
