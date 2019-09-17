@@ -6,6 +6,15 @@ This new version features a greatly optimized memory architecture, better cache-
 
 ![koala](koala.png)
 
+## Installation
+
+The engine uses Git submodules, and should therefore be cloned recursively with
+```
+git clone https://github.com/phisko/kengine --recursive
+```
+
+Alternatively, the entire source code can be found in ZIP form in the latest release.
+
 ## C++ version
 
 The engine requires a **C++17** compiler.
