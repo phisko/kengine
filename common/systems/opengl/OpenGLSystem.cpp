@@ -661,6 +661,11 @@ namespace kengine {
 
 		const putils::Point2ui gBufferSize = _gBuffer.getSize();
 
+		if (p.pixel.x >= gBufferSize.x || p.pixel.y >= gBufferSize.y) {
+			p.id = kengine::Entity::INVALID_ID;
+			return;
+		}
+
 		if (!g_entityTextureUpToDate) {
 			_gBuffer.getTexture(GBUFFER_ENTITY_LOCATION, g_entityTexture, gBufferSize.x * gBufferSize.y * GBUFFER_TEXTURE_COMPONENTS);
 			g_entityTextureUpToDate = true;
