@@ -57,7 +57,7 @@ namespace kengine::Shaders {
 			model = glm::scale(model, { radius, radius, radius });
 			putils::gl::setUniform(this->model, model);
 
-			if (centre.distanceTo(putils::Point3f{ params.camPos.x, params.camPos.y, params.camPos.z }) < radius)
+			if (centre.getDistanceTo({ params.camPos.x, params.camPos.y, params.camPos.z }) < radius)
 				glCullFace(GL_BACK);
 			else
 				glCullFace(GL_FRONT);

@@ -289,7 +289,7 @@ namespace kengine {
 		if (graphics.model != Entity::INVALID_ID)
 			model = &_em.getEntity(graphics.model).get<ModelComponent>();
 
-		const auto center = transform.boundingBox.getCenter();
+		const auto center = transform.boundingBox.position + transform.boundingBox.size / 2.f;
 		const auto size = transform.boundingBox.size * (model != nullptr ? model->boundingBox.size : putils::Point3f{ 1.f, 1.f, 1.f });
 		const putils::Point3f endPos{
 			// x' = y*sin(a) + x*cos(a)
