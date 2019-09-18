@@ -229,7 +229,7 @@ namespace kengine::Shaders {
 				{ 0.f, 1.f, 0.f }
 			);
 			model = glm::rotate(model,
-				transform.pitch + (in2D ? 0.f : helpers::math::pi / 2.f),
+				transform.pitch,
 				{ 1.f, 0.f, 0.f }
 			);
 			model = glm::rotate(model,
