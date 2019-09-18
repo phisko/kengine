@@ -214,6 +214,7 @@ static void setValue(kengine::AdjustableComponent & comp, const char * s) {
 		putils::Color tmp;
 		tmp.rgba = putils::parse<unsigned int>(s);
 		comp.color = putils::toNormalizedColor(tmp);
+		assignPtr(comp.colorPtr, comp.color);
 		break;
 	}
 	default:
