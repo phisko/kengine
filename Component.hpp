@@ -77,10 +77,11 @@ namespace kengine {
 		static constexpr size_t INVALID = (size_t)-1;
 
 		struct MetadataBase {
+			size_t id = detail::INVALID;
+
 			virtual ~MetadataBase() = default;
 			virtual bool save(const char * directory) const = 0;
 			virtual bool load(const char * directory) = 0;
-			virtual size_t getId() const = 0;
 
 			FunctionMap funcs;
 		};
@@ -99,7 +100,6 @@ namespace kengine {
 
 		struct Metadata : detail::MetadataBase {
 			std::vector<Chunk> chunks;
-			size_t id = detail::INVALID;
 			mutable detail::Mutex _mutex;
 
 			bool save(const char * directory) const final {
@@ -168,8 +168,6 @@ namespace kengine {
 				}
 				return false;
 			}
-
-			size_t getId() const final { return id;  }
 		};
 
 	public:

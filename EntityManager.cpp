@@ -97,7 +97,7 @@ namespace kengine {
 			detail::ReadLock l(_components.mutex);
 			serializable.resize(_components.map.size());
 			for (const auto &[_, meta] : _components.map)
-				serializable[meta->getId()] = meta->save(directory);
+				serializable[meta->id] = meta->save(directory);
 		}
 
 		std::ofstream f(putils::string<KENGINE_MAX_SAVE_PATH_LENGTH>("%s/entities.bin", directory));
