@@ -661,7 +661,7 @@ namespace kengine {
 
 		const putils::Point2ui gBufferSize = _gBuffer.getSize();
 
-		if (p.pixel.x >= gBufferSize.x || p.pixel.y >= gBufferSize.y) {
+		if (p.pixel.x >= gBufferSize.x || p.pixel.y > gBufferSize.y || p.pixel.y == 0) {
 			p.id = kengine::Entity::INVALID_ID;
 			return;
 		}
