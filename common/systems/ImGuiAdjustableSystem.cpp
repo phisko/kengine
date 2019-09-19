@@ -133,13 +133,17 @@ static void draw(const char * name, kengine::AdjustableComponent & comp) {
 		break;
 	}
 	case kengine::AdjustableComponent::Double: {
+		ImGui::PushItemWidth(-1.f);
 		ImGui::InputFloat((string("##") + comp.name).c_str(), comp.dPtr != nullptr ? comp.dPtr : &comp.d, 0.f, 0.f, KENGINE_ADJUSTABLE_FLOAT_PRECISION);
+		ImGui::PopItemWidth();
 		if (comp.dPtr != nullptr)
 			comp.d = *comp.dPtr;
 		break;
 	}
 	case kengine::AdjustableComponent::Int: {
+		ImGui::PushItemWidth(-1.f);
 		ImGui::InputInt((string("##") + comp.name).c_str(), comp.iPtr != nullptr ? comp.iPtr : &comp.i);
+		ImGui::PopItemWidth();
 		if (comp.iPtr != nullptr)
 			comp.i = *comp.iPtr;
 		break;
