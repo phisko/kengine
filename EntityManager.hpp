@@ -4,6 +4,10 @@
 # define KENGINE_MAX_SAVE_PATH_LENGTH 64
 #endif
 
+#ifndef KENGINE_MAX_COMPONENT_NAME_LENGTH
+# define KENGINE_MAX_COMPONENT_NAME_LENGTH 1024
+#endif
+
 #include <vector>
 #include "SystemManager.hpp"
 #include "Component.hpp"
@@ -12,7 +16,9 @@
 namespace kengine {
     class EntityManager : public SystemManager {
     public:
-		EntityManager(size_t threads = 0) : SystemManager(threads) {}
+		EntityManager(size_t threads = 0) : SystemManager(threads) {
+			detail::components = &_components;
+		}
 
     public:
 		template<typename Func> // Func: void(Entity &);
