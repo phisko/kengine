@@ -35,6 +35,8 @@ auto ImGuiEntityEditor(kengine::EntityManager & em) {
 					ImGui::InputText("##Search", nameSearch, sizeof(nameSearch));
 					ImGui::PopItemWidth();
 
+					ImGui::Separator();
+
 					{
 						ImGui::BeginChild("##child");
 						const auto components = em.getComponentFunctionMaps();
