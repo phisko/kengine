@@ -93,7 +93,7 @@ void detectCollisions(btDynamicsWorld *, btScalar timeStep) {
 	}
 }
 
-struct BulletPhysicsComponent {
+struct BulletPhysicsComponent : kengine::not_serializable {
 	btCompoundShape * shape;
 	btRigidBody * body;
 	pmeta_get_class_name(BulletPhysicsComponent);
