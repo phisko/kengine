@@ -81,6 +81,7 @@ static auto ImGuiEntitySelector(kengine::EntityManager & em) {
 					em += [](kengine::Entity & e) { e += kengine::SelectedComponent{}; };
 				ImGui::Separator();
 
+				ImGui::BeginChild("child");
 				for (auto & e : em.getEntities())
 					if (matches(e, nameSearch, em)) {
 						if (e.has<kengine::SelectedComponent>())
@@ -88,6 +89,7 @@ static auto ImGuiEntitySelector(kengine::EntityManager & em) {
 						else
 							e.attach<kengine::SelectedComponent>();
 					}
+				ImGui::EndChild();
 			}
 			ImGui::End();
 		});
