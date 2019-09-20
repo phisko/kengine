@@ -1,5 +1,13 @@
 #include "EntityManager.hpp"
 
+#ifndef KENGINE_MAX_SAVE_PATH_LENGTH
+# define KENGINE_MAX_SAVE_PATH_LENGTH 64
+#endif
+
+#ifndef KENGINE_MAX_COMPONENT_NAME_LENGTH
+# define KENGINE_MAX_COMPONENT_NAME_LENGTH 64
+#endif
+
 namespace kengine {
 	Entity EntityManager::getEntity(Entity::ID id) {
 		detail::ReadLock l(_entitiesMutex);
@@ -34,6 +42,11 @@ namespace kengine {
 		_entities[id].shouldActivateAfterInit = active;
 	}
 
+	struct ComponentIDSave {
+		size_t id;
+		putils::string<KENGINE_MAX_COMPONENT_NAME_LENGTH> name;
+	};
+
 	void EntityManager::load(const char * directory) {
 		{
 			detail::WriteLock l(_archetypesMutex);
@@ -45,11 +58,8 @@ namespace kengine {
 			_toReuse.clear();
 		}
 
-		{
-			detail::ReadLock l(_entitiesMutex);
-			for (size_t i = 0; i < _entities.size(); ++i)
-				SystemManager::removeEntity(EntityView(i, _entities[i].mask));
-		}
+		for (auto & e : getEntities())
+			SystemManager::removeEntity(e);
 
 		{
 			detail::ReadLock l(_components.mutex);
@@ -57,7 +67,30 @@ namespace kengine {
 				meta->load(directory);
 		}
 
-		std::ifstream f(putils::string<KENGINE_MAX_SAVE_PATH_LENGTH>("%s/entities.bin", directory));
+		size_t idMap[KENGINE_COMPONENT_COUNT]; // index = new, value = old
+		for (auto & i : idMap)
+			i = (size_t)-1;
+		{
+			detail::ReadLock l(_components.mutex);
+
+			std::ifstream f(putils::string<KENGINE_MAX_SAVE_PATH_LENGTH>("%s/components.bin", directory), std::ifstream::binary);
+			assert(f);
+			size_t size;
+			f.read((char *)&size, sizeof(size));
+			for (size_t i = 0; i < size; ++i) {
+				ComponentIDSave save;
+				f.read((char *)&save, sizeof(save));
+				assert(f.gcount() == sizeof(save));
+
+				for (const auto & [_, meta] : _components.map)
+					if (meta->funcs.name == save.name) {
+						idMap[meta->id] = save.id;
+						break;
+					}
+			}
+		}
+
+		std::ifstream f(putils::string<KENGINE_MAX_SAVE_PATH_LENGTH>("%s/entities.bin", directory), std::ifstream::binary);
 		assert(f);
 		size_t size;
 		f.read((char *)&size, sizeof(size));
@@ -65,25 +98,29 @@ namespace kengine {
 		{
 			detail::WriteLock l(_entitiesMutex);
 			_entities.resize(size);
-			f.read((char *)_entities.data(), size * sizeof(Entity::Mask));
+			f.read((char *)_entities.data(), size * sizeof(_entities[0]));
 		}
 
-		{
-			detail::ReadLock l(_entitiesMutex);
-			for (size_t i = 0; i < _entities.size(); ++i) {
-				const auto mask = _entities[i].mask;
-				if (mask != 0) {
-					detail::WriteLock l(_updatesMutex);
-					updateMask(i, mask, true);
-					Entity e{ i, mask, this };
-					SystemManager::registerEntity(e);
+		for (auto & e : getEntities()) {
+			if (e.componentMask != 0) { // Adjust for Components with new IDs since save
+				Entity::Mask tmp = 0;
+				for (size_t i = 0; i < KENGINE_COMPONENT_COUNT; ++i) {
+					const auto oldId = idMap[i];
+					tmp[i] = oldId == (size_t)-1 ? false : e.componentMask[oldId];
 				}
-				else {
-					detail::WriteLock l(_toReuseMutex);
-					_toReuse.emplace_back(i);
-				}
+				e.componentMask = tmp;
+
+				if (e.componentMask != 0)
+					updateMask(e.id, e.componentMask, true);
+			}
+			else {
+				detail::WriteLock l(_toReuseMutex);
+				_toReuse.emplace_back(e.id);
 			}
 		}
+
+		for (auto & e : getEntities())
+			SystemManager::registerEntity(e);
 
 		SystemManager::load(directory);
 	}
@@ -98,19 +135,30 @@ namespace kengine {
 			serializable.resize(_components.map.size());
 			for (const auto &[_, meta] : _components.map)
 				serializable[meta->id] = meta->save(directory);
+
+			// Save Component IDs
+			std::ofstream f(putils::string<KENGINE_MAX_SAVE_PATH_LENGTH>("%s/components.bin", directory), std::ofstream::binary);
+			const size_t size = _components.map.size();
+			f.write((const char *)&size, sizeof(size));
+			for (const auto &[_, meta] : _components.map) {
+				ComponentIDSave save;
+				save.id = meta->id;
+				save.name = meta->funcs.name;
+				f.write((const char *)&save, sizeof(save));
+			}
 		}
 
-		std::ofstream f(putils::string<KENGINE_MAX_SAVE_PATH_LENGTH>("%s/entities.bin", directory));
+		std::ofstream f(putils::string<KENGINE_MAX_SAVE_PATH_LENGTH>("%s/entities.bin", directory), std::ofstream::binary);
 		assert(f);
 
 		{
 			detail::ReadLock l(_entitiesMutex);
 			const auto size = _entities.size();
 			f.write((const char *)&size, sizeof(size));
-			for (auto [active, mask, _] : _entities) {
+			for (EntityMetadata e : _entities) {
 				for (size_t i = 0; i < serializable.size(); ++i)
-					mask[i] = mask[i] & serializable[i];
-				f.write((const char *)&mask, sizeof(mask));
+					e.mask[i] = e.mask[i] && serializable[i];
+				f.write((const char *)&e, sizeof(e));
 			}
 		}
 	}
@@ -212,14 +260,17 @@ namespace kengine {
 	void EntityManager::doUpdateMask(Entity::ID id, Entity::Mask newMask, bool ignoreOldMask) {
 		// _updatesMutex already locked
 		const auto oldMask = ignoreOldMask ? 0 : _entities[id].mask;
+		assert(newMask != oldMask);
 
-		int done = 0;
-		if (oldMask == 0) // Will not have to remove
-			++done;
+		bool removeDone = oldMask == 0;
+		bool addDone = newMask == 0;
 
 		{
 			detail::WriteLock l(_archetypesMutex);
 			for (auto & collection : _archetypes) {
+				if (removeDone && addDone)
+					break;
+
 				if (collection.mask == oldMask) {
 					const auto size = collection.entities.size();
 					if (size > 1) {
@@ -228,20 +279,17 @@ namespace kengine {
 					}
 					collection.entities.pop_back();
 					collection.sorted = false;
-					++done;
+					removeDone = true;
 				}
 
 				if (collection.mask == newMask) {
 					collection.entities.emplace_back(id);
 					collection.sorted = false;
-					++done;
+					addDone = true;
 				}
-
-				if (done == 2)
-					break;
 			}
 
-			if (done == 1)
+			if (!addDone)
 				_archetypes.emplace_back(newMask, id);
 		}
 

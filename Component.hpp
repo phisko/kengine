@@ -105,14 +105,16 @@ namespace kengine {
 			bool save(const char * directory) const final {
 				if constexpr (putils::has_member_get_class_name<Comp>::value && !std::is_base_of<kengine::not_serializable, Comp>::value) {
 					putils::string<KENGINE_MAX_SAVE_PATH_LENGTH> file("%s/%s.bin", directory, Comp::get_class_name());
-					std::ofstream f(file.c_str());
+					std::ofstream f(file.c_str(), std::ofstream::binary);
 
 					if (!f)
 						return false;
 
 					detail::ReadLock l(_mutex);
-					const auto size = chunks.size();
+
+					const size_t size = chunks.size();
 					f.write((const char *)&size, sizeof(size));
+
 					for (const auto & chunk : chunks) {
 						const bool empty = chunk.empty();
 						f.write((const char *)&empty, sizeof(empty));
@@ -127,41 +129,22 @@ namespace kengine {
 			bool load(const char * directory) final {
 				if constexpr (putils::has_member_get_class_name<Comp>::value && !std::is_base_of<kengine::not_serializable, Comp>::value) {
 					putils::string<KENGINE_MAX_SAVE_PATH_LENGTH> file("%s/%s.bin", directory, Comp::get_class_name());
-					std::ifstream f(file.c_str());
+					std::ifstream f(file.c_str(), std::ifstream::binary);
 					if (!f)
 						return false;
 
 					size_t size;
 					f.read((char *)&size, sizeof(size));
 
-					size_t i = 0;
-					{
-						detail::ReadLock l(_mutex);
-						// Read into already allocated chunks
-						for (; i < size && i < chunks.size(); ++i) {
-							bool empty;
-							f.read((char *)&empty, sizeof(empty));
-							if (!empty) {
-								if (chunks[i].empty())
-									chunks[i].resize(KENGINE_COMPONENT_CHUNK_SIZE);
-								f.read((char *)chunks[i].data(), KENGINE_COMPONENT_CHUNK_SIZE * sizeof(Comp));
-							}
-							++i;
-						}
-					}
-
-					{
-						detail::WriteLock l(_mutex);
-						// Allocate necessary new chunks
-						for (; i < size; ++i) {
-							chunks.emplace_back(0);
-							bool empty;
-							f.read((char *)&empty, sizeof(empty));
-							if (!empty) {
-								if (chunks[i].empty())
-									chunks.back().resize(KENGINE_COMPONENT_CHUNK_SIZE);
-								f.read((char *)chunks.back().data(), KENGINE_COMPONENT_CHUNK_SIZE * sizeof(Comp));
-							}
+					detail::WriteLock l(_mutex);
+					chunks.clear();
+					for (size_t i = 0; i < size; ++i) {
+						chunks.emplace_back(0);
+						bool empty;
+						f.read((char *)&empty, sizeof(empty));
+						if (!empty) {
+							chunks.back().resize(KENGINE_COMPONENT_CHUNK_SIZE);
+							f.read((char *)chunks.back().data(), KENGINE_COMPONENT_CHUNK_SIZE * sizeof(Comp));
 						}
 					}
 					return true;

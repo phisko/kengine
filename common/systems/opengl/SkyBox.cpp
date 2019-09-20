@@ -6,7 +6,7 @@
 #include "common/systems/opengl/ShaderHelper.hpp"
 #include "stb_image.h"
 
-struct SkyBoxOpenGLComponent {
+struct SkyBoxOpenGLComponent : kengine::not_serializable {
 	GLuint textureID;
 	pmeta_get_class_name(SkyBoxOpenGLComponent);
 };
