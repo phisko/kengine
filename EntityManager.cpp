@@ -1,3 +1,4 @@
+#include <filesystem>
 #include "EntityManager.hpp"
 
 #ifndef KENGINE_MAX_SAVE_PATH_LENGTH
@@ -48,6 +49,11 @@ namespace kengine {
 	};
 
 	void EntityManager::load(const char * directory) {
+		const bool good = std::filesystem::exists(directory) && std::filesystem::is_directory(directory);
+		assert(good);
+		if (!good)
+			return;
+
 		{
 			detail::WriteLock l(_archetypesMutex);
 			_archetypes.clear();
@@ -102,11 +108,11 @@ namespace kengine {
 		}
 
 		for (auto & e : getEntities()) {
-				Entity::Mask tmp = 0;
-				for (size_t i = 0; i < KENGINE_COMPONENT_COUNT; ++i) {
-					const auto oldId = idMap[i];
-					tmp[i] = oldId == (size_t)-1 ? false : e.componentMask[oldId];
-				}
+			Entity::Mask tmp = 0;
+			for (size_t i = 0; i < KENGINE_COMPONENT_COUNT; ++i) {
+				const auto oldId = idMap[i];
+				tmp[i] = oldId == (size_t)-1 ? false : e.componentMask[oldId];
+			}
 			updateMask(e.id, tmp, true);
 		}
 
@@ -117,7 +123,7 @@ namespace kengine {
 				if (e.mask == 0) {
 					detail::WriteLock l(_toReuseMutex);
 					_toReuse.emplace_back(id);
-			}
+				}
 				++id;
 			}
 		}
@@ -129,6 +135,12 @@ namespace kengine {
 	}
 
 	void EntityManager::save(const char * directory) const {
+		std::filesystem::create_directories(directory);
+		const auto good = std::filesystem::exists(directory) && std::filesystem::is_directory(directory);
+		assert(good);
+		if (!good)
+			return;
+
 		SystemManager::save(directory);
 
 		putils::vector<bool, KENGINE_COMPONENT_COUNT> serializable;
