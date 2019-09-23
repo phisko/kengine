@@ -161,7 +161,7 @@ namespace kengine {
 				r.unlock(); { // Unlock read so we can get write
 					detail::WriteLock l(meta._mutex);
 					while (id >= meta.chunks.size() * KENGINE_COMPONENT_CHUNK_SIZE)
-						meta.chunks.emplace_back(0);
+						meta.chunks.emplace_back();
 					// Only populate the chunk we need
 					meta.chunks.back().resize(KENGINE_COMPONENT_CHUNK_SIZE);
 				} r.lock(); // Re-lock read
