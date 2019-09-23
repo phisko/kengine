@@ -134,12 +134,20 @@ namespace kengine {
 
 		e.attach<MagicaVoxelModelComponent>().mesh = detailMagicaVoxel::buildMesh(volume);
 
-		auto & comp = e.get<ModelComponent>();
-		auto & box = comp.boundingBox;
-		auto & offset = box.position;
+		struct OffsetAppliedComponent { // Used for serialization: entities that get unserialized should not have the offset applied again
+			pmeta_get_class_name(OffsetAppliedComponent);
+		};
 
-		offset.x += size.x / 2.f * box.size.x;
-		offset.z += size.y / 2.f * box.size.z;
+		if (!e.has<OffsetAppliedComponent>()) {
+			auto & comp = e.get<ModelComponent>();
+			auto & box = comp.boundingBox;
+			auto & offset = box.position;
+
+			offset.x += size.x / 2.f * box.size.x;
+			offset.z += size.y / 2.f * box.size.z;
+
+			e += OffsetAppliedComponent{};
+		}
 
 #ifndef NDEBUG
 		std::cout << " Done.\n";
