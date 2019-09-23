@@ -102,20 +102,23 @@ namespace kengine {
 		}
 
 		for (auto & e : getEntities()) {
-			if (e.componentMask != 0) { // Adjust for Components with new IDs since save
 				Entity::Mask tmp = 0;
 				for (size_t i = 0; i < KENGINE_COMPONENT_COUNT; ++i) {
 					const auto oldId = idMap[i];
 					tmp[i] = oldId == (size_t)-1 ? false : e.componentMask[oldId];
 				}
-				e.componentMask = tmp;
+			updateMask(e.id, tmp, true);
+		}
 
-				if (e.componentMask != 0)
-					updateMask(e.id, e.componentMask, true);
+		{
+			detail::ReadLock l(_entitiesMutex);
+			size_t id = 0;
+			for (const auto & e : _entities) {
+				if (e.mask == 0) {
+					detail::WriteLock l(_toReuseMutex);
+					_toReuse.emplace_back(id);
 			}
-			else {
-				detail::WriteLock l(_toReuseMutex);
-				_toReuse.emplace_back(e.id);
+				++id;
 			}
 		}
 
