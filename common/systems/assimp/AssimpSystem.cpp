@@ -191,7 +191,7 @@ namespace kengine {
 				const putils::string<KENGINE_TEXTURE_PATH_MAX_LENGTH> fullPath("%s/%s", directory, path.C_Str());
 
 				Entity::ID modelID = Entity::INVALID_ID;
-				for (const auto &[e, model, tex] : g_em->getEntities<ModelComponent, TextureModelComponent>())
+				for (const auto &[e, model] : g_em->getEntities<TextureModelComponent>())
 					if (model.file == fullPath) {
 						modelID = e.id;
 						break;
@@ -201,11 +201,12 @@ namespace kengine {
 					*g_em += [&](Entity & e) {
 						modelID = e.id;
 
-						auto & comp = e.attach<ModelComponent>();
+						auto & comp = e.attach<TextureModelComponent>();
 						comp.file = fullPath.c_str();
 
 						TextureLoaderComponent textureLoader; {
-							textureLoader.textureID = &e.attach<TextureModelComponent>().texture;
+							textureLoader.textureID = &comp.texture;
+
 							textureLoader.data = stbi_load(fullPath.c_str(), &textureLoader.width, &textureLoader.height, &textureLoader.components, 0);
 							assert(textureLoader.data != nullptr);
 							textureLoader.free = stbi_image_free;

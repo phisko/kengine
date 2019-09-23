@@ -28,7 +28,7 @@ namespace kengine {
 		auto & graphics = p.e.get<GraphicsComponent>();
 		const auto & file = graphics.appearance;
 
-		for (const auto &[e, model, tex] : _em.getEntities<ModelComponent, TextureModelComponent>())
+		for (const auto &[e, model] : _em.getEntities<TextureModelComponent>())
 			if (model.file == file) {
 				graphics.model = e.id;
 				return;
@@ -42,11 +42,11 @@ namespace kengine {
 		_em += [&](Entity & e) {
 			graphics.model = e.id;
 
-			auto & comp = e.attach<ModelComponent>();
+			auto & comp = e.attach<TextureModelComponent>();
 			comp.file = file;
 
 			TextureLoaderComponent textureLoader; {
-				textureLoader.textureID = &e.attach<TextureModelComponent>().texture;
+				textureLoader.textureID = &comp.texture;
 
 				textureLoader.data = data;
 				textureLoader.width = width;
