@@ -48,10 +48,21 @@ void removeScript(const char * file) noexcept;
 const script_vector &getScripts() const noexcept;
 ```
 
-##### meta
+# [LuaMetaComponent](LuaComponent.hpp)
+
+### Specs
+
+`Component` that holds a lua table that can be used to store arbitrary information in the `Entity`.
+
+* [Reflectible](https://github.com/phiste/putils/blob/master/reflection/Reflectible.md)
+* Not serializable
+
+### Members
+
+##### table
 
 ```cpp
-sol::table meta;
+sol::table table;
 ```
 
 Lua scripts can set this value to anything they desire.

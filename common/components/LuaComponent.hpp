@@ -12,38 +12,25 @@
 #include "vector.hpp"
 #include "lua/sol.hpp"
 #include "reflection/Reflectible.hpp"
+#include "not_serializable.hpp"
 
 namespace kengine {
-    class LuaComponent : public putils::Reflectible<LuaComponent> {
+    struct LuaComponent {
 	public:
 		static constexpr char stringName[] = "LuaComponentString";
 		using script = putils::string<KENGINE_MAX_LUA_SCRIPT_PATH, stringName>;
 		static constexpr char vectorName[] = "LuaComponentVector";
 		using script_vector = putils::vector<script, KENGINE_MAX_LUA_SCRIPTS>;
 
-    public:
-        LuaComponent(const script_vector & scripts = {}) : _scripts(scripts) {}
-
-		LuaComponent(const LuaComponent &) = default;
-		LuaComponent & operator=(const LuaComponent &) = default;
-		LuaComponent(LuaComponent &&) = default;
-		LuaComponent & operator=(LuaComponent &&) = default;
-
-    public:
-        sol::table meta;
-
-    public:
-        void attachScript(const char * file) noexcept { _scripts.push_back(file); }
+        void attachScript(const char * file) noexcept { scripts.push_back(file); }
 
         void removeScript(const char * file) noexcept {
-            _scripts.erase(std::find(_scripts.begin(), _scripts.end(), file));
+            scripts.erase(std::find(scripts.begin(), scripts.end(), file));
         }
 
-    public:
-        const script_vector & getScripts() const noexcept { return _scripts; }
+        const auto & getScripts() const noexcept { return scripts; }
 
-    private:
-        script_vector _scripts;
+        script_vector scripts;
 
         /*
          * Reflectible
@@ -51,8 +38,7 @@ namespace kengine {
     public:
         pmeta_get_class_name(LuaComponent);
         pmeta_get_attributes(
-                pmeta_reflectible_attribute_private(&LuaComponent::_scripts),
-                pmeta_reflectible_attribute(&LuaComponent::meta)
+                pmeta_reflectible_attribute(&LuaComponent::scripts)
         );
         pmeta_get_methods(
                 pmeta_reflectible_attribute(&LuaComponent::attachScript),
@@ -60,4 +46,13 @@ namespace kengine {
         );
         pmeta_get_parents();
     };
+
+	struct LuaTableComponent : kengine::not_serializable {
+		sol::table table;
+
+		pmeta_get_class_name(LuaTableComponent);
+		pmeta_get_attributes(
+			pmeta_reflectible_attribute(&LuaTableComponent::table)
+		);
+	};
 }
