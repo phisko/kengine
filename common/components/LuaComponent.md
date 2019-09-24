@@ -48,7 +48,7 @@ void removeScript(const char * file) noexcept;
 const script_vector &getScripts() const noexcept;
 ```
 
-# [LuaMetaComponent](LuaComponent.hpp)
+# [LuaTableComponent](LuaComponent.hpp)
 
 ### Specs
 
