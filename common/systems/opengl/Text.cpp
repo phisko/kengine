@@ -134,7 +134,8 @@ namespace kengine::Shaders {
 	}
 
 	Text::Text(EntityManager & em)
-		: _em(em)
+		: Program(false, pmeta_nameof(Text)),
+		_em(em)
 	{
 		if (FT_Init_FreeType(&g_ft))
 			assert(false && !"[FreeType] Could not init FreeType\n");
