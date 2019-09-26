@@ -32,25 +32,6 @@ If a `GameObject` is found to have a [CameraComponent3f](../../components/Camera
 
 Refer to [the SFML website](https://www.sfml-dev.org/tutorials/2.0/graphics-view.php) for more information about viewports.
 
-##### GUI
-
-If a `GameObject` is found to have a [GUIComponent](../../components/GUIComponent.md), it will be rendered as text using the information held in that `GUIComponent`.
-
-If the `GUIComponent`'s `camera` property points to a `GameObject` (and not `nullptr`), the `SfSystem` will interpret the `GUIComponent`'s `position` property as relative to the `camera`'s `CameraComponent3f`'s `frustrum`. For example:
-
-```c++
-auto & gui = gameObject.getComponent<GUIComponent>();
-gui.position.x = 0.5;
-
-gui.camera = &cameraObject;
-
-auto & frustrum = cameraObject.getComponent<CameraComponent3f>().frustrum;
-frustrum.position.x = 20;
-frustrum.size.x = 10;
-```
-
-Based on the code above, `gameObject`'s text will be rendered in the middle of the viewport for `cameraObject`. Its `x` coordinate in the "rendered game world" will be `20 + 0.5 * 10 = 25`.
-
 ##### Input
 
 User input can be handled by attaching [InputComponents](../../components/InputComponent.hpp) to `GameObjects`.

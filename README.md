@@ -106,7 +106,7 @@ Graphics:
 Physics:
 * [BulletSystem](common/systems/bullet/BulletSystem.md): simulates physics using Bullet Physics
 
-Some of these systems make use of libraries which you may not want to compile, and are therefore optional. To enable them, set the corresponding CMake variable to `true` in your `CMakeLists.txt`:
+Some of these systems make use of external libraries which you may not want to depend upon, and are therefore disabled by default. To enable them, set the corresponding CMake variable to `true` in your `CMakeLists.txt`:
 
 | System         | Variable        |
 |----------------|-----------------|
@@ -117,6 +117,11 @@ Some of these systems make use of libraries which you may not want to compile, a
 | MagicaVoxelSystem | KENGINE_POLYVOX |
 | lua library    | KENGINE_LUA     |
 | python library | KENGINE_PYTHON  |
+
+These systems make use of [Conan](https://conan.io/) for dependency management. The necessary packages will be automatically downloaded when you run CMake, but Conan must be installed separately by running:
+```
+pip install conan
+```
 
 ### DataPackets
 

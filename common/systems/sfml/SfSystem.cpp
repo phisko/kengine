@@ -4,7 +4,6 @@
 
 #include "EntityManager.hpp"
 #include "components/TransformComponent.hpp"
-#include "components/GUIComponent.hpp"
 #include "components/CameraComponent.hpp"
 #include "components/InputComponent.hpp"
 #include "components/ImGuiComponent.hpp"
@@ -19,10 +18,6 @@
 #include "imgui.h"
 #include "imgui-SFML.h"
 #include "Shape.hpp"
-
-#include <TGUI/TGUI.hpp>
-#include "TGUI/Widgets/Button.hpp"
-#include <TGUI/Loading/Theme.hpp>
 
 #include "with.hpp"
 #include "to_string.hpp"
@@ -240,50 +235,6 @@ namespace kengine {
 		sprite.setRotation(-transform.yaw - (model != nullptr ? model->yaw : 0.f));
 	}
 
-	void SfSystem::updateGUIElement(EntityView e) noexcept {
-		const auto & gui = e.get<kengine::GUIComponent>();
-		auto & element = _guiElements[e.id];
-		auto & win = _engine.getGui();
-
-		if (gui.guiType == GUIComponent::ProgressBar) {
-			pmeta_with(static_cast<tgui::ProgressBar &>(*element.frame)) {
-				_.setMinimum(gui.progressBar.min);
-				_.setMaximum(gui.progressBar.max);
-				_.setValue(gui.progressBar.value);
-				// _.setText(gui.text);
-				_.setFillDirection(tgui::ProgressBar::FillDirection::LeftToRight);
-			}
-		} else if (gui.guiType == GUIComponent::List) {
-			pmeta_with(static_cast<tgui::ListBox &>(*element.frame)) {
-				for (size_t i = _.getItemCount() - 1; i >= gui.list.items.size(); --i)
-					_.removeItemByIndex(i);
-				size_t i = 0;
-				for (; i < _.getItemCount(); ++i)
-					_.changeItemByIndex(i, gui.list.items[i].c_str());
-				for (; i < gui.list.items.size(); ++i)
-					_.addItem(gui.list.items[i].c_str());
-			}
-		}
-
-		if (element.frame != nullptr) {
-			if (gui.onClick != nullptr) {
-				element.frame->disconnectAll("clicked");
-				element.frame->connect("clicked", gui.onClick);
-			}
-
-			element.frame->setPosition(tgui::bindWidth(win) * gui.boundingBox.position.x, tgui::bindHeight(win) * gui.boundingBox.position.z);
-			element.frame->setSize(tgui::bindWidth(win) * gui.boundingBox.size.x, tgui::bindHeight(win) * gui.boundingBox.size.z);
-
-			if (element.label != nullptr) {
-				element.label->setText(gui.text.c_str());
-				if (gui.onClick != nullptr) {
-					element.label->disconnectAll("clicked");
-					element.label->connect("clicked", gui.onClick);
-				}
-			}
-		}
-	}
-
 	void SfSystem::updateTransform(pse::ViewItem & item, const TransformComponent3f & transform, const GraphicsComponent & graphics, bool fixedSize) noexcept {
 		ModelComponent * model = nullptr;
 		if (graphics.model != Entity::INVALID_ID)
@@ -382,8 +333,6 @@ namespace kengine {
 			attachNormal(e);
 		if (e.has<DebugGraphicsComponent>())
 			attachDebug(e);
-		if (e.has<GUIComponent>())
-			attachGUI(e);
 	}
 
 	void SfSystem::attachDebug(Entity e) {
@@ -425,47 +374,6 @@ namespace kengine {
 		}
 	}
 
-	void SfSystem::attachGUI(Entity e) {
-		// static auto theme = _config.find("theme") != _config.end() ? tgui::Theme::create(_config["theme"]) : nullptr;
-		static tgui::Theme * theme = nullptr;
-		auto & gui = e.get<GUIComponent>();
-
-		gui.addObserver([this, &e] { updateGUIElement(e); });
-
-		auto & win = _engine.getGui();
-
-		auto & element = _guiElements[e.id];
-		if (gui.guiType == GUIComponent::Button || gui.guiType == GUIComponent::Text) {
-			element.frame = theme != nullptr ? theme->load("Button") : tgui::Button::create();
-		} else if (gui.guiType == GUIComponent::ProgressBar) {
-			element.frame = theme != nullptr ? theme->load("ProgressBar") : tgui::ProgressBar::create();
-		} else if (gui.guiType == GUIComponent::List) {
-			element.frame = theme != nullptr ? theme->load("ListBox") : tgui::ListBox::create();
-			if (gui.list.onItemClick != nullptr)
-				static_cast<tgui::ListBox &>(*element.frame).connect("ItemSelected", [&gui](const std::string & param) { gui.list.onItemClick(param.c_str()); });
-		}
-
-		if (element.frame != nullptr) {
-			element.frame->setPosition(tgui::bindWidth(win) * gui.boundingBox.position.x, tgui::bindHeight(win) * gui.boundingBox.position.z);
-			element.frame->setSize(tgui::bindWidth(win) * gui.boundingBox.size.x, tgui::bindHeight(win) * gui.boundingBox.size.z);
-			if (gui.onClick != nullptr)
-				element.frame->connect("clicked", gui.onClick);
-			_engine.addItem(element.frame);
-
-			if (gui.guiType == GUIComponent::Button || gui.guiType == GUIComponent::Text || gui.guiType == GUIComponent::ProgressBar) {
-				element.label = theme != nullptr ? theme->load("Label") : tgui::Label::create();
-				element.label->setText(gui.text.c_str());
-				element.label->setPosition(tgui::bindPosition(element.frame));
-				element.label->setSize(tgui::bindSize(element.frame));
-				element.label->setHorizontalAlignment(tgui::Label::HorizontalAlignment::Center);
-				element.label->setVerticalAlignment(tgui::Label::VerticalAlignment::Center);
-				if (gui.onClick != nullptr)
-					element.label->connect("clicked", gui.onClick);
-				_engine.addItem(element.label);
-			}
-		}
-	}
-
 	void SfSystem::attachNormal(Entity e) {
 		pmeta_with(e.get<GraphicsComponent>()) {
 			auto & comp = e.attach<SfComponent>();
@@ -489,13 +397,6 @@ namespace kengine {
 
 		if (e.has<CameraComponent3f>() && _engine.hasView(putils::toString(e.id)))
 			_engine.removeView(putils::toString(e.id));
-
-		if (e.has<GUIComponent>()) {
-			const auto & element = _guiElements[e.id];
-			_engine.removeItem(element.frame);
-			_engine.removeItem(element.label);
-			_guiElements.erase(e.id);
-		}
 
 		if (e.has<SfComponent>())
 			_engine.removeItem(*e.get<SfComponent>().item);

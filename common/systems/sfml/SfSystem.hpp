@@ -8,8 +8,6 @@
 #include "packets/RemoveEntity.hpp"
 #include "packets/RegisterEntity.hpp"
 
-#include "TGUI/TGUI.hpp"
-#include "TGUI/Widget.hpp"
 #include "pse/Engine.hpp"
 #include "SfComponent.hpp"
 
@@ -32,7 +30,6 @@ namespace kengine {
 
     private:
 		void attachDebug(Entity go);
-		void attachGUI(Entity go);
 		void attachNormal(Entity go);
 
     public:
@@ -46,7 +43,6 @@ namespace kengine {
         void updateDrawables();
         bool updateDebug(EntityView go, pse::ViewItem & item);
         void updateObject(EntityView go, pse::ViewItem & item, const GraphicsComponent & layer, bool fixedSize);
-        void updateGUIElement(EntityView go) noexcept;
         void updateTransform(pse::ViewItem & item, const kengine::TransformComponent3f & transform, const GraphicsComponent & layer, bool fixedSize) noexcept;
 
 	private:
@@ -73,12 +69,6 @@ namespace kengine {
 	private:
 		pse::Engine _engine;
 		kengine::EntityManager & _em;
-
-		struct GUIElement {
-			std::shared_ptr<tgui::Widget> frame = nullptr;
-			std::shared_ptr<tgui::Label> label = nullptr;
-		};
-		std::unordered_map<Entity::ID, GUIElement> _guiElements;
 
 	private:
 		sf::Clock _deltaClock;
