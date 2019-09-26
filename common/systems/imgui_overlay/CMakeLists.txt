@@ -15,7 +15,9 @@ target_include_directories(${name} PUBLIC
 	${CMAKE_CURRENT_LIST_DIR}/libs/glew/include
 )
 
-target_link_libraries(${name} kengine glfw glew)
+putils_conan(glfw/3.3@bincrafters/stable)
+target_link_libraries(${name} PUBLIC kengine CONAN_PKG::glfw)
+
 configure_file(koala.ico ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources/koala.ico COPYONLY)
 configure_file(koala.ico ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}/resources/koala.ico COPYONLY)
 configure_file(koala.ico ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}/resources/koala.ico COPYONLY)
