@@ -111,10 +111,13 @@ Some of these systems make use of external libraries which you may not want to d
 | System         | Variable        |
 |----------------|-----------------|
 | SfSystem       | KENGINE_SFML    |
+| ImGuiOverlaySystem | KENGINE_IMGUI_OVERLAY |
 | OpenGLSystem   | KENGINE_OPENGL  |
 | AssimpSystem   | KENGINE_ASSIMP  |
 | PolyVoxSystem  | KENGINE_POLYVOX |
+| PolyVoxSystem  | KENGINE_POLYVOX |
 | MagicaVoxelSystem | KENGINE_POLYVOX |
+| BulletSystem   | KENGINE_BULLET  |
 | lua library    | KENGINE_LUA     |
 | python library | KENGINE_PYTHON  |
 
