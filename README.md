@@ -29,7 +29,7 @@ Note that there is no `Component` class. Any type can be used as a `Component`, 
 
 ### Reflection
 
-Many parts of the engine (such as the scripting systems or the OpenGL system) make use of `putils`' [reflection API](https://github.com/phisko/putils/tree/master/reflection). Most of the components in the following samples are thus defined as reflectible.
+Many parts of the engine (such as the scripting systems or the OpenGL system) make use of `putils`' [reflection API](https://github.com/phisko/putils/blob/master/reflection/Reflectible.md). Most of the components in the following samples are thus defined as reflectible.
 
 ### Samples
 
