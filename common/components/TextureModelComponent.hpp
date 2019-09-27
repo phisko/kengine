@@ -17,7 +17,7 @@ namespace kengine {
 		static constexpr char stringName[] = "TextureModelComponentString";
 		putils::string<KENGINE_TEXTURE_MODEL_COMPONENT_PATH_MAX_LENGTH, stringName> file;
 
-		GLuint texture;
+		GLuint texture = -1;
 
 		pmeta_get_class_name(TextureModelComponent);
 		pmeta_get_attributes(

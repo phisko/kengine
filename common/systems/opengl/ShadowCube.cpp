@@ -25,10 +25,13 @@ namespace kengine::Shaders {
 		if (!e.has<DepthCubeComponent>()) {
 			auto & depthCube = e.attach<DepthCubeComponent>();
 
-			glGenFramebuffers(1, &depthCube.fbo);
+			if (depthCube.fbo == -1)
+				glGenFramebuffers(1, &depthCube.fbo);
 			ShaderHelper::BindFramebuffer __f(depthCube.fbo);
 
-			glGenTextures(1, &depthCube.texture);
+			if (depthCube.texture == -1)
+				glGenTextures(1, &depthCube.texture);
+
 			glBindTexture(GL_TEXTURE_CUBE_MAP, depthCube.texture);
 			for (size_t i = 0; i < 6; ++i)
 				glTexImage2D((GLenum)(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i), 0, GL_DEPTH_COMPONENT, KENGINE_SHADOW_CUBE_SIZE, KENGINE_SHADOW_CUBE_SIZE, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);

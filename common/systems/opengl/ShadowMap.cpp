@@ -39,10 +39,12 @@ namespace kengine::Shaders {
 	}
 
 	static void createShadowMap(GLuint & depthMapFBO, GLuint & depthMapTexture, size_t width, size_t height) {
-		glGenFramebuffers(1, &depthMapFBO);
+		if (depthMapFBO == -1)
+			glGenFramebuffers(1, &depthMapFBO);
 		ShaderHelper::BindFramebuffer __f(depthMapFBO);
 
-		glGenTextures(1, &depthMapTexture);
+		if (depthMapTexture == -1)
+			glGenTextures(1, &depthMapTexture);
 		glBindTexture(GL_TEXTURE_2D, depthMapTexture);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, (GLsizei)width, (GLsizei)height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

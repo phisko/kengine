@@ -59,7 +59,9 @@ namespace kengine::Shaders {
 
 	static void loadSkyBox(Entity & e, const SkyBoxComponent & comp) {
 		auto & skyBox = e.attach<SkyBoxOpenGLComponent>();
-		glGenTextures(1, &skyBox.textureID);
+
+		if (skyBox.textureID == -1)
+			glGenTextures(1, &skyBox.textureID);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, skyBox.textureID);
 
 		unsigned int i = 0;

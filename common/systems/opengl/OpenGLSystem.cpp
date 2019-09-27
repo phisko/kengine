@@ -375,7 +375,8 @@ namespace kengine {
 	}
 
 	static void loadTexture(Entity & e, TextureLoaderComponent & textureLoader) {
-		glGenTextures(1, textureLoader.textureID);
+		if (*textureLoader.textureID == -1)
+			glGenTextures(1, textureLoader.textureID);
 
 		if (textureLoader.data != nullptr) {
 			GLenum format;
