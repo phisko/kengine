@@ -39,6 +39,7 @@ namespace kengine::Shaders {
 
 		GLint shadowMap;
 		GLint farPlane;
+		GLint bias;
 
 		pmeta_get_attributes(
 			pmeta_reflectible_attribute(&PointLight::proj),
@@ -59,7 +60,8 @@ namespace kengine::Shaders {
 			pmeta_reflectible_attribute(&PointLight::attenuationQuadratic),
 
 			pmeta_reflectible_attribute(&PointLight::shadowMap),
-			pmeta_reflectible_attribute(&PointLight::farPlane)
+			pmeta_reflectible_attribute(&PointLight::farPlane),
+			pmeta_reflectible_attribute(&PointLight::bias)
 		);
 	private:
 		kengine::EntityManager & _em;

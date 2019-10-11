@@ -5,7 +5,9 @@ namespace kengine::Shaders::src {
 
 uniform samplerCube shadowMap;
 uniform vec3 position;
+uniform vec3 viewPos;
 uniform float farPlane;
+uniform float bias;
 
 vec2 getShadowMapValue(vec3 worldPos) {
     vec3 lightDir = worldPos - position;
@@ -14,13 +16,32 @@ vec2 getShadowMapValue(vec3 worldPos) {
     return vec2(shadowMapValue, objectDepth);
 }
 
-float calcShadow(vec3 worldPos, vec3 normal, vec3 lightDir) {
-    vec2 depths = getShadowMapValue(worldPos);
-    float shadowMapValue = depths.x;
-    float objectDepth = depths.y;
+float calcShadow(vec3 worldPos, vec3 normal, vec3 lightDirIgnore) {
+	vec3 lightDir = worldPos - position;
+	float currentDepth = length(lightDir);
 
-    float bias = 0.05;
-    return objectDepth - bias > shadowMapValue ? 1.0 : 0.0;
+	vec3 sampleOffsetDirections[20] = vec3[](
+	   vec3( 1,  1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1), vec3(-1,  1,  1), 
+	   vec3( 1,  1, -1), vec3( 1, -1, -1), vec3(-1, -1, -1), vec3(-1,  1, -1),
+	   vec3( 1,  1,  0), vec3( 1, -1,  0), vec3(-1, -1,  0), vec3(-1,  1,  0),
+	   vec3( 1,  0,  1), vec3(-1,  0,  1), vec3( 1,  0, -1), vec3(-1,  0, -1),
+	   vec3( 0,  1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0,  1, -1)
+	);   
+	const int samples = 20;
+
+	float viewDistance = length(viewPos - worldPos);
+	float sampleRadius = (1.0 + (viewDistance / farPlane)) / 25.0;
+	
+	float shadow = 0.0;
+	for (int i = 0; i < samples; ++i) {
+		float closestDepth = texture(shadowMap, lightDir + sampleOffsetDirections[i] * sampleRadius).r;
+		closestDepth *= farPlane;
+		if (currentDepth - bias > closestDepth)
+			shadow += 1.0;
+	}
+	shadow /= float(samples);
+
+	return shadow;
 }
         )";
     }

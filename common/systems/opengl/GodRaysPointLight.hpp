@@ -39,6 +39,7 @@ namespace kengine::Shaders {
 		GLint farPlane;
 
 		GLint shadowMap;
+		GLint bias;
 
 		pmeta_get_attributes(
 			pmeta_reflectible_attribute(&GodRaysPointLight::SCATTERING),
@@ -55,7 +56,8 @@ namespace kengine::Shaders {
 			pmeta_reflectible_attribute(&GodRaysPointLight::position),
 			pmeta_reflectible_attribute(&GodRaysPointLight::farPlane),
 
-			pmeta_reflectible_attribute(&GodRaysPointLight::shadowMap)
+			pmeta_reflectible_attribute(&GodRaysPointLight::shadowMap),
+			pmeta_reflectible_attribute(&GodRaysPointLight::bias)
 		);
 	};
 }

@@ -7,11 +7,14 @@
 #include "components/TransformComponent.hpp"
 #include "components/LightComponent.hpp"
 #include "components/ShaderComponent.hpp"
+#include "components/AdjustableComponent.hpp"
 
 #include "helpers/LightHelper.hpp"
 #include "common/systems/opengl/ShaderHelper.hpp"
 
 namespace kengine::Shaders {
+	float POINT_LIGHT_BIAS = .05f;
+
 	void PointLight::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
 		initWithShaders<PointLight>(putils::make_vector(
 			ShaderDescription{ src::ProjViewModel::vert, GL_VERTEX_SHADER },
@@ -22,6 +25,8 @@ namespace kengine::Shaders {
 		use();
 		_shadowMapTextureID = firstTextureID;
 		putils::gl::setUniform(shadowMap, _shadowMapTextureID);
+
+		_em += [](Entity & e) { e += AdjustableComponent("[Render/Lights] Shadow cube bias", &POINT_LIGHT_BIAS); };
 	}
 
 	void PointLight::run(const Parameters & params) {
@@ -33,6 +38,7 @@ namespace kengine::Shaders {
 		glBlendFunc(GL_ONE, GL_ONE);
 
 		use();
+		putils::gl::setUniform(bias, POINT_LIGHT_BIAS);
 		putils::gl::setUniform(viewPos, params.camPos);
 		putils::gl::setUniform(screenSize, params.screenSize);
 
