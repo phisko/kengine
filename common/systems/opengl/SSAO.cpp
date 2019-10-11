@@ -46,12 +46,8 @@ namespace kengine::Shaders {
 		std::default_random_engine generator(std::random_device{}());
 
 		for (size_t i = 0; i < 64; ++i) {
-			glm::vec3 sample(randomFloats(generator) * 2.f - 1.f, randomFloats(generator) * 2.f - 1.f, randomFloats(generator));
-			sample = glm::normalize(sample);
-
-			const auto location = glGetUniformLocation(getHandle(), putils::string<64>("samples[%d]", i));
-			assert(location != -1);
-			putils::gl::setUniform(location, sample);
+			const glm::vec3 sample(randomFloats(generator) * 2.f - 1.f, randomFloats(generator) * 2.f - 1.f, randomFloats(generator));
+			putils::gl::setUniform(samples[i], glm::normalize(sample));
 		}
 	}
 

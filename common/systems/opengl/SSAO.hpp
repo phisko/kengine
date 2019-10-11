@@ -26,6 +26,8 @@ namespace kengine::Shaders {
 		GLint FARCLIP;
 		GLint BIAS;
 
+		GLint samples[64];
+
 		pmeta_get_attributes(
 			pmeta_reflectible_attribute(&SSAO::view),
 			pmeta_reflectible_attribute(&SSAO::proj),
@@ -33,7 +35,9 @@ namespace kengine::Shaders {
 
 			pmeta_reflectible_attribute(&SSAO::RADIUS),
 			pmeta_reflectible_attribute(&SSAO::FARCLIP),
-			pmeta_reflectible_attribute(&SSAO::BIAS)
+			pmeta_reflectible_attribute(&SSAO::BIAS),
+
+			pmeta_reflectible_attribute(&SSAO::samples)
 		);
 
 	private:
