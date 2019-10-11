@@ -225,7 +225,7 @@ namespace kengine {
 			sprite.setTexture(appearance.str());
 		}
 		catch (const std::exception & e) {
-			std::cerr << "[SfSystem] Failed to set appearance: " << e.what() << std::endl;
+			std::cerr << putils::termcolor::red << "[SfSystem] Failed to set appearance: " << e.what() << std::endl << putils::termcolor::reset;
 		}
 
 		ModelComponent * model = nullptr;

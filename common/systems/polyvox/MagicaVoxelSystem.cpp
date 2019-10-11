@@ -92,7 +92,7 @@ namespace kengine {
 			return false;
 
 #ifndef NDEBUG
-		std::cout << "[MagicaVoxel] Loading " << f << "...";
+		std::cout << putils::termcolor::green << "[MagicaVoxel] Loading " << putils::termcolor::cyan << f << putils::termcolor::green << "..." << putils::termcolor::reset;
 #endif
 		std::ifstream stream(f, std::ios::binary);
 		assert(stream);
@@ -150,7 +150,7 @@ namespace kengine {
 		}
 
 #ifndef NDEBUG
-		std::cout << " Done.\n";
+		std::cout << putils::termcolor::green << " Done.\n" << putils::termcolor::reset;
 #endif
 		return true;
 	}

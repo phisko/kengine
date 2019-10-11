@@ -49,7 +49,7 @@ namespace kengine {
 				py::eval_file(fileName, py::globals());
 			}
 			catch (const std::exception & e) {
-				std::cerr << e.what() << '\n';
+				std::cerr << putils::termcolor::red << e.what() << '\n' << putils::termcolor::reset;
 			}
 		}
 

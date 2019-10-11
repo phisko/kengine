@@ -406,7 +406,7 @@ namespace kengine {
 				return false;
 
 #ifndef NDEBUG
-			std::cout << "[AssImp] Loading " << f << "...";
+			std::cout << putils::termcolor::green << "[AssImp] Loading " << putils::termcolor::cyan << f << putils::termcolor::green << "..." << putils::termcolor::reset;
 #endif
 
 			auto & model = e.attach<AssImpModelComponent>();
@@ -425,7 +425,7 @@ namespace kengine {
 			if (model.importer.GetScene() == nullptr) {
 				const auto scene = model.importer.ReadFile(f, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals /*| aiProcess_OptimizeMeshes*/ | aiProcess_JoinIdenticalVertices);
 				if (scene == nullptr || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || scene->mRootNode == nullptr) {
-					std::cerr << model.importer.GetErrorString() << '\n';
+					std::cerr << putils::termcolor::red << model.importer.GetErrorString() << '\n' << putils::termcolor::reset;
 					assert(false);
 				}
 				firstLoad = true;
@@ -474,7 +474,7 @@ namespace kengine {
 
 					const auto scene = importer.ReadFile(f.c_str(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals /*| aiProcess_OptimizeMeshes*/ | aiProcess_JoinIdenticalVertices);
 					if (scene == nullptr || scene->mRootNode == nullptr) {
-						std::cerr << '\n' << importer.GetErrorString() << '\n';
+						std::cerr << '\n' << putils::termcolor::red << importer.GetErrorString() << '\n' << putils::termcolor::reset;
 						assert(false);
 					}
 
@@ -486,7 +486,7 @@ namespace kengine {
 			}
 
 #ifndef NDEBUG
-			std::cout << "Done\n";
+			std::cout << putils::termcolor::green << "Done\n" << putils::termcolor::reset;
 #endif
 			return true;
 		}

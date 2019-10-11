@@ -21,6 +21,8 @@
 #include "helpers/MatrixHelper.hpp"
 #include "helpers/SkeletonHelper.hpp"
 
+#include "termcolor.hpp"
+
 #include "btBulletDynamicsCommon.h"
 #include "BulletCollision/CollisionDispatch/btGhostObject.h"
 
@@ -147,7 +149,7 @@ namespace debug {
 
 		void draw3dText(const btVector3& location, const char* textString) override {}
 
-		void reportErrorWarning(const char* warningString) override { std::cout << "[Bullet] " << warningString; }
+		void reportErrorWarning(const char* warningString) override { std::cout << putils::termcolor::red << "[Bullet] " << warningString << putils::termcolor::reset; }
 
 		void setDebugMode(int debugMode) override {}
 		int getDebugMode() const override { return DBG_DrawWireframe; }

@@ -25,6 +25,7 @@
 #include "not_serializable.hpp"
 #include "string.hpp"
 #include "vector.hpp"
+#include "termcolor.hpp"
 
 #ifndef KENGINE_MAX_COMPONENT_FUNCTIONS
 # define KENGINE_MAX_COMPONENT_FUNCTIONS 8
@@ -215,7 +216,7 @@ namespace kengine {
 
 				ptr->funcs.name = getName();
 #ifndef NDEBUG
-				std::cout << ptr->id << ' ' << ptr->funcs.name << '\n';
+				std::cout << putils::termcolor::green << ptr->id << ' ' << putils::termcolor::cyan << ptr->funcs.name << '\n' << putils::termcolor::reset;
 #endif
 				return ptr;
 			}();

@@ -12,6 +12,7 @@
 #include "common/systems/opengl/ShaderHelper.hpp"
 #include "helpers/math.hpp"
 
+#include "termcolor.hpp"
 #include "magic_enum.hpp"
 
 static FT_Library g_ft;
@@ -85,7 +86,7 @@ namespace kengine::Shaders {
 
 		auto createCharacter(unsigned long c) {
 			if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
-				std::cerr << "[FreeType] Error loading glyph `" << c << "`\n";
+				std::cerr << putils::termcolor::red << "[FreeType] Error loading glyph `" << c << "`\n" << putils::termcolor::reset;
 				return characters.end();
 			}
 
@@ -121,12 +122,12 @@ namespace kengine::Shaders {
 		Font font;
 
 		if (FT_New_Face(g_ft, file, 0, &font.face)) {
-			std::cerr << "[FreeType] Error loading font `" << file << "`\n";
+			std::cerr << putils::termcolor::red << "[FreeType] Error loading font `" << file << "`\n" << putils::termcolor::reset;
 			return g_fonts[file].sizes.end();
 		}
 
 		if (FT_Set_Pixel_Sizes(font.face, 0, (FT_UInt)size)) {
-			std::cerr << "[FreeType] Error setting size `" << size << "` for font `" << file << "`\n";
+			std::cerr << putils::termcolor::red << "[FreeType] Error setting size `" << size << "` for font `" << file << "`\n" << putils::termcolor::red;
 			return g_fonts[file].sizes.end();
 		}
 
