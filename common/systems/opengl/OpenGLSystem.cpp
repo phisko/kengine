@@ -219,6 +219,7 @@ namespace kengine {
 
 #ifndef NDEBUG
 		glEnable(GL_DEBUG_OUTPUT);
+		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 		glDebugMessageCallback([](GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar * message, const void * userParam) {
 			if (severity != GL_DEBUG_SEVERITY_NOTIFICATION)
 				fprintf(stderr, "GL: severity = 0x%x, message = %s\n",
@@ -556,6 +557,7 @@ namespace kengine {
 			}
 
 			g_params.camPos = ShaderHelper::toVec(cam.frustrum.position);
+			g_params.camFOV = cam.frustrum.size.y;
 
 			g_params.view = [&] {
 				const auto front = glm::normalize(glm::vec3{
@@ -571,7 +573,7 @@ namespace kengine {
 			}();
 
 			g_params.proj = glm::perspective(
-				cam.frustrum.size.y,
+				g_params.camFOV,
 				(float)g_params.screenSize.x / (float)g_params.screenSize.y,
 				g_params.nearPlane, g_params.farPlane
 			);
