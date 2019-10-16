@@ -4,6 +4,6 @@
 
 namespace kengine::packets {
 	struct RemoveEntity {
-		EntityView e;
+		Entity & e;
 	};
 }

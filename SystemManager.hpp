@@ -243,7 +243,7 @@ namespace kengine {
             send(packets::RegisterEntity{ e });
         }
 
-        void removeEntity(EntityView e) {
+        void removeEntity(Entity & e) {
             send(packets::RemoveEntity{ e });
         }
 

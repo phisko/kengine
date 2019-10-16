@@ -313,14 +313,9 @@ namespace kengine {
 	}
 
 	void EntityManager::doRemove(Entity::ID id) {
+		SystemManager::removeEntity(getEntity(id));
+
 		Entity::Mask mask;
-		{
-			detail::ReadLock entities(_entitiesMutex);
-			mask = _entities[id].mask;
-		}
-
-		SystemManager::removeEntity(EntityView(id, mask));
-
 		{
 			detail::ReadLock entities(_entitiesMutex);
 			mask = _entities[id].mask;
