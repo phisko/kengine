@@ -4,7 +4,6 @@
 
 #include "EntityManager.hpp"
 #include "components/ImGuiComponent.hpp"
-#include "packets/AddImGuiTool.hpp"
 #include "imgui.h"
 #include "vector.hpp"
 #include "to_string.hpp"
@@ -248,15 +247,16 @@ static void load(kengine::EntityManager & em, const char * directory) {
 }
 
 static auto ImGuiAdjustableManager(kengine::EntityManager & em) {
-	static bool display = true;
-	em.send(kengine::packets::AddImGuiTool{ "Adjustable manager", display });
-
 	return [&em](kengine::Entity & e) {
-		e += kengine::ImGuiComponent([&em] {
-			if (!display)
+		auto & tool = e.attach<kengine::ImGuiToolComponent>();
+		tool.enabled = true;
+		tool.name = "Adjustables";
+
+		e += kengine::ImGuiComponent([&] {
+			if (!tool.enabled)
 				return;
 
-			if (ImGui::Begin("Adjustables", &display)) {
+			if (ImGui::Begin("Adjustables", &tool.enabled)) {
 				static char nameSearch[1024] = "";
 
 				ImGui::Columns(2);

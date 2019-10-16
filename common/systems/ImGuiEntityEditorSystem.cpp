@@ -7,17 +7,16 @@
 #include "functions/Basic.hpp"
 #include "functions/ImGuiEditor.hpp"
 
-#include "packets/AddImGuiTool.hpp"
-
 #include "imgui.h"
 
 auto ImGuiEntityEditor(kengine::EntityManager & em) {
 	return [&](kengine::Entity & e) {
-		static bool display = true;
-		em.send(kengine::packets::AddImGuiTool{ "Entity editor", display });
+		auto & tool = e.attach<kengine::ImGuiToolComponent>();
+		tool.enabled = true;
+		tool.name = "Entity editor";
 
 		e += kengine::ImGuiComponent([&] {
-			if (!display)
+			if (!tool.enabled)
 				return;
 
 			for (auto &[selected, _] : em.getEntities<kengine::SelectedComponent>()) {

@@ -33,8 +33,6 @@ The size of the GBuffer textures can be queried by using the `GetGBufferSize`(..
 The content of a GBuffer texture can be queried by using the [GetGBufferTexture](../../packets/GBuffer.hpp) datapacket. Take note that each pixel in a texture is formatted as 4 `floats`.
 WARNING: textures are flipped vertically (you'll want to do `y = (height - y)` before indexing into them).
 
-Sending the [AddImGuiTool](../../packets/AddImGuiTool.hpp) datapacket will add an entry into the "Tools" section of the ImGui main menu bar, letting users define custom tools windows.
-
 ### Functionality
 
 ##### Rendering

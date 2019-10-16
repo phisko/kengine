@@ -130,7 +130,6 @@ pip install conan
 
 These are datapackets sent from one `System` to another to communicate.
 
-* [AddImGuiTool](common/packets/AddImGuiTool.hpp): received by the graphics system, adds an entry to the "Tools" section of the ImGui main menu bar
 * [ImGuiScale](common/packets/ImGuiScale.hpp): sent by some graphics systems, provides a reference to a `float` that should be used to scale all ImGui elements (for special DPI screens)
 * [Collision](common/packets/Collision.hpp): sent by the `BulletSystem`, indicates a collision between two `Entities`
 * [QueryPosition](common/packets/Collision.hpp): handled by the `BulletSystem`, provides a list of `Entities` found within an area

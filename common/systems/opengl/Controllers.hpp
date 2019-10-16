@@ -16,26 +16,6 @@ namespace kengine {
 
 		static std::vector<Controller> controllers;
 
-		static auto ToolsController() {
-			return [](kengine::Entity & e) {
-				e += kengine::ImGuiComponent([] {
-					if (ImGui::BeginMainMenuBar()) {
-						if (ImGui::BeginMenu("Tools")) {
-							if (ImGui::MenuItem("Disable all"))
-								for (auto & controller : controllers)
-									*controller.enabled = false;
-
-							for (auto & controller : controllers)
-								if (ImGui::MenuItem(controller.name))
-								   *controller.enabled = !*controller.enabled;
-							ImGui::EndMenu();
-						}
-					}
-					ImGui::EndMainMenuBar();
-				});
-			};
-		}
-
 		static auto MouseController(GLFWwindow * window) {
 			return [window](kengine::Entity & e) {
 				auto & comp = e.attach<kengine::InputComponent>();

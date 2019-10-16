@@ -42,70 +42,6 @@ namespace kengine {
 	static bool g_enabled = true;
 	static float g_dpiScale = 1.f;
 
-	struct Controller {
-		const char * name;
-		bool * enabled;
-	};
-	static std::vector<Controller> g_controllers;
-
-	static void saveControllers() {
-		std::ofstream f(KENGINE_IMGUI_OVERLAY_TOOLS_SAVE_FILE);
-		assert(f);
-		for (const auto & controller : g_controllers)
-			f << controller.name << ';' << std::boolalpha << *controller.enabled << std::noboolalpha << '\n';
-	}
-
-	static auto ToolsController() {
-		return [](kengine::Entity & e) {
-			e += kengine::ImGuiComponent([] {
-				if (ImGui::BeginMainMenuBar()) {
-					if (ImGui::MenuItem("Disable"))
-						g_enabled = !g_enabled;
-
-					if (ImGui::BeginMenu("Tools")) {
-						if (ImGui::MenuItem("Disable all"))
-							for (auto & controller : g_controllers)
-								*controller.enabled = false;
-
-						for (auto & controller : g_controllers)
-							if (ImGui::MenuItem(controller.name))
-								*controller.enabled = !*controller.enabled;
-						ImGui::EndMenu();
-					}
-				}
-				ImGui::EndMainMenuBar();
-			});
-		};
-	}
-
-	class ConfFile {
-	public:
-		void parse() {
-			std::ifstream f(KENGINE_IMGUI_OVERLAY_TOOLS_SAVE_FILE);
-			if (!f)
-				return;
-			for (std::string line; std::getline(f, line);)
-				addLine(line);
-		}
-
-		void addLine(const std::string & line) {
-			const auto index = line.find(';');
-			_values[line.substr(0, index)] = putils::parse<bool>(line.substr(index + 1).c_str());
-		}
-
-		bool getValue(const char * name) const {
-			const auto it = _values.find(name);
-			if (it == _values.end())
-				return false;
-			return it->second;
-		}
-
-	private:
-		std::unordered_map<std::string, bool> _values;
-	};
-
-	static ConfFile g_confFile;
-
 	static void hideFromTaskbar(GLFWwindow * window) {
 		const auto win32Window = glfwGetWin32Window(window);
 		const auto currStyle = GetWindowLong(win32Window, GWL_EXSTYLE);
@@ -120,8 +56,8 @@ namespace kengine {
 		g_hMenu = CreatePopupMenu();
 
 		size_t i = 0;
-		for (const auto & controller : g_controllers) {
-			AppendMenu(g_hMenu, MF_STRING, i, controller.name);
+		for (const auto & [e, tool] : g_em->getEntities<ImGuiToolComponent>()) {
+			AppendMenu(g_hMenu, MF_STRING, i, tool.name);
 			++i;
 		}
 		AppendMenu(g_hMenu, MF_STRING, i, "Exit");
@@ -144,11 +80,13 @@ namespace kengine {
 		}
 		else if (umsg == WM_COMMAND) { // In context menu
 			const auto id = LOWORD(wParam);
-			if (id < g_controllers.size()) {
-				auto & enabled = *g_controllers[id].enabled;
-				enabled = !enabled;
+			size_t i = 0;
+			for (const auto & [e, tool] : g_em->getEntities<ImGuiToolComponent>()) {
+				if (id == i)
+					tool.enabled = !tool.enabled;
+				++i;
 			}
-			else // "Exit"
+			if (id >= i) // Exit
 				g_em->running = false;
 		}
 
@@ -291,17 +229,7 @@ namespace kengine {
 		_em += ToolsController();
 	}
 
-	void ImGuiOverlaySystem::handle(kengine::packets::AddImGuiTool p) {
-		for (const auto & controller : g_controllers)
-			if (strcmp(controller.name, p.name) == 0)
-				return;
-		g_controllers.push_back({ p.name, &p.enabled });
-		p.enabled = g_confFile.getValue(p.name);
-	}
-
 	ImGuiOverlaySystem::~ImGuiOverlaySystem() {
-		saveControllers();
-
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();

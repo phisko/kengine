@@ -7,8 +7,6 @@
 #include "functions/MatchString.hpp"
 #include "functions/ImGuiEditor.hpp"
 
-#include "packets/AddImGuiTool.hpp"
-
 #include "imgui.h"
 #include "string.hpp"
 #include "to_string.hpp"
@@ -67,13 +65,15 @@ static bool matches(const kengine::Entity & e, const char * str, kengine::Entity
 
 static auto ImGuiEntitySelector(kengine::EntityManager & em) {
 	return [&](kengine::Entity & e) {
-		static bool display = true;
-		em.send(kengine::packets::AddImGuiTool{ "Entity selector", display });
+		auto & tool = e.attach<kengine::ImGuiToolComponent>();
+		tool.enabled = true;
+		tool.name = "Entity selector";
+
 		e += kengine::ImGuiComponent([&] {
-			if (!display)
+			if (!tool.enabled)
 				return;
 
-			if (ImGui::Begin("Entity selector", &display)) {
+			if (ImGui::Begin("Entity selector", &tool.enabled)) {
 				static char nameSearch[1024];
 				ImGui::InputText("Search", nameSearch, sizeof(nameSearch));
 				ImGui::SameLine();
