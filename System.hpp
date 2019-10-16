@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef PI
-# define PI 3.14159265359f
+#ifndef KENGINE_PI
+# define KENGINE_PI 3.14159265359f
 #endif
 
 #include "ISystem.hpp"
