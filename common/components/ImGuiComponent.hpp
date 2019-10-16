@@ -4,6 +4,10 @@
 # define KENGINE_IMGUI_FUNCTION_SIZE 64
 #endif
 
+#ifndef KENGINE_IMGUI_TOOL_NAME_MAX_LENGTH
+# define KENGINE_IMGUI_TOOL_NAME_MAX_LENGTH 64
+#endif
+
 #include "function.hpp"
 #include "reflection/Reflectible.hpp"
 #include "not_serializable.hpp"
@@ -49,5 +53,12 @@ namespace kengine {
 			pmeta_reflectible_attribute(&ImGuiComponent::setupImGuiContext)
 		);
 		pmeta_get_parents();
+	};
+
+	struct ImGuiToolComponent : kengine::not_serializable {
+		static constexpr char stringName[] = "ImGuiToolComponentString";
+		using string = putils::string<KENGINE_IMGUI_TOOL_NAME_MAX_LENGTH, stringName>;
+		string name;
+		bool enabled;
 	};
 }
