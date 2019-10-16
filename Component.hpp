@@ -8,7 +8,7 @@
 # define KENGINE_MAX_SAVE_PATH_LENGTH 64
 #endif
 
-#ifndef NDEBUG
+#ifndef KENGINE_NDEBUG
 #include <iostream>
 #endif
 
@@ -215,7 +215,7 @@ namespace kengine {
 				}
 
 				ptr->funcs.name = getName();
-#ifndef NDEBUG
+#ifndef KENGINE_NDEBUG
 				std::cout << putils::termcolor::green << ptr->id << ' ' << putils::termcolor::cyan << ptr->funcs.name << '\n' << putils::termcolor::reset;
 #endif
 				return ptr;

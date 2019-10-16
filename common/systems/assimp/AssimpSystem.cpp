@@ -405,7 +405,7 @@ namespace kengine {
 			if (!g_importer.IsExtensionSupported(putils::file_extension(f)))
 				return false;
 
-#ifndef NDEBUG
+#ifndef KENGINE_NDEBUG
 			std::cout << putils::termcolor::green << "[AssImp] Loading " << putils::termcolor::cyan << f << putils::termcolor::green << "..." << putils::termcolor::reset;
 #endif
 
@@ -485,7 +485,7 @@ namespace kengine {
 				}
 			}
 
-#ifndef NDEBUG
+#ifndef KENGINE_NDEBUG
 			std::cout << putils::termcolor::green << "Done\n" << putils::termcolor::reset;
 #endif
 			return true;

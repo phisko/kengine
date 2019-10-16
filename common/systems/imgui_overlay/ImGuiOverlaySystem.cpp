@@ -225,7 +225,7 @@ namespace kengine {
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
 
-#ifndef NDEBUG
+#ifndef KENGINE_NDEBUG
 		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 #endif
 
@@ -274,7 +274,7 @@ namespace kengine {
 			g_focused = focused == GLFW_TRUE;
 		});
 
-#ifndef NDEBUG
+#ifndef KENGINE_NDEBUG
 		glEnable(GL_DEBUG_OUTPUT);
 		glDebugMessageCallback([](GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar * message, const void * userParam) {
 			if (severity != GL_DEBUG_SEVERITY_NOTIFICATION)

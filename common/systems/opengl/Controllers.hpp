@@ -5,7 +5,7 @@
 #include "components/LightComponent.hpp"
 #include "packets/GBuffer.hpp"
 
-#ifndef NDEBUG
+#ifndef KENGINE_NDEBUG
 
 namespace kengine {
 	namespace Controllers {

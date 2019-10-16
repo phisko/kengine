@@ -200,7 +200,7 @@ namespace kengine {
 			_toReuse.pop_back();
 		}
 
-#ifndef NDEBUG
+#ifndef KENGINE_NDEBUG
 		{
 			detail::ReadLock l(_archetypesMutex);
 			for (const auto & archetype : _archetypes) {

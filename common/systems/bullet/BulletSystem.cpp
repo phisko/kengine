@@ -122,7 +122,7 @@ struct KengineMotionState : public btMotionState {
 	kengine::TransformComponent3f & transform;
 };
 
-#ifndef NDEBUG
+#ifndef KENGINE_NDEBUG
 namespace debug {
 	class Drawer : public btIDebugDraw {
 	public:
@@ -181,7 +181,7 @@ namespace kengine {
 	{
 		onLoad("");
 
-#ifndef NDEBUG
+#ifndef KENGINE_NDEBUG
 		debug::drawer = new debug::Drawer(em);
 #endif
 
@@ -191,7 +191,7 @@ namespace kengine {
 
 	void BulletSystem::onLoad(const char * directory) noexcept {
 		_em += [](Entity & e) { e += AdjustableComponent("[Physics] Gravity", &GRAVITY); };
-#ifndef NDEBUG
+#ifndef KENGINE_NDEBUG
 		_em += [](Entity & e) { e += AdjustableComponent("[Physics] Debug", &ENABLE_DEBUG); };
 #endif
 	}
@@ -334,7 +334,7 @@ namespace kengine {
 		dynamicsWorld.setGravity({ 0.f, -GRAVITY, 0.f });
 		dynamicsWorld.stepSimulation(time.getDeltaTime().count());
 
-#ifndef NDEBUG
+#ifndef KENGINE_NDEBUG
 		debug::drawer->cleanup();
 		dynamicsWorld.setDebugDrawer(ENABLE_DEBUG ? debug::drawer : nullptr);
 		dynamicsWorld.debugDrawWorld();
