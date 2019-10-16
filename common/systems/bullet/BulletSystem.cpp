@@ -16,6 +16,7 @@
 #include "components/DebugGraphicsComponent.hpp"
 #include "components/ModelColliderComponent.hpp"
 #include "components/SkeletonComponent.hpp"
+#include "components/ModelSkeletonComponent.hpp"
 #include "components/ModelComponent.hpp"
 
 #include "helpers/MatrixHelper.hpp"

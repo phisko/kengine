@@ -23,6 +23,7 @@
 
 #include "components/AnimationComponent.hpp"
 #include "components/SkeletonComponent.hpp"
+#include "components/ModelSkeletonComponent.hpp"
 
 #include "components/ShaderComponent.hpp"
 #include "components/ImGuiComponent.hpp"
