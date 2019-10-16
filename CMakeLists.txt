@@ -67,5 +67,10 @@ if (KENGINE_BULLET)
     target_link_libraries(kengine PUBLIC kengine_bullet)
 endif()
 
+if (KENGINE_OGRE)
+    add_subdirectory(common/systems/ogre)
+    target_link_libraries(kengine PUBLIC kengine_ogre)
+endif()
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} PARENT_SCOPE)
 target_include_directories(kengine PUBLIC . common)
