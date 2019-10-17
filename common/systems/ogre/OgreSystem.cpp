@@ -58,7 +58,8 @@ namespace kengine {
 
 	bool OgreSystem::frameStarted(const Ogre::FrameEvent & e) {
 		for (const auto manager : g_managers)
-			manager->frameStarted(e);
+			if (!manager->frameStarted(e))
+				return false;
 
 		return OgreBites::ApplicationContext::frameStarted(e);
 	}
