@@ -1,9 +1,5 @@
 #pragma once
 
-// Ogre dll warnings
-#pragma warning(disable : 4251) 
-#pragma warning(disable : 4275)
-
 namespace kengine {
 	class Entity;
 	class EntityManager;

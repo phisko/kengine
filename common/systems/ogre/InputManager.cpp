@@ -25,18 +25,18 @@ void InputManager::execute() noexcept {
 
 		if (input.onMouseMove != nullptr)
 			for (const auto & event : g_mouseMovedEvents)
-				input.onMouseMove(event.x, event.y);
+				input.onMouseMove((float)event.x, (float)event.y);
 
 		if (input.onMouseButton != nullptr) {
 			for (const auto & event : g_mousePressedEvents)
-				input.onMouseButton(event.button, event.x, event.y, true);
+				input.onMouseButton(event.button, (float)event.x, (float)event.y, true);
 			for (const auto & event : g_mouseReleasedEvents)
-				input.onMouseButton(event.button, event.x, event.y, false);
+				input.onMouseButton(event.button, (float)event.x, (float)event.y, false);
 		}
 
 		if (input.onMouseWheel != nullptr)
 			for (const auto & event : g_mouseWheelEvents)
-				input.onMouseWheel(event.y, 0.f, 0.f);
+				input.onMouseWheel((float)event.y, 0.f, 0.f);
 	}
 
 	g_keyPressedEvents.clear();

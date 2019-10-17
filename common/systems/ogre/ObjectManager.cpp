@@ -1,3 +1,6 @@
+// Ogre dll warnings
+#pragma warning(disable : 4251 4275) 
+
 #include "ObjectManager.hpp"
 #include "EntityManager.hpp"
 
@@ -26,7 +29,6 @@ ObjectManager::ObjectManager(kengine::EntityManager & em, Ogre::SceneManager & s
 	: _em(em), _sceneManager(sceneManager)
 {
 	_sceneManager.setAmbientLight(Ogre::ColourValue(.5f, .5f, .5f));
-	Ogre::ResourceGroupManager::getSingleton().addResourceLocation("resources/Sinbad.zip", "Zip");
 }
 
 void ObjectManager::registerEntity(kengine::Entity & e) noexcept {

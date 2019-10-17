@@ -11,8 +11,8 @@ class ObjectManager : public Manager {
 public:
 	ObjectManager(kengine::EntityManager & em, Ogre::SceneManager & sceneManager);
 
-	void registerEntity(kengine::Entity & e) noexcept;
-	void removeEntity(kengine::Entity & e) noexcept;
+	void registerEntity(kengine::Entity & e) noexcept override;
+	void removeEntity(kengine::Entity & e) noexcept override;
 
 private:
 	kengine::EntityManager & _em;

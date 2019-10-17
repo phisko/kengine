@@ -11,8 +11,8 @@ class CameraManager : public Manager {
 public:
 	CameraManager(kengine::EntityManager & em, Ogre::SceneManager & sceneManager, Ogre::RenderWindow & window);
 
-	void registerEntity(kengine::Entity & e) noexcept;
-	void removeEntity(kengine::Entity & e) noexcept;
+	void registerEntity(kengine::Entity & e) noexcept override;
+	void removeEntity(kengine::Entity & e) noexcept override;
 
 private:
 	kengine::EntityManager & _em;
