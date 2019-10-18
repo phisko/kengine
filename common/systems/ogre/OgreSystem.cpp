@@ -60,11 +60,13 @@ namespace kengine {
 	}
 
 	bool OgreSystem::frameStarted(const Ogre::FrameEvent & e) {
+		const bool ret = OgreBites::ApplicationContext::frameStarted(e);
+
 		for (const auto manager : g_managers)
 			if (!manager->frameStarted(e))
 				return false;
 
-		return OgreBites::ApplicationContext::frameStarted(e);
+		return ret;
 	}
 
 	void OgreSystem::handle(packets::RegisterEntity p) noexcept {
