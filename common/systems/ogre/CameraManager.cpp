@@ -47,6 +47,10 @@ void CameraManager::execute() noexcept {
 		if (NEAR_PLANE < 0.00001f)
 			NEAR_PLANE = 0.00001f;
 		comp.camera->setNearClipDistance(NEAR_PLANE);
+
+		// stolen from https://forums.ogre3d.org/viewtopic.php?p=108002#p108002
+		const float angle = std::atanf(std::tanf(cam.frustrum.size.y / 2.f) / comp.camera->getAspectRatio()) * 2.f;
+		comp.camera->setFOVy(Ogre::Radian(angle));
 	}
 }
 
