@@ -20,6 +20,9 @@ struct OgreObjectComponent {
 
 static void setTransform(Ogre::SceneNode & node, const kengine::TransformComponent3f & transform) {
 	node.setPosition(convert(transform.boundingBox.position));
+	node.setScale(convert(transform.boundingBox.size));
+
+	node.resetOrientation();
 	node.yaw(Ogre::Radian(transform.yaw));
 	node.pitch(Ogre::Radian(transform.pitch));
 	node.roll(Ogre::Radian(transform.roll));
@@ -29,6 +32,11 @@ ObjectManager::ObjectManager(kengine::EntityManager & em, Ogre::SceneManager & s
 	: _em(em), _sceneManager(sceneManager)
 {
 	_sceneManager.setAmbientLight(Ogre::ColourValue(.5f, .5f, .5f));
+}
+
+void ObjectManager::execute() noexcept {
+	for (const auto & [e, transform, comp] : _em.getEntities<kengine::TransformComponent3f, OgreObjectComponent>())
+		setTransform(*comp.node, transform);
 }
 
 void ObjectManager::registerEntity(kengine::Entity & e) noexcept {

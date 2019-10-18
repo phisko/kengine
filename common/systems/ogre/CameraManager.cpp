@@ -22,6 +22,7 @@ struct OgreCameraComponent {
 
 static void setTransform(Ogre::SceneNode & node, const kengine::CameraComponent3f & transform) {
 	node.setPosition(convert(transform.frustrum.position));
+	node.resetOrientation();
 	node.yaw(Ogre::Radian(transform.yaw));
 	node.pitch(Ogre::Radian(transform.pitch));
 	node.roll(Ogre::Radian(transform.roll));
@@ -30,6 +31,11 @@ static void setTransform(Ogre::SceneNode & node, const kengine::CameraComponent3
 CameraManager::CameraManager(kengine::EntityManager & em, Ogre::SceneManager & sceneManager, Ogre::RenderWindow & window)
 	: _em(em), _sceneManager(sceneManager), _window(window)
 {
+}
+
+void CameraManager::execute() noexcept {
+	for (const auto & [e, cam, comp] : _em.getEntities<kengine::CameraComponent3f, OgreCameraComponent>())
+		setTransform(*comp.node, cam);
 }
 
 void CameraManager::registerEntity(kengine::Entity & e) noexcept {
