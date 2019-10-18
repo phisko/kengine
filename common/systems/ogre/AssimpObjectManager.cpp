@@ -46,6 +46,7 @@ void AssimpObjectManager::registerEntity(kengine::Entity & e) noexcept {
 			return;
 	}
 
+	// Cleanup after AssimpLoader::convert
 	resourceGroupManager.removeResourceLocation(path);
 	resourceGroupManager.removeResourceLocation("./resources");
 
