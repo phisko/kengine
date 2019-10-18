@@ -28,6 +28,7 @@ namespace kengine {
 	};
 
 	struct PointLightComponent : LightComponent {
+		float range = 1000.f;
 		float constant = 1.f;
 		float linear = .09f;
 		float quadratic = .032f;
@@ -36,6 +37,7 @@ namespace kengine {
 			pmeta_reflectible_attribute(&PointLightComponent::color),
 			pmeta_reflectible_attribute(&PointLightComponent::diffuseStrength),
 			pmeta_reflectible_attribute(&PointLightComponent::specularStrength),
+			pmeta_reflectible_attribute(&PointLightComponent::range),
 			pmeta_reflectible_attribute(&PointLightComponent::constant),
 			pmeta_reflectible_attribute(&PointLightComponent::linear),
 			pmeta_reflectible_attribute(&PointLightComponent::quadratic)
@@ -47,13 +49,14 @@ namespace kengine {
 
 	struct SpotLightComponent : PointLightComponent {
 		putils::Vector3f direction = { 0.f, -1.f, 0.f };
-		float cutOff = std::cos(12.5f);
-		float outerCutOff = std::cos(15.f);
+		float cutOff = 1.f;
+		float outerCutOff = 1.2f;
 
 		pmeta_get_attributes(
 			pmeta_reflectible_attribute(&SpotLightComponent::color),
 			pmeta_reflectible_attribute(&SpotLightComponent::diffuseStrength),
 			pmeta_reflectible_attribute(&SpotLightComponent::specularStrength),
+			pmeta_reflectible_attribute(&SpotLightComponent::range),
 			pmeta_reflectible_attribute(&SpotLightComponent::constant),
 			pmeta_reflectible_attribute(&SpotLightComponent::linear),
 			pmeta_reflectible_attribute(&SpotLightComponent::quadratic),

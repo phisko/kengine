@@ -14,8 +14,9 @@
 #include "InputManager.hpp"
 #include "ImGuiManager.hpp"
 #include "CameraManager.hpp"
-#include "AssimpObjectManager.hpp"
+#include "LightManager.hpp"
 #include "ObjectManager.hpp"
+#include "AssimpObjectManager.hpp"
 
 static putils::vector<Manager *, 8> g_managers;
 
@@ -38,6 +39,7 @@ namespace kengine {
 
 	void OgreSystem::setup() {
 		OgreBites::ApplicationContext::setup();
+
 		_sceneManager = getRoot()->createSceneManager();
 		Ogre::RTShader::ShaderGenerator::getSingleton().addSceneManager(_sceneManager);
 		_sceneManager->addRenderQueueListener(getOverlaySystem());
@@ -45,6 +47,7 @@ namespace kengine {
 		g_managers.push_back(new InputManager(_em, *this));
 		g_managers.push_back(new ImGuiManager(_em, *this));
 		g_managers.push_back(new CameraManager(_em, *_sceneManager, *getRenderWindow()));
+		g_managers.push_back(new LightManager(_em, *_sceneManager));
 		g_managers.push_back(new ObjectManager(_em, *_sceneManager));
 		g_managers.push_back(new AssimpObjectManager(_em, *_sceneManager));
 	}
