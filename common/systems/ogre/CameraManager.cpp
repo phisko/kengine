@@ -11,8 +11,11 @@
 
 #include "components/CameraComponent.hpp"
 #include "components/TransformComponent.hpp"
+#include "components/AdjustableComponent.hpp"
 
 #include "Utils.hpp"
+
+static float NEAR_PLANE = 0.f;
 
 struct OgreCameraComponent {
 	Ogre::SceneNode * node;
@@ -31,11 +34,20 @@ static void setTransform(Ogre::SceneNode & node, const kengine::CameraComponent3
 CameraManager::CameraManager(kengine::EntityManager & em, Ogre::SceneManager & sceneManager, Ogre::RenderWindow & window)
 	: _em(em), _sceneManager(sceneManager), _window(window)
 {
+	onLoad("");
+}
+
+void CameraManager::onLoad(const char *) noexcept {
+	_em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Ogre/Camera] Near plane", &NEAR_PLANE); };
 }
 
 void CameraManager::execute() noexcept {
-	for (const auto & [e, cam, comp] : _em.getEntities<kengine::CameraComponent3f, OgreCameraComponent>())
+	for (const auto & [e, cam, comp] : _em.getEntities<kengine::CameraComponent3f, OgreCameraComponent>()) {
 		setTransform(*comp.node, cam);
+		if (NEAR_PLANE < 0.00001f)
+			NEAR_PLANE = 0.00001f;
+		comp.camera->setNearClipDistance(NEAR_PLANE);
+	}
 }
 
 void CameraManager::registerEntity(kengine::Entity & e) noexcept {
