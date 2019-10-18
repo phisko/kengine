@@ -41,8 +41,8 @@ void CameraManager::onLoad(const char *) noexcept {
 void CameraManager::execute() noexcept {
 	for (const auto & [e, cam, comp] : _em.getEntities<kengine::CameraComponent3f, OgreCameraComponent>()) {
 		setTransform(*comp.node, cam);
-		if (NEAR_PLANE < 0.00001f)
-			NEAR_PLANE = 0.00001f;
+		if (NEAR_PLANE < 0.1f)
+			NEAR_PLANE = 0.1f;
 		comp.camera->setNearClipDistance(NEAR_PLANE);
 
 		// stolen from https://forums.ogre3d.org/viewtopic.php?p=108002#p108002
