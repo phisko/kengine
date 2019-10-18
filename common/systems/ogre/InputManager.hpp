@@ -1,10 +1,7 @@
 #pragma once
 
-// Ogre dll warnings
-#pragma warning(disable : 4251 4275) 
-
-#include <OgreApplicationContext.h>
 #include "Manager.hpp"
+#include <OgreApplicationContext.h>
 
 class InputManager : public Manager, public OgreBites::InputListener {
 public:

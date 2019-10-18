@@ -1,7 +1,8 @@
 #pragma once
 
-#include <OgreApplicationContext.h>
 #include "Manager.hpp"
+
+#include <OgreApplicationContext.h>
 
 class ImGuiManager : public Manager {
 public:

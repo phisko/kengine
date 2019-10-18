@@ -1,6 +1,3 @@
-// Ogre dll warnings
-#pragma warning(disable : 4251 4275) 
-
 #include "AssimpObjectManager.hpp"
 #include "AssimpLoader.h"
 #include "EntityManager.hpp"

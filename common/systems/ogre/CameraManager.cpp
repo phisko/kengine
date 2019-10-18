@@ -1,6 +1,3 @@
-// Ogre dll warnings
-#pragma warning(disable : 4251 4275) 
-
 #include "CameraManager.hpp"
 #include "EntityManager.hpp"
 
