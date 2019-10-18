@@ -161,9 +161,13 @@ static void draw(const char * name, kengine::AdjustableComponent & comp) {
 			comp.color = *comp.colorPtr;
 		break;
 	}
+	case kengine::AdjustableComponent::Enum: {
+		ImGui::Combo((string("##") + comp.name).c_str(), comp.iPtr != nullptr ? comp.iPtr : &comp.i, comp.getEnumNames(), (int)comp.enumCount);
+		break;
+	}
 	default:
 		assert("Unknown type" && false);
-		static_assert(putils::magic_enum::enum_count<kengine::AdjustableComponent::EType>() == 4);
+		static_assert(putils::magic_enum::enum_count<kengine::AdjustableComponent::EType>() == 5);
 	}
 	ImGui::Columns();
 }
@@ -186,9 +190,12 @@ static void save(kengine::EntityManager & em, const char * directory) {
 		case kengine::AdjustableComponent::Color:
 			f << putils::toRGBA(comp.color);
 			break;
+		case kengine::AdjustableComponent::Enum:
+			f << comp.i;
+			break;
 		default:
 			assert("Unknown adjustable type" && false);
-			static_assert(putils::magic_enum::enum_count<kengine::AdjustableComponent::EType>() == 4);
+			static_assert(putils::magic_enum::enum_count<kengine::AdjustableComponent::EType>() == 5);
 		}
 		f << '\n';
 	}
@@ -220,9 +227,13 @@ static void setValue(kengine::AdjustableComponent & comp, const char * s) {
 		assignPtr(comp.colorPtr, comp.color);
 		break;
 	}
+	case kengine::AdjustableComponent::Enum:
+		comp.i = putils::parse<int>(s);
+		assignPtr(comp.iPtr, comp.i);
+		break;
 	default:
 		assert("Unknown adjustable type" && false);
-		static_assert(putils::magic_enum::enum_count<kengine::AdjustableComponent::EType>() == 4);
+		static_assert(putils::magic_enum::enum_count<kengine::AdjustableComponent::EType>() == 5);
 	}
 }
 
