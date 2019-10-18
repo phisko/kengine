@@ -47,6 +47,10 @@ static bool matches(const kengine::Entity & e, const char * str, kengine::Entity
 	if (ImGui::Button(putils::string<64>("Select##") + e.id))
 		ret = true;
 	ImGui::SameLine();
+	if (ImGui::Button(putils::string<64>("Remove##") + e.id)) {
+		em.removeEntity(e);
+		return false;
+	}
 	if (ImGui::TreeNode(displayText + "##" + e.id)) {
 		for (const auto & comp : components) {
 			const auto has = comp->getFunction<kengine::functions::Has>();
