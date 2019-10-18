@@ -190,6 +190,8 @@ namespace kengine {
 				});
 			}
 			else if constexpr (std::is_enum_v<Member>) {
+				static_assert(std::is_same_v<std::underlying_type_t<Member>, int>);
+
 				displayInColumns(name, [&] {
 					static putils::string<64> names[putils::magic_enum::enum_count<Member>()];
 					static bool first = true;
