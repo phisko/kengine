@@ -14,6 +14,7 @@
 #include "InputManager.hpp"
 #include "ImGuiManager.hpp"
 #include "CameraManager.hpp"
+#include "AssimpObjectManager.hpp"
 #include "ObjectManager.hpp"
 
 static putils::vector<Manager *, 8> g_managers;
@@ -45,6 +46,7 @@ namespace kengine {
 		g_managers.push_back(new ImGuiManager(_em, *this));
 		g_managers.push_back(new CameraManager(_em, *_sceneManager, *getRenderWindow()));
 		g_managers.push_back(new ObjectManager(_em, *_sceneManager));
+		g_managers.push_back(new AssimpObjectManager(_em, *_sceneManager));
 	}
 
 	void OgreSystem::execute() noexcept {

@@ -9,10 +9,18 @@ file(GLOB src
 )
 
 add_library(${name} STATIC ${src})
-
-putils_conan(freetype/2.10.0@bincrafters/stable)
-target_link_libraries(${name} PRIVATE kengine CONAN_PKG::freetype)
 target_include_directories(${name} PRIVATE ${IMGUI_FREETYPE_DIR})
+
+putils_conan(
+	freetype/2.10.0@bincrafters/stable
+	Assimp/4.1.0@jacmoe/stable
+)
+
+# putils_conan(
+# 	freetype/2.10.0@bincrafters/stable
+# 	Assimp/4.1.0@jacmoe/stable
+# )
+target_link_libraries(${name} PRIVATE kengine CONAN_PKG::freetype CONAN_PKG::Assimp)
 
 # For now, users have to install Ogre themselves
 # Hoping for someone to make a Conan repo
