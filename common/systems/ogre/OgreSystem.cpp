@@ -16,6 +16,8 @@
 #include "CameraManager.hpp"
 #include "ObjectManager.hpp"
 
+static putils::vector<Manager *, 8> g_managers;
+
 namespace kengine {
 	OgreSystem::OgreSystem(EntityManager & em)
 		: System(em), _em(em),
@@ -23,7 +25,15 @@ namespace kengine {
 	{
 	}
 
-	static putils::vector<Manager *, 8> g_managers;
+	void OgreSystem::onLoad(const char * path) noexcept {
+		for (const auto manager : g_managers)
+			manager->onLoad(path);
+	}
+
+	void OgreSystem::onSave(const char * path) noexcept {
+		for (const auto manager : g_managers)
+			manager->onSave(path);
+	}
 
 	void OgreSystem::setup() {
 		OgreBites::ApplicationContext::setup();
