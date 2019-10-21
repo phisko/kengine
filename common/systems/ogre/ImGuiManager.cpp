@@ -2,13 +2,15 @@
 #include "EntityManager.hpp"
 
 #include <OgreOverlayManager.h>
+#include <OgreRenderWindow.h>
 
 #include "ImGuiOverlay.h"
 #include "ImGuiInputListener.h"
 #include "components/ImGuiComponent.hpp"
 #include "components/CameraComponent.hpp"
 
-ImGuiManager::ImGuiManager(kengine::EntityManager & em, OgreBites::ApplicationContext & app) : _em(em) {
+ImGuiManager::ImGuiManager(kengine::EntityManager & em, OgreBites::ApplicationContext & app)
+	: _em(em), _app(app) {
 	auto imguiOverlay = new Ogre::kengine::ImGuiOverlay;
 	imguiOverlay->setZOrder(300);
 	imguiOverlay->show();
@@ -19,7 +21,7 @@ ImGuiManager::ImGuiManager(kengine::EntityManager & em, OgreBites::ApplicationCo
 static size_t g_nbCameras = 0;
 
 bool ImGuiManager::frameStarted(const Ogre::FrameEvent & e) noexcept {
-	if (g_nbCameras == 0)
+	if (g_nbCameras == 0 || !_app.getRenderWindow()->isVisible())
 		return true;
 
 	Ogre::kengine::ImGuiOverlay::NewFrame(e);
