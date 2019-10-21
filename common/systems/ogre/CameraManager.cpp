@@ -60,6 +60,7 @@ void CameraManager::registerEntity(kengine::Entity & e) noexcept {
 
 	OgreCameraComponent comp;
 	comp.camera = _sceneManager.createCamera(Ogre::StringConverter::toString(e.id));
+	comp.camera->setAutoAspectRatio(true);
 
 	comp.node = _sceneManager.getRootSceneNode()->createChildSceneNode();
 	comp.node->attachObject(comp.camera);
