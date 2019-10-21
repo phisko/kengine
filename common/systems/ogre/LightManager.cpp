@@ -30,7 +30,7 @@ void LightManager::onLoad(const char *) noexcept {
 void LightManager::execute() noexcept {
 	_sceneManager.setShadowTechnique(SHADOW_TYPE);
 
-	Ogre::ColourValue ambientColor;
+	Ogre::ColourValue ambientColor{ 0.f, 0.f, 0.f, 0.f };
 	for (const auto & [e, light, comp] : _em.getEntities<kengine::DirLightComponent, OgreLightComponent>()) {
 		const auto color = convert(light.color);
 		ambientColor += color * light.ambientStrength;
@@ -38,7 +38,7 @@ void LightManager::execute() noexcept {
 		comp.light->setDiffuseColour(color * light.diffuseStrength);
 		comp.light->setSpecularColour(color * light.specularStrength);
 
-		comp.node->setDirection(convert(light.direction));
+		comp.node->setDirection(convert(light.direction), Ogre::SceneNode::TS_WORLD);
 	}
 	_sceneManager.setAmbientLight(ambientColor);
 
@@ -61,7 +61,7 @@ void LightManager::execute() noexcept {
 		comp.light->setAttenuation(light.range, light.constant, light.linear, light.quadratic);
 		comp.node->setPosition(convert(transform.boundingBox.position));
 
-		comp.node->setDirection(convert(light.direction));
+		comp.node->setDirection(convert(light.direction), Ogre::SceneNode::TS_WORLD);
 		comp.light->setSpotlightRange(Ogre::Radian(light.cutOff), Ogre::Radian(light.outerCutOff));
 	}
 }
@@ -78,6 +78,7 @@ void LightManager::registerEntity(kengine::Entity & e) noexcept {
 	comp.light = _sceneManager.createLight();
 	comp.node = _sceneManager.getRootSceneNode()->createChildSceneNode();
 	comp.node->attachObject(comp.light);
+	comp.node->setPosition({ 0.f, 0.f, 0.f });
 
 	if (isDirLight)
 		comp.light->setType(Ogre::Light::LT_DIRECTIONAL);
@@ -85,6 +86,8 @@ void LightManager::registerEntity(kengine::Entity & e) noexcept {
 		comp.light->setType(Ogre::Light::LT_POINT);
 	else if (isSpotLight)
 		comp.light->setType(Ogre::Light::LT_SPOTLIGHT);
+
+	e += comp;
 }
 
 void LightManager::removeEntity(kengine::Entity & e) noexcept {
