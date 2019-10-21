@@ -123,7 +123,7 @@ public:
 private:
     bool createSubMesh(const Ogre::String& name, int index, const aiNode* pNode, const aiMesh *mesh, const aiMaterial* mat, Ogre::MeshPtr mMesh, Ogre::AxisAlignedBox& mAAB, const Ogre::String& mDir);
     Ogre::MaterialPtr createMaterial(int index, const aiMaterial* mat, const Ogre::String& mDir);
-    Ogre::MaterialPtr createMaterialByScript(int index, const aiMaterial* mat);
+    Ogre::MaterialPtr createMaterialByScript(const Ogre::String & name, int index, const aiMaterial* mat);
     void grabNodeNamesFromNode(const aiScene* mScene,  const aiNode* pNode);
     void grabBoneNamesFromNode(const aiScene* mScene,  const aiNode* pNode);
     void computeNodesDerivedTransform(const aiScene* mScene,  const aiNode *pNode, const aiMatrix4x4 accTransform);

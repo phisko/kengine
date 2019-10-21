@@ -959,12 +959,12 @@ Ogre::String ReplaceSpaces(const Ogre::String& s)
     return res;
 }
 
-Ogre::MaterialPtr AssimpLoader::createMaterialByScript(int index, const aiMaterial* mat)
+Ogre::MaterialPtr AssimpLoader::createMaterialByScript(const Ogre::String & name, int index, const aiMaterial* mat)
 {
     // Create a material in code as using script inheritance variable substitution and other goodies
 
     Ogre::MaterialManager* matMgr = Ogre::MaterialManager::getSingletonPtr();
-    Ogre::String materialName = mBasename + "#" + Ogre::StringConverter::toString(index);
+    Ogre::String materialName = name + "#" + Ogre::StringConverter::toString(index);
     if(matMgr->resourceExists(materialName, Ogre::ResourceGroupManager::AUTODETECT_RESOURCE_GROUP_NAME))
     {
         Ogre::MaterialPtr matPtr = matMgr->getByName(materialName);
@@ -1232,7 +1232,7 @@ bool AssimpLoader::createSubMesh(const Ogre::String& name, int index, const aiNo
     }
     else
     {
-        matptr = createMaterialByScript(mesh->mMaterialIndex, mat);
+        matptr = createMaterialByScript(name, mesh->mMaterialIndex, mat);
     }
 
     // now begin the object definition
