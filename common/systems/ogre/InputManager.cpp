@@ -2,6 +2,7 @@
 #include "EntityManager.hpp"
 
 #include "components/InputComponent.hpp"
+#include "imgui.h"
 
 InputManager::InputManager(kengine::EntityManager & em, OgreBites::ApplicationContext & app) : _em(em) {
 	app.addInputListener(this);
@@ -15,28 +16,31 @@ static putils::vector<OgreBites::MouseButtonEvent, 128> g_mouseReleasedEvents;
 static putils::vector<OgreBites::MouseWheelEvent, 128> g_mouseWheelEvents;
 
 void InputManager::execute() noexcept {
+	const auto & imgui = ImGui::GetIO();
 	for (const auto & [e, input] : _em.getEntities<kengine::InputComponent>()) {
-		if (input.onKey != nullptr) {
+		if (!imgui.WantCaptureKeyboard && input.onKey != nullptr) {
 			for (const auto & event : g_keyPressedEvents)
 				input.onKey(event.keysym.sym, true);
 			for (const auto & event : g_keyReleasedEvents)
 				input.onKey(event.keysym.sym, false);
 		}
 
-		if (input.onMouseMove != nullptr)
-			for (const auto & event : g_mouseMovedEvents)
-				input.onMouseMove((float)event.x, (float)event.y);
+		if (!imgui.WantCaptureMouse) {
+			if (imgui.WantCaptureMouse && input.onMouseMove != nullptr)
+				for (const auto & event : g_mouseMovedEvents)
+					input.onMouseMove((float)event.x, (float)event.y);
 
-		if (input.onMouseButton != nullptr) {
-			for (const auto & event : g_mousePressedEvents)
-				input.onMouseButton(event.button, (float)event.x, (float)event.y, true);
-			for (const auto & event : g_mouseReleasedEvents)
-				input.onMouseButton(event.button, (float)event.x, (float)event.y, false);
+			if (input.onMouseButton != nullptr) {
+				for (const auto & event : g_mousePressedEvents)
+					input.onMouseButton(event.button, (float)event.x, (float)event.y, true);
+				for (const auto & event : g_mouseReleasedEvents)
+					input.onMouseButton(event.button, (float)event.x, (float)event.y, false);
+			}
+
+			if (input.onMouseWheel != nullptr)
+				for (const auto & event : g_mouseWheelEvents)
+					input.onMouseWheel((float)event.y, 0.f, 0.f);
 		}
-
-		if (input.onMouseWheel != nullptr)
-			for (const auto & event : g_mouseWheelEvents)
-				input.onMouseWheel((float)event.y, 0.f, 0.f);
 	}
 
 	g_keyPressedEvents.clear();
