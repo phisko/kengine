@@ -26,7 +26,7 @@ void InputManager::execute() noexcept {
 		}
 
 		if (!imgui.WantCaptureMouse) {
-			if (imgui.WantCaptureMouse && input.onMouseMove != nullptr)
+			if (input.onMouseMove != nullptr)
 				for (const auto & event : g_mouseMovedEvents)
 					input.onMouseMove((float)event.x, (float)event.y);
 
