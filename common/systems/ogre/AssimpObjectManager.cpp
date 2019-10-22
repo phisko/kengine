@@ -9,8 +9,6 @@
 
 #include <filesystem>
 
-static AssimpLoader g_assimp;
-
 AssimpObjectManager::AssimpObjectManager(kengine::EntityManager & em, Ogre::SceneManager & sceneManager)
 	: _em(em), _sceneManager(sceneManager)
 {
@@ -39,19 +37,19 @@ void AssimpObjectManager::registerEntity(kengine::Entity & e) noexcept {
 	if (!std::filesystem::exists(fullPath.c_str())) {
 		AssimpLoader::AssOptions options;
 		options.source = graphics.appearance;
-		if (!g_assimp.convert(options))
-			return;
-	}
 
-	// Cleanup after AssimpLoader::convert
-	resourceGroupManager.removeResourceLocation(path);
-	resourceGroupManager.removeResourceLocation("./resources");
+		AssimpLoader loader;
+		if (!loader.convert(options))
+			return;
+		// Cleanup after AssimpLoader::convert
+		resourceGroupManager.removeResourceLocation(path);
+		resourceGroupManager.removeResourceLocation("./resources");
+	}
 
 	if (!resourceGroupManager.resourceLocationExists(path)) {
-		resourceGroupManager.addResourceLocation(path, "FileSystem");
+		resourceGroupManager.addResourceLocation(path, "FileSystem", path);
 		resourceGroupManager.initialiseAllResourceGroups();
 	}
-
 
 	comp.entity = _sceneManager.createEntity(finalName);
 	comp.node = _sceneManager.getRootSceneNode()->createChildSceneNode();
