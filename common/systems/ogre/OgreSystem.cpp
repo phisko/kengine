@@ -15,6 +15,7 @@
 #include "ImGuiManager.hpp"
 #include "CameraManager.hpp"
 #include "LightManager.hpp"
+#include "SkyBoxManager.hpp"
 #include "ObjectManager.hpp"
 #include "AssimpObjectManager.hpp"
 
@@ -48,6 +49,7 @@ namespace kengine {
 		g_managers.push_back(new ImGuiManager(_em, *this));
 		g_managers.push_back(new CameraManager(_em, *_sceneManager, *getRenderWindow()));
 		g_managers.push_back(new LightManager(_em, *_sceneManager));
+		g_managers.push_back(new SkyBoxManager(_em, *_sceneManager));
 		g_managers.push_back(new ObjectManager(_em, *_sceneManager));
 		g_managers.push_back(new AssimpObjectManager(_em, *_sceneManager));
 	}
