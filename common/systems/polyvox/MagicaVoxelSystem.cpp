@@ -88,7 +88,7 @@ namespace kengine {
 
 	static bool loadVoxFile(Entity & e) {
 		const auto & f = e.get<ModelComponent>().file.c_str();
-		if (strcmp(putils::file_extension(f), "vox") != 0)
+		if (putils::file_extension(f) != "vox")
 			return false;
 
 #ifndef KENGINE_NDEBUG
@@ -172,7 +172,7 @@ namespace kengine {
 	void MagicaVoxelSystem::setModel(Entity & e) {
 		auto & graphics = e.get<GraphicsComponent>();
 
-		if (strcmp(putils::file_extension(graphics.appearance.c_str()), "vox") != 0)
+		if (putils::file_extension(graphics.appearance.c_str()) != "vox")
 			return;
 
 		e += PolyVoxObjectComponent{};

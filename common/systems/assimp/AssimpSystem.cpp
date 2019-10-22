@@ -403,7 +403,7 @@ namespace kengine {
 
 		static bool loadFile(Entity & e) {
 			const auto & f = e.get<ModelComponent>().file.c_str();
-			if (!g_importer.IsExtensionSupported(putils::file_extension(f)))
+			if (!g_importer.IsExtensionSupported(putils::file_extension(f).data()))
 				return false;
 
 #ifndef KENGINE_NDEBUG
@@ -528,7 +528,7 @@ namespace kengine {
 	void AssImpSystem::setModel(Entity & e) {
 		auto & graphics = e.get<GraphicsComponent>();
 
-		if (!g_importer.IsExtensionSupported(putils::file_extension(graphics.appearance.c_str())))
+		if (!g_importer.IsExtensionSupported(putils::file_extension(graphics.appearance.c_str()).data()))
 			return;
 
 		e += AssImpObjectComponent{};

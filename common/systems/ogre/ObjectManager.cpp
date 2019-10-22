@@ -39,7 +39,7 @@ void ObjectManager::registerEntity(kengine::Entity & e) noexcept {
 
 	OgreObjectComponent comp;
 
-	if (strcmp(putils::file_extension(graphics.appearance), "mesh") != 0)
+	if (putils::file_extension(graphics.appearance) != "mesh")
 		return;
 
 	comp.entity = _sceneManager.createEntity(graphics.appearance.c_str());
