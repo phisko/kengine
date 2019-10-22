@@ -1479,7 +1479,7 @@ void AssimpLoader::loadDataFromNode(const aiScene* mScene,  const aiNode *pNode,
         {
             if(mMeshes.size() == 0)
             {
-                mesh = Ogre::MeshManager::getSingleton().createManual("ROOTMesh", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+                mesh = Ogre::MeshManager::getSingleton().createManual(mBasename + "ROOTMesh", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 
                 mMeshes.push_back(mesh);
             }
@@ -1500,7 +1500,7 @@ void AssimpLoader::loadDataFromNode(const aiScene* mScene,  const aiNode *pNode,
 
             // Create a material instance for the mesh.
             const aiMaterial *pAIMaterial = mScene->mMaterials[ pAIMesh->mMaterialIndex ];
-            createSubMesh(pNode->mName.data, idx, pNode, pAIMesh, pAIMaterial, mesh, mAAB, mDir);
+            createSubMesh(mBasename + Ogre::StringConverter::toString(idx) + pNode->mName.data, idx, pNode, pAIMesh, pAIMaterial, mesh, mAAB, mDir);
         }
 
         // We must indicate the bounding box
