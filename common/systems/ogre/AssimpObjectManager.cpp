@@ -46,8 +46,8 @@ void AssimpObjectManager::registerEntity(kengine::Entity & e) noexcept {
 		resourceGroupManager.removeResourceLocation("./resources");
 	}
 
-	if (!resourceGroupManager.resourceLocationExists(path)) {
-		resourceGroupManager.addResourceLocation(path, "FileSystem", path);
+	if (!resourceGroupManager.resourceGroupExists(graphics.appearance.c_str())) {
+		resourceGroupManager.addResourceLocation(path, "FileSystem", graphics.appearance.c_str());
 		resourceGroupManager.initialiseAllResourceGroups();
 	}
 
