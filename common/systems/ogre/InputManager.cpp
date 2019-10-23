@@ -4,16 +4,20 @@
 #include "components/InputComponent.hpp"
 #include "imgui.h"
 
-InputManager::InputManager(kengine::EntityManager & em, OgreBites::ApplicationContext & app) : _em(em) {
+InputManager::InputManager(kengine::EntityManager & em, OgreBites::ApplicationContext & app)
+	: _em(em), _app(app) {
 	app.addInputListener(this);
 }
 
-static putils::vector<OgreBites::KeyboardEvent, 128> g_keyPressedEvents;
-static putils::vector<OgreBites::KeyboardEvent, 128> g_keyReleasedEvents;
-static putils::vector<OgreBites::MouseMotionEvent, 128> g_mouseMovedEvents;
-static putils::vector<OgreBites::MouseButtonEvent, 128> g_mousePressedEvents;
-static putils::vector<OgreBites::MouseButtonEvent, 128> g_mouseReleasedEvents;
-static putils::vector<OgreBites::MouseWheelEvent, 128> g_mouseWheelEvents;
+template<typename T>
+using input_vector = putils::vector<T, 128>;
+
+static input_vector<OgreBites::KeyboardEvent> g_keyPressedEvents;
+static input_vector<OgreBites::KeyboardEvent> g_keyReleasedEvents;
+static input_vector<OgreBites::MouseMotionEvent> g_mouseMovedEvents;
+static input_vector<OgreBites::MouseButtonEvent> g_mousePressedEvents;
+static input_vector<OgreBites::MouseButtonEvent> g_mouseReleasedEvents;
+static input_vector<OgreBites::MouseWheelEvent> g_mouseWheelEvents;
 
 void InputManager::execute() noexcept {
 	const auto & imgui = ImGui::GetIO();
@@ -26,9 +30,22 @@ void InputManager::execute() noexcept {
 		}
 
 		if (!imgui.WantCaptureMouse) {
+			static int xPos = INT_MAX;
+			static int yPos = INT_MAX;
+
 			if (input.onMouseMove != nullptr)
-				for (const auto & event : g_mouseMovedEvents)
-					input.onMouseMove((float)event.x, (float)event.y);
+				for (const auto & event : g_mouseMovedEvents) {
+					if (xPos == INT_MAX) {
+						xPos = event.x;
+						yPos = event.y;
+					}
+					else {
+						xPos += event.xrel;
+						yPos += event.yrel;
+					}
+
+					input.onMouseMove((float)xPos, (float)yPos);
+				}
 
 			if (input.onMouseButton != nullptr) {
 				for (const auto & event : g_mousePressedEvents)

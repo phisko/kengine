@@ -18,4 +18,5 @@ public:
 
 private:
 	kengine::EntityManager & _em;
+	OgreBites::ApplicationContext & _app;
 };
