@@ -73,6 +73,10 @@ bool InputManager::keyPressed(const OgreBites::KeyboardEvent & event) {
 		static bool captured = false;
 		captured = !captured;
 		_app.setWindowGrab(captured);
+		if (captured)
+			ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NoMouse;
+		else
+			ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
 	}
 
 	g_keyPressedEvents.push_back(event);
