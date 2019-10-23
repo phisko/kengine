@@ -11,6 +11,7 @@
 #include "Utils.hpp"
 
 static Ogre::ShadowTechnique SHADOW_TYPE = Ogre::ShadowTechnique::SHADOWTYPE_STENCIL_MODULATIVE;
+static int SHADOW_TEXTURE_SIZE = 1024;
 
 struct OgreLightComponent {
 	Ogre::SceneNode * node = nullptr;
@@ -25,10 +26,12 @@ LightManager::LightManager(kengine::EntityManager & em, Ogre::SceneManager & sce
 
 void LightManager::onLoad(const char *) noexcept {
 	_em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Ogre] Shadow type", &SHADOW_TYPE); };
+	_em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Ogre] Shadow texture size", &SHADOW_TEXTURE_SIZE); };
 }
 
 void LightManager::execute() noexcept {
 	_sceneManager.setShadowTechnique(SHADOW_TYPE);
+	_sceneManager.setShadowTextureSize(SHADOW_TEXTURE_SIZE);
 
 	Ogre::ColourValue ambientColor{ 0.f, 0.f, 0.f, 0.f };
 	for (const auto & [e, light, comp] : _em.getEntities<kengine::DirLightComponent, OgreLightComponent>()) {
