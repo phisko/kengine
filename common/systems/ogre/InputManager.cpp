@@ -52,6 +52,12 @@ void InputManager::execute() noexcept {
 }
 
 bool InputManager::keyPressed(const OgreBites::KeyboardEvent & event) {
+	if (event.keysym.sym == OgreBites::SDLK_RETURN) {
+		static bool captured = false;
+		captured = !captured;
+		_app.setWindowGrab(captured);
+	}
+
 	g_keyPressedEvents.push_back(event);
 	return true;
 }
