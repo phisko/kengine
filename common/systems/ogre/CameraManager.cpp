@@ -38,7 +38,7 @@ void CameraManager::onLoad(const char *) noexcept {
 	_em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Ogre/Camera] Near plane", &NEAR_PLANE); };
 }
 
-void CameraManager::execute() noexcept {
+void CameraManager::execute(float time) noexcept {
 	for (const auto & [e, cam, comp] : _em.getEntities<kengine::CameraComponent3f, OgreCameraComponent>()) {
 		setTransform(*comp.node, cam);
 		if (NEAR_PLANE < 0.1f)

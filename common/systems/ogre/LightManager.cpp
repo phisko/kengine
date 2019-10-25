@@ -10,7 +10,7 @@
 
 #include "Utils.hpp"
 
-static Ogre::ShadowTechnique SHADOW_TYPE = Ogre::ShadowTechnique::SHADOWTYPE_STENCIL_MODULATIVE;
+static Ogre::ShadowTechnique SHADOW_TYPE_INDEX = Ogre::ShadowTechnique::SHADOWTYPE_STENCIL_MODULATIVE;
 static int SHADOW_TEXTURE_SIZE = 1024;
 
 struct OgreLightComponent {
@@ -22,15 +22,25 @@ LightManager::LightManager(kengine::EntityManager & em, Ogre::SceneManager & sce
 	: _em(em), _sceneManager(sceneManager)
 {
 	onLoad("");
+
+	int i = 0;
+	for (const auto value : putils::magic_enum::enum_values<Ogre::ShadowTechnique>()) {
+		if (value == SHADOW_TYPE_INDEX) {
+			SHADOW_TYPE_INDEX = (Ogre::ShadowTechnique)i;
+			break;
+		}
+		++i;
+	}
 }
 
 void LightManager::onLoad(const char *) noexcept {
-	_em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Ogre] Shadow type", &SHADOW_TYPE); };
+	_em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Ogre] Shadow type", &SHADOW_TYPE_INDEX); };
 	_em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Ogre] Shadow texture size", &SHADOW_TEXTURE_SIZE); };
 }
 
-void LightManager::execute() noexcept {
-	_sceneManager.setShadowTechnique(SHADOW_TYPE);
+void LightManager::execute(float time) noexcept {
+	const auto shadowType = putils::magic_enum::enum_value<Ogre::ShadowTechnique>(SHADOW_TYPE_INDEX);
+	_sceneManager.setShadowTechnique(shadowType);
 	_sceneManager.setShadowTextureSize(SHADOW_TEXTURE_SIZE);
 
 	Ogre::ColourValue ambientColor{ 0.f, 0.f, 0.f, 0.f };

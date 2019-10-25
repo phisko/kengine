@@ -19,7 +19,7 @@ static input_vector<OgreBites::MouseButtonEvent> g_mousePressedEvents;
 static input_vector<OgreBites::MouseButtonEvent> g_mouseReleasedEvents;
 static input_vector<OgreBites::MouseWheelEvent> g_mouseWheelEvents;
 
-void InputManager::execute() noexcept {
+void InputManager::execute(float time) noexcept {
 	const auto & imgui = ImGui::GetIO();
 	for (const auto & [e, input] : _em.getEntities<kengine::InputComponent>()) {
 		if (!imgui.WantCaptureKeyboard && input.onKey != nullptr) {

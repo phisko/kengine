@@ -7,7 +7,7 @@ class InputManager : public Manager, public OgreBites::InputListener {
 public:
 	InputManager(kengine::EntityManager & em, OgreBites::ApplicationContext & app);
 
-	void execute() noexcept override;
+	void execute(float time) noexcept override;
 
 	bool keyPressed(const OgreBites::KeyboardEvent & event) override;
 	bool keyReleased(const OgreBites::KeyboardEvent & event) override;
