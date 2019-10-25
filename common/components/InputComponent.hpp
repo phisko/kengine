@@ -4,15 +4,19 @@
 # define KENGINE_INPUT_FUNCTION_SIZE 64
 #endif
 
+#include "not_serializable.hpp"
 #include "reflection/Reflectible.hpp"
 #include "function.hpp"
 
 namespace kengine {
     struct InputComponent : kengine::not_serializable {
-        putils::function<void(int keycode, bool pressed), KENGINE_INPUT_FUNCTION_SIZE> onKey = nullptr;
-        putils::function<void(float x, float y), KENGINE_INPUT_FUNCTION_SIZE> onMouseMove = nullptr;
-        putils::function<void(int button, float x, float y, bool pressed), KENGINE_INPUT_FUNCTION_SIZE> onMouseButton = nullptr;
-        putils::function<void(float delta, float x, float y), KENGINE_INPUT_FUNCTION_SIZE> onMouseWheel = nullptr;
+		template<typename T>
+		using function = putils::function<T, KENGINE_INPUT_FUNCTION_SIZE>;
+
+        function<void(int keycode, bool pressed)> onKey = nullptr;
+        function<void(float x, float y, float xrel, float yrel)> onMouseMove = nullptr;
+        function<void(int button, float x, float y, bool pressed)> onMouseButton = nullptr;
+        function<void(float delta, float x, float y)> onMouseWheel = nullptr;
 
         pmeta_get_class_name(InputComponent);
         pmeta_get_attributes(

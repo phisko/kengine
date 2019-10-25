@@ -18,7 +18,7 @@ putils::function<void(int keycode, bool pressed), KENGINE_INPUT_FUNCTION_SIZE> o
 ##### onMouseMove
 
 ```cpp
-putils::function<void(float x, float y), KENGINE_INPUT_FUNCTION_SIZE> onMouseMove;
+putils::function<void(float x, float y, float xrel, float yrel), KENGINE_INPUT_FUNCTION_SIZE> onMouseMove;
 ```
 
 ##### onMouseButton

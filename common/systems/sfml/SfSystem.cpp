@@ -309,7 +309,7 @@ namespace kengine {
 					if (input.onMouseMove != nullptr) {
 						const auto x = e.mouseMove.x / _engine.getRenderWindow().getSize().x * _screenSize.x;
 						const auto y = e.mouseMove.y / _engine.getRenderWindow().getSize().y * _screenSize.y;
-						input.onMouseMove(x, y);
+						input.onMouseMove(x, y, 0.f, 0.f);
 					}
 					break;
 

@@ -73,7 +73,11 @@ namespace kengine {
 			bool pressed;
 		};
 		static putils::vector<ClickInfo, 128> clicks;
-		static putils::vector<putils::Point2f, 128> positions;
+		struct MoveInfo {
+			putils::Point2f pos;
+			putils::Point2f rel;
+		};
+		static putils::vector<MoveInfo, 128> positions;
 		static putils::vector<float, 128> scrolls;
 
 		static void click(GLFWwindow * g_window, int button, int action, int mods) {
@@ -88,9 +92,10 @@ namespace kengine {
 		static void move(GLFWwindow * g_window, double xpos, double ypos) {
 			if (positions.full())
 				return;
-			positions.push_back(putils::Point2f{ (float)xpos, (float)ypos });
-			lastPos.x = (float)xpos;
-			lastPos.y = (float)ypos;
+			MoveInfo info;
+			info.pos = { (float)xpos, (float)ypos };
+			info.rel = { xpos - (float)xpos, ypos - (float)ypos };
+			positions.push_back(info);
 		}
 
 		static void scroll(GLFWwindow * g_window, double xoffset, double yoffset) {
@@ -638,7 +643,7 @@ namespace kengine {
 
 				if (comp.onMouseMove != nullptr)
 					for (const auto & pos : Input::positions)
-						comp.onMouseMove(pos.x, pos.y);
+						comp.onMouseMove(pos.pos.x, pos.pos.y, pos.rel.x, pos.rel.y);
 				if (comp.onMouseWheel != nullptr)
 					for (const auto delta : Input::scrolls)
 						comp.onMouseWheel(delta, 0.f, 0.f);

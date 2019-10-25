@@ -30,22 +30,9 @@ void InputManager::execute() noexcept {
 		}
 
 		if (!imgui.WantCaptureMouse) {
-			static int xPos = INT_MAX;
-			static int yPos = INT_MAX;
-
 			if (input.onMouseMove != nullptr)
-				for (const auto & event : g_mouseMovedEvents) {
-					if (xPos == INT_MAX) {
-						xPos = event.x;
-						yPos = event.y;
-					}
-					else {
-						xPos += event.xrel;
-						yPos += event.yrel;
-					}
-
-					input.onMouseMove((float)xPos, (float)yPos);
-				}
+				for (const auto & event : g_mouseMovedEvents)
+					input.onMouseMove((float)event.x, (float)event.y, (float)event.xrel, (float)event.yrel);
 
 			if (input.onMouseButton != nullptr) {
 				for (const auto & event : g_mousePressedEvents)
