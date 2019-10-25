@@ -8,13 +8,15 @@
 #include <OgreFrameListener.h>
 #include <OgreApplicationContext.h>
 
+#include "packets/CaptureMouse.hpp"
+
 namespace Ogre {
 	class Root;
 	class RenderWindow;
 }
 
 namespace kengine {
-	class OgreSystem : public System<OgreSystem, packets::RegisterEntity, packets::RemoveEntity>,
+	class OgreSystem : public System<OgreSystem, packets::RegisterEntity, packets::RemoveEntity, packets::CaptureMouse>,
 		public OgreBites::ApplicationContext
 	{
 	public:
@@ -28,6 +30,7 @@ namespace kengine {
 
 		void handle(packets::RegisterEntity p) noexcept;
 		void handle(packets::RemoveEntity p) noexcept;
+		void handle(packets::CaptureMouse p) noexcept;
 
 	private:
 		bool frameStarted(const Ogre::FrameEvent & e) override;

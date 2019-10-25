@@ -56,16 +56,6 @@ void InputManager::execute() noexcept {
 }
 
 bool InputManager::keyPressed(const OgreBites::KeyboardEvent & event) {
-	if (event.keysym.sym == OgreBites::SDLK_RETURN) {
-		static bool captured = false;
-		captured = !captured;
-		_app.setWindowGrab(captured);
-		if (captured)
-			ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NoMouse;
-		else
-			ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
-	}
-
 	g_keyPressedEvents.push_back(event);
 	return true;
 }

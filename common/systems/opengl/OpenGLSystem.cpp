@@ -114,7 +114,7 @@ namespace kengine {
 		}
 	}
 
-	OpenGLSystem::OpenGLSystem(kengine::EntityManager & em)
+	OpenGLSystem::OpenGLSystem(EntityManager & em)
 		: System(em),
 		_em(em)
 	{
@@ -122,36 +122,36 @@ namespace kengine {
 
 	void OpenGLSystem::addShaders() noexcept {
 		{ // GBuffer
-			_em += [=](kengine::Entity & e) { e += kengine::makeGBufferShaderComponent<Shaders::Debug>(_em); };
-			_em += [=](kengine::Entity & e) { e += kengine::makeGBufferShaderComponent<Shaders::Text>(_em); };
+			_em += [=](Entity & e) { e += makeGBufferShaderComponent<Shaders::Debug>(_em); };
+			_em += [=](Entity & e) { e += makeGBufferShaderComponent<Shaders::Text>(_em); };
 		}
 
 		{ // Lighting
-			_em += [&](kengine::Entity & e) {
-				e += kengine::makeLightingShaderComponent<Shaders::ShadowMap>(_em);
-				e += kengine::ShadowMapShaderComponent{};
+			_em += [&](Entity & e) {
+				e += makeLightingShaderComponent<Shaders::ShadowMap>(_em);
+				e += ShadowMapShaderComponent{};
 			};
 
-			_em += [&](kengine::Entity & e) {
-				e += kengine::makeLightingShaderComponent<Shaders::ShadowCube>(_em);
-				e += kengine::ShadowCubeShaderComponent{};
+			_em += [&](Entity & e) {
+				e += makeLightingShaderComponent<Shaders::ShadowCube>(_em);
+				e += ShadowCubeShaderComponent{};
 			};
 
-			_em += [=](kengine::Entity & e) { e += kengine::makeLightingShaderComponent<Shaders::SpotLight>(_em); };
-			_em += [=](kengine::Entity & e) { e += kengine::makeLightingShaderComponent<Shaders::DirLight>(_em); };
-			_em += [=](kengine::Entity & e) { e += kengine::makeLightingShaderComponent<Shaders::PointLight>(_em); };
+			_em += [=](Entity & e) { e += makeLightingShaderComponent<Shaders::SpotLight>(_em); };
+			_em += [=](Entity & e) { e += makeLightingShaderComponent<Shaders::DirLight>(_em); };
+			_em += [=](Entity & e) { e += makeLightingShaderComponent<Shaders::PointLight>(_em); };
 		}
 
 		{ // Post lighting
-			_em += [=](kengine::Entity & e) { e += kengine::makePostLightingShaderComponent<Shaders::GodRaysDirLight>(_em); };
-			_em += [=](kengine::Entity & e) { e += kengine::makePostLightingShaderComponent<Shaders::GodRaysPointLight>(_em); };
-			_em += [=](kengine::Entity & e) { e += kengine::makePostLightingShaderComponent<Shaders::GodRaysSpotLight>(_em); };
+			_em += [=](Entity & e) { e += makePostLightingShaderComponent<Shaders::GodRaysDirLight>(_em); };
+			_em += [=](Entity & e) { e += makePostLightingShaderComponent<Shaders::GodRaysPointLight>(_em); };
+			_em += [=](Entity & e) { e += makePostLightingShaderComponent<Shaders::GodRaysSpotLight>(_em); };
 		}
 
 		{ // Post process
-			_em += [=](kengine::Entity & e) { e += kengine::makePostProcessShaderComponent<Shaders::LightSphere>(_em); };
-			_em += [=](kengine::Entity & e) { e += kengine::makePostProcessShaderComponent<Shaders::Highlight>(_em); };
-			_em += [=](kengine::Entity & e) { e += kengine::makePostProcessShaderComponent<Shaders::SkyBox>(_em); };
+			_em += [=](Entity & e) { e += makePostProcessShaderComponent<Shaders::LightSphere>(_em); };
+			_em += [=](Entity & e) { e += makePostProcessShaderComponent<Shaders::Highlight>(_em); };
+			_em += [=](Entity & e) { e += makePostProcessShaderComponent<Shaders::SkyBox>(_em); };
 		}
 	}
 
@@ -236,55 +236,66 @@ namespace kengine {
 #endif
 	}
 
-	void OpenGLSystem::handle(kengine::packets::RegisterEntity p) {
+	void OpenGLSystem::handle(packets::RegisterEntity p) {
 		if (!_gBuffer.isInit())
 			return;
 
-		if (p.e.has<kengine::GBufferShaderComponent>())
-			initShader(*p.e.get<kengine::GBufferShaderComponent>().shader);
+		if (p.e.has<GBufferShaderComponent>())
+			initShader(*p.e.get<GBufferShaderComponent>().shader);
 
-		if (p.e.has<kengine::LightingShaderComponent>())
-			initShader(*p.e.get<kengine::LightingShaderComponent>().shader);
+		if (p.e.has<LightingShaderComponent>())
+			initShader(*p.e.get<LightingShaderComponent>().shader);
 
-		if (p.e.has<kengine::PostLightingShaderComponent>())
-			initShader(*p.e.get<kengine::PostLightingShaderComponent>().shader);
+		if (p.e.has<PostLightingShaderComponent>())
+			initShader(*p.e.get<PostLightingShaderComponent>().shader);
 
-		if (p.e.has<kengine::PostProcessShaderComponent>())
-			initShader(*p.e.get<kengine::PostProcessShaderComponent>().shader);
+		if (p.e.has<PostProcessShaderComponent>())
+			initShader(*p.e.get<PostProcessShaderComponent>().shader);
 	}
 
-	void OpenGLSystem::handle(kengine::packets::DefineGBufferSize p) {
+	void OpenGLSystem::handle(packets::DefineGBufferSize p) {
 		if (_gBuffer.isInit())
 			return;
 
 		_gBuffer.init((size_t)g_params.screenSize.x, (size_t)g_params.screenSize.y, p.nbAttributes);
 
-		for (const auto & [e, shader] : _em.getEntities<kengine::GBufferShaderComponent>())
+		for (const auto & [e, shader] : _em.getEntities<GBufferShaderComponent>())
 			initShader(*shader.shader);
-		for (const auto & [e, shader] : _em.getEntities<kengine::LightingShaderComponent>())
+		for (const auto & [e, shader] : _em.getEntities<LightingShaderComponent>())
 			initShader(*shader.shader);
-		for (const auto & [e, shader] : _em.getEntities<kengine::PostLightingShaderComponent>())
+		for (const auto & [e, shader] : _em.getEntities<PostLightingShaderComponent>())
 			initShader(*shader.shader);
-		for (const auto & [e, shader] : _em.getEntities<kengine::PostProcessShaderComponent>())
+		for (const auto & [e, shader] : _em.getEntities<PostProcessShaderComponent>())
 			initShader(*shader.shader);
 
-		for (const auto & [e, modelInfo] : _em.getEntities<kengine::OpenGLModelComponent>())
+		for (const auto & [e, modelInfo] : _em.getEntities<OpenGLModelComponent>())
 			for (const auto & meshInfo : modelInfo.meshes) {
 				glBindBuffer(GL_ARRAY_BUFFER, meshInfo.vertexBuffer);
 				modelInfo.vertexRegisterFunc();
 			}
 	}
 
-	void OpenGLSystem::handle(kengine::packets::VertexDataAttributeIterator p) {
+	void OpenGLSystem::handle(packets::VertexDataAttributeIterator p) {
 		_gBufferIterator = p;
 	}
 
-	void OpenGLSystem::handle(kengine::packets::GetGBufferSize p) {
+	void OpenGLSystem::handle(packets::GetGBufferSize p) {
 		p.size = _gBuffer.getSize();
 	}
 
-	void OpenGLSystem::handle(kengine::packets::GetGBufferTexture p) {
+	void OpenGLSystem::handle(packets::GetGBufferTexture p) {
 		_gBuffer.getTexture(p.textureIndex, p.buff, p.buffSize);
+	}
+
+	void OpenGLSystem::handle(packets::CaptureMouse p) {
+		if (glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED) {
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
+		}
+		else {
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+			ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NoMouse;
+		}
 	}
 
 	void OpenGLSystem::initShader(putils::gl::Program & p) {
@@ -311,19 +322,18 @@ namespace kengine {
 		if (!g_init)
 			return;
 
-		_em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/Planes] Near", &g_params.nearPlane); };
-		_em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/Planes] Far", &g_params.farPlane); };
+		_em += [](Entity & e) { e += AdjustableComponent("[Render/Planes] Near", &g_params.nearPlane); };
+		_em += [](Entity & e) { e += AdjustableComponent("[Render/Planes] Far", &g_params.farPlane); };
 
 #ifndef KENGINE_OPENGL_NO_DEFAULT_SHADERS
 		addShaders();
 #endif
 
 #ifndef KENGINE_NDEBUG
-		_em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[ImGui] Scale", &g_dpiScale); };
+		_em += [](Entity & e) { e += AdjustableComponent("[ImGui] Scale", &g_dpiScale); };
 
 		_em += Controllers::ShaderController(_em);
 		_em += Controllers::TextureDebugger(_em, _gBuffer, _gBufferIterator);
-		_em += Controllers::MouseController(g_window);
 #endif
 
 		for (const auto &[e, depthMap] : _em.getEntities<DepthMapComponent>())
@@ -339,7 +349,7 @@ namespace kengine {
 			}
 	}
 
-	void OpenGLSystem::createObject(kengine::Entity & e, const kengine::ModelLoaderComponent & modelLoader) {
+	void OpenGLSystem::createObject(Entity & e, const ModelLoaderComponent & modelLoader) {
 		const auto modelData = modelLoader.load();
 
 		auto & modelInfo = e.attach<OpenGLModelComponent>();
@@ -447,13 +457,13 @@ namespace kengine {
 
 		handleInput();
 
-		for (auto &[e, meshLoader] : _em.getEntities<kengine::ModelLoaderComponent>()) {
+		for (auto &[e, meshLoader] : _em.getEntities<ModelLoaderComponent>()) {
 			createObject(e, meshLoader);
 			if (e.componentMask == 0)
 				_em.removeEntity(e);
 		}
 
-		for (auto &[e, textureLoader] : _em.getEntities<kengine::TextureLoaderComponent>()) {
+		for (auto &[e, textureLoader] : _em.getEntities<TextureLoaderComponent>()) {
 			loadTexture(e, textureLoader);
 			if (e.componentMask == 0)
 				_em.removeEntity(e);
@@ -466,7 +476,7 @@ namespace kengine {
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		for (const auto &[e, comp] : _em.getEntities<kengine::ImGuiComponent>())
+		for (const auto &[e, comp] : _em.getEntities<ImGuiComponent>())
 			comp.display(GImGui);
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -543,7 +553,7 @@ namespace kengine {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		for (const auto &[e, cam, transform] : _em.getEntities<kengine::CameraComponent3f, kengine::TransformComponent3f>()) {
+		for (const auto &[e, cam, transform] : _em.getEntities<CameraComponent3f, TransformComponent3f>()) {
 			{
 				const auto & pos = transform.boundingBox.position;
 				const auto & size = transform.boundingBox.size;
@@ -630,7 +640,7 @@ namespace kengine {
 	}
 
 	void OpenGLSystem::handleInput() noexcept {
-		for (const auto &[e, comp] : _em.getEntities<kengine::InputComponent>()) {
+		for (const auto &[e, comp] : _em.getEntities<InputComponent>()) {
 			if (!ImGui::GetIO().WantCaptureKeyboard)
 				for (const auto & e : Input::keys)
 					if (comp.onKey != nullptr)
@@ -655,14 +665,14 @@ namespace kengine {
 		Input::scrolls.clear();
 	}
 
-	void OpenGLSystem::handle(kengine::packets::GetEntityInPixel p) {
+	void OpenGLSystem::handle(packets::GetEntityInPixel p) {
 		static constexpr auto GBUFFER_TEXTURE_COMPONENTS = 4;
 		static constexpr auto GBUFFER_ENTITY_LOCATION = 3;
 
 		const putils::Point2ui gBufferSize = _gBuffer.getSize();
 
 		if (p.pixel.x >= gBufferSize.x || p.pixel.y > gBufferSize.y || p.pixel.y == 0) {
-			p.id = kengine::Entity::INVALID_ID;
+			p.id = Entity::INVALID_ID;
 			return;
 		}
 
@@ -674,6 +684,6 @@ namespace kengine {
 		const auto index = (p.pixel.x + (gBufferSize.y - p.pixel.y) * gBufferSize.x) * GBUFFER_TEXTURE_COMPONENTS;
 		p.id = (Entity::ID)g_entityTexture[index];
 		if (p.id == 0)
-			p.id = kengine::Entity::INVALID_ID;
+			p.id = Entity::INVALID_ID;
 	}
 }

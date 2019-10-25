@@ -9,6 +9,7 @@
 #include <OgreOverlaySystem.h>
 
 #include "vector.hpp"
+#include "imgui.h"
 
 #include "Manager.hpp"
 #include "InputManager.hpp"
@@ -94,5 +95,13 @@ namespace kengine {
 	void OgreSystem::handle(packets::RemoveEntity p) noexcept {
 		for (const auto manager : g_managers)
 			manager->removeEntity(p.e);
+	}
+
+	void OgreSystem::handle(packets::CaptureMouse p) noexcept {
+		setWindowGrab(p.captured);
+		if (p.captured)
+			ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NoMouse;
+		else
+			ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
 	}
 }

@@ -2,6 +2,7 @@
 
 #include "packets/EntityInPixel.hpp"
 #include "packets/GBuffer.hpp"
+#include "packets/CaptureMouse.hpp"
 
 #include "System.hpp"
 #include "GBuffer.hpp"
@@ -35,27 +36,27 @@ namespace kengine {
 
 	struct ModelLoaderComponent;
 
-	class OpenGLSystem : public kengine::System<OpenGLSystem, kengine::packets::RegisterEntity,
-		kengine::packets::DefineGBufferSize, kengine::packets::VertexDataAttributeIterator,
-		kengine::packets::GetGBufferSize, kengine::packets::GetGBufferTexture,
-		kengine::packets::GetEntityInPixel
+	class OpenGLSystem : public System<OpenGLSystem, packets::RegisterEntity,
+		packets::DefineGBufferSize, packets::VertexDataAttributeIterator,
+		packets::GetGBufferSize, packets::GetGBufferTexture,
+		packets::GetEntityInPixel, packets::CaptureMouse
 	> {
 	public:
-		OpenGLSystem(kengine::EntityManager & em);
+		OpenGLSystem(EntityManager & em);
 		~OpenGLSystem();
 
 		void execute() noexcept final;
 		void onLoad(const char *) noexcept final;
 
-		void handle(kengine::packets::RegisterEntity p);
-		void handle(kengine::packets::DefineGBufferSize p);
-		void handle(kengine::packets::VertexDataAttributeIterator p);
-		void handle(kengine::packets::GetGBufferSize p);
-		void handle(kengine::packets::GetGBufferTexture p);
-		void handle(kengine::packets::GetEntityInPixel p);
+		void handle(packets::RegisterEntity p);
+		void handle(packets::DefineGBufferSize p);
+		void handle(packets::VertexDataAttributeIterator p);
+		void handle(packets::GetGBufferSize p);
+		void handle(packets::GetGBufferTexture p);
+		void handle(packets::GetEntityInPixel p);
 
 	private:
-		void createObject(kengine::Entity & e, const kengine::ModelLoaderComponent & meshLoader);
+		void createObject(Entity & e, const ModelLoaderComponent & meshLoader);
 
 		void init() noexcept;
 		void handleInput() noexcept;
@@ -67,10 +68,10 @@ namespace kengine {
 		void debugTexture(GLint texture);
 
 	private:
-		kengine::EntityManager & _em;
+		EntityManager & _em;
 
 	private:
 		GBuffer _gBuffer;
-		kengine::packets::VertexDataAttributeIterator _gBufferIterator;
+		packets::VertexDataAttributeIterator _gBufferIterator;
 	};
 }
