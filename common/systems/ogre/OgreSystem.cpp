@@ -19,6 +19,7 @@
 #include "SkyBoxManager.hpp"
 #include "ObjectManager.hpp"
 #include "AssimpObjectManager.hpp"
+#include "MagicaVoxelObjectManager.hpp"
 
 static putils::vector<Manager *, 8> g_managers;
 
@@ -53,6 +54,7 @@ namespace kengine {
 		g_managers.push_back(new SkyBoxManager(_em, *_sceneManager));
 		g_managers.push_back(new ObjectManager(_em, *_sceneManager));
 		g_managers.push_back(new AssimpObjectManager(_em, *_sceneManager));
+		g_managers.push_back(new MagicaVoxelObjectManager(_em, *_sceneManager));
 	}
 
 	void OgreSystem::execute() noexcept {

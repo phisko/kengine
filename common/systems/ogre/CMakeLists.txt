@@ -3,6 +3,7 @@ set(name kengine_ogre)
 set(IMGUI_DIR ../../../putils/imgui)
 set(IMGUI_FREETYPE_DIR ${IMGUI_DIR}/misc/freetype)
 
+
 file(GLOB src
 	*.cpp *.hpp
 	${IMGUI_FREETYPE_DIR}/imgui_freetype.cpp
@@ -10,6 +11,10 @@ file(GLOB src
 
 add_library(${name} STATIC ${src})
 target_include_directories(${name} PRIVATE ${IMGUI_FREETYPE_DIR})
+
+set(POLYVOX_DIR ../polyvox/libs/polyvox)
+target_include_directories(${name} PRIVATE ${POLYVOX_DIR}/include)
+
 
 putils_conan(
 	freetype/2.10.0@bincrafters/stable
