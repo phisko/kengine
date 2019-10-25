@@ -16,12 +16,14 @@ namespace kengine {
 		unsigned int currentAnim = 0; // Index into AnimListComponent.allAnims
 		float currentTime = 0.f;
 		float speed = 1.f;
+		bool loop = true;
 
 		pmeta_get_class_name(AnimationComponent);
 		pmeta_get_attributes(
 			pmeta_reflectible_attribute(&AnimationComponent::currentAnim),
 			pmeta_reflectible_attribute(&AnimationComponent::currentTime),
-			pmeta_reflectible_attribute(&AnimationComponent::speed)
+			pmeta_reflectible_attribute(&AnimationComponent::speed),
+			pmeta_reflectible_attribute(&AnimationComponent::loop)
 		);
 	};
 
