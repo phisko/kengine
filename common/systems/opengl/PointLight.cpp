@@ -40,7 +40,7 @@ namespace kengine::Shaders {
 		use();
 		putils::gl::setUniform(bias, POINT_LIGHT_BIAS);
 		putils::gl::setUniform(viewPos, params.camPos);
-		putils::gl::setUniform(screenSize, params.screenSize);
+		putils::gl::setUniform(screenSize, putils::Point2f(params.viewPort.size));
 
 		glActiveTexture((GLenum)(GL_TEXTURE0 + _shadowMapTextureID));
 
@@ -50,7 +50,7 @@ namespace kengine::Shaders {
 
 			for (const auto & [shadowCubeEntity, shader, comp] : _em.getEntities<LightingShaderComponent, ShadowCubeShaderComponent>()) {
 				auto & shadowCube = static_cast<ShadowCubeShader &>(*shader.shader);
-				shadowCube.run(e, light, centre, radius, (size_t)params.screenSize.x, (size_t)params.screenSize.y);
+				shadowCube.run(e, light, centre, radius, (size_t)params.viewPort.size.x, (size_t)params.viewPort.size.y);
 			}
 
 			use();

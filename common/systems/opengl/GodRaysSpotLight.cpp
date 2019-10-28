@@ -42,14 +42,14 @@ namespace kengine::Shaders {
 		putils::gl::setUniform(this->inverseView, glm::inverse(params.view));
 		putils::gl::setUniform(this->inverseProj, glm::inverse(params.proj));
 		putils::gl::setUniform(this->viewPos, params.camPos);
-		putils::gl::setUniform(this->screenSize, params.screenSize);
+		putils::gl::setUniform(this->screenSize, putils::Point2f(params.viewPort.size));
 
 		for (const auto &[e, light, depthMap, transform, comp] : _em.getEntities<SpotLightComponent, DepthMapComponent, TransformComponent3f, GodRaysComponent>()) {
 			putils::gl::setUniform(SCATTERING, comp.scattering);
 			putils::gl::setUniform(NB_STEPS, comp.nbSteps);
 			putils::gl::setUniform(DEFAULT_STEP_LENGTH, comp.defaultStepLength);
 			putils::gl::setUniform(INTENSITY, comp.intensity);
-			drawLight(params.camPos, light, transform.boundingBox.position, depthMap, (size_t)params.screenSize.x, (size_t)params.screenSize.y);
+			drawLight(params.camPos, light, transform.boundingBox.position, depthMap, (size_t)params.viewPort.size.x, (size_t)params.viewPort.size.y);
 		}
 	}
 

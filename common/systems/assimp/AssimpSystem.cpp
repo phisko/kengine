@@ -433,8 +433,8 @@ namespace kengine {
 			}
 			const auto scene = model.importer.GetScene();
 
-			const auto dir = putils::get_directory<64>(f);
-			processNode(model, textures, dir.c_str(), scene->mRootNode, scene, firstLoad);
+			const auto dir = putils::get_directory(f);
+			processNode(model, textures, putils::string<64>(dir), scene->mRootNode, scene, firstLoad);
 
 			std::vector<aiNode *> allNodes;
 			addNode(allNodes, scene->mRootNode);

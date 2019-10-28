@@ -78,7 +78,7 @@ namespace kengine::Shaders {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		putils::gl::setUniform(viewPos, params.camPos);
-		putils::gl::setUniform(screenSize, params.screenSize);
+		putils::gl::setUniform(screenSize, putils::Point2f(params.viewPort.size));
 
 		for (const auto & [e, highlight] : _em.getEntities<HighlightComponent>()) {
 			putils::gl::setUniform(entityID, (float)e.id);

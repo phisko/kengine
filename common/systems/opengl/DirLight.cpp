@@ -46,7 +46,7 @@ namespace kengine::Shaders {
 		use();
 
 		putils::gl::setUniform(viewPos, params.camPos);
-		putils::gl::setUniform(screenSize, params.screenSize);
+		putils::gl::setUniform(screenSize, putils::Point2f(params.viewPort.size));
 
 		putils::gl::setUniform(shadow_map_min_bias, SHADOW_MAP_MIN_BIAS);
 		putils::gl::setUniform(shadow_map_max_bias, SHADOW_MAP_MAX_BIAS);
@@ -58,7 +58,7 @@ namespace kengine::Shaders {
 
 			for (const auto & [shadowMapEntity, shader, comp] : _em.getEntities<LightingShaderComponent, ShadowMapShaderComponent>()) {
 				auto & shadowMap = static_cast<ShadowMapShader &>(*shader.shader);
-				shadowMap.run(e, light, pPos, (size_t)params.screenSize.x, (size_t)params.screenSize.y);
+				shadowMap.run(e, light, pPos, (size_t)params.viewPort.size.x, (size_t)params.viewPort.size.y);
 			}
 
 			use();
@@ -66,7 +66,7 @@ namespace kengine::Shaders {
 			setLight(light);
 
 			glBindTexture(GL_TEXTURE_2D, e.get<DepthMapComponent>().texture);
-			putils::gl::setUniform(lightSpaceMatrix, LightHelper::getLightSpaceMatrix(light, params.camPos, (size_t)params.screenSize.x, (size_t)params.screenSize.y));
+			putils::gl::setUniform(lightSpaceMatrix, LightHelper::getLightSpaceMatrix(light, params.camPos, (size_t)params.viewPort.size.x, (size_t)params.viewPort.size.y));
 
 			ShaderHelper::shapes::drawQuad();
 		}

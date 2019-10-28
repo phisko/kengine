@@ -54,6 +54,7 @@ namespace kengine {
 		void handle(packets::GetGBufferSize p);
 		void handle(packets::GetGBufferTexture p);
 		void handle(packets::GetEntityInPixel p);
+		void handle(packets::CaptureMouse p);
 
 	private:
 		void createObject(Entity & e, const ModelLoaderComponent & meshLoader);

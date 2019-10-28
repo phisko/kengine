@@ -314,14 +314,14 @@ namespace kengine::Shaders {
 		putils::gl::setUniform(proj, glm::mat4(1.f));
 		for (const auto &[e, text, transform] : _em.getEntities<TextComponent2D, TransformComponent3f>()) {
 			putils::gl::setUniform(entityID, (float)e.id);
-			drawObject(text, transform, uniforms, params.screenSize, true);
+			drawObject(text, transform, uniforms, glm::vec2(params.viewPort.size.x, params.viewPort.size.y), true);
 		}
 
 		putils::gl::setUniform(view, params.view);
 		putils::gl::setUniform(proj, params.proj);
 		for (const auto &[e, text, transform] : _em.getEntities<TextComponent3D, TransformComponent3f>()) {
 			putils::gl::setUniform(entityID, (float)e.id);
-			drawObject(text, transform, uniforms, params.screenSize);
+			drawObject(text, transform, uniforms, glm::vec2(params.viewPort.size.x, params.viewPort.size.y));
 		}
 	}
 }

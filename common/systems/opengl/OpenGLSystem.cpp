@@ -90,11 +90,22 @@ namespace kengine {
 		}
 
 		static void move(GLFWwindow * g_window, double xpos, double ypos) {
+			static double oldX = DBL_MAX;
+			static double oldY = DBL_MAX;
+
 			if (positions.full())
 				return;
+
+			if (oldX == DBL_MAX) {
+				oldX = xpos;
+				oldY = ypos;
+			}
+
 			MoveInfo info;
 			info.pos = { (float)xpos, (float)ypos };
-			info.rel = { xpos - (float)xpos, ypos - (float)ypos };
+			info.rel = { (float)(xpos - oldX), (float)(ypos - oldY) };
+			oldX = xpos;
+			oldY = ypos;
 			positions.push_back(info);
 		}
 
@@ -158,11 +169,11 @@ namespace kengine {
 	void OpenGLSystem::init() noexcept {
 		g_init = true;
 
-		g_params.screenSize = { 1280, 720 };
+		g_params.viewPort.size = { 1280, 720 };
 		g_params.nearPlane = 1.f;
 		g_params.farPlane = 1000.f;
 
-		g_entityTexture = new float[(int)g_params.screenSize.x * (int)g_params.screenSize.y * 4];
+		g_entityTexture = new float[g_params.viewPort.size.x * g_params.viewPort.size.y * 4];
 
 		glfwInit();
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -176,12 +187,12 @@ namespace kengine {
 
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
-		g_window = glfwCreateWindow((int)g_params.screenSize.x, (int)g_params.screenSize.y, "Kengine", nullptr, nullptr);
+		g_window = glfwCreateWindow((int)g_params.viewPort.size.x, (int)g_params.viewPort.size.y, "Kengine", nullptr, nullptr);
 		glfwMakeContextCurrent(g_window);
-		glfwSetWindowAspectRatio(g_window, (int)g_params.screenSize.x, (int)g_params.screenSize.y);
+		glfwSetWindowAspectRatio(g_window, (int)g_params.viewPort.size.x, (int)g_params.viewPort.size.y);
 		glfwSetWindowSizeCallback(g_window, [](auto window, int width, int height) {
-			g_params.screenSize.x = (float)width;
-			g_params.screenSize.y = (float)height;
+			g_params.viewPort.size.x = width;
+			g_params.viewPort.size.y = height;
 			g_screenChanged = true;
 			glViewport(0, 0, width, height);
 		});
@@ -257,7 +268,7 @@ namespace kengine {
 		if (_gBuffer.isInit())
 			return;
 
-		_gBuffer.init((size_t)g_params.screenSize.x, (size_t)g_params.screenSize.y, p.nbAttributes);
+		_gBuffer.init((size_t)g_params.viewPort.size.x, (size_t)g_params.viewPort.size.y, p.nbAttributes);
 
 		for (const auto & [e, shader] : _em.getEntities<GBufferShaderComponent>())
 			initShader(*shader.shader);
@@ -288,18 +299,18 @@ namespace kengine {
 	}
 
 	void OpenGLSystem::handle(packets::CaptureMouse p) {
-		if (glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED) {
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		if (glfwGetInputMode(g_window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED) {
+			glfwSetInputMode(g_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 			ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
 		}
 		else {
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+			glfwSetInputMode(g_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 			ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NoMouse;
 		}
 	}
 
 	void OpenGLSystem::initShader(putils::gl::Program & p) {
-		p.init(_gBuffer.getTextureCount(), (size_t)g_params.screenSize.x, (size_t)g_params.screenSize.y, _gBuffer.getFBO());
+		p.init(_gBuffer.getTextureCount(), (size_t)g_params.viewPort.size.x, (size_t)g_params.viewPort.size.y, _gBuffer.getFBO());
 
 		assert(_gBufferIterator.func != nullptr);
 		int texture = 0;
@@ -449,9 +460,9 @@ namespace kengine {
 		}
 
 		if (g_screenChanged) {
-			_gBuffer.resize((size_t)g_params.screenSize.x, (size_t)g_params.screenSize.y);
+			_gBuffer.resize((size_t)g_params.viewPort.size.x, (size_t)g_params.viewPort.size.y);
 			delete [] g_entityTexture;
-			g_entityTexture = new float[(int)g_params.screenSize.x * (int)g_params.screenSize.y * 4];
+			g_entityTexture = new float[(int)g_params.viewPort.size.x * (int)g_params.viewPort.size.y * 4];
 			g_screenChanged = false;
 		}
 
@@ -558,8 +569,8 @@ namespace kengine {
 				const auto & pos = transform.boundingBox.position;
 				const auto & size = transform.boundingBox.size;
 				glViewport(
-					(int)pos.x * (int)g_params.screenSize.x, (int)pos.y * (int)g_params.screenSize.y,
-					(GLsizei)size.x * (GLsizei)g_params.screenSize.x, (GLsizei)size.y * (GLsizei)g_params.screenSize.y
+					(int)pos.x * g_params.viewPort.size.x, (int)pos.y * g_params.viewPort.size.y,
+					(GLsizei)size.x * (GLsizei)g_params.viewPort.size.x, (GLsizei)size.y * (GLsizei)g_params.viewPort.size.y
 				);
 			}
 
@@ -581,7 +592,7 @@ namespace kengine {
 
 			g_params.proj = glm::perspective(
 				g_params.camFOV,
-				(float)g_params.screenSize.x / (float)g_params.screenSize.y,
+				(float)g_params.viewPort.size.x / (float)g_params.viewPort.size.y,
 				g_params.nearPlane, g_params.farPlane
 			);
 
@@ -605,7 +616,7 @@ namespace kengine {
 			} _gBuffer.bindForReading();
 
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-			glBlitFramebuffer(0, 0, (GLint)g_params.screenSize.x, (GLint)g_params.screenSize.y, 0, 0, (GLint)g_params.screenSize.x, (GLint)g_params.screenSize.y, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+			glBlitFramebuffer(0, 0, (GLint)g_params.viewPort.size.x, (GLint)g_params.viewPort.size.y, 0, 0, (GLint)g_params.viewPort.size.x, (GLint)g_params.viewPort.size.y, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			for (const auto &[e, comp] : _em.getEntities<LightingShaderComponent>())
@@ -636,7 +647,7 @@ namespace kengine {
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, readFBO);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 		glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
-		glBlitFramebuffer(0, 0, (GLint)g_params.screenSize.x, (GLint)g_params.screenSize.y, 0, 0, (GLint)g_params.screenSize.x, (GLint)g_params.screenSize.y, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+		glBlitFramebuffer(0, 0, (GLint)g_params.viewPort.size.x, (GLint)g_params.viewPort.size.y, 0, 0, (GLint)g_params.viewPort.size.x, (GLint)g_params.viewPort.size.y, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 	}
 
 	void OpenGLSystem::handleInput() noexcept {
