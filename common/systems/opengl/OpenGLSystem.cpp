@@ -66,7 +66,7 @@ namespace kengine {
 
 		static putils::vector<KeyInfo, 128> keys;
 
-		static putils::Point2f lastPos;
+		static putils::Point2f lastPos{ FLT_MAX, FLT_MAX };
 		struct ClickInfo {
 			putils::Point2f pos;
 			int button;
@@ -90,22 +90,19 @@ namespace kengine {
 		}
 
 		static void move(GLFWwindow * g_window, double xpos, double ypos) {
-			static double oldX = DBL_MAX;
-			static double oldY = DBL_MAX;
-
 			if (positions.full())
 				return;
 
-			if (oldX == DBL_MAX) {
-				oldX = xpos;
-				oldY = ypos;
+			if (lastPos.x == FLT_MAX) {
+				lastPos.x = (float)xpos;
+				lastPos.y = (float)ypos;
 			}
 
 			MoveInfo info;
 			info.pos = { (float)xpos, (float)ypos };
-			info.rel = { (float)(xpos - oldX), (float)(ypos - oldY) };
-			oldX = xpos;
-			oldY = ypos;
+			info.rel = { (float)xpos - lastPos.x, (float)ypos - lastPos.y };
+			lastPos.x = (float)xpos;
+			lastPos.y = (float)ypos;
 			positions.push_back(info);
 		}
 
