@@ -16,7 +16,6 @@ namespace kengine {
 	float SHADOW_MAP_FAR_PLANE = 1000.f;
 	float SHADOW_MAP_MIN_BIAS = .00005f;
 	float SHADOW_MAP_MAX_BIAS = .0001f;
-	float DIRECTIONAL_LIGHT_SHADOW_DISTANCE = 1000.f;
 }
 
 namespace kengine::Shaders {
@@ -25,7 +24,6 @@ namespace kengine::Shaders {
 	{
 		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/Lights] Shadow map near plane", &SHADOW_MAP_NEAR_PLANE); };
 		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/Lights] Shadow map far plane", &SHADOW_MAP_FAR_PLANE); };
-		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/Lights] Directional light shadow distance", &DIRECTIONAL_LIGHT_SHADOW_DISTANCE); };
 		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/Lights] Min shadow map bias", &SHADOW_MAP_MIN_BIAS); };
 		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/Lights] Max shadow map bias", &SHADOW_MAP_MAX_BIAS); };
 	}
@@ -38,15 +36,15 @@ namespace kengine::Shaders {
 		putils::gl::setUniform(proj, glm::mat4(1.f));
 	}
 
-	static void createShadowMap(GLuint & depthMapFBO, GLuint & depthMapTexture, size_t width, size_t height) {
-		if (depthMapFBO == -1)
-			glGenFramebuffers(1, &depthMapFBO);
-		ShaderHelper::BindFramebuffer __f(depthMapFBO);
+	static void createShadowMap(DepthMapComponent & depthMap) {
+		if (depthMap.fbo == -1)
+			glGenFramebuffers(1, &depthMap.fbo);
+		ShaderHelper::BindFramebuffer __f(depthMap.fbo);
 
-		if (depthMapTexture == -1)
-			glGenTextures(1, &depthMapTexture);
-		glBindTexture(GL_TEXTURE_2D, depthMapTexture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, (GLsizei)width, (GLsizei)height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+		if (depthMap.texture == -1)
+			glGenTextures(1, &depthMap.texture);
+		glBindTexture(GL_TEXTURE_2D, depthMap.texture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, (GLsizei)depthMap.size, (GLsizei)depthMap.size, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
@@ -54,7 +52,7 @@ namespace kengine::Shaders {
 		const float borderColor[] = { 1.f, 1.f, 1.f, 1.f };
 		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMapTexture, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap.texture, 0);
 		glDrawBuffer(GL_NONE);
 		glReadBuffer(GL_NONE);
 
@@ -63,14 +61,17 @@ namespace kengine::Shaders {
 
 	template<typename T>
 	void ShadowMap::runImpl(kengine::Entity & e, T & light, const putils::Point3f & pos, size_t screenWidth, size_t screenHeight) {
-		if (!e.has<DepthMapComponent>()) {
-			auto & depthMap = e.attach<DepthMapComponent>();
-			createShadowMap(depthMap.fbo, depthMap.texture, KENGINE_SHADOW_MAP_SIZE, KENGINE_SHADOW_MAP_SIZE);
+		if (!e.has<DepthMapComponent>())
+			 e.attach<DepthMapComponent>();
+
+		auto & depthMap = e.get<DepthMapComponent>();
+		if (depthMap.size != light.shadowMapSize) {
+			depthMap.size = light.shadowMapSize;
+			createShadowMap(depthMap);
 		}
 
-		glViewport(0, 0, KENGINE_SHADOW_MAP_SIZE, KENGINE_SHADOW_MAP_SIZE);
+		glViewport(0, 0, light.shadowMapSize, light.shadowMapSize);
 
-		const auto & depthMap = e.get<DepthMapComponent>();
 		ShaderHelper::BindFramebuffer __f(depthMap.fbo);
 		ShaderHelper::Enable __e(GL_DEPTH_TEST);
 

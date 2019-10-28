@@ -8,7 +8,6 @@ namespace kengine {
 	struct SpotLightComponent;
 	struct PointLightComponent;
 
-	extern float DIRECTIONAL_LIGHT_SHADOW_DISTANCE;
 	extern float SHADOW_MAP_NEAR_PLANE;
 	extern float SHADOW_MAP_FAR_PLANE;
 }
@@ -27,7 +26,7 @@ namespace kengine::LightHelper {
 
 	static glm::mat4 getLightSpaceMatrix(const DirLightComponent & light, const glm::vec3 & pos, size_t screenWidth, size_t screenHeight) {
 		const auto dir = getCorrectDirection(toVec(light.direction));
-		const auto dist = DIRECTIONAL_LIGHT_SHADOW_DISTANCE;
+		const auto dist = light.shadowDistance;
 		const auto lightProjection = glm::ortho(-dist, dist, -dist, dist, -dist, dist);
 		const auto lightView = glm::lookAt(pos, pos + dir, glm::vec3(0.f, 1.f, 0.f));
 		return lightProjection * lightView;

@@ -29,7 +29,7 @@ namespace kengine {
 		if (!e.has<DepthCubeComponent>())
 			return;
 
-		glViewport(0, 0, KENGINE_SHADOW_CUBE_SIZE, KENGINE_SHADOW_CUBE_SIZE);
+		glViewport(0, 0, light.shadowMapSize, light.shadowMapSize);
 		glCullFace(GL_FRONT);
 
 		const auto & depthCube = e.get<DepthCubeComponent>();
@@ -54,7 +54,7 @@ namespace kengine {
 		const glm::vec3 vPos(pos.x, pos.y, pos.z);
 		static const float SHADOW_MAP_NEAR_PLANE = .1f;
 		static const float SHADOW_MAP_FAR_PLANE = 1000.f;
-		const auto proj = glm::perspective(glm::radians(90.f), (float)KENGINE_SHADOW_CUBE_SIZE / (float)KENGINE_SHADOW_CUBE_SIZE, SHADOW_MAP_NEAR_PLANE, SHADOW_MAP_FAR_PLANE);
+		const auto proj = glm::perspective(glm::radians(90.f), (float)light.shadowMapSize / (float)light.shadowMapSize, SHADOW_MAP_NEAR_PLANE, SHADOW_MAP_FAR_PLANE);
 		for (unsigned int i = 0; i < 6; ++i) {
 			if (directions[i].shadowMatrixUniform == -1) {
 				const putils::string<64> shadowMatrix("shadowMatrices[%d]", i);

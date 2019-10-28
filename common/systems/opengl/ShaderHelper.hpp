@@ -12,15 +12,6 @@
 #include "components/OpenGLModelComponent.hpp"
 #include "components/TransformComponent.hpp"
 
-#ifndef KENGINE_SHADOW_CUBE_SIZE
-# define KENGINE_SHADOW_CUBE_SIZE 1024
-#endif
-
-#ifndef KENGINE_SHADOW_MAP_SIZE
-# define KENGINE_SHADOW_MAP_SIZE 8192
-#endif
-
-
 namespace kengine {
 	namespace ShaderHelper {
 		namespace shapes {

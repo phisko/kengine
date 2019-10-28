@@ -46,11 +46,13 @@ namespace kengine::Shaders {
 
 		for (auto &[e, light, transform] : _em.getEntities<SpotLightComponent, kengine::TransformComponent3f>()) {
 			const auto & centre = transform.boundingBox.position;
+			setLight(light, centre);
 
-			for (const auto & [shadowMapEntity, shader, comp] : _em.getEntities<LightingShaderComponent, ShadowMapShaderComponent>()) {
-				auto & shadowMap = static_cast<ShadowMapShader &>(*shader.shader);
-				shadowMap.run(e, light, centre, (size_t)params.viewPort.size.x, (size_t)params.viewPort.size.y);
-			}
+			if (light.castShadows)
+				for (const auto & [shadowMapEntity, shader, comp] : _em.getEntities<LightingShaderComponent, ShadowMapShaderComponent>()) {
+					auto & shadowMap = static_cast<ShadowMapShader &>(*shader.shader);
+					shadowMap.run(e, light, centre, (size_t)params.viewPort.size.x, (size_t)params.viewPort.size.y);
+				}
 
 			use();
 
@@ -66,8 +68,6 @@ namespace kengine::Shaders {
 				glCullFace(GL_BACK);
 			else
 				glCullFace(GL_FRONT);
-
-			setLight(light, centre);
 
 			glBindTexture(GL_TEXTURE_2D, e.get<DepthMapComponent>().texture);
 			putils::gl::setUniform(lightSpaceMatrix, LightHelper::getLightSpaceMatrix(light, { centre.x, centre.y, centre.z }, (size_t)params.viewPort.size.x, (size_t)params.viewPort.size.y));
@@ -92,5 +92,7 @@ namespace kengine::Shaders {
 		putils::gl::setUniform(attenuationConstant, light.constant);
 		putils::gl::setUniform(attenuationLinear, light.linear);
 		putils::gl::setUniform(attenuationQuadratic, light.quadratic);
+
+		putils::gl::setUniform(pcfSamples, light.shadowPCFSamples);
 	}
 }

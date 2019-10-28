@@ -48,10 +48,11 @@ namespace kengine::Shaders {
 			const auto radius = LightHelper::getRadius(light);
 			const auto & centre = transform.boundingBox.position;
 
-			for (const auto & [shadowCubeEntity, shader, comp] : _em.getEntities<LightingShaderComponent, ShadowCubeShaderComponent>()) {
-				auto & shadowCube = static_cast<ShadowCubeShader &>(*shader.shader);
-				shadowCube.run(e, light, centre, radius, (size_t)params.viewPort.size.x, (size_t)params.viewPort.size.y);
-			}
+			if (light.castShadows)
+				for (const auto & [shadowCubeEntity, shader, comp] : _em.getEntities<LightingShaderComponent, ShadowCubeShaderComponent>()) {
+					auto & shadowCube = static_cast<ShadowCubeShader &>(*shader.shader);
+					shadowCube.run(e, light, centre, radius, (size_t)params.viewPort.size.x, (size_t)params.viewPort.size.y);
+				}
 
 			use();
 

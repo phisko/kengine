@@ -25,7 +25,7 @@ namespace kengine {
 		if (!e.has<DepthMapComponent>())
 			return;
 
-		glViewport(0, 0, KENGINE_SHADOW_MAP_SIZE, KENGINE_SHADOW_MAP_SIZE);
+		glViewport(0, 0, light.shadowMapSize, light.shadowMapSize);
 
 		const auto & depthMap = e.get<DepthMapComponent>();
 		ShaderHelper::BindFramebuffer __f(depthMap.fbo);

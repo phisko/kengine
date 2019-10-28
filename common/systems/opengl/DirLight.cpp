@@ -54,16 +54,18 @@ namespace kengine::Shaders {
 		glActiveTexture((GLenum)(GL_TEXTURE0 + _shadowMapTextureID));
 
 		for (auto &[e, light] : _em.getEntities<DirLightComponent>()) {
-			const putils::Point3f pPos = { params.camPos.x, params.camPos.y, params.camPos.z };
+			setLight(light);
 
-			for (const auto & [shadowMapEntity, shader, comp] : _em.getEntities<LightingShaderComponent, ShadowMapShaderComponent>()) {
-				auto & shadowMap = static_cast<ShadowMapShader &>(*shader.shader);
-				shadowMap.run(e, light, pPos, (size_t)params.viewPort.size.x, (size_t)params.viewPort.size.y);
+			const putils::Point3f pos = { params.camPos.x, params.camPos.y, params.camPos.z };
+
+			if (light.castShadows) {
+				for (const auto & [shadowMapEntity, shader, comp] : _em.getEntities<LightingShaderComponent, ShadowMapShaderComponent>()) {
+					auto & shadowMap = static_cast<ShadowMapShader &>(*shader.shader);
+					shadowMap.run(e, light, pos, (size_t)params.viewPort.size.x, (size_t)params.viewPort.size.y);
+				}
 			}
 
 			use();
-
-			setLight(light);
 
 			glBindTexture(GL_TEXTURE_2D, e.get<DepthMapComponent>().texture);
 			putils::gl::setUniform(lightSpaceMatrix, LightHelper::getLightSpaceMatrix(light, params.camPos, (size_t)params.viewPort.size.x, (size_t)params.viewPort.size.y));
@@ -79,5 +81,6 @@ namespace kengine::Shaders {
 		putils::gl::setUniform(ambientStrength, light.ambientStrength);
 		putils::gl::setUniform(diffuseStrength, light.diffuseStrength);
 		putils::gl::setUniform(specularStrength, light.specularStrength);
+		putils::gl::setUniform(pcfSamples, light.shadowPCFSamples);
 	}
 }

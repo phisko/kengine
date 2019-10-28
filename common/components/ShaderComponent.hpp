@@ -54,6 +54,7 @@ namespace kengine {
 	struct DepthMapComponent : kengine::not_serializable {
 		GLuint fbo = -1;
 		GLuint texture = -1;
+		int size = -1;
 		pmeta_get_class_name(DepthMapComponent);
 	};
 	class ShadowMapShader : public putils::gl::Program {
@@ -69,6 +70,7 @@ namespace kengine {
 	struct DepthCubeComponent : kengine::not_serializable {
 		GLuint fbo = -1;
 		GLuint texture = -1;
+		int size = -1;
 		pmeta_get_class_name(DepthCubeComponent);
 	};
 	class ShadowCubeShader : public putils::gl::Program {

@@ -27,6 +27,9 @@ namespace kengine::Shaders {
 
 		GLint lightSpaceMatrix = -1;
 		GLint shadowMap = -1;
+		GLint shadow_map_min_bias = -1;
+		GLint shadow_map_max_bias = -1;
+		GLint pcfSamples = -1;
 
 		GLint viewPos = -1;
 		GLint screenSize = -1;
@@ -45,9 +48,6 @@ namespace kengine::Shaders {
 		GLint attenuationLinear = -1;
 		GLint attenuationQuadratic = -1;
 
-		GLint shadow_map_min_bias = -1;
-		GLint shadow_map_max_bias = -1;
-
 		pmeta_get_attributes(
 			pmeta_reflectible_attribute(&SpotLight::proj),
 			pmeta_reflectible_attribute(&SpotLight::view),
@@ -55,6 +55,9 @@ namespace kengine::Shaders {
 
 			pmeta_reflectible_attribute(&SpotLight::lightSpaceMatrix),
 			pmeta_reflectible_attribute(&SpotLight::shadowMap),
+			pmeta_reflectible_attribute(&SpotLight::shadow_map_min_bias),
+			pmeta_reflectible_attribute(&SpotLight::shadow_map_max_bias),
+			pmeta_reflectible_attribute(&SpotLight::pcfSamples),
 
 			pmeta_reflectible_attribute(&SpotLight::viewPos),
 			pmeta_reflectible_attribute(&SpotLight::screenSize),
@@ -71,10 +74,7 @@ namespace kengine::Shaders {
 
 			pmeta_reflectible_attribute(&SpotLight::attenuationConstant),
 			pmeta_reflectible_attribute(&SpotLight::attenuationLinear),
-			pmeta_reflectible_attribute(&SpotLight::attenuationQuadratic),
-
-			pmeta_reflectible_attribute(&SpotLight::shadow_map_min_bias),
-			pmeta_reflectible_attribute(&SpotLight::shadow_map_max_bias)
+			pmeta_reflectible_attribute(&SpotLight::attenuationQuadratic)
 		);
 
 	private:
