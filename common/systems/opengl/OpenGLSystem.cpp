@@ -557,6 +557,23 @@ namespace kengine {
 		dst[2] = z;
 	}
 
+	struct ShaderProfiler {
+		ShaderProfiler(Entity & e) {
+			if (!e.has<Controllers::ShaderProfileComponent>())
+				_comp = &e.attach<Controllers::ShaderProfileComponent>();
+			else
+				_comp = &e.get<Controllers::ShaderProfileComponent>();
+			_timer.restart();
+		}
+
+		~ShaderProfiler() {
+			_comp->executionTime = _timer.getTimeSinceStart().count();
+		}
+
+		Controllers::ShaderProfileComponent * _comp;
+		putils::Timer _timer;
+	};
+
 	void OpenGLSystem::doOpenGL() noexcept {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -603,30 +620,28 @@ namespace kengine {
 				glClear(GL_DEPTH_BUFFER_BIT);
 			}
 
+			static const auto runShaders = [](auto && shaders) {
+				for (auto & [e, comp] : shaders)
+					if (comp.enabled) {
+						ShaderProfiler _(e);
+						comp.shader->run(g_params);
+					}
+			};
+
 			_gBuffer.bindForWriting(); {
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 				ShaderHelper::Enable depth(GL_DEPTH_TEST);
-				for (const auto &[e, comp] : _em.getEntities<GBufferShaderComponent>())
-					if (comp.enabled)
-						comp.shader->run(g_params);
+				runShaders(_em.getEntities<GBufferShaderComponent>());
 			} _gBuffer.bindForReading();
 
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 			glBlitFramebuffer(0, 0, (GLint)g_params.viewPort.size.x, (GLint)g_params.viewPort.size.y, 0, 0, (GLint)g_params.viewPort.size.x, (GLint)g_params.viewPort.size.y, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			for (const auto &[e, comp] : _em.getEntities<LightingShaderComponent>())
-				if (comp.enabled)
-					comp.shader->run(g_params);
 
-			for (const auto &[e, comp] : _em.getEntities<PostLightingShaderComponent>())
-				if (comp.enabled)
-					comp.shader->run(g_params);
-
-			for (const auto &[e, comp] : _em.getEntities<PostProcessShaderComponent>())
-				if (comp.enabled)
-					comp.shader->run(g_params);
+			runShaders(_em.getEntities<LightingShaderComponent>());
+			runShaders(_em.getEntities<PostLightingShaderComponent>());
+			runShaders(_em.getEntities<PostProcessShaderComponent>());
 
 #ifndef KENGINE_NDEBUG
 			if (Controllers::TEXTURE_TO_DEBUG != -1)

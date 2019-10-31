@@ -9,6 +9,10 @@
 
 namespace kengine {
 	namespace Controllers {
+		struct ShaderProfileComponent {
+			float executionTime;
+		};
+
 		static auto ShaderController(EntityManager & em) {
 			return [&](Entity & e) {
 				auto & tool = e.attach<ImGuiToolComponent>();
@@ -20,21 +24,22 @@ namespace kengine {
 						return;
 
 					if (ImGui::Begin("Shaders", &tool.enabled)) {
-						if (ImGui::CollapsingHeader("GBuffer"))
-							for (auto &[e, comp] : em.getEntities<GBufferShaderComponent>())
-								ImGui::Checkbox(comp.shader->getName().c_str(), &comp.enabled);
+						static const auto displayShaders = [](const char * groupName, auto && shaders) {
+							if (ImGui::CollapsingHeader(groupName))
+								for (auto & [e, comp] : shaders) {
+									ImGui::Checkbox(comp.shader->getName().c_str(), &comp.enabled);
+									if (e.has<ShaderProfileComponent>()) {
+										const auto & prof = e.get<ShaderProfileComponent>();
+										ImGui::SameLine();
+										ImGui::Text("%f", prof.executionTime);
+									}
+								}
+						};
 
-						if (ImGui::CollapsingHeader("Lighting"))
-							for (auto &[e, comp] : em.getEntities<LightingShaderComponent>())
-								ImGui::Checkbox(comp.shader->getName().c_str(), &comp.enabled);
-
-						if (ImGui::CollapsingHeader("Post lighting"))
-							for (auto &[e, comp] : em.getEntities<PostLightingShaderComponent>())
-								ImGui::Checkbox(comp.shader->getName().c_str(), &comp.enabled);
-
-						if (ImGui::CollapsingHeader("Post process"))
-							for (auto &[e, comp] : em.getEntities<PostProcessShaderComponent>())
-								ImGui::Checkbox(comp.shader->getName().c_str(), &comp.enabled);
+						displayShaders("GBuffer", em.getEntities<GBufferShaderComponent>());
+						displayShaders("Lighting", em.getEntities<LightingShaderComponent>());
+						displayShaders("Post lighting", em.getEntities<PostLightingShaderComponent>());
+						displayShaders("Post process", em.getEntities<PostProcessShaderComponent>());
 					}
 					ImGui::End();
 				});
