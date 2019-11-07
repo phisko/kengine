@@ -21,11 +21,6 @@
 # define KENGINE_ADJUSTABLE_SEPARATOR ';'
 #endif
 
-#ifndef KENGINE_ADJUSTABLE_FLOAT_PRECISION
-# define KENGINE_ADJUSTABLE_FLOAT_PRECISION 5
-#endif
-
-
 #ifndef KENGINE_MAX_ADJUSTABLES_SECTIONS
 # define KENGINE_MAX_ADJUSTABLES_SECTIONS 8
 #endif
@@ -133,7 +128,7 @@ static void draw(const char * name, kengine::AdjustableComponent & comp) {
 	}
 	case kengine::AdjustableComponent::Double: {
 		ImGui::PushItemWidth(-1.f);
-		ImGui::InputFloat((string("##") + comp.name).c_str(), comp.dPtr != nullptr ? comp.dPtr : &comp.d, 0.f, 0.f, KENGINE_ADJUSTABLE_FLOAT_PRECISION);
+		ImGui::InputFloat((string("##") + comp.name).c_str(), comp.dPtr != nullptr ? comp.dPtr : &comp.d, 0.f, 0.f, "%.6f");
 		ImGui::PopItemWidth();
 		if (comp.dPtr != nullptr)
 			comp.d = *comp.dPtr;

@@ -116,7 +116,7 @@ namespace kengine {
 
 		template<typename MemberRef>
 		static void editAttribute(const char * name, MemberRef && member) {
-			using Member = std::decay_t<MemberRef>;
+			using Member = std::remove_reference_t<MemberRef>;
 
 			if constexpr (imguiEditor::has_member_c_str<Member>::value) {
 				displayInColumns(name, [&] {
@@ -225,7 +225,7 @@ namespace kengine {
 			else if constexpr (std::is_same_v<Member, float>) {
 				displayInColumns(name, [&] {
 					ImGui::PushItemWidth(-1.f);
-					ImGui::InputFloat(getID(name, member), &member);
+					ImGui::InputFloat(getID(name, member), &member, 0.f, 0.f, "%.6f");
 					ImGui::PopItemWidth();
 				});
 			}
