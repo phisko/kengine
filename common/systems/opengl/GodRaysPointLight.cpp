@@ -12,8 +12,6 @@
 #include "shaders/shaders.hpp"
 
 namespace kengine::Shaders {
-	extern float POINT_LIGHT_BIAS;
-
 	GodRaysPointLight::GodRaysPointLight(kengine::EntityManager & em)
 		: Program(true, pmeta_nameof(GodRaysPointLight)),
 		_em(em)
@@ -41,7 +39,6 @@ namespace kengine::Shaders {
 
 		glActiveTexture(GL_TEXTURE0 + _shadowMapTextureID);
 
-		putils::gl::setUniform(this->bias, POINT_LIGHT_BIAS);
 		putils::gl::setUniform(this->inverseView, glm::inverse(params.view));
 		putils::gl::setUniform(this->inverseProj, glm::inverse(params.proj));
 		putils::gl::setUniform(this->viewPos, params.camPos);

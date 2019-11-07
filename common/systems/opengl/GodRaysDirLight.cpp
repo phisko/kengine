@@ -24,11 +24,12 @@ namespace kengine::Shaders {
 			ShaderDescription{ src::Quad::vert, GL_VERTEX_SHADER },
 			ShaderDescription{ src::GodRays::frag, GL_FRAGMENT_SHADER },
 			ShaderDescription{ src::DirLight::GetDirection::frag, GL_FRAGMENT_SHADER },
-			ShaderDescription{ src::ShadowMap::frag, GL_FRAGMENT_SHADER }
+			ShaderDescription{ src::CSM::frag, GL_FRAGMENT_SHADER }
 		));
 
 		_shadowMapTextureID = (GLuint)firstTextureID;
-		putils::gl::setUniform(shadowMap, _shadowMapTextureID);
+		for (size_t i = 0; i < lengthof(shadowMap); ++i)
+			putils::gl::setUniform(shadowMap[i], _shadowMapTextureID + i);
 	}
 
 	void GodRaysDirLight::run(const Parameters & params) {
@@ -38,28 +39,32 @@ namespace kengine::Shaders {
 		glBlendEquation(GL_FUNC_ADD);
 		glBlendFunc(GL_ONE, GL_ONE);
 
-		glActiveTexture(GL_TEXTURE0 + _shadowMapTextureID);
 
 		putils::gl::setUniform(this->inverseView, glm::inverse(params.view));
 		putils::gl::setUniform(this->inverseProj, glm::inverse(params.proj));
 		putils::gl::setUniform(this->viewPos, params.camPos);
 		putils::gl::setUniform(this->screenSize, putils::Point2f(params.viewPort.size));
 
-		for (const auto &[e, light, depthMap, comp] : _em.getEntities<DirLightComponent, DepthMapComponent, GodRaysComponent>()) {
+		for (const auto &[e, light, depthMap, comp] : _em.getEntities<DirLightComponent, CSMComponent, GodRaysComponent>()) {
 			putils::gl::setUniform(SCATTERING, comp.scattering);
 			putils::gl::setUniform(NB_STEPS, comp.nbSteps);
 			putils::gl::setUniform(DEFAULT_STEP_LENGTH, comp.defaultStepLength);
 			putils::gl::setUniform(INTENSITY, comp.intensity);
-			drawLight(params.camPos, light, depthMap, (size_t)params.viewPort.size.x, (size_t)params.viewPort.size.y);
+
+			drawLight(light, depthMap, params);
 		}
 	}
 
-	void GodRaysDirLight::drawLight(const glm::vec3 & camPos, const DirLightComponent & light, const DepthMapComponent & depthMap, size_t screenWidth, size_t screenHeight) {
+	void GodRaysDirLight::drawLight(const DirLightComponent & light, const CSMComponent & depthMap, const Parameters & params) {
 		putils::gl::setUniform(color, light.color);
 		putils::gl::setUniform(direction, light.direction);
 
-		glBindTexture(GL_TEXTURE_2D, depthMap.texture);
-		putils::gl::setUniform(lightSpaceMatrix, LightHelper::getLightSpaceMatrix(light, camPos, screenWidth, screenHeight));
+		for (int i = 0; i < lengthof(depthMap.textures); ++i) {
+			glActiveTexture(GL_TEXTURE0 + _shadowMapTextureID + i);
+			glBindTexture(GL_TEXTURE_2D, depthMap.textures[i]);
+			putils::gl::setUniform(lightSpaceMatrix[i], LightHelper::getCSMLightSpaceMatrix(light, params, i));
+			putils::gl::setUniform(cascadeEnd[i], LightHelper::getCSMCascadeEnd(light, i));
+		}
 
 		ShaderHelper::shapes::drawQuad();
 	}

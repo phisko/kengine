@@ -1,6 +1,7 @@
 #pragma once
 
 #include "opengl/Program.hpp"
+#include "components/ShaderComponent.hpp"
 
 namespace kengine {
 	class EntityManager;
@@ -21,13 +22,12 @@ namespace kengine::Shaders {
 	public:
 		GLint proj;
 		GLint view;
-		GLint model;
 
 		// shadowMap
-		GLint lightSpaceMatrix;
-		GLint shadowMap;
-		GLint shadow_map_min_bias;
-		GLint shadow_map_max_bias;
+		GLint lightSpaceMatrix[KENGINE_CSM_COUNT];
+		GLint shadowMap[KENGINE_CSM_COUNT];
+		GLint cascadeEnd[KENGINE_CSM_COUNT];
+		GLint bias;
 		GLint pcfSamples;
 
 		GLint viewPos;
@@ -40,15 +40,16 @@ namespace kengine::Shaders {
 		GLint diffuseStrength;
 		GLint specularStrength;
 
+		GLint debugCSM;
+
 		pmeta_get_attributes(
 			pmeta_reflectible_attribute(&DirLight::proj),
 			pmeta_reflectible_attribute(&DirLight::view),
-			pmeta_reflectible_attribute(&DirLight::model),
 
 			pmeta_reflectible_attribute(&DirLight::lightSpaceMatrix),
 			pmeta_reflectible_attribute(&DirLight::shadowMap),
-			pmeta_reflectible_attribute(&DirLight::shadow_map_min_bias),
-			pmeta_reflectible_attribute(&DirLight::shadow_map_max_bias),
+			pmeta_reflectible_attribute(&DirLight::cascadeEnd),
+			pmeta_reflectible_attribute(&DirLight::bias),
 			pmeta_reflectible_attribute(&DirLight::pcfSamples),
 
 			pmeta_reflectible_attribute(&DirLight::viewPos),
@@ -59,7 +60,9 @@ namespace kengine::Shaders {
 
 			pmeta_reflectible_attribute(&DirLight::ambientStrength),
 			pmeta_reflectible_attribute(&DirLight::diffuseStrength),
-			pmeta_reflectible_attribute(&DirLight::specularStrength)
+			pmeta_reflectible_attribute(&DirLight::specularStrength),
+
+			pmeta_reflectible_attribute(&DirLight::debugCSM)
 		);
 
 	private:

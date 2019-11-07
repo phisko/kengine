@@ -1,11 +1,11 @@
 #pragma once
 
 #include "opengl/Program.hpp"
+#include "components/ShaderComponent.hpp"
 
 namespace kengine {
 	class EntityManager;
 	struct DirLightComponent;
-	struct DepthMapComponent;
 }
 
 namespace kengine::Shaders {
@@ -17,7 +17,7 @@ namespace kengine::Shaders {
 		void run(const Parameters & params) override;
 		
 	private:
-		void drawLight(const glm::vec3 & camPos, const DirLightComponent & light, const DepthMapComponent & depthMap, size_t screenWidth, size_t screenHeight);
+		void drawLight(const DirLightComponent & light, const CSMComponent & depthMap, const Parameters & params);
 
 	private:
 		kengine::EntityManager & _em;
@@ -37,8 +37,11 @@ namespace kengine::Shaders {
 		GLint color;
 		GLint direction;
 
-		GLint shadowMap;
-		GLint lightSpaceMatrix;
+		GLint shadowMap[KENGINE_CSM_COUNT];
+		GLint lightSpaceMatrix[KENGINE_CSM_COUNT];
+		GLint cascadeEnd[KENGINE_CSM_COUNT];
+		GLint bias;
+		GLint pcfSamples;
 
 		pmeta_get_attributes(
 			pmeta_reflectible_attribute(&GodRaysDirLight::SCATTERING),
@@ -55,7 +58,9 @@ namespace kengine::Shaders {
 			pmeta_reflectible_attribute(&GodRaysDirLight::direction),
 
 			pmeta_reflectible_attribute(&GodRaysDirLight::shadowMap),
-			pmeta_reflectible_attribute(&GodRaysDirLight::lightSpaceMatrix)
+			pmeta_reflectible_attribute(&GodRaysDirLight::lightSpaceMatrix),
+			pmeta_reflectible_attribute(&GodRaysDirLight::cascadeEnd),
+			pmeta_reflectible_attribute(&GodRaysDirLight::pcfSamples)
 		);
 	};
 }

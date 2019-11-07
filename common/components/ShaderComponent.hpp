@@ -4,6 +4,7 @@
 
 #include "not_serializable.hpp"
 #include "putils/opengl/Program.hpp"
+#include "components/LightComponent.hpp"
 
 namespace kengine {
 	class Entity;
@@ -57,11 +58,19 @@ namespace kengine {
 		int size = -1;
 		pmeta_get_class_name(DepthMapComponent);
 	};
+
+	struct CSMComponent : kengine::not_serializable {
+		GLuint fbo = -1;
+		GLuint textures[KENGINE_CSM_COUNT];
+		int size = -1;
+		pmeta_get_class_name(CSMComponent);
+	};
+
 	class ShadowMapShader : public putils::gl::Program {
 	public:
 		ShadowMapShader(bool usesGBuffer = false, const char * name = "") : Program(usesGBuffer, name) {}
-		virtual void run(kengine::Entity & e, DirLightComponent & light, const putils::Point3f & pos, size_t screenWidth, size_t screenHeight) = 0;
-		virtual void run(kengine::Entity & e, SpotLightComponent & light, const putils::Point3f & pos, size_t screenWidth, size_t screenHeight) = 0;
+		virtual void run(kengine::Entity & e, DirLightComponent & light, const Parameters & params) = 0;
+		virtual void run(kengine::Entity & e, SpotLightComponent & light, const putils::Point3f & pos, const Parameters & params) = 0;
 	};
 	struct ShadowMapShaderComponent : kengine::not_serializable {
 		pmeta_get_class_name(ShadowMapShaderComponent);
@@ -76,7 +85,7 @@ namespace kengine {
 	class ShadowCubeShader : public putils::gl::Program {
 	public:
 		ShadowCubeShader(bool usesGBuffer = false, const char * name = "") : Program(usesGBuffer, name) {}
-		virtual void run(kengine::Entity & e, PointLightComponent & light, const putils::Point3f & pos, float radius, size_t screenWidth, size_t screenHeight) = 0;
+		virtual void run(kengine::Entity & e, PointLightComponent & light, const putils::Point3f & pos, float radius, const Parameters & params) = 0;
 	};
 	struct ShadowCubeShaderComponent : kengine::not_serializable {
 		pmeta_get_class_name(ShadowCubeShaderComponent);

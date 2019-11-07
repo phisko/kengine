@@ -344,16 +344,34 @@ namespace kengine {
 		_em += Controllers::TextureDebugger(_em, _gBuffer, _gBufferIterator);
 #endif
 
-		for (const auto &[e, depthMap] : _em.getEntities<DepthMapComponent>())
+		for (const auto &[e, depthMap] : _em.getEntities<CSMComponent>()) {
 			glDeleteFramebuffers(1, &depthMap.fbo);
-		for (const auto &[e, depthCube] : _em.getEntities<DepthCubeComponent>())
+			depthMap.fbo = -1;
+			glDeleteTextures(lengthof(depthMap.textures), depthMap.textures);
+			for (auto & texture : depthMap.textures)
+				texture = -1;
+		}
+		for (const auto &[e, depthMap] : _em.getEntities<DepthMapComponent>()) {
+			glDeleteFramebuffers(1, &depthMap.fbo);
+			depthMap.fbo = -1;
+			glDeleteTextures(1, &depthMap.texture);
+			depthMap.texture = -1;
+		}
+		for (const auto &[e, depthCube] : _em.getEntities<DepthCubeComponent>()) {
 			glDeleteFramebuffers(1, &depthCube.fbo);
+			depthCube.fbo = -1;
+			glDeleteTextures(1, &depthCube.texture);
+			depthCube.texture = -1;
+		}
 
 		for (const auto & [e, modelInfo] : _em.getEntities<OpenGLModelComponent>())
-			for (const auto & mesh : modelInfo.meshes) {
+			for (auto & mesh : modelInfo.meshes) {
 				glDeleteVertexArrays(1, &mesh.vertexArrayObject);
+				mesh.vertexArrayObject = -1;
 				glDeleteBuffers(1, &mesh.vertexBuffer);
+				mesh.vertexBuffer = -1;
 				glDeleteBuffers(1, &mesh.indexBuffer);
+				mesh.indexBuffer = -1;
 			}
 	}
 
@@ -606,13 +624,21 @@ namespace kengine {
 
 			g_params.proj = glm::perspective(
 				g_params.camFOV,
-				(float)g_params.viewPort.size.x / (float)g_params.viewPort.size.y,
+				((float)g_params.viewPort.size.x * transform.boundingBox.size.x) / ((float)g_params.viewPort.size.y * transform.boundingBox.size.y),
 				g_params.nearPlane, g_params.farPlane
 			);
 
 			for (const auto &[e, depthMap] : _em.getEntities<DepthMapComponent>()) {
 				ShaderHelper::BindFramebuffer b(depthMap.fbo);
 				glClear(GL_DEPTH_BUFFER_BIT);
+			}
+
+			for (const auto &[e, depthMap] : _em.getEntities<CSMComponent>()) {
+				ShaderHelper::BindFramebuffer b(depthMap.fbo);
+				for (const auto texture : depthMap.textures) {
+					glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture, 0);
+					glClear(GL_DEPTH_BUFFER_BIT);
+				}
 			}
 
 			for (const auto &[e, depthCube] : _em.getEntities<DepthCubeComponent>()) {

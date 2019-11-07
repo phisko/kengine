@@ -12,6 +12,9 @@ namespace kengine::Shaders::src {
 		extern const char * vert;
 	}
 
+	namespace CSM {
+		extern const char * frag;
+	}
 	namespace ShadowMap {
 		extern const char * frag;
 	}

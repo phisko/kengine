@@ -1,7 +1,6 @@
 #pragma once
 
-#define MACRO_AS_STRING_IMPL(macro) #macro
-#define MACRO_AS_STRING(macro) MACRO_AS_STRING_IMPL(macro)
+#include "macro_as_string.hpp"
 
 namespace kengine {
 	namespace src {
@@ -19,7 +18,7 @@ uniform mat4 proj;
 uniform mat4 view;
 uniform mat4 model;
 
-const int MAX_BONES = )" MACRO_AS_STRING(KENGINE_SKELETON_MAX_BONES) R"(;
+const int MAX_BONES = )" putils_macro_as_string(KENGINE_SKELETON_MAX_BONES) R"(;
 uniform mat4 bones[MAX_BONES];
 
 out vec4 WorldPosition;

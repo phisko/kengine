@@ -17,7 +17,7 @@ namespace kengine::Shaders {
 		void run(const Parameters & params) override;
 		
 	private:
-		void drawLight(const glm::vec3 & camPos, const SpotLightComponent & light, const putils::Point3f & pos, const DepthMapComponent & depthMap, size_t screenWidth, size_t screenHeight);
+		void drawLight(const SpotLightComponent & light, const putils::Point3f & pos, const DepthMapComponent & depthMap, const Parameters & params);
 
 	private:
 		kengine::EntityManager & _em;

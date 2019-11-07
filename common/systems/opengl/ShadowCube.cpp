@@ -21,7 +21,7 @@ namespace kengine::Shaders {
 		putils::gl::setUniform(view, glm::mat4(1.f));
 	}
 
-	void ShadowCube::run(kengine::Entity & e, PointLightComponent & light, const putils::Point3f & pos, float radius, size_t screenWidth, size_t screenHeight) {
+	void ShadowCube::run(kengine::Entity & e, PointLightComponent & light, const putils::Point3f & pos, float radius, const Parameters & params) {
 		if (!e.has<DepthCubeComponent>())
 			e.attach<DepthCubeComponent>();
 
@@ -100,7 +100,7 @@ namespace kengine::Shaders {
 			ShaderHelper::drawModel(openGL);
 		}
 
-		glViewport(0, 0, (GLsizei)screenWidth, (GLsizei)screenHeight);
+		putils::gl::setViewPort(params.viewPort);
 		glCullFace(GL_BACK);
 	}
 }

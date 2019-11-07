@@ -4,6 +4,10 @@
 #include "Point.hpp"
 #include "Color.hpp"
 
+#ifndef KENGINE_CSM_COUNT
+# define KENGINE_CSM_COUNT 3
+#endif
+
 namespace kengine {
 	struct LightComponent {
 		putils::NormalizedColor color;
@@ -12,12 +16,14 @@ namespace kengine {
 		bool castShadows = true;
 		int shadowPCFSamples = 1;
 		int shadowMapSize = 1024;
+		float shadowMapBias = .00001f;
 	};
 
 	struct DirLightComponent : LightComponent {
 		putils::Vector3f direction = { 0.f, -1.f, 0.f };
 		float ambientStrength = .1f;
-		float shadowDistance = 50.f;
+		float cascadeEnds[KENGINE_CSM_COUNT] = { 50.f };
+		float shadowCasterMaxDistance = 100.f;
 
 		pmeta_get_attributes(
 			pmeta_reflectible_attribute(&DirLightComponent::color),
@@ -26,10 +32,12 @@ namespace kengine {
 			pmeta_reflectible_attribute(&DirLightComponent::castShadows),
 			pmeta_reflectible_attribute(&DirLightComponent::shadowPCFSamples),
 			pmeta_reflectible_attribute(&DirLightComponent::shadowMapSize),
+			pmeta_reflectible_attribute(&DirLightComponent::shadowMapBias),
+			pmeta_reflectible_attribute(&DirLightComponent::shadowCasterMaxDistance),
 
 			pmeta_reflectible_attribute(&DirLightComponent::direction),
 			pmeta_reflectible_attribute(&DirLightComponent::ambientStrength),
-			pmeta_reflectible_attribute(&DirLightComponent::shadowDistance)
+			pmeta_reflectible_attribute(&DirLightComponent::cascadeEnds)
 		);
 		pmeta_get_class_name(DirLightComponent);
 		pmeta_get_methods();
@@ -49,6 +57,7 @@ namespace kengine {
 			pmeta_reflectible_attribute(&PointLightComponent::castShadows),
 			pmeta_reflectible_attribute(&PointLightComponent::shadowPCFSamples),
 			pmeta_reflectible_attribute(&PointLightComponent::shadowMapSize),
+			pmeta_reflectible_attribute(&PointLightComponent::shadowMapBias),
 
 			pmeta_reflectible_attribute(&PointLightComponent::range),
 			pmeta_reflectible_attribute(&PointLightComponent::constant),
@@ -72,6 +81,7 @@ namespace kengine {
 			pmeta_reflectible_attribute(&SpotLightComponent::castShadows),
 			pmeta_reflectible_attribute(&SpotLightComponent::shadowPCFSamples),
 			pmeta_reflectible_attribute(&SpotLightComponent::shadowMapSize),
+			pmeta_reflectible_attribute(&SpotLightComponent::shadowMapBias),
 
 			pmeta_reflectible_attribute(&SpotLightComponent::range),
 			pmeta_reflectible_attribute(&SpotLightComponent::constant),

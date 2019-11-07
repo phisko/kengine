@@ -14,12 +14,13 @@ namespace kengine {
 
 		void init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) override;
 		void run(const Parameters & params) override {}
-		void run(kengine::Entity & e, DirLightComponent & light, const putils::Point3f & pos, size_t screenWidth, size_t screenHeight) override;
-		void run(kengine::Entity & e, SpotLightComponent & light, const putils::Point3f & pos, size_t screenWidth, size_t screenHeight) override;
+		void run(kengine::Entity & e, DirLightComponent & light, const Parameters & params) override;
+		void run(kengine::Entity & e, SpotLightComponent & light, const putils::Point3f & pos, const Parameters & params) override;
 
 	private:
-		template<typename T>
-		void runImpl(kengine::Entity & e, T & light, const putils::Point3f & pos, size_t screenWidth, size_t screenHeight);
+		template<typename T, typename Func>
+		void runImpl(T & depthMap, Func && draw, const Parameters & params);
+		void drawToTexture(GLuint texture);
 
 		kengine::EntityManager & _em;
 

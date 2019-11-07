@@ -25,7 +25,7 @@ namespace kengine {
 		putils::gl::setUniform(view, glm::mat4(1.f));
 	}
 
-	void AssImpShadowCube::run(kengine::Entity & e, PointLightComponent & light, const putils::Point3f & pos, float radius, size_t screenWidth, size_t screenHeight) {
+	void AssImpShadowCube::run(kengine::Entity & e, PointLightComponent & light, const putils::Point3f & pos, float radius, const Parameters & params) {
 		if (!e.has<DepthCubeComponent>())
 			return;
 
@@ -75,7 +75,7 @@ namespace kengine {
 			AssImpHelper::drawModel(_em, graphics, transform, skeleton, false, locations);
 		}
 
-		glViewport(0, 0, (GLsizei)screenWidth, (GLsizei)screenHeight);
+		putils::gl::setViewPort(params.viewPort);
 		glCullFace(GL_BACK);
 	}
 }

@@ -49,16 +49,16 @@ namespace kengine::Shaders {
 			putils::gl::setUniform(NB_STEPS, comp.nbSteps);
 			putils::gl::setUniform(DEFAULT_STEP_LENGTH, comp.defaultStepLength);
 			putils::gl::setUniform(INTENSITY, comp.intensity);
-			drawLight(params.camPos, light, transform.boundingBox.position, depthMap, (size_t)params.viewPort.size.x, (size_t)params.viewPort.size.y);
+			drawLight(light, transform.boundingBox.position, depthMap, params);
 		}
 	}
 
-	void GodRaysSpotLight::drawLight(const glm::vec3 & camPos, const SpotLightComponent & light, const putils::Point3f & pos, const DepthMapComponent & depthMap, size_t screenWidth, size_t screenHeight) {
+	void GodRaysSpotLight::drawLight(const SpotLightComponent & light, const putils::Point3f & pos, const DepthMapComponent & depthMap, const Parameters & params) {
 		putils::gl::setUniform(color, light.color);
 		putils::gl::setUniform(position, pos);
 
 		glBindTexture(GL_TEXTURE_2D, depthMap.texture);
-		putils::gl::setUniform(lightSpaceMatrix, LightHelper::getLightSpaceMatrix(light, glm::vec3(pos.x, pos.y, pos.z), screenWidth, screenHeight));
+		putils::gl::setUniform(lightSpaceMatrix, LightHelper::getLightSpaceMatrix(light, glm::vec3(pos.x, pos.y, pos.z), params));
 
 		ShaderHelper::shapes::drawQuad();
 	}

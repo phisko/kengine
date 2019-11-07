@@ -20,37 +20,65 @@ namespace kengine {
 		putils::gl::setUniform(proj, glm::mat4(1.f));
 	}
 
-	template<typename T>
-	void AssImpShadowMap::runImpl(kengine::Entity & e, T & light, const putils::Point3f & pos, size_t screenWidth, size_t screenHeight) {
-		if (!e.has<DepthMapComponent>())
-			return;
+	void AssImpShadowMap::drawToTexture(GLuint texture) {
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture, 0);
 
-		glViewport(0, 0, light.shadowMapSize, light.shadowMapSize);
-
-		const auto & depthMap = e.get<DepthMapComponent>();
-		ShaderHelper::BindFramebuffer __f(depthMap.fbo);
-		ShaderHelper::Enable depth(GL_DEPTH_TEST);
-
-		use();
-		putils::gl::setUniform(view, LightHelper::getLightSpaceMatrix(light, { pos.x, pos.y, pos.z }, screenWidth, screenHeight));
-		glCullFace(GL_FRONT);
-
-		for (const auto &[e, textured, graphics, transform, skeleton] : _em.getEntities<AssImpObjectComponent, GraphicsComponent, kengine::TransformComponent3f, SkeletonComponent>()) {
+		for (const auto & [e, textured, graphics, transform, skeleton] : _em.getEntities<AssImpObjectComponent, GraphicsComponent, kengine::TransformComponent3f, SkeletonComponent>()) {
 			AssImpHelper::Locations locations;
 			locations.model = this->model;
 			locations.bones = this->bones;
 
 			AssImpHelper::drawModel(_em, graphics, transform, skeleton, false, locations);
 		}
+	}
+
+	template<typename T, typename Func>
+	void AssImpShadowMap::runImpl(T & depthMap, Func && draw, const Parameters & params) {
+		glViewport(0, 0, depthMap.size, depthMap.size);
+		glCullFace(GL_FRONT);
+
+		ShaderHelper::BindFramebuffer __f(depthMap.fbo);
+		ShaderHelper::Enable depth(GL_DEPTH_TEST);
+
+		use();
+
+		draw();
 
 		glCullFace(GL_BACK);
-		glViewport(0, 0, (GLsizei)screenWidth, (GLsizei)screenHeight);
+		putils::gl::setViewPort(params.viewPort);
 	}
 
-	void AssImpShadowMap::run(kengine::Entity & e, DirLightComponent & light, const putils::Point3f & pos, size_t screenWidth, size_t screenHeight) {
-		runImpl(e, light, pos, screenWidth, screenHeight);
+	void AssImpShadowMap::run(kengine::Entity & e, DirLightComponent & light, const Parameters & params) {
+		if (!e.has<CSMComponent>())
+			return;
+
+		auto & depthMap = e.get<CSMComponent>();
+		if (depthMap.size != light.shadowMapSize)
+			return;
+
+		runImpl(depthMap, [&] {
+			for (size_t i = 0; i < lengthof(depthMap.textures); ++i) {
+				const float cascadeStart = (i == 0 ? params.nearPlane : LightHelper::getCSMCascadeEnd(light, i - 1));
+				const float cascadeEnd = LightHelper::getCSMCascadeEnd(light, i);
+				if (cascadeStart >= cascadeEnd)
+					continue;
+				putils::gl::setUniform(view, LightHelper::getCSMLightSpaceMatrix(light, params, i));
+				drawToTexture(depthMap.textures[i]);
+			}
+		}, params);
 	}
-	void AssImpShadowMap::run(kengine::Entity & e, SpotLightComponent & light, const putils::Point3f & pos, size_t screenWidth, size_t screenHeight) {
-		runImpl(e, light, pos, screenWidth, screenHeight);
+
+	void AssImpShadowMap::run(kengine::Entity & e, SpotLightComponent & light, const putils::Point3f & pos, const Parameters & params) {
+		if (!e.has<DepthMapComponent>())
+			return;
+
+		auto & depthMap = e.get<DepthMapComponent>();
+		if (depthMap.size != light.shadowMapSize)
+			return;
+
+		runImpl(depthMap, [&] {
+			putils::gl::setUniform(view, LightHelper::getLightSpaceMatrix(light, ShaderHelper::toVec(pos), params));
+			drawToTexture(depthMap.texture);
+		}, params);
 	}
 }
