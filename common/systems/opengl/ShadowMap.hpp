@@ -30,14 +30,14 @@ namespace kengine::Shaders {
 		kengine::EntityManager & _em;
 
 	public:
-		GLint proj;
-		GLint view;
-		GLint model;
+		putils::gl::Uniform<glm::mat4> _proj;
+		putils::gl::Uniform<glm::mat4> _view;
+		putils::gl::Uniform<glm::mat4> _model;
 
 		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&ShadowMap::proj),
-			pmeta_reflectible_attribute(&ShadowMap::view),
-			pmeta_reflectible_attribute(&ShadowMap::model)
+			pmeta_reflectible_attribute_private(&ShadowMap::_proj),
+			pmeta_reflectible_attribute_private(&ShadowMap::_view),
+			pmeta_reflectible_attribute_private(&ShadowMap::_model)
 		);
 	};
 

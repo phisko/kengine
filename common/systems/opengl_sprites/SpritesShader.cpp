@@ -84,13 +84,13 @@ namespace kengine {
 		));
 
 		_textureID = firstTextureID;
-		putils::gl::setUniform(tex, _textureID);
+		_tex = _textureID;
 	}
 
 	struct Uniforms {
 		size_t textureID;
-		GLint color;
-		GLint model;
+		putils::gl::Uniform<putils::NormalizedColor> color;
+		putils::gl::Uniform<glm::mat4> model;
 	};
 
 	static void drawObject(EntityManager & em, const GraphicsComponent & graphics, const TransformComponent3f & transform, Uniforms uniforms, bool in2D = false) {
@@ -102,7 +102,7 @@ namespace kengine {
 			return;
 		const auto texture = modelEntity.get<TextureModelComponent>().texture;
 
-		putils::gl::setUniform(uniforms.color, graphics.color);
+		uniforms.color = graphics.color;
 
 		glBindTexture(GL_TEXTURE_2D, texture);
 
@@ -141,31 +141,31 @@ namespace kengine {
 
 			model = glm::scale(model, { 1.f, -1.f, 1.f });
 
-			putils::gl::setUniform(uniforms.model, model);
+			uniforms.model = model;
 		}
 
 		ShaderHelper::shapes::drawTexturedQuad();
 	}
 
 	void SpritesShader::run(const Parameters & params) {
-		const Uniforms uniforms{ _textureID, color, model };
+		const Uniforms uniforms{ _textureID, _color, _model };
 
 		use();
 		
-		putils::gl::setUniform(viewPos, params.camPos);
+		_viewPos = params.camPos;
 		glActiveTexture((GLenum)(GL_TEXTURE0 + uniforms.textureID));
 
-		putils::gl::setUniform(this->view, glm::mat4(1.f));
-		putils::gl::setUniform(this->proj, glm::mat4(1.f));
+		_view = glm::mat4(1.f);
+		_proj = glm::mat4(1.f);
 		for (const auto &[e, graphics, transform, sprite] : _em.getEntities<GraphicsComponent, TransformComponent3f, SpriteComponent2D>()) {
-			putils::gl::setUniform(entityID, (float)e.id);
+			_entityID = (float)e.id;
 			drawObject(_em, graphics, transform, uniforms, true);
 		}
 
-		putils::gl::setUniform(this->view, params.view);
-		putils::gl::setUniform(this->proj, params.proj);
+		_view = params.view;
+		_proj = params.proj;
 		for (const auto &[e, graphics, transform, sprite] : _em.getEntities<GraphicsComponent, TransformComponent3f, SpriteComponent3D>()) {
-			putils::gl::setUniform(entityID, (float)e.id);
+			_entityID = (float)e.id;
 			drawObject(_em, graphics, transform, uniforms);
 		}
 	}

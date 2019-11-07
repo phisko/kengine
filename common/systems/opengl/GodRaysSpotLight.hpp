@@ -24,38 +24,38 @@ namespace kengine::Shaders {
 		GLuint _shadowMapTextureID;
 
 	public:
-		GLint SCATTERING;
-		GLint NB_STEPS;
-		GLint DEFAULT_STEP_LENGTH;
-		GLint INTENSITY;
+		putils::gl::Uniform<float> _scattering;
+		putils::gl::Uniform<float> _nbSteps;
+		putils::gl::Uniform<float> _defaultStepLength;
+		putils::gl::Uniform<float> _intensity;
 
-		GLint inverseView;
-		GLint inverseProj;
-		GLint viewPos;
-		GLint screenSize;
+		putils::gl::Uniform<glm::mat4> _inverseView;
+		putils::gl::Uniform<glm::mat4> _inverseProj;
+		putils::gl::Uniform<glm::vec3> _viewPos;
+		putils::gl::Uniform<putils::Point2f> _screenSize;
 
-		GLint color;
-		GLint position;
+		putils::gl::Uniform<putils::NormalizedColor> _color;
+		putils::gl::Uniform<putils::Point3f> _position;
 
-		GLint shadowMap;
-		GLint lightSpaceMatrix;
+		putils::gl::Uniform<size_t> _shadowMap;
+		putils::gl::Uniform<glm::mat4> _lightSpaceMatrix;
 
 		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&GodRaysSpotLight::SCATTERING),
-			pmeta_reflectible_attribute(&GodRaysSpotLight::NB_STEPS),
-			pmeta_reflectible_attribute(&GodRaysSpotLight::DEFAULT_STEP_LENGTH),
-			pmeta_reflectible_attribute(&GodRaysSpotLight::INTENSITY),
+			pmeta_reflectible_attribute_private(&GodRaysSpotLight::_scattering),
+			pmeta_reflectible_attribute_private(&GodRaysSpotLight::_nbSteps),
+			pmeta_reflectible_attribute_private(&GodRaysSpotLight::_defaultStepLength),
+			pmeta_reflectible_attribute_private(&GodRaysSpotLight::_intensity),
 
-			pmeta_reflectible_attribute(&GodRaysSpotLight::inverseView),
-			pmeta_reflectible_attribute(&GodRaysSpotLight::inverseProj),
-			pmeta_reflectible_attribute(&GodRaysSpotLight::viewPos),
-			pmeta_reflectible_attribute(&GodRaysSpotLight::screenSize),
+			pmeta_reflectible_attribute_private(&GodRaysSpotLight::_inverseView),
+			pmeta_reflectible_attribute_private(&GodRaysSpotLight::_inverseProj),
+			pmeta_reflectible_attribute_private(&GodRaysSpotLight::_viewPos),
+			pmeta_reflectible_attribute_private(&GodRaysSpotLight::_screenSize),
 
-			pmeta_reflectible_attribute(&GodRaysSpotLight::color),
-			pmeta_reflectible_attribute(&GodRaysSpotLight::position),
+			pmeta_reflectible_attribute_private(&GodRaysSpotLight::_color),
+			pmeta_reflectible_attribute_private(&GodRaysSpotLight::_position),
 
-			pmeta_reflectible_attribute(&GodRaysSpotLight::shadowMap),
-			pmeta_reflectible_attribute(&GodRaysSpotLight::lightSpaceMatrix)
+			pmeta_reflectible_attribute_private(&GodRaysSpotLight::_shadowMap),
+			pmeta_reflectible_attribute_private(&GodRaysSpotLight::_lightSpaceMatrix)
 		);
 	};
 }

@@ -16,24 +16,24 @@ namespace kengine::Shaders {
 		void run(const Parameters & params) override;
 
 	public:
-		GLint model;
-		GLint view;
-		GLint proj;
-		GLint viewPos;
+		putils::gl::Uniform<glm::mat4> _model;
+		putils::gl::Uniform<glm::mat4> _view;
+		putils::gl::Uniform<glm::mat4> _proj;
+		putils::gl::Uniform<glm::vec3> _viewPos;
 
-		GLint tex;
-		GLint color;
-		GLint entityID;
+		putils::gl::Uniform<size_t> _tex;
+		putils::gl::Uniform<putils::NormalizedColor> _color;
+		putils::gl::Uniform<float> _entityID;
 
 		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&Text::model),
-			pmeta_reflectible_attribute(&Text::view),
-			pmeta_reflectible_attribute(&Text::proj),
-			pmeta_reflectible_attribute(&Text::viewPos),
+			pmeta_reflectible_attribute_private(&Text::_model),
+			pmeta_reflectible_attribute_private(&Text::_view),
+			pmeta_reflectible_attribute_private(&Text::_proj),
+			pmeta_reflectible_attribute_private(&Text::_viewPos),
 
-			pmeta_reflectible_attribute(&Text::tex),
-			pmeta_reflectible_attribute(&Text::color),
-			pmeta_reflectible_attribute(&Text::entityID)
+			pmeta_reflectible_attribute_private(&Text::_tex),
+			pmeta_reflectible_attribute_private(&Text::_color),
+			pmeta_reflectible_attribute_private(&Text::_entityID)
 		);
 
 	private:

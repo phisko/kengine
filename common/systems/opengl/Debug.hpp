@@ -18,22 +18,22 @@ namespace kengine::Shaders {
 		kengine::EntityManager & _em;
 
 	public:
-		GLint model = -1;
-		GLint view = -1;
-		GLint proj = -1;
-		GLint viewPos = -1;
+		putils::gl::Uniform<glm::mat4> _model;
+		putils::gl::Uniform<glm::mat4> _view;
+		putils::gl::Uniform<glm::mat4> _proj;
+		putils::gl::Uniform<glm::vec3> _viewPos;
 
-		GLint entityID = -1;
-		GLint color = -1;
+		putils::gl::Uniform<float> _entityID;
+		putils::gl::Uniform<putils::NormalizedColor> _color;
 
 		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&Debug::model),
-			pmeta_reflectible_attribute(&Debug::view),
-			pmeta_reflectible_attribute(&Debug::proj),
-			pmeta_reflectible_attribute(&Debug::viewPos),
+			pmeta_reflectible_attribute_private(&Debug::_model),
+			pmeta_reflectible_attribute_private(&Debug::_view),
+			pmeta_reflectible_attribute_private(&Debug::_proj),
+			pmeta_reflectible_attribute_private(&Debug::_viewPos),
 
-			pmeta_reflectible_attribute(&Debug::entityID),
-			pmeta_reflectible_attribute(&Debug::color)
+			pmeta_reflectible_attribute_private(&Debug::_entityID),
+			pmeta_reflectible_attribute_private(&Debug::_color)
 		);
 
 	};

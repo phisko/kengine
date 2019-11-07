@@ -24,20 +24,20 @@ namespace kengine::Shaders {
 		kengine::EntityManager & _em;
 
 	public:
-		GLint proj;
-		GLint view;
-		GLint model;
+		putils::gl::Uniform<glm::mat4> _proj;
+		putils::gl::Uniform<glm::mat4> _view;
+		putils::gl::Uniform<glm::mat4> _model;
 
-		GLint lightPos;
-		GLint farPlane;
+		putils::gl::Uniform<putils::Point3f> _lightPos;
+		putils::gl::Uniform<float> _farPlane;
 
 		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&ShadowCube::proj),
-			pmeta_reflectible_attribute(&ShadowCube::view),
-			pmeta_reflectible_attribute(&ShadowCube::model),
+			pmeta_reflectible_attribute_private(&ShadowCube::_proj),
+			pmeta_reflectible_attribute_private(&ShadowCube::_view),
+			pmeta_reflectible_attribute_private(&ShadowCube::_model),
 
-			pmeta_reflectible_attribute(&ShadowCube::lightPos),
-			pmeta_reflectible_attribute(&ShadowCube::farPlane)
+			pmeta_reflectible_attribute_private(&ShadowCube::_lightPos),
+			pmeta_reflectible_attribute_private(&ShadowCube::_farPlane)
 		);
 	};
 }

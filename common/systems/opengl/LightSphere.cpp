@@ -29,8 +29,6 @@ namespace kengine::Shaders {
 			ShaderDescription{ src::ProjViewModel::vert, GL_VERTEX_SHADER },
 			ShaderDescription{ src::Color::frag, GL_FRAGMENT_SHADER }
 		));
-
-		_gBufferFBO = gBufferFBO;
 	}
 
 	void LightSphere::run(const Parameters & params) {
@@ -38,8 +36,8 @@ namespace kengine::Shaders {
 		ShaderHelper::Enable __c(GL_CULL_FACE);
 
 		use();
-		putils::gl::setUniform(this->proj, params.proj);
-		putils::gl::setUniform(this->view, params.view);
+		_proj = params.proj;
+		_view = params.view;
 
 		for (const auto & [e, light] : _em.getEntities<DirLightComponent>())
 			drawLight(light, params.camPos - toVec(light.direction) * SUN_DIST, SUN_SIZE);
@@ -61,8 +59,8 @@ namespace kengine::Shaders {
 		glm::mat4 model(1.f);
 		model = glm::translate(model, pos);
 		model = glm::scale(model, glm::vec3(size));
-		putils::gl::setUniform(this->model, model);
-		putils::gl::setUniform(this->color, light.color);
+		_model = model;
+		_color = light.color;
 
 		ShaderHelper::shapes::drawSphere();
 	}

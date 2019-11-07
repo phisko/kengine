@@ -21,8 +21,8 @@ namespace kengine {
 			ShaderDescription{ kengine::Shaders::src::DepthCube::frag, GL_FRAGMENT_SHADER }
 		));
 
-		putils::gl::setUniform(proj, glm::mat4(1.f));
-		putils::gl::setUniform(view, glm::mat4(1.f));
+		_proj = glm::mat4(1.f);
+		_view = glm::mat4(1.f);
 	}
 
 	void AssImpShadowCube::run(kengine::Entity & e, PointLightComponent & light, const putils::Point3f & pos, float radius, const Parameters & params) {
@@ -64,15 +64,15 @@ namespace kengine {
 			putils::gl::setUniform(directions[i].shadowMatrixUniform, proj * glm::lookAt(vPos, vPos + directions[i].target, directions[i].up));
 		}
 
-		putils::gl::setUniform(lightPos, vPos);
-		putils::gl::setUniform(farPlane, radius);
+		_lightPos = vPos;
+		_farPlane = radius;
 
 		for (const auto &[e, textured, graphics, transform, skeleton] : _em.getEntities<AssImpObjectComponent, GraphicsComponent, TransformComponent3f, SkeletonComponent>()) {
-			AssImpHelper::Locations locations;
-			locations.model = this->model;
-			locations.bones = this->bones;
+			AssImpHelper::Uniforms uniforms;
+			uniforms.model = _model;
+			uniforms.bones = _bones;
 
-			AssImpHelper::drawModel(_em, graphics, transform, skeleton, false, locations);
+			AssImpHelper::drawModel(_em, graphics, transform, skeleton, false, uniforms);
 		}
 
 		putils::gl::setViewPort(params.viewPort);

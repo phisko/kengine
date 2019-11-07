@@ -18,20 +18,20 @@ namespace kengine::Shaders {
 		kengine::EntityManager & _em;
 
 	public:
-		GLint viewPos;
-		GLint screenSize;
+		putils::gl::Uniform<glm::vec3> _viewPos;
+		putils::gl::Uniform<putils::Point2f> _screenSize;
 
-		GLint entityID;
-		GLint highlightColor;
-		GLint intensity;
+		putils::gl::Uniform<float> _entityID;
+		putils::gl::Uniform<putils::NormalizedColor> _highlightColor;
+		putils::gl::Uniform<float> _intensity;
 
 		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&Highlight::viewPos),
-			pmeta_reflectible_attribute(&Highlight::screenSize),
+			pmeta_reflectible_attribute_private(&Highlight::_viewPos),
+			pmeta_reflectible_attribute_private(&Highlight::_screenSize),
 
-			pmeta_reflectible_attribute(&Highlight::entityID),
-			pmeta_reflectible_attribute(&Highlight::highlightColor),
-			pmeta_reflectible_attribute(&Highlight::intensity)
+			pmeta_reflectible_attribute_private(&Highlight::_entityID),
+			pmeta_reflectible_attribute_private(&Highlight::_highlightColor),
+			pmeta_reflectible_attribute_private(&Highlight::_intensity)
 		);
 	};
 }

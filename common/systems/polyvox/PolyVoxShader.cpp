@@ -83,9 +83,9 @@ namespace kengine {
 	void PolyVoxShader::run(const Parameters & params) {
 		use();
 
-		putils::gl::setUniform(this->view, params.view);
-		putils::gl::setUniform(this->proj, params.proj);
-		putils::gl::setUniform(viewPos, params.camPos);
+		_view = params.view;
+		_proj = params.proj;
+		_viewPos = params.camPos;
 
 		for (const auto &[e, poly, graphics, transform] : _em.getEntities<PolyVoxObjectComponent, GraphicsComponent, TransformComponent3f>()) {
 			if (graphics.model == kengine::Entity::INVALID_ID)
@@ -98,9 +98,9 @@ namespace kengine {
 			const auto & modelInfo = modelInfoEntity.get<ModelComponent>();
 			const auto & openGL = modelInfoEntity.get<OpenGLModelComponent>();
 
-			putils::gl::setUniform(this->model, ShaderHelper::getModelMatrix(modelInfo, transform));
-			putils::gl::setUniform(this->entityID, (float)e.id);
-			putils::gl::setUniform(this->color, graphics.color);
+			_model = ShaderHelper::getModelMatrix(modelInfo, transform);
+			_entityID = (float)e.id;
+			_color = graphics.color;
 
 			ShaderHelper::drawModel(openGL);
 		}

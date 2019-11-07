@@ -19,22 +19,22 @@ namespace kengine::Shaders {
 		size_t _textureID;
 
 	public:
-		GLint view;
-		GLint proj;
+		putils::gl::Uniform<glm::mat4> _view;
+		putils::gl::Uniform<glm::mat4> _proj;
 
-		GLint tex;
+		putils::gl::Uniform<size_t> _tex;
 
-		GLint entityID;
-		GLint color;
+		putils::gl::Uniform<float> _entityID;
+		putils::gl::Uniform<putils::NormalizedColor> _color;
 
 		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&SkyBox::view),
-			pmeta_reflectible_attribute(&SkyBox::proj),
+			pmeta_reflectible_attribute_private(&SkyBox::_view),
+			pmeta_reflectible_attribute_private(&SkyBox::_proj),
 
-			pmeta_reflectible_attribute(&SkyBox::tex),
+			pmeta_reflectible_attribute_private(&SkyBox::_tex),
 
-			pmeta_reflectible_attribute(&SkyBox::entityID),
-			pmeta_reflectible_attribute(&SkyBox::color)
+			pmeta_reflectible_attribute_private(&SkyBox::_entityID),
+			pmeta_reflectible_attribute_private(&SkyBox::_color)
 		);
 	};
 }

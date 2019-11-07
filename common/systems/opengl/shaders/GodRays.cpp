@@ -6,10 +6,10 @@ namespace kengine::Shaders::src {
 uniform sampler2D gposition;
 uniform sampler2D gcolor;
 
-uniform float SCATTERING;
-uniform float NB_STEPS;
-uniform float DEFAULT_STEP_LENGTH;
-uniform float INTENSITY;
+uniform float scattering;
+uniform float nbSteps;
+uniform float defaultStepLength;
+uniform float intensity;
 
 uniform mat4 inverseView;
 uniform mat4 inverseProj;
@@ -26,8 +26,8 @@ vec2 getShadowMapValue(vec3 worldPos);
 vec3 getLightDirection(vec3 worldPos);
 
 float computeScattering(float lightDotView) {
-    float result = 1.0 - SCATTERING * SCATTERING;
-    result /= (4.0 * PI * pow(1.0 + SCATTERING * SCATTERING - (2.0 * SCATTERING) * lightDotView, 1.5));
+    float result = 1.0 - scattering * scattering;
+    result /= (4.0 * PI * pow(1.0 + scattering * scattering - (2.0 * scattering) * lightDotView, 1.5));
     return result;
 }
 
@@ -56,12 +56,12 @@ void main() {
     float stepLength;
     if (worldPos.w == 0.0) { // "Empty" pixel, cast rays up to arbitrary distance
 		rayDir = getRayToPixel(screenSize);
-        stepLength = DEFAULT_STEP_LENGTH;
+        stepLength = defaultStepLength;
     }
     else { // "Full" pixel, cast rays up to it
         vec3 rayVector = worldPos.xyz - viewPos;
         rayDir = normalize(rayVector);
-        stepLength = length(rayVector) / NB_STEPS;
+        stepLength = length(rayVector) / nbSteps;
     }
 
     vec3 rayStep = rayDir * stepLength;
@@ -78,13 +78,13 @@ void main() {
 
     vec3 accumFog = vec3(0.0);
 
-    for (int i = 0; i < NB_STEPS; ++i) {
+    for (int i = 0; i < nbSteps; ++i) {
         vec2 shadow = getShadowMapValue(currentPos);
         if (shadow.x < 0.0 || shadow.x > shadow.y)
-            accumFog += computeScattering(dot(rayDir, lightDir)) * color.rgb * INTENSITY;
+            accumFog += computeScattering(dot(rayDir, lightDir)) * color.rgb * intensity;
 		currentPos += rayStep;
     }
-    accumFog /= NB_STEPS;
+    accumFog /= nbSteps;
 
     outColor = vec4(accumFog, 1.0);
 }

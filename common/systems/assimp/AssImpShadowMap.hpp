@@ -25,18 +25,18 @@ namespace kengine {
 		kengine::EntityManager & _em;
 
 	public:
-		GLint proj;
-		GLint view;
-		GLint model;
+		putils::gl::Uniform<glm::mat4> _proj;
+		putils::gl::Uniform<glm::mat4> _view;
+		putils::gl::Uniform<glm::mat4> _model;
 
-		GLint bones;
+		GLint _bones;
 
 		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&AssImpShadowMap::proj),
-			pmeta_reflectible_attribute(&AssImpShadowMap::view),
-			pmeta_reflectible_attribute(&AssImpShadowMap::model),
+			pmeta_reflectible_attribute_private(&AssImpShadowMap::_proj),
+			pmeta_reflectible_attribute_private(&AssImpShadowMap::_view),
+			pmeta_reflectible_attribute_private(&AssImpShadowMap::_model),
 
-			pmeta_reflectible_attribute(&AssImpShadowMap::bones)
+			pmeta_reflectible_attribute_private(&AssImpShadowMap::_bones)
 		);
 	};
 }

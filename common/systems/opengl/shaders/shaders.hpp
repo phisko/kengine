@@ -50,11 +50,4 @@ namespace kengine::Shaders::src {
 	namespace GodRays {
 		extern const char * frag;
 	}
-
-	namespace SSAO {
-		extern const char * frag;
-		namespace Blur {
-			extern const char * frag;
-		}
-	}
 }

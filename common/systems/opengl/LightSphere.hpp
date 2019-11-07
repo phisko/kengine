@@ -21,21 +21,20 @@ namespace kengine::Shaders {
 		void drawLight(const LightComponent & light, const glm::vec3 & pos, float size);
 
 	public:
-		GLint proj;
-		GLint view;
-		GLint model;
+		putils::gl::Uniform<glm::mat4> _proj;
+		putils::gl::Uniform<glm::mat4> _view;
+		putils::gl::Uniform<glm::mat4> _model;
 
-		GLint color;
+		putils::gl::Uniform<putils::NormalizedColor> _color;
 
 		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&LightSphere::proj),
-			pmeta_reflectible_attribute(&LightSphere::view),
-			pmeta_reflectible_attribute(&LightSphere::model),
-			pmeta_reflectible_attribute(&LightSphere::color)
+			pmeta_reflectible_attribute_private(&LightSphere::_proj),
+			pmeta_reflectible_attribute_private(&LightSphere::_view),
+			pmeta_reflectible_attribute_private(&LightSphere::_model),
+			pmeta_reflectible_attribute_private(&LightSphere::_color)
 		);
 
 	private:
 		kengine::EntityManager & _em;
-		GLuint _gBufferFBO;
 	};
 }

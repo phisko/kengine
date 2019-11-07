@@ -24,24 +24,24 @@ namespace kengine {
 		kengine::EntityManager & _em;
 
 	public:
-		GLint proj;
-		GLint view;
-		GLint model;
+		putils::gl::Uniform<glm::mat4> _proj;
+		putils::gl::Uniform<glm::mat4> _view;
+		putils::gl::Uniform<glm::mat4> _model;
 
-		GLint lightPos;
-		GLint farPlane;
+		putils::gl::Uniform<glm::vec3> _lightPos;
+		putils::gl::Uniform<float> _farPlane;
 
-		GLint bones;
+		GLint _bones;
 
 		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&AssImpShadowCube::proj),
-			pmeta_reflectible_attribute(&AssImpShadowCube::view),
-			pmeta_reflectible_attribute(&AssImpShadowCube::model),
+			pmeta_reflectible_attribute_private(&AssImpShadowCube::_proj),
+			pmeta_reflectible_attribute_private(&AssImpShadowCube::_view),
+			pmeta_reflectible_attribute_private(&AssImpShadowCube::_model),
 
-			pmeta_reflectible_attribute(&AssImpShadowCube::lightPos),
-			pmeta_reflectible_attribute(&AssImpShadowCube::farPlane),
+			pmeta_reflectible_attribute_private(&AssImpShadowCube::_lightPos),
+			pmeta_reflectible_attribute_private(&AssImpShadowCube::_farPlane),
 
-			pmeta_reflectible_attribute(&AssImpShadowCube::bones)
+			pmeta_reflectible_attribute_private(&AssImpShadowCube::_bones)
 		);
 
 	};

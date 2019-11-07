@@ -22,7 +22,7 @@ namespace kengine::Shaders {
 
 		use();
 		_shadowMapTextureID = firstTextureID;
-		putils::gl::setUniform(shadowMap, _shadowMapTextureID);
+		_shadowMap = _shadowMapTextureID;
 	}
 
 	void PointLight::run(const Parameters & params) {
@@ -34,8 +34,8 @@ namespace kengine::Shaders {
 		glBlendFunc(GL_ONE, GL_ONE);
 
 		use();
-		putils::gl::setUniform(viewPos, params.camPos);
-		putils::gl::setUniform(screenSize, putils::Point2f(params.viewPort.size));
+		_viewPos = params.camPos;
+		_screenSize = putils::Point2f(params.viewPort.size);
 
 		glActiveTexture((GLenum)(GL_TEXTURE0 + _shadowMapTextureID));
 
@@ -51,13 +51,13 @@ namespace kengine::Shaders {
 
 			use();
 
-			putils::gl::setUniform(this->proj, params.proj);
-			putils::gl::setUniform(this->view, params.view);
+			_proj = params.proj;
+			_view = params.view;
 
 			glm::mat4 model(1.f);
 			model = glm::translate(model, { centre.x, centre.y, centre.z });
 			model = glm::scale(model, { radius, radius, radius });
-			putils::gl::setUniform(this->model, model);
+			_model = model;
 
 			if (centre.getDistanceTo({ params.camPos.x, params.camPos.y, params.camPos.z }) < radius)
 				glCullFace(GL_BACK);
@@ -75,17 +75,17 @@ namespace kengine::Shaders {
 	}
 
 	void PointLight::setLight(const PointLightComponent & light, const putils::Point3f & pos, float radius) {
-		putils::gl::setUniform(color, light.color);
-		putils::gl::setUniform(position, pos);
+		_color = light.color;
+		_position = pos;
 
-		putils::gl::setUniform(diffuseStrength, light.diffuseStrength);
-		putils::gl::setUniform(specularStrength, light.specularStrength);
+		_diffuseStrength = light.diffuseStrength;
+		_specularStrength = light.specularStrength;
 
-		putils::gl::setUniform(attenuationConstant, light.constant);
-		putils::gl::setUniform(attenuationLinear, light.linear);
-		putils::gl::setUniform(attenuationQuadratic, light.quadratic);
-		putils::gl::setUniform(farPlane, radius);
+		_attenuationConstant = light.constant;
+		_attenuationLinear = light.linear;
+		_attenuationQuadratic = light.quadratic;
+		_farPlane = radius;
 
-		putils::gl::setUniform(bias, light.shadowMapBias);
+		_bias = light.shadowMapBias;
 	}
 }

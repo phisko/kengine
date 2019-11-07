@@ -54,7 +54,7 @@ namespace kengine::Shaders {
 		));
 
 		_textureID = firstTextureID;
-		putils::gl::setUniform(tex, _textureID);
+		_tex = _textureID;
 	}
 
 	static void loadSkyBox(Entity & e, const SkyBoxComponent & comp) {
@@ -156,14 +156,14 @@ namespace kengine::Shaders {
 		ShaderHelper::Enable depth(GL_DEPTH_TEST);
 		glDepthFunc(GL_LEQUAL);
 
-		putils::gl::setUniform(view, glm::mat4(glm::mat3(params.view)));
-		putils::gl::setUniform(proj, params.proj);
-		putils::gl::setUniform(entityID, 0.f);
+		_view = glm::mat4(glm::mat3(params.view));
+		_proj = params.proj;
+		_entityID = 0.f;
 
 		glActiveTexture((GLenum)(GL_TEXTURE0 + _textureID));
 
 		for (auto & [e, comp] : _em.getEntities<SkyBoxComponent>()) {
-			putils::gl::setUniform(color, comp.color);
+			_color = comp.color;
 
 			if (!e.has<SkyBoxOpenGLComponent>())
 				loadSkyBox(e, comp);

@@ -16,36 +16,36 @@ namespace kengine {
 		void run(const Parameters & params) override;
 
 	public:
-		GLint model;
-		GLint view;
-		GLint proj;
+		putils::gl::Uniform<glm::mat4> _model;
+		putils::gl::Uniform<glm::mat4> _view;
+		putils::gl::Uniform<glm::mat4> _proj;
 
-		GLint bones;
+		GLint _bones;
 
-		GLint hasTexture;
-		GLint texture_diffuse;
-		GLint texture_specular;
-		GLint diffuseColor;
-		GLint specularColor;
+		putils::gl::Uniform<bool> _hasTexture;
+		putils::gl::Uniform<size_t> _texture_diffuse;
+		putils::gl::Uniform<size_t> _texture_specular;
+		putils::gl::Uniform<putils::NormalizedColor> _diffuseColor;
+		putils::gl::Uniform<putils::NormalizedColor> _specularColor;
 
-		GLint entityID;
-		GLint color;
+		putils::gl::Uniform<float> _entityID;
+		putils::gl::Uniform<putils::NormalizedColor> _color;
 
 		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&AssImpShader::model),
-			pmeta_reflectible_attribute(&AssImpShader::view),
-			pmeta_reflectible_attribute(&AssImpShader::proj),
+			pmeta_reflectible_attribute_private(&AssImpShader::_model),
+			pmeta_reflectible_attribute_private(&AssImpShader::_view),
+			pmeta_reflectible_attribute_private(&AssImpShader::_proj),
 
-			pmeta_reflectible_attribute(&AssImpShader::bones),
+			pmeta_reflectible_attribute_private(&AssImpShader::_bones),
 
-			pmeta_reflectible_attribute(&AssImpShader::hasTexture),
-			pmeta_reflectible_attribute(&AssImpShader::texture_diffuse),
-			// pmeta_reflectible_attribute(&TexturedShader::texture_specular),
-			pmeta_reflectible_attribute(&AssImpShader::diffuseColor),
-			// pmeta_reflectible_attribute(&TexturedShader::specularColor),
+			pmeta_reflectible_attribute_private(&AssImpShader::_hasTexture),
+			pmeta_reflectible_attribute_private(&AssImpShader::_texture_diffuse),
+			// pmeta_reflectible_attrib_privateute(&TexturedShader::texture_specular),
+			pmeta_reflectible_attribute_private(&AssImpShader::_diffuseColor),
+			// pmeta_reflectible_attrib_privateute(&TexturedShader::specularColor),
 
-			pmeta_reflectible_attribute(&AssImpShader::entityID),
-			pmeta_reflectible_attribute(&AssImpShader::color)
+			pmeta_reflectible_attribute_private(&AssImpShader::_entityID),
+			pmeta_reflectible_attribute_private(&AssImpShader::_color)
 		);
 
 	private:

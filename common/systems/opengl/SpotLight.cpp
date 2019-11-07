@@ -24,7 +24,7 @@ namespace kengine::Shaders {
 		));
 
 		_shadowMapTextureID = firstTextureID;
-		putils::gl::setUniform(this->shadowMap, _shadowMapTextureID);
+		_shadowMap = _shadowMapTextureID;
 	}
 
 	void SpotLight::run(const Parameters & params) {
@@ -36,8 +36,8 @@ namespace kengine::Shaders {
 		glBlendFunc(GL_ONE, GL_ONE);
 
 		use();
-		putils::gl::setUniform(viewPos, params.camPos);
-		putils::gl::setUniform(screenSize, putils::Point2f(params.viewPort.size));
+		_viewPos = params.camPos;
+		_screenSize = putils::Point2f(params.viewPort.size);
 
 
 		glActiveTexture((GLenum)(GL_TEXTURE0 + _shadowMapTextureID));
@@ -58,9 +58,9 @@ namespace kengine::Shaders {
 			model = glm::translate(model, { centre.x, centre.y, centre.z });
 			const auto radius = LightHelper::getRadius(light);
 			model = glm::scale(model, { radius, radius, radius });
-			putils::gl::setUniform(this->proj, params.proj);
-			putils::gl::setUniform(this->view, params.view);
-			putils::gl::setUniform(this->model, model);
+			_proj = params.proj;
+			_view = params.view;
+			_model = model;
 
 			if (centre.getDistanceTo(putils::Point3f{ params.camPos.x, params.camPos.y, params.camPos.z }) < radius)
 				glCullFace(GL_BACK);
@@ -68,7 +68,7 @@ namespace kengine::Shaders {
 				glCullFace(GL_FRONT);
 
 			glBindTexture(GL_TEXTURE_2D, e.get<DepthMapComponent>().texture);
-			putils::gl::setUniform(lightSpaceMatrix, LightHelper::getLightSpaceMatrix(light, { centre.x, centre.y, centre.z }, params));
+			_lightSpaceMatrix = LightHelper::getLightSpaceMatrix(light, { centre.x, centre.y, centre.z }, params);
 
 			ShaderHelper::shapes::drawSphere();
 		}
@@ -77,21 +77,21 @@ namespace kengine::Shaders {
 	}
 
 	void SpotLight::setLight(const SpotLightComponent & light, const putils::Point3f & pos) {
-		putils::gl::setUniform(color, light.color);
-		putils::gl::setUniform(position, pos);
-		putils::gl::setUniform(direction, light.direction);
+		_color = light.color;
+		_position = pos;
+		_direction = light.direction;
 
-		putils::gl::setUniform(cutOff, light.cutOff);
-		putils::gl::setUniform(outerCutOff, light.outerCutOff);
+		_cutOff = light.cutOff;
+		_outerCutOff = light.outerCutOff;
 
-		putils::gl::setUniform(diffuseStrength, light.diffuseStrength);
-		putils::gl::setUniform(specularStrength, light.specularStrength);
+		_diffuseStrength = light.diffuseStrength;
+		_specularStrength = light.specularStrength;
 
-		putils::gl::setUniform(attenuationConstant, light.constant);
-		putils::gl::setUniform(attenuationLinear, light.linear);
-		putils::gl::setUniform(attenuationQuadratic, light.quadratic);
+		_attenuationConstant = light.constant;
+		_attenuationLinear = light.linear;
+		_attenuationQuadratic = light.quadratic;
 
-		putils::gl::setUniform(pcfSamples, light.shadowPCFSamples);
-		putils::gl::setUniform(bias, light.shadowMapBias);
+		_pcfSamples = light.shadowPCFSamples;
+		_bias = light.shadowMapBias;
 	}
 }

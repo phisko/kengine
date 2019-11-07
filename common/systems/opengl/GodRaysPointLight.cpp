@@ -27,7 +27,7 @@ namespace kengine::Shaders {
 		));
 
 		_shadowMapTextureID = (GLuint)firstTextureID;
-		putils::gl::setUniform(shadowMap, _shadowMapTextureID);
+		_shadowMap = _shadowMapTextureID;
 	}
 
 	void GodRaysPointLight::run(const Parameters & params) {
@@ -39,26 +39,26 @@ namespace kengine::Shaders {
 
 		glActiveTexture(GL_TEXTURE0 + _shadowMapTextureID);
 
-		putils::gl::setUniform(this->inverseView, glm::inverse(params.view));
-		putils::gl::setUniform(this->inverseProj, glm::inverse(params.proj));
-		putils::gl::setUniform(this->viewPos, params.camPos);
-		putils::gl::setUniform(this->screenSize, putils::Point2f(params.viewPort.size));
+		_inverseView = glm::inverse(params.view);
+		_inverseProj = glm::inverse(params.proj);
+		_viewPos = params.camPos;
+		_screenSize = putils::Point2f(params.viewPort.size);
 
 		for (const auto &[e, light, depthMap, transform, comp] : _em.getEntities<PointLightComponent, DepthCubeComponent, TransformComponent3f, GodRaysComponent>()) {
-			putils::gl::setUniform(SCATTERING, comp.scattering);
-			putils::gl::setUniform(NB_STEPS, comp.nbSteps);
-			putils::gl::setUniform(DEFAULT_STEP_LENGTH, comp.defaultStepLength);
-			putils::gl::setUniform(INTENSITY, comp.intensity);
+			_scattering = comp.scattering;
+			_nbSteps = comp.nbSteps;
+			_defaultStepLength = comp.defaultStepLength;
+			_intensity = comp.intensity;
 			drawLight(params.camPos, light, transform.boundingBox.position, depthMap, (size_t)params.viewPort.size.x, (size_t)params.viewPort.size.y);
 		}
 	}
 
 	void GodRaysPointLight::drawLight(const glm::vec3 & camPos, const PointLightComponent & light, const putils::Point3f & pos, const DepthCubeComponent & depthMap, size_t screenWidth, size_t screenHeight) {
-		putils::gl::setUniform(color, light.color);
-		putils::gl::setUniform(position, pos);
+		_color = light.color;
+		_position = pos;
 
 		glBindTexture(GL_TEXTURE_CUBE_MAP, depthMap.texture);
-		putils::gl::setUniform(farPlane, LightHelper::getRadius(light));
+		_farPlane = LightHelper::getRadius(light);
 
 		ShaderHelper::shapes::drawQuad();
 	}

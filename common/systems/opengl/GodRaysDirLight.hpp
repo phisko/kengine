@@ -1,6 +1,7 @@
 #pragma once
 
 #include "opengl/Program.hpp"
+#include "opengl/Uniform.hpp"
 #include "components/ShaderComponent.hpp"
 
 namespace kengine {
@@ -24,43 +25,43 @@ namespace kengine::Shaders {
 		GLuint _shadowMapTextureID;
 
 	public:
-		GLint SCATTERING;
-		GLint NB_STEPS;
-		GLint DEFAULT_STEP_LENGTH;
-		GLint INTENSITY;
+		putils::gl::Uniform<float> _scattering;
+		putils::gl::Uniform<float> _nbSteps;
+		putils::gl::Uniform<float> _defaultStepLength;
+		putils::gl::Uniform<float> _intensity;
 
-		GLint inverseView;
-		GLint inverseProj;
-		GLint viewPos;
-		GLint screenSize;
+		putils::gl::Uniform<glm::mat4> _inverseView;
+		putils::gl::Uniform<glm::mat4> _inverseProj;
+		putils::gl::Uniform<glm::vec3> _viewPos;
+		putils::gl::Uniform<putils::Point2f> _screenSize;
 
-		GLint color;
-		GLint direction;
+		putils::gl::Uniform<putils::NormalizedColor> _color;
+		putils::gl::Uniform<putils::Vector3f> _direction;
 
-		GLint shadowMap[KENGINE_CSM_COUNT];
-		GLint lightSpaceMatrix[KENGINE_CSM_COUNT];
-		GLint cascadeEnd[KENGINE_CSM_COUNT];
-		GLint bias;
-		GLint pcfSamples;
+		putils::gl::Uniform<size_t> _shadowMap[KENGINE_CSM_COUNT];
+		putils::gl::Uniform<glm::mat4> _lightSpaceMatrix[KENGINE_CSM_COUNT];
+		putils::gl::Uniform<float> _cascadeEnd[KENGINE_CSM_COUNT];
+		putils::gl::Uniform<float> _bias;
+		putils::gl::Uniform<float> _pcfSamples;
 
 		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&GodRaysDirLight::SCATTERING),
-			pmeta_reflectible_attribute(&GodRaysDirLight::NB_STEPS),
-			pmeta_reflectible_attribute(&GodRaysDirLight::DEFAULT_STEP_LENGTH),
-			pmeta_reflectible_attribute(&GodRaysDirLight::INTENSITY),
+			pmeta_reflectible_attribute_private(&GodRaysDirLight::_scattering),
+			pmeta_reflectible_attribute_private(&GodRaysDirLight::_nbSteps),
+			pmeta_reflectible_attribute_private(&GodRaysDirLight::_defaultStepLength),
+			pmeta_reflectible_attribute_private(&GodRaysDirLight::_intensity),
 
-			pmeta_reflectible_attribute(&GodRaysDirLight::inverseView),
-			pmeta_reflectible_attribute(&GodRaysDirLight::inverseProj),
-			pmeta_reflectible_attribute(&GodRaysDirLight::viewPos),
-			pmeta_reflectible_attribute(&GodRaysDirLight::screenSize),
+			pmeta_reflectible_attribute_private(&GodRaysDirLight::_inverseView),
+			pmeta_reflectible_attribute_private(&GodRaysDirLight::_inverseProj),
+			pmeta_reflectible_attribute_private(&GodRaysDirLight::_viewPos),
+			pmeta_reflectible_attribute_private(&GodRaysDirLight::_screenSize),
 
-			pmeta_reflectible_attribute(&GodRaysDirLight::color),
-			pmeta_reflectible_attribute(&GodRaysDirLight::direction),
+			pmeta_reflectible_attribute_private(&GodRaysDirLight::_color),
+			pmeta_reflectible_attribute_private(&GodRaysDirLight::_direction),
 
-			pmeta_reflectible_attribute(&GodRaysDirLight::shadowMap),
-			pmeta_reflectible_attribute(&GodRaysDirLight::lightSpaceMatrix),
-			pmeta_reflectible_attribute(&GodRaysDirLight::cascadeEnd),
-			pmeta_reflectible_attribute(&GodRaysDirLight::pcfSamples)
+			pmeta_reflectible_attribute_private(&GodRaysDirLight::_shadowMap),
+			pmeta_reflectible_attribute_private(&GodRaysDirLight::_lightSpaceMatrix),
+			pmeta_reflectible_attribute_private(&GodRaysDirLight::_cascadeEnd),
+			pmeta_reflectible_attribute_private(&GodRaysDirLight::_pcfSamples)
 		);
 	};
 }

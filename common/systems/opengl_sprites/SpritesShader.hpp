@@ -13,24 +13,24 @@ namespace kengine {
 		void run(const Parameters & params) override;
 
 	public:
-		GLint model;
-		GLint view;
-		GLint proj;
-		GLint viewPos;
+		putils::gl::Uniform<glm::mat4> _model;
+		putils::gl::Uniform<glm::mat4> _view;
+		putils::gl::Uniform<glm::mat4> _proj;
+		putils::gl::Uniform<glm::vec3> _viewPos;
 
-		GLint tex;
-		GLint color;
-		GLint entityID;
+		putils::gl::Uniform<size_t> _tex;
+		putils::gl::Uniform<putils::NormalizedColor> _color;
+		putils::gl::Uniform<float> _entityID;
 
 		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&SpritesShader::model),
-			pmeta_reflectible_attribute(&SpritesShader::view),
-			pmeta_reflectible_attribute(&SpritesShader::proj),
-			pmeta_reflectible_attribute(&SpritesShader::viewPos),
+			pmeta_reflectible_attribute_private(&SpritesShader::_model),
+			pmeta_reflectible_attribute_private(&SpritesShader::_view),
+			pmeta_reflectible_attribute_private(&SpritesShader::_proj),
+			pmeta_reflectible_attribute_private(&SpritesShader::_viewPos),
 
-			pmeta_reflectible_attribute(&SpritesShader::tex),
-			pmeta_reflectible_attribute(&SpritesShader::color),
-			pmeta_reflectible_attribute(&SpritesShader::entityID)
+			pmeta_reflectible_attribute_private(&SpritesShader::_tex),
+			pmeta_reflectible_attribute_private(&SpritesShader::_color),
+			pmeta_reflectible_attribute_private(&SpritesShader::_entityID)
 		);
 
 	private:

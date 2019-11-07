@@ -33,8 +33,8 @@ namespace kengine::Shaders {
 		));
 
 		_shadowMapTextureID = firstTextureID;
-		for (size_t i = 0; i < lengthof(this->shadowMap); ++i)
-			putils::gl::setUniform(this->shadowMap[i], _shadowMapTextureID + i);
+		for (size_t i = 0; i < lengthof(_shadowMap); ++i)
+			_shadowMap[i] = _shadowMapTextureID + i;
 	}
 
 	void DirLight::run(const Parameters & params) {
@@ -46,12 +46,12 @@ namespace kengine::Shaders {
 
 		use();
 
-		putils::gl::setUniform(proj, params.proj);
-		putils::gl::setUniform(view, params.view);
+		_proj = params.proj;
+		_view = params.view;
 
-		putils::gl::setUniform(debugCSM, DEBUG_CSM);
-		putils::gl::setUniform(viewPos, params.camPos);
-		putils::gl::setUniform(screenSize, putils::Point2f(params.viewPort.size));
+		_debugCSM = DEBUG_CSM;
+		_viewPos = params.camPos;
+		_screenSize = putils::Point2f(params.viewPort.size);
 
 		for (auto &[e, light] : _em.getEntities<DirLightComponent>()) {
 			const putils::Point3f pos = { params.camPos.x, params.camPos.y, params.camPos.z };
@@ -66,10 +66,10 @@ namespace kengine::Shaders {
 			setLight(light);
 
 			const auto & depthMap = e.get<CSMComponent>();
-			for (size_t i = 0; i < lengthof(shadowMap); ++i) {
+			for (size_t i = 0; i < lengthof(_shadowMap); ++i) {
 				glActiveTexture((GLenum)(GL_TEXTURE0 + _shadowMapTextureID + i));
 				glBindTexture(GL_TEXTURE_2D, depthMap.textures[i]);
-				putils::gl::setUniform(lightSpaceMatrix[i], LightHelper::getCSMLightSpaceMatrix(light, params, i));
+				_lightSpaceMatrix[i] = LightHelper::getCSMLightSpaceMatrix(light, params, i);
 			}
 
 			ShaderHelper::shapes::drawQuad();
@@ -77,16 +77,16 @@ namespace kengine::Shaders {
 	}
 
 	void DirLight::setLight(const DirLightComponent & light) {
-		putils::gl::setUniform(color, light.color);
-		putils::gl::setUniform(direction, light.direction);
+		_color = light.color;
+		_direction = light.direction;
 
-		putils::gl::setUniform(ambientStrength, light.ambientStrength);
-		putils::gl::setUniform(diffuseStrength, light.diffuseStrength);
-		putils::gl::setUniform(specularStrength, light.specularStrength);
-		putils::gl::setUniform(pcfSamples, light.shadowPCFSamples);
-		putils::gl::setUniform(bias, light.shadowMapBias);
+		_ambientStrength = light.ambientStrength;
+		_diffuseStrength = light.diffuseStrength;
+		_specularStrength = light.specularStrength;
+		_pcfSamples = light.shadowPCFSamples;
+		_bias = light.shadowMapBias;
 
 		for (size_t i = 0; i < KENGINE_CSM_COUNT; ++i)
-			putils::gl::setUniform(cascadeEnd[i], LightHelper::getCSMCascadeEnd(light, i));
+			_cascadeEnd[i] = LightHelper::getCSMCascadeEnd(light, i);
 	}
 }

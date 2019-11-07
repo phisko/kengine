@@ -29,7 +29,7 @@ namespace kengine::Shaders {
 			ShaderDescription{ src::ProjViewModel::vert, GL_VERTEX_SHADER }
 		));
 
-		putils::gl::setUniform(proj, glm::mat4(1.f));
+		_proj = glm::mat4(1.f);
 	}
 
 	static void initTexture(GLuint texture, size_t size) {
@@ -90,7 +90,7 @@ namespace kengine::Shaders {
 			const auto & modelInfo = modelInfoEntity.get<ModelComponent>();
 			const auto & openGL = modelInfoEntity.get<OpenGLModelComponent>();
 
-			putils::gl::setUniform(this->model, ShaderHelper::getModelMatrix(modelInfo, transform));
+			_model = ShaderHelper::getModelMatrix(modelInfo, transform);
 			ShaderHelper::drawModel(openGL);
 		}
 	}
@@ -127,7 +127,7 @@ namespace kengine::Shaders {
 				const float cascadeEnd = LightHelper::getCSMCascadeEnd(light, i);
 				if (cascadeStart >= cascadeEnd)
 					continue;
-				putils::gl::setUniform(view, LightHelper::getCSMLightSpaceMatrix(light, params, i));
+				_view = LightHelper::getCSMLightSpaceMatrix(light, params, i);
 				drawToTexture(depthMap.textures[i]);
 			}
 		}, params);
@@ -144,7 +144,7 @@ namespace kengine::Shaders {
 		}
 
 		runImpl(depthMap, [&] {
-			putils::gl::setUniform(view, LightHelper::getLightSpaceMatrix(light, ShaderHelper::toVec(pos), params));
+			_view = LightHelper::getLightSpaceMatrix(light, ShaderHelper::toVec(pos), params);
 			drawToTexture(depthMap.texture);
 		}, params);
 	}

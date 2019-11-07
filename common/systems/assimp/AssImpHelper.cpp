@@ -10,7 +10,7 @@
 
 namespace kengine {
 	namespace AssImpHelper {
-		void drawModel(EntityManager & em, const GraphicsComponent & graphics, const TransformComponent3f & transform, const SkeletonComponent & skeleton, bool useTextures, const Locations & locations) {
+		void drawModel(EntityManager & em, const GraphicsComponent & graphics, const TransformComponent3f & transform, const SkeletonComponent & skeleton, bool useTextures, const Uniforms & uniforms) {
 			if (graphics.model == Entity::INVALID_ID)
 				return;
 
@@ -22,7 +22,7 @@ namespace kengine {
 			const auto & modelInfo = modelInfoEntity.get<ModelComponent>();
 			const auto & textures = modelInfoEntity.get<AssImpTexturesModelComponent>();
 
-			putils::gl::setUniform(locations.model, ShaderHelper::getModelMatrix(modelInfo, transform));
+			uniforms.model = ShaderHelper::getModelMatrix(modelInfo, transform);
 
 			if (skeleton.meshes.empty()) {
 				static glm::mat4 defaultMats[KENGINE_SKELETON_MAX_BONES];
@@ -32,24 +32,24 @@ namespace kengine {
 						defaultMats[i] = glm::mat4(1.f);
 					first = false;
 				}
-				glUniformMatrix4fv(locations.bones, KENGINE_SKELETON_MAX_BONES, GL_FALSE, glm::value_ptr(defaultMats[0]));
+				glUniformMatrix4fv(uniforms.bones, KENGINE_SKELETON_MAX_BONES, GL_FALSE, glm::value_ptr(defaultMats[0]));
 			}
 
 			for (unsigned int i = 0; i < openGL.meshes.size(); ++i) {
 				if (!skeleton.meshes.empty())
-					glUniformMatrix4fv(locations.bones, KENGINE_SKELETON_MAX_BONES, GL_FALSE, glm::value_ptr(skeleton.meshes[i].boneMatsBoneSpace[0]));
+					glUniformMatrix4fv(uniforms.bones, KENGINE_SKELETON_MAX_BONES, GL_FALSE, glm::value_ptr(skeleton.meshes[i].boneMatsBoneSpace[0]));
 
 				if (useTextures) {
 					const auto & meshTextures = textures.meshes[i];
 					if (!meshTextures.diffuse.empty()) {
-						glActiveTexture((GLenum)(GL_TEXTURE0 + locations.diffuseTextureID));
+						glActiveTexture((GLenum)(GL_TEXTURE0 + uniforms.diffuseTextureID));
 						const auto & modelEntity = em.getEntity(meshTextures.diffuse[0]);
 						glBindTexture(GL_TEXTURE_2D, modelEntity.get<TextureModelComponent>().texture);
 					}
 					else
-						putils::gl::setUniform(locations.diffuseColor, meshTextures.diffuseColor);
+						uniforms.diffuseColor = meshTextures.diffuseColor;
 
-					putils::gl::setUniform(locations.hasTexture, meshTextures.diffuse.empty() ? 0 : 1);
+					uniforms.hasTexture = !meshTextures.diffuse.empty();
 
 					// glActiveTexture(GL_TEXTURE0 + locations.specularTextureID);
 					// if (!meshTextures.specular.empty())

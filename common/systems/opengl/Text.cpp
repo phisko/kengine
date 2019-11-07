@@ -158,7 +158,7 @@ namespace kengine::Shaders {
 		));
 
 		_textureID = firstTextureID;
-		putils::gl::setUniform(tex, _textureID);
+		_tex = _textureID;
 
 		glGenVertexArrays(1, &g_vao);
 		glGenBuffers(1, &g_vbo);
@@ -171,8 +171,8 @@ namespace kengine::Shaders {
 
 	struct Uniforms {
 		size_t textureID;
-		GLint color;
-		GLint model;
+		putils::gl::Uniform<putils::NormalizedColor> color;
+		putils::gl::Uniform<glm::mat4> model;
 	};
 
 	static putils::Point2f getSizeAndGenerateCharacters(const TextComponent & text, Font & font, float scaleX, float scaleY) {
@@ -198,7 +198,7 @@ namespace kengine::Shaders {
 	}
 
 	static void drawObject(const TextComponent & text, const TransformComponent3f & transform, Uniforms uniforms, const glm::vec2 & screenSize, bool in2D = false) {
-		putils::gl::setUniform(uniforms.color, text.color);
+		uniforms.color = text.color;
 
 		auto & fontSizes = g_fonts[text.font];
 		auto it = fontSizes.sizes.find(text.fontSize);
@@ -242,7 +242,7 @@ namespace kengine::Shaders {
 			if (!in2D)
 				model = glm::scale(model, { -scale, scale, scale });
 
-			putils::gl::setUniform(uniforms.model, model);
+			uniforms.model = model;
 		}
 
 		const auto scaleY = 1.f / (float)text.fontSize;
@@ -301,26 +301,26 @@ namespace kengine::Shaders {
 	}
 
 	void Text::run(const Parameters & params) {
-		const Uniforms uniforms{ _textureID, color, model };
+		const Uniforms uniforms{ _textureID, _color, _model };
 
 		use();
 
-		putils::gl::setUniform(viewPos, params.camPos);
+		_viewPos = params.camPos;
 		glActiveTexture((GLenum)(GL_TEXTURE0 + uniforms.textureID));
 		glBindVertexArray(g_vao);
 		glBindBuffer(GL_ARRAY_BUFFER, g_vbo);
 
-		putils::gl::setUniform(view, glm::mat4(1.f));
-		putils::gl::setUniform(proj, glm::mat4(1.f));
+		_view = glm::mat4(1.f);
+		_proj = glm::mat4(1.f);
 		for (const auto &[e, text, transform] : _em.getEntities<TextComponent2D, TransformComponent3f>()) {
-			putils::gl::setUniform(entityID, (float)e.id);
+			_entityID = (float)e.id;
 			drawObject(text, transform, uniforms, glm::vec2(params.viewPort.size.x, params.viewPort.size.y), true);
 		}
 
-		putils::gl::setUniform(view, params.view);
-		putils::gl::setUniform(proj, params.proj);
+		_view = params.view;
+		_proj = params.proj;
 		for (const auto &[e, text, transform] : _em.getEntities<TextComponent3D, TransformComponent3f>()) {
-			putils::gl::setUniform(entityID, (float)e.id);
+			_entityID = (float)e.id;
 			drawObject(text, transform, uniforms, glm::vec2(params.viewPort.size.x, params.viewPort.size.y));
 		}
 	}

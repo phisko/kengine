@@ -12,8 +12,7 @@
 # define KENGINE_ASSIMP_MODEL_PATH_MAX_LENGTH 256
 #endif
 
-#include "GL/glew.h"
-#include "GL/GL.h"
+#include "opengl/Uniform.hpp"
 
 #include "components/GraphicsComponent.hpp"
 #include "components/TransformComponent.hpp"
@@ -41,18 +40,18 @@ namespace kengine {
 	};
 
 	namespace AssImpHelper {
-		struct Locations {
-			GLint model;
+		struct Uniforms {
+			putils::gl::Uniform<glm::mat4> model;
 			GLint bones;
 
-			GLint hasTexture;
+			putils::gl::Uniform<bool> hasTexture;
 			size_t diffuseTextureID;
 			size_t specularTextureID;
 
-			GLint diffuseColor;
-			GLint specularColor;
+			putils::gl::Uniform<putils::NormalizedColor> diffuseColor;
+			putils::gl::Uniform<putils::NormalizedColor> specularColor;
 		};
 
-		void drawModel(EntityManager & em, const GraphicsComponent & model, const TransformComponent3f & transform, const SkeletonComponent & skeleton, bool useTextures, const Locations & locations);
+		void drawModel(EntityManager & em, const GraphicsComponent & model, const TransformComponent3f & transform, const SkeletonComponent & skeleton, bool useTextures, const Uniforms & uniforms);
 	}
 }

@@ -17,8 +17,8 @@ namespace kengine::Shaders {
 			ShaderDescription{ src::DepthCube::frag, GL_FRAGMENT_SHADER }
 		));
 
-		putils::gl::setUniform(proj, glm::mat4(1.f));
-		putils::gl::setUniform(view, glm::mat4(1.f));
+		_proj = glm::mat4(1.f);
+		_view = glm::mat4(1.f);
 	}
 
 	void ShadowCube::run(kengine::Entity & e, PointLightComponent & light, const putils::Point3f & pos, float radius, const Parameters & params) {
@@ -82,8 +82,8 @@ namespace kengine::Shaders {
 			putils::gl::setUniform(directions[i].shadowMatrixUniform, proj * glm::lookAt(vPos, vPos + directions[i].target, directions[i].up));
 		}
 
-		putils::gl::setUniform(lightPos, vPos);
-		putils::gl::setUniform(farPlane, radius);
+		_lightPos = pos;
+		_farPlane = radius;
 
 		for (const auto &[e, graphics, transform, shadow] : _em.getEntities<GraphicsComponent, TransformComponent3f, DefaultShadowComponent>()) {
 			if (graphics.model == kengine::Entity::INVALID_ID)
@@ -96,7 +96,7 @@ namespace kengine::Shaders {
 			const auto & modelInfo = modelInfoEntity.get<ModelComponent>();
 			const auto & openGL = modelInfoEntity.get<OpenGLModelComponent>();
 
-			putils::gl::setUniform(this->model, ShaderHelper::getModelMatrix(modelInfo, transform));
+			_model = ShaderHelper::getModelMatrix(modelInfo, transform);
 			ShaderHelper::drawModel(openGL);
 		}
 

@@ -17,19 +17,18 @@ namespace kengine {
 			ShaderDescription{ src::TexturedShader::vert, GL_VERTEX_SHADER }
 		));
 
-		putils::gl::setUniform(proj, glm::mat4(1.f));
+		_proj = glm::mat4(1.f);
 	}
 
 	void AssImpShadowMap::drawToTexture(GLuint texture) {
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture, 0);
 
-		for (const auto & [e, textured, graphics, transform, skeleton] : _em.getEntities<AssImpObjectComponent, GraphicsComponent, kengine::TransformComponent3f, SkeletonComponent>()) {
-			AssImpHelper::Locations locations;
-			locations.model = this->model;
-			locations.bones = this->bones;
+		AssImpHelper::Uniforms uniforms;
+		uniforms.model = _model;
+		uniforms.bones = _bones;
 
-			AssImpHelper::drawModel(_em, graphics, transform, skeleton, false, locations);
-		}
+		for (const auto & [e, textured, graphics, transform, skeleton] : _em.getEntities<AssImpObjectComponent, GraphicsComponent, kengine::TransformComponent3f, SkeletonComponent>())
+			AssImpHelper::drawModel(_em, graphics, transform, skeleton, false, uniforms);
 	}
 
 	template<typename T, typename Func>
@@ -62,7 +61,7 @@ namespace kengine {
 				const float cascadeEnd = LightHelper::getCSMCascadeEnd(light, i);
 				if (cascadeStart >= cascadeEnd)
 					continue;
-				putils::gl::setUniform(view, LightHelper::getCSMLightSpaceMatrix(light, params, i));
+				_view = LightHelper::getCSMLightSpaceMatrix(light, params, i);
 				drawToTexture(depthMap.textures[i]);
 			}
 		}, params);
@@ -77,7 +76,7 @@ namespace kengine {
 			return;
 
 		runImpl(depthMap, [&] {
-			putils::gl::setUniform(view, LightHelper::getLightSpaceMatrix(light, ShaderHelper::toVec(pos), params));
+			_view = LightHelper::getLightSpaceMatrix(light, ShaderHelper::toVec(pos), params);
 			drawToTexture(depthMap.texture);
 		}, params);
 	}

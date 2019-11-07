@@ -20,49 +20,49 @@ namespace kengine::Shaders {
 		void setLight(const DirLightComponent & light); 
 
 	public:
-		GLint proj;
-		GLint view;
+		putils::gl::Uniform<glm::mat4> _proj;
+		putils::gl::Uniform<glm::mat4> _view;
 
 		// shadowMap
-		GLint lightSpaceMatrix[KENGINE_CSM_COUNT];
-		GLint shadowMap[KENGINE_CSM_COUNT];
-		GLint cascadeEnd[KENGINE_CSM_COUNT];
-		GLint bias;
-		GLint pcfSamples;
+		putils::gl::Uniform<glm::mat4> _lightSpaceMatrix[KENGINE_CSM_COUNT];
+		putils::gl::Uniform<size_t> _shadowMap[KENGINE_CSM_COUNT];
+		putils::gl::Uniform<float> _cascadeEnd[KENGINE_CSM_COUNT];
+		putils::gl::Uniform<float> _bias;
+		putils::gl::Uniform<int> _pcfSamples;
 
-		GLint viewPos;
-		GLint screenSize;
+		putils::gl::Uniform<glm::vec3> _viewPos;
+		putils::gl::Uniform<putils::Point2f> _screenSize;
 
-		GLint color;
-		GLint direction;
+		putils::gl::Uniform<putils::NormalizedColor> _color;
+		putils::gl::Uniform<putils::Vector3f> _direction;
 
-		GLint ambientStrength;
-		GLint diffuseStrength;
-		GLint specularStrength;
+		putils::gl::Uniform<float> _ambientStrength;
+		putils::gl::Uniform<float> _diffuseStrength;
+		putils::gl::Uniform<float> _specularStrength;
 
-		GLint debugCSM;
+		putils::gl::Uniform<bool> _debugCSM;
 
 		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&DirLight::proj),
-			pmeta_reflectible_attribute(&DirLight::view),
+			pmeta_reflectible_attribute_private(&DirLight::_proj),
+			pmeta_reflectible_attribute_private(&DirLight::_view),
 
-			pmeta_reflectible_attribute(&DirLight::lightSpaceMatrix),
-			pmeta_reflectible_attribute(&DirLight::shadowMap),
-			pmeta_reflectible_attribute(&DirLight::cascadeEnd),
-			pmeta_reflectible_attribute(&DirLight::bias),
-			pmeta_reflectible_attribute(&DirLight::pcfSamples),
+			pmeta_reflectible_attribute_private(&DirLight::_lightSpaceMatrix),
+			pmeta_reflectible_attribute_private(&DirLight::_shadowMap),
+			pmeta_reflectible_attribute_private(&DirLight::_cascadeEnd),
+			pmeta_reflectible_attribute_private(&DirLight::_bias),
+			pmeta_reflectible_attribute_private(&DirLight::_pcfSamples),
 
-			pmeta_reflectible_attribute(&DirLight::viewPos),
-			pmeta_reflectible_attribute(&DirLight::screenSize),
+			pmeta_reflectible_attribute_private(&DirLight::_viewPos),
+			pmeta_reflectible_attribute_private(&DirLight::_screenSize),
 
-			pmeta_reflectible_attribute(&DirLight::color),
-			pmeta_reflectible_attribute(&DirLight::direction),
+			pmeta_reflectible_attribute_private(&DirLight::_color),
+			pmeta_reflectible_attribute_private(&DirLight::_direction),
 
-			pmeta_reflectible_attribute(&DirLight::ambientStrength),
-			pmeta_reflectible_attribute(&DirLight::diffuseStrength),
-			pmeta_reflectible_attribute(&DirLight::specularStrength),
+			pmeta_reflectible_attribute_private(&DirLight::_ambientStrength),
+			pmeta_reflectible_attribute_private(&DirLight::_diffuseStrength),
+			pmeta_reflectible_attribute_private(&DirLight::_specularStrength),
 
-			pmeta_reflectible_attribute(&DirLight::debugCSM)
+			pmeta_reflectible_attribute_private(&DirLight::_debugCSM)
 		);
 
 	private:

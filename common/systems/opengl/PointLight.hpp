@@ -20,48 +20,48 @@ namespace kengine::Shaders {
 		void run(const Parameters & params) override;
 
 	public:
-		GLint proj;
-		GLint view;
-		GLint model;
+		putils::gl::Uniform<glm::mat4> _proj;
+		putils::gl::Uniform<glm::mat4> _view;
+		putils::gl::Uniform<glm::mat4> _model;
 
-		GLint viewPos;
-		GLint screenSize;
+		putils::gl::Uniform<glm::vec3> _viewPos;
+		putils::gl::Uniform<putils::Point2f> _screenSize;
 
-		GLint color;
-		GLint position;
+		putils::gl::Uniform<putils::NormalizedColor> _color;
+		putils::gl::Uniform<putils::Point3f> _position;
 
-		GLint diffuseStrength;
-		GLint specularStrength;
+		putils::gl::Uniform<float> _diffuseStrength;
+		putils::gl::Uniform<float> _specularStrength;
 
-		GLint attenuationConstant;
-		GLint attenuationLinear;
-		GLint attenuationQuadratic;
+		putils::gl::Uniform<float> _attenuationConstant;
+		putils::gl::Uniform<float> _attenuationLinear;
+		putils::gl::Uniform<float> _attenuationQuadratic;
 
-		GLint shadowMap;
-		GLint farPlane;
-		GLint bias;
+		putils::gl::Uniform<size_t> _shadowMap;
+		putils::gl::Uniform<float> _farPlane;
+		putils::gl::Uniform<float> _bias;
 
 		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&PointLight::proj),
-			pmeta_reflectible_attribute(&PointLight::view),
-			pmeta_reflectible_attribute(&PointLight::model),
+			pmeta_reflectible_attribute_private(&PointLight::_proj),
+			pmeta_reflectible_attribute_private(&PointLight::_view),
+			pmeta_reflectible_attribute_private(&PointLight::_model),
 
-			pmeta_reflectible_attribute(&PointLight::viewPos),
-			pmeta_reflectible_attribute(&PointLight::screenSize),
+			pmeta_reflectible_attribute_private(&PointLight::_viewPos),
+			pmeta_reflectible_attribute_private(&PointLight::_screenSize),
 
-			pmeta_reflectible_attribute(&PointLight::color),
-			pmeta_reflectible_attribute(&PointLight::position),
+			pmeta_reflectible_attribute_private(&PointLight::_color),
+			pmeta_reflectible_attribute_private(&PointLight::_position),
 
-			pmeta_reflectible_attribute(&PointLight::diffuseStrength),
-			pmeta_reflectible_attribute(&PointLight::specularStrength),
+			pmeta_reflectible_attribute_private(&PointLight::_diffuseStrength),
+			pmeta_reflectible_attribute_private(&PointLight::_specularStrength),
 
-			pmeta_reflectible_attribute(&PointLight::attenuationConstant),
-			pmeta_reflectible_attribute(&PointLight::attenuationLinear),
-			pmeta_reflectible_attribute(&PointLight::attenuationQuadratic),
+			pmeta_reflectible_attribute_private(&PointLight::_attenuationConstant),
+			pmeta_reflectible_attribute_private(&PointLight::_attenuationLinear),
+			pmeta_reflectible_attribute_private(&PointLight::_attenuationQuadratic),
 
-			pmeta_reflectible_attribute(&PointLight::shadowMap),
-			pmeta_reflectible_attribute(&PointLight::farPlane),
-			pmeta_reflectible_attribute(&PointLight::bias)
+			pmeta_reflectible_attribute_private(&PointLight::_shadowMap),
+			pmeta_reflectible_attribute_private(&PointLight::_farPlane),
+			pmeta_reflectible_attribute_private(&PointLight::_bias)
 		);
 	private:
 		kengine::EntityManager & _em;
