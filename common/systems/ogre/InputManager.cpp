@@ -32,18 +32,18 @@ void InputManager::execute(float time) noexcept {
 		if (!imgui.WantCaptureMouse) {
 			if (input.onMouseMove != nullptr)
 				for (const auto & event : g_mouseMovedEvents)
-					input.onMouseMove((float)event.x, (float)event.y, (float)event.xrel, (float)event.yrel);
+					input.onMouseMove({ (float)event.x, (float)event.y }, { (float)event.xrel, (float)event.yrel });
 
 			if (input.onMouseButton != nullptr) {
 				for (const auto & event : g_mousePressedEvents)
-					input.onMouseButton(event.button, (float)event.x, (float)event.y, true);
+					input.onMouseButton(event.button, { (float)event.x, (float)event.y }, true);
 				for (const auto & event : g_mouseReleasedEvents)
-					input.onMouseButton(event.button, (float)event.x, (float)event.y, false);
+					input.onMouseButton(event.button, { (float)event.x, (float)event.y }, false);
 			}
 
 			if (input.onMouseWheel != nullptr)
 				for (const auto & event : g_mouseWheelEvents)
-					input.onMouseWheel((float)event.y, 0.f, 0.f);
+					input.onMouseWheel((float)event.y, {});
 		}
 	}
 

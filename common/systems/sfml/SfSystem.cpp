@@ -301,7 +301,7 @@ namespace kengine {
 					if (input.onMouseButton != nullptr) {
 						const auto x = e.mouseButton.x / _engine.getRenderWindow().getSize().x * _screenSize.x;
 						const auto y = e.mouseButton.y / _engine.getRenderWindow().getSize().y * _screenSize.y;
-						input.onMouseButton(e.mouseButton.button, x, y, e.type == sf::Event::MouseButtonPressed);
+						input.onMouseButton(e.mouseButton.button, { x, y }, e.type == sf::Event::MouseButtonPressed);
 					}
 					break;
 
@@ -309,7 +309,7 @@ namespace kengine {
 					if (input.onMouseMove != nullptr) {
 						const auto x = e.mouseMove.x / _engine.getRenderWindow().getSize().x * _screenSize.x;
 						const auto y = e.mouseMove.y / _engine.getRenderWindow().getSize().y * _screenSize.y;
-						input.onMouseMove(x, y, 0.f, 0.f);
+						input.onMouseMove({ x, y }, {});
 					}
 					break;
 
@@ -317,7 +317,7 @@ namespace kengine {
 					if (input.onMouseWheel != nullptr && e.type == sf::Event::MouseWheelScrolled) {
 						const auto x = e.mouseWheelScroll.x / _engine.getRenderWindow().getSize().x * _screenSize.x;
 						const auto y = e.mouseWheelScroll.y / _engine.getRenderWindow().getSize().y * _screenSize.y;
-						input.onMouseWheel(e.mouseWheelScroll.delta, x, y);
+						input.onMouseWheel(e.mouseWheelScroll.delta, { x, y });
 					}
 					break;
 

@@ -16,12 +16,12 @@ namespace kengine {
 	void OnClickSystem::onLoad(const char *) noexcept {
 		_em += [this](Entity & e) {
 			InputComponent input;
-			input.onMouseButton = [this](int button, float x, float y, bool pressed) {
+			input.onMouseButton = [this](int button, const putils::Point2f & coords, bool pressed) {
 				if (!pressed)
 					return;
 
 				Entity::ID id = Entity::INVALID_ID;
-				send(packets::GetEntityInPixel{ { (unsigned int)x, (unsigned int)y }, id });
+				send(packets::GetEntityInPixel{ coords, id });
 
 				if (id == Entity::INVALID_ID)
 					return;

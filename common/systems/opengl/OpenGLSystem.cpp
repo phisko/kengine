@@ -698,14 +698,14 @@ namespace kengine {
 			if (!ImGui::GetIO().WantCaptureMouse) {
 				if (comp.onMouseButton != nullptr)
 					for (const auto & click : Input::clicks)
-						comp.onMouseButton(click.button, click.pos.x, click.pos.y, click.pressed);
+						 comp.onMouseButton(click.button, click.pos, click.pressed);
 
 				if (comp.onMouseMove != nullptr)
 					for (const auto & pos : Input::positions)
-						comp.onMouseMove(pos.pos.x, pos.pos.y, pos.rel.x, pos.rel.y);
+						comp.onMouseMove(pos.pos, pos.rel);
 				if (comp.onMouseWheel != nullptr)
 					for (const auto delta : Input::scrolls)
-						comp.onMouseWheel(delta, 0.f, 0.f);
+						comp.onMouseWheel(delta, {});
 			}
 		}
 		Input::keys.clear();
