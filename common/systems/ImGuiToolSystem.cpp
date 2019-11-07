@@ -68,7 +68,7 @@ static auto ToolsController(kengine::EntityManager & em) {
 					saveTools(em);
 			}
 			ImGui::EndMainMenuBar();
-			});
+		});
 	};
 }
 
