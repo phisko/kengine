@@ -21,7 +21,7 @@ namespace kengine {
 		}
 		template<typename MemberRef>
 		static void loadJSONObject(const putils::json & object, MemberRef && member) {
-			using Member = std::decay_t<MemberRef>;
+			using Member = std::remove_reference_t<MemberRef>;
 
 			if constexpr (componentJSONLoader::has_member_c_str<Member>::value)
 				member = object.get<std::string>().c_str();
@@ -36,6 +36,15 @@ namespace kengine {
 				for (const auto & it : object) {
 					auto & element = member.emplace_back();
 					loadJSONObject(it, element);
+				}
+			}
+			else if constexpr (std::is_array<Member>::value) {
+				size_t i = 0;
+				assert(object.array().size() <= lengthof(member));
+				for (const auto & it : object) {
+					auto & element = member[i];
+					loadJSONObject(it, element);
+					++i;
 				}
 			}
 			else if constexpr (putils::has_member_get_attributes<Member>::value) {
