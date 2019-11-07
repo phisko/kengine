@@ -43,7 +43,7 @@ namespace kengine::LightHelper {
 		const float xf = cascadeEnd * tanHalfHFOV;
 		const float yf = cascadeEnd * tanHalfVFOV;
 
-		const glm::vec3 frustrumCorners[] = {
+		const glm::vec3 frustumCorners[] = {
 			// near face
 			{ xn, yn, -cascadeStart },
 			{ -xn, yn, -cascadeStart },
@@ -69,8 +69,8 @@ namespace kengine::LightHelper {
 		const auto lightView = glm::lookAt({ 0.f, 0.f, 0.f }, dir, { 0.f, 1.f, 0.f });
 		const auto inverseView = glm::inverse(params.view);
 
-		for (size_t i = 0; i < lengthof(frustrumCorners); ++i) {
-			const auto worldPos = inverseView * glm::vec4(frustrumCorners[i], 1.f);
+		for (size_t i = 0; i < lengthof(frustumCorners); ++i) {
+			const auto worldPos = inverseView * glm::vec4(frustumCorners[i], 1.f);
 			const auto lightPos = lightView * worldPos;
 
 			minX = std::min(minX, lightPos.x);

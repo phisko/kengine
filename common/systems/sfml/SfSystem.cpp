@@ -133,11 +133,11 @@ namespace kengine {
 			const auto name = putils::toString(e.id);
 			auto & view = _engine.getView(name);
 
-			auto & frustrum = cam.frustrum; {
-				auto pos = toWorldPos(frustrum.position);
+			auto & frustum = cam.frustum; {
+				auto pos = toWorldPos(frustum.position);
 				pos.x *= _screenSize.x / _tileSize.x;
 				pos.y *= _screenSize.y / _tileSize.y;
-				auto size = toWorldSize(frustrum.size);
+				auto size = toWorldSize(frustum.size);
 				size.x *= _screenSize.x / _tileSize.x;
 				size.y *= _screenSize.y / _tileSize.y;
 				view.setCenter({ pos.x + size.x / 2, pos.y + size.y / 2 });

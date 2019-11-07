@@ -59,7 +59,7 @@ Debug tools:
 Graphics:
 * [GraphicsComponent](common/components/GraphicsComponent.md): specifies the appearance of an `Entity`
 * [ModelComponent](common/components/ModelComponent.md): describes a model file (be it a 3D model, a 2D sprite or any other graphical asset)
-* [CameraComponent](common/components/CameraComponent.hpp): lets `Entities` be used as in-game cameras, to define a frustrum and position. Follows the same conventions as `TransformComponent`
+* [CameraComponent](common/components/CameraComponent.hpp): lets `Entities` be used as in-game cameras, to define a frustum and position. Follows the same conventions as `TransformComponent`
 * [GUIComponent](common/components/GUIComponent.md): lets `Entities` be used as GUI elements such as buttons, lists...)
 
 3D Graphics:

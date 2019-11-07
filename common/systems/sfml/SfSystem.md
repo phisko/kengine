@@ -28,7 +28,7 @@ A *"default"* camera is added upon system construction, meaning typical use does
 
 If a `GameObject` is found to have a [CameraComponent3f](../../components/CameraComponent.hpp), a camera will be added to the scene.
 
- The `CameraComponent3f`'s `frustrum` property defines the area to be rendered, whereas the `GameObject`'s `TransformComponent3f`'s `boundingBox` property defines the bounds of the viewport to be displayed. The `boundingBox.position.y` property defines the "height" at which the camera should be rendered (higher cameras appear in front of lower ones).
+ The `CameraComponent3f`'s `frustum` property defines the area to be rendered, whereas the `GameObject`'s `TransformComponent3f`'s `boundingBox` property defines the bounds of the viewport to be displayed. The `boundingBox.position.y` property defines the "height" at which the camera should be rendered (higher cameras appear in front of lower ones).
 
 Refer to [the SFML website](https://www.sfml-dev.org/tutorials/2.0/graphics-view.php) for more information about viewports.
 

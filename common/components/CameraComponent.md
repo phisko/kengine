@@ -11,13 +11,13 @@ Its overall layout is very similar to that of the [TransformComponent](Transform
 
 ### Members
 
-##### frustrum
+##### frustum
 
 ```cpp
-putils::Rect<Precision, Dimensions> frustrum;
+putils::Rect<Precision, Dimensions> frustum;
 ```
 
-Specifies the frustrum for the camera, i.e. its on-screen rendering coordinates and size.
+Specifies the frustum for the camera, i.e. its on-screen rendering coordinates and size.
 
 ##### pitch, yaw, roll
 

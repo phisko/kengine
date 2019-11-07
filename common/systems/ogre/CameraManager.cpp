@@ -21,7 +21,7 @@ struct OgreCameraComponent {
 };
 
 static void setTransform(Ogre::SceneNode & node, const kengine::CameraComponent3f & transform) {
-	node.setPosition(convert(transform.frustrum.position));
+	node.setPosition(convert(transform.frustum.position));
 	node.resetOrientation();
 	node.yaw(Ogre::Radian(transform.yaw));
 	node.pitch(Ogre::Radian(transform.pitch));
@@ -46,7 +46,7 @@ void CameraManager::execute(float time) noexcept {
 		comp.camera->setNearClipDistance(NEAR_PLANE);
 
 		// stolen from https://forums.ogre3d.org/viewtopic.php?p=108002#p108002
-		const float angle = std::atanf(std::tanf(cam.frustrum.size.y / 2.f) / comp.camera->getAspectRatio()) * 2.f;
+		const float angle = std::atanf(std::tanf(cam.frustum.size.y / 2.f) / comp.camera->getAspectRatio()) * 2.f;
 		comp.camera->setFOVy(Ogre::Radian(angle));
 	}
 }

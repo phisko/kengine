@@ -606,8 +606,8 @@ namespace kengine {
 				);
 			}
 
-			g_params.camPos = ShaderHelper::toVec(cam.frustrum.position);
-			g_params.camFOV = cam.frustrum.size.y;
+			g_params.camPos = ShaderHelper::toVec(cam.frustum.position);
+			g_params.camFOV = cam.frustum.size.y;
 
 			g_params.view = [&] {
 				const auto front = glm::normalize(glm::vec3{

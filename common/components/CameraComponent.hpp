@@ -8,16 +8,16 @@ namespace kengine {
     public:
         CameraComponent(const putils::Point<Precision, Dimensions> & pos = { 0, 0 },
                         const putils::Point<Precision, Dimensions> & size = { 1, 1 })
-                : frustrum(pos, size) {
+                : frustum(pos, size) {
 			if constexpr (Dimensions == 3)
 				if (size.x == 1 && size.y == 1)
-					frustrum.size.z = 1;
+					frustum.size.z = 1;
 		}
 
         CameraComponent(const putils::Rect<Precision, Dimensions> & rect)
-                : frustrum(rect) {}
+                : frustum(rect) {}
 
-        putils::Rect<Precision, Dimensions> frustrum;
+        putils::Rect<Precision, Dimensions> frustum;
         Precision pitch = 0; // Radians
         Precision yaw = 0; // Radians
 		Precision roll = 0; // Radians
@@ -28,10 +28,10 @@ namespace kengine {
 			ret.x /= screenSize.x;
 			ret.y /= screenSize.y;
 
-			ret.x *= frustrum.size.x;
-			ret.y *= frustrum.size.z;
+			ret.x *= frustum.size.x;
+			ret.y *= frustum.size.z;
 
-			const auto & offset = frustrum.position;
+			const auto & offset = frustum.position;
 			ret.x += offset.x;
 			ret.y -= offset.z;
 
@@ -41,15 +41,15 @@ namespace kengine {
 		putils::Point2f getScreenCoordinates(const putils::Point3f & gamePos, const putils::Point2f & screenSize) const noexcept {
 			putils::Point2f ret(gamePos.x, -gamePos.z);
 
-			const auto & offset = frustrum.position;
+			const auto & offset = frustum.position;
 			ret.x -= offset.x;
 			ret.y += offset.z;
 
 			ret.x *= screenSize.x;
 			ret.y *= screenSize.y;
 
-			ret.x /= frustrum.size.x;
-			ret.y /= frustrum.size.z;
+			ret.x /= frustum.size.x;
+			ret.y /= frustum.size.z;
 
 			return ret;
 		}
@@ -61,7 +61,7 @@ namespace kengine {
     public:
         pmeta_get_class_name(CameraComponent);
         pmeta_get_attributes(
-                pmeta_reflectible_attribute(&CameraComponent::frustrum),
+                pmeta_reflectible_attribute(&CameraComponent::frustum),
                 pmeta_reflectible_attribute(&CameraComponent::pitch),
                 pmeta_reflectible_attribute(&CameraComponent::yaw),
                 pmeta_reflectible_attribute(&CameraComponent::roll)
