@@ -593,9 +593,9 @@ namespace kengine {
 
 			g_params.view = [&] {
 				const auto front = glm::normalize(glm::vec3{
-					std::cos(cam.yaw) * std::cos(cam.pitch),
+					std::sin(cam.yaw) * std::cos(cam.pitch),
 					std::sin(cam.pitch),
-					std::sin(cam.yaw) * std::cos(cam.pitch)
+					std::cos(cam.yaw) * std::cos(cam.pitch)
 				});
 				const auto right = glm::normalize(glm::cross(front, { 0.f, 1.f, 0.f }));
 				auto up = glm::normalize(glm::cross(right, front));
