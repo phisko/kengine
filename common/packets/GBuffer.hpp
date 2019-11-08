@@ -17,7 +17,7 @@ namespace kengine::packets {
 		size_t nbAttributes;
 	};
 
-	struct VertexDataAttributeIterator {
+	struct GBufferTexturesIterator {
 		using AttributeFunc = const std::function<void(const char *)> &;
 		std::function<void(AttributeFunc func)> func = nullptr;
 	};
@@ -26,7 +26,7 @@ namespace kengine::packets {
 namespace kengine {
 	template<typename Textures>
 	void initGBuffer(kengine::EntityManager & em) {
-		em.send(packets::VertexDataAttributeIterator{
+		em.send(packets::GBufferTexturesIterator{
 			[](auto func) {
 				putils::for_each_attribute<Textures>([&](auto name, auto member) {
 					func(name);

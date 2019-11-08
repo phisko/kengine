@@ -37,7 +37,7 @@ namespace kengine {
 	struct ModelLoaderComponent;
 
 	class OpenGLSystem : public System<OpenGLSystem, packets::RegisterEntity,
-		packets::DefineGBufferSize, packets::VertexDataAttributeIterator,
+		packets::DefineGBufferSize, packets::GBufferTexturesIterator,
 		packets::GetGBufferSize, packets::GetGBufferTexture,
 		packets::GetEntityInPixel, packets::CaptureMouse
 	> {
@@ -50,7 +50,7 @@ namespace kengine {
 
 		void handle(packets::RegisterEntity p);
 		void handle(packets::DefineGBufferSize p);
-		void handle(packets::VertexDataAttributeIterator p);
+		void handle(packets::GBufferTexturesIterator p);
 		void handle(packets::GetGBufferSize p);
 		void handle(packets::GetGBufferTexture p);
 		void handle(packets::GetEntityInPixel p);
@@ -73,6 +73,6 @@ namespace kengine {
 
 	private:
 		GBuffer _gBuffer;
-		packets::VertexDataAttributeIterator _gBufferIterator;
+		packets::GBufferTexturesIterator _gBufferIterator;
 	};
 }

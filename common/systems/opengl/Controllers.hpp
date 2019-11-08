@@ -47,7 +47,7 @@ namespace kengine {
 		}
 
 		static int TEXTURE_TO_DEBUG = -1;
-		static auto TextureDebugger(EntityManager & em, const GBuffer & gBuffer, const packets::VertexDataAttributeIterator & iterator) {
+		static auto TextureDebugger(EntityManager & em, const GBuffer & gBuffer, const packets::GBufferTexturesIterator & iterator) {
 			return [&](Entity & e) {
 				e += ImGuiComponent([&] {
 					if (ImGui::BeginMainMenuBar()) {

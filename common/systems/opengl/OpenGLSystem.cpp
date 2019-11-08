@@ -283,7 +283,7 @@ namespace kengine {
 			}
 	}
 
-	void OpenGLSystem::handle(packets::VertexDataAttributeIterator p) {
+	void OpenGLSystem::handle(packets::GBufferTexturesIterator p) {
 		_gBufferIterator = p;
 	}
 
