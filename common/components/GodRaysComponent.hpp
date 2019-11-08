@@ -1,6 +1,6 @@
 #pragma once
 
-#include "reflection/Reflectible.hpp"
+#include "reflection.hpp"
 
 namespace kengine {
 	struct GodRaysComponent {

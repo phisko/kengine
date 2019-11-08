@@ -4,7 +4,7 @@
 
 ### Specs
 
-* [Reflectible](https://github.com/phiste/putils/blob/master/reflection/Reflectible.md)
+* [Reflectible](https://github.com/phiste/putils/blob/master/reflection.md)
 * Serializable
 
 ### Members

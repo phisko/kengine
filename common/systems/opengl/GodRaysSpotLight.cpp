@@ -9,7 +9,7 @@
 #include "common/systems/opengl/ShaderHelper.hpp"
 
 #include "ShadowMap.hpp"
-#include "shaders/shaders.hpp"
+#include "shaders/QuadSrc.hpp"
 
 namespace kengine::Shaders {
 	GodRaysSpotLight::GodRaysSpotLight(kengine::EntityManager & em)
@@ -20,10 +20,10 @@ namespace kengine::Shaders {
 
 	void GodRaysSpotLight::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
 		initWithShaders<GodRaysSpotLight>(putils::make_vector(
-			ShaderDescription{ src::Quad::vert, GL_VERTEX_SHADER },
-			ShaderDescription{ src::GodRays::frag, GL_FRAGMENT_SHADER },
-			ShaderDescription{ src::PointLight::GetDirection::frag, GL_FRAGMENT_SHADER },
-			ShaderDescription{ src::ShadowMap::frag, GL_FRAGMENT_SHADER }
+			ShaderDescription{ src::Quad::Vert::glsl, GL_VERTEX_SHADER },
+			ShaderDescription{ src::GodRays::Frag::glsl, GL_FRAGMENT_SHADER },
+			ShaderDescription{ src::PointLight::GetDirection::glsl, GL_FRAGMENT_SHADER },
+			ShaderDescription{ src::ShadowMap::Frag::glsl, GL_FRAGMENT_SHADER }
 		));
 
 		_shadowMapTextureID = (GLuint)firstTextureID;

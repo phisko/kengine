@@ -1,6 +1,7 @@
 namespace kengine::Shaders::src {
     namespace DepthCube {
-        const char * geom = R"(
+		namespace Geom {
+			const char * glsl = R"(
 #version 330
 
 layout (triangles) in;
@@ -20,9 +21,11 @@ void main() {
         EndPrimitive();
     }
 }
-        )";
+			)";
+		}
 
-        const char * frag = R"(
+		namespace Frag {
+			const char * glsl = R"(
 #version 330
 
 in vec4 FragPos;
@@ -35,6 +38,7 @@ void main() {
     lightDistance /= farPlane;
     gl_FragDepth = lightDistance;
 }
-        )";
+			)";
+		}
     }
 }

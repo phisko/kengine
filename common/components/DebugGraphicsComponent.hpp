@@ -6,7 +6,7 @@
 
 #include "string.hpp"
 #include "Color.hpp"
-#include "reflection/Reflectible.hpp"
+#include "reflection.hpp"
 
 namespace kengine {
 	class DebugGraphicsComponent {

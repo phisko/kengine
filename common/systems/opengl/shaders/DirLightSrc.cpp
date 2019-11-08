@@ -1,6 +1,7 @@
 namespace kengine::Shaders::src {
     namespace DirLight {
-        const char * frag = R"(
+		namespace Frag {
+			const char * glsl = R"(
 #version 330
 
 uniform sampler2D gposition;
@@ -72,10 +73,11 @@ void main() {
 			outputColor = outputColor * vec4(0.5, 1.0, 0.5, 1.0);
 	}
 }
-        )";
+)";
+		}
 
         namespace GetDirection {
-            const char * frag = R"(
+            const char * glsl = R"(
 #version 330
 
 uniform vec3 direction;

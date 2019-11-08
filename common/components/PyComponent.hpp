@@ -12,7 +12,7 @@
 #include "vector.hpp"
 
 namespace kengine {
-    class PyComponent : public putils::Reflectible<PyComponent> {
+    class PyComponent {
     public:
 		static constexpr char stringName[] = "PyComponentString";
 		using script = putils::string<KENGINE_MAX_PYTHON_SCRIPT_PATH, stringName>;

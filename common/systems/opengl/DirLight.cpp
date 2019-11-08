@@ -2,18 +2,15 @@
 
 #include "EntityManager.hpp"
 #include "helpers/LightHelper.hpp"
-#include "shaders/shaders.hpp"
 
 #include "components/LightComponent.hpp"
 #include "components/AdjustableComponent.hpp"
 #include "components/ShaderComponent.hpp"
 
 #include "common/systems/opengl/ShaderHelper.hpp"
+#include "shaders/QuadSrc.hpp"
 
 namespace kengine {
-	extern float SHADOW_MAP_MIN_BIAS;
-	extern float SHADOW_MAP_MAX_BIAS;
-
 	static bool DEBUG_CSM = false;
 }
 
@@ -27,9 +24,9 @@ namespace kengine::Shaders {
 
 	void DirLight::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
 		initWithShaders<DirLight>(putils::make_vector(
-			ShaderDescription{ src::Quad::vert, GL_VERTEX_SHADER },
-			ShaderDescription{ src::CSM::frag, GL_FRAGMENT_SHADER },
-			ShaderDescription{ src::DirLight::frag, GL_FRAGMENT_SHADER }
+			ShaderDescription{ src::Quad::Vert::glsl, GL_VERTEX_SHADER },
+			ShaderDescription{ src::CSM::Frag::glsl, GL_FRAGMENT_SHADER },
+			ShaderDescription{ src::DirLight::Frag::glsl, GL_FRAGMENT_SHADER }
 		));
 
 		_shadowMapTextureID = firstTextureID;

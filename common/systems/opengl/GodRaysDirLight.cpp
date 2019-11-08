@@ -9,7 +9,7 @@
 #include "helpers/LightHelper.hpp"
 #include "common/systems/opengl/ShaderHelper.hpp"
 
-#include "shaders/shaders.hpp"
+#include "shaders/QuadSrc.hpp"
 #include "ShadowMap.hpp"
 
 namespace kengine::Shaders {
@@ -21,10 +21,10 @@ namespace kengine::Shaders {
 
 	void GodRaysDirLight::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
 		initWithShaders<GodRaysDirLight>(putils::make_vector(
-			ShaderDescription{ src::Quad::vert, GL_VERTEX_SHADER },
-			ShaderDescription{ src::GodRays::frag, GL_FRAGMENT_SHADER },
-			ShaderDescription{ src::DirLight::GetDirection::frag, GL_FRAGMENT_SHADER },
-			ShaderDescription{ src::CSM::frag, GL_FRAGMENT_SHADER }
+			ShaderDescription{ src::Quad::Vert::glsl, GL_VERTEX_SHADER },
+			ShaderDescription{ src::GodRays::Frag::glsl, GL_FRAGMENT_SHADER },
+			ShaderDescription{ src::DirLight::GetDirection::glsl, GL_FRAGMENT_SHADER },
+			ShaderDescription{ src::CSM::Frag::glsl, GL_FRAGMENT_SHADER }
 		));
 
 		_shadowMapTextureID = (GLuint)firstTextureID;

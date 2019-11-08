@@ -3,7 +3,7 @@
 
 #include "components/HighlightComponent.hpp"
 
-#include "shaders/shaders.hpp"
+#include "shaders/QuadSrc.hpp"
 #include "common/systems/opengl/ShaderHelper.hpp"
 
 static const auto frag = R"(
@@ -65,7 +65,7 @@ namespace kengine::Shaders {
 
 	void Highlight::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
 		initWithShaders<Highlight>(putils::make_vector(
-			ShaderDescription{ src::Quad::vert, GL_VERTEX_SHADER },
+			ShaderDescription{ src::Quad::Vert::glsl, GL_VERTEX_SHADER },
 			ShaderDescription{ frag, GL_FRAGMENT_SHADER }
 		));
 	}

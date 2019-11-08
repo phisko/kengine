@@ -8,7 +8,7 @@ In all the following functions, a `script` is the path to a file containing a sc
 
 ### Specs
 
-* [Reflectible](https://github.com/phiste/putils/blob/master/reflection/Reflectible.md)
+* [Reflectible](https://github.com/phiste/putils/blob/master/reflection.md)
 * Serializable
 
 The maximum length of a script name (stored as a [putils::string](https://github.com/phiste/putils/blob/master/string.hpp)) defaults to 64, and can be adjusted by defining the `KENGINE_MAX_LUA_SCRIPT_PATH` macro.
@@ -54,7 +54,7 @@ const script_vector &getScripts() const noexcept;
 
 `Component` that holds a lua table that can be used to store arbitrary information in the `Entity`.
 
-* [Reflectible](https://github.com/phiste/putils/blob/master/reflection/Reflectible.md)
+* [Reflectible](https://github.com/phiste/putils/blob/master/reflection.md)
 * Not serializable
 
 ### Members

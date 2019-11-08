@@ -4,6 +4,7 @@
 #include "Entity.hpp"
 
 #include "components/ShaderComponent.hpp"
+#include "shaders/ProjViewModelSrc.hpp"
 
 namespace kengine {
 	class EntityManager;
@@ -12,7 +13,9 @@ namespace kengine {
 }
 
 namespace kengine::Shaders {
-	class ShadowMap : public ShadowMapShader {
+	class ShadowMap : public ShadowMapShader,
+		public src::ProjViewModel::Vert::Uniforms
+	{
 	public:
 		ShadowMap(kengine::EntityManager & em);
 
@@ -30,14 +33,8 @@ namespace kengine::Shaders {
 		kengine::EntityManager & _em;
 
 	public:
-		putils::gl::Uniform<glm::mat4> _proj;
-		putils::gl::Uniform<glm::mat4> _view;
-		putils::gl::Uniform<glm::mat4> _model;
-
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute_private(&ShadowMap::_proj),
-			pmeta_reflectible_attribute_private(&ShadowMap::_view),
-			pmeta_reflectible_attribute_private(&ShadowMap::_model)
+		pmeta_get_parents(
+			pmeta_reflectible_parent(src::ProjViewModel::Vert::Uniforms)
 		);
 	};
 

@@ -7,7 +7,7 @@
 #include "components/TextComponent.hpp"
 #include "components/TransformComponent.hpp"
 
-#include "shaders/shaders.hpp"
+#include "shaders/ApplyTransparencySrc.hpp"
 
 #include "common/systems/opengl/ShaderHelper.hpp"
 #include "helpers/math.hpp"
@@ -154,7 +154,7 @@ namespace kengine::Shaders {
 		initWithShaders<Text>(putils::make_vector(
 			ShaderDescription{ vert, GL_VERTEX_SHADER },
 			ShaderDescription{ frag, GL_FRAGMENT_SHADER },
-			ShaderDescription{ kengine::Shaders::src::ApplyTransparency::frag, GL_FRAGMENT_SHADER }
+			ShaderDescription{ kengine::Shaders::src::ApplyTransparency::Frag::glsl, GL_FRAGMENT_SHADER }
 		));
 
 		_textureID = firstTextureID;

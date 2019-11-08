@@ -2,6 +2,7 @@
 
 #include "putils/opengl/Program.hpp"
 #include "components/ShaderComponent.hpp"
+#include "systems/opengl/shaders/DepthCubeSrc.hpp"
 
 namespace kengine {
 	class EntityManager;
@@ -9,7 +10,10 @@ namespace kengine {
 }
 
 namespace kengine {
-	class AssImpShadowCube : public ShadowCubeShader {
+	class AssImpShadowCube : public ShadowCubeShader,
+		public Shaders::src::DepthCube::Geom::Uniforms,
+		public Shaders::src::DepthCube::Frag::Uniforms
+	{
 	public:
 		AssImpShadowCube(kengine::EntityManager & em)
 			: ShadowCubeShader(false, pmeta_nameof(AssImpShadowCube)),
@@ -28,9 +32,6 @@ namespace kengine {
 		putils::gl::Uniform<glm::mat4> _view;
 		putils::gl::Uniform<glm::mat4> _model;
 
-		putils::gl::Uniform<glm::vec3> _lightPos;
-		putils::gl::Uniform<float> _farPlane;
-
 		GLint _bones;
 
 		pmeta_get_attributes(
@@ -38,11 +39,12 @@ namespace kengine {
 			pmeta_reflectible_attribute_private(&AssImpShadowCube::_view),
 			pmeta_reflectible_attribute_private(&AssImpShadowCube::_model),
 
-			pmeta_reflectible_attribute_private(&AssImpShadowCube::_lightPos),
-			pmeta_reflectible_attribute_private(&AssImpShadowCube::_farPlane),
-
 			pmeta_reflectible_attribute_private(&AssImpShadowCube::_bones)
 		);
 
+		pmeta_get_parents(
+			pmeta_reflectible_parent(Shaders::src::DepthCube::Geom::Uniforms),
+			pmeta_reflectible_parent(Shaders::src::DepthCube::Frag::Uniforms)
+		);
 	};
 }

@@ -1,6 +1,5 @@
 #include "ShadowMap.hpp"
 #include "EntityManager.hpp"
-#include "shaders/shaders.hpp"
 
 #include "components/GraphicsComponent.hpp"
 #include "components/AdjustableComponent.hpp"
@@ -26,7 +25,7 @@ namespace kengine::Shaders {
 
 	void ShadowMap::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
 		initWithShaders<ShadowMap>(putils::make_vector(
-			ShaderDescription{ src::ProjViewModel::vert, GL_VERTEX_SHADER }
+			ShaderDescription{ src::ProjViewModel::Vert::glsl, GL_VERTEX_SHADER }
 		));
 
 		_proj = glm::mat4(1.f);

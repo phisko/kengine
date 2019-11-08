@@ -8,7 +8,7 @@
 #include "components/ModelComponent.hpp"
 #include "components/OpenGLModelComponent.hpp"
 
-#include "common/systems/opengl/shaders/shaders.hpp"
+#include "common/systems/opengl/shaders/ApplyTransparencySrc.hpp"
 
 #include "common/systems/opengl/ShaderHelper.hpp"
 
@@ -76,7 +76,7 @@ namespace kengine {
 		initWithShaders<PolyVoxShader>(putils::make_vector(
 			ShaderDescription{ vert, GL_VERTEX_SHADER },
 			ShaderDescription{ frag, GL_FRAGMENT_SHADER },
-			ShaderDescription{ kengine::Shaders::src::ApplyTransparency::frag, GL_FRAGMENT_SHADER }
+			ShaderDescription{ kengine::Shaders::src::ApplyTransparency::Frag::glsl, GL_FRAGMENT_SHADER }
 		));
 	}
 

@@ -2,6 +2,8 @@
 
 #include "opengl/Program.hpp"
 #include "components/ShaderComponent.hpp"
+#include "shaders/ShadowMapSrc.hpp"
+#include "shaders/DirLightSrc.hpp"
 
 namespace kengine {
 	class EntityManager;
@@ -9,7 +11,10 @@ namespace kengine {
 }
 
 namespace kengine::Shaders {
-	class DirLight : public putils::gl::Program {
+	class DirLight : public putils::gl::Program,
+		public src::CSM::Frag::Uniforms,
+		public src::DirLight::Frag::Uniforms
+	{
 	public:
 		DirLight(kengine::EntityManager & em);
 
@@ -20,49 +25,9 @@ namespace kengine::Shaders {
 		void setLight(const DirLightComponent & light); 
 
 	public:
-		putils::gl::Uniform<glm::mat4> _proj;
-		putils::gl::Uniform<glm::mat4> _view;
-
-		// shadowMap
-		putils::gl::Uniform<glm::mat4> _lightSpaceMatrix[KENGINE_CSM_COUNT];
-		putils::gl::Uniform<size_t> _shadowMap[KENGINE_CSM_COUNT];
-		putils::gl::Uniform<float> _cascadeEnd[KENGINE_CSM_COUNT];
-		putils::gl::Uniform<float> _bias;
-		putils::gl::Uniform<int> _pcfSamples;
-
-		putils::gl::Uniform<glm::vec3> _viewPos;
-		putils::gl::Uniform<putils::Point2f> _screenSize;
-
-		putils::gl::Uniform<putils::NormalizedColor> _color;
-		putils::gl::Uniform<putils::Vector3f> _direction;
-
-		putils::gl::Uniform<float> _ambientStrength;
-		putils::gl::Uniform<float> _diffuseStrength;
-		putils::gl::Uniform<float> _specularStrength;
-
-		putils::gl::Uniform<bool> _debugCSM;
-
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute_private(&DirLight::_proj),
-			pmeta_reflectible_attribute_private(&DirLight::_view),
-
-			pmeta_reflectible_attribute_private(&DirLight::_lightSpaceMatrix),
-			pmeta_reflectible_attribute_private(&DirLight::_shadowMap),
-			pmeta_reflectible_attribute_private(&DirLight::_cascadeEnd),
-			pmeta_reflectible_attribute_private(&DirLight::_bias),
-			pmeta_reflectible_attribute_private(&DirLight::_pcfSamples),
-
-			pmeta_reflectible_attribute_private(&DirLight::_viewPos),
-			pmeta_reflectible_attribute_private(&DirLight::_screenSize),
-
-			pmeta_reflectible_attribute_private(&DirLight::_color),
-			pmeta_reflectible_attribute_private(&DirLight::_direction),
-
-			pmeta_reflectible_attribute_private(&DirLight::_ambientStrength),
-			pmeta_reflectible_attribute_private(&DirLight::_diffuseStrength),
-			pmeta_reflectible_attribute_private(&DirLight::_specularStrength),
-
-			pmeta_reflectible_attribute_private(&DirLight::_debugCSM)
+		pmeta_get_parents(
+			pmeta_reflectible_parent(src::CSM::Frag::Uniforms),
+			pmeta_reflectible_parent(src::DirLight::Frag::Uniforms)
 		);
 
 	private:

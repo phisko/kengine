@@ -1,6 +1,6 @@
 namespace kengine::Shaders::src {
-    namespace GodRays {
-        const char * frag = R"(
+    namespace GodRays::Frag {
+        const char * glsl = R"(
 #version 330
 
 uniform sampler2D gposition;

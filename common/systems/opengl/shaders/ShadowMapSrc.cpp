@@ -1,9 +1,9 @@
-#include "components/ShaderComponent.hpp"
 #include "macro_as_string.hpp"
 
 namespace kengine::Shaders::src {
-    namespace ShadowMap {
-        const char * frag = R"(
+	namespace ShadowMap {
+		namespace Frag {
+			const char * glsl = R"(
 #version 330
 
 uniform sampler2D shadowMap;
@@ -45,11 +45,13 @@ float calcShadow(vec3 worldPos, vec3 normal, vec3 lightDir) {
 
     return shadow;
 }
-        )";
-    }
+			)";
+		}
+	}
 
 	namespace CSM {
-		const char * frag = R"(
+		namespace Frag {
+			const char * glsl = R"(
 #version 330
 
 const int CSM_COUNT = )" putils_macro_as_string(KENGINE_CSM_COUNT) R"(;
@@ -119,5 +121,6 @@ float calcShadow(vec3 worldPos, vec3 normal, vec3 lightDir) {
 	return 0.0;
 }
 )";
+		}
 	}
 }

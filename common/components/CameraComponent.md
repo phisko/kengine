@@ -6,7 +6,7 @@ Its overall layout is very similar to that of the [TransformComponent](Transform
 
 ### Specs
 
-* [Reflectible](https://github.com/phiste/putils/blob/master/reflection/Reflectible.md)
+* [Reflectible](https://github.com/phiste/putils/blob/master/reflection.md)
 * Serializable
 
 ### Members

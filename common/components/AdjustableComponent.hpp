@@ -5,7 +5,7 @@
 #endif
 
 #include "string.hpp"
-#include "reflection/Reflectible.hpp"
+#include "reflection.hpp"
 #include "Color.hpp"
 #include "magic_enum.hpp"
 #include "lengthof.hpp"

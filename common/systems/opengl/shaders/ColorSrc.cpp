@@ -1,6 +1,7 @@
 namespace kengine::Shaders::src {
     namespace Color {
-        const char * frag = R"(
+		namespace Frag {
+			const char * glsl = R"(
 #version 330
 
 uniform vec4 color;
@@ -10,5 +11,6 @@ void main() {
     outColor = color;
 }
         )";
+		}
     }
 }

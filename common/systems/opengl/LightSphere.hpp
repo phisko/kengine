@@ -3,6 +3,7 @@
 #include <GL/glew.h>
 #include "glm/fwd.hpp"
 #include "opengl/Program.hpp"
+#include "shaders/ProjViewModelSrc.hpp"
 
 namespace kengine {
 	class EntityManager;
@@ -10,7 +11,9 @@ namespace kengine {
 }
 
 namespace kengine::Shaders {
-	class LightSphere : public putils::gl::Program {
+	class LightSphere : public putils::gl::Program,
+		public src::ProjViewModel::Vert::Uniforms
+	{
 	public:
 		LightSphere(kengine::EntityManager & em);
 
@@ -21,16 +24,14 @@ namespace kengine::Shaders {
 		void drawLight(const LightComponent & light, const glm::vec3 & pos, float size);
 
 	public:
-		putils::gl::Uniform<glm::mat4> _proj;
-		putils::gl::Uniform<glm::mat4> _view;
-		putils::gl::Uniform<glm::mat4> _model;
-
 		putils::gl::Uniform<putils::NormalizedColor> _color;
 
+	public:
+		pmeta_get_parents(
+			pmeta_reflectible_parent(src::ProjViewModel::Vert::Uniforms)
+		);
+
 		pmeta_get_attributes(
-			pmeta_reflectible_attribute_private(&LightSphere::_proj),
-			pmeta_reflectible_attribute_private(&LightSphere::_view),
-			pmeta_reflectible_attribute_private(&LightSphere::_model),
 			pmeta_reflectible_attribute_private(&LightSphere::_color)
 		);
 

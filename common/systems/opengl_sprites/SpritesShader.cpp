@@ -8,7 +8,7 @@
 #include "components/OpenGLModelComponent.hpp"
 #include "components/SpriteComponent.hpp"
 
-#include "systems/opengl/shaders/shaders.hpp"
+#include "systems/opengl/shaders/ApplyTransparencySrc.hpp"
 
 #include "common/systems/opengl/ShaderHelper.hpp"
 #include "helpers/math.hpp"
@@ -80,7 +80,7 @@ namespace kengine {
 		initWithShaders<SpritesShader>(putils::make_vector(
 			ShaderDescription{ vert, GL_VERTEX_SHADER },
 			ShaderDescription{ frag, GL_FRAGMENT_SHADER },
-			ShaderDescription{ kengine::Shaders::src::ApplyTransparency::frag, GL_FRAGMENT_SHADER }
+			ShaderDescription{ kengine::Shaders::src::ApplyTransparency::Frag::glsl, GL_FRAGMENT_SHADER }
 		));
 
 		_textureID = firstTextureID;

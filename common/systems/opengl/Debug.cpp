@@ -5,7 +5,7 @@
 #include "components/TransformComponent.hpp"
 
 #include "common/systems/opengl/ShaderHelper.hpp"
-#include "shaders/shaders.hpp"
+#include "shaders/ApplyTransparencySrc.hpp"
 
 static const char * vert = R"(
 #version 330
@@ -65,7 +65,7 @@ namespace kengine::Shaders {
 		initWithShaders<Debug>(putils::make_vector(
 			ShaderDescription{ vert, GL_VERTEX_SHADER },
 			ShaderDescription{ frag, GL_FRAGMENT_SHADER },
-			ShaderDescription{ src::ApplyTransparency::frag, GL_FRAGMENT_SHADER }
+			ShaderDescription{ src::ApplyTransparency::Frag::glsl, GL_FRAGMENT_SHADER }
 		));
 	}
 

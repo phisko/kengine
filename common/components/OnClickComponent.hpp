@@ -5,7 +5,7 @@
 #endif
 
 #include "not_serializable.hpp"
-#include "reflection/Reflectible.hpp"
+#include "reflection.hpp"
 #include "function.hpp"
 
 namespace kengine {

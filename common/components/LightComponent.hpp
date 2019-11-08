@@ -1,6 +1,6 @@
 #pragma once
 
-#include "reflection/Reflectible.hpp"
+#include "reflection.hpp"
 #include "Point.hpp"
 #include "Color.hpp"
 

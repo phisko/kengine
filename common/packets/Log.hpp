@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "putils/reflection/Reflectible.hpp"
+#include "putils/reflection.hpp"
 
 namespace kengine {
     namespace packets {

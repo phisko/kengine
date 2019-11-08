@@ -48,7 +48,7 @@ namespace kengine {
 				}
 			}
 			else if constexpr (putils::has_member_get_attributes<Member>::value) {
-				putils::for_each_attribute(Member::get_attributes(), [&member, &object](const char * name, const auto attr) {
+				putils::for_each_attribute<Member>([&member, &object](const char * name, const auto attr) {
 					const auto attrJSON = object.find(name);
 					if (attrJSON != object.end())
 						loadJSONObject(*attrJSON, member.*attr);

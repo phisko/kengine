@@ -5,7 +5,7 @@
 #include "components/OpenGLModelComponent.hpp"
 #include "components/SkeletonComponent.hpp"
 
-#include "systems/opengl/shaders/shaders.hpp"
+#include "systems/opengl/shaders/ApplyTransparencySrc.hpp"
 
 #include "common/systems/opengl/ShaderHelper.hpp"
 
@@ -19,7 +19,7 @@ namespace kengine {
 		initWithShaders<AssImpShader>(putils::make_vector(
 			ShaderDescription{ src::TexturedShader::vert, GL_VERTEX_SHADER },
 			ShaderDescription{ src::TexturedShader::frag, GL_FRAGMENT_SHADER },
-			ShaderDescription{ kengine::Shaders::src::ApplyTransparency::frag, GL_FRAGMENT_SHADER }
+			ShaderDescription{ kengine::Shaders::src::ApplyTransparency::Frag::glsl, GL_FRAGMENT_SHADER }
 		));
 
 		_diffuseTextureID = firstTextureID;

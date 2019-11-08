@@ -8,7 +8,7 @@ The maximum length of the adjustable's name (stored as a [putils::string](https:
 
 ### Specs
 
-* [Reflectible](https://github.com/phiste/putils/blob/master/reflection/Reflectible.md)
+* [Reflectible](https://github.com/phiste/putils/blob/master/reflection.md)
 * Not serializable, but the adjustable system you use may externally save adjustable values
 
 ### Usage

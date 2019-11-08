@@ -5,7 +5,7 @@ Attached to the `Entity` itself.
 
 ### Specs
 
-* [Reflectible](https://github.com/phiste/putils/blob/master/reflection/Reflectible.md)
+* [Reflectible](https://github.com/phiste/putils/blob/master/reflection.md)
 * Not serializable
 
 ### Members
@@ -41,7 +41,7 @@ Attached to the `Entity` itself, used to populate its [model info](ModelComponen
 
 ### Specs
 
-* [Reflectible](https://github.com/phiste/putils/blob/master/reflection/Reflectible.md)
+* [Reflectible](https://github.com/phiste/putils/blob/master/reflection.md)
 * Not serializable
 
 ### Members
@@ -62,7 +62,7 @@ Attached to a [model info](ModelComponent.md) `Entity`, shared by all `Entities`
 
 ### Specs
 
-* [Reflectible](https://github.com/phiste/putils/blob/master/reflection/Reflectible.md)
+* [Reflectible](https://github.com/phiste/putils/blob/master/reflection.md)
 * Not serializable
 
 ### Anim type

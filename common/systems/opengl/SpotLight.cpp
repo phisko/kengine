@@ -1,26 +1,20 @@
 #include "SpotLight.hpp"
 
-#include "ShadowMap.hpp"
 #include "EntityManager.hpp"
-#include "shaders/shaders.hpp"
 
 #include "components/TransformComponent.hpp"
 #include "components/LightComponent.hpp"
+#include "components/ShaderComponent.hpp"
 
 #include "helpers/LightHelper.hpp"
 #include "common/systems/opengl/ShaderHelper.hpp"
 
-namespace kengine {
-	extern float SHADOW_MAP_MIN_BIAS;
-	extern float SHADOW_MAP_MAX_BIAS;
-}
-
 namespace kengine::Shaders {
 	void SpotLight::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
 		initWithShaders<SpotLight>(putils::make_vector(
-			ShaderDescription{ src::ProjViewModel::vert, GL_VERTEX_SHADER },
-			ShaderDescription{ src::ShadowMap::frag, GL_FRAGMENT_SHADER },
-			ShaderDescription{ src::SpotLight::frag, GL_FRAGMENT_SHADER }
+			ShaderDescription{ src::ProjViewModel::Vert::glsl, GL_VERTEX_SHADER },
+			ShaderDescription{ src::ShadowMap::Frag::glsl, GL_FRAGMENT_SHADER },
+			ShaderDescription{ src::SpotLight::Frag::glsl, GL_FRAGMENT_SHADER }
 		));
 
 		_shadowMapTextureID = firstTextureID;

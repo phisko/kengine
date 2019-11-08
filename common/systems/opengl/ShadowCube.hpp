@@ -1,6 +1,8 @@
 #pragma once 
 
 #include "opengl/Program.hpp"
+#include "shaders/ProjViewModelSrc.hpp"
+#include "shaders/DepthCubeSrc.hpp"
 #include "Entity.hpp"
 
 #include "components/ShaderComponent.hpp"
@@ -11,7 +13,11 @@ namespace kengine {
 }
 
 namespace kengine::Shaders {
-	class ShadowCube : public ShadowCubeShader {
+	class ShadowCube : public ShadowCubeShader,
+		public src::ProjViewModel::Vert::Uniforms,
+		public src::DepthCube::Frag::Uniforms,
+		public src::DepthCube::Geom::Uniforms
+	{
 	public:
 		ShadowCube(kengine::EntityManager & em) : ShadowCubeShader(false, pmeta_nameof(ShadowCube)), _em(em) {}
 
@@ -24,20 +30,10 @@ namespace kengine::Shaders {
 		kengine::EntityManager & _em;
 
 	public:
-		putils::gl::Uniform<glm::mat4> _proj;
-		putils::gl::Uniform<glm::mat4> _view;
-		putils::gl::Uniform<glm::mat4> _model;
-
-		putils::gl::Uniform<putils::Point3f> _lightPos;
-		putils::gl::Uniform<float> _farPlane;
-
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute_private(&ShadowCube::_proj),
-			pmeta_reflectible_attribute_private(&ShadowCube::_view),
-			pmeta_reflectible_attribute_private(&ShadowCube::_model),
-
-			pmeta_reflectible_attribute_private(&ShadowCube::_lightPos),
-			pmeta_reflectible_attribute_private(&ShadowCube::_farPlane)
+		pmeta_get_parents(
+			pmeta_reflectible_parent(src::ProjViewModel::Vert::Uniforms),
+			pmeta_reflectible_parent(src::DepthCube::Frag::Uniforms),
+			pmeta_reflectible_parent(src::DepthCube::Geom::Uniforms)
 		);
 	};
 }

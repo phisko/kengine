@@ -1,6 +1,7 @@
 namespace kengine::Shaders::src {
-    namespace ShadowCube {
-        const char * frag = R"(
+	namespace ShadowCube {
+		namespace Frag {
+			const char * glsl = R"(
 #version 330
 
 uniform samplerCube shadowMap;
@@ -44,5 +45,6 @@ float calcShadow(vec3 worldPos, vec3 normal, vec3 lightDirIgnore) {
 	return shadow;
 }
         )";
-    }
+		}
+	}
 }

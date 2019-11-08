@@ -1,11 +1,11 @@
 #pragma once
 
-#include "reflection/Reflectible.hpp"
+#include "reflection.hpp"
 #include "Point.hpp"
 
 namespace kengine {
     template<typename Precision, std::size_t Dimensions>
-    class TransformComponent : public putils::Reflectible<TransformComponent<Precision, Dimensions>> {
+    class TransformComponent {
     public:
         TransformComponent(const putils::Point<Precision, Dimensions> & pos = { 0, 0 },
                            const putils::Point<Precision, Dimensions> & size = { 1, 1 })

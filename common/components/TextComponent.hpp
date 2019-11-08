@@ -1,6 +1,6 @@
 #pragma once
 
-#include "reflection/Reflectible.hpp"
+#include "reflection.hpp"
 
 #ifndef KENGINE_FONT_PATH_MAX_LENGTH
 # define KENGINE_FONT_PATH_MAX_LENGTH 128

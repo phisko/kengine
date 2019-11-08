@@ -37,7 +37,7 @@ namespace kengine {
 
 			else if constexpr (putils::has_member_get_attributes<Member>::value) {
 				bool matches = false;
-				putils::for_each_attribute(Member::get_attributes(), [&](const char * name, const auto attr) {
+				putils::for_each_attribute<Member>([&](const char * name, const auto attr) {
 					matches |= matchAttribute(member.*attr, str);
 				});
 				return matches;
@@ -70,7 +70,7 @@ namespace kengine {
 			bool matches = false;
 			if constexpr (putils::has_member_get_attributes<Comp>::value) {
 				auto & comp = e.get<Comp>();
-				putils::for_each_attribute(Comp::get_attributes(), [&](const char * name, const auto member) {
+				putils::for_each_attribute<Comp>([&](const char * name, const auto member) {
 					if (matchAttribute(comp.*member, str))
 						matches = true;
 				});

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+
 namespace kengine::packets {
 	struct GetGBufferSize {
 		putils::Point2ui & size;
@@ -26,7 +28,7 @@ namespace kengine {
 	void initGBuffer(kengine::EntityManager & em) {
 		em.send(packets::VertexDataAttributeIterator{
 			[](auto func) {
-				putils::for_each_attribute(Textures::get_attributes(), [&](auto name, auto member) {
+				putils::for_each_attribute<Textures>([&](auto name, auto member) {
 					func(name);
 				});
 			}

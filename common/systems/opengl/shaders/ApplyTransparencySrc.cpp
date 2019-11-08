@@ -1,6 +1,7 @@
 namespace kengine::Shaders::src {
 	namespace ApplyTransparency {
-		const char * frag = R"(
+		namespace Frag {
+			const char * glsl = R"(
 #version 330
 
 void applyTransparency(float alpha) {
@@ -58,5 +59,6 @@ void applyTransparency(float alpha) {
 		discard;
 }
 )";
+		}
 	}
 }

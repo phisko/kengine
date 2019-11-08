@@ -5,7 +5,7 @@
 #endif
 
 #include "function.hpp"
-#include "reflection/Reflectible.hpp"
+#include "reflection.hpp"
 
 namespace kengine {
 	class CollisionComponent : kengine::not_serializable {

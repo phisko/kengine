@@ -2,7 +2,6 @@
 
 #include "ShadowCube.hpp"
 #include "EntityManager.hpp"
-#include "shaders/shaders.hpp"
 
 #include "components/TransformComponent.hpp"
 #include "components/LightComponent.hpp"
@@ -15,9 +14,9 @@
 namespace kengine::Shaders {
 	void PointLight::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
 		initWithShaders<PointLight>(putils::make_vector(
-			ShaderDescription{ src::ProjViewModel::vert, GL_VERTEX_SHADER },
-			ShaderDescription{ src::PointLight::frag, GL_FRAGMENT_SHADER },
-			ShaderDescription{ src::ShadowCube::frag, GL_FRAGMENT_SHADER }
+			ShaderDescription{ src::ProjViewModel::Vert::glsl, GL_VERTEX_SHADER },
+			ShaderDescription{ src::PointLight::Frag::glsl, GL_FRAGMENT_SHADER },
+			ShaderDescription{ src::ShadowCube::Frag::glsl, GL_FRAGMENT_SHADER }
 		));
 
 		use();
@@ -34,7 +33,8 @@ namespace kengine::Shaders {
 		glBlendFunc(GL_ONE, GL_ONE);
 
 		use();
-		_viewPos = params.camPos;
+		src::ShadowCube::Frag::Uniforms::_viewPos = params.camPos;
+		assert(src::ShadowCube::Frag::Uniforms::_viewPos.location == src::PointLight::Frag::Uniforms::_viewPos.location);
 		_screenSize = putils::Point2f(params.viewPort.size);
 
 		glActiveTexture((GLenum)(GL_TEXTURE0 + _shadowMapTextureID));
@@ -76,7 +76,8 @@ namespace kengine::Shaders {
 
 	void PointLight::setLight(const PointLightComponent & light, const putils::Point3f & pos, float radius) {
 		_color = light.color;
-		_position = pos;
+		src::ShadowCube::Frag::Uniforms::_position = pos;
+		assert(src::ShadowCube::Frag::Uniforms::_position.location == src::PointLight::Frag::Uniforms::_position.location);
 
 		_diffuseStrength = light.diffuseStrength;
 		_specularStrength = light.specularStrength;

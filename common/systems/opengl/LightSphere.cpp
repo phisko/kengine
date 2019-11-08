@@ -1,13 +1,13 @@
 #include "LightSphere.hpp"
 #include "EntityManager.hpp"
 
-#include "shaders/shaders.hpp"
-
 #include "components/LightComponent.hpp"
 #include "components/TransformComponent.hpp"
 #include "components/AdjustableComponent.hpp"
 
 #include "common/systems/opengl/ShaderHelper.hpp"
+
+#include "shaders/ColorSrc.hpp"
 
 static auto SPHERE_SIZE = .25f;
 static auto SUN_DIST = 500.f;
@@ -26,8 +26,8 @@ namespace kengine::Shaders {
 
 	void LightSphere::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
 		initWithShaders<LightSphere>(putils::make_vector(
-			ShaderDescription{ src::ProjViewModel::vert, GL_VERTEX_SHADER },
-			ShaderDescription{ src::Color::frag, GL_FRAGMENT_SHADER }
+			ShaderDescription{ src::ProjViewModel::Vert::glsl, GL_VERTEX_SHADER },
+			ShaderDescription{ src::Color::Frag::glsl, GL_FRAGMENT_SHADER }
 		));
 	}
 

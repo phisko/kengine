@@ -1,6 +1,7 @@
 namespace kengine::Shaders::src {
-    namespace SpotLight {
-        const char * frag = R"(
+	namespace SpotLight {
+		namespace Frag {
+			const char * glsl = R"(
 #version 330
 
 uniform sampler2D gposition;
@@ -63,5 +64,6 @@ void main() {
 	}
 }
         )";
-    }
+		}
+	}
 }

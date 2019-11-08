@@ -4,7 +4,7 @@
 
 namespace kengine {
     template<typename Precision, std::size_t Dimensions>
-    class CameraComponent : public putils::Reflectible<CameraComponent<Precision, Dimensions>> {
+    class CameraComponent {
     public:
         CameraComponent(const putils::Point<Precision, Dimensions> & pos = { 0, 0 },
                         const putils::Point<Precision, Dimensions> & size = { 1, 1 })

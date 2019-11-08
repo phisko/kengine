@@ -4,7 +4,7 @@
 #include <bitset>
 #include <cstddef>
 #include "Component.hpp"
-#include "reflection/Reflectible.hpp"
+#include "reflection.hpp"
 
 #ifndef KENGINE_COMPONENT_COUNT
 # define KENGINE_COMPONENT_COUNT 64
