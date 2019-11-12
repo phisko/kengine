@@ -4,6 +4,7 @@
 
 #include "EntityManager.hpp"
 #include "components/TransformComponent.hpp"
+#include "components/ViewportComponent.hpp"
 #include "components/CameraComponent.hpp"
 #include "components/InputComponent.hpp"
 #include "components/ImGuiComponent.hpp"
@@ -114,8 +115,7 @@ namespace kengine {
 
 		ImGui::SFML::Update(_engine.getRenderWindow(), _deltaClock.restart());
 
-		const auto objects = _em.getEntities<ImGuiComponent>();
-		for (const auto & [e, comp] : objects)
+		for (const auto & [e, comp] : _em.getEntities<ImGuiComponent>())
 			comp.display(GImGui);
 
 		updateCameras();
@@ -125,9 +125,7 @@ namespace kengine {
 	}
 
 	void SfSystem::updateCameras() noexcept {
-		const auto cameras = _em.getEntities<CameraComponent3f, TransformComponent3f>();
-
-		for (const auto & [e, cam, transform] : cameras) {
+		for (const auto & [e, cam, viewport] : _em.getEntities<CameraComponent3f, ViewportComponent>()) {
 			_engine.removeView("default");
 
 			const auto name = putils::toString(e.id);
@@ -144,10 +142,10 @@ namespace kengine {
 				view.setSize(size);
 			}
 
-			const auto & box = transform.boundingBox;
+			const auto & box = viewport.boundingBox;
 			view.setViewport(sf::FloatRect{
-					(float)box.position.x, (float)box.position.z,
-					(float)box.size.x, (float)box.size.z
+					(float)box.position.x, (float)box.position.y,
+					(float)box.size.x, (float)box.size.y
 				});
 			_engine.setViewHeight(name, (size_t)box.position.y);
 		}

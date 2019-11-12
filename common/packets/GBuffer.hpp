@@ -3,16 +3,6 @@
 #include <functional>
 
 namespace kengine::packets {
-	struct GetGBufferSize {
-		putils::Point2ui & size;
-	};
-
-	struct GetGBufferTexture { // WARNING: texture is flipped vertically (you'll want to do `y = (height - y)` before indexing)
-		size_t textureIndex;
-		float * buff;
-		size_t buffSize;
-	};
-
 	struct DefineGBufferSize {
 		size_t nbAttributes;
 	};

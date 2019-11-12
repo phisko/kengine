@@ -7,7 +7,7 @@
 #include "packets/GBuffer.hpp"
 
 namespace kengine {
-	class GBuffer {
+	class GBufferComponent {
 	public:
 		void init(size_t width, size_t height, size_t nbAttributes) {
 			if (!textures.empty())
@@ -81,7 +81,7 @@ namespace kengine {
 
 		const auto & getSize() const { return _size; }
 
-		void getTexture(size_t textureIndex, float * buff, size_t buffSize) {
+		void getTexture(size_t textureIndex, float * buff, size_t buffSize) const {
 			if (glGetnTexImage == nullptr) {
 				memset(buff, 0, buffSize * sizeof(float));
 				return;

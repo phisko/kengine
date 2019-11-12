@@ -16,7 +16,7 @@ namespace kengine {
 	// so long as you are careful to declare the reflectible attributes in the same order
 	// (as that order will define their GLSL locations)
 	struct GBufferTextures {
-		// This format is not optimized, as the entity id could fit in with the normal or color
+		// This format is not optimized, as the entity id could fit in with the normal
 		// However, this has not caused any performance issues so far, and this being a learning project
 		// for me I'd rather keep things clear and simple.
 		// If this is a no-no for you, please open an issue on github and I'll change things around
@@ -38,7 +38,6 @@ namespace kengine {
 
 	class OpenGLSystem : public System<OpenGLSystem, packets::RegisterEntity,
 		packets::DefineGBufferSize, packets::GBufferTexturesIterator,
-		packets::GetGBufferSize, packets::GetGBufferTexture,
 		packets::GetEntityInPixel, packets::CaptureMouse
 	> {
 	public:
@@ -51,8 +50,6 @@ namespace kengine {
 		void handle(packets::RegisterEntity p);
 		void handle(packets::DefineGBufferSize p);
 		void handle(packets::GBufferTexturesIterator p);
-		void handle(packets::GetGBufferSize p);
-		void handle(packets::GetGBufferTexture p);
 		void handle(packets::GetEntityInPixel p);
 		void handle(packets::CaptureMouse p);
 
@@ -66,13 +63,10 @@ namespace kengine {
 
 		void initShader(putils::gl::Program & p);
 
-		void debugTexture(GLint texture);
-
 	private:
 		EntityManager & _em;
 
 	private:
-		GBuffer _gBuffer;
 		packets::GBufferTexturesIterator _gBufferIterator;
 	};
 }

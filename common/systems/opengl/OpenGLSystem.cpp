@@ -18,14 +18,15 @@
 #include "components/ImGuiComponent.hpp"
 #include "components/AdjustableComponent.hpp"
 #include "components/InputComponent.hpp"
-#include "components/TransformComponent.hpp"
 #include "components/CameraComponent.hpp"
+#include "components/ViewportComponent.hpp"
 #include "components/ShaderComponent.hpp"
-#include "components/SkeletonComponent.hpp"
 
 #include "packets/ImGuiScale.hpp"
 
 #include "common/systems/opengl/ShaderHelper.hpp"
+
+#include "helpers/CameraHelper.hpp"
 
 #include "OpenGLSystem.hpp"
 #include "Controllers.hpp"
@@ -44,17 +45,13 @@
 #include "SkyBox.hpp"
 #include "Text.hpp"
 
-#include "Export.hpp"
-
 namespace kengine {
 	static bool g_init = false;
 
+	static size_t g_gBufferTextureCount = 0;
 	putils::gl::Program::Parameters g_params;
-	static auto g_screenChanged = false;
+	putils::Point2i g_screenSize = { 1280, 720 };
 	static float g_dpiScale = 1.f;
-
-	static float * g_entityTexture = nullptr;
-	static auto g_entityTextureUpToDate = false;
 
 	static GLFWwindow * g_window = nullptr;
 
@@ -166,11 +163,9 @@ namespace kengine {
 	void OpenGLSystem::init() noexcept {
 		g_init = true;
 
-		g_params.viewPort.size = { 1280, 720 };
+		g_params.viewPort.size = g_screenSize;
 		g_params.nearPlane = 1.f;
 		g_params.farPlane = 1000.f;
-
-		g_entityTexture = new float[g_params.viewPort.size.x * g_params.viewPort.size.y * 4];
 
 		glfwInit();
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -184,13 +179,12 @@ namespace kengine {
 
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
-		g_window = glfwCreateWindow((int)g_params.viewPort.size.x, (int)g_params.viewPort.size.y, "Kengine", nullptr, nullptr);
+		g_window = glfwCreateWindow((int)g_screenSize.x, (int)g_screenSize.y, "Kengine", nullptr, nullptr);
 		glfwMakeContextCurrent(g_window);
-		glfwSetWindowAspectRatio(g_window, (int)g_params.viewPort.size.x, (int)g_params.viewPort.size.y);
+		glfwSetWindowAspectRatio(g_window, (int)g_screenSize.x, (int)g_screenSize.y);
 		glfwSetWindowSizeCallback(g_window, [](auto window, int width, int height) {
-			g_params.viewPort.size.x = width;
-			g_params.viewPort.size.y = height;
-			g_screenChanged = true;
+			g_screenSize.x = width;
+			g_screenSize.y = height;
 			glViewport(0, 0, width, height);
 		});
 
@@ -243,9 +237,8 @@ namespace kengine {
 		}, nullptr);
 #endif
 	}
-
 	void OpenGLSystem::handle(packets::RegisterEntity p) {
-		if (!_gBuffer.isInit())
+		if (_gBufferIterator.func == nullptr)
 			return;
 
 		if (p.e.has<GBufferShaderComponent>())
@@ -262,10 +255,10 @@ namespace kengine {
 	}
 
 	void OpenGLSystem::handle(packets::DefineGBufferSize p) {
-		if (_gBuffer.isInit())
-			return;
+		g_gBufferTextureCount = p.nbAttributes;
 
-		_gBuffer.init((size_t)g_params.viewPort.size.x, (size_t)g_params.viewPort.size.y, p.nbAttributes);
+		for (const auto & [e, gbuffer] : _em.getEntities<GBufferComponent>())
+			gbuffer.init((size_t)g_screenSize.x, (size_t)g_screenSize.y, g_gBufferTextureCount);
 
 		for (const auto & [e, shader] : _em.getEntities<GBufferShaderComponent>())
 			initShader(*shader.shader);
@@ -285,14 +278,6 @@ namespace kengine {
 
 	void OpenGLSystem::handle(packets::GBufferTexturesIterator p) {
 		_gBufferIterator = p;
-	}
-
-	void OpenGLSystem::handle(packets::GetGBufferSize p) {
-		p.size = _gBuffer.getSize();
-	}
-
-	void OpenGLSystem::handle(packets::GetGBufferTexture p) {
-		_gBuffer.getTexture(p.textureIndex, p.buff, p.buffSize);
 	}
 
 	void OpenGLSystem::handle(packets::CaptureMouse p) {
@@ -341,7 +326,7 @@ namespace kengine {
 		_em += [](Entity & e) { e += AdjustableComponent("[ImGui] Scale", &g_dpiScale); };
 
 		_em += Controllers::ShaderController(_em);
-		_em += Controllers::TextureDebugger(_em, _gBuffer, _gBufferIterator);
+		_em += Controllers::GBufferDebugger(_em, _gBufferIterator);
 #endif
 
 		for (const auto &[e, depthMap] : _em.getEntities<CSMComponent>()) {
@@ -395,8 +380,7 @@ namespace kengine {
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshInfo.indexBuffer);
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, meshData.indices.nbElements * meshData.indices.elementSize, meshData.indices.data, GL_STATIC_DRAW);
 
-			if (_gBuffer.isInit())
-				modelLoader.vertexRegisterFunc();
+			modelLoader.vertexRegisterFunc();
 
 			meshInfo.nbIndices = meshData.indices.nbElements;
 			meshInfo.indexType = meshData.indexType;
@@ -445,6 +429,12 @@ namespace kengine {
 		e.detach<TextureLoaderComponent>();
 	}
 
+	struct EntityTextureComponent {
+		putils::Point2ui size;
+		float * texture;
+		bool upToDate;
+	};
+
 	void OpenGLSystem::execute() noexcept {
 		static bool first = true;
 		if (first) {
@@ -452,15 +442,14 @@ namespace kengine {
 			onLoad("");
 
 			send(packets::ImGuiScale{ g_dpiScale });
+#ifndef KENGINE_NO_DEFAULT_GBUFFER
+			initGBuffer<GBufferTextures>(_em);
+#endif
 			first = false;
 		}
 
-		g_entityTextureUpToDate = false;
-
-#ifndef KENGINE_NO_DEFAULT_GBUFFER
-		if (!_gBuffer.isInit())
-			initGBuffer<GBufferTextures>(_em);
-#endif
+		for (const auto & [e, entityTexture] : _em.getEntities<EntityTextureComponent>())
+			entityTexture.upToDate = false;
 
 		glfwPollEvents();
 
@@ -472,13 +461,6 @@ namespace kengine {
 		if (glfwWindowShouldClose(g_window)) {
 			_em.running = false;
 			return;
-		}
-
-		if (g_screenChanged) {
-			_gBuffer.resize((size_t)g_params.viewPort.size.x, (size_t)g_params.viewPort.size.y);
-			delete [] g_entityTexture;
-			g_entityTexture = new float[(int)g_params.viewPort.size.x * (int)g_params.viewPort.size.y * 4];
-			g_screenChanged = false;
 		}
 
 		handleInput();
@@ -575,36 +557,54 @@ namespace kengine {
 		dst[2] = z;
 	}
 
-	struct ShaderProfiler {
-		ShaderProfiler(Entity & e) {
-			if (!e.has<Controllers::ShaderProfileComponent>())
-				_comp = &e.attach<Controllers::ShaderProfileComponent>();
-			else
-				_comp = &e.get<Controllers::ShaderProfileComponent>();
-			_timer.restart();
-		}
-
-		~ShaderProfiler() {
-			_comp->executionTime = _timer.getTimeSinceStart().count();
-		}
-
-		Controllers::ShaderProfileComponent * _comp;
-		putils::Timer _timer;
+	struct CameraFramebufferComponent {
+		GLuint fbo = -1;
+		GLuint depthTexture = -1;
+		putils::Point2i resolution;
 	};
+
+	static void initFramebuffer(Entity & e) {
+		auto & viewport = e.get<ViewportComponent>();
+		if (viewport.resolution.x == 0 || viewport.resolution.y == 0)
+			return;
+
+		auto & fb = e.attach<CameraFramebufferComponent>();
+		fb.resolution = viewport.resolution;
+
+		if (fb.fbo == -1)
+			glGenFramebuffers(1, &fb.fbo);
+		glBindFramebuffer(GL_FRAMEBUFFER, fb.fbo);
+
+		GLuint texture = (GLuint)viewport.renderTexture;
+		if (viewport.renderTexture == (ViewportComponent::RenderTexture)-1)
+			glGenTextures(1, &texture);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, viewport.resolution.x, viewport.resolution.y, 0, GL_RGBA, GL_FLOAT, nullptr);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+
+		if (fb.depthTexture == -1)
+			glGenTextures(1, &fb.depthTexture);
+		glBindTexture(GL_TEXTURE_2D, fb.depthTexture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, viewport.resolution.x, viewport.resolution.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, fb.depthTexture, 0);
+
+		assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+
+		viewport.renderTexture = (ViewportComponent::RenderTexture)texture;
+	}
 
 	void OpenGLSystem::doOpenGL() noexcept {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		for (const auto &[e, cam, transform] : _em.getEntities<CameraComponent3f, TransformComponent3f>()) {
-			{
-				const auto & pos = transform.boundingBox.position;
-				const auto & size = transform.boundingBox.size;
-				glViewport(
-					(int)pos.x * g_params.viewPort.size.x, (int)pos.y * g_params.viewPort.size.y,
-					(GLsizei)size.x * (GLsizei)g_params.viewPort.size.x, (GLsizei)size.y * (GLsizei)g_params.viewPort.size.y
-				);
-			}
+		for (auto &[e, cam, viewport] : _em.getEntities<CameraComponent3f, ViewportComponent>()) {
+			g_params.viewPort.size = viewport.resolution;
+
+			putils::gl::setViewPort(g_params.viewPort);
 
 			g_params.camPos = ShaderHelper::toVec(cam.frustum.position);
 			g_params.camFOV = cam.frustum.size.y;
@@ -624,7 +624,7 @@ namespace kengine {
 
 			g_params.proj = glm::perspective(
 				g_params.camFOV,
-				((float)g_params.viewPort.size.x * transform.boundingBox.size.x) / ((float)g_params.viewPort.size.y * transform.boundingBox.size.y),
+				(float)g_params.viewPort.size.x / (float)g_params.viewPort.size.y,
 				g_params.nearPlane, g_params.farPlane
 			);
 
@@ -649,43 +649,86 @@ namespace kengine {
 			static const auto runShaders = [](auto && shaders) {
 				for (auto & [e, comp] : shaders)
 					if (comp.enabled) {
+#ifndef KENGINE_NDEBUG
+						struct ShaderProfiler {
+							ShaderProfiler(Entity & e) {
+								if (!e.has<Controllers::ShaderProfileComponent>())
+									_comp = &e.attach<Controllers::ShaderProfileComponent>();
+								else
+									_comp = &e.get<Controllers::ShaderProfileComponent>();
+								_timer.restart();
+							}
+
+							~ShaderProfiler() {
+								_comp->executionTime = _timer.getTimeSinceStart().count();
+							}
+
+							Controllers::ShaderProfileComponent * _comp;
+							putils::Timer _timer;
+						};
 						ShaderProfiler _(e);
+#endif
 						comp.shader->run(g_params);
 					}
 			};
 
-			_gBuffer.bindForWriting(); {
+			if (!e.has<GBufferComponent>()) {
+				auto & gbuffer = e.attach<GBufferComponent>();
+				gbuffer.init(viewport.resolution.x, viewport.resolution.y, g_gBufferTextureCount);
+				std::cout << gbuffer.textures.size() << '\n';
+			}
+			auto & gbuffer = e.get<GBufferComponent>();
+			if (gbuffer.getSize() != viewport.resolution)
+				gbuffer.resize(viewport.resolution.x, viewport.resolution.y);
+
+			gbuffer.bindForWriting(); {
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 				ShaderHelper::Enable depth(GL_DEPTH_TEST);
 				runShaders(_em.getEntities<GBufferShaderComponent>());
-			} _gBuffer.bindForReading();
+			} gbuffer.bindForReading();
 
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+			if (!e.has<CameraFramebufferComponent>() || e.get<CameraFramebufferComponent>().resolution != viewport.resolution)
+				initFramebuffer(e);
+			auto & fb = e.get<CameraFramebufferComponent>();
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb.fbo);
+			glClear(GL_COLOR_BUFFER_BIT);
+
 			glBlitFramebuffer(0, 0, (GLint)g_params.viewPort.size.x, (GLint)g_params.viewPort.size.y, 0, 0, (GLint)g_params.viewPort.size.x, (GLint)g_params.viewPort.size.y, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 			runShaders(_em.getEntities<LightingShaderComponent>());
 			runShaders(_em.getEntities<PostLightingShaderComponent>());
 			runShaders(_em.getEntities<PostProcessShaderComponent>());
 
-#ifndef KENGINE_NDEBUG
-			if (Controllers::TEXTURE_TO_DEBUG != -1)
-				debugTexture(Controllers::TEXTURE_TO_DEBUG);
-#endif
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, fb.fbo);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+			const auto destSizeX = (GLint)(viewport.boundingBox.size.x * g_screenSize.x);
+			const auto destSizeY = (GLint)(viewport.boundingBox.size.y * g_screenSize.y);
+
+			const auto destX = (GLint)(viewport.boundingBox.position.x * g_screenSize.x);
+			// OpenGL coords have Y=0 at the bottom, I want Y=0 at the top
+			const auto destY = (GLint)(g_screenSize.y - destSizeY - viewport.boundingBox.position.y * g_screenSize.y);
+
+			glBlitFramebuffer(
+				// src
+				0, 0, fb.resolution.x, fb.resolution.y,
+				// dest
+				destX, destY, destX + destSizeX, destY + destSizeY,
+				GL_COLOR_BUFFER_BIT, GL_LINEAR
+			);
+
+			if (!e.has<ImGuiComponent>())
+				e += ImGuiComponent([&] {
+					if (ImGui::Begin("FBO")) {
+						const auto start = ImGui::GetWindowContentRegionMin();
+						const auto end = ImGui::GetWindowContentRegionMax();
+						ImGui::Image((ImTextureID)viewport.renderTexture, { end.x - start.x, end.y - start.y }, { 0, 1 }, { 1, 0 });
+					}
+					ImGui::End();
+				});
 		}
-	}
 
-	void OpenGLSystem::debugTexture(GLint texture) {
-		static GLuint readFBO = -1;
-
-		if (readFBO == -1)
-			glGenFramebuffers(1, &readFBO);
-
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, readFBO);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-		glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
-		glBlitFramebuffer(0, 0, (GLint)g_params.viewPort.size.x, (GLint)g_params.viewPort.size.y, 0, 0, (GLint)g_params.viewPort.size.x, (GLint)g_params.viewPort.size.y, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
 	void OpenGLSystem::handleInput() noexcept {
@@ -718,20 +761,47 @@ namespace kengine {
 		static constexpr auto GBUFFER_TEXTURE_COMPONENTS = 4;
 		static constexpr auto GBUFFER_ENTITY_LOCATION = 3;
 
-		const putils::Point2ui gBufferSize = _gBuffer.getSize();
-
-		if (p.pixel.x >= gBufferSize.x || p.pixel.y > gBufferSize.y || p.pixel.y == 0) {
+		const auto viewportInfo = CameraHelper::getViewportForPixel(_em, p.pixel, g_screenSize);
+		if (viewportInfo.camera == Entity::INVALID_ID) {
 			p.id = Entity::INVALID_ID;
 			return;
 		}
 
-		if (!g_entityTextureUpToDate) {
-			_gBuffer.getTexture(GBUFFER_ENTITY_LOCATION, g_entityTexture, gBufferSize.x * gBufferSize.y * GBUFFER_TEXTURE_COMPONENTS);
-			g_entityTextureUpToDate = true;
+		auto & camera = _em.getEntity(viewportInfo.camera);
+
+		const auto & gbuffer = camera.get<GBufferComponent>();
+		const putils::Point2ui gBufferSize = gbuffer.getSize();
+
+		const auto pixelInGBuffer = putils::Point2i(viewportInfo.pixel * gBufferSize);
+
+		if (pixelInGBuffer.x >= gBufferSize.x || pixelInGBuffer.y > gBufferSize.y || pixelInGBuffer.y == 0) {
+			p.id = Entity::INVALID_ID;
+			return;
 		}
 
-		const auto index = (p.pixel.x + (gBufferSize.y - p.pixel.y) * gBufferSize.x) * GBUFFER_TEXTURE_COMPONENTS;
-		p.id = (Entity::ID)g_entityTexture[index];
+		if (!camera.has<EntityTextureComponent>()) {
+			auto & entityTexture = camera.attach<EntityTextureComponent>();
+			entityTexture.size = gBufferSize;
+			entityTexture.texture = new float[gBufferSize.x * gBufferSize.y * 4];
+			gbuffer.getTexture(GBUFFER_ENTITY_LOCATION, entityTexture.texture, gBufferSize.x * gBufferSize.y * GBUFFER_TEXTURE_COMPONENTS);
+			entityTexture.upToDate = true;
+		}
+
+		auto & entityTexture = camera.get<EntityTextureComponent>();
+		if (entityTexture.size != gBufferSize) {
+			delete[] entityTexture.texture;
+			entityTexture.texture = new float[gBufferSize.x * gBufferSize.y * 4];
+			entityTexture.upToDate = false;
+			entityTexture.size = gBufferSize;
+		}
+
+		if (!entityTexture.upToDate) {
+			gbuffer.getTexture(GBUFFER_ENTITY_LOCATION, entityTexture.texture, gBufferSize.x * gBufferSize.y * GBUFFER_TEXTURE_COMPONENTS);
+			entityTexture.upToDate = true;
+		}
+
+		const auto index = (pixelInGBuffer.x + (gBufferSize.y - pixelInGBuffer.y) * gBufferSize.x) * GBUFFER_TEXTURE_COMPONENTS;
+		p.id = (Entity::ID)entityTexture.texture[index];
 		if (p.id == 0)
 			p.id = Entity::INVALID_ID;
 	}

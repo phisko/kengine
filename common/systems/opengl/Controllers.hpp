@@ -5,8 +5,6 @@
 #include "components/LightComponent.hpp"
 #include "packets/GBuffer.hpp"
 
-#ifndef KENGINE_NDEBUG
-
 namespace kengine {
 	namespace Controllers {
 		struct ShaderProfileComponent {
@@ -46,45 +44,44 @@ namespace kengine {
 			};
 		}
 
-		static int TEXTURE_TO_DEBUG = -1;
-		static auto TextureDebugger(EntityManager & em, const GBuffer & gBuffer, const packets::GBufferTexturesIterator & iterator) {
+		static auto GBufferDebugger(EntityManager & em, const packets::GBufferTexturesIterator & iterator) {
 			return [&](Entity & e) {
+				auto & tool = e.attach<ImGuiToolComponent>();
+				tool.name = "GBuffer viewer";
+				tool.enabled = false;
+
 				e += ImGuiComponent([&] {
-					if (ImGui::BeginMainMenuBar()) {
-						if (ImGui::BeginMenu("Textures")) {
-							if (ImGui::MenuItem("Disable"))
-								TEXTURE_TO_DEBUG = -1;
+					if (!tool.enabled)
+						return;
+					
+					if (ImGui::Begin("GBuffer viewer", &tool.enabled)) {
+						for (const auto & [e, gbuffer] : em.getEntities<GBufferComponent>()) {
+							if (ImGui::CollapsingHeader(putils::string<64>("%d", e.id))) {
+								static bool * enabled = nullptr;
+								if (enabled == nullptr)
+									enabled = new bool[gbuffer.getTextureCount()];
 
-							int i = 0;
-							iterator.func([&](auto name) {
-								if (ImGui::MenuItem(putils::string<64>("GBuffer %s", name)))
-									TEXTURE_TO_DEBUG = gBuffer.textures[i];
-								++i;
-							});
-
-							for (const auto &[e, comp] : em.getEntities<GBufferShaderComponent>())
-								for (const auto & texture : comp.shader->texturesToDebug)
-									if (ImGui::MenuItem(texture.name.c_str()))
-										TEXTURE_TO_DEBUG = texture.id;
-
-							for (const auto &[e, comp] : em.getEntities<LightingShaderComponent>())
-								for (const auto & texture : comp.shader->texturesToDebug)
-									if (ImGui::MenuItem(texture.name.c_str()))
-										TEXTURE_TO_DEBUG = texture.id;
-
-							for (const auto &[e, comp] : em.getEntities<PostProcessShaderComponent>())
-								for (const auto & texture : comp.shader->texturesToDebug)
-									if (ImGui::MenuItem(texture.name.c_str()))
-										TEXTURE_TO_DEBUG = texture.id;
-
-							ImGui::EndMenu();
+								int i = 0;
+								iterator.func([&](const char * name) {
+									ImGui::Checkbox(name, &enabled[i]);
+									if (!enabled[i]) {
+										++i;
+										return;
+									}
+									if (ImGui::Begin(putils::string<64>("%d [%s]", e.id, name), &enabled[i])) {
+										const auto start = ImGui::GetWindowContentRegionMin();
+										const auto end = ImGui::GetWindowContentRegionMax();
+										ImGui::Image((ImTextureID)gbuffer.textures[i], { end.x - start.x, end.y - start.y }, { 0, 1 }, { 1, 0 });
+									}
+									ImGui::End();
+									++i;
+								});
+							}
 						}
 					}
-					ImGui::EndMainMenuBar();
+					ImGui::End();
 				});
 			};
 		}
 	}
 }
-
-#endif

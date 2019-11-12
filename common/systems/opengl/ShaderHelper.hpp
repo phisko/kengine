@@ -24,11 +24,14 @@ namespace kengine {
 		}
 
 		struct BindFramebuffer {
-			BindFramebuffer(GLuint fbo, GLuint prev = 0) : fbo(fbo), prev(prev) { glBindFramebuffer(GL_FRAMEBUFFER, fbo); }
+			BindFramebuffer(GLint fbo) : fbo(fbo) {
+				glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prev);
+				glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+			}
 			~BindFramebuffer() { glBindFramebuffer(GL_FRAMEBUFFER, prev); }
 
-			GLuint fbo;
-			GLuint prev;
+			GLint fbo;
+			GLint prev;
 		};
 
 		struct Enable {
