@@ -18,7 +18,7 @@ namespace kengine::Shaders {
 	{
 	}
 
-	void GodRaysSpotLight::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
+	void GodRaysSpotLight::init(size_t firstTextureID) {
 		initWithShaders<GodRaysSpotLight>(putils::make_vector(
 			ShaderDescription{ src::Quad::Vert::glsl, GL_VERTEX_SHADER },
 			ShaderDescription{ src::GodRays::Frag::glsl, GL_FRAGMENT_SHADER },

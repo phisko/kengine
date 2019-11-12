@@ -22,7 +22,7 @@ namespace kengine::Shaders {
 		_em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/Lights] Debug CSM", &DEBUG_CSM); };
 	}
 
-	void DirLight::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
+	void DirLight::init(size_t firstTextureID) {
 		initWithShaders<DirLight>(putils::make_vector(
 			ShaderDescription{ src::Quad::Vert::glsl, GL_VERTEX_SHADER },
 			ShaderDescription{ src::CSM::Frag::glsl, GL_FRAGMENT_SHADER },
@@ -35,8 +35,6 @@ namespace kengine::Shaders {
 	}
 
 	void DirLight::run(const Parameters & params) {
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
 		ShaderHelper::Enable __b(GL_BLEND);
 		glBlendEquation(GL_FUNC_ADD);
 		glBlendFunc(GL_ONE, GL_ONE);

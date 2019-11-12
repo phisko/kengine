@@ -307,7 +307,7 @@ namespace kengine {
 	}
 
 	void OpenGLSystem::initShader(putils::gl::Program & p) {
-		p.init(_gBuffer.getTextureCount(), (size_t)g_params.viewPort.size.x, (size_t)g_params.viewPort.size.y, _gBuffer.getFBO());
+		p.init(g_gBufferTextureCount);
 
 		assert(_gBufferIterator.func != nullptr);
 		int texture = 0;

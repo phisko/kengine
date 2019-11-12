@@ -19,7 +19,7 @@ namespace kengine::Shaders {
 	{
 	}
 
-	void GodRaysDirLight::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
+	void GodRaysDirLight::init(size_t firstTextureID) {
 		initWithShaders<GodRaysDirLight>(putils::make_vector(
 			ShaderDescription{ src::Quad::Vert::glsl, GL_VERTEX_SHADER },
 			ShaderDescription{ src::GodRays::Frag::glsl, GL_FRAGMENT_SHADER },

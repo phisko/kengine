@@ -61,7 +61,7 @@ namespace kengine::Shaders {
 	{
 	}
 
-	void Debug::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
+	void Debug::init(size_t firstTextureID) {
 		initWithShaders<Debug>(putils::make_vector(
 			ShaderDescription{ vert, GL_VERTEX_SHADER },
 			ShaderDescription{ frag, GL_FRAGMENT_SHADER },

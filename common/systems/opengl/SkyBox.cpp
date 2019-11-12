@@ -47,7 +47,7 @@ namespace kengine::Shaders {
 		_em(em)
 	{}
 
-	void SkyBox::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
+	void SkyBox::init(size_t firstTextureID) {
 		initWithShaders<SkyBox>(putils::make_vector(
 			ShaderDescription{ vert, GL_VERTEX_SHADER },
 			ShaderDescription{ frag, GL_FRAGMENT_SHADER }
@@ -148,6 +148,10 @@ namespace kengine::Shaders {
 
 	void SkyBox::run(const Parameters & params) {
 		use();
+
+		GLint fbo;
+		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
+		assert(fbo != 0);
 
 		ShaderHelper::Enable _(GL_BLEND);
 		glBlendEquation(GL_FUNC_ADD);

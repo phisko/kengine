@@ -10,7 +10,7 @@
 #include "common/systems/opengl/ShaderHelper.hpp"
 
 namespace kengine::Shaders {
-	void SpotLight::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
+	void SpotLight::init(size_t firstTextureID) {
 		initWithShaders<SpotLight>(putils::make_vector(
 			ShaderDescription{ src::ProjViewModel::Vert::glsl, GL_VERTEX_SHADER },
 			ShaderDescription{ src::ShadowMap::Frag::glsl, GL_FRAGMENT_SHADER },
@@ -22,8 +22,6 @@ namespace kengine::Shaders {
 	}
 
 	void SpotLight::run(const Parameters & params) {
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
 		ShaderHelper::Enable __c(GL_CULL_FACE);
 		ShaderHelper::Enable __b(GL_BLEND);
 		glBlendEquation(GL_FUNC_ADD);

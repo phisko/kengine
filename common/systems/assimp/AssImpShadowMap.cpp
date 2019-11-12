@@ -12,7 +12,7 @@
 #include "AssImpHelper.hpp"
 
 namespace kengine {
-	void AssImpShadowMap::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
+	void AssImpShadowMap::init(size_t firstTextureID) {
 		initWithShaders<AssImpShadowMap>(putils::make_vector(
 			ShaderDescription{ src::TexturedShader::vert, GL_VERTEX_SHADER }
 		));

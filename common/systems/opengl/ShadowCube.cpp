@@ -9,7 +9,7 @@
 #include "helpers/LightHelper.hpp"
 
 namespace kengine::Shaders {
-	void ShadowCube::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
+	void ShadowCube::init(size_t firstTextureID) {
 		initWithShaders<ShadowCube>(putils::make_vector(
 			ShaderDescription{ src::ProjViewModel::Vert::glsl, GL_VERTEX_SHADER },
 			ShaderDescription{ src::DepthCube::Geom::glsl, GL_GEOMETRY_SHADER },

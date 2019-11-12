@@ -15,7 +15,7 @@
 static_assert(KENGINE_ASSIMP_BONE_INFO_PER_VERTEX == 4, "This shader assumes only 4 bones per vertex");
 
 namespace kengine {
-	void AssImpShader::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
+	void AssImpShader::init(size_t firstTextureID) {
 		initWithShaders<AssImpShader>(putils::make_vector(
 			ShaderDescription{ src::TexturedShader::vert, GL_VERTEX_SHADER },
 			ShaderDescription{ src::TexturedShader::frag, GL_FRAGMENT_SHADER },

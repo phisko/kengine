@@ -12,7 +12,7 @@
 #include "common/systems/opengl/ShaderHelper.hpp"
 
 namespace kengine::Shaders {
-	void PointLight::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
+	void PointLight::init(size_t firstTextureID) {
 		initWithShaders<PointLight>(putils::make_vector(
 			ShaderDescription{ src::ProjViewModel::Vert::glsl, GL_VERTEX_SHADER },
 			ShaderDescription{ src::PointLight::Frag::glsl, GL_FRAGMENT_SHADER },
@@ -25,8 +25,6 @@ namespace kengine::Shaders {
 	}
 
 	void PointLight::run(const Parameters & params) {
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
 		ShaderHelper::Enable __c(GL_CULL_FACE);
 		ShaderHelper::Enable __b(GL_BLEND);
 		glBlendEquation(GL_FUNC_ADD);
@@ -59,7 +57,7 @@ namespace kengine::Shaders {
 			model = glm::scale(model, { radius, radius, radius });
 			_model = model;
 
-			if (centre.getDistanceTo({ params.camPos.x, params.camPos.y, params.camPos.z }) < radius)
+			if (centre.getDistanceTo(putils::Point3f{ params.camPos.x, params.camPos.y, params.camPos.z }) < radius)
 				glCullFace(GL_BACK);
 			else
 				glCullFace(GL_FRONT);

@@ -23,7 +23,7 @@ namespace kengine::Shaders {
 		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/Lights] Shadow map far plane", &SHADOW_MAP_FAR_PLANE); };
 	}
 
-	void ShadowMap::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
+	void ShadowMap::init(size_t firstTextureID) {
 		initWithShaders<ShadowMap>(putils::make_vector(
 			ShaderDescription{ src::ProjViewModel::Vert::glsl, GL_VERTEX_SHADER }
 		));

@@ -24,7 +24,7 @@ namespace kengine::Shaders {
 		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/Lights] Sun dist", &SUN_DIST); };
 	}
 
-	void LightSphere::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
+	void LightSphere::init(size_t firstTextureID) {
 		initWithShaders<LightSphere>(putils::make_vector(
 			ShaderDescription{ src::ProjViewModel::Vert::glsl, GL_VERTEX_SHADER },
 			ShaderDescription{ src::Color::Frag::glsl, GL_FRAGMENT_SHADER }

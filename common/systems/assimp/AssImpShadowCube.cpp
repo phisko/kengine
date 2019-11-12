@@ -14,7 +14,7 @@
 #include "AssImpHelper.hpp"
 
 namespace kengine {
-	void AssImpShadowCube::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
+	void AssImpShadowCube::init(size_t firstTextureID) {
 		initWithShaders<AssImpShadowCube>(putils::make_vector(
 			ShaderDescription{ src::TexturedShader::vert, GL_VERTEX_SHADER },
 			ShaderDescription{ kengine::Shaders::src::DepthCube::Geom::glsl, GL_GEOMETRY_SHADER },

@@ -150,7 +150,7 @@ namespace kengine::Shaders {
 		FT_Done_FreeType(g_ft);
 	}
 
-	void Text::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
+	void Text::init(size_t firstTextureID) {
 		initWithShaders<Text>(putils::make_vector(
 			ShaderDescription{ vert, GL_VERTEX_SHADER },
 			ShaderDescription{ frag, GL_FRAGMENT_SHADER },

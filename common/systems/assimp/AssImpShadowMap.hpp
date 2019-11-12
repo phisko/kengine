@@ -12,7 +12,7 @@ namespace kengine {
 			_em(em)
 		{}
 
-		void init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) override;
+		void init(size_t firstTextureID) override;
 		void run(const Parameters & params) override {}
 		void run(kengine::Entity & e, DirLightComponent & light, const Parameters & params) override;
 		void run(kengine::Entity & e, SpotLightComponent & light, const putils::Point3f & pos, const Parameters & params) override;

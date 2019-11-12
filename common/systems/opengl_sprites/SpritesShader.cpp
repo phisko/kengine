@@ -76,7 +76,7 @@ namespace kengine {
 		_em(em)
 	{}
 
-	void SpritesShader::init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) {
+	void SpritesShader::init(size_t firstTextureID) {
 		initWithShaders<SpritesShader>(putils::make_vector(
 			ShaderDescription{ vert, GL_VERTEX_SHADER },
 			ShaderDescription{ frag, GL_FRAGMENT_SHADER },

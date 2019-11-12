@@ -12,7 +12,7 @@ namespace kengine::Shaders {
 		Text(EntityManager & em);
 		~Text();
 
-		void init(size_t firstTextureID, size_t screenWidth, size_t screenHeight, GLuint gBufferFBO) override;
+		void init(size_t firstTextureID) override;
 		void run(const Parameters & params) override;
 
 	public:
