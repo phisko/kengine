@@ -128,18 +128,24 @@ static void draw(const char * name, kengine::AdjustableComponent & comp) {
 	}
 	case kengine::AdjustableComponent::Double: {
 		ImGui::PushItemWidth(-1.f);
-		ImGui::InputFloat((string("##") + comp.name).c_str(), comp.dPtr != nullptr ? comp.dPtr : &comp.d, 0.f, 0.f, "%.6f");
+		auto val = comp.dPtr != nullptr ? *comp.dPtr : comp.d;
+		if (ImGui::InputFloat((string("##") + comp.name).c_str(), &val, 0.f, 0.f, "%.6f", ImGuiInputTextFlags_EnterReturnsTrue)) {
+			comp.d = val;
+			if (comp.dPtr != nullptr)
+				*comp.dPtr = val;
+		}
 		ImGui::PopItemWidth();
-		if (comp.dPtr != nullptr)
-			comp.d = *comp.dPtr;
 		break;
 	}
 	case kengine::AdjustableComponent::Int: {
 		ImGui::PushItemWidth(-1.f);
-		ImGui::InputInt((string("##") + comp.name).c_str(), comp.iPtr != nullptr ? comp.iPtr : &comp.i);
+		auto val = comp.iPtr != nullptr ? *comp.iPtr : comp.i;
+		if (ImGui::InputInt((string("##") + comp.name).c_str(), comp.iPtr != nullptr ? comp.iPtr : &comp.i, 1, 100, ImGuiInputTextFlags_EnterReturnsTrue)) {
+			comp.i = val;
+			if (comp.iPtr != nullptr)
+				*comp.iPtr = val;
+		}
 		ImGui::PopItemWidth();
-		if (comp.iPtr != nullptr)
-			comp.i = *comp.iPtr;
 		break;
 	}
 	case kengine::AdjustableComponent::Color: {

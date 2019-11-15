@@ -122,7 +122,7 @@ namespace kengine {
 				displayInColumns(name, [&] {
 					putils::string<1024> s = member.c_str();
 					ImGui::PushItemWidth(-1.f);
-					if (ImGui::InputText(getID(name, member), s.begin(), s.max_size))
+					if (ImGui::InputText(getID(name, member), s.begin(), s.max_size, ImGuiInputTextFlags_EnterReturnsTrue))
 						member = s.c_str();
 					ImGui::PopItemWidth();
 				});
@@ -185,7 +185,9 @@ namespace kengine {
 						imguiEditor::g_em->getEntity(member).attach<kengine::SelectedComponent>();
 					ImGui::SameLine();
 					ImGui::PushItemWidth(-1.f);
-					ImGui::InputScalar(getID(name, member), sizeof(Member) == 64 ? ImGuiDataType_U64 : ImGuiDataType_U32, &member);
+					auto val = member;
+					if (ImGui::InputScalar(getID(name, member), sizeof(Member) == 64 ? ImGuiDataType_U64 : ImGuiDataType_U32, &val, nullptr, nullptr, nullptr, ImGuiInputTextFlags_EnterReturnsTrue))
+						member = val;
 					ImGui::PopItemWidth();
 				});
 			}
@@ -211,28 +213,36 @@ namespace kengine {
 			else if constexpr (std::is_same_v<Member, int>) {
 				displayInColumns(name, [&] {
 					ImGui::PushItemWidth(-1.f);
-					ImGui::InputInt(getID(name, member), &member);
+					auto val = member;
+					if (ImGui::InputInt(getID(name, member), &val, ImGuiInputTextFlags_EnterReturnsTrue))
+						member = val;
 					ImGui::PopItemWidth();
 				});
 			}
 			else if constexpr (std::is_same_v<Member, unsigned int>) {
 				displayInColumns(name, [&] {
 					ImGui::PushItemWidth(-1.f);
-					ImGui::InputScalar(getID(name, member), sizeof(Member) == 64 ? ImGuiDataType_U64 : ImGuiDataType_U32, &member);
+					auto val = member;
+					if (ImGui::InputScalar(getID(name, member), sizeof(Member) == 64 ? ImGuiDataType_U64 : ImGuiDataType_U32, &val, nullptr, nullptr, nullptr, ImGuiInputTextFlags_EnterReturnsTrue))
+						member = val;
 					ImGui::PopItemWidth();
 				});
 			}
 			else if constexpr (std::is_same_v<Member, float>) {
 				displayInColumns(name, [&] {
 					ImGui::PushItemWidth(-1.f);
-					ImGui::InputFloat(getID(name, member), &member, 0.f, 0.f, "%.6f");
+					auto val = member;
+					if (ImGui::InputFloat(getID(name, member), &val, 0.f, 0.f, "%.6f", ImGuiInputTextFlags_EnterReturnsTrue))
+						member = val;
 					ImGui::PopItemWidth();
 				});
 			}
 			else if constexpr (std::is_same_v<Member, double>) {
 				displayInColumns(name, [&] {
 					ImGui::PushItemWidth(-1.f);
-					ImGui::InputDouble(getID(name, member), &member);
+					auto val = member;
+					if (ImGui::InputDouble(getID(name, member), &val, 0.0, 0.0, "%.6f", ImGuiInputTextFlags_EnterReturnsTrue))
+						member = val;
 					ImGui::PopItemWidth();
 				});
 			}
