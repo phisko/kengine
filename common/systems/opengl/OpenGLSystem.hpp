@@ -5,7 +5,6 @@
 #include "packets/CaptureMouse.hpp"
 
 #include "System.hpp"
-#include "GBuffer.hpp"
 
 namespace putils::gl { class Program; }
 
@@ -36,7 +35,8 @@ namespace kengine {
 
 	struct ModelLoaderComponent;
 
-	class OpenGLSystem : public System<OpenGLSystem, packets::RegisterEntity,
+	class OpenGLSystem : public System<OpenGLSystem,
+		packets::RegisterEntity, packets::RemoveEntity,
 		packets::DefineGBufferSize, packets::GBufferTexturesIterator,
 		packets::GetEntityInPixel, packets::CaptureMouse
 	> {
@@ -48,6 +48,7 @@ namespace kengine {
 		void onLoad(const char *) noexcept final;
 
 		void handle(packets::RegisterEntity p);
+		void handle(packets::RemoveEntity p);
 		void handle(packets::DefineGBufferSize p);
 		void handle(packets::GBufferTexturesIterator p);
 		void handle(packets::GetEntityInPixel p);

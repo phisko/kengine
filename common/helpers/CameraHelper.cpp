@@ -1,23 +1,29 @@
 #include "CameraHelper.hpp"
 
 #include "components/ViewportComponent.hpp"
+#include "components/WindowComponent.hpp"
 
 namespace kengine::CameraHelper {
-	ViewportInfo getViewportForPixel(EntityManager & em, const putils::Point2ui & pixel, const putils::Point2ui & screenSize) {
+	ViewportInfo getViewportForPixel(EntityManager & em, Entity::ID windowID, const putils::Point2ui & pixel) {
 		ViewportInfo ret;
 
+		const auto & window = em.getEntity(windowID).get<WindowComponent>();
+
 		for (const auto & [e, viewport] : em.getEntities<ViewportComponent>()) {
-			const auto startX = viewport.boundingBox.position.x * screenSize.x;
-			const auto startY = viewport.boundingBox.position.y * screenSize.y;
-			const auto sizeX = viewport.boundingBox.size.x * screenSize.x;
-			const auto sizeY = viewport.boundingBox.size.y * screenSize.y;
+			if (viewport.window != windowID)
+				continue;
+
+			const auto startX = viewport.boundingBox.position.x * window.size.x;
+			const auto startY = viewport.boundingBox.position.y * window.size.y;
+			const auto sizeX = viewport.boundingBox.size.x * window.size.x;
+			const auto sizeY = viewport.boundingBox.size.y * window.size.y;
 
 			if (pixel.x < startX || pixel.y < startY ||
 				pixel.x >= startX + sizeX ||
 				pixel.y >= startY + sizeY)
 				continue;
 
-			const auto pixelSreenPercent = putils::Point2f(pixel) / screenSize;
+			const auto pixelSreenPercent = putils::Point2f(pixel) / window.size;
 			const auto pixelViewportPercent = (pixelSreenPercent - viewport.boundingBox.position) / viewport.boundingBox.size;
 
 			ret.camera = e.id;

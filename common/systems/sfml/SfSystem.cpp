@@ -291,7 +291,7 @@ namespace kengine {
 				case sf::Event::KeyPressed:
 				case sf::Event::KeyReleased:
 					if (input.onKey != nullptr && (e.type == sf::Event::KeyPressed || e.type == sf::Event::KeyReleased))
-						input.onKey(e.key.code, e.type == sf::Event::KeyPressed);
+						input.onKey(Entity::INVALID_ID, e.key.code, e.type == sf::Event::KeyPressed);
 					break;
 
 				case sf::Event::MouseButtonPressed:
@@ -299,7 +299,7 @@ namespace kengine {
 					if (input.onMouseButton != nullptr) {
 						const auto x = e.mouseButton.x / _engine.getRenderWindow().getSize().x * _screenSize.x;
 						const auto y = e.mouseButton.y / _engine.getRenderWindow().getSize().y * _screenSize.y;
-						input.onMouseButton(e.mouseButton.button, { x, y }, e.type == sf::Event::MouseButtonPressed);
+						input.onMouseButton(Entity::INVALID_ID, e.mouseButton.button, { x, y }, e.type == sf::Event::MouseButtonPressed);
 					}
 					break;
 
@@ -307,15 +307,15 @@ namespace kengine {
 					if (input.onMouseMove != nullptr) {
 						const auto x = e.mouseMove.x / _engine.getRenderWindow().getSize().x * _screenSize.x;
 						const auto y = e.mouseMove.y / _engine.getRenderWindow().getSize().y * _screenSize.y;
-						input.onMouseMove({ x, y }, {});
+						input.onMouseMove(Entity::INVALID_ID, { x, y }, {});
 					}
 					break;
 
 				case sf::Event::MouseWheelScrolled:
-					if (input.onMouseWheel != nullptr && e.type == sf::Event::MouseWheelScrolled) {
+					if (input.onScroll != nullptr && e.type == sf::Event::MouseWheelScrolled) {
 						const auto x = e.mouseWheelScroll.x / _engine.getRenderWindow().getSize().x * _screenSize.x;
 						const auto y = e.mouseWheelScroll.y / _engine.getRenderWindow().getSize().y * _screenSize.y;
-						input.onMouseWheel(e.mouseWheelScroll.delta, { x, y });
+						input.onScroll(Entity::INVALID_ID, 0.f, e.mouseWheelScroll.delta, { x, y });
 					}
 					break;
 

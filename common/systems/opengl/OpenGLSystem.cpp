@@ -20,7 +20,9 @@
 #include "components/InputComponent.hpp"
 #include "components/CameraComponent.hpp"
 #include "components/ViewportComponent.hpp"
+#include "components/WindowComponent.hpp"
 #include "components/ShaderComponent.hpp"
+#include "components/GBufferComponent.hpp"
 
 #include "packets/ImGuiScale.hpp"
 
@@ -49,73 +51,100 @@ namespace kengine {
 	static bool g_init = false;
 
 	static size_t g_gBufferTextureCount = 0;
-	putils::gl::Program::Parameters g_params;
-	putils::Point2i g_screenSize = { 1280, 720 };
+
+	struct OpenGLWindow {
+		GLFWwindow * window = nullptr;
+
+		Entity::ID id = Entity::INVALID_ID;
+		WindowComponent::string name;
+		WindowComponent * comp = nullptr;
+		putils::Point2i size;
+		bool fullScreen;
+	};
+	static OpenGLWindow g_window;
+
+	static putils::gl::Program::Parameters g_params;
 	static float g_dpiScale = 1.f;
 
-	static GLFWwindow * g_window = nullptr;
 
 	namespace Input {
-		struct KeyInfo {
-			int key;
-			bool pressed;
-		};
-
-		static putils::vector<KeyInfo, 128> keys;
+		namespace Keys {
+			struct Info {
+				Entity::ID window;
+				int key;
+				bool pressed;
+			};
+			static putils::vector<Info, 128> events;
+			static void callback(GLFWwindow *, int key, int scancode, int action, int mods) {
+				if (events.full())
+					return;
+				if (action == GLFW_PRESS)
+					events.push_back(Info{ g_window.id, key, true });
+				else if (action == GLFW_RELEASE)
+					events.push_back(Info{ g_window.id, key, false });
+			}
+		}
 
 		static putils::Point2f lastPos{ FLT_MAX, FLT_MAX };
-		struct ClickInfo {
-			putils::Point2f pos;
-			int button;
-			bool pressed;
-		};
-		static putils::vector<ClickInfo, 128> clicks;
-		struct MoveInfo {
-			putils::Point2f pos;
-			putils::Point2f rel;
-		};
-		static putils::vector<MoveInfo, 128> positions;
-		static putils::vector<float, 128> scrolls;
 
-		static void click(GLFWwindow * g_window, int button, int action, int mods) {
-			if (clicks.full())
-				return;
-			if (action == GLFW_PRESS)
-				clicks.push_back(ClickInfo{ lastPos, button, true });
-			else if (action == GLFW_RELEASE)
-				clicks.push_back(ClickInfo{ lastPos, button, false });
-		}
+		namespace Clicks {
+			struct Info {
+				Entity::ID window;
+				putils::Point2f pos;
+				int button;
+				bool pressed;
+			};
+			static putils::vector<Info, 128> events;
 
-		static void move(GLFWwindow * g_window, double xpos, double ypos) {
-			if (positions.full())
-				return;
-
-			if (lastPos.x == FLT_MAX) {
-				lastPos.x = (float)xpos;
-				lastPos.y = (float)ypos;
+			static void callback(GLFWwindow *, int button, int action, int mods) {
+				if (events.full())
+					return;
+				if (action == GLFW_PRESS)
+					events.push_back(Info{ g_window.id, lastPos, button, true });
+				else if (action == GLFW_RELEASE)
+					events.push_back(Info{ g_window.id, lastPos, button, false });
 			}
-
-			MoveInfo info;
-			info.pos = { (float)xpos, (float)ypos };
-			info.rel = { (float)xpos - lastPos.x, (float)ypos - lastPos.y };
-			lastPos.x = (float)xpos;
-			lastPos.y = (float)ypos;
-			positions.push_back(info);
 		}
 
-		static void scroll(GLFWwindow * g_window, double xoffset, double yoffset) {
-			if (scrolls.full())
-				return;
-			scrolls.push_back((float)yoffset);
+		namespace Moves {
+			struct Info {
+				Entity::ID window;
+				putils::Point2f pos;
+				putils::Point2f rel;
+			};
+			static putils::vector<Info, 128> events;
+			static void callback(GLFWwindow *, double xpos, double ypos) {
+				if (events.full())
+					return;
+
+				if (lastPos.x == FLT_MAX) {
+					lastPos.x = (float)xpos;
+					lastPos.y = (float)ypos;
+				}
+
+				Info info;
+				info.window = g_window.id;
+				info.pos = { (float)xpos, (float)ypos };
+				info.rel = { (float)xpos - lastPos.x, (float)ypos - lastPos.y };
+				lastPos = info.pos;
+				events.push_back(info);
+			}
 		}
 
-		static void key(GLFWwindow * g_window, int key, int scancode, int action, int mods) {
-			if (keys.full())
-				return;
-			if (action == GLFW_PRESS)
-				keys.push_back(KeyInfo{ key, true });
-			else if (action == GLFW_RELEASE)
-				keys.push_back(KeyInfo{ key, false });
+		namespace Scrolls {
+			struct Info {
+				Entity::ID window;
+				float xoffset;
+				float yoffset;
+				putils::Point2f pos;
+			};
+			static putils::vector<Info, 128> events;
+
+			static void callback(GLFWwindow *, double xoffset, double yoffset) {
+				if (events.full())
+					return;
+				events.push_back(Info{ g_window.id, (float)xoffset, (float)yoffset, lastPos });
+			}
 		}
 	}
 
@@ -163,7 +192,6 @@ namespace kengine {
 	void OpenGLSystem::init() noexcept {
 		g_init = true;
 
-		g_params.viewPort.size = g_screenSize;
 		g_params.nearPlane = 1.f;
 		g_params.farPlane = 1000.f;
 
@@ -177,23 +205,48 @@ namespace kengine {
 		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 #endif
 
+		for (const auto & [e, window] : _em.getEntities<WindowComponent>()) {
+			if (!window.assignedSystem.empty())
+				continue;
+			window.assignedSystem = "OpenGL";
+			g_window.id = e.id;
+			break;
+		}
+
+		if (g_window.id == Entity::INVALID_ID) {
+			_em += [](Entity & e) {
+				g_window.comp = &e.attach<WindowComponent>();
+				g_window.comp->name = "Kengine";
+				g_window.comp->size = { 1280, 720 };
+				g_window.comp->assignedSystem = "OpenGL";
+				g_window.id = e.id;
+			};
+		}
+		else
+			g_window.comp = &_em.getEntity(g_window.id).get<WindowComponent>();
+
+		g_window.name = g_window.comp->name;
+
+		// TODO: depend on g_windowComponent->fullscreen
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
-		g_window = glfwCreateWindow((int)g_screenSize.x, (int)g_screenSize.y, "Kengine", nullptr, nullptr);
-		glfwMakeContextCurrent(g_window);
-		glfwSetWindowAspectRatio(g_window, (int)g_screenSize.x, (int)g_screenSize.y);
-		glfwSetWindowSizeCallback(g_window, [](auto window, int width, int height) {
-			g_screenSize.x = width;
-			g_screenSize.y = height;
-			glViewport(0, 0, width, height);
+		g_window.window = glfwCreateWindow((int)g_window.comp->size.x, (int)g_window.comp->size.y, g_window.comp->name, nullptr, nullptr);
+		// Desired size may not have been available, update to actual size
+		glfwGetWindowSize(g_window.window, &g_window.size.x, &g_window.size.y);
+		g_window.comp->size = g_window.size;
+		glfwSetWindowAspectRatio(g_window.window, g_window.size.x, g_window.size.y);
+
+		glfwMakeContextCurrent(g_window.window);
+		glfwSetWindowSizeCallback(g_window.window, [](auto window, int width, int height) {
+			g_window.size = { width, height };
+			g_window.comp->size = g_window.size;
 		});
 
-		glfwSetMouseButtonCallback(g_window, Input::click);
-		glfwSetCursorPosCallback(g_window, Input::move);
-		glfwSetScrollCallback(g_window, Input::scroll);
-		glfwSetKeyCallback(g_window, Input::key);
+		glfwSetMouseButtonCallback(g_window.window, Input::Clicks::callback);
+		glfwSetCursorPosCallback(g_window.window, Input::Moves::callback);
+		glfwSetScrollCallback(g_window.window, Input::Scrolls::callback);
+		glfwSetKeyCallback(g_window.window, Input::Keys::callback);
 
-#ifndef KENGINE_NDEBUG
 		ImGui::CreateContext();
 		auto & io = ImGui::GetIO();
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
@@ -216,9 +269,8 @@ namespace kengine {
 			glBindTexture(GL_TEXTURE_2D, last_texture);
 		}
 
-		ImGui_ImplGlfw_InitForOpenGL(g_window, true);
+		ImGui_ImplGlfw_InitForOpenGL(g_window.window, true);
 		ImGui_ImplOpenGL3_Init();
-#endif
 
 		glewExperimental = true;
 		const bool ret = glewInit();
@@ -257,9 +309,6 @@ namespace kengine {
 	void OpenGLSystem::handle(packets::DefineGBufferSize p) {
 		g_gBufferTextureCount = p.nbAttributes;
 
-		for (const auto & [e, gbuffer] : _em.getEntities<GBufferComponent>())
-			gbuffer.init((size_t)g_screenSize.x, (size_t)g_screenSize.y, g_gBufferTextureCount);
-
 		for (const auto & [e, shader] : _em.getEntities<GBufferShaderComponent>())
 			initShader(*shader.shader);
 		for (const auto & [e, shader] : _em.getEntities<LightingShaderComponent>())
@@ -276,18 +325,29 @@ namespace kengine {
 			}
 	}
 
+	void OpenGLSystem::handle(packets::RemoveEntity p) {
+		if (!p.e.has<WindowComponent>() || p.e.id != g_window.id)
+			return;
+		g_window.id = Entity::INVALID_ID;
+		g_window.comp = nullptr;
+		glfwDestroyWindow(g_window.window);
+	}
+
 	void OpenGLSystem::handle(packets::GBufferTexturesIterator p) {
 		_gBufferIterator = p;
 	}
 
 	void OpenGLSystem::handle(packets::CaptureMouse p) {
-		if (glfwGetInputMode(g_window, GLFW_CURSOR) == GLFW_CURSOR_DISABLED) {
-			glfwSetInputMode(g_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-			ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
+		if (p.window != Entity::INVALID_ID && p.window != g_window.id)
+			return;
+
+		if (p.captured) {
+			glfwSetInputMode(g_window.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+			ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NoMouse;
 		}
 		else {
-			glfwSetInputMode(g_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-			ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NoMouse;
+			glfwSetInputMode(g_window.window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
 		}
 	}
 
@@ -307,7 +367,7 @@ namespace kengine {
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
 
-		glfwDestroyWindow(g_window);
+		glfwDestroyWindow(g_window.window);
 		glfwTerminate();
 	}
 
@@ -322,9 +382,9 @@ namespace kengine {
 		addShaders();
 #endif
 
-#ifndef KENGINE_NDEBUG
 		_em += [](Entity & e) { e += AdjustableComponent("[ImGui] Scale", &g_dpiScale); };
 
+#ifndef KENGINE_NDEBUG
 		_em += Controllers::ShaderController(_em);
 		_em += Controllers::GBufferDebugger(_em, _gBufferIterator);
 #endif
@@ -448,19 +508,55 @@ namespace kengine {
 			first = false;
 		}
 
+		if (g_window.id == Entity::INVALID_ID)
+			return;
+
 		for (const auto & [e, entityTexture] : _em.getEntities<EntityTextureComponent>())
 			entityTexture.upToDate = false;
 
 		glfwPollEvents();
 
-		if (glfwGetWindowAttrib(g_window, GLFW_ICONIFIED)) {
-			glfwSwapBuffers(g_window);
+		if (glfwGetWindowAttrib(g_window.window, GLFW_ICONIFIED)) {
+			glfwSwapBuffers(g_window.window);
 			return;
 		}
 
-		if (glfwWindowShouldClose(g_window)) {
-			_em.running = false;
+		if (glfwWindowShouldClose(g_window.window)) {
+			if (g_window.comp->shutdownOnClose)
+				_em.running = false;
+			_em.getEntity(g_window.id).detach<WindowComponent>();
+			g_window.id = Entity::INVALID_ID;
+			g_window.comp = nullptr;
 			return;
+		}
+		
+		if (g_window.comp->name != g_window.name) {
+			g_window.name = g_window.comp->name;
+			glfwSetWindowTitle(g_window.window, g_window.comp->name);
+		}
+
+		if (g_window.comp->size != g_window.size) {
+			g_window.size = g_window.comp->size;
+			glfwSetWindowSize(g_window.window, g_window.size.x, g_window.size.y);
+			glfwGetWindowSize(g_window.window, &g_window.size.x, &g_window.size.y);
+			g_window.comp->size = g_window.size;
+			glfwSetWindowAspectRatio(g_window.window, g_window.size.x, g_window.size.y);
+		}
+
+		if (g_window.comp->fullscreen != g_window.fullScreen) {
+			g_window.fullScreen = g_window.comp->fullscreen;
+
+			const auto monitor = glfwGetPrimaryMonitor();
+			const auto mode = glfwGetVideoMode(monitor);
+
+			if (g_window.comp->fullscreen)
+				glfwSetWindowMonitor(g_window.window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+			else
+				glfwSetWindowMonitor(g_window.window, nullptr, 0, 0, g_window.size.x, g_window.size.y, mode->refreshRate);
+
+			glfwGetWindowSize(g_window.window, &g_window.size.x, &g_window.size.y);
+			g_window.comp->size = g_window.size;
+			glfwSetWindowAspectRatio(g_window.window, g_window.size.x, g_window.size.y);
 		}
 
 		handleInput();
@@ -479,7 +575,6 @@ namespace kengine {
 
 		doOpenGL();
 
-#ifndef KENGINE_NDEBUG
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
@@ -495,9 +590,8 @@ namespace kengine {
 			ImGui::RenderPlatformWindowsDefault();
 			glfwMakeContextCurrent(backup_current_context);
 		}
-#endif
 
-		glfwSwapBuffers(g_window);
+		glfwSwapBuffers(g_window.window);
 	}
 
 	static void axisToQuaternion(float * quat, const glm::vec3 & axis, float angle) {
@@ -602,8 +696,12 @@ namespace kengine {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		for (auto &[e, cam, viewport] : _em.getEntities<CameraComponent3f, ViewportComponent>()) {
-			g_params.viewPort.size = viewport.resolution;
+			if (viewport.window == Entity::INVALID_ID)
+				viewport.window = g_window.id;
+			else if (viewport.window != g_window.id)
+				return;
 
+			g_params.viewPort.size = viewport.resolution;
 			putils::gl::setViewPort(g_params.viewPort);
 
 			g_params.camPos = ShaderHelper::toVec(cam.frustum.position);
@@ -675,7 +773,6 @@ namespace kengine {
 			if (!e.has<GBufferComponent>()) {
 				auto & gbuffer = e.attach<GBufferComponent>();
 				gbuffer.init(viewport.resolution.x, viewport.resolution.y, g_gBufferTextureCount);
-				std::cout << gbuffer.textures.size() << '\n';
 			}
 			auto & gbuffer = e.get<GBufferComponent>();
 			if (gbuffer.getSize() != viewport.resolution)
@@ -702,12 +799,12 @@ namespace kengine {
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, fb.fbo);
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
-			const auto destSizeX = (GLint)(viewport.boundingBox.size.x * g_screenSize.x);
-			const auto destSizeY = (GLint)(viewport.boundingBox.size.y * g_screenSize.y);
+			const auto destSizeX = (GLint)(viewport.boundingBox.size.x * g_window.size.x);
+			const auto destSizeY = (GLint)(viewport.boundingBox.size.y * g_window.size.y);
 
-			const auto destX = (GLint)(viewport.boundingBox.position.x * g_screenSize.x);
+			const auto destX = (GLint)(viewport.boundingBox.position.x * g_window.size.x);
 			// OpenGL coords have Y=0 at the bottom, I want Y=0 at the top
-			const auto destY = (GLint)(g_screenSize.y - destSizeY - viewport.boundingBox.position.y * g_screenSize.y);
+			const auto destY = (GLint)(g_window.size.y - destSizeY - viewport.boundingBox.position.y * g_window.size.y);
 
 			glBlitFramebuffer(
 				// src
@@ -716,58 +813,52 @@ namespace kengine {
 				destX, destY, destX + destSizeX, destY + destSizeY,
 				GL_COLOR_BUFFER_BIT, GL_LINEAR
 			);
-
-			if (!e.has<ImGuiComponent>())
-				e += ImGuiComponent([&] {
-					if (ImGui::Begin("FBO")) {
-						const auto start = ImGui::GetWindowContentRegionMin();
-						const auto end = ImGui::GetWindowContentRegionMax();
-						ImGui::Image((ImTextureID)viewport.renderTexture, { end.x - start.x, end.y - start.y }, { 0, 1 }, { 1, 0 });
-					}
-					ImGui::End();
-				});
 		}
-
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
 	void OpenGLSystem::handleInput() noexcept {
 		for (const auto &[e, comp] : _em.getEntities<InputComponent>()) {
 			if (!ImGui::GetIO().WantCaptureKeyboard)
-				for (const auto & e : Input::keys)
+				for (const auto & e : Input::Keys::events)
 					if (comp.onKey != nullptr)
-						comp.onKey(e.key, e.pressed);
+						comp.onKey(e.window, e.key, e.pressed);
 
 			if (!ImGui::GetIO().WantCaptureMouse) {
 				if (comp.onMouseButton != nullptr)
-					for (const auto & click : Input::clicks)
-						 comp.onMouseButton(click.button, click.pos, click.pressed);
+					for (const auto & e : Input::Clicks::events)
+						 comp.onMouseButton(e.window, e.button, e.pos, e.pressed);
 
 				if (comp.onMouseMove != nullptr)
-					for (const auto & pos : Input::positions)
-						comp.onMouseMove(pos.pos, pos.rel);
-				if (comp.onMouseWheel != nullptr)
-					for (const auto delta : Input::scrolls)
-						comp.onMouseWheel(delta, {});
+					for (const auto & e : Input::Moves::events)
+						comp.onMouseMove(e.window, e.pos, e.rel);
+
+				if (comp.onScroll != nullptr)
+					for (const auto & e : Input::Scrolls::events)
+						comp.onScroll(e.window, e.xoffset, e.yoffset, e.pos);
 			}
 		}
-		Input::keys.clear();
-		Input::clicks.clear();
-		Input::positions.clear();
-		Input::scrolls.clear();
+		Input::Keys::events.clear();
+		Input::Clicks::events.clear();
+		Input::Moves::events.clear();
+		Input::Scrolls::events.clear();
 	}
 
 	void OpenGLSystem::handle(packets::GetEntityInPixel p) {
 		static constexpr auto GBUFFER_TEXTURE_COMPONENTS = 4;
 		static constexpr auto GBUFFER_ENTITY_LOCATION = 3;
 
-		const auto viewportInfo = CameraHelper::getViewportForPixel(_em, p.pixel, g_screenSize);
+		if (p.window != Entity::INVALID_ID && p.window != g_window.id)
+			return;
+
+		const auto viewportInfo = CameraHelper::getViewportForPixel(_em, g_window.id, p.pixel);
 		if (viewportInfo.camera == Entity::INVALID_ID) {
 			p.id = Entity::INVALID_ID;
 			return;
 		}
 
 		auto & camera = _em.getEntity(viewportInfo.camera);
+		if (!camera.has<GBufferComponent>())
+			return;
 
 		const auto & gbuffer = camera.get<GBufferComponent>();
 		const putils::Point2ui gBufferSize = gbuffer.getSize();
