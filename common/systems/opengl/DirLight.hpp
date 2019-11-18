@@ -25,9 +25,9 @@ namespace kengine::Shaders {
 		void setLight(const DirLightComponent & light); 
 
 	public:
-		pmeta_get_parents(
-			pmeta_reflectible_parent(src::CSM::Frag::Uniforms),
-			pmeta_reflectible_parent(src::DirLight::Frag::Uniforms)
+		putils_reflection_parents(
+			putils_reflection_parent(src::CSM::Frag::Uniforms),
+			putils_reflection_parent(src::DirLight::Frag::Uniforms)
 		);
 
 	private:

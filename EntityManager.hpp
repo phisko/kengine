@@ -71,8 +71,8 @@ namespace kengine {
 				}
 
 				bool good = true;
-				pmeta_for_each(Comps, [&](auto && type) {
-					using CompType = pmeta_wrapped(type);
+				putils_for_each_type(Comps, [&](auto && type) {
+					using CompType = putils_wrapped_type(type);
 					good &= mask.test(Component<CompType>::id());
 				});
 				return good;

@@ -98,24 +98,24 @@ namespace kengine {
 	public:
 		template<typename ...Types>
 		void registerTypes() noexcept {
-			pmeta::tuple_for_each(std::make_tuple(pmeta::type<Types>()...),
+			putils::tuple_for_each(std::make_tuple(putils::meta::type<Types>()...),
 				[this](auto && t) {
-				using Type = pmeta_wrapped(t);
-				registerType<Type>();
-			}
+					using Type = putils_wrapped_type(t);
+					registerType<Type>();
+				}
 			);
 		}
 
 		template<typename T>
 		void registerType() noexcept {
-			{ pmeta_with(static_cast<CRTP &>(*this)) {
+			{ putils_with(static_cast<CRTP &>(*this)) {
 #ifdef _WIN32
 				_.registerTypeInternal<T>();
 #else
 				_.template registerTypeInternal<T>();
 #endif
 
-				const auto sender = putils::concat("send", T::get_class_name());
+				const auto sender = putils::concat("send", putils::reflection::get_class_name<T>());
 #ifdef _WIN32
 				_.registerFunction(sender,
 					std::function<void(const T &)>(
@@ -136,7 +136,7 @@ namespace kengine {
 		// System methods
 	public:
 		void execute() final {
-			{ pmeta_with(static_cast<CRTP &>(*this)) {
+			{ putils_with(static_cast<CRTP &>(*this)) {
 				for (auto & [go, comp] : _em.getEntities<CompType>()) {
 					_.setSelf(go);
 					for (const auto & s : comp.getScripts())
@@ -149,26 +149,27 @@ namespace kengine {
 	private:
 		template<typename T>
 		void registerComponent() noexcept {
-			{ pmeta_with(static_cast<CRTP &>(*this)) {
-				_.registerEntityMember(putils::concat("get", T::get_class_name()),
+			{ putils_with(static_cast<CRTP &>(*this)) {
+				const auto className = putils::reflection::get_class_name<T>();
+				_.registerEntityMember(putils::concat("get", className),
 					std::function<T &(Entity &)>(
 						[](Entity & self) { return std::ref(self.get<T>()); }
 						)
 				);
 
-				_.registerEntityMember(putils::concat("has", T::get_class_name()),
+				_.registerEntityMember(putils::concat("has", className),
 					std::function<bool(Entity &)>(
 						[](Entity & self) { return self.has<T>(); }
 						)
 				);
 
-				_.registerEntityMember(putils::concat("attach", T::get_class_name()),
+				_.registerEntityMember(putils::concat("attach", className),
 					std::function<T &(Entity &)>(
 						[](Entity & self) { return std::ref(self.attach<T>()); }
 						)
 				);
 
-				_.registerEntityMember(putils::concat("detach", T::get_class_name()),
+				_.registerEntityMember(putils::concat("detach", className),
 					std::function<void(Entity &)>(
 						[](Entity & self) { self.detach<T>(); }
 						)

@@ -18,19 +18,17 @@ namespace kengine {
 		float roll = 0.f;
 		bool mirrored = false;
 
-		pmeta_get_class_name(ModelComponent);
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&ModelComponent::file),
+		putils_reflection_class_name(ModelComponent);
+		putils_reflection_attributes(
+			putils_reflection_attribute(&ModelComponent::file),
 
-			pmeta_reflectible_attribute(&ModelComponent::boundingBox),
+			putils_reflection_attribute(&ModelComponent::boundingBox),
 
-			pmeta_reflectible_attribute(&ModelComponent::pitch),
-			pmeta_reflectible_attribute(&ModelComponent::yaw),
-			pmeta_reflectible_attribute(&ModelComponent::roll),
+			putils_reflection_attribute(&ModelComponent::pitch),
+			putils_reflection_attribute(&ModelComponent::yaw),
+			putils_reflection_attribute(&ModelComponent::roll),
 
-			pmeta_reflectible_attribute(&ModelComponent::mirrored)
+			putils_reflection_attribute(&ModelComponent::mirrored)
 		);
-		pmeta_get_methods();
-		pmeta_get_parents();
 	};
 }

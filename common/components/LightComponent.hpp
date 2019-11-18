@@ -18,14 +18,14 @@ namespace kengine {
 		int shadowMapSize = 1024;
 		float shadowMapBias = .00001f;
 
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&LightComponent::color),
-			pmeta_reflectible_attribute(&LightComponent::diffuseStrength),
-			pmeta_reflectible_attribute(&LightComponent::specularStrength),
-			pmeta_reflectible_attribute(&LightComponent::castShadows),
-			pmeta_reflectible_attribute(&LightComponent::shadowPCFSamples),
-			pmeta_reflectible_attribute(&LightComponent::shadowMapSize),
-			pmeta_reflectible_attribute(&LightComponent::shadowMapBias)
+		putils_reflection_attributes(
+			putils_reflection_attribute(&LightComponent::color),
+			putils_reflection_attribute(&LightComponent::diffuseStrength),
+			putils_reflection_attribute(&LightComponent::specularStrength),
+			putils_reflection_attribute(&LightComponent::castShadows),
+			putils_reflection_attribute(&LightComponent::shadowPCFSamples),
+			putils_reflection_attribute(&LightComponent::shadowMapSize),
+			putils_reflection_attribute(&LightComponent::shadowMapBias)
 		);
 	};
 
@@ -35,16 +35,15 @@ namespace kengine {
 		float cascadeEnds[KENGINE_CSM_COUNT] = { 50.f };
 		float shadowCasterMaxDistance = 100.f;
 
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&DirLightComponent::shadowCasterMaxDistance),
-			pmeta_reflectible_attribute(&DirLightComponent::direction),
-			pmeta_reflectible_attribute(&DirLightComponent::ambientStrength),
-			pmeta_reflectible_attribute(&DirLightComponent::cascadeEnds)
+		putils_reflection_class_name(DirLightComponent);
+		putils_reflection_attributes(
+			putils_reflection_attribute(&DirLightComponent::shadowCasterMaxDistance),
+			putils_reflection_attribute(&DirLightComponent::direction),
+			putils_reflection_attribute(&DirLightComponent::ambientStrength),
+			putils_reflection_attribute(&DirLightComponent::cascadeEnds)
 		);
-		pmeta_get_class_name(DirLightComponent);
-		pmeta_get_methods();
-		pmeta_get_parents(
-			pmeta_reflectible_parent(LightComponent)
+		putils_reflection_parents(
+			putils_reflection_parent(LightComponent)
 		);
 	};
 
@@ -54,16 +53,15 @@ namespace kengine {
 		float linear = .09f;
 		float quadratic = .032f;
 
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&PointLightComponent::range),
-			pmeta_reflectible_attribute(&PointLightComponent::constant),
-			pmeta_reflectible_attribute(&PointLightComponent::linear),
-			pmeta_reflectible_attribute(&PointLightComponent::quadratic)
+		putils_reflection_class_name(PointLightComponent);
+		putils_reflection_attributes(
+			putils_reflection_attribute(&PointLightComponent::range),
+			putils_reflection_attribute(&PointLightComponent::constant),
+			putils_reflection_attribute(&PointLightComponent::linear),
+			putils_reflection_attribute(&PointLightComponent::quadratic)
 		);
-		pmeta_get_class_name(PointLightComponent);
-		pmeta_get_methods();
-		pmeta_get_parents(
-			pmeta_reflectible_parent(LightComponent)
+		putils_reflection_parents(
+			putils_reflection_parent(LightComponent)
 		);
 	};
 
@@ -72,15 +70,14 @@ namespace kengine {
 		float cutOff = 1.f;
 		float outerCutOff = 1.2f;
 
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&SpotLightComponent::direction),
-			pmeta_reflectible_attribute(&SpotLightComponent::cutOff),
-			pmeta_reflectible_attribute(&SpotLightComponent::outerCutOff)
+		putils_reflection_class_name(SpotLightComponent);
+		putils_reflection_attributes(
+			putils_reflection_attribute(&SpotLightComponent::direction),
+			putils_reflection_attribute(&SpotLightComponent::cutOff),
+			putils_reflection_attribute(&SpotLightComponent::outerCutOff)
 		);
-		pmeta_get_class_name(SpotLightComponent);
-		pmeta_get_methods();
-		pmeta_get_parents(
-			pmeta_reflectible_parent(PointLightComponent)
+		putils_reflection_parents(
+			putils_reflection_parent(PointLightComponent)
 		);
 	};
 }

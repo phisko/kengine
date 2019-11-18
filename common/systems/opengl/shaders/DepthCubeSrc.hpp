@@ -10,8 +10,8 @@ namespace kengine::Shaders::src {
 			struct Uniforms {
 				putils::gl::Uniform<glm::mat4> _shadowMatrices[6];
 
-				pmeta_get_attributes(
-					pmeta_reflectible_attribute_private(&Uniforms::_shadowMatrices)
+				putils_reflection_attributes(
+					putils_reflection_attribute_private(&Uniforms::_shadowMatrices)
 				);
 			};
 		}
@@ -23,9 +23,9 @@ namespace kengine::Shaders::src {
 				putils::gl::Uniform<putils::Point3f> _lightPos;
 				putils::gl::Uniform<float> _farPlane;
 
-				pmeta_get_attributes(
-					pmeta_reflectible_attribute_private(&Uniforms::_lightPos), 
-					pmeta_reflectible_attribute_private(&Uniforms::_farPlane)
+				putils_reflection_attributes(
+					putils_reflection_attribute_private(&Uniforms::_lightPos), 
+					putils_reflection_attribute_private(&Uniforms::_farPlane)
 				);
 			};
 		}

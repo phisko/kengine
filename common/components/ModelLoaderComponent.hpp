@@ -9,7 +9,7 @@
 #include "function.hpp"
 
 namespace kengine {
-	struct ModelLoaderComponent : kengine::not_serializable {
+	struct ModelLoaderComponent {
 
 		struct ModelData {
 			struct MeshData {
@@ -36,7 +36,7 @@ namespace kengine {
 		using VertexRegisterFunc = void(*)();
 		VertexRegisterFunc vertexRegisterFunc;
 
-		pmeta_get_class_name(ModelLoaderComponent);
+		putils_reflection_class_name(ModelLoaderComponent);
 
 		template<typename Loader, typename Releaser>
 		ModelLoaderComponent(Loader && loader, Releaser && releaser, VertexRegisterFunc vertexRegisterFunc)

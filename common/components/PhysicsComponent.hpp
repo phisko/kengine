@@ -12,17 +12,15 @@ namespace kengine {
         float speed = 1;
 		bool changed = false;
 
-        pmeta_get_class_name(PhysicsComponent);
-        pmeta_get_attributes(
-                pmeta_reflectible_attribute(&PhysicsComponent::solid),
-                pmeta_reflectible_attribute(&PhysicsComponent::kinematic),
-                pmeta_reflectible_attribute(&PhysicsComponent::mass),
+        putils_reflection_class_name(PhysicsComponent);
+        putils_reflection_attributes(
+                putils_reflection_attribute(&PhysicsComponent::solid),
+                putils_reflection_attribute(&PhysicsComponent::kinematic),
+                putils_reflection_attribute(&PhysicsComponent::mass),
 
-                pmeta_reflectible_attribute(&PhysicsComponent::movement),
-                pmeta_reflectible_attribute(&PhysicsComponent::speed),
-                pmeta_reflectible_attribute(&PhysicsComponent::changed)
+                putils_reflection_attribute(&PhysicsComponent::movement),
+                putils_reflection_attribute(&PhysicsComponent::speed),
+                putils_reflection_attribute(&PhysicsComponent::changed)
         );
-		pmeta_get_methods();
-		pmeta_get_parents();
     };
 }

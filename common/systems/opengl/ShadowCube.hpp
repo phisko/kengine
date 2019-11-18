@@ -19,7 +19,7 @@ namespace kengine::Shaders {
 		public src::DepthCube::Geom::Uniforms
 	{
 	public:
-		ShadowCube(kengine::EntityManager & em) : ShadowCubeShader(false, pmeta_nameof(ShadowCube)), _em(em) {}
+		ShadowCube(kengine::EntityManager & em) : ShadowCubeShader(false, putils_nameof(ShadowCube)), _em(em) {}
 
 		void init(size_t firstTextureID) override;
 
@@ -30,10 +30,10 @@ namespace kengine::Shaders {
 		kengine::EntityManager & _em;
 
 	public:
-		pmeta_get_parents(
-			pmeta_reflectible_parent(src::ProjViewModel::Vert::Uniforms),
-			pmeta_reflectible_parent(src::DepthCube::Frag::Uniforms),
-			pmeta_reflectible_parent(src::DepthCube::Geom::Uniforms)
+		putils_reflection_parents(
+			putils_reflection_parent(src::ProjViewModel::Vert::Uniforms),
+			putils_reflection_parent(src::DepthCube::Frag::Uniforms),
+			putils_reflection_parent(src::DepthCube::Geom::Uniforms)
 		);
 	};
 }

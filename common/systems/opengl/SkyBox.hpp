@@ -27,14 +27,14 @@ namespace kengine::Shaders {
 		putils::gl::Uniform<float> _entityID;
 		putils::gl::Uniform<putils::NormalizedColor> _color;
 
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute_private(&SkyBox::_view),
-			pmeta_reflectible_attribute_private(&SkyBox::_proj),
+		putils_reflection_attributes(
+			putils_reflection_attribute_private(&SkyBox::_view),
+			putils_reflection_attribute_private(&SkyBox::_proj),
 
-			pmeta_reflectible_attribute_private(&SkyBox::_tex),
+			putils_reflection_attribute_private(&SkyBox::_tex),
 
-			pmeta_reflectible_attribute_private(&SkyBox::_entityID),
-			pmeta_reflectible_attribute_private(&SkyBox::_color)
+			putils_reflection_attribute_private(&SkyBox::_entityID),
+			putils_reflection_attribute_private(&SkyBox::_color)
 		);
 	};
 }

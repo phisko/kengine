@@ -26,20 +26,20 @@ namespace kengine {
 		putils::NormalizedColor color;
 		Alignment alignment = Alignment::Center;
 
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&TextComponent::font),
-			pmeta_reflectible_attribute(&TextComponent::text),
-			pmeta_reflectible_attribute(&TextComponent::fontSize),
-			pmeta_reflectible_attribute(&TextComponent::color),
-			pmeta_reflectible_attribute(&TextComponent::alignment)
+		putils_reflection_attributes(
+			putils_reflection_attribute(&TextComponent::font),
+			putils_reflection_attribute(&TextComponent::text),
+			putils_reflection_attribute(&TextComponent::fontSize),
+			putils_reflection_attribute(&TextComponent::color),
+			putils_reflection_attribute(&TextComponent::alignment)
 		);
 	};
 
 	struct TextComponent2D : TextComponent { // UI element
-		pmeta_get_class_name(TextComponent2D);
+		putils_reflection_class_name(TextComponent2D);
 	};
 
 	struct TextComponent3D : TextComponent { // Ground feedback and such
-		pmeta_get_class_name(TextComponent3D);
+		putils_reflection_class_name(TextComponent3D);
 	};
 }

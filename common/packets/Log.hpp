@@ -1,12 +1,17 @@
 #pragma once
 
-#include <string>
-#include "putils/reflection.hpp"
+#ifndef KENGINE_LOG_MSG_SIZE
+# define KENGINE_LOG_MSG_SIZE 128
+#endif
+
+#include "string.hpp"
+#include "reflection.hpp"
 
 namespace kengine {
     namespace packets {
         struct Log {
-            std::string msg;
+            static constexpr char stringName[] = "LogPacketString";
+            putils::string<KENGINE_LOG_MSG_SIZE, stringName> msg;
 
             Log(std::string_view msg = "") : msg(msg) {}
 
@@ -14,12 +19,10 @@ namespace kengine {
              * Reflectible
              */
 
-            pmeta_get_class_name(Log);
-            pmeta_get_attributes(
-                    pmeta_reflectible_attribute(&Log::msg)
+            putils_reflection_class_name(Log);
+            putils_reflection_attributes(
+                    putils_reflection_attribute(&Log::msg)
             );
-            pmeta_get_methods();
-            pmeta_get_parents();
         };
     }
 }

@@ -135,7 +135,7 @@ namespace kengine::Shaders {
 	}
 
 	Text::Text(EntityManager & em)
-		: Program(false, pmeta_nameof(Text)),
+		: Program(false, putils_nameof(Text)),
 		_em(em)
 	{
 		if (FT_Init_FreeType(&g_ft))

@@ -11,7 +11,7 @@
 #include "lengthof.hpp"
 
 namespace kengine {
-	class AdjustableComponent : kengine::not_serializable {
+	class AdjustableComponent {
 	public:
 		static constexpr char stringName[] = "AdjustableComponentString";
 		using string = putils::string<KENGINE_ADJUSTABLE_NAME_MAX_LENGTH, stringName>;
@@ -88,16 +88,14 @@ namespace kengine {
 
 		EType adjustableType = Bool;
 
-		pmeta_get_class_name(AdjustableComponent);
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&AdjustableComponent::name),
-			pmeta_reflectible_attribute(&AdjustableComponent::b),
-			pmeta_reflectible_attribute(&AdjustableComponent::d),
-			pmeta_reflectible_attribute(&AdjustableComponent::i),
-			pmeta_reflectible_attribute(&AdjustableComponent::color),
-			pmeta_reflectible_attribute(&AdjustableComponent::adjustableType)
+		putils_reflection_class_name(AdjustableComponent);
+		putils_reflection_attributes(
+			putils_reflection_attribute(&AdjustableComponent::name),
+			putils_reflection_attribute(&AdjustableComponent::b),
+			putils_reflection_attribute(&AdjustableComponent::d),
+			putils_reflection_attribute(&AdjustableComponent::i),
+			putils_reflection_attribute(&AdjustableComponent::color),
+			putils_reflection_attribute(&AdjustableComponent::adjustableType)
 		);
-		pmeta_get_methods();
-		pmeta_get_parents();
 	};
 }

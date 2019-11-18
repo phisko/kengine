@@ -16,7 +16,7 @@ namespace kengine {
 
 namespace kengine::Shaders {
 	DirLight::DirLight(kengine::EntityManager & em)
-		: Program(true, pmeta_nameof(DirLight)),
+		: Program(true, putils_nameof(DirLight)),
 		_em(em)
 	{
 		_em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/Lights] Debug CSM", &DEBUG_CSM); };

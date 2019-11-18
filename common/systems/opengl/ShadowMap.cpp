@@ -17,7 +17,7 @@ namespace kengine {
 
 namespace kengine::Shaders {
 	ShadowMap::ShadowMap(kengine::EntityManager & em)
-		: ShadowMapShader(false, pmeta_nameof(ShadowMap)), _em(em)
+		: ShadowMapShader(false, putils_nameof(ShadowMap)), _em(em)
 	{
 		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/Lights] Shadow map near plane", &SHADOW_MAP_NEAR_PLANE); };
 		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/Lights] Shadow map far plane", &SHADOW_MAP_FAR_PLANE); };

@@ -17,7 +17,7 @@ namespace kengine::Shaders {
 	static glm::vec3 toVec(const putils::Point3f & p) { return { p.x, p.y, p.z }; }
 
 	LightSphere::LightSphere(kengine::EntityManager & em) 
-		: Program(false, pmeta_nameof(LightSphere)),
+		: Program(false, putils_nameof(LightSphere)),
 		_em(em) {
 		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/Lights] Sphere size", &SPHERE_SIZE); };
 		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/Lights] Sun size", &SUN_SIZE); };

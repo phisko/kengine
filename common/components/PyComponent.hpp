@@ -44,14 +44,13 @@ namespace kengine {
          * Reflectible
          */
     public:
-        pmeta_get_class_name(PyComponent);
-        pmeta_get_attributes(
-                pmeta_reflectible_attribute_private(&PyComponent::_scripts)
+        putils_reflection_class_name(PyComponent);
+        putils_reflection_attributes(
+                putils_reflection_attribute_private(&PyComponent::_scripts)
         );
-        pmeta_get_methods(
-                pmeta_reflectible_attribute(&PyComponent::attachScript),
-                pmeta_reflectible_attribute(&PyComponent::removeScript)
+        putils_reflection_methods(
+                putils_reflection_attribute(&PyComponent::attachScript),
+                putils_reflection_attribute(&PyComponent::removeScript)
         );
-        pmeta_get_parents();
     };
 }

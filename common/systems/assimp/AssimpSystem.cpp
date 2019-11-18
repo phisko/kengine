@@ -38,7 +38,7 @@ static Assimp::Importer g_importer;
 
 namespace kengine {
 	namespace AssImp {
-		struct AssImpModelComponent : kengine::not_serializable {
+		struct AssImpModelComponent {
 			struct Mesh {
 				struct Vertex {
 					float position[3];
@@ -47,13 +47,13 @@ namespace kengine {
 					float boneWeights[KENGINE_ASSIMP_BONE_INFO_PER_VERTEX] = { 0.f };
 					unsigned int boneIDs[KENGINE_ASSIMP_BONE_INFO_PER_VERTEX] = { 0 };
 
-					pmeta_get_attributes(
-						pmeta_reflectible_attribute(&Vertex::position),
-						pmeta_reflectible_attribute(&Vertex::normal),
-						pmeta_reflectible_attribute(&Vertex::texCoords),
+					putils_reflection_attributes(
+						putils_reflection_attribute(&Vertex::position),
+						putils_reflection_attribute(&Vertex::normal),
+						putils_reflection_attribute(&Vertex::texCoords),
 
-						pmeta_reflectible_attribute(&Vertex::boneWeights),
-						pmeta_reflectible_attribute(&Vertex::boneIDs)
+						putils_reflection_attribute(&Vertex::boneWeights),
+						putils_reflection_attribute(&Vertex::boneIDs)
 					);
 				};
 
@@ -66,7 +66,7 @@ namespace kengine {
 			std::vector<Mesh> meshes;
 		};
 
-		struct AssImpSkeletonComponent : kengine::not_serializable {
+		struct AssImpSkeletonComponent {
 			struct Mesh {
 				struct Bone {
 					aiNode * node = nullptr;
@@ -79,8 +79,6 @@ namespace kengine {
 			aiNode * rootNode;
 			std::vector<Mesh> meshes;
 			glm::mat4 globalInverseTransform;
-
-			pmeta_get_class_name(AssImpSkeletonComponent);
 		};
 
 		static aiMatrix4x4 toAiMat(const glm::mat4 & mat) {

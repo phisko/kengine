@@ -10,8 +10,8 @@ namespace kengine::Shaders::src {
 			struct Uniforms {
 				putils::gl::Uniform<putils::NormalizedColor> _color;
 
-				pmeta_get_attributes(
-					pmeta_reflectible_attribute_private(&Uniforms::_color)
+				putils_reflection_attributes(
+					putils_reflection_attribute_private(&Uniforms::_color)
 				);
 			};
 		}

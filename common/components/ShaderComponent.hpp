@@ -2,7 +2,6 @@
 
 #include <memory>
 
-#include "not_serializable.hpp"
 #include "putils/opengl/Program.hpp"
 #include "components/LightComponent.hpp"
 
@@ -14,18 +13,18 @@ namespace kengine {
 		bool enabled = true;
 	};
 
-	struct GBufferShaderComponent : ShaderComponent, kengine::not_serializable {
-		pmeta_get_class_name(GBufferShaderComponent);
+	struct GBufferShaderComponent : ShaderComponent {
+		putils_reflection_class_name(GBufferShaderComponent);
 	};
-	struct LightingShaderComponent : ShaderComponent, kengine::not_serializable {
-		pmeta_get_class_name(LightingShaderComponent);
+	struct LightingShaderComponent : ShaderComponent {
+		putils_reflection_class_name(LightingShaderComponent);
 	};
-	struct PostLightingShaderComponent : ShaderComponent, kengine::not_serializable {
-		pmeta_get_class_name(PostLightingShaderComponent);
+	struct PostLightingShaderComponent : ShaderComponent {
+		putils_reflection_class_name(PostLightingShaderComponent);
 	};
 
-	struct PostProcessShaderComponent : ShaderComponent, kengine::not_serializable {
-		pmeta_get_class_name(PostProcessShaderComponent);
+	struct PostProcessShaderComponent : ShaderComponent {
+		putils_reflection_class_name(PostProcessShaderComponent);
 	};
 
 	template<typename T, typename ...Args>
@@ -52,18 +51,18 @@ namespace kengine {
 	struct SpotLightComponent;
 	struct PointLightComponent;
 
-	struct DepthMapComponent : kengine::not_serializable {
+	struct DepthMapComponent {
 		GLuint fbo = -1;
 		GLuint texture = -1;
 		int size = -1;
-		pmeta_get_class_name(DepthMapComponent);
+		putils_reflection_class_name(DepthMapComponent);
 	};
 
-	struct CSMComponent : kengine::not_serializable {
+	struct CSMComponent {
 		GLuint fbo = -1;
 		GLuint textures[KENGINE_CSM_COUNT];
 		int size = -1;
-		pmeta_get_class_name(CSMComponent);
+		putils_reflection_class_name(CSMComponent);
 	};
 
 	class ShadowMapShader : public putils::gl::Program {
@@ -72,22 +71,22 @@ namespace kengine {
 		virtual void run(kengine::Entity & e, DirLightComponent & light, const Parameters & params) = 0;
 		virtual void run(kengine::Entity & e, SpotLightComponent & light, const putils::Point3f & pos, const Parameters & params) = 0;
 	};
-	struct ShadowMapShaderComponent : kengine::not_serializable {
-		pmeta_get_class_name(ShadowMapShaderComponent);
+	struct ShadowMapShaderComponent {
+		putils_reflection_class_name(ShadowMapShaderComponent);
 	};
 
-	struct DepthCubeComponent : kengine::not_serializable {
+	struct DepthCubeComponent {
 		GLuint fbo = -1;
 		GLuint texture = -1;
 		int size = -1;
-		pmeta_get_class_name(DepthCubeComponent);
+		putils_reflection_class_name(DepthCubeComponent);
 	};
 	class ShadowCubeShader : public putils::gl::Program {
 	public:
 		ShadowCubeShader(bool usesGBuffer = false, const char * name = "") : Program(usesGBuffer, name) {}
 		virtual void run(kengine::Entity & e, PointLightComponent & light, const putils::Point3f & pos, float radius, const Parameters & params) = 0;
 	};
-	struct ShadowCubeShaderComponent : kengine::not_serializable {
-		pmeta_get_class_name(ShadowCubeShaderComponent);
+	struct ShadowCubeShaderComponent {
+		putils_reflection_class_name(ShadowCubeShaderComponent);
 	};
 }

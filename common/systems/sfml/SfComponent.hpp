@@ -27,11 +27,8 @@ public:
     SfComponent(std::unique_ptr<pse::ViewItem>&& viewItem) {
 		item = std::move(viewItem);
     }
-
-	pmeta_get_class_name(SfComponent);
 };
 
 struct SfComponentDebug {
 	std::unique_ptr<pse::ViewItem> item;
-	pmeta_get_class_name(SfComponentDebug);
 };

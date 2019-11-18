@@ -14,8 +14,7 @@
 #include "Observable.hpp"
 
 namespace kengine {
-    class GUIComponent : public putils::Observable<>, 
-                         public kengine::not_serializable {
+    class GUIComponent : public putils::Observable<> {
     public:
 	    	static constexpr char stringName[] = "GUIComponentString";
 		using string = putils::string<KENGINE_GUI_TEXT_MAX_LENGTH, stringName>;
@@ -60,16 +59,15 @@ namespace kengine {
          */
 
     public:
-        pmeta_get_class_name(GUIComponent);
-        pmeta_get_attributes(
-                pmeta_reflectible_attribute(&GUIComponent::onClick),
-                pmeta_reflectible_attribute(&GUIComponent::text),
-                pmeta_reflectible_attribute(&GUIComponent::boundingBox),
-                pmeta_reflectible_attribute(&GUIComponent::guiType)
+        putils_reflection_class_name(GUIComponent);
+        putils_reflection_attributes(
+                putils_reflection_attribute(&GUIComponent::onClick),
+                putils_reflection_attribute(&GUIComponent::text),
+                putils_reflection_attribute(&GUIComponent::boundingBox),
+                putils_reflection_attribute(&GUIComponent::guiType)
         );
-        pmeta_get_methods(
-			pmeta_reflectible_attribute(&GUIComponent::changed)
+        putils_reflection_methods(
+			putils_reflection_attribute(&GUIComponent::changed)
 		);
-        pmeta_get_parents();
     };
 }

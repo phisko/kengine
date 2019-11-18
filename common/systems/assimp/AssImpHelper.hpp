@@ -21,11 +21,9 @@
 namespace kengine {
 	class EntityManager;
 
-	struct AssImpObjectComponent : kengine::not_serializable {
-		pmeta_get_class_name(AssImpObjectComponent);
-	};
+	struct AssImpObjectComponent {};
 
-	struct AssImpTexturesModelComponent : kengine::not_serializable {
+	struct AssImpTexturesModelComponent {
 		struct MeshTextures {
 			std::vector<Entity::ID> diffuse; // id of entities with TextureModelComponent
 			std::vector<Entity::ID> specular;
@@ -35,8 +33,6 @@ namespace kengine {
 		};
 
 		std::vector<MeshTextures> meshes; // Must match those in ModelInfoComponent
-
-		pmeta_get_class_name(AssImpTexturesModelComponent);
 	};
 
 	namespace AssImpHelper {

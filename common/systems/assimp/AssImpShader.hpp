@@ -8,7 +8,7 @@ namespace kengine {
 	class AssImpShader : public putils::gl::Program {
 	public:
 		AssImpShader(kengine::EntityManager & em)
-			: Program(false, pmeta_nameof(AssImpShader)),
+			: Program(false, putils_nameof(AssImpShader)),
 			_em(em)
 		{}
 
@@ -31,21 +31,21 @@ namespace kengine {
 		putils::gl::Uniform<float> _entityID;
 		putils::gl::Uniform<putils::NormalizedColor> _color;
 
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute_private(&AssImpShader::_model),
-			pmeta_reflectible_attribute_private(&AssImpShader::_view),
-			pmeta_reflectible_attribute_private(&AssImpShader::_proj),
+		putils_reflection_attributes(
+			putils_reflection_attribute_private(&AssImpShader::_model),
+			putils_reflection_attribute_private(&AssImpShader::_view),
+			putils_reflection_attribute_private(&AssImpShader::_proj),
 
-			pmeta_reflectible_attribute_private(&AssImpShader::_bones),
+			putils_reflection_attribute_private(&AssImpShader::_bones),
 
-			pmeta_reflectible_attribute_private(&AssImpShader::_hasTexture),
-			pmeta_reflectible_attribute_private(&AssImpShader::_texture_diffuse),
-			// pmeta_reflectible_attrib_privateute(&TexturedShader::texture_specular),
-			pmeta_reflectible_attribute_private(&AssImpShader::_diffuseColor),
-			// pmeta_reflectible_attrib_privateute(&TexturedShader::specularColor),
+			putils_reflection_attribute_private(&AssImpShader::_hasTexture),
+			putils_reflection_attribute_private(&AssImpShader::_texture_diffuse),
+			// putils_reflection_attribute_private(&TexturedShader::texture_specular),
+			putils_reflection_attribute_private(&AssImpShader::_diffuseColor),
+			// putils_reflection_attribute_private(&TexturedShader::specularColor),
 
-			pmeta_reflectible_attribute_private(&AssImpShader::_entityID),
-			pmeta_reflectible_attribute_private(&AssImpShader::_color)
+			putils_reflection_attribute_private(&AssImpShader::_entityID),
+			putils_reflection_attribute_private(&AssImpShader::_color)
 		);
 
 	private:

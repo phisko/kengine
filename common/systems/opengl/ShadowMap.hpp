@@ -33,8 +33,8 @@ namespace kengine::Shaders {
 		kengine::EntityManager & _em;
 
 	public:
-		pmeta_get_parents(
-			pmeta_reflectible_parent(src::ProjViewModel::Vert::Uniforms)
+		putils_reflection_parents(
+			putils_reflection_parent(src::ProjViewModel::Vert::Uniforms)
 		);
 	};
 

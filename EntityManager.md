@@ -113,26 +113,6 @@ double getSpeed() const;
 
 Returns the game's speed.
 
-### Serialization
-
-##### save
-
-```cpp
-void save(const char * directory) const;
-```
-
-Saves all `Entities` and `Components` to a series of binary files (one for the list of `Entities`, and one for each type of `Component`) in `directory`.
-
-To specify that a `Component` should not be serialized, it should inherit from `kengine::not_serializable`.
-
-##### load
-
-```cpp
-void load(const char * directory);
-```
-
-Loads all `Entities` and `Components` from the binary files found in `directory`.
-
 ##### registerComponentFunction
 
 ```cpp

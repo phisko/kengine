@@ -59,15 +59,13 @@ namespace kengine {
          */
 
     public:
-        pmeta_get_class_name(CameraComponent);
-        pmeta_get_attributes(
-                pmeta_reflectible_attribute(&CameraComponent::frustum),
-                pmeta_reflectible_attribute(&CameraComponent::pitch),
-                pmeta_reflectible_attribute(&CameraComponent::yaw),
-                pmeta_reflectible_attribute(&CameraComponent::roll)
+        putils_reflection_class_name(CameraComponent);
+        putils_reflection_attributes(
+                putils_reflection_attribute(&CameraComponent::frustum),
+                putils_reflection_attribute(&CameraComponent::pitch),
+                putils_reflection_attribute(&CameraComponent::yaw),
+                putils_reflection_attribute(&CameraComponent::roll)
         );
-        pmeta_get_methods();
-        pmeta_get_parents();
     };
 
     using CameraComponent2i = CameraComponent<int, 2>;

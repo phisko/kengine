@@ -56,7 +56,7 @@ void main() {
 
 namespace kengine::Shaders {
 	Debug::Debug(kengine::EntityManager & em)
-		: Program(false, pmeta_nameof(Debug)),
+		: Program(false, putils_nameof(Debug)),
 		_em(em)
 	{
 	}

@@ -18,12 +18,12 @@ namespace kengine {
 		float speed = 1.f;
 		bool loop = true;
 
-		pmeta_get_class_name(AnimationComponent);
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&AnimationComponent::currentAnim),
-			pmeta_reflectible_attribute(&AnimationComponent::currentTime),
-			pmeta_reflectible_attribute(&AnimationComponent::speed),
-			pmeta_reflectible_attribute(&AnimationComponent::loop)
+		putils_reflection_class_name(AnimationComponent);
+		putils_reflection_attributes(
+			putils_reflection_attribute(&AnimationComponent::currentAnim),
+			putils_reflection_attribute(&AnimationComponent::currentTime),
+			putils_reflection_attribute(&AnimationComponent::speed),
+			putils_reflection_attribute(&AnimationComponent::loop)
 		);
 	};
 
@@ -36,20 +36,20 @@ namespace kengine {
 			float totalTime;
 			float ticksPerSecond;
 
-			pmeta_get_class_name(AnimListComponentAnim);
-			pmeta_get_attributes(
-				pmeta_reflectible_attribute(&Anim::name),
-				pmeta_reflectible_attribute(&Anim::totalTime),
-				pmeta_reflectible_attribute(&Anim::ticksPerSecond)
+			putils_reflection_class_name(AnimListComponentAnim);
+			putils_reflection_attributes(
+				putils_reflection_attribute(&Anim::name),
+				putils_reflection_attribute(&Anim::totalTime),
+				putils_reflection_attribute(&Anim::ticksPerSecond)
 			);
 		};
 
 		static constexpr char vectorName[] = "AnimListComponentVector";
 		putils::vector<Anim, KENGINE_MAX_ANIMATION_FILES, vectorName> allAnims;
 
-		pmeta_get_class_name(AnimListComponent);
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&AnimListComponent::allAnims)
+		putils_reflection_class_name(AnimListComponent);
+		putils_reflection_attributes(
+			putils_reflection_attribute(&AnimListComponent::allAnims)
 		);
 	};
 
@@ -58,9 +58,9 @@ namespace kengine {
 		using vector = putils::vector<AnimListComponent::string, KENGINE_MAX_ANIMATION_FILES, vectorName>;
 		vector files;
 
-		pmeta_get_class_name(AnimFilesComponent);
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&AnimFilesComponent::files)
+		putils_reflection_class_name(AnimFilesComponent);
+		putils_reflection_attributes(
+			putils_reflection_attribute(&AnimFilesComponent::files)
 		);
 	};
 }

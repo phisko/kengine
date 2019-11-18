@@ -17,12 +17,11 @@ namespace kengine {
 		kengine::Entity::ID model = kengine::Entity::INVALID_ID; // Entity which had a ModelComponent
 		putils::NormalizedColor color = { 1.f, 1.f, 1.f, 1.f };
 
-        pmeta_get_class_name(GraphicsComponent);
-        pmeta_get_attributes(
-				pmeta_reflectible_attribute(&GraphicsComponent::appearance),
-				pmeta_reflectible_attribute(&GraphicsComponent::model),
-				pmeta_reflectible_attribute(&GraphicsComponent::color)
+        putils_reflection_class_name(GraphicsComponent);
+        putils_reflection_attributes(
+				putils_reflection_attribute(&GraphicsComponent::appearance),
+				putils_reflection_attribute(&GraphicsComponent::model),
+				putils_reflection_attribute(&GraphicsComponent::color)
         );
-		pmeta_get_parents();
     };
 }

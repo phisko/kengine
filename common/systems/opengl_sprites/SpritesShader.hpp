@@ -22,15 +22,15 @@ namespace kengine {
 		putils::gl::Uniform<putils::NormalizedColor> _color;
 		putils::gl::Uniform<float> _entityID;
 
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute_private(&SpritesShader::_model),
-			pmeta_reflectible_attribute_private(&SpritesShader::_view),
-			pmeta_reflectible_attribute_private(&SpritesShader::_proj),
-			pmeta_reflectible_attribute_private(&SpritesShader::_viewPos),
+		putils_reflection_attributes(
+			putils_reflection_attribute_private(&SpritesShader::_model),
+			putils_reflection_attribute_private(&SpritesShader::_view),
+			putils_reflection_attribute_private(&SpritesShader::_proj),
+			putils_reflection_attribute_private(&SpritesShader::_viewPos),
 
-			pmeta_reflectible_attribute_private(&SpritesShader::_tex),
-			pmeta_reflectible_attribute_private(&SpritesShader::_color),
-			pmeta_reflectible_attribute_private(&SpritesShader::_entityID)
+			putils_reflection_attribute_private(&SpritesShader::_tex),
+			putils_reflection_attribute_private(&SpritesShader::_color),
+			putils_reflection_attribute_private(&SpritesShader::_entityID)
 		);
 
 	private:

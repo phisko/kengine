@@ -7,21 +7,19 @@
 #include <gl/glew.h>
 #include <GL/GL.h>
 
-#include "not_serializable.hpp"
-
 #include "reflection.hpp"
 #include "string.hpp"
 
 namespace kengine {
-	struct TextureModelComponent : not_serializable {
+	struct TextureModelComponent {
 		static constexpr char stringName[] = "TextureModelComponentString";
 		putils::string<KENGINE_TEXTURE_MODEL_COMPONENT_PATH_MAX_LENGTH, stringName> file;
 
 		GLuint texture = -1;
 
-		pmeta_get_class_name(TextureModelComponent);
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&TextureModelComponent::file)
+		putils_reflection_class_name(TextureModelComponent);
+		putils_reflection_attributes(
+			putils_reflection_attribute(&TextureModelComponent::file)
 		);
 	};
 }

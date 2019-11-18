@@ -1,7 +1,9 @@
 #pragma once
 
+#include "reflection.hpp"
+
 namespace kengine {
 	struct SelectedComponent {
-		pmeta_get_class_name(SelectedComponent);
+		putils_reflection_class_name(SelectedComponent);
 	};
 }

@@ -34,7 +34,7 @@ namespace kengine {
 
 	using MeshType = decltype(detailMagicaVoxel::buildMesh(PolyVox::RawVolume<PolyVoxComponent::VertexData>{ {} }));
 
-	struct MagicaVoxelModelComponent : not_serializable {
+	struct MagicaVoxelModelComponent {
 		MeshType mesh;
 	};
 
@@ -76,9 +76,9 @@ namespace kengine {
 			ModelLoaderComponent::ModelData ret; {
 				ModelLoaderComponent::ModelData::MeshData meshData; {
 					const auto & model = e.get<MagicaVoxelModelComponent>();
-					meshData.vertices = { model.mesh.getNoOfVertices(), sizeof(pmeta_typeof(model.mesh)::VertexType), model.mesh.getRawVertexData() };
-					meshData.indices = { model.mesh.getNoOfIndices(), sizeof(pmeta_typeof(model.mesh)::IndexType), model.mesh.getRawIndexData() };
-					meshData.indexType = sizeof(pmeta_typeof(model.mesh)::IndexType) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
+					meshData.vertices = { model.mesh.getNoOfVertices(), sizeof(putils_typeof(model.mesh)::VertexType), model.mesh.getRawVertexData() };
+					meshData.indices = { model.mesh.getNoOfIndices(), sizeof(putils_typeof(model.mesh)::IndexType), model.mesh.getRawIndexData() };
+					meshData.indexType = sizeof(putils_typeof(model.mesh)::IndexType) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
 				}
 				ret.meshes.push_back(meshData);
 			}
@@ -134,20 +134,12 @@ namespace kengine {
 
 		e.attach<MagicaVoxelModelComponent>().mesh = detailMagicaVoxel::buildMesh(volume);
 
-		struct OffsetAppliedComponent { // Used for serialization: entities that get unserialized should not have the offset applied again
-			pmeta_get_class_name(OffsetAppliedComponent);
-		};
+		auto &comp = e.get<ModelComponent>();
+		auto &box = comp.boundingBox;
+		auto &offset = box.position;
 
-		if (!e.has<OffsetAppliedComponent>()) {
-			auto & comp = e.get<ModelComponent>();
-			auto & box = comp.boundingBox;
-			auto & offset = box.position;
-
-			offset.x += size.x / 2.f * box.size.x;
-			offset.z += size.y / 2.f * box.size.z;
-
-			e += OffsetAppliedComponent{};
-		}
+		offset.x += size.x / 2.f * box.size.x;
+		offset.z += size.y / 2.f * box.size.z;
 
 #ifndef KENGINE_NDEBUG
 		std::cout << putils::termcolor::green << " Done.\n" << putils::termcolor::reset;

@@ -25,7 +25,7 @@ namespace kengine {
 
 		template<typename Ret, typename ...Args>
 		void registerEntityMember(const std::string & name, const std::function<Ret(Args...)> & func) {
-			_lua[Entity::get_class_name()][name] = FWD(func);
+			_lua[putils::reflection::get_class_name<Entity>()][name] = FWD(func);
 		}
 
 		template<typename T>

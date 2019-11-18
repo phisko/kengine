@@ -2,7 +2,6 @@
 
 #include <glm/glm.hpp>
 #include "vector.hpp"
-#include "not_serializable.hpp"
 
 #ifndef KENGINE_BONE_NAME_MAX_LENGTH
 # define KENGINE_BONE_NAME_MAX_LENGTH 64
@@ -17,13 +16,11 @@
 #endif
 
 namespace kengine {
-	struct SkeletonComponent : kengine::not_serializable {
+	struct SkeletonComponent {
 		struct Mesh {
 			glm::mat4 boneMatsBoneSpace[KENGINE_SKELETON_MAX_BONES]; // Used by shader
 			glm::mat4 boneMatsMeshSpace[KENGINE_SKELETON_MAX_BONES]; // Used to get bone matrix in world space
 		};
 		putils::vector<Mesh, KENGINE_MAX_MESHES_PER_MODEL> meshes;
-
-		pmeta_get_class_name(SkeletonComponent);
 	};
 }

@@ -18,16 +18,16 @@ namespace kengine::Shaders::src {
 				putils::gl::Uniform<float> _attenuationLinear;
 				putils::gl::Uniform<float> _attenuationQuadratic;
 
-				pmeta_get_attributes(
-					pmeta_reflectible_attribute_private(&Uniforms::_viewPos), 
-					pmeta_reflectible_attribute_private(&Uniforms::_screenSize), 
-					pmeta_reflectible_attribute_private(&Uniforms::_color), 
-					pmeta_reflectible_attribute_private(&Uniforms::_position), 
-					pmeta_reflectible_attribute_private(&Uniforms::_diffuseStrength), 
-					pmeta_reflectible_attribute_private(&Uniforms::_specularStrength), 
-					pmeta_reflectible_attribute_private(&Uniforms::_attenuationConstant), 
-					pmeta_reflectible_attribute_private(&Uniforms::_attenuationLinear), 
-					pmeta_reflectible_attribute_private(&Uniforms::_attenuationQuadratic)
+				putils_reflection_attributes(
+					putils_reflection_attribute_private(&Uniforms::_viewPos), 
+					putils_reflection_attribute_private(&Uniforms::_screenSize), 
+					putils_reflection_attribute_private(&Uniforms::_color), 
+					putils_reflection_attribute_private(&Uniforms::_position), 
+					putils_reflection_attribute_private(&Uniforms::_diffuseStrength), 
+					putils_reflection_attribute_private(&Uniforms::_specularStrength), 
+					putils_reflection_attribute_private(&Uniforms::_attenuationConstant), 
+					putils_reflection_attribute_private(&Uniforms::_attenuationLinear), 
+					putils_reflection_attribute_private(&Uniforms::_attenuationQuadratic)
 				);
 			};
 		}
@@ -38,8 +38,8 @@ namespace kengine::Shaders::src {
 			struct Uniforms {
 				putils::gl::Uniform<putils::Point3f> _position;
 
-				pmeta_get_attributes(
-					pmeta_reflectible_attribute_private(&Uniforms::_position)
+				putils_reflection_attributes(
+					putils_reflection_attribute_private(&Uniforms::_position)
 				);
 			};
 		}

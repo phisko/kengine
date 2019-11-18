@@ -34,14 +34,14 @@ namespace kengine {
 			float pitch = 0.f;
 			float roll = 0.f;
 
-			pmeta_get_class_name(ModelColliderComponentCollider);
-			pmeta_get_attributes(
-				pmeta_reflectible_attribute(&Collider::shape),
-				pmeta_reflectible_attribute(&Collider::boneName),
-				pmeta_reflectible_attribute(&Collider::boundingBox),
-				pmeta_reflectible_attribute(&Collider::yaw),
-				pmeta_reflectible_attribute(&Collider::pitch),
-				pmeta_reflectible_attribute(&Collider::roll)
+			putils_reflection_class_name(ModelColliderComponentCollider);
+			putils_reflection_attributes(
+				putils_reflection_attribute(&Collider::shape),
+				putils_reflection_attribute(&Collider::boneName),
+				putils_reflection_attribute(&Collider::boundingBox),
+				putils_reflection_attribute(&Collider::yaw),
+				putils_reflection_attribute(&Collider::pitch),
+				putils_reflection_attribute(&Collider::roll)
 			);
 		};
 
@@ -49,9 +49,9 @@ namespace kengine {
 		using vector = putils::vector<Collider, KENGINE_MAX_MODEL_COLLIDERS, vectorName>;
 		vector colliders;
 
-		pmeta_get_class_name(ModelColliderComponent);
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&ModelColliderComponent::colliders)
+		putils_reflection_class_name(ModelColliderComponent);
+		putils_reflection_attributes(
+			putils_reflection_attribute(&ModelColliderComponent::colliders)
 		);
 	};
 }

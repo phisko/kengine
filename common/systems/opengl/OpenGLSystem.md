@@ -53,11 +53,11 @@ struct GBufferTextures {
 	float color[4];
 	float entityID[4];
 
-	pmeta_get_attributes(
-		pmeta_reflectible_attribute(&GBufferTextures::position),
-		pmeta_reflectible_attribute(&GBufferTextures::normal),
-		pmeta_reflectible_attribute(&GBufferTextures::color),
-		pmeta_reflectible_attribute(&GBufferTextures::entityID)
+	putils_reflection_attributes(
+		putils_reflection_attribute(&GBufferTextures::position),
+		putils_reflection_attribute(&GBufferTextures::normal),
+		putils_reflection_attribute(&GBufferTextures::color),
+		putils_reflection_attribute(&GBufferTextures::entityID)
 	);
 };
 ```

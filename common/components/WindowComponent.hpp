@@ -19,13 +19,13 @@ namespace kengine {
 		bool shutdownOnClose = true;
 		string assignedSystem;
 
-		pmeta_get_class_name(WindowComponent);
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&WindowComponent::name),
-			pmeta_reflectible_attribute(&WindowComponent::size),
-			pmeta_reflectible_attribute(&WindowComponent::fullscreen),
-			pmeta_reflectible_attribute(&WindowComponent::shutdownOnClose),
-			pmeta_reflectible_attribute(&WindowComponent::assignedSystem)
+		putils_reflection_class_name(WindowComponent);
+		putils_reflection_attributes(
+			putils_reflection_attribute(&WindowComponent::name),
+			putils_reflection_attribute(&WindowComponent::size),
+			putils_reflection_attribute(&WindowComponent::fullscreen),
+			putils_reflection_attribute(&WindowComponent::shutdownOnClose),
+			putils_reflection_attribute(&WindowComponent::assignedSystem)
 		);
 	};
 }

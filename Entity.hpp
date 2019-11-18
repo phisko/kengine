@@ -54,13 +54,13 @@ namespace kengine {
 		}
 
 	public:
-		pmeta_get_class_name(EntityView);
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&EntityView::id),
-			pmeta_reflectible_attribute(&EntityView::componentMask)
+		putils_reflection_class_name(EntityView);
+		putils_reflection_attributes(
+			putils_reflection_attribute(&EntityView::id),
+			putils_reflection_attribute(&EntityView::componentMask)
 		);
-		pmeta_get_methods();
-		pmeta_get_parents();
+		putils_reflection_methods();
+		putils_reflection_parents();
 	};
 
 	class Entity : public EntityView {

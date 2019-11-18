@@ -14,12 +14,12 @@ namespace kengine::Shaders::src {
 				putils::gl::Uniform<float> _farPlane;
 				putils::gl::Uniform<float> _bias;
 
-				pmeta_get_attributes(
-					pmeta_reflectible_attribute_private(&Uniforms::_shadowMap), 
-					pmeta_reflectible_attribute_private(&Uniforms::_position), 
-					pmeta_reflectible_attribute_private(&Uniforms::_viewPos), 
-					pmeta_reflectible_attribute_private(&Uniforms::_farPlane), 
-					pmeta_reflectible_attribute_private(&Uniforms::_bias)
+				putils_reflection_attributes(
+					putils_reflection_attribute_private(&Uniforms::_shadowMap), 
+					putils_reflection_attribute_private(&Uniforms::_position), 
+					putils_reflection_attribute_private(&Uniforms::_viewPos), 
+					putils_reflection_attribute_private(&Uniforms::_farPlane), 
+					putils_reflection_attribute_private(&Uniforms::_bias)
 				);
 			};
 		}

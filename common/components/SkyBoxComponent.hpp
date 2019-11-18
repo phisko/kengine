@@ -21,16 +21,15 @@ namespace kengine {
 
 		putils::NormalizedColor color;
 
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&SkyBoxComponent::right),
-			pmeta_reflectible_attribute(&SkyBoxComponent::left),
-			pmeta_reflectible_attribute(&SkyBoxComponent::top),
-			pmeta_reflectible_attribute(&SkyBoxComponent::bottom),
-			pmeta_reflectible_attribute(&SkyBoxComponent::front),
-			pmeta_reflectible_attribute(&SkyBoxComponent::back),
-			pmeta_reflectible_attribute(&SkyBoxComponent::color)
+		putils_reflection_class_name(SkyBoxComponent);
+		putils_reflection_attributes(
+			putils_reflection_attribute(&SkyBoxComponent::right),
+			putils_reflection_attribute(&SkyBoxComponent::left),
+			putils_reflection_attribute(&SkyBoxComponent::top),
+			putils_reflection_attribute(&SkyBoxComponent::bottom),
+			putils_reflection_attribute(&SkyBoxComponent::front),
+			putils_reflection_attribute(&SkyBoxComponent::back),
+			putils_reflection_attribute(&SkyBoxComponent::color)
 		);
-
-		pmeta_get_class_name(SkyBoxComponent);
 	};
 }

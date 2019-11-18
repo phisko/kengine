@@ -21,7 +21,6 @@ namespace kengine {
 	struct PolyVoxMeshContainerComponent {
 		using MeshType = decltype(detailPolyVox::buildMesh(PolyVox::RawVolume<PolyVoxComponent::VertexData>({ {0, 0, 0 }, {0, 0, 0} })));
 		MeshType mesh;
-		pmeta_get_class_name(PolyVoxMeshContainerComponent);
 	};
 
 	static auto ExtractPolyVoxMeshData(kengine::Entity::ID id, kengine::EntityManager & em) {

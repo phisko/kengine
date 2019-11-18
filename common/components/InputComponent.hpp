@@ -4,13 +4,12 @@
 # define KENGINE_INPUT_FUNCTION_SIZE 64
 #endif
 
-#include "not_serializable.hpp"
 #include "reflection.hpp"
 #include "function.hpp"
 #include "Point.hpp"
 
 namespace kengine {
-    struct InputComponent : kengine::not_serializable {
+    struct InputComponent {
 		template<typename T>
 		using function = putils::function<T, KENGINE_INPUT_FUNCTION_SIZE>;
 
@@ -19,14 +18,12 @@ namespace kengine {
         function<void(Entity::ID window, int button, const putils::Point2f & screenCoordinates, bool pressed)> onMouseButton = nullptr;
         function<void(Entity::ID window, float xoffset, float yoffset, const putils::Point2f & screenCoordinates)> onScroll = nullptr;
 
-        pmeta_get_class_name(InputComponent);
-        pmeta_get_attributes(
-            pmeta_reflectible_attribute(&InputComponent::onKey),
-            pmeta_reflectible_attribute(&InputComponent::onMouseMove),
-            pmeta_reflectible_attribute(&InputComponent::onMouseButton),
-            pmeta_reflectible_attribute(&InputComponent::onScroll)
+        putils_reflection_class_name(InputComponent);
+        putils_reflection_attributes(
+            putils_reflection_attribute(&InputComponent::onKey),
+            putils_reflection_attribute(&InputComponent::onMouseMove),
+            putils_reflection_attribute(&InputComponent::onMouseButton),
+            putils_reflection_attribute(&InputComponent::onScroll)
         );
-        pmeta_get_methods();
-        pmeta_get_parents();
     };
 }

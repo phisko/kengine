@@ -18,11 +18,11 @@ namespace kengine {
 	void initGBuffer(kengine::EntityManager & em) {
 		em.send(packets::GBufferTexturesIterator{
 			[](auto func) {
-				putils::for_each_attribute<Textures>([&](auto name, auto member) {
+				putils::reflection::for_each_attribute<Textures>([&](auto name, auto member) {
 					func(name);
 				});
 			}
 		});
-		em.send(packets::DefineGBufferSize{ Textures::get_attributes().size });
+		em.send(packets::DefineGBufferSize{ putils::reflection::get_attributes<Textures>().size });
 	}
 }

@@ -18,7 +18,6 @@
 #include <vector>
 #include "meta/type.hpp"
 #include "reflection.hpp"
-#include "not_serializable.hpp"
 #include "string.hpp"
 #include "vector.hpp"
 #include "termcolor.hpp"
@@ -44,7 +43,7 @@ namespace kengine {
 		typename Func::Signature getFunction() const {
 			detail::ReadLock l(_mutex);
 			for (const auto & f : _funcs)
-				if (f.id == pmeta::type<Func>::index)
+				if (f.id == putils::meta::type<Func>::index)
 					return (typename Func::Signature)f.funcPtr;
 			return nullptr;
 		}
@@ -54,16 +53,16 @@ namespace kengine {
 			{
 				detail::ReadLock l(_mutex);
 				for (const auto & f : _funcs)
-					if (f.id == pmeta::type<Func>::index)
+					if (f.id == putils::meta::type<Func>::index)
 						return;
 			}
 			detail::WriteLock l(_mutex);
-			_funcs.push_back(Function{ pmeta::type<Func>::index, func.funcPtr });
+			_funcs.push_back(Function{ putils::meta::type<Func>::index, func.funcPtr });
 		}
 
 	private:
 		struct Function {
-			pmeta::type_index id = -1;
+			putils::meta::type_index id = -1;
 			void * funcPtr = nullptr;
 		};
 		putils::vector<Function, KENGINE_MAX_COMPONENT_FUNCTIONS> _funcs;
@@ -80,7 +79,7 @@ namespace kengine {
 		};
 
 		struct GlobalCompMap {
-			std::unordered_map<pmeta::type_index, std::unique_ptr<MetadataBase>> map;
+			std::unordered_map<putils::meta::type_index, std::unique_ptr<MetadataBase>> map;
 			detail::Mutex mutex;
 		};
 		extern GlobalCompMap * components;
@@ -139,7 +138,7 @@ namespace kengine {
 	private:
 		static inline Metadata & metadata() {
 			static Metadata * ret = [] {
-				const auto typeIndex = pmeta::type<Comp>::index;
+				const auto typeIndex = putils::meta::type<Comp>::index;
 
 				{
 					detail::ReadLock l(detail::components->mutex);
@@ -167,8 +166,8 @@ namespace kengine {
 		}
 
 		static const char * getName() {
-			if constexpr (putils::has_member_get_class_name<Comp>::value)
-				return Comp::get_class_name();
+			if constexpr (putils::reflection::has_class_name<Comp>::value)
+				return putils::reflection::get_class_name<Comp>();
 			else
 				return typeid(Comp).name();
 		}

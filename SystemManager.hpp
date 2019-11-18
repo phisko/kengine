@@ -141,9 +141,9 @@ namespace kengine {
             // Call "creatorFunc" in each plugin, passing myself as an EntityManager
             auto & em = static_cast<kengine::EntityManager &>(*this);
 
-            pmeta::tuple_for_each(std::tuple < pmeta::type<Systems>... > (),
+            putils::tuple_for_each(std::tuple < putils::meta::type<Systems>... > (),
                                   [this, &em](auto && type) {
-                                      using System = pmeta_wrapped(type);
+                                      using System = putils_wrapped_type(type);
                                       createSystem<System>(em);
                                   }
             );
@@ -170,7 +170,7 @@ namespace kengine {
         T & getSystem() {
             static_assert(std::is_base_of<ISystem, T>::value, "Attempt to get something that isn't a System");
 			for (auto & system : _systems)
-				if (system.type == pmeta::type<T>::index)
+				if (system.type == putils::meta::type<T>::index)
 					return static_cast<T &>(*system.ptr);
 			assert(false);
 			return static_cast<T &>(*_systems[0].ptr);
@@ -180,7 +180,7 @@ namespace kengine {
         const T & getSystem() const {
             static_assert(std::is_base_of<ISystem, T>::value, "Attempt to get something that isn't a System");
 			for (auto & system : _systems)
-				if (system.type == pmeta::type<T>::index)
+				if (system.type == putils::meta::type<T>::index)
 					return static_cast<const T &>(*system.ptr);
 			assert(false);
 			return static_cast<const T &>(*_systems[0].ptr);
@@ -190,7 +190,7 @@ namespace kengine {
         bool hasSystem() const noexcept {
             static_assert(std::is_base_of<ISystem, T>::value, "Attempt to check something that isn't a System");
 			for (auto & system : _systems)
-				if (system.type == pmeta::type<T>::index)
+				if (system.type == putils::meta::type<T>::index)
 					return true;
 			return false;
         }
@@ -199,9 +199,9 @@ namespace kengine {
         void removeSystem() noexcept {
             static_assert(std::is_base_of<ISystem, T>::value, "Attempt to remove something that isn't a System");
 			if (_inFrame)
-				_toRemove.emplace_back(pmeta::type<T>::index);
+				_toRemove.emplace_back(putils::meta::type<T>::index);
 			else {
-				const auto index = pmeta::type<T>::index;
+				const auto index = putils::meta::type<T>::index;
 				const auto it = std::find_if(_systems.begin(), _systems.end(), [index](const auto & system) { return system.type == index; });
 				if (it != _systems.end()) {
 					removeModule(*it->ptr);
@@ -233,15 +233,15 @@ namespace kengine {
     private:
         float _speed = 1;
 		bool _inFrame = false;
-        std::vector<std::pair<pmeta::type_index, std::unique_ptr<ISystem>>> _toAdd;
+        std::vector<std::pair<putils::meta::type_index, std::unique_ptr<ISystem>>> _toAdd;
 
-        std::vector<pmeta::type_index> _toRemove;
+        std::vector<putils::meta::type_index> _toRemove;
 
 		std::vector<putils::function<void(), KENGINE_AFTER_SYSTEM_FUNCTION_SIZE>> _afterSystem;
 
 	protected:
 		struct SystemInfo {
-			pmeta::type_index type;
+			putils::meta::type_index type;
 			std::unique_ptr<ISystem> ptr;
 		};
         std::vector<SystemInfo> _systems;

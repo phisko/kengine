@@ -26,15 +26,14 @@ namespace kengine::Shaders {
 		putils::gl::Uniform<float> _entityID;
 		putils::gl::Uniform<putils::NormalizedColor> _color;
 
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute_private(&Debug::_model),
-			pmeta_reflectible_attribute_private(&Debug::_view),
-			pmeta_reflectible_attribute_private(&Debug::_proj),
-			pmeta_reflectible_attribute_private(&Debug::_viewPos),
+		putils_reflection_attributes(
+			putils_reflection_attribute_private(&Debug::_model),
+			putils_reflection_attribute_private(&Debug::_view),
+			putils_reflection_attribute_private(&Debug::_proj),
+			putils_reflection_attribute_private(&Debug::_viewPos),
 
-			pmeta_reflectible_attribute_private(&Debug::_entityID),
-			pmeta_reflectible_attribute_private(&Debug::_color)
+			putils_reflection_attribute_private(&Debug::_entityID),
+			putils_reflection_attribute_private(&Debug::_color)
 		);
-
 	};
 }

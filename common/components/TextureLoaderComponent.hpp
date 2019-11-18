@@ -4,10 +4,8 @@
 # define KENGINE_TEXTURE_PATH_MAX_LENGTH 256
 #endif
 
-#include "not_serializable.hpp"
-
 namespace kengine {
-	struct TextureLoaderComponent : not_serializable {
+	struct TextureLoaderComponent {
 		void * data;
 		GLuint * textureID;
 

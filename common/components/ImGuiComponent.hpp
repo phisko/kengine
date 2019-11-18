@@ -10,13 +10,12 @@
 
 #include "function.hpp"
 #include "reflection.hpp"
-#include "not_serializable.hpp"
 
 struct ImGuiContext;
 extern ImGuiContext * GImGui;
 
 namespace kengine {
-	struct ImGuiComponent : kengine::not_serializable {
+	struct ImGuiComponent {
 		using function = putils::function<void(void * context), KENGINE_IMGUI_FUNCTION_SIZE>;
 
 		ImGuiComponent() = default;
@@ -45,17 +44,16 @@ namespace kengine {
 		 * Reflectible
 		 */
 
-		pmeta_get_class_name(ImGuiComponent);
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&ImGuiComponent::display)
+		putils_reflection_class_name(ImGuiComponent);
+		putils_reflection_attributes(
+			putils_reflection_attribute(&ImGuiComponent::display)
 		);
-		pmeta_get_methods(
-			pmeta_reflectible_attribute(&ImGuiComponent::setupImGuiContext)
+		putils_reflection_methods(
+			putils_reflection_attribute(&ImGuiComponent::setupImGuiContext)
 		);
-		pmeta_get_parents();
 	};
 
-	struct ImGuiToolComponent : kengine::not_serializable {
+	struct ImGuiToolComponent {
 		static constexpr char stringName[] = "ImGuiToolComponentString";
 		using string = putils::string<KENGINE_IMGUI_TOOL_NAME_MAX_LENGTH, stringName>;
 		string name;

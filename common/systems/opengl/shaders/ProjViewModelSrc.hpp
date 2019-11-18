@@ -12,10 +12,10 @@ namespace kengine::Shaders::src {
 				putils::gl::Uniform<glm::mat4> _view;
 				putils::gl::Uniform<glm::mat4> _model;
 
-				pmeta_get_attributes(
-					pmeta_reflectible_attribute_private(&Uniforms::_proj), 
-					pmeta_reflectible_attribute_private(&Uniforms::_view), 
-					pmeta_reflectible_attribute_private(&Uniforms::_model)
+				putils_reflection_attributes(
+					putils_reflection_attribute_private(&Uniforms::_proj), 
+					putils_reflection_attribute_private(&Uniforms::_view), 
+					putils_reflection_attribute_private(&Uniforms::_model)
 				);
 			};
 		}

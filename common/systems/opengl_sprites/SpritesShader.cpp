@@ -72,7 +72,7 @@ namespace kengine {
 	static glm::vec3 toVec(const putils::Point3f & p) { return { p.x, p.y, p.z }; }
 
 	SpritesShader::SpritesShader(kengine::EntityManager & em)
-		: Program(false, pmeta_nameof(SpritesShader)),
+		: Program(false, putils_nameof(SpritesShader)),
 		_em(em)
 	{}
 

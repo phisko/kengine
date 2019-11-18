@@ -6,9 +6,8 @@
 #include "common/systems/opengl/ShaderHelper.hpp"
 #include "stb_image.h"
 
-struct SkyBoxOpenGLComponent : kengine::not_serializable {
+struct SkyBoxOpenGLComponent {
 	GLuint textureID;
-	pmeta_get_class_name(SkyBoxOpenGLComponent);
 };
 
 static const auto vert = R"(
@@ -43,7 +42,7 @@ void main() {
 
 namespace kengine::Shaders {
 	SkyBox::SkyBox(kengine::EntityManager & em)
-		: Program(true, pmeta_nameof(SkyBox)),
+		: Program(true, putils_nameof(SkyBox)),
 		_em(em)
 	{}
 
@@ -65,7 +64,7 @@ namespace kengine::Shaders {
 		glBindTexture(GL_TEXTURE_CUBE_MAP, skyBox.textureID);
 
 		unsigned int i = 0;
-		putils::for_each_attribute<SkyBoxComponent>([&comp, &i](const char * name, auto member) {
+		putils::reflection::for_each_attribute<SkyBoxComponent>([&comp, &i](const char * name, auto member) {
 			using MemberType = std::decay_t<decltype(SkyBoxComponent{}.*member) > ;
 			if constexpr (std::is_same<MemberType, SkyBoxComponent::string>::value) {
 				int width, height, nrChannels;

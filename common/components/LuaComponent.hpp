@@ -12,7 +12,6 @@
 #include "vector.hpp"
 #include "lua/sol.hpp"
 #include "reflection.hpp"
-#include "not_serializable.hpp"
 
 namespace kengine {
     struct LuaComponent {
@@ -36,23 +35,22 @@ namespace kengine {
          * Reflectible
          */
     public:
-        pmeta_get_class_name(LuaComponent);
-        pmeta_get_attributes(
-                pmeta_reflectible_attribute(&LuaComponent::scripts)
+        putils_reflection_class_name(LuaComponent);
+        putils_reflection_attributes(
+                putils_reflection_attribute(&LuaComponent::scripts)
         );
-        pmeta_get_methods(
-                pmeta_reflectible_attribute(&LuaComponent::attachScript),
-                pmeta_reflectible_attribute(&LuaComponent::removeScript)
+        putils_reflection_methods(
+                putils_reflection_attribute(&LuaComponent::attachScript),
+                putils_reflection_attribute(&LuaComponent::removeScript)
         );
-        pmeta_get_parents();
     };
 
-	struct LuaTableComponent : kengine::not_serializable {
+	struct LuaTableComponent {
 		sol::table table;
 
-		pmeta_get_class_name(LuaTableComponent);
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&LuaTableComponent::table)
+		putils_reflection_class_name(LuaTableComponent);
+		putils_reflection_attributes(
+			putils_reflection_attribute(&LuaTableComponent::table)
 		);
 	};
 }

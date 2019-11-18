@@ -8,13 +8,12 @@
 
 #include "Color.hpp"
 #include "Entity.hpp"
-#include "not_serializable.hpp"
 
 namespace putils::gl { class Program; }
 
 namespace kengine {
 	// Used only by shaders, built from a ModelLoaderComponent
-	struct OpenGLModelComponent : kengine::not_serializable {
+	struct OpenGLModelComponent {
 		struct Mesh {
 			GLuint vertexArrayObject = -1;
 			GLuint vertexBuffer = -1;
@@ -26,7 +25,5 @@ namespace kengine {
 		std::vector<Mesh> meshes;
 
 		void (*vertexRegisterFunc)() = nullptr;
-
-		pmeta_get_class_name(OpenGLModelComponent);
 	};
 }

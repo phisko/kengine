@@ -32,8 +32,8 @@ namespace kengine {
 
 	template<typename ... Comps>
 	void registerComponentsFunctions(kengine::EntityManager & em) {
-		pmeta_for_each(Comps, [&](auto type) {
-			using Type = pmeta_wrapped(type);
+		putils_for_each_type(Comps, [&](auto type) {
+			using Type = putils_wrapped_type(type);
 			registerComponentFunctions<Type>(em);
 		});
 	}

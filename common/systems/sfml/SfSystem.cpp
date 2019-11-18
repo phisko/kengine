@@ -373,7 +373,7 @@ namespace kengine {
 	}
 
 	void SfSystem::attachNormal(Entity e) {
-		pmeta_with(e.get<GraphicsComponent>()) {
+		putils_with(e.get<GraphicsComponent>()) {
 			auto & comp = e.attach<SfComponent>();
 
 			const auto & transform = e.get<TransformComponent3f>();

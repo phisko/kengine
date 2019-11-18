@@ -21,14 +21,14 @@ namespace kengine {
 		putils::gl::Uniform<float> _entityID;
 		putils::gl::Uniform<putils::NormalizedColor> _color;
 
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute_private(&PolyVoxShader::_model),
-			pmeta_reflectible_attribute_private(&PolyVoxShader::_view),
-			pmeta_reflectible_attribute_private(&PolyVoxShader::_proj),
-			pmeta_reflectible_attribute_private(&PolyVoxShader::_viewPos),
+		putils_reflection_attributes(
+			putils_reflection_attribute_private(&PolyVoxShader::_model),
+			putils_reflection_attribute_private(&PolyVoxShader::_view),
+			putils_reflection_attribute_private(&PolyVoxShader::_proj),
+			putils_reflection_attribute_private(&PolyVoxShader::_viewPos),
 
-			pmeta_reflectible_attribute_private(&PolyVoxShader::_entityID),
-			pmeta_reflectible_attribute_private(&PolyVoxShader::_color)
+			putils_reflection_attribute_private(&PolyVoxShader::_entityID),
+			putils_reflection_attribute_private(&PolyVoxShader::_color)
 		);
 
 	private:

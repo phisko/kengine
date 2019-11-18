@@ -20,16 +20,16 @@ namespace kengine::Shaders::src {
 
 				putils::gl::Uniform<putils::NormalizedColor> _color;
 
-				pmeta_get_attributes(
-					pmeta_reflectible_attribute_private(&Uniforms::_scattering), 
-					pmeta_reflectible_attribute_private(&Uniforms::_nbSteps), 
-					pmeta_reflectible_attribute_private(&Uniforms::_defaultStepLength), 
-					pmeta_reflectible_attribute_private(&Uniforms::_intensity), 
-					pmeta_reflectible_attribute_private(&Uniforms::_inverseView), 
-					pmeta_reflectible_attribute_private(&Uniforms::_inverseProj), 
-					pmeta_reflectible_attribute_private(&Uniforms::_viewPos), 
-					pmeta_reflectible_attribute_private(&Uniforms::_screenSize), 
-					pmeta_reflectible_attribute_private(&Uniforms::_color)
+				putils_reflection_attributes(
+					putils_reflection_attribute_private(&Uniforms::_scattering), 
+					putils_reflection_attribute_private(&Uniforms::_nbSteps), 
+					putils_reflection_attribute_private(&Uniforms::_defaultStepLength), 
+					putils_reflection_attribute_private(&Uniforms::_intensity), 
+					putils_reflection_attribute_private(&Uniforms::_inverseView), 
+					putils_reflection_attribute_private(&Uniforms::_inverseProj), 
+					putils_reflection_attribute_private(&Uniforms::_viewPos), 
+					putils_reflection_attribute_private(&Uniforms::_screenSize), 
+					putils_reflection_attribute_private(&Uniforms::_color)
 				);
 			};
 		}

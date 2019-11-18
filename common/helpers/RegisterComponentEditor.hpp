@@ -67,9 +67,9 @@ namespace kengine {
 				});
 			}
 
-			else if constexpr (putils::has_member_get_attributes<Member>::value) {
+			else if constexpr (putils::reflection::has_attributes<Member>::value) {
 				if (ImGui::TreeNode(name)) {
-					putils::for_each_attribute<Member>([&member](const char * name, const auto attr) {
+					putils::reflection::for_each_attribute<Member>([&member](const char * name, const auto attr) {
 						displayAttribute(name, member.*attr);
 					});
 					ImGui::TreePop();
@@ -101,9 +101,9 @@ namespace kengine {
 
 		template<typename Comp>
 		static void displayComponent(const kengine::Entity & e) {
-			if constexpr (putils::has_member_get_attributes<Comp>::value) {
+			if constexpr (putils::reflection::has_attributes<Comp>::value) {
 				const auto & comp = e.get<Comp>();
-				putils::for_each_attribute<Comp>([&comp](const char * name, const auto member) {
+				putils::reflection::for_each_attribute<Comp>([&comp](const char * name, const auto member) {
 					displayAttribute(name, comp.*member);
 				});
 			}
@@ -170,9 +170,9 @@ namespace kengine {
 				});
 			}
 
-			else if constexpr (putils::has_member_get_attributes<Member>::value) {
+			else if constexpr (putils::reflection::has_attributes<Member>::value) {
 				if (ImGui::TreeNode(name)) {
-					putils::for_each_attribute<Member>([&member](const char * name, const auto attr) {
+					putils::reflection::for_each_attribute<Member>([&member](const char * name, const auto attr) {
 						editAttribute(name, member.*attr);
 					});
 					ImGui::TreePop();
@@ -255,9 +255,9 @@ namespace kengine {
 
 		template<typename Comp>
 		static void editComponent(kengine::Entity & e) {
-			if constexpr (putils::has_member_get_attributes<Comp>::value) {
+			if constexpr (putils::reflection::has_attributes<Comp>::value) {
 				auto & comp = e.get<Comp>();
-				putils::for_each_attribute<Comp>([&comp](const char * name, const auto member) {
+				putils::reflection::for_each_attribute<Comp>([&comp](const char * name, const auto member) {
 					editAttribute(name, comp.*member);
 				});
 			}
@@ -273,8 +273,8 @@ namespace kengine {
 
 	template<typename ... Comps>
 	void registerComponentEditors(kengine::EntityManager & em) {
-		pmeta_for_each(Comps, [&](auto type) {
-			using Type = pmeta_wrapped(type);
+		putils_for_each_type(Comps, [&](auto type) {
+			using Type = putils_wrapped_type(type);
 			registerComponentEditor<Type>(em);
 		});
 	}

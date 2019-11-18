@@ -43,15 +43,13 @@ namespace kengine {
 
 		Type debugType = Type::Box;
 
-		pmeta_get_class_name(DebugGraphicsComponent);
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&DebugGraphicsComponent::text),
-			pmeta_reflectible_attribute(&DebugGraphicsComponent::font),
-			pmeta_reflectible_attribute(&DebugGraphicsComponent::color),
-			pmeta_reflectible_attribute(&DebugGraphicsComponent::offset),
-			pmeta_reflectible_attribute(&DebugGraphicsComponent::debugType)
+		putils_reflection_class_name(DebugGraphicsComponent);
+		putils_reflection_attributes(
+			putils_reflection_attribute(&DebugGraphicsComponent::text),
+			putils_reflection_attribute(&DebugGraphicsComponent::font),
+			putils_reflection_attribute(&DebugGraphicsComponent::color),
+			putils_reflection_attribute(&DebugGraphicsComponent::offset),
+			putils_reflection_attribute(&DebugGraphicsComponent::debugType)
 		);
-		pmeta_get_methods();
-		pmeta_get_parents();
 	};
 }

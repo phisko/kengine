@@ -6,10 +6,9 @@
 
 #include "function.hpp"
 #include "reflection.hpp"
-#include "not_serializable.hpp"
 
 namespace kengine {
-	class BehaviorComponent : not_serializable {
+	class BehaviorComponent {
 	public:
 		using function = putils::function<void(), KENGINE_BEHAVIOR_FUNCTION_SIZE>;
 
@@ -20,11 +19,9 @@ namespace kengine {
 
 		function func = nullptr;
 
-		pmeta_get_class_name(BehaviorComponent);
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&BehaviorComponent::func)
+		putils_reflection_class_name(BehaviorComponent);
+		putils_reflection_attributes(
+			putils_reflection_attribute(&BehaviorComponent::func)
 		);
-		pmeta_get_methods();
-		pmeta_get_parents();
 	};
 }

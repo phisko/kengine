@@ -25,15 +25,15 @@ namespace kengine::Shaders {
 		putils::gl::Uniform<putils::NormalizedColor> _color;
 		putils::gl::Uniform<float> _entityID;
 
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute_private(&Text::_model),
-			pmeta_reflectible_attribute_private(&Text::_view),
-			pmeta_reflectible_attribute_private(&Text::_proj),
-			pmeta_reflectible_attribute_private(&Text::_viewPos),
+		putils_reflection_attributes(
+			putils_reflection_attribute_private(&Text::_model),
+			putils_reflection_attribute_private(&Text::_view),
+			putils_reflection_attribute_private(&Text::_proj),
+			putils_reflection_attribute_private(&Text::_viewPos),
 
-			pmeta_reflectible_attribute_private(&Text::_tex),
-			pmeta_reflectible_attribute_private(&Text::_color),
-			pmeta_reflectible_attribute_private(&Text::_entityID)
+			putils_reflection_attribute_private(&Text::_tex),
+			putils_reflection_attribute_private(&Text::_color),
+			putils_reflection_attribute_private(&Text::_entityID)
 		);
 
 	private:

@@ -12,11 +12,11 @@ namespace kengine {
 		putils::Point2i resolution = { 1280, 720 };
 		RenderTexture renderTexture = (RenderTexture)-1;
 
-		pmeta_get_class_name(ViewportComponent);
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&ViewportComponent::window),
-			pmeta_reflectible_attribute(&ViewportComponent::boundingBox),
-			pmeta_reflectible_attribute(&ViewportComponent::resolution)
+		putils_reflection_class_name(ViewportComponent);
+		putils_reflection_attributes(
+			putils_reflection_attribute(&ViewportComponent::window),
+			putils_reflection_attribute(&ViewportComponent::boundingBox),
+			putils_reflection_attribute(&ViewportComponent::resolution)
 		);
 	};
 }

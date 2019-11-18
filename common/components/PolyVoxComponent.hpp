@@ -6,17 +6,16 @@
 
 #include <PolyVox/RawVolume.h>
 
-struct PolyVoxObjectComponent : kengine::not_serializable {
+struct PolyVoxObjectComponent {
 	// Indicates that this entity's model should be processed by PolyVoxShader
-	pmeta_get_class_name(PolyVoxObjectComponent);
 };
 
-struct PolyVoxComponent : kengine::not_serializable {
+struct PolyVoxComponent {
 	struct VertexData {
 		float color[3] = { 0.f, 0.f, 0.f };
 
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&VertexData::color)
+		putils_reflection_attributes(
+			putils_reflection_attribute(&VertexData::color)
 		);
 
 		bool operator==(size_t i) const {
@@ -53,6 +52,4 @@ struct PolyVoxComponent : kengine::not_serializable {
 
 		return *this;
 	}
-
-	pmeta_get_class_name(PolyVoxComponent);
 };

@@ -28,15 +28,13 @@ namespace kengine {
          */
 
     public:
-        pmeta_get_class_name(TransformComponent);
-        pmeta_get_attributes(
-                pmeta_reflectible_attribute(&TransformComponent::boundingBox),
-                pmeta_reflectible_attribute(&TransformComponent::pitch),
-                pmeta_reflectible_attribute(&TransformComponent::yaw),
-                pmeta_reflectible_attribute(&TransformComponent::roll)
+        putils_reflection_class_name(TransformComponent);
+        putils_reflection_attributes(
+                putils_reflection_attribute(&TransformComponent::boundingBox),
+                putils_reflection_attribute(&TransformComponent::pitch),
+                putils_reflection_attribute(&TransformComponent::yaw),
+                putils_reflection_attribute(&TransformComponent::roll)
         );
-		pmeta_get_methods();
-		pmeta_get_parents();
     };
 
     using TransformComponent2i = TransformComponent<int, 2>;

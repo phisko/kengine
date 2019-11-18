@@ -4,17 +4,16 @@
 # define KENGINE_ONCLICK_FUNCTION_SIZE 64
 #endif
 
-#include "not_serializable.hpp"
 #include "reflection.hpp"
 #include "function.hpp"
 
 namespace kengine {
-	struct OnClickComponent : not_serializable {
+	struct OnClickComponent {
 		putils::function<void(), KENGINE_ONCLICK_FUNCTION_SIZE> onClick = nullptr;
 
-		pmeta_get_class_name(OnClickComponent);
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&OnClickComponent::onClick)
+		putils_reflection_class_name(OnClickComponent);
+		putils_reflection_attributes(
+			putils_reflection_attribute(&OnClickComponent::onClick)
 		);
 	};
 }

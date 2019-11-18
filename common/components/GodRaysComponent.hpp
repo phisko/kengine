@@ -9,12 +9,12 @@ namespace kengine {
 		float defaultStepLength = 25.f;
 		float intensity = 2.5f;
 
-		pmeta_get_class_name(GodRaysComponent);
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&GodRaysComponent::scattering),
-			pmeta_reflectible_attribute(&GodRaysComponent::nbSteps),
-			pmeta_reflectible_attribute(&GodRaysComponent::defaultStepLength),
-			pmeta_reflectible_attribute(&GodRaysComponent::intensity)
+		putils_reflection_class_name(GodRaysComponent);
+		putils_reflection_attributes(
+			putils_reflection_attribute(&GodRaysComponent::scattering),
+			putils_reflection_attribute(&GodRaysComponent::nbSteps),
+			putils_reflection_attribute(&GodRaysComponent::defaultStepLength),
+			putils_reflection_attribute(&GodRaysComponent::intensity)
 		);
 	};
 }

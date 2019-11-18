@@ -38,7 +38,7 @@ namespace kengine {
         } time;
 
     public:
-        virtual pmeta::type_index getType() const noexcept = 0;
+        virtual putils::meta::type_index getType() const noexcept = 0;
 
     };
 }

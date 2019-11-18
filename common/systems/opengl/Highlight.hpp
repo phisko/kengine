@@ -25,13 +25,13 @@ namespace kengine::Shaders {
 		putils::gl::Uniform<putils::NormalizedColor> _highlightColor;
 		putils::gl::Uniform<float> _intensity;
 
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute_private(&Highlight::_viewPos),
-			pmeta_reflectible_attribute_private(&Highlight::_screenSize),
+		putils_reflection_attributes(
+			putils_reflection_attribute_private(&Highlight::_viewPos),
+			putils_reflection_attribute_private(&Highlight::_screenSize),
 
-			pmeta_reflectible_attribute_private(&Highlight::_entityID),
-			pmeta_reflectible_attribute_private(&Highlight::_highlightColor),
-			pmeta_reflectible_attribute_private(&Highlight::_intensity)
+			putils_reflection_attribute_private(&Highlight::_entityID),
+			putils_reflection_attribute_private(&Highlight::_highlightColor),
+			putils_reflection_attribute_private(&Highlight::_intensity)
 		);
 	};
 }

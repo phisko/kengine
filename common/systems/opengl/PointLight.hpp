@@ -20,17 +20,17 @@ namespace kengine::Shaders {
 	{
 	public:
 		PointLight(kengine::EntityManager & em)
-			: Program(true, pmeta_nameof(PointLight)), _em(em)
+			: Program(true, putils_nameof(PointLight)), _em(em)
 		{}
 
 		void init(size_t firstTextureID) override;
 		void run(const Parameters & params) override;
 
 	public:
-		pmeta_get_parents(
-			pmeta_reflectible_parent(src::ProjViewModel::Vert::Uniforms),
-			pmeta_reflectible_parent(src::ShadowCube::Frag::Uniforms),
-			pmeta_reflectible_parent(src::PointLight::Frag::Uniforms)
+		putils_reflection_parents(
+			putils_reflection_parent(src::ProjViewModel::Vert::Uniforms),
+			putils_reflection_parent(src::ShadowCube::Frag::Uniforms),
+			putils_reflection_parent(src::PointLight::Frag::Uniforms)
 		);
 
 	private:

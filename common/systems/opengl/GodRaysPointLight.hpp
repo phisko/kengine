@@ -31,10 +31,10 @@ namespace kengine::Shaders {
 		GLuint _shadowMapTextureID;
 
 	public:
-		pmeta_get_parents(
-			pmeta_reflectible_parent(src::ShadowCube::Frag::Uniforms),
-			pmeta_reflectible_parent(src::GodRays::Frag::Uniforms),
-			pmeta_reflectible_parent(src::PointLight::GetDirection::Uniforms)
+		putils_reflection_parents(
+			putils_reflection_parent(src::ShadowCube::Frag::Uniforms),
+			putils_reflection_parent(src::GodRays::Frag::Uniforms),
+			putils_reflection_parent(src::PointLight::GetDirection::Uniforms)
 		);
 	};
 }

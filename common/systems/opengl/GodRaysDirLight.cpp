@@ -14,7 +14,7 @@
 
 namespace kengine::Shaders {
 	GodRaysDirLight::GodRaysDirLight(kengine::EntityManager & em)
-		: Program(true, pmeta_nameof(GodRaysDirLight)),
+		: Program(true, putils_nameof(GodRaysDirLight)),
 		_em(em)
 	{
 	}

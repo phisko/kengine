@@ -35,9 +35,9 @@ namespace kengine {
 				return false;
 			}
 
-			else if constexpr (putils::has_member_get_attributes<Member>::value) {
+			else if constexpr (putils::reflection::has_attributes<Member>::value) {
 				bool matches = false;
-				putils::for_each_attribute<Member>([&](const char * name, const auto attr) {
+				putils::reflection::for_each_attribute<Member>([&](const char * name, const auto attr) {
 					matches |= matchAttribute(member.*attr, str);
 				});
 				return matches;
@@ -64,13 +64,13 @@ namespace kengine {
 
 		template<typename Comp>
 		static bool componentMatches(const kengine::Entity & e, const char * str) {
-			if (strstr(Comp::get_class_name(), str))
+			if (strstr(putils::reflection::get_class_name<Comp>(), str))
 				return true;
 
 			bool matches = false;
-			if constexpr (putils::has_member_get_attributes<Comp>::value) {
+			if constexpr (putils::reflection::has_attributes<Comp>::value) {
 				auto & comp = e.get<Comp>();
-				putils::for_each_attribute<Comp>([&](const char * name, const auto member) {
+				putils::reflection::for_each_attribute<Comp>([&](const char * name, const auto member) {
 					if (matchAttribute(comp.*member, str))
 						matches = true;
 				});
@@ -86,8 +86,8 @@ namespace kengine {
 
 	template<typename ... Comps>
 	void registerComponentMatchers(kengine::EntityManager & em) {
-		pmeta_for_each(Comps, [&](auto type) {
-			using Type = pmeta_wrapped(type);
+		putils_for_each_type(Comps, [&](auto type) {
+			using Type = putils_wrapped_type(type);
 			registerComponentMatcher<Type>(em);
 		});
 	}

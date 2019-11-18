@@ -27,12 +27,12 @@ namespace kengine::Shaders {
 		putils::gl::Uniform<putils::NormalizedColor> _color;
 
 	public:
-		pmeta_get_parents(
-			pmeta_reflectible_parent(src::ProjViewModel::Vert::Uniforms)
+		putils_reflection_parents(
+			putils_reflection_parent(src::ProjViewModel::Vert::Uniforms)
 		);
 
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute_private(&LightSphere::_color)
+		putils_reflection_attributes(
+			putils_reflection_attribute_private(&LightSphere::_color)
 		);
 
 	private:

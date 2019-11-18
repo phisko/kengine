@@ -8,7 +8,7 @@
 #include "reflection.hpp"
 
 namespace kengine {
-	class CollisionComponent : kengine::not_serializable {
+	class CollisionComponent {
 	public:
 		using function = putils::function<void(kengine::Entity &, kengine::Entity &), KENGINE_COLLISION_FUNCTION_SIZE>;
 
@@ -20,11 +20,9 @@ namespace kengine {
 		function onCollide = nullptr;
 
 	public:
-		pmeta_get_class_name(CollisionComponent);
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&CollisionComponent::onCollide)
+		putils_reflection_class_name(CollisionComponent);
+		putils_reflection_attributes(
+			putils_reflection_attribute(&CollisionComponent::onCollide)
 		);
-        pmeta_get_methods();
-        pmeta_get_parents();
 	};
 }

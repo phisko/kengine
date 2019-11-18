@@ -8,7 +8,7 @@ namespace kengine {
 	class AssImpShadowMap : public ShadowMapShader {
 	public:
 		AssImpShadowMap(kengine::EntityManager & em)
-			: ShadowMapShader(false, pmeta_nameof(AssImpShadowMap)),
+			: ShadowMapShader(false, putils_nameof(AssImpShadowMap)),
 			_em(em)
 		{}
 
@@ -31,12 +31,12 @@ namespace kengine {
 
 		GLint _bones;
 
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute_private(&AssImpShadowMap::_proj),
-			pmeta_reflectible_attribute_private(&AssImpShadowMap::_view),
-			pmeta_reflectible_attribute_private(&AssImpShadowMap::_model),
+		putils_reflection_attributes(
+			putils_reflection_attribute_private(&AssImpShadowMap::_proj),
+			putils_reflection_attribute_private(&AssImpShadowMap::_view),
+			putils_reflection_attribute_private(&AssImpShadowMap::_model),
 
-			pmeta_reflectible_attribute_private(&AssImpShadowMap::_bones)
+			putils_reflection_attribute_private(&AssImpShadowMap::_bones)
 		);
 	};
 }

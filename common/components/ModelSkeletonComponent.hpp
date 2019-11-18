@@ -2,7 +2,6 @@
 
 #include "vector.hpp"
 #include "string.hpp"
-#include "not_serializable.hpp"
 
 #ifndef KENGINE_BONE_NAME_MAX_LENGTH
 # define KENGINE_BONE_NAME_MAX_LENGTH 64
@@ -17,21 +16,21 @@
 #endif
 
 namespace kengine {
-	struct ModelSkeletonComponent : kengine::not_serializable {
+	struct ModelSkeletonComponent {
 		struct Mesh {
 			using string = putils::string<KENGINE_BONE_NAME_MAX_LENGTH>;
 			putils::vector<string, KENGINE_SKELETON_MAX_BONES> boneNames;
 
-			pmeta_get_class_name(ModelSkeletonComponentMesh);
-			pmeta_get_attributes(
-				pmeta_reflectible_attribute(&Mesh::boneNames)
+			putils_reflection_class_name(ModelSkeletonComponentMesh);
+			putils_reflection_attributes(
+				putils_reflection_attribute(&Mesh::boneNames)
 			);
 		};
 		putils::vector<Mesh, KENGINE_MAX_MESHES_PER_MODEL> meshes;
 
-		pmeta_get_class_name(ModelSkeletonComponent);
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute(&ModelSkeletonComponent::meshes)
+		putils_reflection_class_name(ModelSkeletonComponent);
+		putils_reflection_attributes(
+			putils_reflection_attribute(&ModelSkeletonComponent::meshes)
 		);
 	};
 }

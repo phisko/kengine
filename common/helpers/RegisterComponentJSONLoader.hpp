@@ -47,8 +47,8 @@ namespace kengine {
 					++i;
 				}
 			}
-			else if constexpr (putils::has_member_get_attributes<Member>::value) {
-				putils::for_each_attribute<Member>([&member, &object](const char * name, const auto attr) {
+			else if constexpr (putils::reflection::has_attributes<Member>::value) {
+				putils::reflection::for_each_attribute<Member>([&member, &object](const char * name, const auto attr) {
 					const auto attrJSON = object.find(name);
 					if (attrJSON != object.end())
 						loadJSONObject(*attrJSON, member.*attr);
@@ -65,7 +65,7 @@ namespace kengine {
 
 		template<typename Component>
 		static void loadJSONComponent(const putils::json & jsonEntity, kengine::Entity & e) {
-			const auto it = jsonEntity.find(Component::get_class_name());
+			const auto it = jsonEntity.find(putils::reflection::get_class_name<Component>());
 			if (it == jsonEntity.end())
 				return;
 			auto & comp = e.attach<Component>();
@@ -80,8 +80,8 @@ namespace kengine {
 
 	template<typename ... Comps>
 	void registerComponentJSONLoaders(kengine::EntityManager & em) {
-		pmeta_for_each(Comps, [&](auto type) {
-			using Type = pmeta_wrapped(type);
+		putils_for_each_type(Comps, [&](auto type) {
+			using Type = putils_wrapped_type(type);
 			registerComponentJSONLoader<Type>(em);
 		});
 	}

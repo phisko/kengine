@@ -20,7 +20,7 @@ namespace kengine::Shaders {
 	{
 	public:
 		SpotLight(kengine::EntityManager & em)
-			: Program(true, pmeta_nameof(SpotLight)),
+			: Program(true, putils_nameof(SpotLight)),
 			_em(em)
 		{}
 
@@ -28,10 +28,10 @@ namespace kengine::Shaders {
 		void run(const Parameters & params) override;
 
 	public:
-		pmeta_get_parents(
-			pmeta_reflectible_parent(src::ProjViewModel::Vert::Uniforms),
-			pmeta_reflectible_parent(src::ShadowMap::Frag::Uniforms),
-			pmeta_reflectible_parent(src::SpotLight::Frag::Uniforms)
+		putils_reflection_parents(
+			putils_reflection_parent(src::ProjViewModel::Vert::Uniforms),
+			putils_reflection_parent(src::ShadowMap::Frag::Uniforms),
+			putils_reflection_parent(src::SpotLight::Frag::Uniforms)
 		);
 
 	private:

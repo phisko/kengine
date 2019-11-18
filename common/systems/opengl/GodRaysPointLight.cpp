@@ -13,7 +13,7 @@
 
 namespace kengine::Shaders {
 	GodRaysPointLight::GodRaysPointLight(kengine::EntityManager & em)
-		: Program(true, pmeta_nameof(GodRaysPointLight)),
+		: Program(true, putils_nameof(GodRaysPointLight)),
 		_em(em)
 	{
 	}

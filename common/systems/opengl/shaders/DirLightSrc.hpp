@@ -17,15 +17,15 @@ namespace kengine::Shaders::src {
 				putils::gl::Uniform<float> _specularStrength;
 				putils::gl::Uniform<bool> _debugCSM;
 
-				pmeta_get_attributes(
-					pmeta_reflectible_attribute_private(&Uniforms::_viewPos), 
-					pmeta_reflectible_attribute_private(&Uniforms::_screenSize), 
-					pmeta_reflectible_attribute_private(&Uniforms::_color), 
-					pmeta_reflectible_attribute_private(&Uniforms::_direction), 
-					pmeta_reflectible_attribute_private(&Uniforms::_ambientStrength), 
-					pmeta_reflectible_attribute_private(&Uniforms::_diffuseStrength), 
-					pmeta_reflectible_attribute_private(&Uniforms::_specularStrength), 
-					pmeta_reflectible_attribute_private(&Uniforms::_debugCSM)
+				putils_reflection_attributes(
+					putils_reflection_attribute_private(&Uniforms::_viewPos), 
+					putils_reflection_attribute_private(&Uniforms::_screenSize), 
+					putils_reflection_attribute_private(&Uniforms::_color), 
+					putils_reflection_attribute_private(&Uniforms::_direction), 
+					putils_reflection_attribute_private(&Uniforms::_ambientStrength), 
+					putils_reflection_attribute_private(&Uniforms::_diffuseStrength), 
+					putils_reflection_attribute_private(&Uniforms::_specularStrength), 
+					putils_reflection_attribute_private(&Uniforms::_debugCSM)
 				);
 			};
 		}
@@ -36,8 +36,8 @@ namespace kengine::Shaders::src {
 			struct Uniforms {
 				putils::gl::Uniform<putils::Vector3f> _direction;
 
-				pmeta_get_attributes(
-					pmeta_reflectible_attribute_private(&Uniforms::_direction)
+				putils_reflection_attributes(
+					putils_reflection_attribute_private(&Uniforms::_direction)
 				);
 			};
 		}

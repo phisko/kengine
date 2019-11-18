@@ -16,7 +16,7 @@ namespace kengine {
 	{
 	public:
 		AssImpShadowCube(kengine::EntityManager & em)
-			: ShadowCubeShader(false, pmeta_nameof(AssImpShadowCube)),
+			: ShadowCubeShader(false, putils_nameof(AssImpShadowCube)),
 			_em(em)
 		{}
 
@@ -34,17 +34,17 @@ namespace kengine {
 
 		GLint _bones;
 
-		pmeta_get_attributes(
-			pmeta_reflectible_attribute_private(&AssImpShadowCube::_proj),
-			pmeta_reflectible_attribute_private(&AssImpShadowCube::_view),
-			pmeta_reflectible_attribute_private(&AssImpShadowCube::_model),
+		putils_reflection_attributes(
+			putils_reflection_attribute_private(&AssImpShadowCube::_proj),
+			putils_reflection_attribute_private(&AssImpShadowCube::_view),
+			putils_reflection_attribute_private(&AssImpShadowCube::_model),
 
-			pmeta_reflectible_attribute_private(&AssImpShadowCube::_bones)
+			putils_reflection_attribute_private(&AssImpShadowCube::_bones)
 		);
 
-		pmeta_get_parents(
-			pmeta_reflectible_parent(Shaders::src::DepthCube::Geom::Uniforms),
-			pmeta_reflectible_parent(Shaders::src::DepthCube::Frag::Uniforms)
+		putils_reflection_parents(
+			putils_reflection_parent(Shaders::src::DepthCube::Geom::Uniforms),
+			putils_reflection_parent(Shaders::src::DepthCube::Frag::Uniforms)
 		);
 	};
 }
