@@ -495,10 +495,7 @@ namespace kengine {
 
 	AssImpSystem::AssImpSystem(EntityManager & em) : System(em), _em(em) {
 		g_em = &em;
-		onLoad("");
-	}
 
-	void AssImpSystem::onLoad(const char *) noexcept {
 		_em += [this](Entity & e) {
 			e += makeGBufferShaderComponent<AssImpShader>(_em);
 		};

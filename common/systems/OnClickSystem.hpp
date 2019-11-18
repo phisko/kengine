@@ -7,8 +7,6 @@ namespace kengine {
 	public:
 		OnClickSystem(kengine::EntityManager& em);
 
-		void onLoad(const char *) noexcept override;
-
 	private:
 		kengine::EntityManager & _em;
 	};

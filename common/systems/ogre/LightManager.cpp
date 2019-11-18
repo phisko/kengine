@@ -21,7 +21,8 @@ struct OgreLightComponent {
 LightManager::LightManager(kengine::EntityManager & em, Ogre::SceneManager & sceneManager)
 	: _em(em), _sceneManager(sceneManager)
 {
-	onLoad("");
+	_em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Ogre] Shadow type", &SHADOW_TYPE_INDEX); };
+	_em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Ogre] Shadow texture size", &SHADOW_TEXTURE_SIZE); };
 
 	int i = 0;
 	for (const auto value : putils::magic_enum::enum_values<Ogre::ShadowTechnique>()) {
@@ -31,11 +32,6 @@ LightManager::LightManager(kengine::EntityManager & em, Ogre::SceneManager & sce
 		}
 		++i;
 	}
-}
-
-void LightManager::onLoad(const char *) noexcept {
-	_em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Ogre] Shadow type", &SHADOW_TYPE_INDEX); };
-	_em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Ogre] Shadow texture size", &SHADOW_TEXTURE_SIZE); };
 }
 
 void LightManager::execute(float time) noexcept {

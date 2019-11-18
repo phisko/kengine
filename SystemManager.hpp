@@ -217,23 +217,6 @@ namespace kengine {
         void resume() noexcept { _speed = 1; }
 
     public:
-		void load(const char * directory) {
-			for (const auto & system : _systems)
-				system.ptr->onLoad(directory);
-			for (const auto & f : _onLoad)
-				f(directory);
-		}
-
-		void save(const char * directory) const {
-			for (const auto & system : _systems)
-				system.ptr->onSave(directory);
-			for (const auto & f : _onSave)
-				f(directory);
-		}
-
-		void onLoad(const std::function<void(const char * directory)> & func) { _onLoad.push_back(func); }
-		void onSave(const std::function<void(const char * directory)> & func) { _onSave.push_back(func); }
-
         /*
          * Internal
          */
@@ -254,15 +237,13 @@ namespace kengine {
 
         std::vector<pmeta::type_index> _toRemove;
 
+		std::vector<putils::function<void(), KENGINE_AFTER_SYSTEM_FUNCTION_SIZE>> _afterSystem;
+
+	protected:
 		struct SystemInfo {
 			pmeta::type_index type;
 			std::unique_ptr<ISystem> ptr;
 		};
-
         std::vector<SystemInfo> _systems;
-
-		std::vector<std::function<void(const char * directory)>> _onLoad;
-		std::vector<std::function<void(const char * directory)>> _onSave;
-		std::vector<putils::function<void(), KENGINE_AFTER_SYSTEM_FUNCTION_SIZE>> _afterSystem;
     };
 }

@@ -10,10 +10,6 @@ namespace kengine {
 	OnClickSystem::OnClickSystem(EntityManager & em)
 		: System(em), _em(em)
 	{
-		onLoad("");
-	}
-
-	void OnClickSystem::onLoad(const char *) noexcept {
 		_em += [this](Entity & e) {
 			InputComponent input;
 			input.onMouseButton = [this](Entity::ID window, int button, const putils::Point2f & coords, bool pressed) {

@@ -10,8 +10,6 @@ namespace kengine {
 	public:
 		AssImpSystem(kengine::EntityManager & em);
 
-		void onLoad(const char *) noexcept override;
-
 		void handle(kengine::packets::RegisterEntity p);
 		void loadModel(kengine::Entity & e);
 		void setModel(kengine::Entity & e);

@@ -180,21 +180,15 @@ namespace kengine {
 	BulletSystem::BulletSystem(EntityManager & em)
 		: System(em), _em(em)
 	{
-		onLoad("");
+		_em += [](Entity & e) { e += AdjustableComponent("[Physics] Gravity", &GRAVITY); };
 
 #ifndef KENGINE_NDEBUG
+		_em += [](Entity & e) { e += AdjustableComponent("[Physics] Debug", &ENABLE_DEBUG); };
 		debug::drawer = new debug::Drawer(em);
 #endif
 
 		g_em = &em;
 		// dynamicsWorld.setInternalTickCallback(detectCollisions);
-	}
-
-	void BulletSystem::onLoad(const char * directory) noexcept {
-		_em += [](Entity & e) { e += AdjustableComponent("[Physics] Gravity", &GRAVITY); };
-#ifndef KENGINE_NDEBUG
-		_em += [](Entity & e) { e += AdjustableComponent("[Physics] Debug", &ENABLE_DEBUG); };
-#endif
 	}
 
 	using CollisionShapeMap = std::map<putils::Point3f, std::unique_ptr<btCollisionShape>>;

@@ -152,48 +152,21 @@ namespace kengine {
 		: System(em),
 		_em(em)
 	{
-	}
+		g_params.nearPlane = 1.f;
+		g_params.farPlane = 1000.f;
 
-	void OpenGLSystem::addShaders() noexcept {
-		{ // GBuffer
-			_em += [=](Entity & e) { e += makeGBufferShaderComponent<Shaders::Debug>(_em); };
-			_em += [=](Entity & e) { e += makeGBufferShaderComponent<Shaders::Text>(_em); };
-		}
+		_em += [](Entity & e) { e += AdjustableComponent("[Render/Planes] Near", &g_params.nearPlane); };
+		_em += [](Entity & e) { e += AdjustableComponent("[Render/Planes] Far", &g_params.farPlane); };
+		_em += [](Entity & e) { e += AdjustableComponent("[ImGui] Scale", &g_dpiScale); };
 
-		{ // Lighting
-			_em += [&](Entity & e) {
-				e += makeLightingShaderComponent<Shaders::ShadowMap>(_em);
-				e += ShadowMapShaderComponent{};
-			};
-
-			_em += [&](Entity & e) {
-				e += makeLightingShaderComponent<Shaders::ShadowCube>(_em);
-				e += ShadowCubeShaderComponent{};
-			};
-
-			_em += [=](Entity & e) { e += makeLightingShaderComponent<Shaders::SpotLight>(_em); };
-			_em += [=](Entity & e) { e += makeLightingShaderComponent<Shaders::DirLight>(_em); };
-			_em += [=](Entity & e) { e += makeLightingShaderComponent<Shaders::PointLight>(_em); };
-		}
-
-		{ // Post lighting
-			_em += [=](Entity & e) { e += makePostLightingShaderComponent<Shaders::GodRaysDirLight>(_em); };
-			_em += [=](Entity & e) { e += makePostLightingShaderComponent<Shaders::GodRaysPointLight>(_em); };
-			_em += [=](Entity & e) { e += makePostLightingShaderComponent<Shaders::GodRaysSpotLight>(_em); };
-		}
-
-		{ // Post process
-			_em += [=](Entity & e) { e += makePostProcessShaderComponent<Shaders::LightSphere>(_em); };
-			_em += [=](Entity & e) { e += makePostProcessShaderComponent<Shaders::Highlight>(_em); };
-			_em += [=](Entity & e) { e += makePostProcessShaderComponent<Shaders::SkyBox>(_em); };
-		}
+#ifndef KENGINE_NDEBUG
+		_em += Controllers::ShaderController(_em);
+		_em += Controllers::GBufferDebugger(_em, _gBufferIterator);
+#endif
 	}
 
 	void OpenGLSystem::init() noexcept {
 		g_init = true;
-
-		g_params.nearPlane = 1.f;
-		g_params.farPlane = 1000.f;
 
 		glfwInit();
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -288,7 +261,47 @@ namespace kengine {
 				putils::termcolor::reset;
 		}, nullptr);
 #endif
+
+#ifndef KENGINE_OPENGL_NO_DEFAULT_SHADERS
+		addShaders();
+#endif
 	}
+
+	void OpenGLSystem::addShaders() noexcept {
+		{ // GBuffer
+			_em += [=](Entity & e) { e += makeGBufferShaderComponent<Shaders::Debug>(_em); };
+			_em += [=](Entity & e) { e += makeGBufferShaderComponent<Shaders::Text>(_em); };
+		}
+
+		{ // Lighting
+			_em += [&](Entity & e) {
+				e += makeLightingShaderComponent<Shaders::ShadowMap>(_em);
+				e += ShadowMapShaderComponent{};
+			};
+
+			_em += [&](Entity & e) {
+				e += makeLightingShaderComponent<Shaders::ShadowCube>(_em);
+				e += ShadowCubeShaderComponent{};
+			};
+
+			_em += [=](Entity & e) { e += makeLightingShaderComponent<Shaders::SpotLight>(_em); };
+			_em += [=](Entity & e) { e += makeLightingShaderComponent<Shaders::DirLight>(_em); };
+			_em += [=](Entity & e) { e += makeLightingShaderComponent<Shaders::PointLight>(_em); };
+		}
+
+		{ // Post lighting
+			_em += [=](Entity & e) { e += makePostLightingShaderComponent<Shaders::GodRaysDirLight>(_em); };
+			_em += [=](Entity & e) { e += makePostLightingShaderComponent<Shaders::GodRaysPointLight>(_em); };
+			_em += [=](Entity & e) { e += makePostLightingShaderComponent<Shaders::GodRaysSpotLight>(_em); };
+		}
+
+		{ // Post process
+			_em += [=](Entity & e) { e += makePostProcessShaderComponent<Shaders::LightSphere>(_em); };
+			_em += [=](Entity & e) { e += makePostProcessShaderComponent<Shaders::Highlight>(_em); };
+			_em += [=](Entity & e) { e += makePostProcessShaderComponent<Shaders::SkyBox>(_em); };
+		}
+	}
+
 	void OpenGLSystem::handle(packets::RegisterEntity p) {
 		if (_gBufferIterator.func == nullptr)
 			return;
@@ -371,55 +384,6 @@ namespace kengine {
 		glfwTerminate();
 	}
 
-	void OpenGLSystem::onLoad(const char *) noexcept {
-		if (!g_init)
-			return;
-
-		_em += [](Entity & e) { e += AdjustableComponent("[Render/Planes] Near", &g_params.nearPlane); };
-		_em += [](Entity & e) { e += AdjustableComponent("[Render/Planes] Far", &g_params.farPlane); };
-
-#ifndef KENGINE_OPENGL_NO_DEFAULT_SHADERS
-		addShaders();
-#endif
-
-		_em += [](Entity & e) { e += AdjustableComponent("[ImGui] Scale", &g_dpiScale); };
-
-#ifndef KENGINE_NDEBUG
-		_em += Controllers::ShaderController(_em);
-		_em += Controllers::GBufferDebugger(_em, _gBufferIterator);
-#endif
-
-		for (const auto &[e, depthMap] : _em.getEntities<CSMComponent>()) {
-			glDeleteFramebuffers(1, &depthMap.fbo);
-			depthMap.fbo = -1;
-			glDeleteTextures(lengthof(depthMap.textures), depthMap.textures);
-			for (auto & texture : depthMap.textures)
-				texture = -1;
-		}
-		for (const auto &[e, depthMap] : _em.getEntities<DepthMapComponent>()) {
-			glDeleteFramebuffers(1, &depthMap.fbo);
-			depthMap.fbo = -1;
-			glDeleteTextures(1, &depthMap.texture);
-			depthMap.texture = -1;
-		}
-		for (const auto &[e, depthCube] : _em.getEntities<DepthCubeComponent>()) {
-			glDeleteFramebuffers(1, &depthCube.fbo);
-			depthCube.fbo = -1;
-			glDeleteTextures(1, &depthCube.texture);
-			depthCube.texture = -1;
-		}
-
-		for (const auto & [e, modelInfo] : _em.getEntities<OpenGLModelComponent>())
-			for (auto & mesh : modelInfo.meshes) {
-				glDeleteVertexArrays(1, &mesh.vertexArrayObject);
-				mesh.vertexArrayObject = -1;
-				glDeleteBuffers(1, &mesh.vertexBuffer);
-				mesh.vertexBuffer = -1;
-				glDeleteBuffers(1, &mesh.indexBuffer);
-				mesh.indexBuffer = -1;
-			}
-	}
-
 	void OpenGLSystem::createObject(Entity & e, const ModelLoaderComponent & modelLoader) {
 		const auto modelData = modelLoader.load();
 
@@ -499,7 +463,6 @@ namespace kengine {
 		static bool first = true;
 		if (first) {
 			init();
-			onLoad("");
 
 			send(packets::ImGuiScale{ g_dpiScale });
 #ifndef KENGINE_NO_DEFAULT_GBUFFER

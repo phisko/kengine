@@ -11,19 +11,11 @@ namespace kengine {
 
 	public:
 		ImGuiAdjustableSystem(kengine::EntityManager & em);
-
-		void onLoad(const char * directory) noexcept final;
-		void onSave(const char * directory) noexcept final;
+		~ImGuiAdjustableSystem();
 
 		void handle(const packets::RegisterEntity & p);
 
 	private:
 		kengine::EntityManager & _em;
-		struct PointerSave {
-			bool * bPtr;
-			int * iPtr;
-			float * dPtr;
-		};
-		std::unordered_map<string, PointerSave> _pointerSaves;
 	};
 }

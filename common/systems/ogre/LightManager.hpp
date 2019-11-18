@@ -10,8 +10,6 @@ class LightManager : public Manager {
 public:
 	LightManager(kengine::EntityManager & em, Ogre::SceneManager & sceneManager);
 
-	void onLoad(const char *) noexcept override;
-
 	void execute(float time) noexcept override;
 	void registerEntity(kengine::Entity & e) noexcept override;
 	void removeEntity(kengine::Entity & e) noexcept override;

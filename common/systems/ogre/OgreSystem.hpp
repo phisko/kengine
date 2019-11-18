@@ -22,9 +22,6 @@ namespace kengine {
 	public:
 		OgreSystem(EntityManager & em);
 
-		void onLoad(const char * path) noexcept override;
-		void onSave(const char * path) noexcept override;
-
 		void execute() noexcept override;
 		void setup() override;
 

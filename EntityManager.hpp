@@ -11,6 +11,7 @@ namespace kengine {
 		EntityManager(size_t threads = 0) : SystemManager(threads) {
 			detail::components = &_components;
 		}
+		~EntityManager();
 
     public:
 		template<typename Func> // Func: void(Entity &);
@@ -45,12 +46,6 @@ namespace kengine {
 	public:
 		void setEntityActive(EntityView e, bool active);
 		void setEntityActive(Entity::ID id, bool active);
-
-    public:
-		void load(const char * directory = ".");
-
-		void save(const char * directory = ".") const;
-
 
 	private:
 		struct Archetype {
@@ -235,7 +230,7 @@ namespace kengine {
 			Component<Comp>::registerFunction(func);
 		}
 
-		using FunctionMapCollection = putils::vector<FunctionMap *, KENGINE_COMPONENT_COUNT>;
+		using FunctionMapCollection = putils::vector<const FunctionMap *, KENGINE_COMPONENT_COUNT>;
 		FunctionMapCollection getComponentFunctionMaps() const {
 			FunctionMapCollection ret;
 

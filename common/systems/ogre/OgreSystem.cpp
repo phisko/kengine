@@ -30,16 +30,6 @@ namespace kengine {
 	{
 	}
 
-	void OgreSystem::onLoad(const char * path) noexcept {
-		for (const auto manager : g_managers)
-			manager->onLoad(path);
-	}
-
-	void OgreSystem::onSave(const char * path) noexcept {
-		for (const auto manager : g_managers)
-			manager->onSave(path);
-	}
-
 	void OgreSystem::setup() {
 		OgreBites::ApplicationContext::setup();
 

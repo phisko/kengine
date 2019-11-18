@@ -59,10 +59,6 @@ namespace kengine {
 	}
 
 	PolyVoxSystem::PolyVoxSystem(kengine::EntityManager & em) : System(em), _em(em) {
-		onLoad("");
-	}
-
-	void PolyVoxSystem::onLoad(const char *) noexcept {
 		_em += [this](kengine::Entity & e) {
 			e += kengine::makeGBufferShaderComponent<PolyVoxShader>(_em);
 		};

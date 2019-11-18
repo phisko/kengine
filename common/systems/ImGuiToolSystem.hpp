@@ -7,7 +7,6 @@ namespace kengine {
 	public:
 		ImGuiToolSystem(EntityManager & em);
 
-		void onLoad(const char *) noexcept override;
 		void handle(packets::RegisterEntity p) noexcept;
 
 	private:

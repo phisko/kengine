@@ -4,10 +4,6 @@
 # define KENGINE_COMPONENT_CHUNK_SIZE 64
 #endif
 
-#ifndef KENGINE_MAX_SAVE_PATH_LENGTH
-# define KENGINE_MAX_SAVE_PATH_LENGTH 64
-#endif
-
 #ifndef KENGINE_NDEBUG
 #include <iostream>
 #endif
@@ -79,11 +75,7 @@ namespace kengine {
 
 		struct MetadataBase {
 			size_t id = detail::INVALID;
-
 			virtual ~MetadataBase() = default;
-			virtual bool save(const char * directory) const = 0;
-			virtual bool load(const char * directory) = 0;
-
 			FunctionMap funcs;
 		};
 
@@ -102,56 +94,6 @@ namespace kengine {
 		struct Metadata : detail::MetadataBase {
 			std::vector<Chunk> chunks;
 			mutable detail::Mutex _mutex;
-
-			bool save(const char * directory) const final {
-				if constexpr (putils::has_member_get_class_name<Comp>::value && !std::is_base_of<kengine::not_serializable, Comp>::value) {
-					putils::string<KENGINE_MAX_SAVE_PATH_LENGTH> file("%s/%s.bin", directory, Comp::get_class_name());
-					std::ofstream f(file.c_str(), std::ofstream::binary);
-
-					if (!f)
-						return false;
-
-					detail::ReadLock l(_mutex);
-
-					const size_t size = chunks.size();
-					f.write((const char *)&size, sizeof(size));
-
-					for (const auto & chunk : chunks) {
-						const bool empty = chunk.empty();
-						f.write((const char *)&empty, sizeof(empty));
-						if (!empty)
-							f.write((const char *)chunk.data(), KENGINE_COMPONENT_CHUNK_SIZE * sizeof(Comp));
-					}
-					return true;
-				}
-				return false;
-			}
-
-			bool load(const char * directory) final {
-				if constexpr (putils::has_member_get_class_name<Comp>::value && !std::is_base_of<kengine::not_serializable, Comp>::value) {
-					putils::string<KENGINE_MAX_SAVE_PATH_LENGTH> file("%s/%s.bin", directory, Comp::get_class_name());
-					std::ifstream f(file.c_str(), std::ifstream::binary);
-					if (!f)
-						return false;
-
-					size_t size;
-					f.read((char *)&size, sizeof(size));
-
-					detail::WriteLock l(_mutex);
-					chunks.clear();
-					for (size_t i = 0; i < size; ++i) {
-						chunks.emplace_back(0);
-						bool empty;
-						f.read((char *)&empty, sizeof(empty));
-						if (!empty) {
-							chunks.back().resize(KENGINE_COMPONENT_CHUNK_SIZE);
-							f.read((char *)chunks.back().data(), KENGINE_COMPONENT_CHUNK_SIZE * sizeof(Comp));
-						}
-					}
-					return true;
-				}
-				return false;
-			}
 		};
 
 	public:

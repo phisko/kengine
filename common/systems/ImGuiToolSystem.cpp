@@ -74,12 +74,8 @@ static auto ToolsController(kengine::EntityManager & em) {
 
 namespace kengine {
 	ImGuiToolSystem::ImGuiToolSystem(EntityManager & em) : System(em), _em(em) {
-		onLoad("");
-		g_confFile.parse();
-	}
-
-	void ImGuiToolSystem::onLoad(const char *) noexcept {
 		_em += ToolsController(_em);
+		g_confFile.parse();
 	}
 
 	void ImGuiToolSystem::handle(packets::RegisterEntity p) noexcept {

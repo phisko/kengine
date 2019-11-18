@@ -6,11 +6,7 @@
 namespace kengine {
 	class ImGuiEntityEditorSystem : public kengine::System<ImGuiEntityEditorSystem> {
 	public:
-		ImGuiEntityEditorSystem(kengine::EntityManager & em) : System(em), _em(em) {
-			onLoad("");
-		}
-
-		void onLoad(const char * directory) noexcept final;
+		ImGuiEntityEditorSystem(kengine::EntityManager & em);
 
 	private:
 		kengine::EntityManager & _em;

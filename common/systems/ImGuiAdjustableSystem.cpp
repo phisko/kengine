@@ -173,8 +173,8 @@ static void draw(const char * name, kengine::AdjustableComponent & comp) {
 	ImGui::Columns();
 }
 
-static void save(kengine::EntityManager & em, const char * directory) {
-	std::ofstream f(putils::string<KENGINE_MAX_SAVE_PATH_LENGTH>("%s/%s", directory, KENGINE_ADJUSTABLE_SAVE_FILE), std::ofstream::trunc);
+static void save(kengine::EntityManager & em) {
+	std::ofstream f(KENGINE_ADJUSTABLE_SAVE_FILE, std::ofstream::trunc);
 	assert(f);
 	for (const auto &[e, comp] : em.getEntities<kengine::AdjustableComponent>()) {
 		f << comp.name << KENGINE_ADJUSTABLE_SEPARATOR;
@@ -239,8 +239,8 @@ static void setValue(kengine::AdjustableComponent & comp, const char * s) {
 }
 
 static std::unordered_map<string, string> g_loadedFile;
-static void load(kengine::EntityManager & em, const char * directory) {
-	std::ifstream f(putils::string<KENGINE_MAX_SAVE_PATH_LENGTH>("%s/%s", directory, KENGINE_ADJUSTABLE_SAVE_FILE));
+static void load(kengine::EntityManager & em) {
+	std::ifstream f(KENGINE_ADJUSTABLE_SAVE_FILE);
 	if (!f)
 		return;
 	for (std::string line; std::getline(f, line);) {
@@ -273,10 +273,10 @@ static auto ImGuiAdjustableManager(kengine::EntityManager & em) {
 
 				ImGui::Columns(2);
 				if (ImGui::Button("Save"))
-					save(em, KENGINE_DEFAULT_ADJUSTABLE_SAVE_PATH);
+					save(em);
 				ImGui::NextColumn();
 				if (ImGui::Button("Load"))
-					load(em, KENGINE_DEFAULT_ADJUSTABLE_SAVE_PATH);
+					load(em);
 				ImGui::Columns();
 
 				ImGui::Separator();
@@ -330,36 +330,12 @@ static auto ImGuiAdjustableManager(kengine::EntityManager & em) {
 kengine::ImGuiAdjustableSystem::ImGuiAdjustableSystem(kengine::EntityManager & em)
 	: System(em), _em(em)
 {
-	for (auto &[e, comp] : _em.getEntities<AdjustableComponent>()) {
-		auto & save = _pointerSaves[comp.name];
-		save.bPtr = comp.bPtr;
-		save.iPtr = comp.iPtr;
-		save.dPtr = comp.dPtr;
-	}
-
-	onLoad(KENGINE_DEFAULT_ADJUSTABLE_SAVE_PATH);
-}
-
-void kengine::ImGuiAdjustableSystem::onLoad(const char * directory) noexcept {
 	_em += ImGuiAdjustableManager(_em);
-
-	for (auto &[e, comp] : _em.getEntities<AdjustableComponent>()) {
-		const auto it = _pointerSaves.find(comp.name);
-		if (it == _pointerSaves.end()) {
-			_em.removeEntity(e);
-			continue;
-		}
-
-		comp.bPtr = it->second.bPtr;
-		comp.iPtr = it->second.iPtr;
-		comp.dPtr = it->second.dPtr;
-	}
-
-	load(_em, directory);
+	load(_em);
 }
 
-void kengine::ImGuiAdjustableSystem::onSave(const char * directory) noexcept {
-	save(_em, directory);
+kengine::ImGuiAdjustableSystem::~ImGuiAdjustableSystem() {
+	save(_em);
 }
 
 void kengine::ImGuiAdjustableSystem::handle(const packets::RegisterEntity & p) {
@@ -371,9 +347,4 @@ void kengine::ImGuiAdjustableSystem::handle(const packets::RegisterEntity & p) {
 	const auto it = g_loadedFile.find(comp.name);
 	if (it != g_loadedFile.end())
 		setValue(comp, it->second.c_str());
-
-	auto & save = _pointerSaves[comp.name];
-	save.bPtr = comp.bPtr;
-	save.iPtr = comp.iPtr;
-	save.dPtr = comp.dPtr;
 }

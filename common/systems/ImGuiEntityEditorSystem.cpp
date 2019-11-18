@@ -77,6 +77,8 @@ auto ImGuiEntityEditor(kengine::EntityManager & em) {
 	};
 }
 
-void kengine::ImGuiEntityEditorSystem::onLoad(const char * directory) noexcept {
+kengine::ImGuiEntityEditorSystem::ImGuiEntityEditorSystem(kengine::EntityManager & em)
+	: System(em), _em(em)
+{
 	_em += ImGuiEntityEditor(_em);
 }

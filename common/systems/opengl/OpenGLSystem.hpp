@@ -45,7 +45,6 @@ namespace kengine {
 		~OpenGLSystem();
 
 		void execute() noexcept final;
-		void onLoad(const char *) noexcept final;
 
 		void handle(packets::RegisterEntity p);
 		void handle(packets::RemoveEntity p);

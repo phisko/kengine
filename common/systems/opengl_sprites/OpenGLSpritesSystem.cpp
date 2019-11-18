@@ -12,10 +12,6 @@
 
 namespace kengine {
 	OpenGLSpritesSystem::OpenGLSpritesSystem(kengine::EntityManager & em) : System(em), _em(em) {
-		onLoad("");
-	}
-
-	void OpenGLSpritesSystem::onLoad(const char *) noexcept {
 		_em += [this](kengine::Entity & e) {
 			e += kengine::makeGBufferShaderComponent<SpritesShader>(_em);
 		};

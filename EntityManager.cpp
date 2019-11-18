@@ -10,6 +10,10 @@
 #endif
 
 namespace kengine {
+	EntityManager::~EntityManager() {
+		_systems.clear(); // Clear here so that system dtors still have access to entities
+	}
+
 	Entity EntityManager::getEntity(Entity::ID id) {
 		detail::ReadLock l(_entitiesMutex);
 		return Entity(id, _entities[id].mask, this);
@@ -47,136 +51,6 @@ namespace kengine {
 		size_t id;
 		putils::string<KENGINE_MAX_COMPONENT_NAME_LENGTH> name;
 	};
-
-	void EntityManager::load(const char * directory) {
-		const bool good = std::filesystem::exists(directory) && std::filesystem::is_directory(directory);
-		assert(good);
-		if (!good)
-			return;
-
-		{
-			detail::WriteLock l(_archetypesMutex);
-			_archetypes.clear();
-		}
-
-		{
-			detail::WriteLock l(_toReuseMutex);
-			_toReuse.clear();
-		}
-
-		for (auto & e : getEntities())
-			SystemManager::removeEntity(e);
-
-		{
-			detail::ReadLock l(_components.mutex);
-			for (const auto &[_, meta] : _components.map)
-				meta->load(directory);
-		}
-
-		size_t idMap[KENGINE_COMPONENT_COUNT]; // index = new, value = old
-		for (auto & i : idMap)
-			i = (size_t)-1;
-		{
-			detail::ReadLock l(_components.mutex);
-
-			std::ifstream f(putils::string<KENGINE_MAX_SAVE_PATH_LENGTH>("%s/components.bin", directory), std::ifstream::binary);
-			assert(f);
-			size_t size;
-			f.read((char *)&size, sizeof(size));
-			for (size_t i = 0; i < size; ++i) {
-				ComponentIDSave save;
-				f.read((char *)&save, sizeof(save));
-				assert(f.gcount() == sizeof(save));
-
-				for (const auto & [_, meta] : _components.map)
-					if (meta->funcs.name == save.name) {
-						idMap[meta->id] = save.id;
-						break;
-					}
-			}
-		}
-
-		std::ifstream f(putils::string<KENGINE_MAX_SAVE_PATH_LENGTH>("%s/entities.bin", directory), std::ifstream::binary);
-		assert(f);
-		size_t size;
-		f.read((char *)&size, sizeof(size));
-
-		{
-			detail::WriteLock l(_entitiesMutex);
-			_entities.resize(size);
-			f.read((char *)_entities.data(), size * sizeof(_entities[0]));
-		}
-
-		for (auto & e : getEntities()) {
-			Entity::Mask tmp = 0;
-			for (size_t i = 0; i < KENGINE_COMPONENT_COUNT; ++i) {
-				const auto oldId = idMap[i];
-				tmp[i] = oldId == (size_t)-1 ? false : e.componentMask[oldId];
-			}
-			updateMask(e.id, tmp, true);
-		}
-
-		{
-			detail::ReadLock l(_entitiesMutex);
-			size_t id = 0;
-			for (const auto & e : _entities) {
-				if (e.mask == 0) {
-					detail::WriteLock l(_toReuseMutex);
-					_toReuse.emplace_back(id);
-				}
-				++id;
-			}
-		}
-
-		for (auto & e : getEntities())
-			SystemManager::registerEntity(e);
-
-		SystemManager::load(directory);
-	}
-
-	void EntityManager::save(const char * directory) const {
-		std::filesystem::create_directories(directory);
-		const auto good = std::filesystem::exists(directory) && std::filesystem::is_directory(directory);
-		assert(good);
-		if (!good)
-			return;
-
-		SystemManager::save(directory);
-
-		putils::vector<bool, KENGINE_COMPONENT_COUNT> serializable;
-
-		{
-			detail::ReadLock l(_components.mutex);
-			serializable.resize(_components.map.size());
-			for (const auto &[_, meta] : _components.map)
-				serializable[meta->id] = meta->save(directory);
-
-			// Save Component IDs
-			std::ofstream f(putils::string<KENGINE_MAX_SAVE_PATH_LENGTH>("%s/components.bin", directory), std::ofstream::binary);
-			const size_t size = _components.map.size();
-			f.write((const char *)&size, sizeof(size));
-			for (const auto &[_, meta] : _components.map) {
-				ComponentIDSave save;
-				save.id = meta->id;
-				save.name = meta->funcs.name;
-				f.write((const char *)&save, sizeof(save));
-			}
-		}
-
-		std::ofstream f(putils::string<KENGINE_MAX_SAVE_PATH_LENGTH>("%s/entities.bin", directory), std::ofstream::binary);
-		assert(f);
-
-		{
-			detail::ReadLock l(_entitiesMutex);
-			const auto size = _entities.size();
-			f.write((const char *)&size, sizeof(size));
-			for (EntityMetadata e : _entities) {
-				for (size_t i = 0; i < serializable.size(); ++i)
-					e.mask[i] = e.mask[i] && serializable[i];
-				f.write((const char *)&e, sizeof(e));
-			}
-		}
-	}
 
 	Entity EntityManager::alloc() {
 		{

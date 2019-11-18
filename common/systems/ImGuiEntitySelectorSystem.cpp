@@ -104,10 +104,6 @@ namespace kengine {
 	ImGuiEntitySelectorSystem::ImGuiEntitySelectorSystem(kengine::EntityManager & em)
 		: System(em), _em(em)
 	{
-		onLoad("");
-	}
-
-	void ImGuiEntitySelectorSystem::onLoad(const char * directory) noexcept {
 		_em += ImGuiEntitySelector(_em);
 	}
 }
