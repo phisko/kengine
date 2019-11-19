@@ -240,10 +240,6 @@ namespace kengine {
 					ret.push_back(&p.second->funcs);
 			}
 
-			std::sort(ret.begin(), ret.end(), [](const FunctionMap * lhs, const FunctionMap * rhs) {
-				return strcmp(lhs->name, rhs->name) < 0;
-			});
-
 			return ret;
 		}
 

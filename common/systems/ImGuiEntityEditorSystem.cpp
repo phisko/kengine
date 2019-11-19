@@ -38,7 +38,11 @@ auto ImGuiEntityEditor(kengine::EntityManager & em) {
 
 					{
 						ImGui::BeginChild("##child");
-						const auto components = em.getComponentFunctionMaps();
+						auto components = em.getComponentFunctionMaps();
+						std::sort(components.begin(), components.end(), [](const auto lhs, const auto rhs) {
+							return strcmp(lhs->name, rhs->name) < 0;
+						});
+
 						if (ImGui::CollapsingHeader("Edit"))
 							for (const auto comp : components) {
 								const auto has = comp->getFunction<kengine::functions::Has>();

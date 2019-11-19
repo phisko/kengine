@@ -14,7 +14,10 @@
 static bool matches(const kengine::Entity & e, const char * str, kengine::EntityManager & em) {
 	putils::string<1024> displayText("[%d]", e.id);
 
-	const auto components = em.getComponentFunctionMaps();
+	auto components = em.getComponentFunctionMaps();
+	std::sort(components.begin(), components.end(), [](const auto lhs, const auto rhs) {
+		return strcmp(lhs->name, rhs->name) < 0;
+	});
 
 	if (strlen(str) != 0) {
 		displayText += " Matches in ";
