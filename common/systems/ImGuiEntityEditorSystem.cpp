@@ -3,6 +3,7 @@
 
 #include "components/ImGuiComponent.hpp"
 #include "components/SelectedComponent.hpp"
+#include "components/NameComponent.hpp"
 
 #include "functions/Basic.hpp"
 #include "functions/ImGuiEditor.hpp"
@@ -20,13 +21,23 @@ auto ImGuiEntityEditor(kengine::EntityManager & em) {
 				return;
 
 			for (auto &[selected, _] : em.getEntities<kengine::SelectedComponent>()) {
+				bool open = true;
+
 				ImGui::SetNextWindowSize({ 200.f, 200.f}, ImGuiCond_FirstUseEver);
 
-				if (ImGui::Begin(putils::string<64>("[%d] Entity editor", selected.id), nullptr, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoTitleBar)) {
+				const auto beginWindow = [&] {
+					if (selected.has<kengine::NameComponent>())
+						return ImGui::Begin(putils::string<64>("%s##[%d]", selected.get<kengine::NameComponent>().name.c_str(), selected.id), &open, ImGuiWindowFlags_NoSavedSettings);
+					else
+						return ImGui::Begin(putils::string<64>("[%d] Entity editor", selected.id), nullptr, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoTitleBar);
+				};
 
-					if (ImGui::Button("x"))
-						selected.detach<kengine::SelectedComponent>();
-					ImGui::SameLine();
+				if (beginWindow()) {
+					if (!selected.has<kengine::NameComponent>()) { // no title bar
+						if (ImGui::Button("x"))
+							selected.detach<kengine::SelectedComponent>();
+						ImGui::SameLine();
+					}
 					ImGui::Text("Search");
 					ImGui::SameLine();
 					static char nameSearch[1024] = "";
@@ -76,6 +87,9 @@ auto ImGuiEntityEditor(kengine::EntityManager & em) {
 					}
 				}
 				ImGui::End();
+
+				if (!open)
+					selected.detach<kengine::SelectedComponent>();
 			}
 		});
 	};
