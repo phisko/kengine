@@ -33,7 +33,7 @@ namespace kengine {
 		);
 	};
 
-	struct ModelLoaderComponent;
+	struct ModelDataComponent;
 
 	class OpenGLSystem : public System<OpenGLSystem,
 		packets::RegisterEntity, packets::RemoveEntity,
@@ -54,7 +54,7 @@ namespace kengine {
 		void handle(packets::CaptureMouse p);
 
 	private:
-		void createObject(Entity & e, const ModelLoaderComponent & meshLoader);
+		void createObject(Entity & e, const ModelDataComponent & meshLoader);
 
 		void init() noexcept;
 		void handleInput() noexcept;

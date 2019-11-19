@@ -12,7 +12,7 @@
 namespace putils::gl { class Program; }
 
 namespace kengine {
-	// Used only by shaders, built from a ModelLoaderComponent
+	// Used only by shaders, built from a ModelDataComponent
 	struct OpenGLModelComponent {
 		struct Mesh {
 			GLuint vertexArrayObject = -1;

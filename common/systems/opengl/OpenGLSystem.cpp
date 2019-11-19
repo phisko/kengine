@@ -10,7 +10,7 @@
 
 #include "EntityManager.hpp"
 
-#include "components/ModelLoaderComponent.hpp"
+#include "components/ModelDataComponent.hpp"
 #include "components/TextureLoaderComponent.hpp"
 
 #include "components/ModelComponent.hpp"
@@ -384,12 +384,10 @@ namespace kengine {
 		glfwTerminate();
 	}
 
-	void OpenGLSystem::createObject(Entity & e, const ModelLoaderComponent & modelLoader) {
-		const auto modelData = modelLoader.load();
-
+	void OpenGLSystem::createObject(Entity & e, const ModelDataComponent & modelData) {
 		auto & modelInfo = e.attach<OpenGLModelComponent>();
 		modelInfo.meshes.clear();
-		modelInfo.vertexRegisterFunc = modelLoader.vertexRegisterFunc;
+		modelInfo.vertexRegisterFunc = modelData.vertexRegisterFunc;
 
 		for (const auto & meshData : modelData.meshes) {
 			OpenGLModelComponent::Mesh meshInfo;
@@ -404,7 +402,7 @@ namespace kengine {
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshInfo.indexBuffer);
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, meshData.indices.nbElements * meshData.indices.elementSize, meshData.indices.data, GL_STATIC_DRAW);
 
-			modelLoader.vertexRegisterFunc();
+			modelData.vertexRegisterFunc();
 
 			meshInfo.nbIndices = meshData.indices.nbElements;
 			meshInfo.indexType = meshData.indexType;
@@ -412,8 +410,8 @@ namespace kengine {
 			modelInfo.meshes.push_back(meshInfo);
 		}
 
-		modelLoader.free();
-		e.detach<ModelLoaderComponent>();
+		modelData.free();
+		e.detach<ModelDataComponent>();
 	}
 
 	static void loadTexture(Entity & e, TextureLoaderComponent & textureLoader) {
@@ -524,8 +522,8 @@ namespace kengine {
 
 		handleInput();
 
-		for (auto &[e, meshLoader] : _em.getEntities<ModelLoaderComponent>()) {
-			createObject(e, meshLoader);
+		for (auto &[e, modelData] : _em.getEntities<ModelDataComponent>()) {
+			createObject(e, modelData);
 			if (e.componentMask == 0)
 				_em.removeEntity(e);
 		}

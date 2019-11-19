@@ -1,4 +1,4 @@
-# [ModelComponent](ModelComponent.hpp)
+# [ModelDataComponent](ModelDataComponent.hpp)
 
 Used only by model loading systems.
 

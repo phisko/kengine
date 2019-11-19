@@ -10,7 +10,7 @@
 
 #include "EntityManager.hpp"
 
-#include "components/ModelLoaderComponent.hpp"
+#include "components/ModelDataComponent.hpp"
 #include "components/ModelComponent.hpp"
 #include "components/GraphicsComponent.hpp"
 #include "components/PolyVoxComponent.hpp"
@@ -22,6 +22,16 @@
 #include "MagicaVoxel.hpp"
 
 namespace kengine {
+	MagicaVoxelSystem::MagicaVoxelSystem(EntityManager & em) : System(em), _em(em) {
+	}
+
+	void MagicaVoxelSystem::handle(packets::RegisterEntity p) {
+		if (p.e.has<ModelComponent>())
+			loadModel(p.e);
+		else if (p.e.has<GraphicsComponent>())
+			setModel(p.e);
+	}
+
 	namespace detailMagicaVoxel {
 		static auto buildMesh(PolyVox::RawVolume<PolyVoxComponent::VertexData> & volume) {
 			const auto encodedMesh = PolyVox::extractCubicMesh(&volume, volume.getEnclosingRegion());
@@ -71,15 +81,14 @@ namespace kengine {
 				e.detach<MagicaVoxelModelComponent>();
 			}
 			else { // Was unserialized and we (violently) `new`-ed the data buffers
-				auto & meshData = e.get<ModelLoaderComponent::ModelData::MeshData>();
-				delete[] meshData.vertices.data;
-				delete[] meshData.indices.data;
+				const auto & modelData = e.get<ModelDataComponent>();
+				delete[] modelData.meshes[0].vertices.data;
+				delete[] modelData.meshes[0].indices.data;
 			}
-			e.detach<ModelLoaderComponent::ModelData::MeshData>();
 		};
 	}
 
-	static void serialize(const char * f, const ModelLoaderComponent::ModelData::MeshData & meshData, const MagicaVoxel::ChunkContent::Size & size) {
+	static void serialize(const char * f, const ModelDataComponent::Mesh & meshData, const MagicaVoxel::ChunkContent::Size & size) {
 		std::ofstream file(f, std::ofstream::binary | std::ofstream::trunc);
 		assert(f);
 
@@ -106,7 +115,7 @@ namespace kengine {
 		write(size);
 	}
 
-	static void unserialize(const char * f, ModelLoaderComponent::ModelData::MeshData & meshData, MagicaVoxel::ChunkContent::Size & size) {
+	static void unserialize(const char * f, ModelDataComponent::Mesh & meshData, MagicaVoxel::ChunkContent::Size & size) {
 		std::ifstream file(f, std::ofstream::binary);
 		assert(f);
 
@@ -135,32 +144,28 @@ namespace kengine {
 		parse(size);
 	}
 
-	static auto extractData(Entity::ID id, EntityManager & em) {
-		return [&em, id] {
-			auto & e = em.getEntity(id);
-
-			ModelLoaderComponent::ModelData ret;
-			ret.meshes.push_back(e.get<ModelLoaderComponent::ModelData::MeshData>());
-			return ret;
-		};
-	}
-
-	static bool loadVoxFile(Entity & e) {
+	void MagicaVoxelSystem::loadModel(Entity & e) {
 		const auto & f = e.get<ModelComponent>().file.c_str();
 		if (putils::file_extension(f) != "vox")
-			return false;
+			return;
 
 		const putils::string<256> binaryFile("%s.bin", f);
 
 		if (std::filesystem::exists(binaryFile.c_str())) {
 			MagicaVoxel::ChunkContent::Size size;
-			unserialize(binaryFile.c_str(), e.attach<ModelLoaderComponent::ModelData::MeshData>(), size);
+
+			ModelDataComponent modelData;
+			modelData.meshes.push_back({});
+			unserialize(binaryFile.c_str(), modelData.meshes.back(), size);
+			modelData.free = release(e.id, _em);
+			modelData.vertexRegisterFunc = putils::gl::setPolyvoxVertexType<MeshType::VertexType>;
+			e += std::move(modelData);
 
 			auto & box = e.get<ModelComponent>().boundingBox;
 			box.position.x += size.x / 2.f * box.size.x;
 			box.position.z += size.y / 2.f * box.size.z;
 
-			return true;
+			return;
 		}
 
 #ifndef KENGINE_NDEBUG
@@ -207,11 +212,17 @@ namespace kengine {
 		auto & mesh = e.attach<MagicaVoxelModelComponent>().mesh;
 		mesh = detailMagicaVoxel::buildMesh(volume);
 
-		auto & meshData = e.attach<ModelLoaderComponent::ModelData::MeshData>();
+		ModelDataComponent modelData;
+		modelData.meshes.push_back({});
+		auto & meshData = modelData.meshes.back();
 		meshData.vertices = { mesh.getNoOfVertices(), sizeof(putils_typeof(mesh)::VertexType), mesh.getRawVertexData() };
 		meshData.indices = { mesh.getNoOfIndices(), sizeof(putils_typeof(mesh)::IndexType), mesh.getRawIndexData() };
 		meshData.indexType = sizeof(putils_typeof(mesh)::IndexType) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
 		serialize(binaryFile, meshData, size);
+
+		modelData.free = release(e.id, _em);
+		modelData.vertexRegisterFunc = putils::gl::setPolyvoxVertexType<MeshType::VertexType>;
+		e += std::move(modelData);
 
 		auto & box = e.get<ModelComponent>().boundingBox;
 		box.position.x += size.x / 2.f * box.size.x;
@@ -220,21 +231,6 @@ namespace kengine {
 #ifndef KENGINE_NDEBUG
 		std::cout << putils::termcolor::green << " Done.\n" << putils::termcolor::reset;
 #endif
-		return true;
-	}
-
-	MagicaVoxelSystem::MagicaVoxelSystem(EntityManager & em) : System(em), _em(em) {
-	}
-
-	void MagicaVoxelSystem::loadModel(Entity & e) {
-		if (!loadVoxFile(e))
-			return;
-
-		e += ModelLoaderComponent{
-			extractData(e.id, _em),
-			release(e.id, _em),
-			[]() { putils::gl::setPolyvoxVertexType<MeshType::VertexType>(); }
-		};
 	}
 
 	void MagicaVoxelSystem::setModel(Entity & e) {
@@ -257,13 +253,5 @@ namespace kengine {
 			e += ModelComponent{ graphics.appearance.c_str() };
 			graphics.model = e.id;
 		};
-	}
-
-
-	void MagicaVoxelSystem::handle(packets::RegisterEntity p) {
-		if (p.e.has<ModelComponent>())
-			loadModel(p.e);
-		else if (p.e.has<GraphicsComponent>())
-			setModel(p.e);
 	}
 }

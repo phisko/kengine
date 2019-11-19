@@ -68,11 +68,11 @@ The default shaders provided with this system assume you make use of a type with
 
 ##### Model construction
 
-[ModelLoaderComponents](../../components/ModelLoaderComponent.md) are processed to generate meshes and transformed into [ModelInfoComponents](../../components/ModelInfoComponent.md).
+[ModelDataComponents](../../components/ModelDataComponent.md) are processed to generate meshes and transformed into [ModelInfoComponents](../../components/ModelInfoComponent.md).
 
 ##### Shader initialization and vertex type registration
 
-The shader [Programs](../../../putils/opengl/Program.md) for the various [ShaderComponents](../../components/ShaderComponent.md) are initialized by the `OpenGLSystem`, and the vertex type registration functions provided by the [ModelLoaderComponents](../../components/ModelLoaderComponent.md) are called.
+The shader [Programs](../../../putils/opengl/Program.md) for the various [ShaderComponents](../../components/ShaderComponent.md) are initialized by the `OpenGLSystem`, and the vertex type registration functions provided by the [ModelDataComponents](../../components/ModelDataComponent.md) are called.
 
 ##### ImGui
 

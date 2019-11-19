@@ -16,7 +16,7 @@
 #include "AssImpShadowCube.hpp"
 
 #include "components/GraphicsComponent.hpp"
-#include "components/ModelLoaderComponent.hpp"
+#include "components/ModelDataComponent.hpp"
 #include "components/TextureLoaderComponent.hpp"
 #include "components/TextureModelComponent.hpp"
 #include "components/ModelComponent.hpp"
@@ -32,12 +32,38 @@
 
 #include "AssImpHelper.hpp"
 
-static kengine::EntityManager * g_em = nullptr;
-
-static Assimp::Importer g_importer;
-
 namespace kengine {
+	static kengine::EntityManager * g_em = nullptr;
+
+	AssImpSystem::AssImpSystem(EntityManager & em) : System(em), _em(em) {
+		g_em = &em;
+
+		_em += [this](Entity & e) {
+			e += makeGBufferShaderComponent<AssImpShader>(_em);
+		};
+
+		_em += [this](Entity & e) {
+			e += makeLightingShaderComponent<AssImpShadowMap>(_em);
+			e += ShadowMapShaderComponent{};
+		};
+
+		_em += [&](Entity & e) {
+			e += makeLightingShaderComponent<AssImpShadowCube>(_em);
+			e += ShadowCubeShaderComponent{};
+		};
+	}
+
+	void AssImpSystem::handle(packets::RegisterEntity p) {
+		if (p.e.has<ModelComponent>())
+			loadModel(p.e);
+		else if (p.e.has<GraphicsComponent>())
+			setModel(p.e);
+	}
+
+	static Assimp::Importer g_importer;
+
 	namespace AssImp {
+
 		struct AssImpModelComponent {
 			struct Mesh {
 				struct Vertex {
@@ -367,24 +393,6 @@ namespace kengine {
 			}
 		}
 
-		static auto extractData(Entity::ID id, EntityManager & em) {
-			return [id, &em] {
-				auto & e = em.getEntity(id);
-				auto & model = e.get<AssImpModelComponent>();
-
-				ModelLoaderComponent::ModelData ret;
-				for (const auto & mesh : model.meshes) {
-					decltype(ret)::MeshData meshData;
-					meshData.vertices = { mesh.vertices.size(), sizeof(AssImpModelComponent::Mesh::Vertex), mesh.vertices.data() };
-					meshData.indices = { mesh.indices.size(), sizeof(mesh.indices[0]), mesh.indices.data() };
-					meshData.indexType = GL_UNSIGNED_INT;
-					ret.meshes.push_back(meshData);
-				}
-
-				return ret;
-			};
-		}
-
 		static auto release(Entity::ID id, EntityManager & em) {
 			return [id, &em] {
 #if 0 // Disabled because scene is still used for animation at this point
@@ -491,33 +499,25 @@ namespace kengine {
 		}
 	}
 
-	AssImpSystem::AssImpSystem(EntityManager & em) : System(em), _em(em) {
-		g_em = &em;
-
-		_em += [this](Entity & e) {
-			e += makeGBufferShaderComponent<AssImpShader>(_em);
-		};
-
-		_em += [this](Entity & e) {
-			e += makeLightingShaderComponent<AssImpShadowMap>(_em);
-			e += ShadowMapShaderComponent{};
-		};
-
-		_em += [&](Entity & e) {
-			e += makeLightingShaderComponent<AssImpShadowCube>(_em);
-			e += ShadowCubeShaderComponent{};
-		};
-	}
-
 	void AssImpSystem::loadModel(Entity & e) {
 		if (!AssImp::loadFile(e))
 			return;
 
-		e += ModelLoaderComponent{
-			AssImp::extractData(e.id, _em),
-			AssImp::release(e.id, _em),
-			[]() { putils::gl::setVertexType<AssImp::AssImpModelComponent::Mesh::Vertex>(); }
-		};
+		ModelDataComponent modelData;
+
+		auto & model = e.get<AssImp::AssImpModelComponent>();
+		for (const auto & mesh : model.meshes) {
+			ModelDataComponent::Mesh meshData;
+			meshData.vertices = { mesh.vertices.size(), sizeof(AssImp::AssImpModelComponent::Mesh::Vertex), mesh.vertices.data() };
+			meshData.indices = { mesh.indices.size(), sizeof(mesh.indices[0]), mesh.indices.data() };
+			meshData.indexType = GL_UNSIGNED_INT;
+			modelData.meshes.push_back(meshData);
+		}
+		
+		modelData.free = AssImp::release(e.id, _em);
+		modelData.vertexRegisterFunc = putils::gl::setVertexType<AssImp::AssImpModelComponent::Mesh::Vertex>;
+
+		e += std::move(modelData);
 	}
 
 	void AssImpSystem::setModel(Entity & e) {
@@ -540,13 +540,6 @@ namespace kengine {
 			e += ModelComponent{ graphics.appearance.c_str() };
 			graphics.model = e.id;
 		};
-	}
-
-	void AssImpSystem::handle(packets::RegisterEntity p) {
-		if (p.e.has<ModelComponent>())
-			loadModel(p.e);
-		else if (p.e.has<GraphicsComponent>())
-			setModel(p.e);
 	}
 
 	void AssImpSystem::execute() {
