@@ -65,27 +65,17 @@ namespace kengine {
 		putils_reflection_class_name(CSMComponent);
 	};
 
-	class ShadowMapShader : public putils::gl::Program {
-	public:
-		ShadowMapShader(bool usesGBuffer = false, const char * name = "") : Program(usesGBuffer, name) {}
-		virtual void run(kengine::Entity & e, DirLightComponent & light, const Parameters & params) = 0;
-		virtual void run(kengine::Entity & e, SpotLightComponent & light, const putils::Point3f & pos, const Parameters & params) = 0;
-	};
-	struct ShadowMapShaderComponent {
-		putils_reflection_class_name(ShadowMapShaderComponent);
-	};
-
 	struct DepthCubeComponent {
 		GLuint fbo = -1;
 		GLuint texture = -1;
 		int size = -1;
 		putils_reflection_class_name(DepthCubeComponent);
 	};
-	class ShadowCubeShader : public putils::gl::Program {
-	public:
-		ShadowCubeShader(bool usesGBuffer = false, const char * name = "") : Program(usesGBuffer, name) {}
-		virtual void run(kengine::Entity & e, PointLightComponent & light, const putils::Point3f & pos, float radius, const Parameters & params) = 0;
+
+	struct ShadowMapShaderComponent {
+		putils_reflection_class_name(ShadowMapShaderComponent);
 	};
+
 	struct ShadowCubeShaderComponent {
 		putils_reflection_class_name(ShadowCubeShaderComponent);
 	};

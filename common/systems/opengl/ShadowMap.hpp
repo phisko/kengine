@@ -5,6 +5,7 @@
 
 #include "components/ShaderComponent.hpp"
 #include "shaders/ProjViewModelSrc.hpp"
+#include "shaders/ShadowMapShader.hpp"
 
 namespace kengine {
 	class EntityManager;
@@ -20,16 +21,9 @@ namespace kengine::Shaders {
 		ShadowMap(kengine::EntityManager & em);
 
 		void init(size_t firstTextureID) override;
-		void run(const Parameters & params) override {}
-		void run(kengine::Entity & e, DirLightComponent & light, const Parameters & params) override;
-		void run(kengine::Entity & e, SpotLightComponent & light, const putils::Point3f & pos, const Parameters & params) override;
+		void drawToTexture(GLuint texture, const glm::mat4 & lightSpaceMatrix) override;
 
 	private:
-		template<typename T, typename Func>
-		void runImpl(T & depthMap, Func && draw, const Parameters & params);
-
-		void drawToTexture(GLuint texture);
-
 		kengine::EntityManager & _em;
 
 	public:

@@ -1,11 +1,11 @@
 #pragma once
 
-#include "components/ShaderComponent.hpp"
+#include "systems/opengl/shaders/ShadowMapShader.hpp"
 
 namespace kengine {
 	class EntityManager;
 
-	class AssImpShadowMap : public ShadowMapShader {
+	class AssImpShadowMap : public Shaders::ShadowMapShader {
 	public:
 		AssImpShadowMap(kengine::EntityManager & em)
 			: ShadowMapShader(false, putils_nameof(AssImpShadowMap)),
@@ -13,15 +13,9 @@ namespace kengine {
 		{}
 
 		void init(size_t firstTextureID) override;
-		void run(const Parameters & params) override {}
-		void run(kengine::Entity & e, DirLightComponent & light, const Parameters & params) override;
-		void run(kengine::Entity & e, SpotLightComponent & light, const putils::Point3f & pos, const Parameters & params) override;
+		void drawToTexture(GLuint texture, const glm::mat4 & lightSpaceMatrix);
 
 	private:
-		template<typename T, typename Func>
-		void runImpl(T & depthMap, Func && draw, const Parameters & params);
-		void drawToTexture(GLuint texture);
-
 		kengine::EntityManager & _em;
 
 	public:

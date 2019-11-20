@@ -31,51 +31,9 @@ namespace kengine::Shaders {
 		_proj = glm::mat4(1.f);
 	}
 
-	static void initTexture(GLuint texture, size_t size) {
-		glBindTexture(GL_TEXTURE_2D, texture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, (GLsizei)size, (GLsizei)size, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-		const float borderColor[] = { 1.f, 1.f, 1.f, 1.f };
-		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-	}
+	void ShadowMap::drawToTexture(GLuint texture, const glm::mat4 & lightSpaceMatrix) {
+		_view = lightSpaceMatrix;
 
-	static void createShadowMap(DepthMapComponent & depthMap) {
-		if (depthMap.fbo == -1) {
-			glGenFramebuffers(1, &depthMap.fbo);
-			glGenTextures(1, &depthMap.texture);
-		}
-
-		ShaderHelper::BindFramebuffer __f(depthMap.fbo);
-		initTexture(depthMap.texture, depthMap.size);
-
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap.texture, 0);
-		glDrawBuffer(GL_NONE);
-		glReadBuffer(GL_NONE);
-
-		assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
-	}
-
-	static void createCSM(CSMComponent & depthMap) {
-		if (depthMap.fbo == -1) {
-			glGenFramebuffers(1, &depthMap.fbo);
-			glGenTextures(lengthof(depthMap.textures), depthMap.textures);
-		}
-
-		ShaderHelper::BindFramebuffer __f(depthMap.fbo);
-		for (const auto texture : depthMap.textures)
-			initTexture(texture, depthMap.size);
-
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap.textures[0], 0);
-		glDrawBuffer(GL_NONE);
-		glReadBuffer(GL_NONE);
-
-		assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
-	}
-
-	void ShadowMap::drawToTexture(GLuint texture) {
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture, 0);
 
 		for (const auto & [e, graphics, transform, shadow] : _em.getEntities<GraphicsComponent, TransformComponent3f, DefaultShadowComponent>()) {
@@ -92,59 +50,5 @@ namespace kengine::Shaders {
 			_model = ShaderHelper::getModelMatrix(modelInfo, transform);
 			ShaderHelper::drawModel(openGL);
 		}
-	}
-
-	template<typename T, typename Func>
-	void ShadowMap::runImpl(T & depthMap, Func && draw, const Parameters & params) {
-		glViewport(0, 0, depthMap.size, depthMap.size);
-		glCullFace(GL_FRONT);
-
-		ShaderHelper::BindFramebuffer __f(depthMap.fbo);
-		ShaderHelper::Enable __e(GL_DEPTH_TEST);
-
-		use();
-
-		draw();
-
-		glCullFace(GL_BACK);
-		putils::gl::setViewPort(params.viewPort);
-	}
-
-	void ShadowMap::run(kengine::Entity & e, DirLightComponent & light, const Parameters & params) {
-		if (!e.has<CSMComponent>())
-			 e.attach<CSMComponent>();
-
-		auto & depthMap = e.get<CSMComponent>();
-		if (depthMap.size != light.shadowMapSize) {
-			depthMap.size = light.shadowMapSize;
-			createCSM(depthMap);
-		}
-
-		runImpl(depthMap, [&] {
-			for (size_t i = 0; i < lengthof(depthMap.textures); ++i) {
-				const float cascadeStart = (i == 0 ? params.nearPlane : LightHelper::getCSMCascadeEnd(light, i - 1));
-				const float cascadeEnd = LightHelper::getCSMCascadeEnd(light, i);
-				if (cascadeStart >= cascadeEnd)
-					continue;
-				_view = LightHelper::getCSMLightSpaceMatrix(light, params, i);
-				drawToTexture(depthMap.textures[i]);
-			}
-		}, params);
-	}
-
-	void ShadowMap::run(kengine::Entity & e, SpotLightComponent & light, const putils::Point3f & pos, const Parameters & params) {
-		if (!e.has<DepthMapComponent>())
-			e.attach<DepthMapComponent>();
-
-		auto & depthMap = e.get<DepthMapComponent>();
-		if (depthMap.size != light.shadowMapSize) {
-			depthMap.size = light.shadowMapSize;
-			createShadowMap(depthMap);
-		}
-
-		runImpl(depthMap, [&] {
-			_view = LightHelper::getLightSpaceMatrix(light, ShaderHelper::toVec(pos), params);
-			drawToTexture(depthMap.texture);
-		}, params);
 	}
 }

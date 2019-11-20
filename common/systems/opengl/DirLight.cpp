@@ -9,6 +9,7 @@
 
 #include "common/systems/opengl/ShaderHelper.hpp"
 #include "shaders/QuadSrc.hpp"
+#include "shaders/ShadowMapShader.hpp"
 
 namespace kengine {
 	static bool DEBUG_CSM = false;

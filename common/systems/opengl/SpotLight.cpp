@@ -9,6 +9,8 @@
 #include "helpers/LightHelper.hpp"
 #include "common/systems/opengl/ShaderHelper.hpp"
 
+#include "shaders/ShadowMapShader.hpp"
+
 namespace kengine::Shaders {
 	void SpotLight::init(size_t firstTextureID) {
 		initWithShaders<SpotLight>(putils::make_vector(

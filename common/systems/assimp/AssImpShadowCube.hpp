@@ -1,8 +1,7 @@
 #pragma once
 
 #include "putils/opengl/Program.hpp"
-#include "components/ShaderComponent.hpp"
-#include "systems/opengl/shaders/DepthCubeSrc.hpp"
+#include "systems/opengl/shaders/ShadowMapShader.hpp"
 
 namespace kengine {
 	class EntityManager;
@@ -10,9 +9,7 @@ namespace kengine {
 }
 
 namespace kengine {
-	class AssImpShadowCube : public ShadowCubeShader,
-		public Shaders::src::DepthCube::Geom::Uniforms,
-		public Shaders::src::DepthCube::Frag::Uniforms
+	class AssImpShadowCube : public Shaders::ShadowCubeShader
 	{
 	public:
 		AssImpShadowCube(kengine::EntityManager & em)
@@ -21,30 +18,20 @@ namespace kengine {
 		{}
 
 		void init(size_t firstTextureID) override;
-		void run(kengine::Entity & e, PointLightComponent & light, const putils::Point3f & pos, float radius, const Parameters & params) override;
-		void run(const Parameters & params) override {}
+		void drawObjects() override;
 
 	private:
 		kengine::EntityManager & _em;
 
 	public:
-		putils::gl::Uniform<glm::mat4> _proj;
-		putils::gl::Uniform<glm::mat4> _view;
-		putils::gl::Uniform<glm::mat4> _model;
-
 		GLint _bones;
 
 		putils_reflection_attributes(
-			putils_reflection_attribute_private(&AssImpShadowCube::_proj),
-			putils_reflection_attribute_private(&AssImpShadowCube::_view),
-			putils_reflection_attribute_private(&AssImpShadowCube::_model),
-
 			putils_reflection_attribute_private(&AssImpShadowCube::_bones)
 		);
 
 		putils_reflection_parents(
-			putils_reflection_parent(Shaders::src::DepthCube::Geom::Uniforms),
-			putils_reflection_parent(Shaders::src::DepthCube::Frag::Uniforms)
+			putils_reflection_parent(Shaders::ShadowCubeShader)
 		);
 	};
 }
