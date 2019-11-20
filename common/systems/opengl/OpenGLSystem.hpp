@@ -57,7 +57,6 @@ namespace kengine {
 		void createObject(Entity & e, const ModelDataComponent & meshLoader);
 
 		void init() noexcept;
-		void handleInput() noexcept;
 		void addShaders() noexcept;
 		void doOpenGL() noexcept;
 

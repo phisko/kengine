@@ -10,6 +10,7 @@
 
 #include "EntityManager.hpp"
 
+#include "systems/InputSystem.hpp"
 #include "components/ModelDataComponent.hpp"
 #include "components/TextureLoaderComponent.hpp"
 
@@ -68,83 +69,40 @@ namespace kengine {
 
 
 	namespace Input {
-		namespace Keys {
-			struct Info {
-				Entity::ID window;
-				int key;
-				bool pressed;
-			};
-			static putils::vector<Info, 128> events;
-			static void callback(GLFWwindow *, int key, int scancode, int action, int mods) {
-				if (events.full())
-					return;
-				if (action == GLFW_PRESS)
-					events.push_back(Info{ g_window.id, key, true });
-				else if (action == GLFW_RELEASE)
-					events.push_back(Info{ g_window.id, key, false });
-			}
+		static InputSystem * g_inputSystem;
+
+		static void onKey(GLFWwindow *, int key, int scancode, int action, int mods) {
+			if (action == GLFW_PRESS)
+				g_inputSystem->addEvent(InputSystem::KeyEvent{ g_window.id, key, true });
+			else if (action == GLFW_RELEASE)
+				g_inputSystem->addEvent(InputSystem::KeyEvent{ g_window.id, key, false });
 		}
 
 		static putils::Point2f lastPos{ FLT_MAX, FLT_MAX };
 
-		namespace Clicks {
-			struct Info {
-				Entity::ID window;
-				putils::Point2f pos;
-				int button;
-				bool pressed;
-			};
-			static putils::vector<Info, 128> events;
-
-			static void callback(GLFWwindow *, int button, int action, int mods) {
-				if (events.full())
-					return;
-				if (action == GLFW_PRESS)
-					events.push_back(Info{ g_window.id, lastPos, button, true });
-				else if (action == GLFW_RELEASE)
-					events.push_back(Info{ g_window.id, lastPos, button, false });
-			}
+		static void onClick(GLFWwindow *, int button, int action, int mods) {
+			if (action == GLFW_PRESS)
+				g_inputSystem->addEvent(InputSystem::ClickEvent{ g_window.id, lastPos, button, true });
+			else if (action == GLFW_RELEASE)
+				g_inputSystem->addEvent(InputSystem::ClickEvent{ g_window.id, lastPos, button, false });
 		}
 
-		namespace Moves {
-			struct Info {
-				Entity::ID window;
-				putils::Point2f pos;
-				putils::Point2f rel;
-			};
-			static putils::vector<Info, 128> events;
-			static void callback(GLFWwindow *, double xpos, double ypos) {
-				if (events.full())
-					return;
-
-				if (lastPos.x == FLT_MAX) {
-					lastPos.x = (float)xpos;
-					lastPos.y = (float)ypos;
-				}
-
-				Info info;
-				info.window = g_window.id;
-				info.pos = { (float)xpos, (float)ypos };
-				info.rel = { (float)xpos - lastPos.x, (float)ypos - lastPos.y };
-				lastPos = info.pos;
-				events.push_back(info);
+		static void onMouseMove(GLFWwindow *, double xpos, double ypos) {
+			if (lastPos.x == FLT_MAX) {
+				lastPos.x = (float)xpos;
+				lastPos.y = (float)ypos;
 			}
+
+			InputSystem::MouseMoveEvent info;
+			info.window = g_window.id;
+			info.pos = { (float)xpos, (float)ypos };
+			info.rel = { (float)xpos - lastPos.x, (float)ypos - lastPos.y };
+			lastPos = info.pos;
+			g_inputSystem->addEvent(info);
 		}
 
-		namespace Scrolls {
-			struct Info {
-				Entity::ID window;
-				float xoffset;
-				float yoffset;
-				putils::Point2f pos;
-			};
-			static putils::vector<Info, 128> events;
-
-			static void callback(GLFWwindow *, double xoffset, double yoffset) {
-				if (events.full())
-					return;
-				events.push_back(Info{ g_window.id, (float)xoffset, (float)yoffset, lastPos });
-			}
+		static void onScroll(GLFWwindow *, double xoffset, double yoffset) {
+			g_inputSystem->addEvent(InputSystem::MouseScrollEvent{ g_window.id, (float)xoffset, (float)yoffset, lastPos });
 		}
 	}
 
@@ -152,6 +110,8 @@ namespace kengine {
 		: System(em),
 		_em(em)
 	{
+		Input::g_inputSystem = &em.getSystem<InputSystem>();
+
 		g_params.nearPlane = 1.f;
 		g_params.farPlane = 1000.f;
 
@@ -215,10 +175,10 @@ namespace kengine {
 			g_window.comp->size = g_window.size;
 		});
 
-		glfwSetMouseButtonCallback(g_window.window, Input::Clicks::callback);
-		glfwSetCursorPosCallback(g_window.window, Input::Moves::callback);
-		glfwSetScrollCallback(g_window.window, Input::Scrolls::callback);
-		glfwSetKeyCallback(g_window.window, Input::Keys::callback);
+		glfwSetMouseButtonCallback(g_window.window, Input::onClick);
+		glfwSetCursorPosCallback(g_window.window, Input::onMouseMove);
+		glfwSetScrollCallback(g_window.window, Input::onScroll);
+		glfwSetKeyCallback(g_window.window, Input::onKey);
 
 		ImGui::CreateContext();
 		auto & io = ImGui::GetIO();
@@ -520,8 +480,6 @@ namespace kengine {
 			glfwSetWindowAspectRatio(g_window.window, g_window.size.x, g_window.size.y);
 		}
 
-		handleInput();
-
 		for (auto &[e, modelData] : _em.getEntities<ModelDataComponent>()) {
 			createObject(e, modelData);
 			if (e.componentMask == 0)
@@ -775,33 +733,6 @@ namespace kengine {
 				GL_COLOR_BUFFER_BIT, GL_LINEAR
 			);
 		}
-	}
-
-	void OpenGLSystem::handleInput() noexcept {
-		for (const auto &[e, comp] : _em.getEntities<InputComponent>()) {
-			if (!ImGui::GetIO().WantCaptureKeyboard)
-				for (const auto & e : Input::Keys::events)
-					if (comp.onKey != nullptr)
-						comp.onKey(e.window, e.key, e.pressed);
-
-			if (!ImGui::GetIO().WantCaptureMouse) {
-				if (comp.onMouseButton != nullptr)
-					for (const auto & e : Input::Clicks::events)
-						 comp.onMouseButton(e.window, e.button, e.pos, e.pressed);
-
-				if (comp.onMouseMove != nullptr)
-					for (const auto & e : Input::Moves::events)
-						comp.onMouseMove(e.window, e.pos, e.rel);
-
-				if (comp.onScroll != nullptr)
-					for (const auto & e : Input::Scrolls::events)
-						comp.onScroll(e.window, e.xoffset, e.yoffset, e.pos);
-			}
-		}
-		Input::Keys::events.clear();
-		Input::Clicks::events.clear();
-		Input::Moves::events.clear();
-		Input::Scrolls::events.clear();
 	}
 
 	void OpenGLSystem::handle(packets::GetEntityInPixel p) {
