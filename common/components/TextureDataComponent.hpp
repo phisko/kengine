@@ -5,7 +5,7 @@
 #endif
 
 namespace kengine {
-	struct TextureLoaderComponent {
+	struct TextureDataComponent {
 		void * data;
 		GLuint * textureID;
 

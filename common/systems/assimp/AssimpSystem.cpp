@@ -17,7 +17,7 @@
 
 #include "components/GraphicsComponent.hpp"
 #include "components/ModelDataComponent.hpp"
-#include "components/TextureLoaderComponent.hpp"
+#include "components/TextureDataComponent.hpp"
 #include "components/TextureModelComponent.hpp"
 #include "components/ModelComponent.hpp"
 
@@ -229,7 +229,7 @@ namespace kengine {
 						auto & comp = e.attach<TextureModelComponent>();
 						comp.file = fullPath.c_str();
 
-						TextureLoaderComponent textureLoader; {
+						TextureDataComponent textureLoader; {
 							textureLoader.textureID = &comp.texture;
 
 							textureLoader.data = stbi_load(fullPath.c_str(), &textureLoader.width, &textureLoader.height, &textureLoader.components, 0);

@@ -54,11 +54,12 @@ namespace kengine {
 		void handle(packets::CaptureMouse p);
 
 	private:
-		void createObject(Entity & e, const ModelDataComponent & meshLoader);
-
 		void init() noexcept;
 		void addShaders() noexcept;
+
 		void doOpenGL() noexcept;
+		void doImGui() noexcept;
+		void updateWindowProperties() noexcept;
 
 		void initShader(putils::gl::Program & p);
 

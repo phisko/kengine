@@ -4,7 +4,7 @@
 #include "SpritesShader.hpp"
 #include "components/ModelComponent.hpp"
 #include "components/TextureModelComponent.hpp"
-#include "components/TextureLoaderComponent.hpp"
+#include "components/TextureDataComponent.hpp"
 #include "components/ShaderComponent.hpp"
 #include "components/GraphicsComponent.hpp"
 
@@ -41,7 +41,7 @@ namespace kengine {
 			auto & comp = e.attach<TextureModelComponent>();
 			comp.file = file;
 
-			TextureLoaderComponent textureLoader; {
+			TextureDataComponent textureLoader; {
 				textureLoader.textureID = &comp.texture;
 
 				textureLoader.data = data;
