@@ -38,12 +38,17 @@ namespace kengine::Shaders {
 			const auto & centre = transform.boundingBox.position;
 			setLight(light, centre);
 
-			if (light.castShadows)
+			if (light.castShadows) {
+				if (e.has<DepthMapComponent>()) {
+					ShaderHelper::BindFramebuffer b(e.get<DepthMapComponent>().fbo);
+					glClear(GL_DEPTH_BUFFER_BIT);
+				}
+
 				for (const auto & [shadowMapEntity, shader, comp] : _em.getEntities<LightingShaderComponent, ShadowMapShaderComponent>()) {
 					auto & shadowMap = static_cast<ShadowMapShader &>(*shader.shader);
 					shadowMap.run(e, light, centre, params);
 				}
-
+			}
 			use();
 
 			glm::mat4 model(1.f);

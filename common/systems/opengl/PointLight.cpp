@@ -41,11 +41,17 @@ namespace kengine::Shaders {
 			const auto radius = LightHelper::getRadius(light);
 			const auto & centre = transform.boundingBox.position;
 
-			if (light.castShadows)
+			if (light.castShadows) {
+				if (e.has<DepthCubeComponent>()) {
+					ShaderHelper::BindFramebuffer b(e.get<DepthCubeComponent>().fbo);
+					glClear(GL_DEPTH_BUFFER_BIT);
+				}
+
 				for (const auto & [shadowCubeEntity, shader, comp] : _em.getEntities<LightingShaderComponent, ShadowCubeShaderComponent>()) {
 					auto & shadowCube = static_cast<ShadowCubeShader &>(*shader.shader);
 					shadowCube.run(e, light, centre, radius, params);
 				}
+			}
 
 			use();
 

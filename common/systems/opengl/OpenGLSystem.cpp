@@ -645,24 +645,6 @@ namespace kengine {
 				g_params.nearPlane, g_params.farPlane
 			);
 
-			for (const auto &[e, depthMap] : _em.getEntities<DepthMapComponent>()) {
-				ShaderHelper::BindFramebuffer b(depthMap.fbo);
-				glClear(GL_DEPTH_BUFFER_BIT);
-			}
-
-			for (const auto &[e, depthMap] : _em.getEntities<CSMComponent>()) {
-				ShaderHelper::BindFramebuffer b(depthMap.fbo);
-				for (const auto texture : depthMap.textures) {
-					glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture, 0);
-					glClear(GL_DEPTH_BUFFER_BIT);
-				}
-			}
-
-			for (const auto &[e, depthCube] : _em.getEntities<DepthCubeComponent>()) {
-				ShaderHelper::BindFramebuffer b(depthCube.fbo);
-				glClear(GL_DEPTH_BUFFER_BIT);
-			}
-
 			static const auto runShaders = [](auto && shaders) {
 				for (auto & [e, comp] : shaders)
 					if (comp.enabled) {

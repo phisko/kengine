@@ -51,11 +51,21 @@ namespace kengine::Shaders {
 		for (auto &[e, light] : _em.getEntities<DirLightComponent>()) {
 			const putils::Point3f pos = { params.camPos.x, params.camPos.y, params.camPos.z };
 
-			if (light.castShadows)
+			if (light.castShadows) {
+				if (e.has<CSMComponent>()) {
+					const auto & depthMap = e.get<CSMComponent>();
+					ShaderHelper::BindFramebuffer b(depthMap.fbo);
+					for (const auto texture : depthMap.textures) {
+						glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture, 0);
+						glClear(GL_DEPTH_BUFFER_BIT);
+					}
+				}
+
 				for (const auto & [shadowMapEntity, shader, comp] : _em.getEntities<LightingShaderComponent, ShadowMapShaderComponent>()) {
 					auto & shadowMap = static_cast<ShadowMapShader &>(*shader.shader);
 					shadowMap.run(e, light, params);
 				}
+			}
 
 			use();
 			setLight(light);
