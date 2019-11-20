@@ -153,9 +153,9 @@ namespace kengine {
 					detail::WriteLock l(detail::components->mutex);
 					detail::components->map[typeIndex] = std::move(tmp);
 					ptr->id = detail::components->map.size() - 1;
+					ptr->funcs.name = getName();
 				}
 
-				ptr->funcs.name = getName();
 #ifndef KENGINE_NDEBUG
 				std::cout << putils::termcolor::green << ptr->id << ' ' << putils::termcolor::cyan << ptr->funcs.name << '\n' << putils::termcolor::reset;
 #endif
