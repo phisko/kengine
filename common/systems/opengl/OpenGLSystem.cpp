@@ -650,6 +650,12 @@ namespace kengine {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		struct ToBlit {
+			const CameraFramebufferComponent * fb;
+			const ViewportComponent * viewport;
+		};
+		putils::vector<ToBlit, KENGINE_MAX_VIEWPORTS> toBlit;
+
 		for (auto &[e, cam, viewport] : _em.getEntities<CameraComponent3f, ViewportComponent>()) {
 			if (viewport.window == Entity::INVALID_ID)
 				viewport.window = g_window.id;
@@ -664,8 +670,16 @@ namespace kengine {
 			auto & fb = e.get<CameraFramebufferComponent>();
 
 			renderToTexture(_em, fb);
-			blitTextureToViewport(fb, viewport);
+			if (viewport.boundingBox.size.x > 0 && viewport.boundingBox.size.y > 0)
+				toBlit.push_back(ToBlit{ &fb, &viewport });
 		}
+
+		std::sort(toBlit.begin(), toBlit.end(), [](const ToBlit & lhs, const ToBlit & rhs) {
+			return lhs.viewport->zOrder < rhs.viewport->zOrder;
+		});
+
+		for (const auto & blit : toBlit)
+			blitTextureToViewport(*blit.fb, *blit.viewport);
 	}
 
 	void OpenGLSystem::doImGui() noexcept {
