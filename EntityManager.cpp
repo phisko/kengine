@@ -1,5 +1,6 @@
 #include <filesystem>
 #include "EntityManager.hpp"
+#include "packets/Terminate.hpp"
 
 #ifndef KENGINE_MAX_SAVE_PATH_LENGTH
 # define KENGINE_MAX_SAVE_PATH_LENGTH 64
@@ -11,6 +12,7 @@
 
 namespace kengine {
 	EntityManager::~EntityManager() {
+		send(packets::Terminate{});
 		_systems.clear(); // Clear here so that system dtors still have access to entities
 	}
 
