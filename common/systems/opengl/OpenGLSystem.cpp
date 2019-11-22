@@ -196,7 +196,6 @@ namespace kengine {
 		for (const auto & [e, window] : _em.getEntities<WindowComponent>()) {
 			if (!window.assignedSystem.empty())
 				continue;
-			window.assignedSystem = "OpenGL";
 			g_window.id = e.id;
 			break;
 		}
@@ -206,12 +205,13 @@ namespace kengine {
 				g_window.comp = &e.attach<WindowComponent>();
 				g_window.comp->name = "Kengine";
 				g_window.comp->size = { 1280, 720 };
-				g_window.comp->assignedSystem = "OpenGL";
 				g_window.id = e.id;
 			};
 		}
 		else
 			g_window.comp = &_em.getEntity(g_window.id).get<WindowComponent>();
+
+		g_window.comp->assignedSystem = "OpenGL";
 
 		g_window.name = g_window.comp->name;
 
