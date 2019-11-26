@@ -22,10 +22,6 @@
 #include "vector.hpp"
 #include "termcolor.hpp"
 
-#ifndef KENGINE_MAX_COMPONENT_FUNCTIONS
-# define KENGINE_MAX_COMPONENT_FUNCTIONS 8
-#endif
-
 namespace kengine {
 	namespace detail {
 		using Mutex = std::shared_mutex;
@@ -33,49 +29,13 @@ namespace kengine {
 		using WriteLock = std::lock_guard<Mutex>;
 	}
 
-	struct FunctionMap {
-		const char * name = nullptr;
-
-		// In the following functions, `Func` must inherit from kengine::functions::BaseFunction, i.e. have:
-		//		a `Signature` type alias for a function pointer type
-		//		a `Signature funcPtr;` attribute
-		template<typename Func>
-		typename Func::Signature getFunction() const {
-			detail::ReadLock l(_mutex);
-			for (const auto & f : _funcs)
-				if (f.id == putils::meta::type<Func>::index)
-					return (typename Func::Signature)f.funcPtr;
-			return nullptr;
-		}
-
-		template<typename Func>
-		void registerFunction(Func func) {
-			{
-				detail::ReadLock l(_mutex);
-				for (const auto & f : _funcs)
-					if (f.id == putils::meta::type<Func>::index)
-						return;
-			}
-			detail::WriteLock l(_mutex);
-			_funcs.push_back(Function{ putils::meta::type<Func>::index, func.funcPtr });
-		}
-
-	private:
-		struct Function {
-			putils::meta::type_index id = -1;
-			void * funcPtr = nullptr;
-		};
-		putils::vector<Function, KENGINE_MAX_COMPONENT_FUNCTIONS> _funcs;
-		mutable detail::Mutex _mutex;
-	};
-
 	namespace detail {
 		static constexpr size_t INVALID = (size_t)-1;
 
 		struct MetadataBase {
 			size_t id = detail::INVALID;
+			size_t typeEntityID = detail::INVALID;
 			virtual ~MetadataBase() = default;
-			FunctionMap funcs;
 		};
 
 		struct GlobalCompMap {
@@ -126,13 +86,26 @@ namespace kengine {
 		}
 
 		template<typename Func>
-		static auto getFunction() { static auto & meta = metadata();
-			return meta.funcs.getFunction<Func>(name);
+		static size_t initTypeEntityID(Func && createEntity) {
+			auto & meta = metadata();
+			detail::ReadLock l(meta._mutex);
+			if (meta.typeEntityID == detail::INVALID) {
+				l.unlock();
+				detail::WriteLock l2(meta._mutex);
+				if (meta.typeEntityID == detail::INVALID) // Might have been set by another thread between unlock() and lock()
+					meta.typeEntityID = createEntity();
+			}
+			return meta.typeEntityID;
 		}
 
 		template<typename Func>
-		static void registerFunction(Func func) { static auto & meta = metadata();
-			meta.funcs.registerFunction(func);
+		static size_t typeEntityID(Func && createEntity) {
+			static size_t ret = initTypeEntityID(createEntity);
+			return ret;
+		}
+
+		static void setTypeEntityID(size_t id) {
+			metadata().typeEntityID = id;
 		}
 
 	private:
@@ -153,23 +126,15 @@ namespace kengine {
 					detail::WriteLock l(detail::components->mutex);
 					detail::components->map[typeIndex] = std::move(tmp);
 					ptr->id = detail::components->map.size() - 1;
-					ptr->funcs.name = getName();
 				}
 
 #ifndef KENGINE_NDEBUG
-				std::cout << putils::termcolor::green << ptr->id << ' ' << putils::termcolor::cyan << ptr->funcs.name << '\n' << putils::termcolor::reset;
+				std::cout << putils::termcolor::green << ptr->id << ' ' << putils::termcolor::cyan << putils::reflection::get_class_name<Comp>() << '\n' << putils::termcolor::reset;
 #endif
 				return ptr;
 			}();
 
 			return *ret;
-		}
-
-		static const char * getName() {
-			if constexpr (putils::reflection::has_class_name<Comp>::value)
-				return putils::reflection::get_class_name<Comp>();
-			else
-				return typeid(Comp).name();
 		}
 	};
 }

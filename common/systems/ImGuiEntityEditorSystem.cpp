@@ -4,9 +4,11 @@
 #include "components/ImGuiComponent.hpp"
 #include "components/SelectedComponent.hpp"
 #include "components/NameComponent.hpp"
+#include "components/TypeComponent.hpp"
 
 #include "functions/Basic.hpp"
 #include "functions/ImGuiEditor.hpp"
+#include "helpers/TypeHelper.hpp"
 
 #include "imgui.h"
 
@@ -49,39 +51,47 @@ auto ImGuiEntityEditor(kengine::EntityManager & em) {
 
 					{
 						ImGui::BeginChild("##child");
-						auto components = em.getComponentFunctionMaps();
-						std::sort(components.begin(), components.end(), [](const auto lhs, const auto rhs) {
-							return strcmp(lhs->name, rhs->name) < 0;
-						});
 
-						if (ImGui::CollapsingHeader("Edit"))
-							for (const auto comp : components) {
-								const auto has = comp->getFunction<kengine::functions::Has>();
-								const auto edit = comp->getFunction<kengine::functions::EditImGui>();
-								if (has != nullptr && edit != nullptr && strstr(comp->name, nameSearch) && has(selected))
-									if (ImGui::TreeNode(putils::string<64>(comp->name) + "##edit")) {
-										edit(selected);
-										ImGui::TreePop();
-									}
-							}
+						if (ImGui::CollapsingHeader("Edit")) {
+							const auto types = kengine::TypeHelper::getSortedTypeEntities<
+								kengine::functions::Has, kengine::functions::EditImGui
+							>(em);
 
-						if (ImGui::CollapsingHeader("Add"))
-							for (const auto comp : components) {
-								const auto has = comp->getFunction<kengine::functions::Has>();
-								const auto add = comp->getFunction<kengine::functions::Attach>();
-								if (has != nullptr && add != nullptr && strstr(comp->name, nameSearch) && !has(selected))
-									if (ImGui::Button(putils::string<64>(comp->name) + "##add"))
-										add(selected);
+							for (const auto & [e, type, has, edit] : types) {
+								if (!strstr(type->name, nameSearch) || !has->call(selected))
+									continue;
+								if (ImGui::TreeNode(type->name + "##edit")) {
+									edit->call(selected);
+									ImGui::TreePop();
+								}
 							}
+						}
 
-						if (ImGui::CollapsingHeader("Remove"))
-							for (const auto comp : components) {
-								const auto has = comp->getFunction<kengine::functions::Has>();
-								const auto remove = comp->getFunction<kengine::functions::Detach>();
-								if (has != nullptr && remove != nullptr && strstr(comp->name, nameSearch) && has(selected))
-									if (ImGui::Button(putils::string<64>(comp->name) + "##remove"))
-										remove(selected);
+						if (ImGui::CollapsingHeader("Add")) {
+							const auto types = kengine::TypeHelper::getSortedTypeEntities<
+								kengine::functions::Has, kengine::functions::Attach
+							>(em);
+
+							for (const auto & [e, type, has, add] : types) {
+								if (!strstr(type->name, nameSearch) || has->call(selected))
+									continue;
+								if (ImGui::Button(type->name + "##add"))
+									add->call(selected);
 							}
+						}
+
+						if (ImGui::CollapsingHeader("Remove")) {
+							const auto types = kengine::TypeHelper::getSortedTypeEntities<
+								kengine::functions::Has, kengine::functions::Detach
+							>(em);
+
+							for (const auto & [e, type, has, remove] : types) {
+								if (!strstr(type->name, nameSearch) || !has->call(selected))
+									continue;
+								if (ImGui::Button(type->name + "##remove"))
+									remove->call(selected);
+							}
+						}
 
 						ImGui::EndChild();
 					}

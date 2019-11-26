@@ -2,6 +2,7 @@
 
 #include "EntityManager.hpp"
 #include "functions/MatchString.hpp"
+#include "helpers/TypeHelper.hpp"
 #include "sol.hpp"
 
 namespace kengine {
@@ -81,7 +82,8 @@ namespace kengine {
 
 	template<typename Comp>
 	void registerComponentMatcher(kengine::EntityManager & em) {
-		em.registerComponentFunction<Comp>(functions::MatchString{ detail::componentMatches<Comp> });
+		auto type = TypeHelper::getTypeEntity<Comp>(em);
+		type += functions::MatchString{ detail::componentMatches<Comp> };
 	}
 
 	template<typename ... Comps>

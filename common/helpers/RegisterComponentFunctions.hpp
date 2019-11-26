@@ -2,6 +2,7 @@
 
 #include "EntityManager.hpp"
 #include "functions/Basic.hpp"
+#include "helpers/TypeHelper.hpp"
 
 namespace kengine {
 	template<typename Comp>
@@ -25,9 +26,10 @@ namespace kengine {
 
 	template<typename Comp>
 	void registerComponentFunctions(kengine::EntityManager & em) {
-		em.registerComponentFunction<Comp>(functions::Has{ detail::has<Comp> });
-		em.registerComponentFunction<Comp>(functions::Attach{ detail::attach<Comp> });
-		em.registerComponentFunction<Comp>(functions::Detach{ detail::detach<Comp> });
+		auto type = TypeHelper::getTypeEntity<Comp>(em);
+		type += functions::Has{ detail::has<Comp> };
+		type += functions::Attach{ detail::attach<Comp> };
+		type += functions::Detach{ detail::detach<Comp> };
 	}
 
 	template<typename ... Comps>

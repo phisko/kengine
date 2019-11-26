@@ -3,6 +3,7 @@
 #include "EntityManager.hpp"
 #include "reflection/json_helper.hpp"
 #include "functions/LoadFromJSON.hpp"
+#include "helpers/TypeHelper.hpp"
 
 namespace kengine {
 	template<typename Comp>
@@ -26,7 +27,8 @@ namespace kengine {
 
 	template<typename Comp>
 	void registerComponentJSONLoader(kengine::EntityManager & em) {
-		em.registerComponentFunction<Comp>(kengine::functions::LoadFromJSON{ detail::loadJSONComponent<Comp> });
+		auto type = TypeHelper::getTypeEntity<Comp>(em);
+		type += functions::LoadFromJSON{ detail::loadJSONComponent<Comp> };
 	}
 
 	template<typename ... Comps>

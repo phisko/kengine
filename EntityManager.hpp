@@ -220,29 +220,6 @@ namespace kengine {
             }
 		}
 
-	public:
-		// In the following functions, `Func` must inherit from kengine::functions::BaseFunction, i.e. have:
-		//		a `Signature` type alias for a function pointer type
-		//		a `Signature funcPtr;` attribute
-
-		template<typename Comp, typename Func>
-		void registerComponentFunction(Func func) const {
-			Component<Comp>::registerFunction(func);
-		}
-
-		using FunctionMapCollection = putils::vector<const FunctionMap *, KENGINE_COMPONENT_COUNT>;
-		FunctionMapCollection getComponentFunctionMaps() const {
-			FunctionMapCollection ret;
-
-			{
-				detail::ReadLock l(_components.mutex);
-				for (const auto & p : _components.map)
-					ret.push_back(&p.second->funcs);
-			}
-
-			return ret;
-		}
-
 	private:
 		Entity alloc();
 

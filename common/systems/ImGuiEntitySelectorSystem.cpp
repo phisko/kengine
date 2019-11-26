@@ -3,6 +3,7 @@
 #include "components/ImGuiComponent.hpp"
 #include "components/SelectedComponent.hpp"
 
+#include "helpers/TypeHelper.hpp"
 #include "functions/Basic.hpp"
 #include "functions/MatchString.hpp"
 #include "functions/ImGuiEditor.hpp"
@@ -14,11 +15,6 @@
 static bool matches(const kengine::Entity & e, const char * str, kengine::EntityManager & em) {
 	putils::string<1024> displayText("[%d]", e.id);
 
-	auto components = em.getComponentFunctionMaps();
-	std::sort(components.begin(), components.end(), [](const auto lhs, const auto rhs) {
-		return strcmp(lhs->name, rhs->name) < 0;
-	});
-
 	if (strlen(str) != 0) {
 		displayText += " Matches in ";
 
@@ -28,17 +24,20 @@ static bool matches(const kengine::Entity & e, const char * str, kengine::Entity
 			displayText += "ID";
 		}
 		else {
-			for (const auto comp : components) {
-				const auto has = comp->getFunction<kengine::functions::Has>();
-				const auto matchFunc = comp->getFunction<kengine::functions::MatchString>();
-				if (has != nullptr && matchFunc != nullptr && has(e) && matchFunc(e, str)) {
-					if (displayText.size() + strlen(comp->name) + 2 < decltype(displayText)::max_size) {
-						if (matches) // Isn't the first time
-							displayText += ", ";
-						displayText += comp->name;
-					}
-					matches = true;
+			const auto types = kengine::TypeHelper::getSortedTypeEntities<
+				kengine::functions::Has, kengine::functions::MatchString
+			>(em);
+
+			for (const auto & [_, type, has, matchFunc] : types) {
+				if (!has->call(e) || !matchFunc->call(e, str))
+					continue;
+
+				if (displayText.size() + type->name.size() + 2 < decltype(displayText)::max_size) {
+					if (matches) // Isn't the first time
+						displayText += ", ";
+					displayText += type->name;
 				}
+				matches = true;
 			}
 		}
 
@@ -54,13 +53,16 @@ static bool matches(const kengine::Entity & e, const char * str, kengine::Entity
 		em.removeEntity(e);
 		return false;
 	}
+
 	if (ImGui::TreeNode(displayText + "##" + e.id)) {
-		for (const auto & comp : components) {
-			const auto has = comp->getFunction<kengine::functions::Has>();
-			const auto display = comp->getFunction<kengine::functions::DisplayImGui>();
-			if (has != nullptr && display != nullptr && has(e))
-				if (ImGui::TreeNode(comp->name)) {
-					display(e);
+		const auto types = kengine::TypeHelper::getSortedTypeEntities<
+			kengine::functions::Has, kengine::functions::DisplayImGui
+		>(em);
+
+		for (const auto & [_, type, has, display] : types) {
+			if (has->call(e))
+				if (ImGui::TreeNode(type->name)) {
+					display->call(e);
 					ImGui::TreePop();
 				}
 		}

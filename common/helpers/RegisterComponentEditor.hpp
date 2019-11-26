@@ -3,6 +3,7 @@
 #include "EntityManager.hpp"
 #include "functions/ImGuiEditor.hpp"
 #include "reflection/imgui_helper.hpp"
+#include "helpers/TypeHelper.hpp"
 
 namespace kengine {
 	template<typename Comp>
@@ -29,8 +30,9 @@ namespace kengine {
 
 	template<typename Comp>
 	void registerComponentEditor(kengine::EntityManager & em) {
-		em.registerComponentFunction<Comp>(functions::DisplayImGui{ detail::displayComponent<Comp> });
-		em.registerComponentFunction<Comp>(functions::EditImGui{ detail::editComponent<Comp> });
+		auto type = TypeHelper::getTypeEntity<Comp>(em);
+		type += functions::DisplayImGui{ detail::displayComponent<Comp> };
+		type += functions::EditImGui{ detail::editComponent<Comp> };
 	}
 
 	template<typename ... Comps>
