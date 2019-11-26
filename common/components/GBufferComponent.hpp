@@ -16,6 +16,7 @@ namespace kengine {
 			_size = { (unsigned int)width, (unsigned int)height };
 
 			textures.resize(nbAttributes);
+			pbos.resize(nbAttributes);
 
 			std::vector<GLenum> attachments;
 
@@ -61,6 +62,17 @@ namespace kengine {
 
 			glBindTexture(GL_TEXTURE_2D, _depthTexture);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, (GLsizei)screenWidth, (GLsizei)screenHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+
+			for (const auto & pbo : pbos) {
+				if (!pbo.init)
+					continue;
+				const auto size = _size.x * _size.y * sizeof(float) * 4 /*GL_RGBA32F*/;
+				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo.forRead);
+				glBufferData(GL_PIXEL_PACK_BUFFER, size, 0, GL_STREAM_READ);
+				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo.forWrite);
+				glBufferData(GL_PIXEL_PACK_BUFFER, size, 0, GL_STREAM_READ);
+				glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+			}
 		}
 
 		void bindForWriting() {
@@ -69,10 +81,10 @@ namespace kengine {
 
 		void bindForReading() {
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, _fbo);
-
 			for (unsigned int i = 0; i < textures.size(); ++i) {
 				glActiveTexture(GL_TEXTURE0 + i);
 				glBindTexture(GL_TEXTURE_2D, textures[i]);
+				pbos[i].upToDate = false;
 			}
 		}
 
@@ -81,18 +93,61 @@ namespace kengine {
 
 		const auto & getSize() const { return _size; }
 
-		void getTexture(size_t textureIndex, float * buff, size_t buffSize) const {
-			if (glGetnTexImage == nullptr) {
-				memset(buff, 0, buffSize * sizeof(float));
-				return;
+		struct Texture {
+			const float * data;
+
+			// Impl
+			Texture(GLuint pbo) : _pbo(pbo) {
+				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
+				data = (const float *)glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
 			}
-			else {
+
+			~Texture() {
+				glBindBuffer(GL_PIXEL_PACK_BUFFER, _pbo);
+				glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
+				glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+			}
+
+		private:
+			GLuint _pbo;
+		};
+
+		Texture getTexture(size_t textureIndex) {
+			auto & pbo = pbos[textureIndex];
+			if (!pbo.init) {
+				pbo.init = true;
+				glGenBuffers(1, &pbo.forRead);
+				glGenBuffers(1, &pbo.forWrite);
+
+				const auto size = _size.x * _size.y * sizeof(float) * 4 /*GL_RGBA*/;
+				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo.forRead);
+				glBufferData(GL_PIXEL_PACK_BUFFER, size, 0, GL_STREAM_READ);
+				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo.forWrite);
+				glBufferData(GL_PIXEL_PACK_BUFFER, size, 0, GL_STREAM_READ);
+			}
+
+			if (!pbo.upToDate) {
+				pbo.upToDate = true;
+
+				std::swap(pbo.forRead, pbo.forWrite);
+
 				glBindTexture(GL_TEXTURE_2D, textures[textureIndex]);
-				glGetnTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, (GLsizei)buffSize * sizeof(float), buff);
+				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo.forWrite);
+				glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_FLOAT, nullptr);
 			}
+
+			return Texture(pbo.forRead);
 		}
 
 		std::vector<GLuint> textures;
+
+		struct PBO {
+			GLuint forWrite;
+			GLuint forRead;
+			bool init = false;
+			bool upToDate = false;
+		};
+		std::vector<PBO> pbos;
 
 		bool isInit() const { return !textures.empty(); }
 

@@ -1,4 +1,3 @@
-#include <memory>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
@@ -414,12 +413,6 @@ namespace kengine {
 		e.detach<TextureDataComponent>();
 	}
 
-	struct EntityTextureComponent {
-		putils::Point2ui size;
-		std::unique_ptr<float[]> texture;
-		bool upToDate;
-	};
-
 	void OpenGLSystem::execute() noexcept {
 		static bool first = true;
 		if (first) {
@@ -434,9 +427,6 @@ namespace kengine {
 
 		if (g_window.id == Entity::INVALID_ID)
 			return;
-
-		for (const auto & [e, entityTexture] : _em.getEntities<EntityTextureComponent>())
-			entityTexture.upToDate = false;
 
 		glfwPollEvents();
 		updateWindowProperties();
@@ -714,41 +704,25 @@ namespace kengine {
 		}
 
 		auto & camera = _em.getEntity(viewportInfo.camera);
-		if (!camera.has<GBufferComponent>())
+		if (!camera.has<GBufferComponent>()) {
+			p.id = Entity::INVALID_ID;
 			return;
+		}
 
-		const auto & gbuffer = camera.get<GBufferComponent>();
+		auto & gbuffer = camera.get<GBufferComponent>();
+
 		const putils::Point2ui gBufferSize = gbuffer.getSize();
-
-		if (!camera.has<EntityTextureComponent>()) {
-			auto & entityTexture = camera.attach<EntityTextureComponent>();
-			entityTexture.size = gBufferSize;
-			entityTexture.texture.reset(new float[gBufferSize.x * gBufferSize.y * 4]);
-			gbuffer.getTexture(GBUFFER_ENTITY_LOCATION, entityTexture.texture.get(), gBufferSize.x * gBufferSize.y * GBUFFER_TEXTURE_COMPONENTS);
-			entityTexture.upToDate = true;
-		}
-
-		auto & entityTexture = camera.get<EntityTextureComponent>();
-		if (entityTexture.size != gBufferSize) {
-			entityTexture.texture.reset(new float[gBufferSize.x * gBufferSize.y * 4]);
-			entityTexture.upToDate = false;
-			entityTexture.size = gBufferSize;
-		}
-
-		if (!entityTexture.upToDate) {
-			gbuffer.getTexture(GBUFFER_ENTITY_LOCATION, entityTexture.texture.get(), gBufferSize.x * gBufferSize.y * GBUFFER_TEXTURE_COMPONENTS);
-			entityTexture.upToDate = true;
-		}
-
 		const auto pixelInGBuffer = putils::Point2i(viewportInfo.pixel * gBufferSize);
-
 		if (pixelInGBuffer.x >= gBufferSize.x || pixelInGBuffer.y > gBufferSize.y || pixelInGBuffer.y == 0) {
 			p.id = Entity::INVALID_ID;
 			return;
 		}
 
 		const auto index = (pixelInGBuffer.x + (gBufferSize.y - pixelInGBuffer.y) * gBufferSize.x) * GBUFFER_TEXTURE_COMPONENTS;
-		p.id = (Entity::ID)entityTexture.texture[index];
+		{ // Release texture asap
+			const auto texture = gbuffer.getTexture(GBUFFER_ENTITY_LOCATION);
+			p.id = (Entity::ID)texture.data[index];
+		}
 		if (p.id == 0)
 			p.id = Entity::INVALID_ID;
 	}
