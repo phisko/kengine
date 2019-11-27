@@ -88,7 +88,7 @@ namespace kengine {
 
 	template<typename ... Comps>
 	void registerComponentMatchers(kengine::EntityManager & em) {
-		putils_for_each_type(Comps, [&](auto type) {
+		putils::for_each_type<Comps...>([&](auto type) {
 			using Type = putils_wrapped_type(type);
 			registerComponentMatcher<Type>(em);
 		});

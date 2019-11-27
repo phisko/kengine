@@ -71,7 +71,7 @@ namespace kengine {
 				}
 
 				bool good = true;
-				putils_for_each_type(Comps, [&](auto && type) {
+				putils::for_each_type<Comps...>([&](auto && type) {
 					using CompType = putils_wrapped_type(type);
 					good &= mask.test(Component<CompType>::id());
 				});
