@@ -1,12 +1,9 @@
 #include "InputSystem.hpp"
 #include "components/InputComponent.hpp"
-#include "imgui.h"
 
 #ifndef KENGINE_INPUT_MAX_BUFFERED_EVENTS
 # define KENGINE_INPUT_MAX_BUFFERED_EVENTS 128
 #endif
-
-extern ImGuiContext * GImGui;
 
 namespace kengine {
 	template<typename T>
@@ -23,24 +20,21 @@ namespace kengine {
 
 	void InputSystem::execute() noexcept {
 		for (const auto &[e, comp] : _em.getEntities<InputComponent>()) {
-			if (GImGui == nullptr || !ImGui::GetIO().WantCaptureKeyboard)
-				for (const auto & e : g_keys)
-					if (comp.onKey != nullptr)
-						comp.onKey(e.window, e.key, e.pressed);
+			for (const auto & e : g_keys)
+				if (comp.onKey != nullptr)
+					comp.onKey(e.window, e.key, e.pressed);
 
-			if (GImGui == nullptr || !ImGui::GetIO().WantCaptureMouse) {
-				if (comp.onMouseButton != nullptr)
-					for (const auto & e : g_clicks)
-						 comp.onMouseButton(e.window, e.button, e.pos, e.pressed);
+			if (comp.onMouseButton != nullptr)
+				for (const auto & e : g_clicks)
+					comp.onMouseButton(e.window, e.button, e.pos, e.pressed);
 
-				if (comp.onMouseMove != nullptr)
-					for (const auto & e : g_moves)
-						comp.onMouseMove(e.window, e.pos, e.rel);
+			if (comp.onMouseMove != nullptr)
+				for (const auto & e : g_moves)
+					comp.onMouseMove(e.window, e.pos, e.rel);
 
-				if (comp.onScroll != nullptr)
-					for (const auto & e : g_scrolls)
-						comp.onScroll(e.window, e.xoffset, e.yoffset, e.pos);
-			}
+			if (comp.onScroll != nullptr)
+				for (const auto & e : g_scrolls)
+					comp.onScroll(e.window, e.xoffset, e.yoffset, e.pos);
 		}
 		g_keys.clear();
 		g_clicks.clear();

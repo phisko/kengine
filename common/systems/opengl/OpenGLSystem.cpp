@@ -70,6 +70,9 @@ namespace kengine {
 		static InputSystem * g_inputSystem;
 
 		static void onKey(GLFWwindow *, int key, int scancode, int action, int mods) {
+			if (GImGui != nullptr && ImGui::GetIO().WantCaptureKeyboard)
+				return;
+
 			if (action == GLFW_PRESS)
 				g_inputSystem->addEvent(InputSystem::KeyEvent{ g_window.id, key, true });
 			else if (action == GLFW_RELEASE)
@@ -79,6 +82,9 @@ namespace kengine {
 		static putils::Point2f lastPos{ FLT_MAX, FLT_MAX };
 
 		static void onClick(GLFWwindow *, int button, int action, int mods) {
+			if (GImGui != nullptr && ImGui::GetIO().WantCaptureMouse)
+				return;
+
 			if (action == GLFW_PRESS)
 				g_inputSystem->addEvent(InputSystem::ClickEvent{ g_window.id, lastPos, button, true });
 			else if (action == GLFW_RELEASE)
@@ -96,10 +102,15 @@ namespace kengine {
 			info.pos = { (float)xpos, (float)ypos };
 			info.rel = { (float)xpos - lastPos.x, (float)ypos - lastPos.y };
 			lastPos = info.pos;
+
+			if (GImGui != nullptr && ImGui::GetIO().WantCaptureMouse)
+				return;
 			g_inputSystem->addEvent(info);
 		}
 
 		static void onScroll(GLFWwindow *, double xoffset, double yoffset) {
+			if (GImGui != nullptr && ImGui::GetIO().WantCaptureMouse)
+				return;
 			g_inputSystem->addEvent(InputSystem::MouseScrollEvent{ g_window.id, (float)xoffset, (float)yoffset, lastPos });
 		}
 	}
