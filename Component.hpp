@@ -56,28 +56,35 @@ namespace kengine {
 		};
 
 	public:
-		static Comp & get(size_t id) { static auto & meta = metadata();
-			detail::ReadLock r(meta._mutex);
-
-			if (id >= meta.chunks.size() * KENGINE_COMPONENT_CHUNK_SIZE) {
-				r.unlock(); { // Unlock read so we can get write
-					detail::WriteLock l(meta._mutex);
-					while (id >= meta.chunks.size() * KENGINE_COMPONENT_CHUNK_SIZE)
-						meta.chunks.emplace_back();
-					// Only populate the chunk we need
-					meta.chunks.back().resize(KENGINE_COMPONENT_CHUNK_SIZE);
-				} r.lock(); // Re-lock read
+		static Comp & get(size_t id) {
+			if constexpr (std::is_empty<Comp>::value) {
+				static Comp ret;
+				return ret;
 			}
+			else {
+				static auto & meta = metadata();
+				detail::ReadLock r(meta._mutex);
 
-			auto & currentChunk = meta.chunks[id / KENGINE_COMPONENT_CHUNK_SIZE];
-			if (currentChunk.empty()) {
-				r.unlock(); {
-					detail::WriteLock l(meta._mutex);
-					currentChunk.resize(KENGINE_COMPONENT_CHUNK_SIZE);
-				} r.lock();
+				if (id >= meta.chunks.size() * KENGINE_COMPONENT_CHUNK_SIZE) {
+					r.unlock(); { // Unlock read so we can get write
+						detail::WriteLock l(meta._mutex);
+						while (id >= meta.chunks.size() * KENGINE_COMPONENT_CHUNK_SIZE)
+							meta.chunks.emplace_back();
+						// Only populate the chunk we need
+						meta.chunks.back().resize(KENGINE_COMPONENT_CHUNK_SIZE);
+					} r.lock(); // Re-lock read
+				}
+
+				auto & currentChunk = meta.chunks[id / KENGINE_COMPONENT_CHUNK_SIZE];
+				if (currentChunk.empty()) {
+					r.unlock(); {
+						detail::WriteLock l(meta._mutex);
+						currentChunk.resize(KENGINE_COMPONENT_CHUNK_SIZE);
+					} r.lock();
+				}
+
+				return currentChunk[id % KENGINE_COMPONENT_CHUNK_SIZE];
 			}
-
-			return currentChunk[id % KENGINE_COMPONENT_CHUNK_SIZE];
 		}
 
 		static size_t id() {
