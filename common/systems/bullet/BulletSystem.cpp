@@ -271,9 +271,12 @@ namespace kengine {
 	static void updateBulletComponent(Entity & e, const TransformComponent3f & transform, PhysicsComponent & physics, const Entity & modelEntity) {
 		auto & comp = e.get<BulletPhysicsComponent>();
 
+		const bool kinematic = e.has<KinematicComponent>();
+
 		if (physics.changed) {
 			// comp.body->clearForces();
 			comp.body->setLinearVelocity(toBullet(physics.movement * physics.speed));
+			comp.body->setAngularVelocity(btVector3{ physics.pitch, physics.yaw, physics.roll } * physics.speed);
 
 			btVector3 localInertia{ 0.f, 0.f, 0.f };
 			if (physics.mass != 0.f)
@@ -283,10 +286,14 @@ namespace kengine {
 			comp.body->setActivationState(ACTIVE_TAG);
 			comp.body->setDeactivationTime(0.f);
 		}
-		else if (!physics.kinematic)
+		else if (!kinematic) {
 			physics.movement = toPutils(comp.body->getLinearVelocity()) / physics.speed;
+			physics.pitch = comp.body->getAngularVelocity().x();
+			physics.yaw = comp.body->getAngularVelocity().y();
+			physics.roll = comp.body->getAngularVelocity().z();
+		}
 
-		if (physics.kinematic) {
+		if (kinematic) {
 			comp.body->setCollisionFlags(comp.body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
 			comp.body->setActivationState(WANTS_DEACTIVATION);
 		}
