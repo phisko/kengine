@@ -29,7 +29,7 @@ namespace kengine {
 			: text(text), offset(offset), font(font), color(color), debugType(Text) {}
 
 		// Sphere/Line/Box
-		DebugGraphicsComponent(Type type, const putils::Rect3f & offset, const putils::NormalizedColor & color)
+		DebugGraphicsComponent(Type type, const putils::Rect3f & offset = { {}, { 1.f, 1.f, 1.f } }, const putils::NormalizedColor & color = {})
 			: offset(offset), color(color), debugType(type) {}
 
 		string text; 
