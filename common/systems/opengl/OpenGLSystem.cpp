@@ -578,10 +578,7 @@ namespace kengine {
 #ifndef KENGINE_NDEBUG
 				struct ShaderProfiler {
 					ShaderProfiler(Entity & e) {
-						if (!e.has<Controllers::ShaderProfileComponent>())
-							_comp = &e.attach<Controllers::ShaderProfileComponent>();
-						else
-							_comp = &e.get<Controllers::ShaderProfileComponent>();
+						_comp = &e.attach<Controllers::ShaderProfileComponent>();
 						_timer.restart();
 					}
 
