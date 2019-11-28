@@ -57,7 +57,7 @@ namespace kengine {
 
 	public:
 		static Comp & get(size_t id) {
-			if constexpr (std::is_empty<Comp>::value) {
+			if constexpr (std::is_empty<Comp>()) {
 				static Comp ret;
 				return ret;
 			}

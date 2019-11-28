@@ -66,7 +66,7 @@ namespace kengine::Shaders {
 		unsigned int i = 0;
 		putils::reflection::for_each_attribute<SkyBoxComponent>([&comp, &i](const char * name, auto member) {
 			using MemberType = std::decay_t<decltype(SkyBoxComponent{}.*member) > ;
-			if constexpr (std::is_same<MemberType, SkyBoxComponent::string>::value) {
+			if constexpr (std::is_same<MemberType, SkyBoxComponent::string>()) {
 				int width, height, nrChannels;
 				const auto data = stbi_load((comp.*member).c_str(), &width, &height, &nrChannels, 0);
 				assert(data != nullptr);

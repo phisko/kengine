@@ -101,7 +101,7 @@ namespace kengine {
     public:
         template<typename T, typename ...Args>
         T & createSystem(Args && ...args) {
-            static_assert(std::is_base_of<ISystem, T>::value,
+            static_assert(std::is_base_of<ISystem, T>(),
                           "Attempt to create something that's not a System");
             return static_cast<T &>(addSystem(std::make_unique<T>(FWD(args)...)));
         }
@@ -168,7 +168,7 @@ namespace kengine {
     public:
         template<typename T>
         T & getSystem() {
-            static_assert(std::is_base_of<ISystem, T>::value, "Attempt to get something that isn't a System");
+            static_assert(std::is_base_of<ISystem, T>(), "Attempt to get something that isn't a System");
 			for (auto & system : _systems)
 				if (system.type == putils::meta::type<T>::index)
 					return static_cast<T &>(*system.ptr);
@@ -178,7 +178,7 @@ namespace kengine {
 
         template<typename T>
         const T & getSystem() const {
-            static_assert(std::is_base_of<ISystem, T>::value, "Attempt to get something that isn't a System");
+            static_assert(std::is_base_of<ISystem, T>(), "Attempt to get something that isn't a System");
 			for (auto & system : _systems)
 				if (system.type == putils::meta::type<T>::index)
 					return static_cast<const T &>(*system.ptr);
@@ -188,7 +188,7 @@ namespace kengine {
 
         template<typename T>
         bool hasSystem() const noexcept {
-            static_assert(std::is_base_of<ISystem, T>::value, "Attempt to check something that isn't a System");
+            static_assert(std::is_base_of<ISystem, T>(), "Attempt to check something that isn't a System");
 			for (auto & system : _systems)
 				if (system.type == putils::meta::type<T>::index)
 					return true;
@@ -197,7 +197,7 @@ namespace kengine {
 
         template<typename T>
         void removeSystem() noexcept {
-            static_assert(std::is_base_of<ISystem, T>::value, "Attempt to remove something that isn't a System");
+            static_assert(std::is_base_of<ISystem, T>(), "Attempt to remove something that isn't a System");
 			if (_inFrame)
 				_toRemove.emplace_back(putils::meta::type<T>::index);
 			else {

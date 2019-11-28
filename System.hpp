@@ -17,7 +17,7 @@ namespace kengine {
 
     public:
         putils::meta::type_index getType() const noexcept final {
-            static_assert(std::is_base_of<System, CRTP>::value,
+            static_assert(std::is_base_of<System, CRTP>(),
                           "System's first template parameter should be inheriting class");
             return putils::meta::type<CRTP>::index;
         }

@@ -31,7 +31,7 @@ namespace kengine {
 
 		template<typename T>
 		void registerTypeInternal() {
-			if constexpr (std::is_same<T, Entity>::value) {
+			if constexpr (std::is_same<T, Entity>()) {
 				_go = new py::class_<Entity>(_m, putils::reflection::get_class_name<Entity>(), py::dynamic_attr());
 				putils::reflection::for_each_attribute<Entity>([this](auto name, auto member) {
 					_go->def_readwrite(name, member);

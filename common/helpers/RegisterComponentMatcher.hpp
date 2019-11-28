@@ -21,22 +21,22 @@ namespace kengine {
 
 		template<typename Member>
 		static bool matchAttribute(const Member & member, const char * str) {
-			if constexpr (matcher::has_member_c_str<Member>::value) {
+			if constexpr (matcher::has_member_c_str<Member>()) {
 				return strstr(member.c_str(), str);
 			}
 			// else if constexpr (std::is_same_v<Member, const char *>::value)
 			// 	ImGui::LabelText(name, member);
 
-			else if constexpr (putils::is_iterable<Member>::value &&
-				!std::is_same<sol::object, Member>::value &&
-				!std::is_base_of<sol::object, Member>::value) {
+			else if constexpr (putils::is_iterable<Member>() &&
+				!std::is_same<sol::object, Member>() &&
+				!std::is_base_of<sol::object, Member>()) {
 				for (const auto & val : member)
 					if (matchAttribute(val, str))
 						return true;
 				return false;
 			}
 
-			else if constexpr (putils::reflection::has_attributes<Member>::value) {
+			else if constexpr (putils::reflection::has_attributes<Member>()) {
 				bool matches = false;
 				putils::reflection::for_each_attribute<Member>([&](const char * name, const auto attr) {
 					matches |= matchAttribute(member.*attr, str);
@@ -69,7 +69,7 @@ namespace kengine {
 				return true;
 
 			bool matches = false;
-			if constexpr (putils::reflection::has_attributes<Comp>::value) {
+			if constexpr (putils::reflection::has_attributes<Comp>()) {
 				auto & comp = e.get<Comp>();
 				putils::reflection::for_each_attribute<Comp>([&](const char * name, const auto member) {
 					if (matchAttribute(comp.*member, str))

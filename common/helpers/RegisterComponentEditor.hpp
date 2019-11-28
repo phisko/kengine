@@ -17,14 +17,12 @@ namespace kengine {
 	namespace detail {
 		template<typename Comp>
 		static void displayComponent(const kengine::Entity & e) {
-			if constexpr (putils::reflection::has_attributes<Comp>::value)
-				putils::reflection::imguiDisplay(e.get<Comp>());
+			putils::reflection::imguiDisplay(e.get<Comp>());
 		}
 
 		template<typename Comp>
 		static void editComponent(kengine::Entity & e) {
-			if constexpr (putils::reflection::has_attributes<Comp>::value)
-				putils::reflection::imguiEdit(e.get<Comp>());
+			putils::reflection::imguiEdit(e.get<Comp>());
 		}
 	}
 
