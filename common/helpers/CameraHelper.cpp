@@ -9,8 +9,11 @@ namespace kengine::CameraHelper {
 
 		const auto & window = em.getEntity(windowID).get<WindowComponent>();
 
+		float highestZ = -FLT_MAX;
 		for (const auto & [e, viewport] : em.getEntities<ViewportComponent>()) {
 			if (viewport.window != windowID)
+				continue;
+			if (highestZ != -FLT_MAX && highestZ >= viewport.zOrder)
 				continue;
 
 			const auto startX = viewport.boundingBox.position.x * window.size.x;
@@ -23,12 +26,13 @@ namespace kengine::CameraHelper {
 				pixel.y >= startY + sizeY)
 				continue;
 
+			highestZ = viewport.zOrder;
+
 			const auto pixelSreenPercent = putils::Point2f(pixel) / window.size;
 			const auto pixelViewportPercent = (pixelSreenPercent - viewport.boundingBox.position) / viewport.boundingBox.size;
 
 			ret.camera = e.id;
 			ret.pixel = pixelViewportPercent;
-			return ret;
 		}
 
 		return ret;
