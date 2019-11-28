@@ -7,7 +7,7 @@
 
 namespace kengine {
 	template<typename T>
-	struct not {
+	struct no {
 		using CompType = T;
 	};
 
@@ -15,7 +15,7 @@ namespace kengine {
 	struct is_not : std::false_type {};
 
 	template<typename T>
-	struct is_not<not<T>> : std::true_type {};
+	struct is_not<no<T>> : std::true_type {};
 
     class EntityManager : public SystemManager {
     public:
