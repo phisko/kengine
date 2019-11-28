@@ -8,7 +8,9 @@
 #include "functions/MatchString.hpp"
 #include "functions/ImGuiEditor.hpp"
 
+#include "helpers/ImGuiHelper.hpp"
 #include "imgui.h"
+
 #include "string.hpp"
 #include "to_string.hpp"
 
@@ -55,17 +57,7 @@ static bool matches(const kengine::Entity & e, const char * str, kengine::Entity
 	}
 
 	if (ImGui::TreeNode(displayText + "##" + e.id)) {
-		const auto types = kengine::TypeHelper::getSortedTypeEntities<
-			kengine::functions::Has, kengine::functions::DisplayImGui
-		>(em);
-
-		for (const auto & [_, type, has, display] : types) {
-			if (has->call(e))
-				if (ImGui::TreeNode(type->name)) {
-					display->call(e);
-					ImGui::TreePop();
-				}
-		}
+		kengine::ImGuiHelper::displayEntity(em, e);
 		ImGui::TreePop();
 	}
 
