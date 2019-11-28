@@ -1,9 +1,5 @@
 #pragma once
 
-#ifndef KENGINE_PI
-# define KENGINE_PI 3.14159265359f
-#endif
-
 #include "ISystem.hpp"
 #include "EntityManager.hpp"
 
