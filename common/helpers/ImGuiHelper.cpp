@@ -40,7 +40,7 @@ namespace kengine::ImGuiHelper {
 			>(em);
 
 			for (const auto & [_, type, has, add] : types)
-				if (has->call(e))
+				if (!has->call(e))
 					if (ImGui::Button(type->name + "##add"))
 						add->call(e);
 		}
@@ -51,7 +51,7 @@ namespace kengine::ImGuiHelper {
 			>(em);
 
 			for (const auto & [_, type, has, remove] : types)
-				if (!has->call(e))
+				if (has->call(e))
 					if (ImGui::Button(type->name + "##remove"))
 						remove->call(e);
 		}
