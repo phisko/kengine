@@ -77,7 +77,7 @@ namespace kengine {
 
 				if (!sorted) {
 					detail::WriteLock l(mutex);
-					std::sort(entities.begin(), entities.end(), std::greater<Entity::ID>());
+					std::sort(entities.begin(), entities.end(), std::less<Entity::ID>());
 					sorted = true;
 				}
 
@@ -99,7 +99,12 @@ namespace kengine {
 			}
 
 			Archetype() = default;
-			Archetype(Archetype && rhs) = default;
+			Archetype(Archetype && rhs) {
+				mask = rhs.mask;
+				sorted = rhs.sorted;
+				detail::WriteLock l(rhs.mutex);
+				entities = std::move(rhs.entities);
+			}
 			Archetype(const Archetype & rhs) {
 				mask = rhs.mask;
 				sorted = rhs.sorted;
