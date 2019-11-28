@@ -6,6 +6,17 @@
 #include "Entity.hpp"
 
 namespace kengine {
+	template<typename T>
+	struct not {
+		using CompType = T;
+	};
+
+	template<typename>
+	struct is_not : std::false_type {};
+
+	template<typename T>
+	struct is_not<not<T>> : std::true_type {};
+
     class EntityManager : public SystemManager {
     public:
 		EntityManager(size_t threads = 0) : SystemManager(threads) {
@@ -72,8 +83,17 @@ namespace kengine {
 
 				bool good = true;
 				putils::for_each_type<Comps...>([&](auto && type) {
-					using CompType = putils_wrapped_type(type);
-					good &= mask.test(Component<CompType>::id());
+					using T = putils_wrapped_type(type);
+
+					if constexpr (kengine::is_not<T>()) {
+						using CompType = typename T::CompType;
+						const bool hasComp = mask.test(Component<CompType>::id());
+						good &= !hasComp;
+					}
+					else {
+						const bool hasComp = mask.test(Component<T>::id());
+						good &= hasComp;
+					}
 				});
 				return good;
 			}
@@ -148,13 +168,23 @@ namespace kengine {
 				// Use `<` as it will only be compared with `end()`, and there is a risk that new entities have been added since `end()` was called
 				bool operator!=(const ComponentIterator & rhs) const { return currentType < rhs.currentType || currentEntity < rhs.currentEntity; }
 
+				template<typename T>
+				static T & get(Entity & e) {
+					if constexpr (kengine::is_not<T>()) {
+						static T ret;
+						return ret;
+					}
+					else
+						return e.get<T>();
+				};
+
 				std::tuple<Entity, Comps &...> operator*() const {
 					detail::ReadLock l(em._archetypesMutex);
 					const auto & archetype = em._archetypes[currentType];
 
 					detail::ReadLock l2(archetype.mutex);
 					Entity e(archetype.entities[currentEntity], archetype.mask, &em);
-					return std::make_tuple(e, std::ref(e.get<Comps>())...);
+					return std::make_tuple(e, std::ref(get<Comps>(e))...);
 				}
 
 				kengine::EntityManager & em;
@@ -214,7 +244,7 @@ namespace kengine {
     public:
         template<typename RegisterWith, typename ...Types>
         void registerTypes() {
-            if constexpr (!std::is_same<RegisterWith, nullptr_t>::value) {
+            if constexpr (!std::is_same<RegisterWith, nullptr_t>()) {
 				auto & s = getSystem<RegisterWith>();
 				s.template registerTypes<Types...>();
             }
