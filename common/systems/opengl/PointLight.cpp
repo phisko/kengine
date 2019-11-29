@@ -63,7 +63,8 @@ namespace kengine::Shaders {
 			model = glm::scale(model, { radius, radius, radius });
 			_model = model;
 
-			if (centre.getDistanceTo(putils::Point3f{ params.camPos.x, params.camPos.y, params.camPos.z }) < radius)
+			const auto centreToCam = putils::Point3f{ params.camPos.x, params.camPos.y, params.camPos.z } - centre;
+			if (centre.getLengthSquared() < radius * radius)
 				glCullFace(GL_BACK);
 			else
 				glCullFace(GL_FRONT);
