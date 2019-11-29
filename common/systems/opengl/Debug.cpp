@@ -88,7 +88,7 @@ namespace kengine::Shaders {
 				model = glm::rotate(model, transform.pitch, { 1.f, 0.f, 0.f });
 				_model = model;
 
-				ShaderHelper::shapes::drawLine({ 0.f, 0.f, 0.f }, ShaderHelper::toVec(debug.offset.position));
+				ShaderHelper::shapes::drawLine(ShaderHelper::toVec(debug.offset.position), ShaderHelper::toVec(debug.lineEnd));
 			}
 			else if (debug.debugType == DebugGraphicsComponent::Sphere || debug.debugType == DebugGraphicsComponent::Box) {
 				glm::mat4 model(1.f);

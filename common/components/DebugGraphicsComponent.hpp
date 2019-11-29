@@ -37,6 +37,7 @@ namespace kengine {
 
 		putils::NormalizedColor color;
 		putils::Rect3f offset{ {}, { 1.f, 1.f, 1.f } };
+		putils::Point3f lineEnd;
 		// text size: offset.size.x
 		// circle radius: offset.size.x
 		// line thickness: offset.size.y
