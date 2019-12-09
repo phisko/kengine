@@ -2,6 +2,7 @@
 #include "EntityManager.hpp"
 
 #include "helpers/TypeHelper.hpp"
+#include "helpers/SortHelper.hpp"
 #include "meta/Has.hpp"
 #include "meta/AttachTo.hpp"
 #include "meta/DetachFrom.hpp"
@@ -10,7 +11,7 @@
 
 namespace kengine::ImGuiHelper {
 	void displayEntity(EntityManager & em, const Entity & e) {
-		const auto types = kengine::TypeHelper::getSortedTypeEntities<
+		const auto types = SortHelper::getNameSortedEntities<
 			meta::Has, meta::DisplayImGui
 		>(em);
 
@@ -24,37 +25,37 @@ namespace kengine::ImGuiHelper {
 
 	void editEntity(EntityManager & em, Entity & e) {
 		if (ImGui::CollapsingHeader("Edit")) {
-			const auto types = kengine::TypeHelper::getSortedTypeEntities<
+			const auto types = SortHelper::getNameSortedEntities<
 				meta::Has, meta::EditImGui
 			>(em);
 
-			for (const auto & [_, type, has, edit] : types)
+			for (const auto & [_, name, has, edit] : types)
 				if (has->call(e))
-					if (ImGui::TreeNode(type->name + "##edit")) {
+					if (ImGui::TreeNode(name->name + "##edit")) {
 						edit->call(e);
 						ImGui::TreePop();
 					}
 		}
 
 		if (ImGui::CollapsingHeader("Add")) {
-			const auto types = kengine::TypeHelper::getSortedTypeEntities<
+			const auto types = SortHelper::getNameSortedEntities<
 				meta::Has, meta::AttachTo
 			>(em);
 
-			for (const auto & [_, type, has, add] : types)
+			for (const auto & [_, name, has, add] : types)
 				if (!has->call(e))
-					if (ImGui::Button(type->name + "##add"))
+					if (ImGui::Button(name->name + "##add"))
 						add->call(e);
 		}
 
 		if (ImGui::CollapsingHeader("Remove")) {
-			const auto types = kengine::TypeHelper::getSortedTypeEntities<
+			const auto types = SortHelper::getNameSortedEntities<
 				meta::Has, meta::DetachFrom
 			>(em);
 
-			for (const auto & [_, type, has, remove] : types)
+			for (const auto & [_, name, has, remove] : types)
 				if (has->call(e))
-					if (ImGui::Button(type->name + "##remove"))
+					if (ImGui::Button(name->name + "##remove"))
 						remove->call(e);
 		}
 	}

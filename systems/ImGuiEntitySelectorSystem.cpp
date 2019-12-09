@@ -4,6 +4,7 @@
 #include "data/SelectedComponent.hpp"
 
 #include "helpers/TypeHelper.hpp"
+#include "helpers/SortHelper.hpp"
 #include "meta/Has.hpp"
 #include "meta/MatchString.hpp"
 #include "meta/ImGuiEditor.hpp"
@@ -17,12 +18,12 @@
 namespace kengine {
 	static bool matches(const Entity & e, const char * str, EntityManager & em);
 	EntityCreatorFunctor<64> ImGuiEntitySelectorSystem(EntityManager & em) {
-		return [&](kengine::Entity & e) {
-			auto & tool = e.attach<kengine::ImGuiToolComponent>();
+		return [&](Entity & e) {
+			auto & tool = e.attach<ImGuiToolComponent>();
 			tool.enabled = true;
 			tool.name = "Entity selector";
 
-			e += kengine::ImGuiComponent([&] {
+			e += ImGuiComponent([&] {
 				if (!tool.enabled)
 					return;
 
@@ -31,16 +32,16 @@ namespace kengine {
 					ImGui::InputText("Search", nameSearch, sizeof(nameSearch));
 					ImGui::SameLine();
 					if (ImGui::Button("New"))
-						em += [](kengine::Entity & e) { e += kengine::SelectedComponent{}; };
+						em += [](Entity & e) { e += SelectedComponent{}; };
 					ImGui::Separator();
 
 					ImGui::BeginChild("child");
 					for (auto & e : em.getEntities())
 						if (matches(e, nameSearch, em)) {
-							if (e.has<kengine::SelectedComponent>())
-								e.detach<kengine::SelectedComponent>();
+							if (e.has<SelectedComponent>())
+								e.detach<SelectedComponent>();
 							else
-								e.attach<kengine::SelectedComponent>();
+								e.attach<SelectedComponent>();
 						}
 					ImGui::EndChild();
 				}
@@ -61,7 +62,7 @@ namespace kengine {
 				displayText += "ID";
 			}
 			else {
-				const auto types = TypeHelper::getSortedTypeEntities<
+				const auto types = SortHelper::getNameSortedEntities<
 					meta::Has, meta::MatchString
 				>(em);
 
