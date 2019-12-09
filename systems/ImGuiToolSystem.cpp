@@ -49,6 +49,10 @@ static void saveTools(kengine::EntityManager & em) {
 namespace kengine {
 	static void onEntityCreated(Entity & e);
 	EntityCreatorFunctor<64> ImGuiToolSystem(EntityManager & em) {
+		g_confFile.parse();
+		for (const auto & [e, tool] : em.getEntities<ImGuiToolComponent>())
+			tool.enabled = g_confFile.getValue(tool.name);
+
 		return [&](Entity & e) {
 			e += functions::OnEntityCreated{ onEntityCreated };
 
@@ -72,10 +76,8 @@ namespace kengine {
 						saveTools(em);
 				}
 				ImGui::EndMainMenuBar();
-				});
+			});
 		};
-
-		g_confFile.parse();
 	}
 
 	static void onEntityCreated(Entity & e) {
