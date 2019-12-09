@@ -15,9 +15,9 @@ namespace kengine::ImGuiHelper {
 			meta::Has, meta::DisplayImGui
 		>(em);
 
-		for (const auto & [_, type, has, display] : types)
+		for (const auto & [_, name, has, display] : types)
 			if (has->call(e))
-				if (ImGui::TreeNode(type->name)) {
+				if (ImGui::TreeNode(name->name)) {
 					display->call(e);
 					ImGui::TreePop();
 				}
