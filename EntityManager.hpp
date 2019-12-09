@@ -1,9 +1,11 @@
 #pragma once
 
 #include <vector>
-#include "SystemManager.hpp"
 #include "Component.hpp"
 #include "Entity.hpp"
+#include "ThreadPool.hpp"
+#include "EntityCreator.hpp"
+#include "functions/OnEntityCreated.hpp"
 
 namespace kengine {
 	template<typename T>
@@ -17,19 +19,21 @@ namespace kengine {
 	template<typename T>
 	struct is_not<no<T>> : std::true_type {};
 
-    class EntityManager : public SystemManager {
+    class EntityManager : public putils::ThreadPool {
     public:
-		EntityManager(size_t threads = 0) : SystemManager(threads) {
+		EntityManager(size_t threads = 0) : ThreadPool(threads) {
 			detail::components = &_components;
 		}
 		~EntityManager();
 
     public:
-		template<typename Func> // Func: void(Entity &);
+		template<typename Func> // Func: kengine::EntityCreator
         Entity createEntity(Func && postCreate) {
 			auto e = alloc();
 			postCreate(e);
-			SystemManager::registerEntity(e);
+
+			for (const auto & [_, f] : getEntities<functions::OnEntityCreated>())
+				f(e);
 
 			bool shouldActivate;
 			{
@@ -58,6 +62,9 @@ namespace kengine {
 		void setEntityActive(EntityView e, bool active);
 		void setEntityActive(Entity::ID id, bool active);
 
+	public:
+		std::atomic<bool> running = true;
+
 	private:
 		struct Archetype {
 			Entity::Mask mask;
@@ -65,7 +72,14 @@ namespace kengine {
 			bool sorted = true;
 			mutable detail::Mutex mutex;
 
-			Archetype(Entity::Mask mask, Entity::ID firstEntity) : mask(mask), entities({ firstEntity }) {}
+			Archetype(Entity::Mask mask, Entity::ID firstEntity);
+			Archetype() = default;
+			Archetype(Archetype &&);
+			Archetype(const Archetype &);
+
+			void add(Entity::ID id);
+			void remove(Entity::ID id);
+			void sort();
 
 			template<typename ... Comps>
 			bool matches() {
@@ -73,12 +87,6 @@ namespace kengine {
 					detail::ReadLock l(mutex);
 					if (entities.empty())
 						return false;
-				}
-
-				if (!sorted) {
-					detail::WriteLock l(mutex);
-					std::sort(entities.begin(), entities.end(), std::less<Entity::ID>());
-					sorted = true;
 				}
 
 				bool good = true;
@@ -95,21 +103,13 @@ namespace kengine {
 						good &= hasComp;
 					}
 				});
-				return good;
-			}
 
-			Archetype() = default;
-			Archetype(Archetype && rhs) {
-				mask = rhs.mask;
-				sorted = rhs.sorted;
-				detail::WriteLock l(rhs.mutex);
-				entities = std::move(rhs.entities);
-			}
-			Archetype(const Archetype & rhs) {
-				mask = rhs.mask;
-				sorted = rhs.sorted;
-				detail::ReadLock l(rhs.mutex);
-				entities = rhs.entities;
+				if (good && !sorted) {
+					detail::WriteLock l(mutex);
+					sort();
+				}
+
+				return good;
 			}
 		};
 
@@ -125,9 +125,6 @@ namespace kengine {
 
 			EntityIterator begin() const;
 			EntityIterator end() const;
-
-			EntityCollection(EntityManager & em);
-			~EntityCollection();
 
 			EntityManager & em;
 		};
@@ -147,7 +144,7 @@ namespace kengine {
 
 				ComponentIterator & operator++() {
 					++currentEntity;
-					const auto & archetype = em._archetypes[currentType];
+					auto & archetype = em._archetypes[currentType];
 
 					{
 						detail::ReadLock l(archetype.mutex);
@@ -224,19 +221,6 @@ namespace kengine {
 				return ComponentIterator{ em, em._archetypes.size(), 0 };
 			}
 
-			ComponentCollection(EntityManager & em) : em(em) {
-				detail::WriteLock l(em._updatesMutex);
-				++em._updatesLocked;
-			}
-
-			~ComponentCollection() {
-				detail::WriteLock l(em._updatesMutex);
-				assert(em._updatesLocked != 0);
-				--em._updatesLocked;
-				if (em._updatesLocked == 0)
-					em.doAllUpdates();
-			}
-
 			EntityManager & em;
 		};
 
@@ -244,15 +228,6 @@ namespace kengine {
 		template<typename ... Comps>
 		auto getEntities() {
 			return ComponentCollection<Comps...>{ *this };
-		}
-
-    public:
-        template<typename RegisterWith, typename ...Types>
-        void registerTypes() {
-            if constexpr (!std::is_same<RegisterWith, nullptr_t>()) {
-				auto & s = getSystem<RegisterWith>();
-				s.template registerTypes<Types...>();
-            }
 		}
 
 	private:
@@ -263,11 +238,6 @@ namespace kengine {
 		void addComponent(Entity::ID id, size_t component);
 		void removeComponent(Entity::ID id, size_t component);
 		void updateHasComponent(Entity::ID id, size_t component, bool newHasComponent);
-		void updateMask(Entity::ID id, Entity::Mask newMask, bool ignoreOldMask = false);
-
-		void doAllUpdates();
-		void doUpdateMask(Entity::ID id, Entity::Mask newMask, bool ignoreOldMask);
-		void doRemove(Entity::ID id);
 
 	private:
 		struct EntityMetadata {
@@ -285,34 +255,10 @@ namespace kengine {
 		bool _toReuseSorted = true;
 		mutable detail::Mutex _toReuseMutex;
 
-		struct Update {
-			Entity::ID id;
-			Entity::Mask newMask;
-			bool ignoreOldMask;
-			std::mutex mutex;
-
-			Update() = default;
-			Update(Update &&) = default;
-			Update(const Update & rhs) {
-				id = rhs.id;
-				newMask = rhs.newMask;
-				ignoreOldMask = rhs.ignoreOldMask;
-			}
-		};
-		std::vector<Update> _updates;
-
-		struct Removal {
-			Entity::ID id;
-		};
-		std::vector<Removal> _removals;
-
-		size_t _updatesLocked = 0;
-		mutable detail::Mutex _updatesMutex;
-
 	private:
 		mutable detail::GlobalCompMap _components; // Mutable to lock mutex
 
-	public: // Reserved to systems
-		detail::GlobalCompMap & __getComponentMap() { return _components; }
+	public: // Reserved to PluginHelper::initPlugin
+		detail::GlobalCompMap & _getComponentMap() { return _components; }
 	};
 }

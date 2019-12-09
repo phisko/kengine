@@ -1,6 +1,8 @@
 #include <filesystem>
 #include "EntityManager.hpp"
-#include "packets/Terminate.hpp"
+
+#include "functions/OnTerminate.hpp"
+#include "functions/OnEntityRemoved.hpp"
 
 #ifndef KENGINE_MAX_SAVE_PATH_LENGTH
 # define KENGINE_MAX_SAVE_PATH_LENGTH 64
@@ -12,8 +14,8 @@
 
 namespace kengine {
 	EntityManager::~EntityManager() {
-		send(packets::Terminate{});
-		_systems.clear(); // Clear here so that system dtors still have access to entities
+		for (const auto & [e, func] : getEntities<functions::OnTerminate>())
+			func();
 	}
 
 	Entity EntityManager::getEntity(Entity::ID id) {
@@ -31,12 +33,35 @@ namespace kengine {
 	}
 
 	void EntityManager::removeEntity(Entity::ID id) {
-		detail::WriteLock l(_updatesMutex);
-		if (_updatesLocked) {
-			_removals.push_back({ id });
+		auto e = getEntity(id);
+		for (const auto & [_, func] : getEntities<functions::OnEntityRemoved>())
+			func(e);
+
+		Entity::Mask mask;
+		{
+			detail::ReadLock entities(_entitiesMutex);
+			mask = _entities[id].mask;
 		}
-		else
-			doRemove(id);
+
+		{
+			detail::ReadLock archetypes(_archetypesMutex);
+			const auto archetype = std::find_if(
+				_archetypes.begin(), _archetypes.end(),
+				[mask](const auto & a) { return a.mask == mask; }
+			);
+			archetype->remove(id);
+		}
+
+		{
+			detail::WriteLock entities(_entitiesMutex);
+			_entities[id].mask = 0;
+			_entities[id].active = false;
+			_entities[id].shouldActivateAfterInit = true;
+		}
+
+		detail::WriteLock l(_toReuseMutex);
+		_toReuse.emplace_back(id);
+		_toReuseSorted = false;
 	}
 
 	void EntityManager::setEntityActive(EntityView e, bool active) {
@@ -103,126 +128,42 @@ namespace kengine {
 	}
 
 	void EntityManager::updateHasComponent(Entity::ID id, size_t component, bool newHasComponent) {
-		{
-			detail::WriteLock l(_updatesMutex);
-			for (auto & update : _updates)
-				if (update.id == id) {
-					std::unique_lock<std::mutex> l(update.mutex);
-					update.newMask[component] = newHasComponent;
-					return;
-				}
-		}
-
-		Entity::Mask currentMask;
+		Entity::Mask oldMask;
 		{
 			detail::ReadLock l(_entitiesMutex);
-			currentMask = _entities[id].mask;
+			oldMask = _entities[id].mask;
 		}
 
-		auto updatedMask = currentMask;
+		auto updatedMask = oldMask;
 		updatedMask[component] = newHasComponent;
-		updateMask(id, updatedMask);
-	}
 
-	void EntityManager::updateMask(Entity::ID id, Entity::Mask newMask, bool ignoreOldMask) {
-		detail::WriteLock l(_updatesMutex);
-		if (_updatesLocked == 0)
-			doUpdateMask(id, newMask, ignoreOldMask);
-		else {
-			Update update;
-			update.id = id;
-			update.newMask = newMask;
-			update.ignoreOldMask = ignoreOldMask;
-			_updates.push_back(std::move(update));
+		assert(oldMask != updatedMask);
+
+		if (oldMask != 0) {
+			detail::ReadLock l(_archetypesMutex);
+
+			const auto archetype = std::find_if(
+				_archetypes.begin(), _archetypes.end(),
+				[oldMask](const auto & a) { return a.mask == oldMask; }
+			);
+			archetype->remove(id);
 		}
-	}
 
-	void EntityManager::doAllUpdates() {
-		// _updatesMutex already locked
-		for (const auto & update : _updates)
-			doUpdateMask(update.id, update.newMask, update.ignoreOldMask);
-		_updates.clear();
-
-		for (const auto removal : _removals)
-			doRemove(removal.id);
-		_removals.clear();
-	}
-
-	void EntityManager::doUpdateMask(Entity::ID id, Entity::Mask newMask, bool ignoreOldMask) {
-		// _updatesMutex already locked
-		const auto oldMask = ignoreOldMask ? 0 : _entities[id].mask;
-		assert(newMask != oldMask);
-
-		bool removeDone = oldMask == 0;
-		bool addDone = newMask == 0;
-
-		{
+		if (updatedMask != 0) {
 			detail::WriteLock l(_archetypesMutex);
-			for (auto & collection : _archetypes) {
-				if (removeDone && addDone)
-					break;
 
-				if (collection.mask == oldMask) {
-					const auto size = collection.entities.size();
-					if (size > 1) {
-						const auto it = std::find(collection.entities.begin(), collection.entities.end(), id);
-						std::iter_swap(it, collection.entities.begin() + size - 1);
-					}
-					collection.entities.pop_back();
-					collection.sorted = false;
-					removeDone = true;
-				}
-
-				if (collection.mask == newMask) {
-					collection.entities.emplace_back(id);
-					collection.sorted = false;
-					addDone = true;
-				}
-			}
-
-			if (!addDone)
-				_archetypes.emplace_back(newMask, id);
+			const auto archetype = std::find_if(
+				_archetypes.begin(), _archetypes.end(),
+				[updatedMask](const auto & a) { return a.mask == updatedMask; }
+			);
+			if (archetype != _archetypes.end())
+				archetype->add(id);
+			else
+				_archetypes.emplace_back(updatedMask, id);
 		}
 
 		detail::WriteLock l(_entitiesMutex);
-		_entities[id].mask = newMask;
-	}
-
-	void EntityManager::doRemove(Entity::ID id) {
-		SystemManager::removeEntity(getEntity(id));
-
-		Entity::Mask mask;
-		{
-			detail::ReadLock entities(_entitiesMutex);
-			mask = _entities[id].mask;
-		}
-
-		{
-			detail::ReadLock archetypes(_archetypesMutex);
-			for (auto & collection : _archetypes) {
-				if (collection.mask == mask) {
-					detail::WriteLock archetype(collection.mutex);
-					const auto tmp = std::find(collection.entities.begin(), collection.entities.end(), id);
-					if (collection.entities.size() > 1) {
-						std::swap(*tmp, collection.entities.back());
-						collection.sorted = false;
-					}
-					collection.entities.pop_back();
-					break;
-				}
-			}
-		}
-
-		{
-			detail::WriteLock entities(_entitiesMutex);
-			_entities[id].mask = 0;
-			_entities[id].active = false;
-			_entities[id].shouldActivateAfterInit = true;
-		}
-
-		detail::WriteLock l(_toReuseMutex);
-		_toReuse.emplace_back(id);
-		_toReuseSorted = false;
+		_entities[id].mask = updatedMask;
 	}
 
 	/*
@@ -264,16 +205,46 @@ namespace kengine {
 		return EntityIterator{ em._entities.size(), em };
 	}
 
-	EntityManager::EntityCollection::EntityCollection(EntityManager & em) : em(em) {
-		detail::WriteLock l(em._updatesMutex);
-		++em._updatesLocked;
+	/*
+	** Archetype
+	*/
+
+	EntityManager::Archetype::Archetype(Entity::Mask mask, Entity::ID firstEntity)
+		: mask(mask), entities({ firstEntity })
+	{}
+
+	EntityManager::Archetype::Archetype(Archetype && rhs) {
+		mask = rhs.mask;
+		sorted = rhs.sorted;
+		detail::WriteLock l(rhs.mutex);
+		entities = std::move(rhs.entities);
 	}
 
-	EntityManager::EntityCollection::~EntityCollection() {
-		detail::WriteLock l(em._updatesMutex);
-		assert(em._updatesLocked != 0);
-		--em._updatesLocked;
-		if (em._updatesLocked == 0)
-			em.doAllUpdates();
+	EntityManager::Archetype::Archetype(const Archetype & rhs) {
+		mask = rhs.mask;
+		sorted = rhs.sorted;
+		detail::ReadLock l(rhs.mutex);
+		entities = rhs.entities;
+	}
+
+	void EntityManager::Archetype::add(Entity::ID id) {
+		detail::WriteLock l(mutex);
+		entities.push_back(id);
+		sorted = false;
+	}
+
+	void EntityManager::Archetype::remove(Entity::ID id) {
+		detail::WriteLock l(mutex);
+		if (!sorted)
+			sort();
+		const auto it = std::lower_bound(entities.begin(), entities.end(), id);
+		std::swap(*it, entities.back());
+		entities.pop_back();
+		sorted = false;
+	}
+
+	void EntityManager::Archetype::sort() {
+		std::sort(entities.begin(), entities.end(), std::less<Entity::ID>());
+		sorted = true;
 	}
 }
