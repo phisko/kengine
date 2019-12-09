@@ -6,10 +6,10 @@
 namespace kengine::SortHelper {
 	// Returns a container of tuple<Entity, Comps *...>
 	// Pred: bool(tuple<Entity, Comps*...> lhs, tuple<Entity, Comps*...> rhs) = lhs < rhs 
-	template<typename ... Comps, typename Pred>
+	template<size_t MaxCount, typename ... Comps, typename Pred>
 	auto getSortedEntities(EntityManager & em, Pred && pred);
 
-	template<typename ... Comps>
+	template<size_t MaxCount, typename ... Comps>
 	auto getNameSortedEntities(EntityManager & em);
 }
 
@@ -31,13 +31,15 @@ namespace kengine::SortHelper {
 		}
 	}
 
-	template<typename ... Comps, typename Pred>
+	template<size_t MaxCount, typename ... Comps, typename Pred>
 	auto getSortedEntities(EntityManager & em, Pred && pred) { 
 		using Type = std::tuple<Entity, const Comps *...>;
 
-		putils::vector<Type, KENGINE_COMPONENT_COUNT> ret;
+		putils::vector<Type, MaxCount> ret;
 
 		for (const auto & t : em.getEntities<Comps...>()) {
+			if (ret.full())
+				break;
 			ret.emplace_back();
 			detail::set(ret.back(), t, std::make_index_sequence<sizeof...(Comps)>());
 		}
@@ -46,9 +48,9 @@ namespace kengine::SortHelper {
 		return ret;
 	}
 
-	template<typename ... Comps>
+	template<size_t MaxCount, typename ... Comps>
 	auto getNameSortedEntities(EntityManager & em) {
-		return getSortedEntities<NameComponent, Comps...>(em,
+		return getSortedEntities<MaxCount, NameComponent, Comps...>(em,
 			[](const auto & lhs, const auto & rhs) {
 				return strcmp(std::get<1>(lhs)->name, std::get<1>(rhs)->name) < 0;
 			}
