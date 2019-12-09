@@ -62,7 +62,7 @@ namespace kengine {
 				displayText += "ID";
 			}
 			else {
-				const auto types = SortHelper::getNameSortedEntities<
+				const auto types = SortHelper::getNameSortedEntities<KENGINE_COMPONENT_COUNT,
 					meta::Has, meta::MatchString
 				>(em);
 

@@ -11,7 +11,7 @@
 
 namespace kengine::ImGuiHelper {
 	void displayEntity(EntityManager & em, const Entity & e) {
-		const auto types = SortHelper::getNameSortedEntities<
+		const auto types = SortHelper::getNameSortedEntities<KENGINE_COMPONENT_COUNT,
 			meta::Has, meta::DisplayImGui
 		>(em);
 
@@ -25,7 +25,7 @@ namespace kengine::ImGuiHelper {
 
 	void editEntity(EntityManager & em, Entity & e) {
 		if (ImGui::CollapsingHeader("Edit")) {
-			const auto types = SortHelper::getNameSortedEntities<
+			const auto types = SortHelper::getNameSortedEntities<KENGINE_COMPONENT_COUNT,
 				meta::Has, meta::EditImGui
 			>(em);
 
@@ -38,7 +38,7 @@ namespace kengine::ImGuiHelper {
 		}
 
 		if (ImGui::CollapsingHeader("Add")) {
-			const auto types = SortHelper::getNameSortedEntities<
+			const auto types = SortHelper::getNameSortedEntities<KENGINE_COMPONENT_COUNT,
 				meta::Has, meta::AttachTo
 			>(em);
 
@@ -49,7 +49,7 @@ namespace kengine::ImGuiHelper {
 		}
 
 		if (ImGui::CollapsingHeader("Remove")) {
-			const auto types = SortHelper::getNameSortedEntities<
+			const auto types = SortHelper::getNameSortedEntities<KENGINE_COMPONENT_COUNT,
 				meta::Has, meta::DetachFrom
 			>(em);
 
