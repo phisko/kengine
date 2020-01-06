@@ -10,7 +10,6 @@
 #include "shaders/ApplyTransparencySrc.hpp"
 
 #include "systems/opengl/ShaderHelper.hpp"
-#include "helpers/math.hpp"
 
 #include "termcolor.hpp"
 #include "magic_enum.hpp"
@@ -197,7 +196,7 @@ namespace kengine::Shaders {
 		return size;
 	}
 
-	static void drawObject(const TextComponent & text, const TransformComponent3f & transform, Uniforms uniforms, const glm::vec2 & screenSize, bool in2D = false) {
+	static void drawObject(const TextComponent & text, const TransformComponent & transform, Uniforms uniforms, const glm::vec2 & screenSize, bool in2D = false) {
 		uniforms.color = text.color;
 
 		auto & fontSizes = g_fonts[text.font];
@@ -312,14 +311,14 @@ namespace kengine::Shaders {
 
 		_view = glm::mat4(1.f);
 		_proj = glm::mat4(1.f);
-		for (const auto &[e, text, transform] : _em.getEntities<TextComponent2D, TransformComponent3f>()) {
+		for (const auto &[e, text, transform] : _em.getEntities<TextComponent2D, TransformComponent>()) {
 			_entityID = (float)e.id;
 			drawObject(text, transform, uniforms, glm::vec2(params.viewPort.size.x, params.viewPort.size.y), true);
 		}
 
 		_view = params.view;
 		_proj = params.proj;
-		for (const auto &[e, text, transform] : _em.getEntities<TextComponent3D, TransformComponent3f>()) {
+		for (const auto &[e, text, transform] : _em.getEntities<TextComponent3D, TransformComponent>()) {
 			_entityID = (float)e.id;
 			drawObject(text, transform, uniforms, glm::vec2(params.viewPort.size.x, params.viewPort.size.y));
 		}

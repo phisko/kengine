@@ -11,7 +11,6 @@
 #include "systems/opengl/shaders/ApplyTransparencySrc.hpp"
 
 #include "systems/opengl/ShaderHelper.hpp"
-#include "helpers/math.hpp"
 
 static inline const char * vert = R"(
 #version 330
@@ -93,7 +92,7 @@ namespace kengine {
 		putils::gl::Uniform<glm::mat4> model;
 	};
 
-	static void drawObject(EntityManager & em, const GraphicsComponent & graphics, const TransformComponent3f & transform, Uniforms uniforms, bool in2D = false) {
+	static void drawObject(EntityManager & em, const GraphicsComponent & graphics, const TransformComponent & transform, Uniforms uniforms, bool in2D = false) {
 		if (graphics.model == kengine::Entity::INVALID_ID)
 			return;
 
@@ -157,14 +156,14 @@ namespace kengine {
 
 		_view = glm::mat4(1.f);
 		_proj = glm::mat4(1.f);
-		for (const auto &[e, graphics, transform, sprite] : _em.getEntities<GraphicsComponent, TransformComponent3f, SpriteComponent2D>()) {
+		for (const auto &[e, graphics, transform, sprite] : _em.getEntities<GraphicsComponent, TransformComponent, SpriteComponent2D>()) {
 			_entityID = (float)e.id;
 			drawObject(_em, graphics, transform, uniforms, true);
 		}
 
 		_view = params.view;
 		_proj = params.proj;
-		for (const auto &[e, graphics, transform, sprite] : _em.getEntities<GraphicsComponent, TransformComponent3f, SpriteComponent3D>()) {
+		for (const auto &[e, graphics, transform, sprite] : _em.getEntities<GraphicsComponent, TransformComponent, SpriteComponent3D>()) {
 			_entityID = (float)e.id;
 			drawObject(_em, graphics, transform, uniforms);
 		}

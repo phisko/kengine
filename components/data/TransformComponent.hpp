@@ -4,24 +4,20 @@
 #include "Point.hpp"
 
 namespace kengine {
-    template<typename Precision, std::size_t Dimensions>
     class TransformComponent {
     public:
-        TransformComponent(const putils::Point<Precision, Dimensions> & pos = { 0, 0 },
-                           const putils::Point<Precision, Dimensions> & size = { 1, 1 })
-                : boundingBox(pos, size) {
-            if constexpr (Dimensions == 3)
-            if (size == putils::Point3f{ 1, 1, 0 })
-                boundingBox.size.z = 1;
-        }
+        TransformComponent(const putils::Point3f & pos = { 0, 0, 0 },
+                           const putils::Point3f & size = { 1, 1, 1 })
+                : boundingBox(pos, size)
+		{}
 
-        TransformComponent(const putils::Rect<Precision, Dimensions> & rect)
+        TransformComponent(const putils::Rect3f & rect)
                 : boundingBox(rect) {}
 
-        putils::Rect<Precision, Dimensions> boundingBox;
-        Precision pitch = 0; // Radians
-        Precision yaw = 0; // Radians
-		Precision roll = 0; // Radians
+        putils::Rect3f boundingBox;
+        float pitch = 0; // Radians
+        float yaw = 0; // Radians
+		float roll = 0; // Radians
 
         /*
          * Reflectible
@@ -36,13 +32,4 @@ namespace kengine {
                 putils_reflection_attribute(&TransformComponent::roll)
         );
     };
-
-    using TransformComponent2i = TransformComponent<int, 2>;
-    using TransformComponent3i = TransformComponent<int, 3>;
-
-    using TransformComponent2d = TransformComponent<double, 2>;
-    using TransformComponent3d = TransformComponent<double, 3>;
-
-    using TransformComponent2f = TransformComponent<float, 2>;
-    using TransformComponent3f = TransformComponent<float, 3>;
 };

@@ -2,25 +2,24 @@
 
 `Component` indicating that an `Entity` should be highlighted.
 
-### Specs
+## Specs
 
 * [Reflectible](https://github.com/phiste/putils/blob/master/reflection.md)
-* Serializable
+* Serializable (POD)
+* Processed by graphics systems (such as the [OpenGLSystem](../../systems/opengl/OpenGLSystem.md))
 
-### Members
+## Members
 
-##### colorNormalized
-
-```cpp
-putils::Vector3f colorNormalized;
-```
-
-Color of the highlight. All color components should be normalized in the [0;1] range.
-
-##### intensity
+### color
 
 ```cpp
-float intensity = .5f;
+putils::NormalizedColor color;
 ```
 
-Intensity of the highlight, normalized in the [0;1] range.
+Stored as a [putils::NormalizedColor](https://github.com/phiste/putils/blob/master/Color.md).
+
+### intensity
+
+```cpp
+float intensity = 1.f;
+```

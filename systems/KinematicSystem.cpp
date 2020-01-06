@@ -1,14 +1,18 @@
 #include "KinematicSystem.hpp"
 #include "EntityManager.hpp"
 
-#include "data/TransformComponent.hpp"
+#include "data/KinematicComponent.hpp"
 #include "data/PhysicsComponent.hpp"
+#include "data/TransformComponent.hpp"
+
 #include "functions/Execute.hpp"
 
 #include "angle.hpp"
 
 namespace kengine {
+	// declarations
 	static void execute(EntityManager & em, float deltaTime);
+	//
 	EntityCreatorFunctor<64> KinematicSystem(EntityManager & em) {
 		return [&](Entity & e) {
 			e += functions::Execute{ [&](float deltaTime) { execute(em, deltaTime); } };
@@ -16,7 +20,7 @@ namespace kengine {
 	}
 
 	static void execute(EntityManager & em, float deltaTime) {
-		for (const auto & [e, transform, physics, kinematic] : em.getEntities<TransformComponent3f, PhysicsComponent, KinematicComponent>()) {
+		for (const auto & [e, transform, physics, kinematic] : em.getEntities<TransformComponent, PhysicsComponent, KinematicComponent>()) {
 			transform.boundingBox.position += physics.movement * physics.speed * deltaTime;
 
 			const auto applyRotation = [&](float & transformMember, float physicsMember) {

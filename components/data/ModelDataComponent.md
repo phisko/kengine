@@ -2,45 +2,53 @@
 
 Used only by model loading systems.
 
-Provides functions to load a model into the OpenGLSystem.
+Provides data to loaded for a model into the [OpenGLSystem](../../systems/opengl/OpenGLSystem.md).
 
-### Specs
+## Specs
 
+* Not reflectible
 * Not serializable
+* Initialized by model loading systems (such as the [AssImpSystem](../../systems/assimp/AssImpSystem.md)) and processed by the [OpenGLSystem](../../systems/opengl/OpenGLSystem.md).
 
-### Members
+## Members
 
-##### ModelData
+### Mesh
 
 ```cpp
-struct ModelData {
-	struct MeshData {
-		struct DataInfo {
-			size_t nbElements;
-			size_t elementSize;
-			const void * data;
-		};
-
-		DataInfo vertices;
-		DataInfo indices;
-		int indexType; // GLenum (GL_UNSIGNED_SHORT / GL_UNSIGNED_INT / ...)
+struct Mesh {
+	struct DataInfo {
+		size_t nbElements;
+		size_t elementSize;
+		const void * data;
 	};
 
-	std::vector<MeshData> meshes;
+	DataInfo vertices;
+	DataInfo indices;
+	int indexType; // GLenum (GL_UNSIGNED_SHORT / GL_UNSIGNED_INT / ...)
 };
 ```
 
-Represents a model, comprised of several meshes.
+Holds vertex information about a mesh.
 
-##### func
+### meshes
 
 ```cpp
-putils::function<ModelData(), KENGINE_MODEL_LOADER_FUNCTION_SIZE> func;
+std::vector<MeshData> meshes;
 ```
 
-Its maximum size defaults to 64 and can be adjusted by defining the `KENGINE_MODEL_LOADER_FUNCTION_SIZE` macro.
+Represents a model, made up of several meshes.
 
-##### vertexRegisterFunc
+### free
+
+```cpp
+putils::function<void(), KENGINE_MODEL_LOADER_FUNCTION_SIZE> free;
+```
+
+Called to release the model data once it has been loaded into the OpenGL context.
+
+The maximum size for the `free` functor defaults to 64 and can be adjusted by defining the `KENGINE_MODEL_LOADER_FUNCTION_SIZE` macro.
+
+### vertexRegisterFunc
 
 ```cpp
 void (*vertexRegisterFunc)();

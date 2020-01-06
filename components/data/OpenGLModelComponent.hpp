@@ -1,13 +1,8 @@
 #pragma once
 
 #include <vector>
-
 #include <gl/glew.h>
 #include <GL/GL.h>
-#include <glm/glm.hpp>
-
-#include "Color.hpp"
-#include "Entity.hpp"
 
 namespace putils::gl { class Program; }
 

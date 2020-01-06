@@ -6,13 +6,15 @@
 #include "meta/type.hpp"
 
 namespace kengine {
+	// declarations
 	static void execute(EntityManager & em, sol::state & state, float deltaTime);
+	//
 	EntityCreatorFunctor<64> LuaSystem(EntityManager & em) {
 		return [&](Entity & e) {
-			auto tmp = std::make_unique<sol::state>();
-			auto & state = *tmp;
-			e += LuaStateComponent{ std::move(tmp) };
+			auto tmp = new sol::state;
+			e += LuaStateComponent{ tmp };
 
+			auto & state = *tmp;
 			state.open_libraries();
 			ScriptSystem::init(em,
 				[&](auto && ... args) {

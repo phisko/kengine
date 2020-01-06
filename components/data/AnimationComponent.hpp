@@ -4,16 +4,13 @@
 # define KENGINE_ANIMATION_FILE_PATH_LENGTH 128
 #endif
 
-#ifndef KENGINE_MAX_ANIMATION_FILES
-# define KENGINE_MAX_ANIMATION_FILES 64
-#endif
-
-#include "string.hpp"
-#include "vector.hpp"
+#include <string>
+#include <vector>
+#include "reflection.hpp"
 
 namespace kengine {
 	struct AnimationComponent {
-		unsigned int currentAnim = 0; // Index into AnimListComponent.allAnims
+		unsigned int currentAnim = 0; // Index into AnimListComponent.anims
 		float currentTime = 0.f;
 		float speed = 1.f;
 		bool loop = true;
@@ -28,11 +25,8 @@ namespace kengine {
 	};
 
 	struct AnimListComponent {
-		static constexpr char stringName[] = "AnimListComponentString";
-		using string = putils::string<KENGINE_ANIMATION_FILE_PATH_LENGTH, stringName>;
-
 		struct Anim {
-			string name;
+			std::string name;
 			float totalTime;
 			float ticksPerSecond;
 
@@ -44,19 +38,16 @@ namespace kengine {
 			);
 		};
 
-		static constexpr char vectorName[] = "AnimListComponentVector";
-		putils::vector<Anim, KENGINE_MAX_ANIMATION_FILES, vectorName> allAnims;
+		std::vector<Anim> anims;
 
 		putils_reflection_class_name(AnimListComponent);
 		putils_reflection_attributes(
-			putils_reflection_attribute(&AnimListComponent::allAnims)
+			putils_reflection_attribute(&AnimListComponent::anims)
 		);
 	};
 
 	struct AnimFilesComponent {
-		static constexpr char vectorName[] = "AnimFilesComponentVector";
-		using vector = putils::vector<AnimListComponent::string, KENGINE_MAX_ANIMATION_FILES, vectorName>;
-		vector files;
+		std::vector<std::string> files;
 
 		putils_reflection_class_name(AnimFilesComponent);
 		putils_reflection_attributes(

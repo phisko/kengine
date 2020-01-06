@@ -14,11 +14,11 @@ namespace kengine {
 
 	namespace python {
 		template<typename Ret, typename ...Args>
-		void registerEntityMember(py::class_<Entity> & entity, const std::string & name, const std::function<Ret(Args...)> & func) {
+		void registerEntityMember(py::class_<Entity> & entity, const char * name, const ScriptSystem::function<Ret(Args...)> & func) {
 			if constexpr (std::is_reference_v<Ret>)
-				entity.def(name.c_str(), func, py::return_value_policy::reference);
+				entity.def(name, func, py::return_value_policy::reference);
 			else
-				entity.def(name.c_str(), func);
+				entity.def(name, func);
 		}
 
 		template<typename T>
@@ -47,17 +47,17 @@ namespace kengine {
 		}
 
 		template<typename Ret, typename ...Args>
-		void registerFunctionWithState(PythonStateComponent::Data & state, const std::string & name, const std::function<Ret(Args...)> & func) {
+		void registerFunctionWithState(PythonStateComponent::Data & state, const char * name, const ScriptSystem::function<Ret(Args...)> & func) {
 			if constexpr (std::is_reference_v<Ret>)
-				state.module.def(name.c_str(), func, py::return_value_policy::reference);
+				state.module.def(name, func, py::return_value_policy::reference);
 			else
-				state.module.def(name.c_str(), func);
+				state.module.def(name, func);
 		}
 
 		template<typename Ret, typename ...Args>
-		void registerFunction(EntityManager & em, const std::string & name, const std::function<Ret(Args...)> & func) {
+		void registerFunction(EntityManager & em, const char * name, const ScriptSystem::function<Ret(Args...)> & func) {
 			for (const auto & [e, comp] : em.getEntities<PythonStateComponent>())
-				registerFunctionWithState(*comp.data);
+				registerFunctionWithState(*comp.data, name, func);
 		}
 	}
 }

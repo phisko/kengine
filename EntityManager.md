@@ -1,63 +1,54 @@
 # [EntityManager](EntityManager.hpp)
 
-Manages [Entities](Entity.md), Components and [Systems](System.md).
+Provides access to [Entities](Entity.md).
 
-An `EntityManager` is also a [Mediator](https://github.com/phisko/putils/blob/master/mediator/README.md), managing communication for `Systems`.
+## Members
 
-### Base classes
-
-An `EntityManager`'s role is split-up into two parts:
-
-* the `EntityManager` itself, which manages entities and their components
-* a [SystemManager](SystemManager.md) base
-
-### Members
-
-##### Constructor
+### Constructor
 
 ```cpp
 EntityManager(size_t threads = 0);
 ```
 An `EntityManager` can be constructed with a number of threads, which will be used for its [ThreadPool](https://github.com/phisko/putils/blob/master/ThreadPool.hpp).
 
-##### createEntity
+### createEntity
 
 ```cpp
-template<typename Func> // Func: void(Entity);
-Entity &createEntity(Func && postCreate);
+template<typename Func> // Func: void(Entity &);
+Entity createEntity(Func && postCreate);
 ```
 
 Creates a new `Entity`, calls `postCreate` on it, and registers it to the existing `Systems`.
 
-##### operator+=
+### operator+=
 
 ```cpp
-template<typename Func> Func: void(Entity &)
+template<typename Func> // Func: void(Entity &)
 Entity operator+=(Func && postCreate);
 ```
 
 Equivalent to `createEntity`. Allows for syntax such as:
 
 ```cpp
-em += [](kengine::Entity & e) {
-  e += kengine::TransformComponent3f{};
+em += [](Entity & e) {
+  e += TransformComponent{};
 };
 ```
 
-##### removeEntity
+### removeEntity
 
 ```cpp
-void removeEntity(kengine::EntityView e);
+void removeEntity(Entity e);
 void removeEntity(Entity::ID id);
 ```
 
-##### getEntity
+### getEntity
 
 ```cpp
 Entity getEntity(Entity::ID id);
 ```
 
-##### getEntities
+### getEntities
 
 ```cpp
 auto getEntities();
@@ -70,64 +61,28 @@ template<typename ...Comps>
 auto getEntities<Comps...>();
 ```
 
-Returns and iteratable collection over all `Entities` which have each component listed in `Comps`.
+Returns an iteratable collection over all `Entities` which have each component listed in `Comps`.
 
 Dereferencing the iterator returns an `std::tuple<Entity, Comps &...>`, which means you can write the following:
 ```cpp
-for (const auto & [e, transform, lua] : em.getEntities<TransformComponent3f, LuaComponent>()) {
-  // do stuff
+for (const auto & [e, transform, lua] : em.getEntities<TransformComponent, LuaComponent>()) {
+    std::cout << "Pitch: " << transform.pitch << '\n';
+    // do stuff
 }
 ```
 
-### Game speed
-
-##### pause
+### no
 
 ```cpp
-void pause();
+template<typename T>
+struct no;
 ```
 
-Used to pause the game by setting the `speed` to 0. Calling `isPaused` from a [System](System.md) will return `true`, and `time.getDeltaFrames()` will always return 0. This means that most systems do not have to take any special measures to adapt to the game being paused, as long as they use `time.getDeltaFrames()` to adapt their behavior. The [PhysicsSystem](common/systems/PhysicsSystem.md), for instance, multiplies the `Entities`' movement by `time.getDeltaFrames()` to accomodate for dropped frames, and will therefore automatically stop moving them when the game is paused.
-
-##### resume
+Can be used as a template parameter for `getEntities<Comps...>` to filter out `Entities` which have a specific `Component`:
 
 ```cpp
-void resume();
+for (const auto & [e, transform, noSelected] : em.getEntities<TransformComponent, no<SelectedComponent>>) {
+    // Entities with a SelectedComponent will be filtered out
+    std::cout << e.id << " has a TransformComponent but no SelectedComponent" << '\n';
+}
 ```
-
-Used to resume the game by setting the `speed` to 1.
-
-##### setSpeed
-
-```cpp
-void setSpeed(double speed);
-```
-
-Sets the game's speed to `speed`. This will impact the return value of `time.getDeltaFrames()` in `Systems`, letting them automatically adjust their behavior if they take framerate into account.
-
-##### getSpeed
-
-```cpp
-double getSpeed() const;
-```
-
-Returns the game's speed.
-
-##### registerComponentFunction
-
-```cpp
-template<typename Comp, typename Func>
-void registerComponentFunction(Func func) const;
-```
-
-Registers a `ComponentFunction` (described at the bottom of the [README](README.md)) implementation for a given `Component`.
-
-`Func` must inherit from `kengine::functions::BaseFunction`.
-
-##### getComponentFunctionMaps
-
-```cpp
-FunctionMapCollection getComponentFunctionMaps() const;
-```
-
-Returns a [putils::vector](putils/vector.hpp) of pointers to a `ComponentFunctionMap` for each known `Component` type. The `ComponentFunctionMap` object has a `getFunction()` function template that will return the function pointer for a given `ComponentFunction` (or `nullptr` if the implementation was not provided).

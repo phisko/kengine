@@ -1,7 +1,7 @@
 # [PolyVoxSystem](PolyVoxSystem.hpp)
 
-System that generates 3D models based on [PolyVoxComponents](../../components/PolyVoxComponent.md).
+System that generates 3D models based on [PolyVoxComponents](../../components/data/PolyVoxComponent.md).
 
-### Shader
+## Shader
 
 The `PolyVoxSystem` automatically creates a [PolyVoxShader](PolyVoxShader.hpp) that is able to render the models it generates.

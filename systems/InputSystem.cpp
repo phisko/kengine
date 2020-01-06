@@ -1,12 +1,15 @@
 #include "InputSystem.hpp"
 #include "EntityManager.hpp"
 #include "data/InputComponent.hpp"
+#include "data/InputBufferComponent.hpp"
 #include "functions/Execute.hpp"
 
 namespace kengine {
 	static InputBufferComponent * g_buffer;
 
+	// declarations
 	static void execute(EntityManager & em);
+	//
 	EntityCreatorFunctor<64> InputSystem(EntityManager & em) {
 		return [&](Entity & e) {
 			e += functions::Execute{ [&](float deltaTime) { execute(em); } };

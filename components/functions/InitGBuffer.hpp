@@ -21,8 +21,8 @@ namespace kengine::functions {
 namespace kengine {
 	template<typename Textures>
 	void initGBuffer(kengine::EntityManager & em) {
-		for (const auto & [e, func] : em.getEntities<functions::InitGBuffer>()) {
-			func(putils::reflection::get_attributes<Textures>().size,
+		for (const auto & [e, initGBuffer] : em.getEntities<functions::InitGBuffer>()) {
+			initGBuffer(putils::reflection::get_attributes<Textures>().size,
 				[](auto func) {
 					putils::reflection::for_each_attribute<Textures>([&](auto name, auto member) {
 						func(name);

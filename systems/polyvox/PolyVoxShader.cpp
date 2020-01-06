@@ -87,7 +87,7 @@ namespace kengine {
 		_proj = params.proj;
 		_viewPos = params.camPos;
 
-		for (const auto &[e, poly, graphics, transform] : _em.getEntities<PolyVoxObjectComponent, GraphicsComponent, TransformComponent3f>()) {
+		for (const auto &[e, poly, graphics, transform] : _em.getEntities<PolyVoxObjectComponent, GraphicsComponent, TransformComponent>()) {
 			if (graphics.model == kengine::Entity::INVALID_ID)
 				continue;
 

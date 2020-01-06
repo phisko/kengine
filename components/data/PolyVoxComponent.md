@@ -4,13 +4,15 @@ Stores a volume of voxels that can get transformed into a 3D model.
 
 The length, width and height of the voxel volume default to 16 and can be adjusted by defining the `KENGINE_POLYVOX_CHUNK_SIDE` macro.
 
-### Specs
+## Specs
 
-* Not serializable
+* Not reflectible
+* Not serializable (contains )
+* Processed by the [PolyVoxSystem](../../systems/PolyVoxSystem.md)
 
-### Members
+## Members
 
-##### VertexData
+### VertexData
 
 ```cpp
 struct VertexData {
@@ -20,13 +22,15 @@ struct VertexData {
 
 Each voxel simply provides its color.
 
-##### volume
+### volume
 
 ```cpp
 PolyVox::RawVolume<VertexData> volume;
 ```
 
-##### changed
+Voxel volume that can be manipulated by users.
+
+### changed
 
 ```cpp
 bool changed;

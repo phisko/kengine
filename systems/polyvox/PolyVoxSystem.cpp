@@ -14,6 +14,18 @@
 namespace kengine {
 	static EntityManager * g_em;
 
+	// declarations
+	static void execute(float deltaTime);
+	//
+	EntityCreator * PolyVoxSystem(EntityManager & em) {
+		g_em = &em;
+
+		return [](kengine::Entity & e) {
+			e += functions::Execute { execute };
+			e += kengine::makeGBufferShaderComponent<PolyVoxShader>(*g_em);
+		};
+	}
+
 	namespace detailPolyVox {
 		static auto buildMesh(PolyVox::RawVolume<PolyVoxComponent::VertexData> & volume) {
 			const auto encodedMesh = PolyVox::extractCubicMesh(&volume, volume.getEnclosingRegion());
@@ -33,16 +45,6 @@ namespace kengine {
 			auto & mesh = e.attach<PolyVoxMeshContainerComponent>().mesh; // previous `attach` hasn't been processed yet, so `get` would assert
 			mesh.clear();
 			e.detach<PolyVoxMeshContainerComponent>();
-		};
-	}
-
-	static void execute(float deltaTime);
-	EntityCreator * PolyVoxSystem(EntityManager & em) {
-		g_em = &em;
-
-		return [](kengine::Entity & e) {
-			e += functions::Execute { execute };
-			e += kengine::makeGBufferShaderComponent<PolyVoxShader>(*g_em);
 		};
 	}
 

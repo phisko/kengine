@@ -2,56 +2,47 @@
 
 `Component` that specifies movement information about an `Entity`.
 
-### Specs
+## Specs
 
 * [Reflectible](https://github.com/phiste/putils/blob/master/reflection.md)
-* Serializable
+* Serializable (POD)
+* Processed by physics systems (such as the [BulletSystem](../../systems/bullet/BulletSystem.md)).
 
-### Members
+## Members
 
-##### Constructor
-
-```cpp
-PhysicsComponent(bool solid = true, bool fixed = false);
-```
-
-##### solid
+### movement
 
 ```cpp
-bool solid = true;
+putils::Vector3f movement;
 ```
-Defines whether objects should collide with other objects.
+Indicates the movement vector for the entity in the current frame.
 
-##### mass
+### yaw, pitch, roll
+
+```cpp
+float yaw = 0.f;
+float pitch = 0.f;
+float roll = 0.f;
+```
+
+Radians to turn in the current frame.
+
+### mass
 
 ```cpp
 float mass = 1.f;
 ```
 
-##### fixed
-
-```cpp
-bool fixed = false;
-```
-Used to specify that the object will never move.
-
-##### movement
-
-```cpp
-putils::Vector3f movement;
-```
-Indicates the movement vector for the entity.
-
-##### speed
+### speed
 
 ```cpp
 float speed = 1;
 ```
 Indicates a factor for the `movement` vector's properties.
 
-##### changed
+### changed
 
 ```cpp
 bool changed = false;
 ```
-Indicates that the component was modified by a "user" system (and not the actual PhysicsSystem) and should be read by the PhysicsSystem.
+Indicates that the component was modified by a "user" system (and not the actual physics system) and should be read by the physics system.

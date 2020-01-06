@@ -25,8 +25,4 @@ namespace kengine {
 			putils_reflection_attribute(&PhysicsComponent::changed)
 		);
 	};
-
-	struct KinematicComponent {
-		putils_reflection_class_name(KinematicComponent);
-	};
 }

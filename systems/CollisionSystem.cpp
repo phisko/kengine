@@ -5,14 +5,18 @@
 #include "data/CollisionComponent.hpp"
 
 namespace kengine {
+	// declarations
 	static void onCollision(Entity & first, Entity & second);
+	//
 	EntityCreator * CollisionSystem(EntityManager & em) {
 		return [](Entity & e) {
 			e += functions::OnCollision{ onCollision };
 		};
 	}
 
+	// declarations
 	static void trigger(Entity & first, Entity & second);
+	//
 	static void onCollision(Entity & first, Entity & second) {
 		trigger(first, second);
 		trigger(second, first);

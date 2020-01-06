@@ -1,18 +1,20 @@
 # [CollisionComponent](CollisionComponent.hpp)
 
-`Component` that specifies what should happen when the `Entity` it is attached to collides with another.
+`Component` that holds a callback called when the `Entity` it is attached to collides with another.
 
-### Specs
+
+## Specs
 
 * [Reflectible](https://github.com/phiste/putils/blob/master/reflection.md)
-* Not serializable
+* Not serializable as it contains a functor
+* Processed by the [CollisionSystem](../../systems/CollisionSystem.md).
 
-### Members
+## Members
 
-##### onCollide
+### onCollide
 
 ```cpp
-putils::function<void(kengine::Entity & self, kengine::Entity & other), KENGINE_COLLISION_FUNCTION_SIZE> onCollide;
+putils::function<void(Entity & self, Entity & other), KENGINE_COLLISION_FUNCTION_SIZE> onCollide;
 ```
 
 Its maximum size defaults to 64 and can be adjusted by defining the `KENGINE_COLLISION_FUNCTION_SIZE` macro.

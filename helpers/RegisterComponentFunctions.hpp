@@ -8,26 +8,26 @@
 
 namespace kengine {
 	template<typename Comp>
-	void registerComponentFunctions(kengine::EntityManager & em);
+	void registerComponentFunctions(EntityManager & em);
 
 	template<typename ... Comps>
-	void registerComponentsFunctions(kengine::EntityManager & em);
+	void registerComponentsFunctions(EntityManager & em);
 }
 
 namespace kengine {
 	namespace detail {
 		template<typename Comp>
-		bool has(const kengine::Entity & e) { return e.has<Comp>(); }
+		bool has(const Entity & e) { return e.has<Comp>(); }
 
 		template<typename Comp>
-		void attach(kengine::Entity & e) { e.attach<Comp>(); }
+		void attach(Entity & e) { e.attach<Comp>(); }
 
 		template<typename Comp>
-		void detach(kengine::Entity & e) { e.detach<Comp>(); }
+		void detach(Entity & e) { e.detach<Comp>(); }
 	}
 
 	template<typename Comp>
-	void registerComponentFunctions(kengine::EntityManager & em) {
+	void registerComponentFunctions(EntityManager & em) {
 		auto type = TypeHelper::getTypeEntity<Comp>(em);
 		type += meta::Has{ detail::has<Comp> };
 		type += meta::AttachTo{ detail::attach<Comp> };
@@ -35,7 +35,7 @@ namespace kengine {
 	}
 
 	template<typename ... Comps>
-	void registerComponentsFunctions(kengine::EntityManager & em) {
+	void registerComponentsFunctions(EntityManager & em) {
 		putils::for_each_type<Comps...>([&](auto type) {
 			using Type = putils_wrapped_type(type);
 			registerComponentFunctions<Type>(em);

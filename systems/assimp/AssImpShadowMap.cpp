@@ -29,7 +29,7 @@ namespace kengine {
 		uniforms.model = _model;
 		uniforms.bones = _bones;
 
-		for (const auto & [e, textured, graphics, transform, skeleton] : _em.getEntities<AssImpObjectComponent, GraphicsComponent, kengine::TransformComponent3f, SkeletonComponent>())
+		for (const auto & [e, textured, graphics, transform, skeleton] : _em.getEntities<AssImpObjectComponent, GraphicsComponent, kengine::TransformComponent, SkeletonComponent>())
 			AssImpHelper::drawModel(_em, graphics, transform, skeleton, false, uniforms);
 	}
 }

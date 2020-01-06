@@ -1,13 +1,27 @@
 # [LuaSystem](LuaSystem.hpp)
 
-[ScriptSystem](../../ScriptSystem.md) that executes lua scripts, either at a global scale or attached to a `GameObject` through a [LuaComponent](../components/LuaComponent.md).
+[ScriptSystem](ScriptSystem.md) that executes lua scripts attached to `Entities` through [LuaComponents](../components/LuaComponent.md).
 
-### Members
+Helper functions are also provided to easily register new types and functions with the lua state.
 
-##### Constructor
+## Members
 
-If a *"scripts"* directory is found, `addScriptDirectory("scripts")` is called.
+These are defined in the `kengine::lua` namespace.
 
-### Queries
+### registerType
 
-In order to easily extend the `LuaSystem`'s behavior (cf. [LuaCollisionSystem](LuaCollisionSystem.md)), the lua global state can be obtained through a [LuaState::Query](../packets/LuaState.hpp).
+```cpp
+template<typename T>
+void registerType(EntityManager & em);
+```
+
+Registers a [reflectible](../putils/reflection.md) type with the lua state.
+
+### registerFunction
+
+```cpp
+template<typename F>
+void registerFunction(EntityManager & em, const char * name, F && func);
+```
+
+Register a new function with the lua state.

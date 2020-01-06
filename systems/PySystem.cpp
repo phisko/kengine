@@ -4,7 +4,9 @@
 #include "functions/Execute.hpp"
 
 namespace kengine {
+	// declarations
 	static void execute(EntityManager & em, py::module & module, float deltaTime);
+	//
 	EntityCreatorFunctor<64> PySystem(EntityManager & em) {
 		return [&](Entity & e) {
 			auto tmp = std::make_unique<PythonStateComponent::Data>();

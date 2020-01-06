@@ -6,7 +6,8 @@
 #include "meta/Has.hpp"
 #include "meta/AttachTo.hpp"
 #include "meta/DetachFrom.hpp"
-#include "meta/ImGuiEditor.hpp"
+#include "meta/DisplayImGui.hpp"
+#include "meta/EditImGui.hpp"
 #include "imgui.h"
 
 namespace kengine::ImGuiHelper {

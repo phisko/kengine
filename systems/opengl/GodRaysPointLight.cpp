@@ -45,7 +45,7 @@ namespace kengine::Shaders {
 		assert(src::ShadowCube::Frag::Uniforms::_viewPos.location == src::GodRays::Frag::Uniforms::_viewPos.location);
 		_screenSize = putils::Point2f(params.viewPort.size);
 
-		for (const auto &[e, light, depthMap, transform, comp] : _em.getEntities<PointLightComponent, DepthCubeComponent, TransformComponent3f, GodRaysComponent>()) {
+		for (const auto &[e, light, depthMap, transform, comp] : _em.getEntities<PointLightComponent, DepthCubeComponent, TransformComponent, GodRaysComponent>()) {
 			_scattering = comp.scattering;
 			_nbSteps = comp.nbSteps;
 			_defaultStepLength = comp.defaultStepLength;

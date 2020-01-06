@@ -16,6 +16,7 @@
 #include "data/ModelComponent.hpp"
 #include "data/OpenGLModelComponent.hpp"
 #include "data/ImGuiComponent.hpp"
+#include "data/InputBufferComponent.hpp"
 #include "data/AdjustableComponent.hpp"
 #include "data/InputComponent.hpp"
 #include "data/CameraComponent.hpp"
@@ -57,6 +58,10 @@
 
 #include "Timer.hpp"
 
+#ifndef KENGINE_MAX_VIEWPORTS
+# define KENGINE_MAX_VIEWPORTS 8
+#endif
+
 namespace kengine {
 	namespace Input {
 		static InputBufferComponent * g_buffer;
@@ -69,6 +74,7 @@ namespace kengine {
 	static size_t g_gBufferTextureCount = 0;
 	static functions::GBufferAttributeIterator g_gBufferIterator = nullptr;
 
+	// declarations
 	static void execute(float deltaTime);
 	static void onEntityCreated(Entity & e);
 	static void onEntityRemoved(Entity & e);
@@ -76,7 +82,7 @@ namespace kengine {
 	static void onMouseCaptured(Entity::ID window, bool captured);
 	static Entity::ID getEntityInPixel(Entity::ID window, const putils::Point2ui & pixel);
 	static void initGBuffer(size_t nbAttributes, const functions::GBufferAttributeIterator & iterator);
-	//---
+	//
 	EntityCreator * OpenGLSystem(EntityManager & em) {
 		g_em = &em;
 
@@ -233,7 +239,9 @@ namespace kengine {
 		ImGui_ImplOpenGL3_Init();
 	}
 
+	// declarations
 	static void addShaders();
+	//
 	static void init() noexcept {
 		g_init = true;
 
@@ -319,7 +327,9 @@ namespace kengine {
 		}
 	}
 
+	// declarations
 	static void initShader(putils::gl::Program & program);
+	//
 	static void onEntityCreated(Entity & e) {
 		if (g_gBufferIterator == nullptr)
 			return;
@@ -456,9 +466,11 @@ namespace kengine {
 		e.detach<TextureDataComponent>();
 	}
 
+	// declarations
 	static void updateWindowProperties();
 	static void doOpenGL();
 	static void doImGui();
+	//
 	static void execute(float deltaTime) {
 		static bool first = true;
 		if (first) {
@@ -544,6 +556,76 @@ namespace kengine {
 		putils::Point2i resolution;
 	};
 
+	// declarations
+	static void setupParams(const CameraComponent & cam, const ViewportComponent & viewport);
+	static void initFramebuffer(Entity & e);
+	static void fillGBuffer(EntityManager & em, Entity & e, const ViewportComponent & viewport) noexcept;
+	static void renderToTexture(EntityManager & em, const CameraFramebufferComponent & fb) noexcept;
+	static void blitTextureToViewport(const CameraFramebufferComponent & fb, const ViewportComponent & viewport);
+	//
+	static void doOpenGL() {
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		struct ToBlit {
+			const CameraFramebufferComponent * fb;
+			const ViewportComponent * viewport;
+		};
+		putils::vector<ToBlit, KENGINE_MAX_VIEWPORTS> toBlit;
+
+		for (auto &[e, cam, viewport] : g_em->getEntities<CameraComponent, ViewportComponent>()) {
+			if (viewport.window == Entity::INVALID_ID)
+				viewport.window = g_window.id;
+			else if (viewport.window != g_window.id)
+				return;
+
+			setupParams(cam, viewport);
+			fillGBuffer(*g_em, e, viewport);
+
+			if (!e.has<CameraFramebufferComponent>() || e.get<CameraFramebufferComponent>().resolution != viewport.resolution)
+				initFramebuffer(e);
+			auto & fb = e.get<CameraFramebufferComponent>();
+
+			renderToTexture(*g_em, fb);
+			if (viewport.boundingBox.size.x > 0 && viewport.boundingBox.size.y > 0)
+				toBlit.push_back(ToBlit{ &fb, &viewport });
+		}
+
+		std::sort(toBlit.begin(), toBlit.end(), [](const ToBlit & lhs, const ToBlit & rhs) {
+			return lhs.viewport->zOrder < rhs.viewport->zOrder;
+		});
+
+		for (const auto & blit : toBlit)
+			blitTextureToViewport(*blit.fb, *blit.viewport);
+	}
+
+	static void setupParams(const CameraComponent & cam, const ViewportComponent & viewport) {
+		g_params.viewPort.size = viewport.resolution;
+		putils::gl::setViewPort(g_params.viewPort);
+
+		g_params.camPos = ShaderHelper::toVec(cam.frustum.position);
+		g_params.camFOV = cam.frustum.size.y;
+
+		g_params.view = [&] {
+			const auto front = glm::normalize(glm::vec3{
+				std::sin(cam.yaw) * std::cos(cam.pitch),
+				std::sin(cam.pitch),
+				std::cos(cam.yaw) * std::cos(cam.pitch)
+				});
+			const auto right = glm::normalize(glm::cross(front, { 0.f, 1.f, 0.f }));
+			auto up = glm::normalize(glm::cross(right, front));
+			detail::rotate(up, front, cam.roll);
+
+			return glm::lookAt(g_params.camPos, g_params.camPos + front, up);
+		}();
+
+		g_params.proj = glm::perspective(
+			g_params.camFOV,
+			(float)g_params.viewPort.size.x / (float)g_params.viewPort.size.y,
+			g_params.nearPlane, g_params.farPlane
+		);
+	}
+
 	static void initFramebuffer(Entity & e) {
 		auto & viewport = e.get<ViewportComponent>();
 		if (viewport.resolution.x == 0 || viewport.resolution.y == 0)
@@ -576,33 +658,6 @@ namespace kengine {
 		assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
 
 		viewport.renderTexture = (ViewportComponent::RenderTexture)texture;
-	}
-
-	void setupParams(const CameraComponent3f & cam, const ViewportComponent & viewport) {
-		g_params.viewPort.size = viewport.resolution;
-		putils::gl::setViewPort(g_params.viewPort);
-
-		g_params.camPos = ShaderHelper::toVec(cam.frustum.position);
-		g_params.camFOV = cam.frustum.size.y;
-
-		g_params.view = [&] {
-			const auto front = glm::normalize(glm::vec3{
-				std::sin(cam.yaw) * std::cos(cam.pitch),
-				std::sin(cam.pitch),
-				std::cos(cam.yaw) * std::cos(cam.pitch)
-				});
-			const auto right = glm::normalize(glm::cross(front, { 0.f, 1.f, 0.f }));
-			auto up = glm::normalize(glm::cross(right, front));
-			detail::rotate(up, front, cam.roll);
-
-			return glm::lookAt(g_params.camPos, g_params.camPos + front, up);
-		}();
-
-		g_params.proj = glm::perspective(
-			g_params.camFOV,
-			(float)g_params.viewPort.size.x / (float)g_params.viewPort.size.y,
-			g_params.nearPlane, g_params.farPlane
-		);
 	}
 
 	template<typename Shaders>
@@ -676,42 +731,6 @@ namespace kengine {
 			destX, destY, destX + destSizeX, destY + destSizeY,
 			GL_COLOR_BUFFER_BIT, GL_LINEAR
 		);
-	}
-
-	static void doOpenGL() {
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		struct ToBlit {
-			const CameraFramebufferComponent * fb;
-			const ViewportComponent * viewport;
-		};
-		putils::vector<ToBlit, KENGINE_MAX_VIEWPORTS> toBlit;
-
-		for (auto &[e, cam, viewport] : g_em->getEntities<CameraComponent3f, ViewportComponent>()) {
-			if (viewport.window == Entity::INVALID_ID)
-				viewport.window = g_window.id;
-			else if (viewport.window != g_window.id)
-				return;
-
-			setupParams(cam, viewport);
-			fillGBuffer(*g_em, e, viewport);
-
-			if (!e.has<CameraFramebufferComponent>() || e.get<CameraFramebufferComponent>().resolution != viewport.resolution)
-				initFramebuffer(e);
-			auto & fb = e.get<CameraFramebufferComponent>();
-
-			renderToTexture(*g_em, fb);
-			if (viewport.boundingBox.size.x > 0 && viewport.boundingBox.size.y > 0)
-				toBlit.push_back(ToBlit{ &fb, &viewport });
-		}
-
-		std::sort(toBlit.begin(), toBlit.end(), [](const ToBlit & lhs, const ToBlit & rhs) {
-			return lhs.viewport->zOrder < rhs.viewport->zOrder;
-		});
-
-		for (const auto & blit : toBlit)
-			blitTextureToViewport(*blit.fb, *blit.viewport);
 	}
 
 	static void doImGui() {

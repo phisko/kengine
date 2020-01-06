@@ -3,6 +3,8 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include "data/LightComponent.hpp"
+#include "data/ImGuiToolComponent.hpp"
+#include "data/NameComponent.hpp"
 #include "functions/InitGBuffer.hpp"
 
 namespace kengine {
@@ -13,8 +15,9 @@ namespace kengine {
 
 		static auto ShaderController(EntityManager & em) {
 			return [&](Entity & e) {
+				e += NameComponent{ "Shader controller" };
+
 				auto & tool = e.attach<ImGuiToolComponent>();
-				tool.name = "Shader controller";
 				tool.enabled = false;
 
 				e += ImGuiComponent([&] {
@@ -46,8 +49,9 @@ namespace kengine {
 
 		static auto GBufferDebugger(EntityManager & em, const functions::GBufferAttributeIterator & iterator) {
 			return [&](Entity & e) {
+				e += NameComponent{ "GBuffer viewer" };
+
 				auto & tool = e.attach<ImGuiToolComponent>();
-				tool.name = "GBuffer viewer";
 				tool.enabled = false;
 
 				e += ImGuiComponent([&] {

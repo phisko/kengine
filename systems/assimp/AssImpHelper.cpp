@@ -10,7 +10,7 @@
 
 namespace kengine {
 	namespace AssImpHelper {
-		void drawModel(EntityManager & em, const GraphicsComponent & graphics, const TransformComponent3f & transform, const SkeletonComponent & skeleton, bool useTextures, const Uniforms & uniforms) {
+		void drawModel(EntityManager & em, const GraphicsComponent & graphics, const TransformComponent & transform, const SkeletonComponent & skeleton, bool useTextures, const Uniforms & uniforms) {
 			if (graphics.model == Entity::INVALID_ID)
 				return;
 

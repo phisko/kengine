@@ -9,15 +9,16 @@
 #include "BulletSystem.hpp"
 #include "EntityManager.hpp"
 
-#include "data/GraphicsComponent.hpp"
-#include "data/TransformComponent.hpp"
-#include "data/PhysicsComponent.hpp"
 #include "data/AdjustableComponent.hpp"
 #include "data/DebugGraphicsComponent.hpp"
+#include "data/GraphicsComponent.hpp"
+#include "data/KinematicComponent.hpp"
 #include "data/ModelColliderComponent.hpp"
-#include "data/SkeletonComponent.hpp"
-#include "data/ModelSkeletonComponent.hpp"
 #include "data/ModelComponent.hpp"
+#include "data/ModelSkeletonComponent.hpp"
+#include "data/PhysicsComponent.hpp"
+#include "data/SkeletonComponent.hpp"
+#include "data/TransformComponent.hpp"
 
 #include "functions/Execute.hpp"
 #include "functions/OnEntityRemoved.hpp"
@@ -41,7 +42,7 @@ static glm::vec3 toVec(const putils::Point3f & p) { return { p.x, p.y, p.z }; }
 static putils::Point3f toPutils(const btVector3 & vec) { return { vec.getX(), vec.getY(), vec.getZ() }; }
 static btVector3 toBullet(const putils::Point3f & p) { return { p.x, p.y, p.z }; }
 
-static btTransform toBullet(const kengine::TransformComponent3f & transform) {
+static btTransform toBullet(const kengine::TransformComponent & transform) {
 	glm::mat4 mat(1.f);
 
 	mat = glm::translate(mat, toVec(transform.boundingBox.position));
@@ -96,7 +97,7 @@ namespace debug {
 			_em += [&](kengine::Entity & e) {
 				const auto a = toPutils(from);
 				const auto b = toPutils(to) - a;
-				e += kengine::TransformComponent3f({ a });
+				e += kengine::TransformComponent({ a });
 				e += kengine::DebugGraphicsComponent(kengine::DebugGraphicsComponent::Line, { b }, putils::NormalizedColor{ color[0], color[1], color[2], 1.f });
 				_toCleanup.push_back(e.id);
 			};
@@ -120,8 +121,6 @@ namespace debug {
 	static Drawer * drawer = nullptr;
 }
 #endif
-
-
 
 namespace putils {
 	inline bool operator<(const Point3f & lhs, const Point3f & rhs) {
@@ -148,9 +147,11 @@ namespace kengine {
 
 	static EntityManager * g_em;
 
+	// declarations
 	static void execute(float deltaTime);
 	static void onEntityRemoved(Entity & e);
 	static putils::vector<Entity::ID, KENGINE_QUERY_POSITION_MAX_RESULTS> queryPosition(const putils::Point3f & pos, float radius);
+	//
 	EntityCreator * BulletSystem(EntityManager & em) {
 		g_em = &em;
 
@@ -168,10 +169,12 @@ namespace kengine {
 		};
 	}
 
-	static void addBulletComponent(Entity & e, TransformComponent3f & transform, const PhysicsComponent & physics, const Entity & modelEntity);
-	static void updateBulletComponent(Entity & e, const TransformComponent3f & transform, PhysicsComponent & physics, const Entity & modelEntity);
+	// declarations
+	static void addBulletComponent(Entity & e, TransformComponent & transform, const PhysicsComponent & physics, const Entity & modelEntity);
+	static void updateBulletComponent(Entity & e, const TransformComponent & transform, PhysicsComponent & physics, const Entity & modelEntity);
+	//
 	static void execute(float deltaTime) {
-		for (auto & [e, graphics, transform, physics] : g_em->getEntities<GraphicsComponent, TransformComponent3f, PhysicsComponent>()) {
+		for (auto & [e, graphics, transform, physics] : g_em->getEntities<GraphicsComponent, TransformComponent, PhysicsComponent>()) {
 			if (graphics.model == Entity::INVALID_ID)
 				continue;
 
@@ -206,7 +209,7 @@ namespace kengine {
 		return ret;
 	}
 
-	static void addBulletComponent(Entity & e, TransformComponent3f & transform, const PhysicsComponent & physics, const Entity & modelEntity) {
+	static void addBulletComponent(Entity & e, TransformComponent & transform, const PhysicsComponent & physics, const Entity & modelEntity) {
 		auto & comp = e.attach<BulletPhysicsComponent>();
 
 		const auto & modelCollider = modelEntity.get<ModelColliderComponent>();
@@ -263,7 +266,7 @@ namespace kengine {
 		}
 
 		struct KengineMotionState : public btMotionState {
-			KengineMotionState(kengine::TransformComponent3f & transform) : transform(transform) {}
+			KengineMotionState(kengine::TransformComponent & transform) : transform(transform) {}
 
 			void getWorldTransform(btTransform & worldTrans) const final {
 				worldTrans = toBullet(transform);
@@ -280,7 +283,7 @@ namespace kengine {
 				transform.roll = zRotation;
 			}
 
-			kengine::TransformComponent3f & transform;
+			kengine::TransformComponent & transform;
 		};
 
 		const auto motionState = new KengineMotionState(transform);
@@ -303,12 +306,12 @@ namespace kengine {
 			const auto id2 = objectB->getUserIndex();
 			auto e1 = g_em->getEntity(id1);
 			auto e2 = g_em->getEntity(id2);
-			for (const auto & [_, func] : g_em->getEntities<functions::OnCollision>())
-				func(e1, e2);
+			for (const auto & [_, onCollision] : g_em->getEntities<functions::OnCollision>())
+				onCollision(e1, e2);
 		}
 	}
 
-	static void updateBulletComponent(Entity & e, const TransformComponent3f & transform, PhysicsComponent & physics, const Entity & modelEntity) {
+	static void updateBulletComponent(Entity & e, const TransformComponent & transform, PhysicsComponent & physics, const Entity & modelEntity) {
 		auto & comp = e.get<BulletPhysicsComponent>();
 
 		const bool kinematic = e.has<KinematicComponent>();

@@ -36,7 +36,7 @@ namespace kengine::Shaders {
 
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture, 0);
 
-		for (const auto & [e, graphics, transform, shadow] : _em.getEntities<GraphicsComponent, TransformComponent3f, DefaultShadowComponent>()) {
+		for (const auto & [e, graphics, transform, shadow] : _em.getEntities<GraphicsComponent, TransformComponent, DefaultShadowComponent>()) {
 			if (graphics.model == kengine::Entity::INVALID_ID)
 				continue;
 

@@ -1,13 +1,14 @@
 #include "ImGuiEntitySelectorSystem.hpp"
 
 #include "data/ImGuiComponent.hpp"
+#include "data/ImGuiToolComponent.hpp"
+#include "data/NameComponent.hpp"
 #include "data/SelectedComponent.hpp"
 
 #include "helpers/TypeHelper.hpp"
 #include "helpers/SortHelper.hpp"
 #include "meta/Has.hpp"
 #include "meta/MatchString.hpp"
-#include "meta/ImGuiEditor.hpp"
 
 #include "helpers/ImGuiHelper.hpp"
 #include "imgui.h"
@@ -16,12 +17,14 @@
 #include "to_string.hpp"
 
 namespace kengine {
+	// declarations
 	static bool matches(const Entity & e, const char * str, EntityManager & em);
+	//
 	EntityCreatorFunctor<64> ImGuiEntitySelectorSystem(EntityManager & em) {
 		return [&](Entity & e) {
+			e += NameComponent{ "Entity selector" };
 			auto & tool = e.attach<ImGuiToolComponent>();
 			tool.enabled = true;
-			tool.name = "Entity selector";
 
 			e += ImGuiComponent([&] {
 				if (!tool.enabled)

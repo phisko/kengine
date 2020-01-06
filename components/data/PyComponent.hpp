@@ -12,8 +12,7 @@
 #include "vector.hpp"
 
 namespace kengine {
-    class PyComponent {
-    public:
+    struct PyComponent {
 		static constexpr char stringName[] = "PyComponentString";
 		using script = putils::string<KENGINE_MAX_PYTHON_SCRIPT_PATH, stringName>;
 		static constexpr char vectorName[] = "PyComponentVector";
@@ -21,10 +20,6 @@ namespace kengine {
 
         script_vector scripts;
 
-        /*
-         * Reflectible
-         */
-    public:
         putils_reflection_class_name(PyComponent);
         putils_reflection_attributes(
                 putils_reflection_attribute(&PyComponent::scripts)

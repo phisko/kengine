@@ -7,6 +7,7 @@
 #include "data/TextureDataComponent.hpp"
 #include "data/ShaderComponent.hpp"
 #include "data/GraphicsComponent.hpp"
+#include "data/SpriteComponent.hpp"
 
 #include "functions/OnEntityCreated.hpp"
 
@@ -15,7 +16,9 @@
 namespace kengine {
 	static EntityManager * g_em;
 
+	// declarations
 	static void onEntityCreated(Entity & e);
+	//
 	EntityCreator * OpenGLSpritesSystem(EntityManager & em) {
 		g_em = &em;
 
@@ -30,6 +33,9 @@ namespace kengine {
 
 	void onEntityCreated(Entity & e) {
 		if (!e.has<GraphicsComponent>())
+			return;
+
+		if (!e.has<SpriteComponent2D>() && !e.has<SpriteComponent3D>())
 			return;
 
 		auto & graphics = e.get<GraphicsComponent>();

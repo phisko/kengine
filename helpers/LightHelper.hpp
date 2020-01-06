@@ -9,6 +9,12 @@ namespace kengine {
 	struct SpotLightComponent;
 	struct PointLightComponent;
 
+	namespace LightHelper {
+		static glm::mat4 getCSMLightSpaceMatrix(const DirLightComponent & light, const putils::gl::Program::Parameters & params, size_t csmIndex);
+		static glm::mat4 getLightSpaceMatrix(const SpotLightComponent & light, const glm::vec3 & pos, const putils::gl::Program::Parameters & params);
+		static float getRadius(const PointLightComponent & light);
+	}
+
 	extern float SHADOW_MAP_NEAR_PLANE;
 	extern float SHADOW_MAP_FAR_PLANE;
 }

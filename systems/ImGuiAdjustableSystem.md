@@ -1,8 +1,14 @@
 # [ImGuiAdjustableSystem](ImGuiAdjustableSystem.hpp)
 
-`System` that renders an ImGui window with editing tools for [AdjustableComponents](../components/AdjustableComponent.md).
+`System` that renders an ImGui window with editing tools for [AdjustableComponents](../components/data/AdjustableComponent.md).
 
-An adjustable value can specify a category by formatting its `name` like so: "[Category/Subcategory/...] Name". Categories are then displayed together in a tree format.
+An adjustable value can specify a category by formatting its `name` like so:
+```
+[Category/Subcategory/...] Name
+```
+ Categories are then displayed together in a tree format.
+
+## Serialization
 
 Saving and loading to CSV are also implemented.
 

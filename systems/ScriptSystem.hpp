@@ -1,39 +1,47 @@
 #pragma once
 
 #include "EntityManager.hpp"
-#include "concat.hpp"
+#include "string.hpp"
 #include "with.hpp"
+#include "function.hpp"
+
+#ifndef KENGINE_SCRIPT_SYSTEM_MAX_FUNCTION_SIZE
+# define KENGINE_SCRIPT_SYSTEM_MAX_FUNCTION_SIZE 64
+#endif
 
 namespace kengine::ScriptSystem {
+	template<typename Func>
+	using function = putils::function<Func, KENGINE_SCRIPT_SYSTEM_MAX_FUNCTION_SIZE>;
+
 	template<typename Func, typename Func2>
 	void init(EntityManager & em, Func && registerFunction, Func2 && registerType) {
 		registerFunction("createEntity",
-			std::function<Entity(const std::function<void(Entity &)> &)>(
-				[&](const std::function<void(Entity &)> & f) {
+			function<Entity(const function<void(Entity &)> &)>(
+				[&](const function<void(Entity &)> & f) {
 					return em.createEntity(FWD(f));
 				}
 			)
 		);
 
 		registerFunction("removeEntity",
-			std::function<void(Entity &)>(
+			function<void(Entity &)>(
 				[&](Entity & go) { em.removeEntity(go); }
 			)
 		);
 		registerFunction("removeEntityById",
-			std::function<void(Entity::ID id)>(
+			function<void(Entity::ID id)>(
 				[&](Entity::ID id) { em.removeEntity(id); }
 			)
 		);
 
 		registerFunction("getEntity",
-			std::function<Entity(Entity::ID id)>(
+			function<Entity(Entity::ID id)>(
 				[&](Entity::ID id) { return em.getEntity(id); }
 			)
 		);
 
 		registerFunction("stopRunning",
-			std::function<void()>(
+			function<void()>(
 				[&] { em.running = false; }
 			)
 		);
@@ -41,41 +49,33 @@ namespace kengine::ScriptSystem {
 		registerType(putils::meta::type<Entity>{});
 	}
 
-	template<typename Comp, typename Func, typename Func2>
-	void execute(EntityManager & em, Func && setSelf, Func2 && executeComp) {
-		for (auto & [e, comp] : em.getEntities<Comp>()) {
-			setSelf(e);
-			executeComp(comp);
-		}
-	}
-
 	template<typename T, typename Func>
 	void registerComponent(Func && registerEntityMember) {
 		static_assert(putils::reflection::has_class_name<T>());
 
 		const auto className = putils::reflection::get_class_name<T>();
-		registerEntityMember(putils::concat("get", className),
-			std::function<T & (Entity &)>(
+		registerEntityMember(putils::string<128>("get%s", className),
+			function<T & (Entity &)>(
 				[](Entity & self) { return std::ref(self.get<T>()); }
-				)
+			)
 		);
 
-		registerEntityMember(putils::concat("has", className),
-			std::function<bool(Entity &)>(
+		registerEntityMember(putils::string<128>("has%s", className),
+			function<bool(Entity &)>(
 				[](Entity & self) { return self.has<T>(); }
-				)
+			)
 		);
 
-		registerEntityMember(putils::concat("attach", className),
-			std::function<T & (Entity &)>(
+		registerEntityMember(putils::string<128>("attach%s", className),
+			function<T & (Entity &)>(
 				[](Entity & self) { return std::ref(self.attach<T>()); }
-				)
+			)
 		);
 
-		registerEntityMember(putils::concat("detach", className),
-			std::function<void(Entity &)>(
+		registerEntityMember(putils::string<128>("detach%s", className),
+			function<void(Entity &)>(
 				[](Entity & self) { self.detach<T>(); }
-				)
+			)
 		);
 	}
 }

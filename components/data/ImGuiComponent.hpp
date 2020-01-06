@@ -4,12 +4,8 @@
 # define KENGINE_IMGUI_FUNCTION_SIZE 64
 #endif
 
-#ifndef KENGINE_IMGUI_TOOL_NAME_MAX_LENGTH
-# define KENGINE_IMGUI_TOOL_NAME_MAX_LENGTH 64
-#endif
-
 #include "function.hpp"
-#include "string.hpp"
+#include "reflection.hpp"
 
 struct ImGuiContext;
 extern ImGuiContext * GImGui;
@@ -51,12 +47,5 @@ namespace kengine {
 		putils_reflection_methods(
 			putils_reflection_attribute(&ImGuiComponent::setupImGuiContext)
 		);
-	};
-
-	struct ImGuiToolComponent {
-		static constexpr char stringName[] = "ImGuiToolComponentString";
-		using string = putils::string<KENGINE_IMGUI_TOOL_NAME_MAX_LENGTH, stringName>;
-		string name;
-		bool enabled;
 	};
 }

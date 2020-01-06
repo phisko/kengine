@@ -94,7 +94,7 @@ namespace kengine {
 template<typename T>
 T & kengine::Entity::attach() {
 	if (!has<T>()) {
-		const auto component = getId<T>();
+		static const auto component = getId<T>();
 		componentMask.set(component, true);
 		manager->addComponent(id, component);
 	}
@@ -107,7 +107,7 @@ void kengine::Entity::attach(T && comp) {
 
 	Component<Comp>::get(id) = FWD(comp);
 	if (!has<Comp>()) {
-		const auto component = getId<Comp>();
+		static const auto component = getId<Comp>();
 		componentMask.set(component, true);
 		manager->addComponent(id, component);
 	}
@@ -117,7 +117,7 @@ void kengine::Entity::attach(T && comp) {
 template<typename T>
 void kengine::Entity::detach() {
 	assert("No such component" && has<T>());
-	const auto component = getId<T>();
+	static const auto component = getId<T>();
 	componentMask.set(component, false);
 	manager->removeComponent(id, component);
 }

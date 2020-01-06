@@ -35,7 +35,7 @@ namespace kengine {
 		_view = params.view;
 		_proj = params.proj;
 
-		for (const auto &[e, textured, graphics, transform, skeleton] : _em.getEntities<AssImpObjectComponent, GraphicsComponent, TransformComponent3f, SkeletonComponent>()) {
+		for (const auto &[e, textured, graphics, transform, skeleton] : _em.getEntities<AssImpObjectComponent, GraphicsComponent, TransformComponent, SkeletonComponent>()) {
 			if (graphics.model == Entity::INVALID_ID)
 				return;
 

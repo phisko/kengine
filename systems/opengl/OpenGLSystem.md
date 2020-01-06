@@ -4,47 +4,47 @@ System that renders `Entities` in an OpenGL render window.
 
 The implementation (as well as the shaders) is still a WIP, and I am by no means an expert in computer graphics so this is not expected to be production ready. Heavy-load has not been tested, and bugs are to be expected. If you need to do heavy lifting with 3D graphics, it may be a good idea to implement a new `System` using a higher level library like Ogre3D.
 
-### Shaders
+## Shaders
 
 Unless the `KENGINE_OPENGL_NO_DEFAULT_SHADERS` macro is defined, the following shaders are automatically created:
 
-* [DirLight](DirLight.hpp), performs lighting for [DirLightComponents](../../components/LightComponent.hpp)
-* [SpotLight](SpotLight.hpp), performs lighting for [SpotLightComponents](../../components/LightComponent.hpp)
-* [PointLight](PointLight.hpp), performs lighting for [PointLightComponents](../../components/LightComponent.hpp)
+* [DirLight](DirLight.hpp), performs lighting for [DirLightComponents](../../components/data/LightComponent.hpp)
+* [SpotLight](SpotLight.hpp), performs lighting for [SpotLightComponents](../../components/data/LightComponent.hpp)
+* [PointLight](PointLight.hpp), performs lighting for [PointLightComponents](../../components/data/LightComponent.hpp)
 
 * [ShadowMap](ShadowMap.hpp), used by the lighting shaders
 * [ShadowCube](ShadowCube.hpp), used by the lighting shaders
 
-* [GodRaysDirLight](GodRaysDirLight.hpp), performs volumetric lighting for [DirLightComponents](../../components/LightComponent.hpp)
-* [GodRaysSpotLight](GodRaysSpotLight.hpp), performs volumetric lighting for [SpotLightComponents](../../components/LightComponent.hpp)
-* [GodRaysPointLight](GodRaysPointLight.hpp), performs volumetric lighting for [PointLightComponents](../../components/LightComponent.hpp)
+* [GodRaysDirLight](GodRaysDirLight.hpp), performs volumetric lighting for [DirLightComponents](../../components/data/LightComponent.hpp)
+* [GodRaysSpotLight](GodRaysSpotLight.hpp), performs volumetric lighting for [SpotLightComponents](../../components/data/LightComponent.hpp)
+* [GodRaysPointLight](GodRaysPointLight.hpp), performs volumetric lighting for [PointLightComponents](../../components/data/LightComponent.hpp)
 
 * [LightSphere](LightSphere.hpp), draws spheres where lights are
-* [Highlight](Highlight.hpp), highlights `Entities` with a [HighlightComponent](../../components/HighlightComponent.md)
+* [Highlight](Highlight.hpp), highlights `Entities` with a [HighlightComponent](../../components/data/HighlightComponent.md)
 
 The shadow map resolution defaults to 8192 (this seems like a lot, but I've only tested this on a single machine so far) and can be adjusted by defining the `KENGINE_SHADOW_MAP_SIZE` macro.
 
-### Data packets
+## Function components
 
-The `Entity` seen in a pixel can be queried using the [GetEntityInPixel](../../packets/EntityInPixel.hpp) datapacket.
+The following `function Components` are implemented:
 
-The size of the GBuffer textures can be queried by using the `GetGBufferSize`(../../packets/GBuffer.hpp) datapacket.
+* [OnMouseCaptured](../../components/data/functions/OnMouseCaptured.md): captures the mouse into the GLFW window
+* [GetImGuiScale](../../components/data/functions/GetImGuiScale.md): returns the user-specified ImGui scale
+* [GetEntityInPixel](../../components/data/functions/GetEntityInPixel.md)
 
-The content of a GBuffer texture can be queried by using the [GetGBufferTexture](../../packets/GBuffer.hpp) datapacket. Take note that each pixel in a texture is formatted as 4 `floats`.
-WARNING: textures are flipped vertically (you'll want to do `y = (height - y)` before indexing into them).
+## Functionality
 
-### Functionality
+### Rendering
 
-##### Rendering
-
-For each [CameraComponent](../../components/CameraComponent.md), all [ShaderComponents](../../components/ShaderComponent.md) are processed in the following order:
+For each [CameraComponent](../../components/data/CameraComponent.md), all [ShaderComponents](../../components/data/ShaderComponent.md) are processed in the following order:
 * GBufferShaderComponents
 * LightingShaderComponents
+* PostLightingShaderComponents
 * PostProcessShaderComponents
 
-#### GBuffer management
+### GBuffer management
 
-Upon game initialization, a system should call [kengine::initGBuffer](../../packets/GBuffer.hpp) with a type defining the different textures comprising the GBuffer. Here is an example type:
+Upon game initialization, a system should call [kengine::initGBuffer](../../components/functions/InitGBuffer.md) with a type defining the different textures comprising the GBuffer. Here is an example type:
 
 ```cpp
 struct GBufferTextures {
@@ -62,27 +62,27 @@ struct GBufferTextures {
 };
 ```
 
-These GBuffer textures will then be registered with all [ShaderComponents](../../components/ShaderComponent.md).
+These GBuffer textures will then be registered with all [ShaderComponents](../../components/data/ShaderComponent.md).
 
 The default shaders provided with this system assume you make use of a type with the same properties as that described above (defined in [kengine::GBufferTextures](OpenGLSystem.hpp)). If you wish to use additional textures in your GBuffer, you can either copy this structure or inherit from it, so long as you are careful to declare the reflectible attributes in the same order (as that order will define their GLSL locations).
 
-##### Model construction
+### Model construction
 
-[ModelDataComponents](../../components/ModelDataComponent.md) are processed to generate meshes and transformed into [ModelInfoComponents](../../components/ModelInfoComponent.md).
+[ModelDataComponents](../../components/data/ModelDataComponent.md) are processed to generate meshes and transformed into [OpenGLModelComponent](../../components/data/OpenGLModelComponent.md).
 
-##### Shader initialization and vertex type registration
+### Shader initialization and vertex type registration
 
-The shader [Programs](../../../putils/opengl/Program.md) for the various [ShaderComponents](../../components/ShaderComponent.md) are initialized by the `OpenGLSystem`, and the vertex type registration functions provided by the [ModelDataComponents](../../components/ModelDataComponent.md) are called.
+The shader [Programs](../../putils/opengl/Program.md) for the various [ShaderComponents](../../components/data/ShaderComponent.md) are initialized by the `OpenGLSystem`, and the vertex type registration functions provided by the [ModelDataComponents](../../components/data/ModelDataComponent.md) are called.
 
-##### ImGui
+### ImGui
 
-ImGui elements can be rendered by [ImGuiComponents](../../components/ImGuiComponent.md).
+ImGui elements can be rendered by [ImGuiComponents](../../components/data/ImGuiComponent.md).
 
 If building in debug mode, the following debug elements are automatically added (from [Controllers.hpp](Controllers.hpp)):
 * A shader controller, letting you enable/disable individual shaders
-* A light debugger, letting you adjust the properties of [LightComponents](../../components/LightComponent.md)
+* A light debugger, letting you adjust the properties of [LightComponents](../../components/data/LightComponent.md)
 * A texture debugger, letting you draw the individual components of the GBuffer or any texture registered by shaders
 
-##### Input
+### Input
 
-Input is captured and transferred to [InputComponents](../../components/InputComponent.md).
+Input is captured and transferred to [InputBufferComponents](../../components/data/InputBufferComponent.md).

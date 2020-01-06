@@ -2,6 +2,7 @@
 #include "EntityManager.hpp"
 
 #include "data/ImGuiComponent.hpp"
+#include "data/ImGuiToolComponent.hpp"
 #include "data/SelectedComponent.hpp"
 #include "data/NameComponent.hpp"
 
@@ -12,9 +13,9 @@
 namespace kengine {
 	EntityCreatorFunctor<64> ImGuiEntityEditorSystem(EntityManager & em) {
 		return [&](Entity & e) {
+			e += NameComponent{ "Entity editor" };
 			auto & tool = e.attach<ImGuiToolComponent>();
 			tool.enabled = true;
-			tool.name = "Entity editor";
 
 			e += ImGuiComponent([&] {
 				if (!tool.enabled)

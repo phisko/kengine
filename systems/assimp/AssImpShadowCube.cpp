@@ -25,7 +25,7 @@ namespace kengine {
 	}
 
 	void AssImpShadowCube::drawObjects() {
-		for (const auto &[e, textured, graphics, transform, skeleton] : _em.getEntities<AssImpObjectComponent, GraphicsComponent, TransformComponent3f, SkeletonComponent>()) {
+		for (const auto &[e, textured, graphics, transform, skeleton] : _em.getEntities<AssImpObjectComponent, GraphicsComponent, TransformComponent, SkeletonComponent>()) {
 			AssImpHelper::Uniforms uniforms;
 			uniforms.model = _model;
 			uniforms.bones = _bones;

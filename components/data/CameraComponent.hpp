@@ -3,56 +3,21 @@
 #include "Point.hpp"
 
 namespace kengine {
-    template<typename Precision, std::size_t Dimensions>
     class CameraComponent {
     public:
-        CameraComponent(const putils::Point<Precision, Dimensions> & pos = { 0, 0 },
-                        const putils::Point<Precision, Dimensions> & size = { 1, 1 })
-                : frustum(pos, size) {
-			if constexpr (Dimensions == 3)
-				if (size.x == 1 && size.y == 1)
-					frustum.size.z = 1;
-		}
+        CameraComponent(const putils::Point3f & pos = { 0, 0, 0 },
+                        const putils::Point3f & size = { 1, 1, 1 })
+                : frustum(pos, size)
+		{}
 
-        CameraComponent(const putils::Rect<Precision, Dimensions> & rect)
-                : frustum(rect) {}
+        CameraComponent(const putils::Rect3f & rect)
+                : frustum(rect)
+		{}
 
-        putils::Rect<Precision, Dimensions> frustum;
-        Precision pitch = 0; // Radians
-        Precision yaw = 0; // Radians
-		Precision roll = 0; // Radians
-
-		putils::Point2f getCoordinatesFromScreen(const putils::Point2f & screenCoordinates, const putils::Point2f & screenSize) const noexcept {
-			auto ret = screenCoordinates;
-
-			ret.x /= screenSize.x;
-			ret.y /= screenSize.y;
-
-			ret.x *= frustum.size.x;
-			ret.y *= frustum.size.z;
-
-			const auto & offset = frustum.position;
-			ret.x += offset.x;
-			ret.y -= offset.z;
-
-			return ret;
-		}
-
-		putils::Point2f getScreenCoordinates(const putils::Point3f & gamePos, const putils::Point2f & screenSize) const noexcept {
-			putils::Point2f ret(gamePos.x, -gamePos.z);
-
-			const auto & offset = frustum.position;
-			ret.x -= offset.x;
-			ret.y += offset.z;
-
-			ret.x *= screenSize.x;
-			ret.y *= screenSize.y;
-
-			ret.x /= frustum.size.x;
-			ret.y /= frustum.size.z;
-
-			return ret;
-		}
+        putils::Rect3f frustum;
+        float pitch = 0; // Radians
+        float yaw = 0; // Radians
+		float roll = 0; // Radians
 
         /*
          * Reflectible
@@ -67,13 +32,4 @@ namespace kengine {
                 putils_reflection_attribute(&CameraComponent::roll)
         );
     };
-
-    using CameraComponent2i = CameraComponent<int, 2>;
-    using CameraComponent3i = CameraComponent<int, 3>;
-
-    using CameraComponent2d = CameraComponent<double, 2>;
-    using CameraComponent3d = CameraComponent<double, 3>;
-
-    using CameraComponent2f = CameraComponent<float, 2>;
-    using CameraComponent3f = CameraComponent<float, 3>;
 };

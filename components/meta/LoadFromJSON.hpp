@@ -8,7 +8,7 @@ namespace kengine {
 
 	namespace meta {
 		struct LoadFromJSON : functions::BaseFunction<
-			void(const putils::json &, kengine::Entity &)
+			void(const putils::json &, Entity &)
 		> {
 			putils_reflection_class_name(LoadFromJSON);
 		};

@@ -2,11 +2,11 @@
 
 System that loads 3D models for `Entities` with a [GraphicsComponent](../../components/GraphicsComponent.md) using the `assimp library`.
 
-### Shader
+## Shader
 
-The `AssImpSystem` automatically creates a [TexturedShader](TexturedShader.hpp) which is able to render the models it loads.
+The `AssImpSystem` automatically creates an [AssImpShader](AssImpShader.hpp) which is able to render the models it loads.
 
-### Vertex format
+## Vertex format
 
 ```cpp
 struct Vertex {

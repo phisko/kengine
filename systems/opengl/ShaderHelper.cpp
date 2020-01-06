@@ -12,7 +12,7 @@ namespace kengine::ShaderHelper {
 		}
 	}
 
-	glm::mat4 getModelMatrix(const kengine::ModelComponent & modelInfo, const kengine::TransformComponent3f & transform) {
+	glm::mat4 getModelMatrix(const kengine::ModelComponent & modelInfo, const kengine::TransformComponent & transform) {
 		glm::mat4 model(1.f);
 		const auto & centre = transform.boundingBox.position;
 

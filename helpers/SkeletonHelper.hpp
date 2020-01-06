@@ -11,6 +11,10 @@ namespace kengine {
 			unsigned int boneIndex = 0;
 		};
 
+		static BoneIndexes getBoneIndex(const char * bone, const ModelSkeletonComponent & model);
+		static glm::mat4 getBoneMatrix(const char * bone, const SkeletonComponent & skeleton, const ModelSkeletonComponent & model);
+		static void setBoneMatrix(const char * bone, const glm::mat4 & m, SkeletonComponent & skeleton, const ModelSkeletonComponent & model);
+
 		static BoneIndexes getBoneIndex(const char * bone, const ModelSkeletonComponent & model) {
 			BoneIndexes indexes;
 

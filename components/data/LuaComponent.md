@@ -6,63 +6,27 @@ Scripts can use the `self` global variable to access the `Entity` they are attac
 
 In all the following functions, a `script` is the path to a file containing a script, NOT THE ACTUAL SCRIPT CODE.
 
-### Specs
+## Specs
 
 * [Reflectible](https://github.com/phiste/putils/blob/master/reflection.md)
-* Serializable
+* Serializable (POD)
+* Processed by the [LuaSystem](../../systems/LuaSystem.md)
 
-The maximum length of a script name (stored as a [putils::string](https://github.com/phiste/putils/blob/master/string.hpp)) defaults to 64, and can be adjusted by defining the `KENGINE_MAX_LUA_SCRIPT_PATH` macro.
+## Members
 
-The maximum number of scripts defaults to 8 and can be adjusted by defining the `KENGINE_MAX_LUA_SCRIPTS` macro.
-
-### Members
-
-##### Types
+### Types
 
 ```cpp
 using script = putils::string<KENGINE_MAX_LUA_SCRIPT_PATH>;
 using script_vector = putils::vector<script, KENGINE_MAX_LUA_SCRIPTS>;
 ```
 
-##### Constructor
+### scripts
 
 ```cpp
-LuaComponent(const script_vector &scripts = {});
+script_vector scripts;
 ```
 
-##### attachScript
+The maximum length of a script name (stored as a [putils::string](https://github.com/phiste/putils/blob/master/string.hpp)) defaults to 64, and can be adjusted by defining the `KENGINE_MAX_LUA_SCRIPT_PATH` macro.
 
-```cpp
-void attachScript(const char * file) noexcept;
-```
-
-##### removeScript
-
-```cpp
-void removeScript(const char * file) noexcept;
-```
-
-##### getScripts
-
-```cpp
-const script_vector &getScripts() const noexcept;
-```
-
-# [LuaTableComponent](LuaComponent.hpp)
-
-### Specs
-
-`Component` that holds a lua table that can be used to store arbitrary information in the `Entity`.
-
-* [Reflectible](https://github.com/phiste/putils/blob/master/reflection.md)
-* Not serializable
-
-### Members
-
-##### table
-
-```cpp
-sol::table table;
-```
-
-Lua scripts can set this value to anything they desire.
+The maximum number of scripts defaults to 8 and can be adjusted by defining the `KENGINE_MAX_LUA_SCRIPTS` macro.

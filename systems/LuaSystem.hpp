@@ -1,8 +1,5 @@
 #pragma once
 
-#include <string>
-#include <functional>
-
 #include "ScriptSystem.hpp"
 #include "data/LuaStateComponent.hpp"
 #include "lua/plua.hpp"
@@ -13,8 +10,8 @@ namespace kengine {
 	EntityCreatorFunctor<64> LuaSystem(EntityManager & em);
 
 	namespace lua {
-		template<typename Ret, typename ...Args>
-		void registerEntityMember(sol::state & state, const std::string & name, const std::function<Ret(Args...)> & func) {
+		template<typename Func>
+		void registerEntityMember(sol::state & state, const char * name, Func && func) {
 			state[putils::reflection::get_class_name<Entity>()][name] = FWD(func);
 		}
 
@@ -32,13 +29,13 @@ namespace kengine {
 				registerTypeWithState<T>(*comp.state);
 		}
 
-		template<typename Ret, typename ...Args>
-		void registerFunctionWithState(sol::state & state, const std::string & name, const std::function<Ret(Args...)> & func) {
+		template<typename Func>
+		void registerFunctionWithState(sol::state & state, const char * name, Func && func) {
 			state[name] = FWD(func);
 		}
 
-		template<typename Ret, typename ...Args>
-		void registerFunction(EntityManager & em, const std::string & name, const std::function<Ret(Args...)> & func) {
+		template<typename Func>
+		void registerFunction(EntityManager & em, const char * name, Func && func) {
 			for (const auto & [e, comp] : em.getEntities<LuaStateComponent>())
 				registerFunctionWithState(state, name, func);
 		}

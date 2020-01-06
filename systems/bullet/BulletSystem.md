@@ -1,7 +1,7 @@
 # [BulletSystem](BulletSystem.hpp)
 
-`System` that moves simulates physics using the Bullet Physics library according to the information found in their [PhysicsComponent](../components/BulletComponent.md).
+`System` that simulates physics using the Bullet Physics library according to the information found in `Entities`' [PhysicsComponent](../../components/data/PhysicsComponent.md).
 
-### Queries
+## Queries
 
-The `BulletSystem` can be used to query the list of `Entities` found within an area using the [QueryPosition](../../packets/Collision.hpp) query.
+The `BulletSystem` can be used to query the list of `Entities` found within an area using the [QueryPosition](../../components/functions/QueryPosition.md) `function Component`.

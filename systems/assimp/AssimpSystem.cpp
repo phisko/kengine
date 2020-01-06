@@ -36,8 +36,10 @@
 namespace kengine {
 	static kengine::EntityManager * g_em = nullptr;
 
+	// declarations
 	static void execute(float deltaTime);
 	static void onEntityCreated(Entity & e);
+	//
 	EntityCreator * AssImpSystem(EntityManager & em) {
 		g_em = &em;
 
@@ -61,8 +63,10 @@ namespace kengine {
 		};
 	}
 
+	// declarations
 	static void loadModel(Entity & e);
 	static void setModel(Entity & e);
+	//
 	static void onEntityCreated(Entity & e) {
 		if (e.has<ModelComponent>())
 			loadModel(e);
@@ -98,7 +102,7 @@ namespace kengine {
 			};
 
 			Assimp::Importer importer;
-			putils::vector<Assimp::Importer, KENGINE_MAX_ANIMATION_FILES> animImporters;
+			std::vector<Assimp::Importer> animImporters;
 			std::vector<Mesh> meshes;
 		};
 
@@ -109,7 +113,7 @@ namespace kengine {
 					std::vector<const aiNodeAnim *> animNodes;
 					glm::mat4 offset;
 				};
-				putils::vector<Bone, KENGINE_SKELETON_MAX_BONES> bones;
+				std::vector<Bone> bones;
 			};
 
 			aiNode * rootNode;
@@ -182,6 +186,8 @@ namespace kengine {
 			for (unsigned int i = 0; i < assimp.meshes.size(); ++i) {
 				const auto & input = assimp.meshes[i];
 				auto & output = comp.meshes[i];
+
+				assert(input.bones.size() < lengthof(output.boneMatsBoneSpace)); // Need to increase KENGINE_SKELETON_MAX_BONES
 
 				size_t boneIndex = 0;
 				for (const auto & bone : input.bones) {
@@ -384,10 +390,12 @@ namespace kengine {
 
 		static void addAnim(const char * animFile, aiAnimation * aiAnim, const ModelSkeletonComponent & model, AssImpSkeletonComponent & skeleton, AnimListComponent & animList) {
 			AnimListComponent::Anim anim;
-			anim.name.set("%s/%s", animFile, aiAnim->mName.data);
+			anim.name = animFile;
+			anim.name += "/";
+			anim.name += aiAnim->mName.data;
 			anim.ticksPerSecond = (float)(aiAnim->mTicksPerSecond != 0 ? aiAnim->mTicksPerSecond : 25.0);
 			anim.totalTime = (float)aiAnim->mDuration / anim.ticksPerSecond;
-			animList.allAnims.push_back(anim);
+			animList.anims.push_back(std::move(anim));
 
 			std::vector<aiNodeAnim *> allNodeAnims;
 			for (unsigned int i = 0; i < aiAnim->mNumChannels; ++i)
@@ -435,7 +443,7 @@ namespace kengine {
 			auto & skeleton = e.attach<AssImpSkeletonComponent>();
 			skeleton.meshes.clear();
 			auto & animList = e.attach<AnimListComponent>();
-			animList.allAnims.clear();
+			animList.anims.clear();
 
 			bool firstLoad = false;
 
@@ -521,9 +529,9 @@ namespace kengine {
 
 				const auto & animList = modelEntity.get<AnimListComponent>();
 
-				if (anim.currentAnim >= animList.allAnims.size())
+				if (anim.currentAnim >= animList.anims.size())
 					return;
-				const auto & currentAnim = animList.allAnims[anim.currentAnim];
+				const auto & currentAnim = animList.anims[anim.currentAnim];
 
 				auto & assimp = modelEntity.get<AssImp::AssImpSkeletonComponent>();
 

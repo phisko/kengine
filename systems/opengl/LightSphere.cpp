@@ -42,12 +42,12 @@ namespace kengine::Shaders {
 		for (const auto & [e, light] : _em.getEntities<DirLightComponent>())
 			drawLight(light, params.camPos - toVec(light.direction) * SUN_DIST, SUN_SIZE);
 
-		for (const auto & [e, light, transform] : _em.getEntities<PointLightComponent, kengine::TransformComponent3f>()) {
+		for (const auto & [e, light, transform] : _em.getEntities<PointLightComponent, kengine::TransformComponent>()) {
 			const auto & pos = transform.boundingBox.position;
 			drawLight(light, toVec(pos), SPHERE_SIZE);
 		}
 
-		for (const auto & [e, light, transform] : _em.getEntities<SpotLightComponent, kengine::TransformComponent3f>()) {
+		for (const auto & [e, light, transform] : _em.getEntities<SpotLightComponent, kengine::TransformComponent>()) {
 			const auto & pos = transform.boundingBox.position;
 			const bool isFacingLight = glm::dot(toVec(pos), params.camPos) < 0;
 			if (isFacingLight)

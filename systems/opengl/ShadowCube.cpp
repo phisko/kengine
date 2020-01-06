@@ -21,7 +21,7 @@ namespace kengine::Shaders {
 	}
 
 	void ShadowCube::drawObjects() {
-		for (const auto &[e, graphics, transform, shadow] : _em.getEntities<GraphicsComponent, TransformComponent3f, DefaultShadowComponent>()) {
+		for (const auto &[e, graphics, transform, shadow] : _em.getEntities<GraphicsComponent, TransformComponent, DefaultShadowComponent>()) {
 			if (graphics.model == kengine::Entity::INVALID_ID)
 				continue;
 

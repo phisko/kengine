@@ -13,9 +13,8 @@ namespace kengine {
 				if (!pressed)
 					return;
 
-				Entity::ID id = Entity::INVALID_ID;
-				for (const auto & [e, func] : em.getEntities<functions::GetEntityInPixel>()) {
-					const auto id = func(window, coords);
+				for (const auto & [e, getEntity] : em.getEntities<functions::GetEntityInPixel>()) {
+					const auto id = getEntity(window, coords);
 					if (id == Entity::INVALID_ID)
 						continue;
 					auto & e = em.getEntity(id);

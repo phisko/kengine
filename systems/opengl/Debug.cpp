@@ -76,7 +76,7 @@ namespace kengine::Shaders {
 		_proj = params.proj;
 		_viewPos = params.camPos;
 
-		for (const auto &[e, debug, transform] : _em.getEntities<kengine::DebugGraphicsComponent, kengine::TransformComponent3f>()) {
+		for (const auto &[e, debug, transform] : _em.getEntities<kengine::DebugGraphicsComponent, kengine::TransformComponent>()) {
 			_color = debug.color;
 			_entityID = (float)e.id;
 

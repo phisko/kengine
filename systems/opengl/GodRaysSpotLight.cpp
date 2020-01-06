@@ -44,7 +44,7 @@ namespace kengine::Shaders {
 		_viewPos = params.camPos;
 		_screenSize = putils::Point2f(params.viewPort.size);
 
-		for (const auto &[e, light, depthMap, transform, comp] : _em.getEntities<SpotLightComponent, DepthMapComponent, TransformComponent3f, GodRaysComponent>()) {
+		for (const auto &[e, light, depthMap, transform, comp] : _em.getEntities<SpotLightComponent, DepthMapComponent, TransformComponent, GodRaysComponent>()) {
 			_scattering = comp.scattering;
 			_nbSteps = comp.nbSteps;
 			_defaultStepLength = comp.defaultStepLength;

@@ -3,10 +3,6 @@
 #include "Point.hpp"
 #include "Entity.hpp"
 
-#ifndef KENGINE_MAX_VIEWPORTS
-# define KENGINE_MAX_VIEWPORTS 8
-#endif
-
 namespace kengine {
 	struct ViewportComponent {
 		using RenderTexture = void *;
