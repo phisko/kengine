@@ -21,7 +21,7 @@ string name;
 
 Name of the window.
 
-The maximum length of this field (stored as a [putils::string](https://github.com/phiste/putils/blob/master/string.hpp)) defaults to 64, and can be adjusted by defining the `KENGINE_WINDOW_COMOPNENT_NAME_MAX_LENGTH` macro.
+The maximum length of this field (stored as a [putils::string](https://github.com/phisko/putils/blob/master/string.hpp)) defaults to 64, and can be adjusted by defining the `KENGINE_WINDOW_COMOPNENT_NAME_MAX_LENGTH` macro.
 
 ### size
 

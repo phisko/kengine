@@ -4,7 +4,7 @@
 
 ## Specs
 
-* [Reflectible](https://github.com/phiste/putils/blob/master/reflection.md)
+* [Reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
 * Not serializable (contains OpenGL identifiers)
 * Processed by the [OpenGLSystem](../../systems/opengl/OpenGLSystem.md)
 
@@ -18,7 +18,7 @@ putils::string<KENGINE_TEXTURE_MODEL_COMPONENT_PATH_MAX_LENGTH> file;
 
 Texture file represented by this `Component`.
 
-The maximum length of the filename (stored as a [putils::string](https://github.com/phiste/putils/blob/master/string.hpp)) defaults to 64, and can be adjusted by defining the `KENGINE_TEXTURE_MODEL_COMPONENT_PATH_MAX_LENGTH` macro.
+The maximum length of the filename (stored as a [putils::string](https://github.com/phisko/putils/blob/master/string.hpp)) defaults to 64, and can be adjusted by defining the `KENGINE_TEXTURE_MODEL_COMPONENT_PATH_MAX_LENGTH` macro.
 
 ### texture
 

@@ -4,7 +4,7 @@
 
 ## Specs
 
-* [Reflectible](https://github.com/phiste/putils/blob/master/reflection.md)
+* [Reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
 * Serializable (POD)
 * Processed by physics systems (such as the [BulletSystem](../../systems/bullet/BulletSystem.md)).
 

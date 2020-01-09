@@ -8,7 +8,7 @@ In all the following functions, a `script` is the path to a file containing a sc
 
 ## Specs
 
-* [Reflectible](https://github.com/phiste/putils/blob/master/reflection.md)
+* [Reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
 * Serializable (POD)
 * Processed by the [LuaSystem](../../systems/LuaSystem.md)
 
@@ -27,6 +27,6 @@ using script_vector = putils::vector<script, KENGINE_MAX_LUA_SCRIPTS>;
 script_vector scripts;
 ```
 
-The maximum length of a script name (stored as a [putils::string](https://github.com/phiste/putils/blob/master/string.hpp)) defaults to 64, and can be adjusted by defining the `KENGINE_MAX_LUA_SCRIPT_PATH` macro.
+The maximum length of a script name (stored as a [putils::string](https://github.com/phisko/putils/blob/master/string.hpp)) defaults to 64, and can be adjusted by defining the `KENGINE_MAX_LUA_SCRIPT_PATH` macro.
 
 The maximum number of scripts defaults to 8 and can be adjusted by defining the `KENGINE_MAX_LUA_SCRIPTS` macro.

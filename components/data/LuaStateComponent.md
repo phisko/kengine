@@ -4,7 +4,7 @@
 
 ## Specs
 
-* Not [reflectible](https://github.com/phiste/putils/blob/master/reflection.md)
+* Not [reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
 * Not serializable (contains pointers)
 * Used by the [LuaSystem](../../systems/LuaSystem.md)
 

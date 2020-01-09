@@ -5,7 +5,7 @@ Attached to the `Entity` itself.
 
 ## Specs
 
-* [Reflectible](https://github.com/phiste/putils/blob/master/reflection.md)
+* [Reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
 * Serializable (POD)
 
 ## Members
@@ -41,7 +41,7 @@ It is used to populate the `Entity`'s `AnimListComponent`.
 
 ## Specs
 
-* [Reflectible](https://github.com/phiste/putils/blob/master/reflection.md)
+* [Reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
 * Serializable (POD)
 
 ## Members
@@ -65,7 +65,7 @@ Attached to a [model](ModelComponent.md) `Entity`, this information is shared by
 
 ## Specs
 
-* [Reflectible](https://github.com/phiste/putils/blob/master/reflection.md)
+* [Reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
 * Serializable (POD)
 
 ## Anim type

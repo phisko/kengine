@@ -4,7 +4,7 @@
 
 ## Specs
 
-* [Reflectible](https://github.com/phiste/putils/blob/master/reflection.md)
+* [Reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
 * Serializable (POD)
 * Processed by graphics systems (such as the [OpenGLSystem](../../systems/opengl/OpenGLSystem.md))
 

@@ -4,7 +4,7 @@
 
 ## Specs
 
-* Not [reflectible](https://github.com/phiste/putils/blob/master/reflection.md)
+* Not [reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
 * Not serializable (contains pointers and OpenGL identifiers)
 * Initialized by model loading systems (such as the [AssImpSystem](../../systems/assimp/AssImpSystem.md)) and processed by the [OpenGLSystem](../../systems/opengl/OpenGLSystem.md).
 

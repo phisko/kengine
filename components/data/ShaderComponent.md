@@ -10,7 +10,7 @@ Shaders can either be:
 
 ## Specs
 
-* [Reflectible](https://github.com/phiste/putils/blob/master/reflection.md)
+* [Reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
 * Not serializable (contains pointers)
 * Processed by the [OpenGLSystem](../../systems/opengl/OpenGLSystem.md)
 

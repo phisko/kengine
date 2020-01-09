@@ -4,7 +4,7 @@
 
 ## Specs
 
-* [Reflectible](https://github.com/phiste/putils/blob/master/reflection.md)
+* [Reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
 * Serializable (POD)
 * Processed by physics systems (such as the [BulletSystem](../../systems/bullet/BulletSystem.md))
 
@@ -31,7 +31,7 @@ struct Collider {
 };
 ```
 
-The maximum length of a bone name (stored as a [putils::string](https://github.com/phiste/putils/blob/master/string.hpp)) defaults to 64, and can be adjusted by defining the `KENGINE_BONE_NAME_MAX_LENGTH` macro.
+The maximum length of a bone name (stored as a [putils::string](https://github.com/phisko/putils/blob/master/string.hpp)) defaults to 64, and can be adjusted by defining the `KENGINE_BONE_NAME_MAX_LENGTH` macro.
 
 ### colliders
 

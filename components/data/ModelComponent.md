@@ -6,7 +6,7 @@
 
 ## Specs
 
-* [Reflectible](https://github.com/phiste/putils/blob/master/reflection.md)
+* [Reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
 * Serializable (POD)
 * Initialized by model-loading systems (such as the [AssImpSystem](../../systems/assimp/AssImpSystem.md)) and then used by graphics systems (such as the [OpenGLSystem](../../systems/opengl/OpenGLSystem.md)) (and others).
 
@@ -20,7 +20,7 @@ putils::string<KENGINE_MODEL_STRING_MAX_LENGTH> file;
 
 The model file this component describes.
 
-The maximum length of a filename (stored as a [putils::string](https://github.com/phiste/putils/blob/master/string.hpp)) defaults to 64, and can be adjusted by defining the `KENGINE_MODEL_STRING_MAX_LENGTH` macro.
+The maximum length of a filename (stored as a [putils::string](https://github.com/phisko/putils/blob/master/string.hpp)) defaults to 64, and can be adjusted by defining the `KENGINE_MODEL_STRING_MAX_LENGTH` macro.
 
 ### boundingBox
 

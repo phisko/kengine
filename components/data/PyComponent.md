@@ -10,10 +10,10 @@ The global layout of the component is very similar to that of the [LuaComponent]
 
 ### Specs
 
-* [Reflectible](https://github.com/phiste/putils/blob/master/reflection.md)
+* [Reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
 * Serializable (POD)
 * Processed by the [PySystem](../../systems/PySystem.md)
 
-The maximum length of a script name (stored as a [putils::string](https://github.com/phiste/putils/blob/master/string.hpp)) defaults to 64, and can be adjusted by defining the `KENGINE_MAX_PYTHON_SCRIPT_PATH` macro.
+The maximum length of a script name (stored as a [putils::string](https://github.com/phisko/putils/blob/master/string.hpp)) defaults to 64, and can be adjusted by defining the `KENGINE_MAX_PYTHON_SCRIPT_PATH` macro.
 
 The maximum number of scripts defaults to 8 and can be adjusted by defining the `KENGINE_MAX_PYTHON_SCRIPTS` macro.

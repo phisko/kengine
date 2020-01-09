@@ -4,6 +4,6 @@
 
 ## Specs
 
-* [Reflectible](https://github.com/phiste/putils/blob/master/reflection.md)
+* [Reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
 * Serializable (empty, only a tag)
 * Taken into account by the [BulletSystem](../../systems/bullet/BulletSystem.md) and the [KinematicSystem](../../systems/KinematicSystem.md)

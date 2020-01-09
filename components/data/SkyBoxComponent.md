@@ -4,7 +4,7 @@
 
 ## Specs
 
-* [Reflectible](https://github.com/phiste/putils/blob/master/reflection.md)
+* [Reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
 * Serializable (POD)
 * Processed by graphics systems (such as the [OpenGLSystem](../../systems/opengl/OpenGLSystem.md))
 
@@ -23,7 +23,7 @@ string front;
 string back;
 ```
 
-The maximum length of a texture name (stored as a [putils::string](https://github.com/phiste/putils/blob/master/string.hpp)) defaults to 128, and can be adjusted by defining the `KENGINE_SKYBOX_TEXTURE_PATH_MAX_NAME` macro.
+The maximum length of a texture name (stored as a [putils::string](https://github.com/phisko/putils/blob/master/string.hpp)) defaults to 128, and can be adjusted by defining the `KENGINE_SKYBOX_TEXTURE_PATH_MAX_NAME` macro.
 
 ### color
 
@@ -31,4 +31,4 @@ The maximum length of a texture name (stored as a [putils::string](https://githu
 putils::NormalizedColor color;
 ```
 
-Color filter to be applied over the skybox. Stored as a [putils::NormalizedColor](https://github.com/phiste/putils/blob/master/Color.md).
+Color filter to be applied over the skybox. Stored as a [putils::NormalizedColor](https://github.com/phisko/putils/blob/master/Color.md).
