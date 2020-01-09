@@ -33,7 +33,7 @@ namespace kengine::SortHelper {
 
 	template<size_t MaxCount, typename ... Comps, typename Pred>
 	auto getSortedEntities(EntityManager & em, Pred && pred) { 
-		using Type = std::tuple<Entity, const Comps *...>;
+		using Type = std::tuple<Entity, Comps *...>;
 
 		putils::vector<Type, MaxCount> ret;
 
