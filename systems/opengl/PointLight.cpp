@@ -6,7 +6,6 @@
 #include "data/TransformComponent.hpp"
 #include "data/LightComponent.hpp"
 #include "data/ShaderComponent.hpp"
-#include "data/AdjustableComponent.hpp"
 
 #include "helpers/LightHelper.hpp"
 #include "systems/opengl/ShaderHelper.hpp"

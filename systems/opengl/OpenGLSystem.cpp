@@ -91,17 +91,21 @@ namespace kengine {
 			break;
 		}
 
-		g_params.nearPlane = 1.f;
-		g_params.farPlane = 1000.f;
-
-		em += [](Entity & e) { e += AdjustableComponent("[Render/Planes] Near", &g_params.nearPlane); };
-		em += [](Entity & e) { e += AdjustableComponent("[Render/Planes] Far", &g_params.farPlane); };
-		em += [](Entity & e) { e += AdjustableComponent("[ImGui] Scale", &g_dpiScale); };
+		em += [](Entity & e) {
+			e += AdjustableComponent{
+				"ImGui", {
+					{ "Scale", &g_dpiScale }
+				}
+			};
+		};
 
 #ifndef KENGINE_NDEBUG
 		em += Controllers::ShaderController(em);
 		em += Controllers::GBufferDebugger(em, g_gBufferIterator);
 #endif
+
+		g_params.nearPlane = 1.f;
+		g_params.farPlane = 1000.f;
 
 		return [](Entity & e) {
 			e += functions::Execute{ execute };
@@ -112,6 +116,13 @@ namespace kengine {
 			e += functions::GetImGuiScale{ [] { return g_dpiScale; } };
 			e += functions::GetEntityInPixel{ getEntityInPixel };
 			e += functions::InitGBuffer{ initGBuffer };
+
+			e += AdjustableComponent{
+				"Render/Planes", {
+					{ "Near", &g_params.nearPlane },
+					{ "Far", &g_params.farPlane }
+				}
+			};
 		};
 	}
 
@@ -300,7 +311,7 @@ namespace kengine {
 
 		{ // Lighting
 			*g_em += [&](Entity & e) {
-				e += makeLightingShaderComponent<Shaders::ShadowMap>(*g_em);
+				e += makeLightingShaderComponent<Shaders::ShadowMap>(*g_em, e);
 				e += ShadowMapShaderComponent{};
 			};
 
@@ -310,7 +321,7 @@ namespace kengine {
 			};
 
 			*g_em += [=](Entity & e) { e += makeLightingShaderComponent<Shaders::SpotLight>(*g_em); };
-			*g_em += [=](Entity & e) { e += makeLightingShaderComponent<Shaders::DirLight>(*g_em); };
+			*g_em += [=](Entity & e) { e += makeLightingShaderComponent<Shaders::DirLight>(*g_em, e); };
 			*g_em += [=](Entity & e) { e += makeLightingShaderComponent<Shaders::PointLight>(*g_em); };
 		}
 
@@ -321,7 +332,7 @@ namespace kengine {
 		}
 
 		{ // Post process
-			*g_em += [=](Entity & e) { e += makePostProcessShaderComponent<Shaders::LightSphere>(*g_em); };
+			*g_em += [=](Entity & e) { e += makePostProcessShaderComponent<Shaders::LightSphere>(*g_em, e); };
 			*g_em += [=](Entity & e) { e += makePostProcessShaderComponent<Shaders::Highlight>(*g_em); };
 			*g_em += [=](Entity & e) { e += makePostProcessShaderComponent<Shaders::SkyBox>(*g_em); };
 		}

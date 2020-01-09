@@ -7,6 +7,7 @@
 
 namespace kengine {
 	class EntityManager;
+	class Entity;
 	struct LightComponent;
 }
 
@@ -15,7 +16,7 @@ namespace kengine::Shaders {
 		public src::ProjViewModel::Vert::Uniforms
 	{
 	public:
-		LightSphere(kengine::EntityManager & em);
+		LightSphere(EntityManager & em, Entity & parent);
 
 		void init(size_t firstTextureID) override;
 		void run(const Parameters & params) override;
@@ -36,6 +37,6 @@ namespace kengine::Shaders {
 		);
 
 	private:
-		kengine::EntityManager & _em;
+		EntityManager & _em;
 	};
 }

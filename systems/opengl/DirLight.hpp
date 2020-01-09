@@ -16,7 +16,7 @@ namespace kengine::Shaders {
 		public src::DirLight::Frag::Uniforms
 	{
 	public:
-		DirLight(kengine::EntityManager & em);
+		DirLight(EntityManager & em, Entity & parent);
 
 		void init(size_t firstTextureID) override;
 		void run(const Parameters & params) override;
@@ -31,7 +31,7 @@ namespace kengine::Shaders {
 		);
 
 	private:
-		kengine::EntityManager & _em;
+		EntityManager & _em;
 		size_t _shadowMapTextureID;
 	};
 }

@@ -16,11 +16,15 @@ namespace kengine {
 }
 
 namespace kengine::Shaders {
-	ShadowMap::ShadowMap(kengine::EntityManager & em)
+	ShadowMap::ShadowMap(EntityManager & em, Entity & parent)
 		: ShadowMapShader(false, putils_nameof(ShadowMap)), _em(em)
 	{
-		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/Lights] Shadow map near plane", &SHADOW_MAP_NEAR_PLANE); };
-		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/Lights] Shadow map far plane", &SHADOW_MAP_FAR_PLANE); };
+		parent += AdjustableComponent{
+			"Render/Lights", {
+				{ "Shadow map near plane", &SHADOW_MAP_NEAR_PLANE },
+				{ "Shadow map far plane", &SHADOW_MAP_FAR_PLANE }
+			}
+		};
 	}
 
 	void ShadowMap::init(size_t firstTextureID) {
@@ -37,7 +41,7 @@ namespace kengine::Shaders {
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture, 0);
 
 		for (const auto & [e, graphics, transform, shadow] : _em.getEntities<GraphicsComponent, TransformComponent, DefaultShadowComponent>()) {
-			if (graphics.model == kengine::Entity::INVALID_ID)
+			if (graphics.model == Entity::INVALID_ID)
 				continue;
 
 			const auto & modelInfoEntity = _em.getEntity(graphics.model);

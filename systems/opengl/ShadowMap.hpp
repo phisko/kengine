@@ -18,13 +18,13 @@ namespace kengine::Shaders {
 		public src::ProjViewModel::Vert::Uniforms
 	{
 	public:
-		ShadowMap(kengine::EntityManager & em);
+		ShadowMap(EntityManager & em, Entity & parent);
 
 		void init(size_t firstTextureID) override;
 		void drawToTexture(GLuint texture, const glm::mat4 & lightSpaceMatrix) override;
 
 	private:
-		kengine::EntityManager & _em;
+		EntityManager & _em;
 
 	public:
 		putils_reflection_parents(

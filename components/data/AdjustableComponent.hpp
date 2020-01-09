@@ -4,98 +4,125 @@
 # define KENGINE_ADJUSTABLE_NAME_MAX_LENGTH 64
 #endif
 
+#include <vector>
 #include "string.hpp"
-#include "reflection.hpp"
 #include "Color.hpp"
 #include "magic_enum.hpp"
 #include "lengthof.hpp"
 
 namespace kengine {
-	class AdjustableComponent {
-	public:
+	struct AdjustableComponent {
 		static constexpr char stringName[] = "AdjustableComponentString";
 		using string = putils::string<KENGINE_ADJUSTABLE_NAME_MAX_LENGTH, stringName>;
 
-	private:
-		template<typename E>
-		static const char ** getEnumNamesImpl() {
-			static putils::string<64> names[putils::magic_enum::enum_count<E>()];
-			static const char * ret[lengthof(names)];
-			static bool first = true;
-			if (first) {
-				for (size_t i = 0; i < lengthof(names); ++i) {
-					names[i] = putils::magic_enum::enum_names<E>()[i];
-					ret[i] = names[i];
+		struct Value {
+			Value() = default;
+
+			Value(const char * name, bool * b) : name(name), b(b), adjustableType(Bool) {}
+			Value(const char * name, bool b) : name(name), b(b), adjustableType(Bool) {}
+
+			Value(const char * name, float * f) : name(name), f(f), adjustableType(Double) {}
+			Value(const char * name, float f) : name(name), f(f), adjustableType(Double) {}
+
+			Value(const char * name, int * i) : name(name), i(i), adjustableType(Int) {}
+			Value(const char * name, int i) : name(name), i(i), adjustableType(Int) {}
+
+			Value(const char * name, putils::NormalizedColor * color) : name(name), color(color), adjustableType(Color) {}
+			Value(const char * name, putils::NormalizedColor color) : name(name), color(color), adjustableType(Color) {}
+			Value(const char * name, putils::Color color) : name(name), color(putils::toNormalizedColor(color)), adjustableType(Color) {}
+
+			template<typename E>
+			static const char ** getEnumNamesImpl() {
+				static putils::string<64> names[putils::magic_enum::enum_count<E>()];
+				static const char * ret[lengthof(names)];
+				static bool first = true;
+				if (first) {
+					for (size_t i = 0; i < lengthof(names); ++i) {
+						names[i] = putils::magic_enum::enum_names<E>()[i];
+						ret[i] = names[i];
+					}
+					first = false;
 				}
-				first = false;
+				return ret;
 			}
-			return ret;
-		}
 
-	public:
-		AdjustableComponent() = default;
+			template<typename E>
+			Value(const char * name, E * enumType) : name(name), i((int *)enumType), adjustableType(Enum) {
+				static_assert(std::is_enum_v<E> && std::is_same_v<std::underlying_type_t<E>, int>);
+				getEnumNames = getEnumNamesImpl<E>;
+				enumCount = putils::magic_enum::enum_count<E>();
+			}
 
-		AdjustableComponent(const char * name, bool * b) : name(name), bPtr(b), b(*b), adjustableType(Bool) {}
-		AdjustableComponent(const char * name, bool b) : name(name), b(b), adjustableType(Bool) {}
+			template<typename E>
+			Value(const char * name, E enumType) : name(name), i(enumType), adjustableType(Enum) {
+				static_assert(std::is_enum_v<E> && std::is_same_v<std::underlying_type_t<E>, int>);
+				getEnumNames = getEnumNamesImpl<E>();
+				enumCount = putils::magic_enum::enum_count<E>();
+			}
 
-		AdjustableComponent(const char * name, float * d) : name(name), dPtr(d), d(*d), adjustableType(Double) {}
-		AdjustableComponent(const char * name, float d) : name(name), d(d), adjustableType(Double) {}
+			string name;
 
-		AdjustableComponent(const char * name, int * i) : name(name), iPtr(i), i(*i), adjustableType(Int) {}
-		AdjustableComponent(const char * name, int i) : name(name), i(i), adjustableType(Int) {}
+			template<typename T, const char * Name, typename = std::enable_if_t<!std::is_pointer<T>{}>>
+			struct Storage {
+				Storage() = default;
+				explicit Storage(T * ptr) : ptr(ptr), value(*ptr) {}
+				explicit Storage(T value) : value(value) {}
+				T * ptr = nullptr;
+				T value;
 
-		AdjustableComponent(const char * name, putils::NormalizedColor * color) : name(name), colorPtr(color), color(*color), adjustableType(Color) {}
-		AdjustableComponent(const char * name, putils::NormalizedColor color) : name(name), color(color), adjustableType(Color) {}
-		AdjustableComponent(const char * name, putils::Color color) : name(name), color(putils::toNormalizedColor(color)), adjustableType(Color) {}
+				static const auto reflection_get_class_name() { return Name; }
+				putils_reflection_attributes(
+					putils_reflection_attribute(&Storage::value)
+				);
+			};
 
-		template<typename E>
-		AdjustableComponent(const char * name, E * enumType) : name(name), iPtr((int*)enumType), i(*(int *)enumType), adjustableType(Enum) {
-			static_assert(std::is_enum_v<E> && std::is_same_v<std::underlying_type_t<E>, int>);
-			getEnumNames = getEnumNamesImpl<E>;
-			enumCount = putils::magic_enum::enum_count<E>();
-		}
+			static constexpr char _boolStorageName[] = "AdjustableComponentStorageBool";
+			using BoolStorage = Storage<bool, _boolStorageName>;
+			BoolStorage b;
 
-		template<typename E>
-		AdjustableComponent(const char * name, E enumType) : name(name), i(enumType), adjustableType(Enum) {
-			static_assert(std::is_enum_v<E> && std::is_same_v<std::underlying_type_t<E>, int>);
-			getEnumNames = getEnumNamesImpl<E>();
-			enumCount = putils::magic_enum::enum_count<E>();
-		}
+			static constexpr char _floatStorageName[] = "AdjustableComponentStorageFloat";
+			using FloatStorage = Storage<float, _floatStorageName>;
+			FloatStorage f;
 
-		string name;
+			static constexpr char _intStorageName[] = "AdjustableComponentStorageInt";
+			using IntStorage = Storage<int, _intStorageName>;
+			IntStorage i;
 
-		bool * bPtr = nullptr;
-		float * dPtr = nullptr;
-		int * iPtr = nullptr;
-		putils::NormalizedColor * colorPtr = nullptr;
+			static constexpr char _colorStorageName[] = "AdjustableComponentStorageColor";
+			using ColorStorage = Storage<putils::NormalizedColor, _colorStorageName>;
+			ColorStorage color;
 
-		bool b = false;
-		float d = 0.f;
-		int i = 0;
-		putils::NormalizedColor color;
+			using EnumNameFunc = const char ** ();
+			EnumNameFunc * getEnumNames = nullptr;
+			size_t enumCount = 0;
 
-		using EnumNameFunc = const char ** ();
-		EnumNameFunc * getEnumNames = nullptr;
-		size_t enumCount;
+			enum EType {
+				Bool,
+				Double,
+				Int,
+				Color,
+				Enum
+			};
 
-		enum EType {
-			Bool,
-			Double,
-			Int,
-			Color,
-			Enum
+			EType adjustableType = Bool;
+
+			putils_reflection_class_name(AdjustableComponentValue);
+			putils_reflection_attributes(
+				putils_reflection_attribute(&Value::name),
+				putils_reflection_attribute(&Value::b),
+				putils_reflection_attribute(&Value::f),
+				putils_reflection_attribute(&Value::i),
+				putils_reflection_attribute(&Value::color),
+				putils_reflection_attribute(&Value::adjustableType)
+			);
 		};
 
-		EType adjustableType = Bool;
+		string section;
+		std::vector<Value> values;
 
 		putils_reflection_class_name(AdjustableComponent);
 		putils_reflection_attributes(
-			putils_reflection_attribute(&AdjustableComponent::name),
-			putils_reflection_attribute(&AdjustableComponent::b),
-			putils_reflection_attribute(&AdjustableComponent::d),
-			putils_reflection_attribute(&AdjustableComponent::i),
-			putils_reflection_attribute(&AdjustableComponent::color),
-			putils_reflection_attribute(&AdjustableComponent::adjustableType)
+			putils_reflection_attribute(&AdjustableComponent::values)
 		);
 	};
 }

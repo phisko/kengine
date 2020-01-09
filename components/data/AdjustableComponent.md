@@ -15,13 +15,19 @@ The maximum length of the adjustable's name (stored as a [putils::string](https:
 ## Usage
 
 ```c++
-static bool globalValue = false;
+static bool globalBool = false;
+static int globalInt = 42;
 
 em += [&](kengine::Entity e) {
-    e += kengine::AdjustableComponent("Adjustable value name", &globalValue);
+    e += kengine::AdjustableComponent(
+        "Globals", // "Category", for these adjustables to be grouped under
+        { // vector of adjustables
+            { "Bool name", &globalBool },
+            { "Int name", &globalInt }
+        }
 };
 
 // ... Later on, once adjustable system has been processed
 
-std::cout << globalValue << std::endl; // May be true, if user modified it
+std::cout << globalBool << std::endl; // May be true, if user modified it
 ```

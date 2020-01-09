@@ -7,19 +7,23 @@
 #include "data/ImGuiComponent.hpp"
 #include "data/ImGuiToolComponent.hpp"
 #include "data/NameComponent.hpp"
+
 #include "functions/OnTerminate.hpp"
 #include "functions/OnEntityCreated.hpp"
+
 #include "imgui.h"
 #include "vector.hpp"
 #include "to_string.hpp"
 #include "magic_enum.hpp"
+#include "regex.hpp"
+#include "chop.hpp"
 
 #ifndef KENGINE_DEFAULT_ADJUSTABLE_SAVE_PATH
 # define KENGINE_DEFAULT_ADJUSTABLE_SAVE_PATH "."
 #endif
 
 #ifndef KENGINE_ADJUSTABLE_SAVE_FILE
-# define KENGINE_ADJUSTABLE_SAVE_FILE "adjust.cnf"
+# define KENGINE_ADJUSTABLE_SAVE_FILE "adjust.ini"
 #endif
 
 #ifndef KENGINE_ADJUSTABLE_SEPARATOR
@@ -47,7 +51,7 @@ namespace kengine {
 	static Sections split(const string & s, char delim);
 	static size_t updateImGuiTree(bool & hidden, const Sections & subs, const Sections & previousSubsections);
 	static string reconstitutePath(const Sections & subSections);
-	static void draw(const char * name, AdjustableComponent & comp);
+	static void draw(const char * name, AdjustableComponent::Value & comp);
 	//
 	EntityCreatorFunctor<64> ImGuiAdjustableSystem(EntityManager & em) {
 		return [&](Entity & e) {
@@ -80,28 +84,34 @@ namespace kengine {
 
 					if (ImGui::BeginChild("##adjustables")) {
 						putils::vector<AdjustableComponent *, KENGINE_MAX_ADJUSTABLES> comps;
-
-						for (const auto & [e, _] : em.getEntities<AdjustableComponent>()) {
-							if (_.name.find(nameSearch) == (size_t)-1)
+							
+						for (const auto & [e, comp] : em.getEntities<AdjustableComponent>()) {
+							if (comp.section.find(nameSearch) != std::string::npos) {
+								comps.emplace_back(&comp);
 								continue;
-							comps.emplace_back(&_);
+							}
+
+							for (const auto & value : comp.values)
+								if (value.name.find(nameSearch) != std::string::npos) {
+									comps.emplace_back(&comp);
+									continue;
+								}
 						}
+
 						std::sort(comps.begin(), comps.end(), [](const auto lhs, const auto rhs) {
-							return strcmp(lhs->name.c_str(), rhs->name.c_str()) < 0;
-							});
+							return strcmp(lhs->section.c_str(), rhs->section.c_str()) < 0;
+						});
 
 						Sections previousSubsections;
 						string previousSection;
 						bool hidden = false;
 						for (const auto comp : comps) {
-							const auto [name, section] = getNameAndSection(comp->name);
+							const bool sectionMatches = comp->section.find(nameSearch) != std::string::npos;
 
-							if (section != previousSection) {
-								const auto subs = split(section, '/');
-
+							if (comp->section != previousSection) {
+								const auto subs = split(comp->section, '/');
 								const auto current = updateImGuiTree(hidden, subs, previousSubsections);
-
-								previousSubsections = std::move(subs);
+								previousSubsections = subs;
 								if (current < previousSubsections.size())
 									previousSubsections.erase(previousSubsections.begin() + current + 1, previousSubsections.end());
 								previousSection = reconstitutePath(previousSubsections);
@@ -110,7 +120,9 @@ namespace kengine {
 							if (hidden)
 								continue;
 
-							draw(name.c_str(), *comp);
+							for (auto & value : comp->values)
+								if (sectionMatches || value.name.find(nameSearch) != std::string::npos)
+									draw(value.name.c_str(), value);
 						}
 						for (size_t i = hidden ? 1 : 0; i < previousSubsections.size(); ++i)
 							ImGui::TreePop();
@@ -118,41 +130,70 @@ namespace kengine {
 					ImGui::EndChild();
 				}
 				ImGui::End();
-				});
+			});
 		};
 	}
 
 	// declarations
-	static void setValue(AdjustableComponent & comp, const char * s);
-	static std::unordered_map<string, string> g_loadedFile;
+	static void initAdjustable(AdjustableComponent & comp);
+	using IniSection = std::unordered_map<string, string>;
+	using IniFile = std::unordered_map<string, IniSection>;
+	static IniFile g_loadedFile;
 	//
 	static void onEntityCreated(Entity & e) {
 		if (!e.has<AdjustableComponent>())
 			return;
 
-		auto & comp = e.get<AdjustableComponent>();
-
-		const auto it = g_loadedFile.find(comp.name);
-		if (it != g_loadedFile.end())
-			setValue(comp, it->second.c_str());
+		initAdjustable(e.get<AdjustableComponent>());
 	}
 
 	static void load(EntityManager & em) {
 		std::ifstream f(KENGINE_ADJUSTABLE_SAVE_FILE);
 		if (!f)
 			return;
+		IniSection * currentSection = nullptr;
 		for (std::string line; std::getline(f, line);) {
-			const auto index = line.find(KENGINE_ADJUSTABLE_SEPARATOR);
-			g_loadedFile[line.substr(0, index)] = line.substr(index + 1);
-		}
+			using namespace putils::regex;
+			const auto match = (line.c_str() == "^\\[(.*)\\]$"_m);
+			if (!match.empty()) {
+				currentSection = &g_loadedFile[match[1].str()];
+				continue;
+			}
+			else if (currentSection == nullptr) {
+				assert(!"Invalid INI file, should start with a section");
+				continue;
+			}
 
-		for (auto & [e, comp] : em.getEntities<AdjustableComponent>()) {
-			const auto it = g_loadedFile.find(comp.name);
-			if (it == g_loadedFile.end())
+			if (putils::chop(line).empty())
 				continue;
 
-			const auto & val = it->second;
-			setValue(comp, val.c_str());
+			const auto index = line.find('=');
+			if (index == std::string::npos) {
+				assert(!"Invalid INI file, line should match 'key = value' format");
+				continue;
+			}
+
+			const auto key = putils::chop(line.substr(0, index));
+			const auto value = putils::chop(line.substr(index + 1));
+			(*currentSection)[key] = value;
+		}
+
+		for (auto & [e, comp] : em.getEntities<AdjustableComponent>())
+			initAdjustable(comp);
+	}
+
+	// declarations
+	static void setValue(AdjustableComponent::Value & value, const char * s);
+	//
+	static void initAdjustable(AdjustableComponent & comp) {
+		const auto it = g_loadedFile.find(comp.section);
+		if (it == g_loadedFile.end())
+			return;
+		const auto & section = it->second;
+		for (auto & value : comp.values) {
+			const auto it = section.find(value.name);
+			if (it != section.end())
+				setValue(value, it->second);
 		}
 	}
 
@@ -160,28 +201,32 @@ namespace kengine {
 		std::ofstream f(KENGINE_ADJUSTABLE_SAVE_FILE, std::ofstream::trunc);
 		assert(f);
 		for (const auto & [e, comp] : em.getEntities<AdjustableComponent>()) {
-			f << comp.name << KENGINE_ADJUSTABLE_SEPARATOR;
-			switch (comp.adjustableType) {
-			case AdjustableComponent::Int:
-				f << comp.i;
-				break;
-			case AdjustableComponent::Double:
-				f << comp.d;
-				break;
-			case AdjustableComponent::Bool:
-				f << std::boolalpha << comp.b << std::noboolalpha;
-				break;
-			case AdjustableComponent::Color:
-				f << putils::toRGBA(comp.color);
-				break;
-			case AdjustableComponent::Enum:
-				f << comp.i;
-				break;
-			default:
-				assert("Unknown adjustable type" && false);
-				static_assert(putils::magic_enum::enum_count<AdjustableComponent::EType>() == 5);
+			f << '[' << comp.section << ']' << std::endl;
+			for (const auto & value : comp.values) {
+				f << value.name << '=';
+				switch (value.adjustableType) {
+				case AdjustableComponent::Value::Int:
+					f << value.i.value;
+					break;
+				case AdjustableComponent::Value::Double:
+					f << value.f.value;
+					break;
+				case AdjustableComponent::Value::Bool:
+					f << std::boolalpha << value.b.value << std::noboolalpha;
+					break;
+				case AdjustableComponent::Value::Color:
+					f << putils::toRGBA(value.color.value);
+					break;
+				case AdjustableComponent::Value::Enum:
+					f << value.i.value;
+					break;
+				default:
+					assert("Unknown adjustable type" && false);
+					static_assert(putils::magic_enum::enum_count<AdjustableComponent::Value::EType>() == 5);
+				}
+				f << std::endl;
 			}
-			f << '\n';
+			f << std::endl;
 		}
 	}
 
@@ -267,98 +312,98 @@ namespace kengine {
 		return current;
 	}
 
-	static void draw(const char * name, AdjustableComponent & comp) {
+	static void draw(const char * name, AdjustableComponent::Value & value) {
 		ImGui::Columns(2);
 		ImGui::Text(name);
 		ImGui::NextColumn();
 
-		switch (comp.adjustableType) {
-		case AdjustableComponent::Bool: {
-			ImGui::Checkbox((string("##") + comp.name).c_str(), comp.bPtr != nullptr ? comp.bPtr : &comp.b);
-			if (comp.bPtr != nullptr)
-				comp.b = *comp.bPtr;
+		switch (value.adjustableType) {
+		case AdjustableComponent::Value::Bool: {
+			ImGui::Checkbox((string("##") + value.name).c_str(), value.b.ptr != nullptr ? value.b.ptr : &value.b.value);
+			if (value.b.ptr != nullptr)
+				value.b.value = *value.b.ptr;
 			break;
 		}
-		case AdjustableComponent::Double: {
+		case AdjustableComponent::Value::Double: {
 			ImGui::PushItemWidth(-1.f);
-			auto val = comp.dPtr != nullptr ? *comp.dPtr : comp.d;
-			if (ImGui::InputFloat((string("##") + comp.name).c_str(), &val, 0.f, 0.f, "%.6f", ImGuiInputTextFlags_EnterReturnsTrue)) {
-				comp.d = val;
-				if (comp.dPtr != nullptr)
-					*comp.dPtr = val;
+			auto val = value.f.ptr != nullptr ? *value.f.ptr : value.f.value;
+			if (ImGui::InputFloat((string("##") + value.name).c_str(), &val, 0.f, 0.f, "%.6f", ImGuiInputTextFlags_EnterReturnsTrue)) {
+				value.f.value = val;
+				if (value.f.ptr != nullptr)
+					*value.f.ptr = val;
 			}
 			ImGui::PopItemWidth();
 			break;
 		}
-		case AdjustableComponent::Int: {
+		case AdjustableComponent::Value::Int: {
 			ImGui::PushItemWidth(-1.f);
-			auto val = comp.iPtr != nullptr ? *comp.iPtr : comp.i;
-			if (ImGui::InputInt((string("##") + comp.name).c_str(), comp.iPtr != nullptr ? comp.iPtr : &comp.i, 1, 100, ImGuiInputTextFlags_EnterReturnsTrue)) {
-				comp.i = val;
-				if (comp.iPtr != nullptr)
-					*comp.iPtr = val;
+			auto val = value.i.ptr != nullptr ? *value.i.ptr : value.i.value;
+			if (ImGui::InputInt((string("##") + value.name).c_str(), &val, 1, 100, ImGuiInputTextFlags_EnterReturnsTrue)) {
+				value.i.value = val;
+				if (value.i.ptr != nullptr)
+					*value.i.ptr = val;
 			}
 			ImGui::PopItemWidth();
 			break;
 		}
-		case AdjustableComponent::Color: {
-			const auto color = comp.colorPtr != nullptr ? comp.colorPtr->attributes : comp.color.attributes;
-			if (ImGui::ColorButton((string("##") + comp.name).c_str(), ImVec4(color[0], color[1], color[2], color[3])))
+		case AdjustableComponent::Value::Color: {
+			const auto color = value.color.ptr != nullptr ? value.color.ptr->attributes : value.color.value.attributes;
+			if (ImGui::ColorButton((string("##") + value.name).c_str(), ImVec4(color[0], color[1], color[2], color[3])))
 				ImGui::OpenPopup("color picker popup");
 
 			if (ImGui::BeginPopup("color picker popup")) {
-				ImGui::ColorPicker4(comp.name, color);
+				ImGui::ColorPicker4(value.name, color);
 				ImGui::EndPopup();
 			}
 
-			if (comp.colorPtr != nullptr)
-				comp.color = *comp.colorPtr;
+			if (value.color.ptr != nullptr)
+				value.color.value = *value.color.ptr;
 			break;
 		}
-		case AdjustableComponent::Enum: {
-			ImGui::Combo((string("##") + comp.name).c_str(), comp.iPtr != nullptr ? comp.iPtr : &comp.i, comp.getEnumNames(), (int)comp.enumCount);
+		case AdjustableComponent::Value::Enum: {
+			ImGui::Combo((string("##") + value.name).c_str(), value.i.ptr != nullptr ? value.i.ptr : &value.i.value, value.getEnumNames(), (int)value.enumCount);
 			break;
 		}
 		default:
 			assert("Unknown type" && false);
-			static_assert(putils::magic_enum::enum_count<AdjustableComponent::EType>() == 5);
+			static_assert(putils::magic_enum::enum_count<AdjustableComponent::Value::EType>() == 5);
 		}
 		ImGui::Columns();
 	}
 
-	static void setValue(AdjustableComponent & comp, const char * s) {
-		const auto assignPtr = [](auto ptr, const auto & val) {
-			if (ptr != nullptr)
-				*ptr = val;
+	static void setValue(AdjustableComponent::Value & value, const char * s) {
+		const auto assignPtr = [](auto & storage) {
+			if (storage.ptr != nullptr)
+				*storage.ptr = storage.value;
 		};
 
-		switch (comp.adjustableType) {
-		case AdjustableComponent::Int:
-			comp.i = putils::parse<int>(s);
-			assignPtr(comp.iPtr, comp.i);
+		switch (value.adjustableType) {
+		case AdjustableComponent::Value::Int:
+			value.i.value = putils::parse<int>(s);
+			assignPtr(value.i);
 			break;
-		case AdjustableComponent::Double:
-			comp.d = putils::parse<float>(s);
-			assignPtr(comp.dPtr, comp.d);
+		case AdjustableComponent::Value::Double:
+			value.f.value = putils::parse<float>(s);
+			assignPtr(value.f);
 			break;
-		case AdjustableComponent::Bool:
-			comp.b = putils::parse<bool>(s);
-			assignPtr(comp.bPtr, comp.b);
+		case AdjustableComponent::Value::Bool:
+			value.b.value = putils::parse<bool>(s);
+			assignPtr(value.b);
 			break;
-		case AdjustableComponent::Color: {
+		case AdjustableComponent::Value::Color: {
 			putils::Color tmp;
 			tmp.rgba = putils::parse<unsigned int>(s);
-			comp.color = putils::toNormalizedColor(tmp);
-			assignPtr(comp.colorPtr, comp.color);
+			value.color.value = putils::toNormalizedColor(tmp);
+			assignPtr(value.color);
 			break;
 		}
-		case AdjustableComponent::Enum:
-			comp.i = putils::parse<int>(s);
-			assignPtr(comp.iPtr, comp.i);
+		case AdjustableComponent::Value::Enum:
+			value.i.value = putils::parse<int>(s);
+			assignPtr(value.i);
 			break;
 		default:
 			assert("Unknown adjustable type" && false);
-			static_assert(putils::magic_enum::enum_count<AdjustableComponent::EType>() == 5);
+			static_assert(putils::magic_enum::enum_count<AdjustableComponent::Value::EType>() == 5);
 		}
 	}
 }

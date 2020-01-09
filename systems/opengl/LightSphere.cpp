@@ -16,12 +16,16 @@ static auto SUN_SIZE = 100.f;
 namespace kengine::Shaders {
 	static glm::vec3 toVec(const putils::Point3f & p) { return { p.x, p.y, p.z }; }
 
-	LightSphere::LightSphere(kengine::EntityManager & em) 
+	LightSphere::LightSphere(EntityManager & em, Entity & parent) 
 		: Program(false, putils_nameof(LightSphere)),
 		_em(em) {
-		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/Lights] Sphere size", &SPHERE_SIZE); };
-		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/Lights] Sun size", &SUN_SIZE); };
-		em += [](kengine::Entity & e) { e += kengine::AdjustableComponent("[Render/Lights] Sun dist", &SUN_DIST); };
+		parent += AdjustableComponent{
+			"Render/Lights", {
+				{ "Sphere size", &SPHERE_SIZE },
+				{ "Sun size", &SUN_SIZE },
+				{ "Sun dist", &SUN_DIST }
+			}
+		};
 	}
 
 	void LightSphere::init(size_t firstTextureID) {
@@ -42,12 +46,12 @@ namespace kengine::Shaders {
 		for (const auto & [e, light] : _em.getEntities<DirLightComponent>())
 			drawLight(light, params.camPos - toVec(light.direction) * SUN_DIST, SUN_SIZE);
 
-		for (const auto & [e, light, transform] : _em.getEntities<PointLightComponent, kengine::TransformComponent>()) {
+		for (const auto & [e, light, transform] : _em.getEntities<PointLightComponent, TransformComponent>()) {
 			const auto & pos = transform.boundingBox.position;
 			drawLight(light, toVec(pos), SPHERE_SIZE);
 		}
 
-		for (const auto & [e, light, transform] : _em.getEntities<SpotLightComponent, kengine::TransformComponent>()) {
+		for (const auto & [e, light, transform] : _em.getEntities<SpotLightComponent, TransformComponent>()) {
 			const auto & pos = transform.boundingBox.position;
 			const bool isFacingLight = glm::dot(toVec(pos), params.camPos) < 0;
 			if (isFacingLight)

@@ -2,7 +2,6 @@
 #include "EntityManager.hpp"
 
 #include "data/LightComponent.hpp"
-#include "data/AdjustableComponent.hpp"
 #include "data/ShaderComponent.hpp"
 #include "data/GodRaysComponent.hpp"
 

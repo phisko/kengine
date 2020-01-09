@@ -155,17 +155,23 @@ namespace kengine {
 	EntityCreator * BulletSystem(EntityManager & em) {
 		g_em = &em;
 
-		em += [](Entity & e) { e += AdjustableComponent("[Physics] Gravity", &GRAVITY); };
-
-#ifndef KENGINE_NDEBUG
-		em += [](Entity & e) { e += AdjustableComponent("[Physics] Debug", &ENABLE_DEBUG); };
-		debug::drawer = new debug::Drawer(em);
-#endif
-
 		return [](Entity & e) {
 			e += functions::Execute{ execute };
 			e += functions::OnEntityRemoved{ onEntityRemoved };
 			e += functions::QueryPosition{ queryPosition };
+
+			e += AdjustableComponent{
+				"Physics", {
+					{ "Gravity", &GRAVITY }
+#ifndef KENGINE_NDEBUG
+					, {"Debug", &ENABLE_DEBUG }
+#endif
+				}
+			};
+
+#ifndef KENGINE_NDEBUG
+			debug::drawer = new debug::Drawer(*g_em);
+#endif
 		};
 	}
 
