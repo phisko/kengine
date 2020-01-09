@@ -7,7 +7,7 @@ namespace kengine {
 
 	class AssImpShadowMap : public Shaders::ShadowMapShader {
 	public:
-		AssImpShadowMap(kengine::EntityManager & em)
+		AssImpShadowMap(EntityManager & em)
 			: ShadowMapShader(false, putils_nameof(AssImpShadowMap)),
 			_em(em)
 		{}
@@ -16,7 +16,7 @@ namespace kengine {
 		void drawToTexture(GLuint texture, const glm::mat4 & lightSpaceMatrix);
 
 	private:
-		kengine::EntityManager & _em;
+		EntityManager & _em;
 
 	public:
 		putils::gl::Uniform<glm::mat4> _proj;

@@ -7,7 +7,7 @@ namespace kengine {
 
 	class SpritesShader : public putils::gl::Program {
 	public:
-		SpritesShader(kengine::EntityManager & em);
+		SpritesShader(EntityManager & em);
 
 		void init(size_t firstTextureID) override;
 		void run(const Parameters & params) override;
@@ -34,7 +34,7 @@ namespace kengine {
 		);
 
 	private:
-		kengine::EntityManager & _em;
+		EntityManager & _em;
 		size_t _textureID;
 	};
 }

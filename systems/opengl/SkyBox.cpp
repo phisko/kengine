@@ -41,7 +41,7 @@ void main() {
 )";
 
 namespace kengine::Shaders {
-	SkyBox::SkyBox(kengine::EntityManager & em)
+	SkyBox::SkyBox(EntityManager & em)
 		: Program(true, putils_nameof(SkyBox)),
 		_em(em)
 	{}

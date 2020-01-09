@@ -9,13 +9,13 @@ namespace kengine {
 namespace kengine::Shaders {
 	class Highlight : public putils::gl::Program {
 	public:
-		Highlight(kengine::EntityManager & em);
+		Highlight(EntityManager & em);
 
 		void init(size_t firstTextureID) override;
 		void run(const Parameters & params) override;
 
 	private:
-		kengine::EntityManager & _em;
+		EntityManager & _em;
 
 	public:
 		putils::gl::Uniform<glm::vec3> _viewPos;

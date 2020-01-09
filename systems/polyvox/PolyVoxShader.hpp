@@ -7,7 +7,7 @@ namespace kengine {
 
 	class PolyVoxShader : public putils::gl::Program {
 	public:
-		PolyVoxShader(kengine::EntityManager & em);
+		PolyVoxShader(EntityManager & em);
 
 		void init(size_t firstTextureID) override;
 		void run(const Parameters & params) override;
@@ -32,6 +32,6 @@ namespace kengine {
 		);
 
 	private:
-		kengine::EntityManager & _em;
+		EntityManager & _em;
 	};
 }

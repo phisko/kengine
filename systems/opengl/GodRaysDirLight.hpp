@@ -19,7 +19,7 @@ namespace kengine::Shaders {
 		public src::DirLight::GetDirection::Uniforms
 	{
 	public:
-		GodRaysDirLight(kengine::EntityManager & em);
+		GodRaysDirLight(EntityManager & em);
 
 		void init(size_t firstTextureID) override;
 		void run(const Parameters & params) override;
@@ -28,7 +28,7 @@ namespace kengine::Shaders {
 		void drawLight(const DirLightComponent & light, const CSMComponent & depthMap, const Parameters & params);
 
 	private:
-		kengine::EntityManager & _em;
+		EntityManager & _em;
 		GLuint _shadowMapTextureID;
 
 	public:

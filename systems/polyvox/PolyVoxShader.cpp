@@ -67,7 +67,7 @@ void main() {
 namespace kengine {
 	static glm::vec3 toVec(const putils::Point3f & p) { return { p.x, p.y, p.z }; }
 
-	PolyVoxShader::PolyVoxShader(kengine::EntityManager & em)
+	PolyVoxShader::PolyVoxShader(EntityManager & em)
 		: Program(false, putils_nameof(PolyVoxShader)),
 		_em(em)
 	{}
@@ -76,7 +76,7 @@ namespace kengine {
 		initWithShaders<PolyVoxShader>(putils::make_vector(
 			ShaderDescription{ vert, GL_VERTEX_SHADER },
 			ShaderDescription{ frag, GL_FRAGMENT_SHADER },
-			ShaderDescription{ kengine::Shaders::src::ApplyTransparency::Frag::glsl, GL_FRAGMENT_SHADER }
+			ShaderDescription{ Shaders::src::ApplyTransparency::Frag::glsl, GL_FRAGMENT_SHADER }
 		));
 	}
 
@@ -88,7 +88,7 @@ namespace kengine {
 		_viewPos = params.camPos;
 
 		for (const auto &[e, poly, graphics, transform] : _em.getEntities<PolyVoxObjectComponent, GraphicsComponent, TransformComponent>()) {
-			if (graphics.model == kengine::Entity::INVALID_ID)
+			if (graphics.model == Entity::INVALID_ID)
 				continue;
 
 			const auto & modelInfoEntity = _em.getEntity(graphics.model);

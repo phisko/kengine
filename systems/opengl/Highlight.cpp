@@ -57,7 +57,7 @@ void main() {
 )";
 
 namespace kengine::Shaders {
-	Highlight::Highlight(kengine::EntityManager & em)
+	Highlight::Highlight(EntityManager & em)
 		: Program(true, putils_nameof(Highlight)),
 		_em(em)
 	{

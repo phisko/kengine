@@ -34,7 +34,7 @@
 #include "AssImpHelper.hpp"
 
 namespace kengine {
-	static kengine::EntityManager * g_em = nullptr;
+	static EntityManager * g_em = nullptr;
 
 	// declarations
 	static void execute(float deltaTime);

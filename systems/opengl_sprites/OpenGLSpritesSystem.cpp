@@ -23,7 +23,7 @@ namespace kengine {
 		g_em = &em;
 
 		em += [&](Entity & e) {
-			e += kengine::makeGBufferShaderComponent<SpritesShader>(em);
+			e += makeGBufferShaderComponent<SpritesShader>(em);
 		};
 
 		return [](Entity & e) {

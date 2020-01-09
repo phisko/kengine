@@ -55,7 +55,7 @@ void main() {
 )";
 
 namespace kengine::Shaders {
-	Debug::Debug(kengine::EntityManager & em)
+	Debug::Debug(EntityManager & em)
 		: Program(false, putils_nameof(Debug)),
 		_em(em)
 	{
@@ -76,7 +76,7 @@ namespace kengine::Shaders {
 		_proj = params.proj;
 		_viewPos = params.camPos;
 
-		for (const auto &[e, debug, transform] : _em.getEntities<kengine::DebugGraphicsComponent, kengine::TransformComponent>()) {
+		for (const auto &[e, debug, transform] : _em.getEntities<DebugGraphicsComponent, TransformComponent>()) {
 			_color = debug.color;
 			_entityID = (float)e.id;
 

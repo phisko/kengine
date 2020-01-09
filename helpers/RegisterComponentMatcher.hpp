@@ -7,10 +7,10 @@
 
 namespace kengine {
 	template<typename Comp>
-	void registerComponentMatcher(kengine::EntityManager & em);
+	void registerComponentMatcher(EntityManager & em);
 
 	template<typename ... Comps>
-	void registerComponentMatchers(kengine::EntityManager & em);
+	void registerComponentMatchers(EntityManager & em);
 }
 
 namespace kengine {
@@ -64,7 +64,7 @@ namespace kengine {
 		}
 
 		template<typename Comp>
-		static bool componentMatches(const kengine::Entity & e, const char * str) {
+		static bool componentMatches(const Entity & e, const char * str) {
 			if (strstr(putils::reflection::get_class_name<Comp>(), str))
 				return true;
 
@@ -81,13 +81,13 @@ namespace kengine {
 	}
 
 	template<typename Comp>
-	void registerComponentMatcher(kengine::EntityManager & em) {
+	void registerComponentMatcher(EntityManager & em) {
 		auto type = TypeHelper::getTypeEntity<Comp>(em);
 		type += meta::MatchString{ detail::componentMatches<Comp> };
 	}
 
 	template<typename ... Comps>
-	void registerComponentMatchers(kengine::EntityManager & em) {
+	void registerComponentMatchers(EntityManager & em) {
 		putils::for_each_type<Comps...>([&](auto type) {
 			using Type = putils_wrapped_type(type);
 			registerComponentMatcher<Type>(em);

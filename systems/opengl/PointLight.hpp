@@ -19,7 +19,7 @@ namespace kengine::Shaders {
 		public src::PointLight::Frag::Uniforms
 	{
 	public:
-		PointLight(kengine::EntityManager & em)
+		PointLight(EntityManager & em)
 			: Program(true, putils_nameof(PointLight)), _em(em)
 		{}
 
@@ -34,7 +34,7 @@ namespace kengine::Shaders {
 		);
 
 	private:
-		kengine::EntityManager & _em;
+		EntityManager & _em;
 		size_t _shadowMapTextureID;
 
 		void setLight(const PointLightComponent & light, const putils::Point3f & pos, float radius); 

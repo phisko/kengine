@@ -7,16 +7,16 @@
 
 namespace kengine {
 	template<typename Comp>
-	void registerComponentJSONLoader(kengine::EntityManager & em);
+	void registerComponentJSONLoader(EntityManager & em);
 
 	template<typename ... Comps>
-	void registerComponentJSONLoaders(kengine::EntityManager & em);
+	void registerComponentJSONLoaders(EntityManager & em);
 }
 
 namespace kengine {
 	namespace detail {
 		template<typename Component>
-		static void loadJSONComponent(const putils::json & jsonEntity, kengine::Entity & e) {
+		static void loadJSONComponent(const putils::json & jsonEntity, Entity & e) {
 			const auto it = jsonEntity.find(putils::reflection::get_class_name<Component>());
 			if (it == jsonEntity.end())
 				return;
@@ -26,13 +26,13 @@ namespace kengine {
 	}
 
 	template<typename Comp>
-	void registerComponentJSONLoader(kengine::EntityManager & em) {
+	void registerComponentJSONLoader(EntityManager & em) {
 		auto type = TypeHelper::getTypeEntity<Comp>(em);
 		type += meta::LoadFromJSON{ detail::loadJSONComponent<Comp> };
 	}
 
 	template<typename ... Comps>
-	void registerComponentJSONLoaders(kengine::EntityManager & em) {
+	void registerComponentJSONLoaders(EntityManager & em) {
 		putils::for_each_type<Comps...>([&](auto type) {
 			using Type = putils_wrapped_type(type);
 			registerComponentJSONLoader<Type>(em);

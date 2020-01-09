@@ -19,7 +19,7 @@ namespace kengine::Shaders {
 		public src::SpotLight::Frag::Uniforms
 	{
 	public:
-		SpotLight(kengine::EntityManager & em)
+		SpotLight(EntityManager & em)
 			: Program(true, putils_nameof(SpotLight)),
 			_em(em)
 		{}
@@ -35,7 +35,7 @@ namespace kengine::Shaders {
 		);
 
 	private:
-		kengine::EntityManager & _em;
+		EntityManager & _em;
 		size_t _shadowMapTextureID = -1;
 
 		void setLight(const SpotLightComponent & light, const putils::Point3f & pos); 

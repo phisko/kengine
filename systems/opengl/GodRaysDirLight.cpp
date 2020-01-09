@@ -12,7 +12,7 @@
 #include "ShadowMap.hpp"
 
 namespace kengine::Shaders {
-	GodRaysDirLight::GodRaysDirLight(kengine::EntityManager & em)
+	GodRaysDirLight::GodRaysDirLight(EntityManager & em)
 		: Program(true, putils_nameof(GodRaysDirLight)),
 		_em(em)
 	{

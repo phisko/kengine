@@ -12,7 +12,7 @@
 #include "shaders/QuadSrc.hpp"
 
 namespace kengine::Shaders {
-	GodRaysPointLight::GodRaysPointLight(kengine::EntityManager & em)
+	GodRaysPointLight::GodRaysPointLight(EntityManager & em)
 		: Program(true, putils_nameof(GodRaysPointLight)),
 		_em(em)
 	{

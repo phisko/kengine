@@ -19,7 +19,7 @@ namespace kengine {
 		initWithShaders<AssImpShader>(putils::make_vector(
 			ShaderDescription{ src::TexturedShader::vert, GL_VERTEX_SHADER },
 			ShaderDescription{ src::TexturedShader::frag, GL_FRAGMENT_SHADER },
-			ShaderDescription{ kengine::Shaders::src::ApplyTransparency::Frag::glsl, GL_FRAGMENT_SHADER }
+			ShaderDescription{ Shaders::src::ApplyTransparency::Frag::glsl, GL_FRAGMENT_SHADER }
 		));
 
 		_diffuseTextureID = firstTextureID;

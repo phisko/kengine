@@ -7,7 +7,7 @@ namespace kengine {
 
 	class AssImpShader : public putils::gl::Program {
 	public:
-		AssImpShader(kengine::EntityManager & em)
+		AssImpShader(EntityManager & em)
 			: Program(false, putils_nameof(AssImpShader)),
 			_em(em)
 		{}
@@ -49,7 +49,7 @@ namespace kengine {
 		);
 
 	private:
-		kengine::EntityManager & _em;
+		EntityManager & _em;
 		size_t _diffuseTextureID;
 		size_t _specularTextureID;
 	};

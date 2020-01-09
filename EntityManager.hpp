@@ -189,7 +189,7 @@ namespace kengine {
 					return std::make_tuple(e, std::ref(get<Comps>(e))...);
 				}
 
-				kengine::EntityManager & em;
+				EntityManager & em;
 				size_t currentType;
 				size_t currentEntity;
 			};

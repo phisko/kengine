@@ -70,7 +70,7 @@ void main() {
 namespace kengine {
 	static glm::vec3 toVec(const putils::Point3f & p) { return { p.x, p.y, p.z }; }
 
-	SpritesShader::SpritesShader(kengine::EntityManager & em)
+	SpritesShader::SpritesShader(EntityManager & em)
 		: Program(false, putils_nameof(SpritesShader)),
 		_em(em)
 	{}
@@ -79,7 +79,7 @@ namespace kengine {
 		initWithShaders<SpritesShader>(putils::make_vector(
 			ShaderDescription{ vert, GL_VERTEX_SHADER },
 			ShaderDescription{ frag, GL_FRAGMENT_SHADER },
-			ShaderDescription{ kengine::Shaders::src::ApplyTransparency::Frag::glsl, GL_FRAGMENT_SHADER }
+			ShaderDescription{ Shaders::src::ApplyTransparency::Frag::glsl, GL_FRAGMENT_SHADER }
 		));
 
 		_textureID = firstTextureID;
@@ -93,7 +93,7 @@ namespace kengine {
 	};
 
 	static void drawObject(EntityManager & em, const GraphicsComponent & graphics, const TransformComponent & transform, Uniforms uniforms, bool in2D = false) {
-		if (graphics.model == kengine::Entity::INVALID_ID)
+		if (graphics.model == Entity::INVALID_ID)
 			return;
 
 		const auto & modelEntity = em.getEntity(graphics.model);

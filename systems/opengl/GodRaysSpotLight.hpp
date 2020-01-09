@@ -18,7 +18,7 @@ namespace kengine::Shaders {
 		public src::PointLight::GetDirection::Uniforms
 	{
 	public:
-		GodRaysSpotLight(kengine::EntityManager & em);
+		GodRaysSpotLight(EntityManager & em);
 
 		void init(size_t firstTextureID) override;
 		void run(const Parameters & params) override;
@@ -27,7 +27,7 @@ namespace kengine::Shaders {
 		void drawLight(const SpotLightComponent & light, const putils::Point3f & pos, const DepthMapComponent & depthMap, const Parameters & params);
 
 	private:
-		kengine::EntityManager & _em;
+		EntityManager & _em;
 		GLuint _shadowMapTextureID;
 
 	public:

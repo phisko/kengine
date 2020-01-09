@@ -9,13 +9,13 @@ namespace kengine {
 namespace kengine::Shaders {
 	class Debug : public putils::gl::Program {
 	public:
-		Debug(kengine::EntityManager & em);
+		Debug(EntityManager & em);
 
 		void init(size_t firstTextureID) override;
 		void run(const Parameters & params) override;
 
 	private:
-		kengine::EntityManager & _em;
+		EntityManager & _em;
 
 	public:
 		putils::gl::Uniform<glm::mat4> _model;

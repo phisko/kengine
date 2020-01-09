@@ -4,7 +4,7 @@
 #include "systems/opengl/ShaderHelper.hpp"
 
 namespace kengine::ShaderHelper {
-	void drawModel(const kengine::OpenGLModelComponent & openGL) {
+	void drawModel(const OpenGLModelComponent & openGL) {
 		for (const auto & meshInfo : openGL.meshes) {
 			glBindVertexArray(meshInfo.vertexArrayObject);
 			glBindBuffer(GL_ARRAY_BUFFER, meshInfo.vertexBuffer);
@@ -12,7 +12,7 @@ namespace kengine::ShaderHelper {
 		}
 	}
 
-	glm::mat4 getModelMatrix(const kengine::ModelComponent & modelInfo, const kengine::TransformComponent & transform) {
+	glm::mat4 getModelMatrix(const ModelComponent & modelInfo, const TransformComponent & transform) {
 		glm::mat4 model(1.f);
 		const auto & centre = transform.boundingBox.position;
 

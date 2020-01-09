@@ -20,9 +20,9 @@ namespace kengine {
 	EntityCreator * PolyVoxSystem(EntityManager & em) {
 		g_em = &em;
 
-		return [](kengine::Entity & e) {
+		return [](Entity & e) {
 			e += functions::Execute { execute };
-			e += kengine::makeGBufferShaderComponent<PolyVoxShader>(*g_em);
+			e += makeGBufferShaderComponent<PolyVoxShader>(*g_em);
 		};
 	}
 

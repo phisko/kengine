@@ -17,13 +17,13 @@ namespace kengine::Shaders {
 	class ShadowCube : public ShadowCubeShader
 	{
 	public:
-		ShadowCube(kengine::EntityManager & em) : ShadowCubeShader(false, putils_nameof(ShadowCube)), _em(em) {}
+		ShadowCube(EntityManager & em) : ShadowCubeShader(false, putils_nameof(ShadowCube)), _em(em) {}
 
 		void init(size_t firstTextureID) override;
 		void drawObjects() override;
 
 	private:
-		kengine::EntityManager & _em;
+		EntityManager & _em;
 
 	public:
 		putils_reflection_parents(

@@ -29,7 +29,7 @@ namespace kengine {
 
 	// declarations
 	static void onEntityCreated(Entity & e);
-	static void saveTools(kengine::EntityManager & em);
+	static void saveTools(EntityManager & em);
 	//
 	EntityCreatorFunctor<64> ImGuiToolSystem(EntityManager & em) {
 		g_confFile.parse();
@@ -40,7 +40,7 @@ namespace kengine {
 			e += functions::OnEntityCreated{ onEntityCreated };
 			e += functions::OnTerminate{ [&] { saveTools(em); } };
 
-			e += kengine::ImGuiComponent([&] {
+			e += ImGuiComponent([&] {
 				if (ImGui::BeginMainMenuBar()) {
 					bool mustSave = false;
 					if (ImGui::BeginMenu("Tools")) {
@@ -73,10 +73,10 @@ namespace kengine {
 		tool.enabled = g_confFile.getValue(name.name);
 	}
 
-	static void saveTools(kengine::EntityManager & em) {
+	static void saveTools(EntityManager & em) {
 		std::ofstream f(KENGINE_IMGUI_TOOLS_SAVE_FILE);
 		assert(f);
-		for (const auto & [e, name, tool] : em.getEntities<kengine::NameComponent, kengine::ImGuiToolComponent>())
+		for (const auto & [e, name, tool] : em.getEntities<NameComponent, ImGuiToolComponent>())
 			f << name.name << ';' << std::boolalpha << tool.enabled << std::noboolalpha << '\n';
 		f.flush();
 	}

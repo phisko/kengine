@@ -55,7 +55,7 @@ namespace kengine::Shaders {
 	}
 
 
-	void ShadowMapShader::run(kengine::Entity & e, DirLightComponent & light, const Parameters & params) {
+	void ShadowMapShader::run(Entity & e, DirLightComponent & light, const Parameters & params) {
 		if (!e.has<CSMComponent>())
 			 e.attach<CSMComponent>();
 
@@ -92,7 +92,7 @@ namespace kengine::Shaders {
 		assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
 	}
 
-	void ShadowMapShader::run(kengine::Entity & e, SpotLightComponent & light, const putils::Point3f & pos, const Parameters & params) {
+	void ShadowMapShader::run(Entity & e, SpotLightComponent & light, const putils::Point3f & pos, const Parameters & params) {
 		if (!e.has<DepthMapComponent>())
 			e.attach<DepthMapComponent>();
 

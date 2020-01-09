@@ -8,8 +8,10 @@
 #include "reflection.hpp"
 
 namespace kengine {
+	class Entity;
+
 	struct CollisionComponent {
-		using function = putils::function<void(kengine::Entity &, kengine::Entity &), KENGINE_COLLISION_FUNCTION_SIZE>;
+		using function = putils::function<void(Entity &, Entity &), KENGINE_COLLISION_FUNCTION_SIZE>;
 		function onCollide = nullptr;
 
 		putils_reflection_class_name(CollisionComponent);

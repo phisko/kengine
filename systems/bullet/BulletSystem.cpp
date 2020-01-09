@@ -272,7 +272,7 @@ namespace kengine {
 		}
 
 		struct KengineMotionState : public btMotionState {
-			KengineMotionState(kengine::TransformComponent & transform) : transform(transform) {}
+			KengineMotionState(TransformComponent & transform) : transform(transform) {}
 
 			void getWorldTransform(btTransform & worldTrans) const final {
 				worldTrans = toBullet(transform);
@@ -289,7 +289,7 @@ namespace kengine {
 				transform.roll = zRotation;
 			}
 
-			kengine::TransformComponent & transform;
+			TransformComponent & transform;
 		};
 
 		const auto motionState = new KengineMotionState(transform);

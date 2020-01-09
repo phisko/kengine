@@ -12,7 +12,7 @@
 #include "shaders/QuadSrc.hpp"
 
 namespace kengine::Shaders {
-	GodRaysSpotLight::GodRaysSpotLight(kengine::EntityManager & em)
+	GodRaysSpotLight::GodRaysSpotLight(EntityManager & em)
 		: Program(true, putils_nameof(GodRaysSpotLight)),
 		_em(em)
 	{

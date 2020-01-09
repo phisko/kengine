@@ -9,13 +9,13 @@ namespace kengine {
 namespace kengine::Shaders {
 	class SkyBox : public putils::gl::Program {
 	public:
-		SkyBox(kengine::EntityManager & em);
+		SkyBox(EntityManager & em);
 
 		void init(size_t firstTextureID) override;
 		void run(const Parameters & params) override;
 
 	private:
-		kengine::EntityManager & _em;
+		EntityManager & _em;
 		size_t _textureID;
 
 	public:

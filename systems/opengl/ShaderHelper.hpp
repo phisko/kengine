@@ -42,7 +42,7 @@ namespace kengine {
 		};
 
 		static glm::vec3 toVec(const putils::Point3f & p) { return { p.x, p.y, p.z }; }
-		void drawModel(const kengine::OpenGLModelComponent & openGL);
-		glm::mat4 getModelMatrix(const kengine::ModelComponent & modelInfo, const kengine::TransformComponent & transform);
+		void drawModel(const OpenGLModelComponent & openGL);
+		glm::mat4 getModelMatrix(const ModelComponent & modelInfo, const TransformComponent & transform);
 	}
 }

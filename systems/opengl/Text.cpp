@@ -115,7 +115,7 @@ namespace kengine::Shaders {
 		std::unordered_map<size_t, Font> sizes;
 	};
 
-	static std::unordered_map<kengine::TextComponent::string, FontSizes> g_fonts;
+	static std::unordered_map<TextComponent::string, FontSizes> g_fonts;
 
 	static auto createFont(const char * file, size_t size) {
 		Font font;
@@ -153,7 +153,7 @@ namespace kengine::Shaders {
 		initWithShaders<Text>(putils::make_vector(
 			ShaderDescription{ vert, GL_VERTEX_SHADER },
 			ShaderDescription{ frag, GL_FRAGMENT_SHADER },
-			ShaderDescription{ kengine::Shaders::src::ApplyTransparency::Frag::glsl, GL_FRAGMENT_SHADER }
+			ShaderDescription{ Shaders::src::ApplyTransparency::Frag::glsl, GL_FRAGMENT_SHADER }
 		));
 
 		_textureID = firstTextureID;

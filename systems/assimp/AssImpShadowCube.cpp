@@ -16,8 +16,8 @@ namespace kengine {
 	void AssImpShadowCube::init(size_t firstTextureID) {
 		initWithShaders<AssImpShadowCube>(putils::make_vector(
 			ShaderDescription{ src::TexturedShader::vert, GL_VERTEX_SHADER },
-			ShaderDescription{ kengine::Shaders::src::DepthCube::Geom::glsl, GL_GEOMETRY_SHADER },
-			ShaderDescription{ kengine::Shaders::src::DepthCube::Frag::glsl, GL_FRAGMENT_SHADER }
+			ShaderDescription{ Shaders::src::DepthCube::Geom::glsl, GL_GEOMETRY_SHADER },
+			ShaderDescription{ Shaders::src::DepthCube::Frag::glsl, GL_FRAGMENT_SHADER }
 		));
 
 		_proj = glm::mat4(1.f);

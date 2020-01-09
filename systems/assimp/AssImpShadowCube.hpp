@@ -12,7 +12,7 @@ namespace kengine {
 	class AssImpShadowCube : public Shaders::ShadowCubeShader
 	{
 	public:
-		AssImpShadowCube(kengine::EntityManager & em)
+		AssImpShadowCube(EntityManager & em)
 			: ShadowCubeShader(false, putils_nameof(AssImpShadowCube)),
 			_em(em)
 		{}
@@ -21,7 +21,7 @@ namespace kengine {
 		void drawObjects() override;
 
 	private:
-		kengine::EntityManager & _em;
+		EntityManager & _em;
 
 	public:
 		GLint _bones;
