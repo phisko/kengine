@@ -34,6 +34,14 @@ float speed = 1.f;
 
 Speed of the animation.
 
+### loop
+
+```cpp
+bool loop = true;
+```
+
+Whether the animation should loop or not.
+
 # [AnimFilesComponent](AnimationComponent.hpp)
 
 `Component` providing a list of animation files to be loaded for a [model](ModelComponent.md) `Entity`.
