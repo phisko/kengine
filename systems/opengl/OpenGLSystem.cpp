@@ -139,7 +139,7 @@ namespace kengine {
 
 	namespace Input {
 		static void onKey(GLFWwindow *, int key, int scancode, int action, int mods) {
-			if (GImGui != nullptr && ImGui::GetIO().WantCaptureKeyboard)
+			if (g_buffer == nullptr || (GImGui != nullptr && ImGui::GetIO().WantCaptureKeyboard))
 				return;
 
 			if (action == GLFW_PRESS)
@@ -151,7 +151,7 @@ namespace kengine {
 		static putils::Point2f lastPos{ FLT_MAX, FLT_MAX };
 
 		static void onClick(GLFWwindow *, int button, int action, int mods) {
-			if (GImGui != nullptr && ImGui::GetIO().WantCaptureMouse)
+			if (g_buffer == nullptr || (GImGui != nullptr && ImGui::GetIO().WantCaptureMouse))
 				return;
 
 			if (action == GLFW_PRESS)
@@ -172,13 +172,13 @@ namespace kengine {
 			info.rel = { (float)xpos - lastPos.x, (float)ypos - lastPos.y };
 			lastPos = info.pos;
 
-			if (GImGui != nullptr && ImGui::GetIO().WantCaptureMouse)
+			if (g_buffer == nullptr || (GImGui != nullptr && ImGui::GetIO().WantCaptureMouse))
 				return;
 			g_buffer->moves.try_push_back(info);
 		}
 
 		static void onScroll(GLFWwindow *, double xoffset, double yoffset) {
-			if (GImGui != nullptr && ImGui::GetIO().WantCaptureMouse)
+			if (g_buffer == nullptr || (GImGui != nullptr && ImGui::GetIO().WantCaptureMouse))
 				return;
 			g_buffer->scrolls.try_push_back(InputBufferComponent::MouseScrollEvent{ g_window.id, (float)xoffset, (float)yoffset, lastPos });
 		}
