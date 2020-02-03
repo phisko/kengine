@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "putils/opengl/Program.hpp"
+#include "data/LightComponent.hpp"
 
 namespace kengine {
 	class Entity;

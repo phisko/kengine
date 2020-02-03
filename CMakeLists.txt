@@ -28,7 +28,7 @@ if (KENGINE_SFML)
     target_link_libraries(kengine PUBLIC kengine_sfml)
 endif ()
 
-if (KENGINE_IMGUI_OVERLAY OR KENGINE_OPENGL)
+if (KENGINE_OPENGL)
     set(BUILD_UTILS FALSE)
     set(GLEW_PATH systems/opengl/libs/glew)
     add_subdirectory(${GLEW_PATH}/build/cmake)
@@ -37,9 +37,7 @@ if (KENGINE_IMGUI_OVERLAY OR KENGINE_OPENGL)
 
     putils_conan(glm/0.9.9.5@g-truc/stable)
     target_link_libraries(kengine PUBLIC CONAN_PKG::glm)
-endif()
 
-if (KENGINE_OPENGL)
     add_subdirectory(systems/opengl)
     target_link_libraries(kengine PUBLIC kengine_opengl)
 
