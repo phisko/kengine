@@ -154,7 +154,8 @@ namespace kengine {
 		IniSection * currentSection = nullptr;
 		for (std::string line; std::getline(f, line);) {
 			using namespace putils::regex;
-			const auto match = (line.c_str() == "^\\[(.*)\\]$"_m);
+			static const auto pattern = "^\\[(.*)\\]$"_m;
+			const auto match = (line.c_str() == pattern);
 			if (!match.empty()) {
 				currentSection = &g_loadedFile[match[1].str()];
 				continue;
