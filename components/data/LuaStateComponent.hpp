@@ -2,6 +2,8 @@
 
 #include "sol.hpp"
 
-struct LuaStateComponent {
-	sol::state * state = nullptr;
-};
+namespace kengine {
+	struct LuaStateComponent {
+		sol::state * state = nullptr;
+	};
+}
