@@ -22,6 +22,7 @@
 #include "data/CameraComponent.hpp"
 #include "data/ViewportComponent.hpp"
 #include "data/WindowComponent.hpp"
+#include "data/GLFWWindowComponent.hpp"
 #include "data/ShaderComponent.hpp"
 #include "data/GBufferComponent.hpp"
 
@@ -99,7 +100,7 @@ namespace kengine {
 			};
 		};
 
-#ifndef KENGINE_NDEBUG
+#if !defined(KENGINE_NDEBUG) && !defined(KENGINE_OPENGL_NO_DEBUG_TOOLS)
 		em += Controllers::ShaderController(em);
 		em += Controllers::GBufferDebugger(em, g_gBufferIterator);
 #endif
@@ -128,10 +129,9 @@ namespace kengine {
 
 	static bool g_init = false;
 	static struct {
-		GLFWwindow * window = nullptr;
-
 		Entity::ID id = Entity::INVALID_ID;
 		WindowComponent::string name;
+		GLFWWindowComponent * glfw = nullptr;
 		WindowComponent * comp = nullptr;
 		putils::Point2i size;
 		bool fullScreen;
@@ -189,7 +189,7 @@ namespace kengine {
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
 
-		glfwDestroyWindow(g_window.window);
+		glfwDestroyWindow(g_window.glfw->window);
 		glfwTerminate();
 	}
 
@@ -205,22 +205,22 @@ namespace kengine {
 		// TODO: depend on g_windowComponent->fullscreen
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
-		g_window.window = glfwCreateWindow((int)g_window.comp->size.x, (int)g_window.comp->size.y, g_window.comp->name, nullptr, nullptr);
+		g_window.glfw->window = glfwCreateWindow((int)g_window.comp->size.x, (int)g_window.comp->size.y, g_window.comp->name, nullptr, nullptr);
 		// Desired size may not have been available, update to actual size
-		glfwGetWindowSize(g_window.window, &g_window.size.x, &g_window.size.y);
+		glfwGetWindowSize(g_window.glfw->window, &g_window.size.x, &g_window.size.y);
 		g_window.comp->size = g_window.size;
-		glfwSetWindowAspectRatio(g_window.window, g_window.size.x, g_window.size.y);
+		glfwSetWindowAspectRatio(g_window.glfw->window, g_window.size.x, g_window.size.y);
 
-		glfwMakeContextCurrent(g_window.window);
-		glfwSetWindowSizeCallback(g_window.window, [](auto window, int width, int height) {
+		glfwMakeContextCurrent(g_window.glfw->window);
+		glfwSetWindowSizeCallback(g_window.glfw->window, [](auto window, int width, int height) {
 			g_window.size = { width, height };
 			g_window.comp->size = g_window.size;
 		});
 
-		glfwSetMouseButtonCallback(g_window.window, Input::onClick);
-		glfwSetCursorPosCallback(g_window.window, Input::onMouseMove);
-		glfwSetScrollCallback(g_window.window, Input::onScroll);
-		glfwSetKeyCallback(g_window.window, Input::onKey);
+		glfwSetMouseButtonCallback(g_window.glfw->window, Input::onClick);
+		glfwSetCursorPosCallback(g_window.glfw->window, Input::onMouseMove);
+		glfwSetScrollCallback(g_window.glfw->window, Input::onScroll);
+		glfwSetKeyCallback(g_window.glfw->window, Input::onKey);
 	}
 
 	static void initImGui() noexcept {
@@ -246,7 +246,7 @@ namespace kengine {
 			glBindTexture(GL_TEXTURE_2D, last_texture);
 		}
 
-		ImGui_ImplGlfw_InitForOpenGL(g_window.window, true);
+		ImGui_ImplGlfw_InitForOpenGL(g_window.glfw->window, true);
 		ImGui_ImplOpenGL3_Init();
 	}
 
@@ -266,13 +266,17 @@ namespace kengine {
 		if (g_window.id == Entity::INVALID_ID) {
 			*g_em += [](Entity & e) {
 				g_window.comp = &e.attach<WindowComponent>();
+				g_window.glfw = &e.attach<GLFWWindowComponent>();
 				g_window.comp->name = "Kengine";
 				g_window.comp->size = { 1280, 720 };
 				g_window.id = e.id;
 			};
 		}
-		else
-			g_window.comp = &g_em->getEntity(g_window.id).get<WindowComponent>();
+		else {
+			auto e = g_em->getEntity(g_window.id);
+			g_window.comp = &e.get<WindowComponent>();
+			g_window.glfw = &e.attach<GLFWWindowComponent>();
+		}
 
 		g_window.comp->assignedSystem = "OpenGL";
 
@@ -383,7 +387,8 @@ namespace kengine {
 			return;
 		g_window.id = Entity::INVALID_ID;
 		g_window.comp = nullptr;
-		glfwDestroyWindow(g_window.window);
+		glfwDestroyWindow(g_window.glfw->window);
+		g_window.glfw = nullptr;
 	}
 
 	static void onMouseCaptured(Entity::ID window, bool captured) {
@@ -391,11 +396,11 @@ namespace kengine {
 			return;
 
 		if (captured) {
-			glfwSetInputMode(g_window.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+			glfwSetInputMode(g_window.glfw->window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 			ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NoMouse;
 		}
 		else {
-			glfwSetInputMode(g_window.window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			glfwSetInputMode(g_window.glfw->window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 			ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
 		}
 	}
@@ -513,35 +518,36 @@ namespace kengine {
 
 		doOpenGL();
 		doImGui();
-		glfwSwapBuffers(g_window.window);
+		glfwSwapBuffers(g_window.glfw->window);
 	}
 
 	static void updateWindowProperties() {
-		if (glfwGetWindowAttrib(g_window.window, GLFW_ICONIFIED)) {
-			glfwSwapBuffers(g_window.window);
+		if (glfwGetWindowAttrib(g_window.glfw->window, GLFW_ICONIFIED)) {
+			glfwSwapBuffers(g_window.glfw->window);
 			return;
 		}
 
-		if (glfwWindowShouldClose(g_window.window)) {
+		if (glfwWindowShouldClose(g_window.glfw->window)) {
 			if (g_window.comp->shutdownOnClose)
 				g_em->running = false;
 			g_em->getEntity(g_window.id).detach<WindowComponent>();
 			g_window.id = Entity::INVALID_ID;
 			g_window.comp = nullptr;
+			g_window.glfw = nullptr;
 			return;
 		}
 		
 		if (g_window.comp->name != g_window.name) {
 			g_window.name = g_window.comp->name;
-			glfwSetWindowTitle(g_window.window, g_window.comp->name);
+			glfwSetWindowTitle(g_window.glfw->window, g_window.comp->name);
 		}
 
 		if (g_window.comp->size != g_window.size) {
 			g_window.size = g_window.comp->size;
-			glfwSetWindowSize(g_window.window, g_window.size.x, g_window.size.y);
-			glfwGetWindowSize(g_window.window, &g_window.size.x, &g_window.size.y);
+			glfwSetWindowSize(g_window.glfw->window, g_window.size.x, g_window.size.y);
+			glfwGetWindowSize(g_window.glfw->window, &g_window.size.x, &g_window.size.y);
 			g_window.comp->size = g_window.size;
-			glfwSetWindowAspectRatio(g_window.window, g_window.size.x, g_window.size.y);
+			glfwSetWindowAspectRatio(g_window.glfw->window, g_window.size.x, g_window.size.y);
 		}
 
 		if (g_window.comp->fullscreen != g_window.fullScreen) {
@@ -551,13 +557,13 @@ namespace kengine {
 			const auto mode = glfwGetVideoMode(monitor);
 
 			if (g_window.comp->fullscreen)
-				glfwSetWindowMonitor(g_window.window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+				glfwSetWindowMonitor(g_window.glfw->window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
 			else
-				glfwSetWindowMonitor(g_window.window, nullptr, 0, 0, g_window.size.x, g_window.size.y, mode->refreshRate);
+				glfwSetWindowMonitor(g_window.glfw->window, nullptr, 0, 0, g_window.size.x, g_window.size.y, mode->refreshRate);
 
-			glfwGetWindowSize(g_window.window, &g_window.size.x, &g_window.size.y);
+			glfwGetWindowSize(g_window.glfw->window, &g_window.size.x, &g_window.size.y);
 			g_window.comp->size = g_window.size;
-			glfwSetWindowAspectRatio(g_window.window, g_window.size.x, g_window.size.y);
+			glfwSetWindowAspectRatio(g_window.glfw->window, g_window.size.x, g_window.size.y);
 		}
 	}
 
