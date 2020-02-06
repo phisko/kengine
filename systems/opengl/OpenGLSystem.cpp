@@ -189,7 +189,8 @@ namespace kengine {
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
 
-		glfwDestroyWindow(g_window.glfw->window);
+		if (g_window.glfw)
+			glfwDestroyWindow(g_window.glfw->window);
 		glfwTerminate();
 	}
 
@@ -503,6 +504,8 @@ namespace kengine {
 
 		glfwPollEvents();
 		updateWindowProperties();
+		if (g_window.id == Entity::INVALID_ID) // window closed
+			return;
 
 		for (auto &[e, modelData] : g_em->getEntities<ModelDataComponent>()) {
 			createObject(e, modelData);
@@ -533,6 +536,7 @@ namespace kengine {
 			g_em->getEntity(g_window.id).detach<WindowComponent>();
 			g_window.id = Entity::INVALID_ID;
 			g_window.comp = nullptr;
+			glfwDestroyWindow(g_window.glfw->window);
 			g_window.glfw = nullptr;
 			return;
 		}
