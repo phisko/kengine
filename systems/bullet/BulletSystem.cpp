@@ -85,26 +85,31 @@ static btTransform toBullet(const kengine::ModelColliderComponent::Collider & co
 namespace debug {
 	class Drawer : public btIDebugDraw {
 	public:
-		Drawer(kengine::EntityManager & em) : _em(em) {}
-
-		void cleanup() {
-			for (const auto id : _toCleanup)
-				_em.removeEntity(id);
-			_toCleanup.clear();
-		}
-
-		void drawLine(const btVector3 & from, const btVector3 & to, const btVector3 & color) override {
-			_em += [&](kengine::Entity & e) {
-				const auto a = toPutils(from);
-				const auto b = toPutils(to) - a;
-				e += kengine::TransformComponent({ a });
-				e += kengine::DebugGraphicsComponent(kengine::DebugGraphicsComponent::Line, { b }, putils::NormalizedColor{ color[0], color[1], color[2], 1.f });
-				_toCleanup.push_back(e.id);
+		Drawer(kengine::EntityManager & em) : _em(em) {
+			em += [this](kengine::Entity & e) {
+				e += kengine::TransformComponent{};
+				e += kengine::DebugGraphicsComponent{};
+				_debugEntity = e.id;
 			};
 		}
 
-		void drawContactPoint(const btVector3 & PointOnB, const btVector3 & normalOnB, btScalar distance, int lifeTime, const btVector3 & color) override {
+		void cleanup() {
+			auto & comp = getDebugComponent();
+			comp.elements.clear();
 		}
+
+	private:
+		kengine::DebugGraphicsComponent & getDebugComponent() { return _em.getEntity(_debugEntity).get<kengine::DebugGraphicsComponent>(); }
+
+		void drawLine(const btVector3 & from, const btVector3 & to, const btVector3 & color) override {
+			auto & comp = getDebugComponent();
+			const auto a = toPutils(from);
+			const auto b = toPutils(to);
+			const auto putilsColor = putils::NormalizedColor{ color[0], color[1], color[2], 1.f };
+			comp.elements.emplace_back(kengine::DebugGraphicsComponent::Line{ a }, b, putilsColor);
+		}
+
+		void drawContactPoint(const btVector3 & PointOnB, const btVector3 & normalOnB, btScalar distance, int lifeTime, const btVector3 & color) override {}
 
 		void draw3dText(const btVector3 & location, const char * textString) override {}
 
@@ -115,7 +120,7 @@ namespace debug {
 
 	private:
 		kengine::EntityManager & _em;
-		std::vector<kengine::Entity::ID> _toCleanup;
+		kengine::Entity::ID _debugEntity;
 	};
 
 	static Drawer * drawer = nullptr;

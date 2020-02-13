@@ -1,56 +1,89 @@
 #pragma once
 
-#ifndef KENGINE_DEBUG_GRAPHICS_TEXT_MAX_LENGTH
-# define KENGINE_DEBUG_GRAPHICS_TEXT_MAX_LENGTH 64
-#endif
-
-#include "string.hpp"
+#include <vector>
+#include <variant>
 #include "Color.hpp"
 #include "Point.hpp"
 
 namespace kengine {
-	class DebugGraphicsComponent {
-	public:
-		static constexpr char stringName[] = "DebugGraphicsComponentString";
-		using string = putils::string<KENGINE_DEBUG_GRAPHICS_TEXT_MAX_LENGTH, stringName>;
+	struct DebugGraphicsComponent {
+		struct Text {
+			std::string text;
+			std::string font;
+			float size = 1.f;
 
-		enum Type {
-			Text,
-			Line,
-			Sphere,
-			Box
+			putils_reflection_class_name(DebugGraphicsComponentText);
+			putils_reflection_attributes(
+				putils_reflection_attribute(&Text::text),
+				putils_reflection_attribute(&Text::font),
+				putils_reflection_attribute(&Text::size)
+			);
 		};
 
-	public:
-		DebugGraphicsComponent() = default;
+		struct Line {
+			putils::Point3f end = {};
+			float thickness = 1.f;
 
-		// Text
-		DebugGraphicsComponent(const char * text, unsigned int textSize, const char * font, const putils::Rect3f & offset, const putils::NormalizedColor & color)
-			: text(text), offset(offset), font(font), color(color), debugType(Text) {}
+			putils_reflection_class_name(DebugGraphicsComponentLine);
+			putils_reflection_attributes(
+				putils_reflection_attribute(&Line::end),
+				putils_reflection_attribute(&Line::thickness)
+			);
+		};
 
-		// Sphere/Line/Box
-		DebugGraphicsComponent(Type type, const putils::Rect3f & offset = { {}, { 1.f, 1.f, 1.f } }, const putils::NormalizedColor & color = {})
-			: offset(offset), color(color), debugType(type) {}
+		struct Sphere {
+			float radius = .5f;
 
-		string text; 
-		string font;
+			putils_reflection_class_name(DebugGraphicsComponentSphere);
+			putils_reflection_attributes(
+				putils_reflection_attribute(&Sphere::radius)
+			);
+		};
 
-		putils::NormalizedColor color;
-		putils::Rect3f offset{ {}, { 1.f, 1.f, 1.f } };
-		putils::Point3f lineEnd;
-		// text size: offset.size.x
-		// circle radius: offset.size.x
-		// line thickness: offset.size.y
+		struct Box {
+			putils::Vector3f size = { 1.f, 1.f, 1.f };
 
-		Type debugType = Type::Box;
+			putils_reflection_class_name(DebugGraphicsComponentBox);
+			putils_reflection_attributes(
+				putils_reflection_attribute(&Box::size)
+			);
+		};
+
+		enum class ReferenceSpace {
+			World,
+			Object
+		};
+
+		struct Element {
+			putils::Point3f pos;
+			putils::NormalizedColor color;
+			std::variant<Text, Line, Sphere, Box> data;
+			ReferenceSpace referenceSpace;
+
+			Element() = default;
+			Element(const Element &) = default;
+			Element & operator=(const Element &) = default;
+			Element(Element &&) = default;
+			Element & operator=(Element &&) = default;
+
+			template<typename T, typename = std::enable_if_t<!std::is_same<std::decay_t<T>, Element>()>>
+			explicit Element(T && val, const putils::Point3f & pos = {}, const putils::NormalizedColor & color = {}, ReferenceSpace referenceSpace = ReferenceSpace::World)
+				: data(FWD(val)), pos(pos), color(color), referenceSpace(referenceSpace)
+			{}
+
+			putils_reflection_class_name(DebugGraphicsComponentElement);
+			putils_reflection_attributes(
+				putils_reflection_attribute(&Element::pos),
+				putils_reflection_attribute(&Element::color),
+				putils_reflection_attribute(&Element::data)
+			);
+		};
+
+		std::vector<Element> elements;
 
 		putils_reflection_class_name(DebugGraphicsComponent);
 		putils_reflection_attributes(
-			putils_reflection_attribute(&DebugGraphicsComponent::text),
-			putils_reflection_attribute(&DebugGraphicsComponent::font),
-			putils_reflection_attribute(&DebugGraphicsComponent::color),
-			putils_reflection_attribute(&DebugGraphicsComponent::offset),
-			putils_reflection_attribute(&DebugGraphicsComponent::debugType)
+			putils_reflection_attribute(&DebugGraphicsComponent::elements)
 		);
 	};
 }

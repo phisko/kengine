@@ -6,6 +6,8 @@
 
 #include "systems/opengl/ShaderHelper.hpp"
 #include "shaders/ApplyTransparencySrc.hpp"
+#include "visit.hpp"
+#include "static_assert.hpp"
 
 static const char * vert = R"(
 #version 330
@@ -76,39 +78,49 @@ namespace kengine::Shaders {
 		_proj = params.proj;
 		_viewPos = params.camPos;
 
+		const auto commonMatrixTransform = [](glm::mat4 & model, const kengine::TransformComponent & transform, DebugGraphicsComponent::ReferenceSpace referenceSpace) {
+			if (referenceSpace == DebugGraphicsComponent::ReferenceSpace::World)
+				return;
+			model = glm::translate(model, ShaderHelper::toVec(transform.boundingBox.position));
+			model = glm::rotate(model, transform.roll, { 0.f, 0.f, 1.f });
+			model = glm::rotate(model, transform.yaw, { 0.f, 1.f, 0.f });
+			model = glm::rotate(model, transform.pitch, { 1.f, 0.f, 0.f });
+		};
+
 		for (const auto &[e, debug, transform] : _em.getEntities<DebugGraphicsComponent, TransformComponent>()) {
-			_color = debug.color;
-			_entityID = (float)e.id;
+			for (const auto & element : debug.elements) {
+				_color = element.color;
+				_entityID = (float)e.id;
 
-			if (debug.debugType == DebugGraphicsComponent::Line) {
-				glm::mat4 model(1.f);
-				model = glm::translate(model, ShaderHelper::toVec(transform.boundingBox.position));
-				model = glm::rotate(model, transform.roll, { 0.f, 0.f, 1.f });
-				model = glm::rotate(model, transform.yaw, { 0.f, 1.f, 0.f });
-				model = glm::rotate(model, transform.pitch, { 1.f, 0.f, 0.f });
-				_model = model;
-
-				ShaderHelper::shapes::drawLine(ShaderHelper::toVec(debug.offset.position), ShaderHelper::toVec(debug.lineEnd));
+				glm::mat4 model{ 1.f };
+				std::visit(putils::overloaded{
+					[&](const DebugGraphicsComponent::Line & line) {
+						commonMatrixTransform(model, transform, element.referenceSpace);
+						_model = model;
+						ShaderHelper::shapes::drawLine(ShaderHelper::toVec(element.pos), ShaderHelper::toVec(line.end));
+					},
+					[&](const DebugGraphicsComponent::Sphere & sphere) {
+						model = glm::translate(model, ShaderHelper::toVec(element.pos));
+						commonMatrixTransform(model, transform, element.referenceSpace);
+						model = glm::scale(model, ShaderHelper::toVec(transform.boundingBox.size * sphere.radius));
+						_model = model;
+						ShaderHelper::shapes::drawSphere();
+					},
+					[&](const DebugGraphicsComponent::Box & box) {
+						model = glm::translate(model, ShaderHelper::toVec(element.pos));
+						commonMatrixTransform(model, transform, element.referenceSpace);
+						model = glm::scale(model, ShaderHelper::toVec(transform.boundingBox.size * box.size));
+						_model = model;
+						ShaderHelper::shapes::drawCube();
+					},
+					[&](const DebugGraphicsComponent::Text & text) {
+						// TODO
+					},
+					[&](auto && v) {
+						static_assert(putils::always_false<decltype(v)>(), "Non exhaustive visitor");
+					}
+				}, element.data);
 			}
-			else if (debug.debugType == DebugGraphicsComponent::Sphere || debug.debugType == DebugGraphicsComponent::Box) {
-				glm::mat4 model(1.f);
-				model = glm::translate(model, ShaderHelper::toVec(transform.boundingBox.position + debug.offset.position));
-				model = glm::rotate(model, transform.roll, { 0.f, 0.f, 1.f });
-				model = glm::rotate(model, transform.yaw, { 0.f, 1.f, 0.f });
-				model = glm::rotate(model, transform.pitch, { 1.f, 0.f, 0.f });
-				model = glm::scale(model, ShaderHelper::toVec(transform.boundingBox.size * debug.offset.size));
-				_model = model;
-
-				if (debug.debugType == DebugGraphicsComponent::Box)
-					ShaderHelper::shapes::drawCube();
-				else
-					ShaderHelper::shapes::drawSphere();
-			}
-			else if (debug.debugType == DebugGraphicsComponent::Text) {
-				// TODO
-			}
-			else
-				assert(!"Unsupported DebugGraphicsComponent type"); // Unsupported type
 		}
 	}
 }
