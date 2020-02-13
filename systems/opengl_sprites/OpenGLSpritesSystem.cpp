@@ -22,12 +22,9 @@ namespace kengine {
 	EntityCreator * OpenGLSpritesSystem(EntityManager & em) {
 		g_em = &em;
 
-		em += [&](Entity & e) {
-			e += makeGBufferShaderComponent<SpritesShader>(em);
-		};
-
 		return [](Entity & e) {
 			e += functions::OnEntityCreated{ onEntityCreated };
+			e += makeGBufferShaderComponent<SpritesShader>(*g_em);
 		};
 	}
 
