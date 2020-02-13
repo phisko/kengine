@@ -9,11 +9,15 @@
 namespace kengine {
 	struct NameComponent {
 		static constexpr char stringName[] = "NameComponentString";
-		putils::string<KENGINE_NAME_COMPONENT_MAX_LENGTH, stringName> name;
+		using string = putils::string<KENGINE_NAME_COMPONENT_MAX_LENGTH, stringName>;
+		string name;
 
 		putils_reflection_class_name(NameComponent);
 		putils_reflection_attributes(
 			putils_reflection_attribute(&NameComponent::name)
+		);
+		putils_reflection_used_types(
+			putils_reflection_type(string)
 		);
 	};
 }

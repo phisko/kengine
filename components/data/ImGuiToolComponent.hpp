@@ -8,7 +8,6 @@
 
 namespace kengine {
 	struct ImGuiToolComponent {
-		static constexpr char stringName[] = "ImGuiToolComponentString";
 		bool enabled;
 
 		putils_reflection_class_name(ImGuiToolComponent);

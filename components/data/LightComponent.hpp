@@ -43,7 +43,7 @@ namespace kengine {
 			putils_reflection_attribute(&DirLightComponent::cascadeEnds)
 		);
 		putils_reflection_parents(
-			putils_reflection_parent(LightComponent)
+			putils_reflection_type(LightComponent)
 		);
 	};
 
@@ -61,7 +61,7 @@ namespace kengine {
 			putils_reflection_attribute(&PointLightComponent::quadratic)
 		);
 		putils_reflection_parents(
-			putils_reflection_parent(LightComponent)
+			putils_reflection_type(LightComponent)
 		);
 	};
 
@@ -77,7 +77,7 @@ namespace kengine {
 			putils_reflection_attribute(&SpotLightComponent::outerCutOff)
 		);
 		putils_reflection_parents(
-			putils_reflection_parent(PointLightComponent)
+			putils_reflection_type(PointLightComponent)
 		);
 	};
 }

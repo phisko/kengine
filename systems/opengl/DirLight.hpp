@@ -26,8 +26,8 @@ namespace kengine::Shaders {
 
 	public:
 		putils_reflection_parents(
-			putils_reflection_parent(src::CSM::Frag::Uniforms),
-			putils_reflection_parent(src::DirLight::Frag::Uniforms)
+			putils_reflection_type(src::CSM::Frag::Uniforms),
+			putils_reflection_type(src::DirLight::Frag::Uniforms)
 		);
 
 	private:

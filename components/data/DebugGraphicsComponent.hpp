@@ -67,7 +67,7 @@ namespace kengine {
 			Element & operator=(Element &&) = default;
 
 			template<typename T, typename = std::enable_if_t<!std::is_same<std::decay_t<T>, Element>()>>
-			explicit Element(T && val, const putils::Point3f & pos = {}, const putils::NormalizedColor & color = {}, ReferenceSpace referenceSpace = ReferenceSpace::World)
+			explicit Element(T && val, const putils::Point3f & pos = {}, const putils::NormalizedColor & color = {}, ReferenceSpace referenceSpace = ReferenceSpace::Object)
 				: data(FWD(val)), pos(pos), color(color), referenceSpace(referenceSpace)
 			{}
 
@@ -84,6 +84,13 @@ namespace kengine {
 		putils_reflection_class_name(DebugGraphicsComponent);
 		putils_reflection_attributes(
 			putils_reflection_attribute(&DebugGraphicsComponent::elements)
+		);
+		putils_reflection_used_types(
+			putils_reflection_type(Element),
+			putils_reflection_type(Text),
+			putils_reflection_type(Line),
+			putils_reflection_type(Sphere),
+			putils_reflection_type(Box)
 		);
 	};
 }

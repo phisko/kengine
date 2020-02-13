@@ -33,9 +33,9 @@ namespace kengine::Shaders {
 
 	public:
 		putils_reflection_parents(
-			putils_reflection_parent(src::GodRays::Frag::Uniforms),
-			putils_reflection_parent(src::CSM::Frag::Uniforms),
-			putils_reflection_parent(src::DirLight::GetDirection::Uniforms)
+			putils_reflection_type(src::GodRays::Frag::Uniforms),
+			putils_reflection_type(src::CSM::Frag::Uniforms),
+			putils_reflection_type(src::DirLight::GetDirection::Uniforms)
 		);
 	};
 }

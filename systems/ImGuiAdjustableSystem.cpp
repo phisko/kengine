@@ -17,6 +17,8 @@
 #include "magic_enum.hpp"
 #include "regex.hpp"
 #include "chop.hpp"
+#include "visit.hpp"
+#include "static_assert.hpp"
 
 #ifndef KENGINE_DEFAULT_ADJUSTABLE_SAVE_PATH
 # define KENGINE_DEFAULT_ADJUSTABLE_SAVE_PATH "."
@@ -205,26 +207,23 @@ namespace kengine {
 			f << '[' << comp.section << ']' << std::endl;
 			for (const auto & value : comp.values) {
 				f << value.name << '=';
-				switch (value.adjustableType) {
-				case AdjustableComponent::Value::Int:
-					f << value.i.value;
-					break;
-				case AdjustableComponent::Value::Double:
-					f << value.f.value;
-					break;
-				case AdjustableComponent::Value::Bool:
-					f << std::boolalpha << value.b.value << std::noboolalpha;
-					break;
-				case AdjustableComponent::Value::Color:
-					f << putils::toRGBA(value.color.value);
-					break;
-				case AdjustableComponent::Value::Enum:
-					f << value.i.value;
-					break;
-				default:
-					assert("Unknown adjustable type" && false);
-					static_assert(putils::magic_enum::enum_count<AdjustableComponent::Value::EType>() == 5);
-				}
+				std::visit(putils::overloaded{
+					[&](const AdjustableComponent::Value::IntStorage & s) {
+						f << s.value;
+					},
+					[&](const AdjustableComponent::Value::FloatStorage & s) {
+						f << s.value;
+					},
+					[&](const AdjustableComponent::Value::BoolStorage & s) {
+						f << std::boolalpha << s.value << std::noboolalpha;
+					},
+					[&](const AdjustableComponent::Value::ColorStorage & s) {
+						f << putils::toRGBA(s.value);
+					},
+					[&](auto && t) {
+						static_assert(putils::always_false<decltype(t)>(), "Non exhaustive visitor");
+					}
+				}, value.storage);
 				f << std::endl;
 			}
 			f << std::endl;
@@ -318,57 +317,54 @@ namespace kengine {
 		ImGui::Text(name);
 		ImGui::NextColumn();
 
-		switch (value.adjustableType) {
-		case AdjustableComponent::Value::Bool: {
-			ImGui::Checkbox((string("##") + value.name).c_str(), value.b.ptr != nullptr ? value.b.ptr : &value.b.value);
-			if (value.b.ptr != nullptr)
-				value.b.value = *value.b.ptr;
-			break;
-		}
-		case AdjustableComponent::Value::Double: {
-			ImGui::PushItemWidth(-1.f);
-			auto val = value.f.ptr != nullptr ? *value.f.ptr : value.f.value;
-			if (ImGui::InputFloat((string("##") + value.name).c_str(), &val, 0.f, 0.f, "%.6f", ImGuiInputTextFlags_EnterReturnsTrue)) {
-				value.f.value = val;
-				if (value.f.ptr != nullptr)
-					*value.f.ptr = val;
-			}
-			ImGui::PopItemWidth();
-			break;
-		}
-		case AdjustableComponent::Value::Int: {
-			ImGui::PushItemWidth(-1.f);
-			auto val = value.i.ptr != nullptr ? *value.i.ptr : value.i.value;
-			if (ImGui::InputInt((string("##") + value.name).c_str(), &val, 1, 100, ImGuiInputTextFlags_EnterReturnsTrue)) {
-				value.i.value = val;
-				if (value.i.ptr != nullptr)
-					*value.i.ptr = val;
-			}
-			ImGui::PopItemWidth();
-			break;
-		}
-		case AdjustableComponent::Value::Color: {
-			const auto color = value.color.ptr != nullptr ? value.color.ptr->attributes : value.color.value.attributes;
-			if (ImGui::ColorButton((string("##") + value.name).c_str(), ImVec4(color[0], color[1], color[2], color[3])))
-				ImGui::OpenPopup("color picker popup");
+		std::visit(putils::overloaded{
+			[&](AdjustableComponent::Value::IntStorage & s) {
+				if (value.getEnumNames != nullptr)
+					ImGui::Combo((string("##") + value.name).c_str(), s.ptr != nullptr ? s.ptr : &s.value, value.getEnumNames(), (int)value.enumCount);
+				else {
+					ImGui::PushItemWidth(-1.f);
+					auto val = s.ptr != nullptr ? *s.ptr : s.value;
+					if (ImGui::InputInt((string("##") + value.name).c_str(), &val, 1, 100, ImGuiInputTextFlags_EnterReturnsTrue)) {
+						s.value = val;
+						if (s.ptr != nullptr)
+							*s.ptr = val;
+					}
+					ImGui::PopItemWidth();
+				}
+			},
+			[&](AdjustableComponent::Value::FloatStorage & s) {
+				ImGui::PushItemWidth(-1.f);
+				auto val = s.ptr != nullptr ? *s.ptr : s.value;
+				if (ImGui::InputFloat((string("##") + value.name).c_str(), &val, 0.f, 0.f, "%.6f", ImGuiInputTextFlags_EnterReturnsTrue)) {
+					s.value = val;
+					if (s.ptr != nullptr)
+						*s.ptr = val;
+				}
+				ImGui::PopItemWidth();
+			},
+			[&](AdjustableComponent::Value::BoolStorage & s) {
+				ImGui::Checkbox((string("##") + value.name).c_str(), s.ptr != nullptr ? s.ptr : &s.value);
+				if (s.ptr != nullptr)
+					s.value = *s.ptr;
+			},
+			[&](AdjustableComponent::Value::ColorStorage & s) {
+				const auto color = s.ptr != nullptr ? s.ptr->attributes : s.value.attributes;
+				if (ImGui::ColorButton((string("##") + value.name).c_str(), ImVec4(color[0], color[1], color[2], color[3])))
+					ImGui::OpenPopup("color picker popup");
 
-			if (ImGui::BeginPopup("color picker popup")) {
-				ImGui::ColorPicker4(value.name, color);
-				ImGui::EndPopup();
-			}
+				if (ImGui::BeginPopup("color picker popup")) {
+					ImGui::ColorPicker4(value.name, color);
+					ImGui::EndPopup();
+				}
 
-			if (value.color.ptr != nullptr)
-				value.color.value = *value.color.ptr;
-			break;
-		}
-		case AdjustableComponent::Value::Enum: {
-			ImGui::Combo((string("##") + value.name).c_str(), value.i.ptr != nullptr ? value.i.ptr : &value.i.value, value.getEnumNames(), (int)value.enumCount);
-			break;
-		}
-		default:
-			assert("Unknown type" && false);
-			static_assert(putils::magic_enum::enum_count<AdjustableComponent::Value::EType>() == 5);
-		}
+				if (s.ptr != nullptr)
+					s.value = *s.ptr;
+			},
+			[&](auto && t) {
+				static_assert(putils::always_false<decltype(t)>(), "Non exhaustive visitor");
+			}
+		}, value.storage);
+
 		ImGui::Columns();
 	}
 
@@ -378,33 +374,28 @@ namespace kengine {
 				*storage.ptr = storage.value;
 		};
 
-		switch (value.adjustableType) {
-		case AdjustableComponent::Value::Int:
-			value.i.value = putils::parse<int>(s);
-			assignPtr(value.i);
-			break;
-		case AdjustableComponent::Value::Double:
-			value.f.value = putils::parse<float>(s);
-			assignPtr(value.f);
-			break;
-		case AdjustableComponent::Value::Bool:
-			value.b.value = putils::parse<bool>(s);
-			assignPtr(value.b);
-			break;
-		case AdjustableComponent::Value::Color: {
-			putils::Color tmp;
-			tmp.rgba = putils::parse<unsigned int>(s);
-			value.color.value = putils::toNormalizedColor(tmp);
-			assignPtr(value.color);
-			break;
-		}
-		case AdjustableComponent::Value::Enum:
-			value.i.value = putils::parse<int>(s);
-			assignPtr(value.i);
-			break;
-		default:
-			assert("Unknown adjustable type" && false);
-			static_assert(putils::magic_enum::enum_count<AdjustableComponent::Value::EType>() == 5);
-		}
+		std::visit(putils::overloaded{
+			[&](AdjustableComponent::Value::IntStorage & storage) {
+				storage.value = putils::parse<int>(s);
+				assignPtr(storage);
+			},
+			[&](AdjustableComponent::Value::FloatStorage & storage) {
+				storage.value = putils::parse<float>(s);
+				assignPtr(storage);
+			},
+			[&](AdjustableComponent::Value::BoolStorage & storage) {
+				storage.value = putils::parse<bool>(s);
+				assignPtr(storage);
+			},
+			[&](AdjustableComponent::Value::ColorStorage & storage) {
+				putils::Color tmp;
+				tmp.rgba = putils::parse<unsigned int>(s);
+				storage.value = putils::toNormalizedColor(tmp);
+				assignPtr(storage);
+			},
+			[&](auto && t) {
+				static_assert(putils::always_false<decltype(t)>(), "Non exhaustive visitor");
+			}
+		}, value.storage);
 	}
 }

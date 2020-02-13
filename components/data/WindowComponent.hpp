@@ -27,5 +27,8 @@ namespace kengine {
 			putils_reflection_attribute(&WindowComponent::shutdownOnClose),
 			putils_reflection_attribute(&WindowComponent::assignedSystem)
 		);
+		putils_reflection_used_types(
+			putils_reflection_type(string)
+		);
 	};
 }

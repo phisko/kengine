@@ -31,7 +31,7 @@ namespace kengine {
 		);
 
 		putils_reflection_parents(
-			putils_reflection_parent(Shaders::ShadowCubeShader)
+			putils_reflection_type(Shaders::ShadowCubeShader)
 		);
 	};
 }

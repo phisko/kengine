@@ -44,6 +44,9 @@ namespace kengine {
 		putils_reflection_attributes(
 			putils_reflection_attribute(&AnimListComponent::anims)
 		);
+		putils_reflection_used_types(
+			putils_reflection_type(Anim)
+		);
 	};
 
 	struct AnimFilesComponent {

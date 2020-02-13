@@ -19,9 +19,12 @@ namespace kengine {
 
         putils_reflection_class_name(GraphicsComponent);
         putils_reflection_attributes(
-				putils_reflection_attribute(&GraphicsComponent::appearance),
-				putils_reflection_attribute(&GraphicsComponent::model),
-				putils_reflection_attribute(&GraphicsComponent::color)
+			putils_reflection_attribute(&GraphicsComponent::appearance),
+			putils_reflection_attribute(&GraphicsComponent::model),
+			putils_reflection_attribute(&GraphicsComponent::color)
         );
+		putils_reflection_used_types(
+			putils_reflection_type(string)
+		);
     };
 }

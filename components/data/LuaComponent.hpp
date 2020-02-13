@@ -23,7 +23,11 @@ namespace kengine {
 
         putils_reflection_class_name(LuaComponent);
         putils_reflection_attributes(
-                putils_reflection_attribute(&LuaComponent::scripts)
+			putils_reflection_attribute(&LuaComponent::scripts)
+        );
+        putils_reflection_used_types(
+            putils_reflection_type(script),
+            putils_reflection_type(script_vector)
         );
     };
 }

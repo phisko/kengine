@@ -28,5 +28,8 @@ namespace kengine {
 		putils_reflection_attributes(
 			putils_reflection_attribute(&ModelSkeletonComponent::meshes)
 		);
+		putils_reflection_used_types(
+			putils_reflection_type(Mesh)
+		);
 	};
 }

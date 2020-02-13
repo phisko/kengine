@@ -33,6 +33,9 @@ namespace kengine {
 			putils_reflection_attribute(&TextComponent::color),
 			putils_reflection_attribute(&TextComponent::alignment)
 		);
+		putils_reflection_used_types(
+			putils_reflection_type(string)
+		);
 	};
 
 	struct TextComponent2D : TextComponent { // UI element

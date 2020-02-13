@@ -55,8 +55,8 @@ namespace kengine::Shaders {
 		);
 
 		putils_reflection_parents(
-			putils_reflection_parent(Shaders::src::DepthCube::Geom::Uniforms),
-			putils_reflection_parent(Shaders::src::DepthCube::Frag::Uniforms)
+			putils_reflection_type(Shaders::src::DepthCube::Geom::Uniforms),
+			putils_reflection_type(Shaders::src::DepthCube::Frag::Uniforms)
 		);
 	};
 }

@@ -27,7 +27,7 @@ namespace kengine::Shaders {
 
 	public:
 		putils_reflection_parents(
-			putils_reflection_parent(ShadowCubeShader)
+			putils_reflection_type(ShadowCubeShader)
 		);
 	};
 }

@@ -32,9 +32,9 @@ namespace kengine::Shaders {
 
 	public:
 		putils_reflection_parents(
-			putils_reflection_parent(src::GodRays::Frag::Uniforms),
-			putils_reflection_parent(src::ShadowMap::Frag::Uniforms),
-			putils_reflection_parent(src::PointLight::GetDirection::Uniforms)
+			putils_reflection_type(src::GodRays::Frag::Uniforms),
+			putils_reflection_type(src::ShadowMap::Frag::Uniforms),
+			putils_reflection_type(src::PointLight::GetDirection::Uniforms)
 		);
 	};
 }

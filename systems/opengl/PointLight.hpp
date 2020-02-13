@@ -28,9 +28,9 @@ namespace kengine::Shaders {
 
 	public:
 		putils_reflection_parents(
-			putils_reflection_parent(src::ProjViewModel::Vert::Uniforms),
-			putils_reflection_parent(src::ShadowCube::Frag::Uniforms),
-			putils_reflection_parent(src::PointLight::Frag::Uniforms)
+			putils_reflection_type(src::ProjViewModel::Vert::Uniforms),
+			putils_reflection_type(src::ShadowCube::Frag::Uniforms),
+			putils_reflection_type(src::PointLight::Frag::Uniforms)
 		);
 
 	private:

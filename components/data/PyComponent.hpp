@@ -24,5 +24,9 @@ namespace kengine {
         putils_reflection_attributes(
                 putils_reflection_attribute(&PyComponent::scripts)
         );
+        putils_reflection_used_types(
+            putils_reflection_type(script),
+            putils_reflection_type(script_vector)
+        );
     };
 }

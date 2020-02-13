@@ -106,7 +106,7 @@ namespace debug {
 			const auto a = toPutils(from);
 			const auto b = toPutils(to);
 			const auto putilsColor = putils::NormalizedColor{ color[0], color[1], color[2], 1.f };
-			comp.elements.emplace_back(kengine::DebugGraphicsComponent::Line{ a }, b, putilsColor);
+			comp.elements.emplace_back(kengine::DebugGraphicsComponent::Line{ a }, b, putilsColor, kengine::DebugGraphicsComponent::ReferenceSpace::World);
 		}
 
 		void drawContactPoint(const btVector3 & PointOnB, const btVector3 & normalOnB, btScalar distance, int lifeTime, const btVector3 & color) override {}

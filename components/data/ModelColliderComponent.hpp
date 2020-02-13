@@ -43,6 +43,9 @@ namespace kengine {
 				putils_reflection_attribute(&Collider::pitch),
 				putils_reflection_attribute(&Collider::roll)
 			);
+			putils_reflection_used_types(
+				putils_reflection_type(string)
+			);
 		};
 
 		static constexpr char vectorName[] = "ModelColliderComponentVector";
@@ -52,6 +55,9 @@ namespace kengine {
 		putils_reflection_class_name(ModelColliderComponent);
 		putils_reflection_attributes(
 			putils_reflection_attribute(&ModelColliderComponent::colliders)
+		);
+		putils_reflection_used_types(
+			putils_reflection_type(Collider)
 		);
 	};
 }

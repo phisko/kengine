@@ -4,6 +4,7 @@
 # define KENGINE_ADJUSTABLE_NAME_MAX_LENGTH 64
 #endif
 
+#include <variant>
 #include <vector>
 #include "string.hpp"
 #include "Color.hpp"
@@ -17,19 +18,23 @@ namespace kengine {
 
 		struct Value {
 			Value() = default;
+			Value(const Value &) = default;
+			Value & operator=(const Value &) = default;
+			Value(Value &&) = default;
+			Value & operator=(Value &&) = default;
 
-			Value(const char * name, bool * b) : name(name), b(b), adjustableType(Bool) {}
-			Value(const char * name, bool b) : name(name), b(b), adjustableType(Bool) {}
+			Value(const char * name, bool * b) : name(name), storage(BoolStorage{ b }) {}
+			Value(const char * name, bool b) : name(name), storage(BoolStorage{ b }) {}
 
-			Value(const char * name, float * f) : name(name), f(f), adjustableType(Double) {}
-			Value(const char * name, float f) : name(name), f(f), adjustableType(Double) {}
+			Value(const char * name, float * f) : name(name), storage(FloatStorage{ f }) {}
+			Value(const char * name, float f) : name(name), storage(FloatStorage{ f }) {}
 
-			Value(const char * name, int * i) : name(name), i(i), adjustableType(Int) {}
-			Value(const char * name, int i) : name(name), i(i), adjustableType(Int) {}
+			Value(const char * name, int * i) : name(name), storage(IntStorage{ i }) {}
+			Value(const char * name, int i) : name(name), storage(IntStorage{ i }) {}
 
-			Value(const char * name, putils::NormalizedColor * color) : name(name), color(color), adjustableType(Color) {}
-			Value(const char * name, putils::NormalizedColor color) : name(name), color(color), adjustableType(Color) {}
-			Value(const char * name, putils::Color color) : name(name), color(putils::toNormalizedColor(color)), adjustableType(Color) {}
+			Value(const char * name, putils::NormalizedColor * color) : name(name), storage(ColorStorage{ color }) {}
+			Value(const char * name, putils::NormalizedColor color) : name(name), storage(ColorStorage{ color }) {}
+			Value(const char * name, putils::Color color) : name(name), storage(ColorStorage{ putils::toNormalizedColor(color) }) {}
 
 			template<typename E>
 			static const char ** getEnumNamesImpl() {
@@ -78,42 +83,32 @@ namespace kengine {
 
 			static constexpr char _boolStorageName[] = "AdjustableComponentStorageBool";
 			using BoolStorage = Storage<bool, _boolStorageName>;
-			BoolStorage b;
 
 			static constexpr char _floatStorageName[] = "AdjustableComponentStorageFloat";
 			using FloatStorage = Storage<float, _floatStorageName>;
-			FloatStorage f;
 
 			static constexpr char _intStorageName[] = "AdjustableComponentStorageInt";
 			using IntStorage = Storage<int, _intStorageName>;
-			IntStorage i;
 
 			static constexpr char _colorStorageName[] = "AdjustableComponentStorageColor";
 			using ColorStorage = Storage<putils::NormalizedColor, _colorStorageName>;
-			ColorStorage color;
+
+			std::variant<BoolStorage, FloatStorage, IntStorage, ColorStorage> storage;
 
 			using EnumNameFunc = const char ** ();
 			EnumNameFunc * getEnumNames = nullptr;
 			size_t enumCount = 0;
 
-			enum EType {
-				Bool,
-				Double,
-				Int,
-				Color,
-				Enum
-			};
-
-			EType adjustableType = Bool;
-
 			putils_reflection_class_name(AdjustableComponentValue);
 			putils_reflection_attributes(
 				putils_reflection_attribute(&Value::name),
-				putils_reflection_attribute(&Value::b),
-				putils_reflection_attribute(&Value::f),
-				putils_reflection_attribute(&Value::i),
-				putils_reflection_attribute(&Value::color),
-				putils_reflection_attribute(&Value::adjustableType)
+				putils_reflection_attribute(&Value::storage)
+			);
+			putils_reflection_used_types(
+				putils_reflection_type(BoolStorage),
+				putils_reflection_type(FloatStorage),
+				putils_reflection_type(IntStorage),
+				putils_reflection_type(ColorStorage)
 			);
 		};
 
@@ -123,6 +118,10 @@ namespace kengine {
 		putils_reflection_class_name(AdjustableComponent);
 		putils_reflection_attributes(
 			putils_reflection_attribute(&AdjustableComponent::values)
+		);
+		putils_reflection_used_types(
+			putils_reflection_type(string),
+			putils_reflection_type(Value)
 		);
 	};
 }

@@ -31,5 +31,8 @@ namespace kengine {
 			putils_reflection_attribute(&SkyBoxComponent::back),
 			putils_reflection_attribute(&SkyBoxComponent::color)
 		);
+		putils_reflection_used_types(
+			putils_reflection_type(string)
+		);
 	};
 }
