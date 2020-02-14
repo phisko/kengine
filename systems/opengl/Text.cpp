@@ -11,6 +11,8 @@
 
 #include "systems/opengl/ShaderHelper.hpp"
 
+#include "helpers/CameraHelper.hpp"
+
 #include "termcolor.hpp"
 #include "magic_enum.hpp"
 
@@ -196,7 +198,7 @@ namespace kengine::Shaders {
 		return size;
 	}
 
-	static void drawObject(const TextComponent & text, const TransformComponent & transform, Uniforms uniforms, const glm::vec2 & screenSize, bool in2D = false) {
+	static void drawObject(const putils::gl::Program::Parameters & params, const TextComponent & text, const TransformComponent & transform, Uniforms uniforms, const glm::vec2 & screenSize, const TextComponent2D * comp = nullptr) {
 		uniforms.color = text.color;
 
 		auto & fontSizes = g_fonts[text.font];
@@ -209,12 +211,30 @@ namespace kengine::Shaders {
 
 		auto & font = it->second;
 
-		const auto scale = transform.boundingBox.size.y;
+		auto scale = transform.boundingBox.size.y;
+		if (comp != nullptr) {
+			switch (comp->coordinateType) {
+			case TextComponent2D::CoordinateType::Pixels:
+				scale /= params.viewPort.size.y;
+				break;
+			case TextComponent2D::CoordinateType::ScreenPercentage:
+			default:
+				static_assert(putils::magic_enum::enum_count<TextComponent2D::CoordinateType>() == 2);
+				break;
+			}
+		}
+
 		{
+			const auto & box =
+				comp == nullptr ?
+				transform.boundingBox : // 3D
+				CameraHelper::convertToScreenPercentage(transform.boundingBox, params.viewPort.size, *comp); // 2D
+
+			auto centre = ShaderHelper::toVec(box.position);
+
 			glm::mat4 model(1.f);
 
-			auto centre = ShaderHelper::toVec(transform.boundingBox.position);
-			if (in2D) {
+			if (comp != nullptr) {
 				centre.y = 1 - centre.y;
 				model = glm::translate(model, glm::vec3(-1.f, -1.f, 0.f));
 				centre *= 2.f;
@@ -222,7 +242,7 @@ namespace kengine::Shaders {
 
 			model = glm::translate(model, centre);
 
-			if (in2D)
+			if (comp != nullptr)
 				model = glm::scale(model, { scale, scale, scale });
 
 			model = glm::rotate(model,
@@ -238,7 +258,7 @@ namespace kengine::Shaders {
 				{ 0.f, 0.f, 1.f }
 			);
 
-			if (!in2D)
+			if (comp == nullptr)
 				model = glm::scale(model, { -scale, scale, scale });
 
 			uniforms.model = model;
@@ -313,14 +333,14 @@ namespace kengine::Shaders {
 		_proj = glm::mat4(1.f);
 		for (const auto &[e, text, transform] : _em.getEntities<TextComponent2D, TransformComponent>()) {
 			_entityID = (float)e.id;
-			drawObject(text, transform, uniforms, glm::vec2(params.viewPort.size.x, params.viewPort.size.y), true);
+			drawObject(params, text, transform, uniforms, glm::vec2(params.viewPort.size.x, params.viewPort.size.y), &text);
 		}
 
 		_view = params.view;
 		_proj = params.proj;
 		for (const auto &[e, text, transform] : _em.getEntities<TextComponent3D, TransformComponent>()) {
 			_entityID = (float)e.id;
-			drawObject(text, transform, uniforms, glm::vec2(params.viewPort.size.x, params.viewPort.size.y));
+			drawObject(params, text, transform, uniforms, glm::vec2(params.viewPort.size.x, params.viewPort.size.y));
 		}
 	}
 }

@@ -738,12 +738,14 @@ namespace kengine {
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, fb.fbo);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
-		const auto destSizeX = (GLint)(viewport.boundingBox.size.x * g_window.size.x);
-		const auto destSizeY = (GLint)(viewport.boundingBox.size.y * g_window.size.y);
+		const auto box = CameraHelper::convertToScreenPercentage(viewport.boundingBox, g_window.size, viewport);
 
-		const auto destX = (GLint)(viewport.boundingBox.position.x * g_window.size.x);
+		const auto destSizeX = (GLint)(box.size.x * g_window.size.x);
+		const auto destSizeY = (GLint)(box.size.y * g_window.size.y);
+
+		const auto destX = (GLint)(box.position.x * g_window.size.x);
 		// OpenGL coords have Y=0 at the bottom, I want Y=0 at the top
-		const auto destY = (GLint)(g_window.size.y - destSizeY - viewport.boundingBox.position.y * g_window.size.y);
+		const auto destY = (GLint)(g_window.size.y - destSizeY - box.position.y * g_window.size.y);
 
 		glBlitFramebuffer(
 			// src
@@ -790,7 +792,7 @@ namespace kengine {
 		auto & gbuffer = camera.get<GBufferComponent>();
 
 		const putils::Point2ui gBufferSize = gbuffer.getSize();
-		const auto pixelInGBuffer = putils::Point2i(viewportInfo.pixel * gBufferSize);
+		const auto pixelInGBuffer = putils::Point2i(viewportInfo.viewportPercent * gBufferSize);
 		if (pixelInGBuffer.x >= gBufferSize.x || pixelInGBuffer.y > gBufferSize.y || pixelInGBuffer.y == 0)
 			return Entity::INVALID_ID;
 

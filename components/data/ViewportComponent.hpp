@@ -2,9 +2,10 @@
 
 #include "Point.hpp"
 #include "Entity.hpp"
+#include "OnScreenComponent.hpp"
 
 namespace kengine {
-	struct ViewportComponent {
+	struct ViewportComponent : OnScreenComponent {
 		using RenderTexture = void *;
 
 		Entity::ID window = Entity::INVALID_ID;
@@ -19,6 +20,9 @@ namespace kengine {
 			putils_reflection_attribute(&ViewportComponent::boundingBox),
 			putils_reflection_attribute(&ViewportComponent::resolution),
 			putils_reflection_attribute(&ViewportComponent::zOrder)
+		);
+		putils_reflection_parents(
+			putils_reflection_type(OnScreenComponent)
 		);
 	};
 }

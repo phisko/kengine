@@ -8,6 +8,7 @@
 
 #include "string.hpp"
 #include "Color.hpp"
+#include "OnScreenComponent.hpp"
 
 namespace kengine {
 	struct TextComponent {
@@ -38,8 +39,12 @@ namespace kengine {
 		);
 	};
 
-	struct TextComponent2D : TextComponent { // UI element
+	struct TextComponent2D : TextComponent, OnScreenComponent { // UI element
 		putils_reflection_class_name(TextComponent2D);
+		putils_reflection_parents(
+			putils_reflection_type(TextComponent),
+			putils_reflection_type(OnScreenComponent)
+		);
 	};
 
 	struct TextComponent3D : TextComponent { // Ground feedback and such

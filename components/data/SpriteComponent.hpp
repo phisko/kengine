@@ -1,9 +1,10 @@
 #pragma once
 
 #include "reflection.hpp"
+#include "OnScreenComponent.hpp"
 
 namespace kengine {
-	struct SpriteComponent2D { // UI element
+	struct SpriteComponent2D : OnScreenComponent { // UI element
 		putils_reflection_class_name(SpriteComponent2D);
 	};
 

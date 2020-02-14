@@ -2,6 +2,8 @@
 
 #include "data/ViewportComponent.hpp"
 #include "data/WindowComponent.hpp"
+#include "data/OnScreenComponent.hpp"
+#include "magic_enum.hpp"
 
 namespace kengine::CameraHelper {
 	ViewportInfo getViewportForPixel(EntityManager & em, Entity::ID windowID, const putils::Point2ui & pixel) {
@@ -16,10 +18,12 @@ namespace kengine::CameraHelper {
 			if (highestZ != -FLT_MAX && highestZ >= viewport.zOrder)
 				continue;
 
-			const auto startX = viewport.boundingBox.position.x * window.size.x;
-			const auto startY = viewport.boundingBox.position.y * window.size.y;
-			const auto sizeX = viewport.boundingBox.size.x * window.size.x;
-			const auto sizeY = viewport.boundingBox.size.y * window.size.y;
+			const auto box = CameraHelper::convertToScreenPercentage(viewport.boundingBox, window.size, viewport);
+
+			const auto startX = box.position.x * window.size.x;
+			const auto startY = box.position.y * window.size.y;
+			const auto sizeX = box.size.x * window.size.x;
+			const auto sizeY = box.size.y * window.size.y;
 
 			if (pixel.x < startX || pixel.y < startY ||
 				pixel.x >= startX + sizeX ||
@@ -28,13 +32,30 @@ namespace kengine::CameraHelper {
 
 			highestZ = viewport.zOrder;
 
-			const auto pixelSreenPercent = putils::Point2f(pixel) / window.size;
-			const auto pixelViewportPercent = (pixelSreenPercent - viewport.boundingBox.position) / viewport.boundingBox.size;
-
 			ret.camera = e.id;
-			ret.pixel = pixelViewportPercent;
+			ret.pixel = putils::Point2f(pixel) / window.size;
+			ret.viewportPercent = (ret.pixel - putils::Point2f(box.position)) / putils::Point2f(box.size);
 		}
 
 		return ret;
+	}
+
+	putils::Rect3f convertToScreenPercentage(const putils::Rect3f & rect, const putils::Point2f & screenSize, const OnScreenComponent & comp) {
+		switch (comp.coordinateType) {
+		case OnScreenComponent::CoordinateType::Pixels: {
+			putils::Rect3f ret = rect;
+			ret.position.x /= screenSize.x;
+			ret.position.y /= screenSize.y;
+			ret.size.x /= screenSize.x;
+			ret.size.y /= screenSize.y;
+			return ret;
+		}
+		case OnScreenComponent::CoordinateType::ScreenPercentage:
+			return rect;
+		default:
+			assert(!"Unsupported coordinate type");
+			static_assert(putils::magic_enum::enum_count<OnScreenComponent::CoordinateType>() == 2);
+			return rect;
+		}
 	}
 }

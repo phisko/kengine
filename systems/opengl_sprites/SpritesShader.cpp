@@ -9,8 +9,9 @@
 #include "data/SpriteComponent.hpp"
 
 #include "systems/opengl/shaders/ApplyTransparencySrc.hpp"
-
 #include "systems/opengl/ShaderHelper.hpp"
+
+#include "helpers/CameraHelper.hpp"
 
 static inline const char * vert = R"(
 #version 330
@@ -68,8 +69,6 @@ void main() {
         )";
 
 namespace kengine {
-	static glm::vec3 toVec(const putils::Point3f & p) { return { p.x, p.y, p.z }; }
-
 	SpritesShader::SpritesShader(EntityManager & em)
 		: Program(false, putils_nameof(SpritesShader)),
 		_em(em)
@@ -92,7 +91,7 @@ namespace kengine {
 		putils::gl::Uniform<glm::mat4> model;
 	};
 
-	static void drawObject(EntityManager & em, const GraphicsComponent & graphics, const TransformComponent & transform, Uniforms uniforms, bool in2D = false) {
+	static void drawObject(EntityManager & em, const putils::gl::Program::Parameters & params, const GraphicsComponent & graphics, const TransformComponent & transform, Uniforms uniforms, const SpriteComponent2D * comp = nullptr) {
 		if (graphics.model == Entity::INVALID_ID)
 			return;
 
@@ -106,19 +105,26 @@ namespace kengine {
 		glBindTexture(GL_TEXTURE_2D, texture);
 
 		{
+			const auto & box =
+				comp == nullptr ?
+				transform.boundingBox : // 3D
+				CameraHelper::convertToScreenPercentage(transform.boundingBox, params.viewPort.size, *comp); // 2D
+
+			auto centre = ShaderHelper::toVec(box.position);
+			const auto size = ShaderHelper::toVec(box.size);
+
 			glm::mat4 model(1.f);
 
-			auto centre = toVec(transform.boundingBox.position);
-			if (in2D) {
-				centre.y = 1 - centre.y;
+			if (comp != nullptr) {
+				centre.y = 1.f - centre.y;
 				model = glm::translate(model, glm::vec3(-1.f, -1.f, 0.f));
 				centre *= 2.f;
 			}
 
 			model = glm::translate(model, centre);
 
-			if (in2D)
-				model = glm::scale(model, toVec(transform.boundingBox.size));
+			if (comp != nullptr)
+				model = glm::scale(model, size);
 
 			model = glm::rotate(model,
 				transform.yaw,
@@ -133,8 +139,8 @@ namespace kengine {
 				{ 0.f, 0.f, 1.f }
 			);
 
-			if (!in2D) {
-				model = glm::scale(model, toVec(transform.boundingBox.size));
+			if (comp == nullptr) {
+				model = glm::scale(model, size);
 				model = glm::scale(model, { -1.f, 1.f, 1.f });
 			}
 
@@ -158,14 +164,14 @@ namespace kengine {
 		_proj = glm::mat4(1.f);
 		for (const auto &[e, graphics, transform, sprite] : _em.getEntities<GraphicsComponent, TransformComponent, SpriteComponent2D>()) {
 			_entityID = (float)e.id;
-			drawObject(_em, graphics, transform, uniforms, true);
+			drawObject(_em, params, graphics, transform, uniforms, &sprite);
 		}
 
 		_view = params.view;
 		_proj = params.proj;
 		for (const auto &[e, graphics, transform, sprite] : _em.getEntities<GraphicsComponent, TransformComponent, SpriteComponent3D>()) {
 			_entityID = (float)e.id;
-			drawObject(_em, graphics, transform, uniforms);
+			drawObject(_em, params, graphics, transform, uniforms);
 		}
 	}
 }
