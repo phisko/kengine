@@ -9,7 +9,6 @@ set(PUTILS_BUILD_PSE ${KENGINE_SFML})
 set(PUTILS_BUILD_LUA ${KENGINE_LUA})
 set(PUTILS_BUILD_PYTHON ${KENGINE_PYTHON})
 set(PUTILS_NO_SHADER_DEBUG ${KENGINE_NO_SHADER_DEBUG})
-set(PUTILS_BUILD_MEDIATOR TRUE)
 add_subdirectory(putils)
 
 file(GLOB src_files
@@ -41,8 +40,10 @@ if (KENGINE_OPENGL)
     add_subdirectory(systems/opengl)
     target_link_libraries(kengine PUBLIC kengine_opengl)
 
-    add_subdirectory(systems/opengl_sprites)
-    target_link_libraries(kengine PUBLIC kengine_opengl_sprites)
+    if (NOT KENGINE_OPENGL_NO_DEFAULT_SHADERS)
+        add_subdirectory(systems/opengl_sprites)
+        target_link_libraries(kengine PUBLIC kengine_opengl_sprites)
+    endif()
 endif ()
 
 if (KENGINE_ASSIMP)
