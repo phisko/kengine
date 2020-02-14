@@ -15,9 +15,10 @@ namespace kengine::ScriptSystem {
 
 	template<typename Func, typename Func2>
 	void init(EntityManager & em, Func && registerFunction, Func2 && registerType) {
+		using CreateEntityFunc = function<void(Entity &)>;
 		registerFunction("createEntity",
-			function<Entity(const function<void(Entity &)> &)>(
-				[&](const function<void(Entity &)> & f) {
+			function<Entity(const CreateEntityFunc &)>(
+				[&](const CreateEntityFunc & f) {
 					return em.createEntity(FWD(f));
 				}
 			)
@@ -40,6 +41,16 @@ namespace kengine::ScriptSystem {
 			)
 		);
 
+		using ForEachEntityFunc = function<void(Entity &)>;
+		registerFunction("forEachEntity",
+			function<void(const ForEachEntityFunc &)>(
+				[&](const ForEachEntityFunc & f) {
+					for (auto & e : em.getEntities())
+						f(e);
+				}
+			)
+		);
+
 		registerFunction("stopRunning",
 			function<void()>(
 				[&] { em.running = false; }
@@ -49,8 +60,8 @@ namespace kengine::ScriptSystem {
 		registerType(putils::meta::type<Entity>{});
 	}
 
-	template<typename T, typename Func>
-	void registerComponent(Func && registerEntityMember) {
+	template<typename T, typename Func, typename Func2>
+	void registerComponent(EntityManager & em, Func && registerEntityMember, Func2 && registerFunction) {
 		static_assert(putils::reflection::has_class_name<T>());
 
 		const auto className = putils::reflection::get_class_name<T>();
@@ -75,6 +86,16 @@ namespace kengine::ScriptSystem {
 		registerEntityMember(putils::string<128>("detach%s", className),
 			function<void(Entity &)>(
 				[](Entity & self) { self.detach<T>(); }
+			)
+		);
+
+		using ForEachEntityFunc = function<void(Entity &, T &)>;
+		registerFunction(putils::string<128>("forEachEntityWith%s", className),
+			function<void(const ForEachEntityFunc &)>(
+				[&](const ForEachEntityFunc & f) {
+					for (auto & [e, t] : em.getEntities<T>())
+						f(e, t);
+				}
 			)
 		);
 	}

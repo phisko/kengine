@@ -20,7 +20,7 @@ namespace kengine {
 				},
 				[&](auto type) {
 					using T = putils_wrapped_type(type);
-					python::registerTypeWithState<T>(state);
+					python::registerTypeWithState<T>(em, state);
 				}
 			);
 

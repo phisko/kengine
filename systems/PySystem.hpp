@@ -21,31 +21,6 @@ namespace kengine {
 				entity.def(name, func);
 		}
 
-		template<typename T>
-		void registerTypeWithState(PythonStateComponent::Data & state) {
-			if constexpr (std::is_same<T, Entity>()) {
-				state.entity = new py::class_<Entity>(state.module, putils::reflection::get_class_name<Entity>(), py::dynamic_attr());
-				putils::reflection::for_each_attribute<Entity>([&](auto name, auto member) {
-					state.entity->def_readwrite(name, member);
-					});
-				putils::reflection::for_each_method<Entity>([&](auto name, auto member) {
-					state.entity->def(name, member);
-					});
-			}
-			else
-				putils::python::registerType<T>(state.module);
-
-			ScriptSystem::registerComponent<T>([&](auto && ... args) {
-				registerEntityMember(*state.entity, FWD(args)...);
-				});
-		}
-
-		template<typename T>
-		void registerType(EntityManager & em) {
-			for (const auto & [e, comp] : em.getEntities<PythonStateComponent>())
-				registerTypeWithState<T>(*comp.data);
-		}
-
 		template<typename Ret, typename ...Args>
 		void registerFunctionWithState(PythonStateComponent::Data & state, const char * name, const ScriptSystem::function<Ret(Args...)> & func) {
 			if constexpr (std::is_reference_v<Ret>)
@@ -58,6 +33,37 @@ namespace kengine {
 		void registerFunction(EntityManager & em, const char * name, const ScriptSystem::function<Ret(Args...)> & func) {
 			for (const auto & [e, comp] : em.getEntities<PythonStateComponent>())
 				registerFunctionWithState(*comp.data, name, func);
+		}
+
+		template<typename T>
+		void registerTypeWithState(EntityManager & em, PythonStateComponent::Data & state) {
+			if constexpr (std::is_same<T, Entity>()) {
+				state.entity = new py::class_<Entity>(state.module, putils::reflection::get_class_name<Entity>(), py::dynamic_attr());
+				putils::reflection::for_each_attribute<Entity>([&](auto name, auto member) {
+					state.entity->def_readwrite(name, member);
+				});
+				putils::reflection::for_each_method<Entity>([&](auto name, auto member) {
+					state.entity->def(name, member);
+				});
+			}
+			else
+				putils::python::registerType<T>(state.module);
+
+			ScriptSystem::registerComponent<T>(
+				em,
+				[&](auto && ... args) {
+					registerEntityMember(*state.entity, FWD(args)...);
+				},
+				[&](auto && ... args) {
+					registerFunctionWithState(state, FWD(args)...);
+				}
+			);
+		}
+
+		template<typename T>
+		void registerType(EntityManager & em) {
+			for (const auto & [e, comp] : em.getEntities<PythonStateComponent>())
+				registerTypeWithState<T>(em, *comp.data);
 		}
 	}
 }

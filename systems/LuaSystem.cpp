@@ -22,7 +22,7 @@ namespace kengine {
 				},
 				[&](auto type) {
 					using T = putils_wrapped_type(type);
-					lua::registerTypeWithState<T>(state);
+					lua::registerTypeWithState<T>(em, state);
 				}
 			);
 
