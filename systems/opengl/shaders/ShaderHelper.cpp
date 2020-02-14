@@ -1,7 +1,7 @@
 #include <cmath>
 #include <vector>
 
-#include "systems/opengl/ShaderHelper.hpp"
+#include "ShaderHelper.hpp"
 
 namespace kengine::ShaderHelper {
 	void drawModel(const OpenGLModelComponent & openGL) {

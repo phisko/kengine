@@ -4,7 +4,7 @@
 #include "data/ModelComponent.hpp"
 #include "data/TextureModelComponent.hpp"
 #include "data/OpenGLModelComponent.hpp"
-#include "systems/opengl/ShaderHelper.hpp"
+#include "systems/opengl/shaders/ShaderHelper.hpp"
 
 #include "opengl/Program.hpp"
 

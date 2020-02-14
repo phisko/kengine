@@ -3,7 +3,7 @@
 
 #include "data/SkyBoxComponent.hpp"
 
-#include "systems/opengl/ShaderHelper.hpp"
+#include "ShaderHelper.hpp"
 #include "stb_image.h"
 
 struct SkyBoxOpenGLComponent {

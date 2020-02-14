@@ -7,9 +7,9 @@
 #include "data/AdjustableComponent.hpp"
 #include "data/ShaderComponent.hpp"
 
-#include "systems/opengl/ShaderHelper.hpp"
-#include "shaders/QuadSrc.hpp"
-#include "shaders/ShadowMapShader.hpp"
+#include "ShaderHelper.hpp"
+#include "QuadSrc.hpp"
+#include "ShadowMapShader.hpp"
 
 namespace kengine {
 	static bool DEBUG_CSM = false;

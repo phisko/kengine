@@ -3,8 +3,8 @@
 
 #include "data/HighlightComponent.hpp"
 
-#include "shaders/QuadSrc.hpp"
-#include "systems/opengl/ShaderHelper.hpp"
+#include "QuadSrc.hpp"
+#include "ShaderHelper.hpp"
 
 static const auto frag = R"(
 #version 330

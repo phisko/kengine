@@ -4,8 +4,8 @@
 #include "Entity.hpp"
 
 #include "data/ShaderComponent.hpp"
-#include "shaders/ProjViewModelSrc.hpp"
-#include "shaders/ShadowMapShader.hpp"
+#include "ProjViewModelSrc.hpp"
+#include "ShadowMapShader.hpp"
 
 namespace kengine {
 	class EntityManager;

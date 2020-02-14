@@ -10,7 +10,7 @@
 
 #include "systems/opengl/shaders/ApplyTransparencySrc.hpp"
 
-#include "systems/opengl/ShaderHelper.hpp"
+#include "systems/opengl/shaders/ShaderHelper.hpp"
 
 static inline const char * vert = R"(
 #version 330

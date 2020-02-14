@@ -1,9 +1,9 @@
 #pragma once 
 
 #include "opengl/Program.hpp"
-#include "shaders/ProjViewModelSrc.hpp"
-#include "shaders/DepthCubeSrc.hpp"
-#include "shaders/ShadowMapShader.hpp"
+#include "ProjViewModelSrc.hpp"
+#include "DepthCubeSrc.hpp"
+#include "ShadowMapShader.hpp"
 #include "Entity.hpp"
 
 #include "data/ShaderComponent.hpp"

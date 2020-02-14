@@ -3,7 +3,7 @@
 #include <GL/glew.h>
 #include "glm/fwd.hpp"
 #include "opengl/Program.hpp"
-#include "shaders/ProjViewModelSrc.hpp"
+#include "ProjViewModelSrc.hpp"
 
 namespace kengine {
 	class EntityManager;

@@ -9,7 +9,7 @@
 #include "data/SpriteComponent.hpp"
 
 #include "systems/opengl/shaders/ApplyTransparencySrc.hpp"
-#include "systems/opengl/ShaderHelper.hpp"
+#include "systems/opengl/shaders/ShaderHelper.hpp"
 
 #include "helpers/CameraHelper.hpp"
 

@@ -5,9 +5,9 @@
 #include "data/TransformComponent.hpp"
 #include "data/AdjustableComponent.hpp"
 
-#include "systems/opengl/ShaderHelper.hpp"
+#include "ShaderHelper.hpp"
 
-#include "shaders/ColorSrc.hpp"
+#include "ColorSrc.hpp"
 
 static auto SPHERE_SIZE = .25f;
 static auto SUN_DIST = 500.f;

@@ -7,9 +7,9 @@
 #include "data/TextComponent.hpp"
 #include "data/TransformComponent.hpp"
 
-#include "shaders/ApplyTransparencySrc.hpp"
+#include "ApplyTransparencySrc.hpp"
 
-#include "systems/opengl/ShaderHelper.hpp"
+#include "ShaderHelper.hpp"
 
 #include "helpers/CameraHelper.hpp"
 

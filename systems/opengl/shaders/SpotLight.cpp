@@ -7,9 +7,9 @@
 #include "data/ShaderComponent.hpp"
 
 #include "helpers/LightHelper.hpp"
-#include "systems/opengl/ShaderHelper.hpp"
+#include "ShaderHelper.hpp"
 
-#include "shaders/ShadowMapShader.hpp"
+#include "ShadowMapShader.hpp"
 
 namespace kengine::Shaders {
 	void SpotLight::init(size_t firstTextureID) {

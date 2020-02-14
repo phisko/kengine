@@ -1,9 +1,9 @@
 #pragma once
 
 #include "opengl/Program.hpp"
-#include "shaders/ShadowMapSrc.hpp"
-#include "shaders/ProjViewModelSrc.hpp"
-#include "shaders/SpotLightSrc.hpp"
+#include "ShadowMapSrc.hpp"
+#include "ProjViewModelSrc.hpp"
+#include "SpotLightSrc.hpp"
 
 namespace kengine {
 	class EntityManager;

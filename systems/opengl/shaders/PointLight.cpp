@@ -8,7 +8,7 @@
 #include "data/ShaderComponent.hpp"
 
 #include "helpers/LightHelper.hpp"
-#include "systems/opengl/ShaderHelper.hpp"
+#include "ShaderHelper.hpp"
 
 namespace kengine::Shaders {
 	void PointLight::init(size_t firstTextureID) {

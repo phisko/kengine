@@ -2,8 +2,8 @@
 
 #include "opengl/Program.hpp"
 #include "data/ShaderComponent.hpp"
-#include "shaders/ShadowMapSrc.hpp"
-#include "shaders/DirLightSrc.hpp"
+#include "ShadowMapSrc.hpp"
+#include "DirLightSrc.hpp"
 
 namespace kengine {
 	class EntityManager;

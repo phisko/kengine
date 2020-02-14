@@ -7,7 +7,7 @@
 #include "data/ModelComponent.hpp"
 #include "data/DefaultShadowComponent.hpp"
 
-#include "systems/opengl/ShaderHelper.hpp"
+#include "ShaderHelper.hpp"
 #include "helpers/LightHelper.hpp"
 
 namespace kengine {

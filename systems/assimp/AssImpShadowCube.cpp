@@ -4,7 +4,7 @@
 
 #include "data/SkeletonComponent.hpp"
 
-#include "systems/opengl/ShaderHelper.hpp"
+#include "systems/opengl/shaders/ShaderHelper.hpp"
 #include "helpers/LightHelper.hpp"
 
 #include "systems/opengl/shaders/DepthCubeSrc.hpp"

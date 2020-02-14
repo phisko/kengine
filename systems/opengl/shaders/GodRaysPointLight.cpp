@@ -6,10 +6,10 @@
 #include "data/GodRaysComponent.hpp"
 
 #include "helpers/LightHelper.hpp"
-#include "systems/opengl/ShaderHelper.hpp"
+#include "ShaderHelper.hpp"
 
 #include "ShadowCube.hpp"
-#include "shaders/QuadSrc.hpp"
+#include "QuadSrc.hpp"
 
 namespace kengine::Shaders {
 	GodRaysPointLight::GodRaysPointLight(EntityManager & em)

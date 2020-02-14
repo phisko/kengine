@@ -6,7 +6,7 @@
 #include "data/OpenGLModelComponent.hpp"
 
 #include "helpers/LightHelper.hpp"
-#include "systems/opengl/ShaderHelper.hpp"
+#include "systems/opengl/shaders/ShaderHelper.hpp"
 
 #include "AssImpShaderSrc.hpp"
 #include "AssImpHelper.hpp"

@@ -6,9 +6,9 @@
 #include "data/GodRaysComponent.hpp"
 
 #include "helpers/LightHelper.hpp"
-#include "systems/opengl/ShaderHelper.hpp"
+#include "ShaderHelper.hpp"
 
-#include "shaders/QuadSrc.hpp"
+#include "QuadSrc.hpp"
 #include "ShadowMap.hpp"
 
 namespace kengine::Shaders {

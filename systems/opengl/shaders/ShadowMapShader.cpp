@@ -6,7 +6,7 @@
 #include "data/ShaderComponent.hpp"
 #include "Entity.hpp"
 
-#include "systems/opengl/ShaderHelper.hpp"
+#include "ShaderHelper.hpp"
 #include "helpers/LightHelper.hpp"
 
 namespace kengine::Shaders {

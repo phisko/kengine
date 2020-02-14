@@ -4,8 +4,8 @@
 #include "data/DebugGraphicsComponent.hpp"
 #include "data/TransformComponent.hpp"
 
-#include "systems/opengl/ShaderHelper.hpp"
-#include "shaders/ApplyTransparencySrc.hpp"
+#include "ShaderHelper.hpp"
+#include "ApplyTransparencySrc.hpp"
 #include "visit.hpp"
 #include "static_assert.hpp"
 

@@ -1,9 +1,9 @@
 #pragma once
 
 #include "opengl/Program.hpp"
-#include "shaders/GodRaysSrc.hpp"
-#include "shaders/ShadowCubeSrc.hpp"
-#include "shaders/PointLightSrc.hpp"
+#include "GodRaysSrc.hpp"
+#include "ShadowCubeSrc.hpp"
+#include "PointLightSrc.hpp"
 
 namespace kengine {
 	class EntityManager;
