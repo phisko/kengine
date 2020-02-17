@@ -265,6 +265,7 @@ namespace kengine {
 				}
 				default:
 					assert(!"Unknown collider shape");
+					static_assert(putils::magic_enum::enum_count<ModelColliderComponent::Collider::Shape>() == 5);
 					break;
 				}
 			}
