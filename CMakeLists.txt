@@ -11,6 +11,14 @@ set(PUTILS_BUILD_PYTHON ${KENGINE_PYTHON})
 set(PUTILS_NO_SHADER_DEBUG ${KENGINE_NO_SHADER_DEBUG})
 add_subdirectory(putils)
 
+if (KENGINE_LUA)
+    add_compile_definitions(KENGINE_LUA)
+endif()
+
+if (KENGINE_PYTHON)
+    add_compile_definitions(KENGINE_PYTHON)
+endif()
+
 file(GLOB src_files
     *.cpp *.hpp
     components/data/*.cpp components/data/*.hpp
