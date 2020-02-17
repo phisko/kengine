@@ -174,7 +174,7 @@ namespace kengine {
 
 			g_bActive = true;
 			try {
-				state.state->do_string(g_buff);
+				state.state->script(g_buff);
 			}
 			catch (const std::exception & e) {
 				g_history.addError(e.what());
@@ -185,11 +185,12 @@ namespace kengine {
 	}
 
 	// declarations
-	static int addToHistoryOrPrint(lua_State * L);
+	static int addToHistoryOrPrint(lua_State * L, const putils::NormalizedColor & color);
 	//
 	static void setupOutputRedirect(sol::state & state) {
 		static const luaL_Reg printlib[] = {
-			{ "print", addToHistoryOrPrint },
+			{ "print", [](lua_State * L) { return addToHistoryOrPrint(L, {}); } },
+			{ "error", [](lua_State * L) { return addToHistoryOrPrint(L, { 1.f, 0.f, 0.f }); } },
 			{ nullptr, nullptr }
 		};
 
@@ -198,7 +199,7 @@ namespace kengine {
 		lua_pop(state, 1);
 	}
 
-	static int addToHistoryOrPrint(lua_State * L) {
+	static int addToHistoryOrPrint(lua_State * L, const putils::NormalizedColor & color) {
 		std::string line;
 
 		// Stolen from luaB_print
@@ -218,7 +219,7 @@ namespace kengine {
 		}
 
 		if (g_bActive)
-			g_history.addLine(std::move(line));
+			g_history.addLine(std::move(line), false, color);
 		else
 			std::cout << line << '\n';
 		return 0;
