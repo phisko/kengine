@@ -130,8 +130,10 @@ namespace kengine {
 		if (ImGui::IsItemHovered())
 			ImGui::SetTooltip("Ctrl+Enter to execute");
 
-		if (ret)
+		if (ret) {
 			g_shouldScrollDown = true;
+			ImGui::SetKeyboardFocusHere(-1);
+		}
 		return ret;
 	}
 
