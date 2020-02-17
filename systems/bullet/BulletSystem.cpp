@@ -337,8 +337,9 @@ namespace kengine {
 				comp.body->getCollisionShape()->calculateLocalInertia(physics.mass, localInertia);
 			comp.body->setMassProps(physics.mass, localInertia);
 
-			comp.body->setActivationState(ACTIVE_TAG);
+			comp.body->forceActivationState(ACTIVE_TAG);
 			comp.body->setDeactivationTime(0.f);
+			comp.body->setWorldTransform(toBullet(transform));
 		}
 		else if (!kinematic) {
 			physics.movement = toPutils(comp.body->getLinearVelocity()) / physics.speed;
@@ -353,7 +354,7 @@ namespace kengine {
 		}
 		else if (comp.body->getCollisionFlags() & btCollisionObject::CF_KINEMATIC_OBJECT) {
 			comp.body->setCollisionFlags(comp.body->getCollisionFlags() & ~btCollisionObject::CF_KINEMATIC_OBJECT);
-			comp.body->setActivationState(ACTIVE_TAG);
+			comp.body->forceActivationState(ACTIVE_TAG);
 			comp.body->setDeactivationTime(0.f);
 		}
 
