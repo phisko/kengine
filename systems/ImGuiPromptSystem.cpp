@@ -90,6 +90,7 @@ namespace kengine {
 		ImGui::End();
 	}
 
+	static bool g_shouldScrollDown = false;
 	static void history() {
 		int tmp = g_maxLines;
 		if (ImGui::InputInt("Max history", &tmp, 0, 0, ImGuiInputTextFlags_EnterReturnsTrue))
@@ -106,21 +107,31 @@ namespace kengine {
 			if (ImGui::IsItemHovered())
 				ImGui::SetTooltip("Right-click to copy to clipboard");
 		}
+
+		if (g_shouldScrollDown) {
+			ImGui::SetScrollHere();
+			g_shouldScrollDown = false;
+		}
+
 		ImGui::EndChild();
 	}
 
 	static bool prompt() {
-		if (putils::reflection::imguiEnumCombo("##Language", g_selectedLanguage))
+		if (putils::reflection::imguiEnumCombo("##Language", g_selectedLanguage)) {
 			g_history.addLine(
 				std::string(putils::magic_enum::enum_names<Language>()[(int)g_selectedLanguage]),
 				true,
 				putils::NormalizedColor{ 1.f, 1.f, 0.f }
 			);
+			g_shouldScrollDown = true;
+		}
 
 		const bool ret = ImGui::InputTextMultiline("##Prompt", g_buff, lengthof(g_buff), { -1.f, -1.f }, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AllowTabInput);
 		if (ImGui::IsItemHovered())
 			ImGui::SetTooltip("Ctrl+Enter to execute");
 
+		if (ret)
+			g_shouldScrollDown = true;
 		return ret;
 	}
 
