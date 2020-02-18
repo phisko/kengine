@@ -572,8 +572,8 @@ namespace kengine {
 	}
 
 	struct CameraFramebufferComponent {
-		GLuint fbo = -1;
-		GLuint depthTexture = -1;
+		GLuint fbo = (GLuint)-1;
+		GLuint depthTexture = (GLuint)-1;
 		putils::Point2i resolution;
 	};
 

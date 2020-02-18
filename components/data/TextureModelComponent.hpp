@@ -16,7 +16,7 @@ namespace kengine {
 		using string = putils::string<KENGINE_TEXTURE_MODEL_COMPONENT_PATH_MAX_LENGTH, stringName>;
 		string file;
 
-		GLuint texture = -1;
+		GLuint texture = (GLuint)-1;
 
 		putils_reflection_class_name(TextureModelComponent);
 		putils_reflection_attributes(

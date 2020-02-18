@@ -48,22 +48,22 @@ namespace kengine {
 	}
 
 	struct DepthMapComponent {
-		GLuint fbo = -1;
-		GLuint texture = -1;
+		GLuint fbo = (GLuint)-1;
+		GLuint texture = (GLuint)-1;
 		int size = -1;
 		putils_reflection_class_name(DepthMapComponent);
 	};
 
 	struct CSMComponent {
-		GLuint fbo = -1;
+		GLuint fbo = (GLuint)-1;
 		GLuint textures[KENGINE_CSM_COUNT];
 		int size = -1;
 		putils_reflection_class_name(CSMComponent);
 	};
 
 	struct DepthCubeComponent {
-		GLuint fbo = -1;
-		GLuint texture = -1;
+		GLuint fbo = (GLuint)-1;
+		GLuint texture = (GLuint)-1;
 		int size = -1;
 		putils_reflection_class_name(DepthCubeComponent);
 	};
