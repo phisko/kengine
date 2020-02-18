@@ -50,6 +50,7 @@ static btTransform toBullet(const kengine::TransformComponent & transform) {
 	mat = glm::rotate(mat, transform.pitch, { 1.f, 0.f, 0.f });
 	mat = glm::rotate(mat, transform.yaw, { 0.f, 1.f, 0.f });
 	mat = glm::rotate(mat, transform.roll, { 0.f, 0.f, 1.f });
+	mat = glm::scale(mat, toVec(transform.boundingBox.size));
 
 	btTransform ret;
 	ret.setFromOpenGLMatrix(glm::value_ptr(mat));
@@ -57,7 +58,7 @@ static btTransform toBullet(const kengine::TransformComponent & transform) {
 	return ret;
 }
 
-static btTransform toBullet(const kengine::ModelColliderComponent::Collider & collider, const kengine::SkeletonComponent * skeleton, const kengine::ModelSkeletonComponent * modelSkeleton, const kengine::ModelComponent * model) {
+static btTransform toBullet(const kengine::TransformComponent & parent, const kengine::ModelColliderComponent::Collider & collider, const kengine::SkeletonComponent * skeleton, const kengine::ModelSkeletonComponent * modelSkeleton, const kengine::ModelComponent * model) {
 	glm::mat4 mat(1.f);
 
 	if (!collider.boneName.empty()) {
@@ -70,6 +71,12 @@ static btTransform toBullet(const kengine::ModelColliderComponent::Collider & co
 		mat = glm::translate(mat, -toVec(pos));
 		mat *= worldSpaceBone;
 	}
+
+	mat = glm::rotate(mat, parent.pitch, { 1.f, 0.f, 0.f });
+	mat = glm::rotate(mat, parent.yaw, { 0.f, 1.f, 0.f });
+	mat = glm::rotate(mat, parent.roll, { 0.f, 0.f, 1.f });
+	if (collider.boneName.empty()) // Otherwise, scale was embedded in bone matrix
+		mat = glm::scale(mat, toVec(parent.boundingBox.size));
 
 	mat = glm::translate(mat, toVec(collider.boundingBox.position));
 	mat = glm::rotate(mat, collider.pitch, { 1.f, 0.f, 0.f });
@@ -240,7 +247,7 @@ namespace kengine {
 
 		comp.shape = new btCompoundShape(false);
 		for (const auto & collider : modelCollider.colliders) {
-			const auto size = transform.boundingBox.size * collider.boundingBox.size;
+			const auto size = collider.boundingBox.size;
 
 			btCollisionShape * shape; {
 				switch (collider.shape) {
@@ -275,7 +282,7 @@ namespace kengine {
 					break;
 				}
 			}
-			comp.shape->addChildShape(toBullet(collider, skeleton, modelSkeleton, modelComponent), shape);
+			comp.shape->addChildShape(toBullet(transform, collider, skeleton, modelSkeleton, modelComponent), shape);
 		}
 
 		btVector3 localInertia{ 0.f, 0.f, 0.f }; {
@@ -377,7 +384,7 @@ namespace kengine {
 
 			int i = 0;
 			for (const auto & collider : modelEntity.get<ModelColliderComponent>().colliders) {
-				comp.shape->updateChildTransform(i, toBullet(collider, &skeleton, &modelSkeleton, &modelComponent));
+				comp.shape->updateChildTransform(i, toBullet(transform, collider, &skeleton, &modelSkeleton, &modelComponent));
 				++i;
 			}
 		}
