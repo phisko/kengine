@@ -7,7 +7,7 @@ namespace kengine {
 	struct PythonStateComponent {
 		struct Data {
 			py::scoped_interpreter guard;
-			py::module module{ "pk" };
+			py::module module{ "kengine" };
 			py::class_<Entity> * entity;
 		};
 
