@@ -117,6 +117,7 @@ namespace kengine {
 
 		putils_reflection_class_name(AdjustableComponent);
 		putils_reflection_attributes(
+			putils_reflection_attribute(&AdjustableComponent::section),
 			putils_reflection_attribute(&AdjustableComponent::values)
 		);
 		putils_reflection_used_types(
