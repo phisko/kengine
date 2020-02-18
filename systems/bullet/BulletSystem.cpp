@@ -29,6 +29,7 @@
 #include "helpers/SkeletonHelper.hpp"
 
 #include "termcolor.hpp"
+#include "magic_enum.hpp"
 
 #include "btBulletDynamicsCommon.h"
 #include "BulletCollision/CollisionDispatch/btGhostObject.h"
@@ -181,8 +182,8 @@ namespace kengine {
 	}
 
 	// declarations
-	static void addBulletComponent(Entity & e, TransformComponent & transform, const PhysicsComponent & physics, const Entity & modelEntity);
-	static void updateBulletComponent(Entity & e, const TransformComponent & transform, PhysicsComponent & physics, const Entity & modelEntity);
+	static void addBulletComponent(Entity & e, TransformComponent & transform, PhysicsComponent & physics, const Entity & modelEntity);
+	static void updateBulletComponent(Entity & e, const TransformComponent & transform, PhysicsComponent & physics, const Entity & modelEntity, bool first = false);
 	//
 	static void execute(float deltaTime) {
 		for (auto & [e, graphics, transform, physics] : g_em->getEntities<GraphicsComponent, TransformComponent, PhysicsComponent>()) {
@@ -220,7 +221,7 @@ namespace kengine {
 		return ret;
 	}
 
-	static void addBulletComponent(Entity & e, TransformComponent & transform, const PhysicsComponent & physics, const Entity & modelEntity) {
+	static void addBulletComponent(Entity & e, TransformComponent & transform, PhysicsComponent & physics, const Entity & modelEntity) {
 		auto & comp = e.attach<BulletPhysicsComponent>();
 
 		const auto & modelCollider = modelEntity.get<ModelColliderComponent>();
@@ -305,6 +306,7 @@ namespace kengine {
 		comp.body->setUserIndex((int)e.id);
 
 		dynamicsWorld.addRigidBody(comp.body);
+		updateBulletComponent(e, transform, physics, modelEntity, true);
 	}
 
 	void detectCollisions(btDynamicsWorld *, btScalar timeStep) {
@@ -325,12 +327,12 @@ namespace kengine {
 			}
 	}
 
-	static void updateBulletComponent(Entity & e, const TransformComponent & transform, PhysicsComponent & physics, const Entity & modelEntity) {
+	static void updateBulletComponent(Entity & e, const TransformComponent & transform, PhysicsComponent & physics, const Entity & modelEntity, bool first) {
 		auto & comp = e.get<BulletPhysicsComponent>();
 
 		const bool kinematic = e.has<KinematicComponent>();
 
-		if (physics.changed) {
+		if (physics.changed || first) {
 			// comp.body->clearForces();
 			comp.body->setLinearVelocity(toBullet(physics.movement * physics.speed));
 			comp.body->setAngularVelocity(btVector3{ physics.pitch, physics.yaw, physics.roll } * physics.speed);
