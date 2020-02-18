@@ -199,6 +199,11 @@ namespace kengine {
 				updateBulletComponent(e, transform, physics, modelEntity);
 		}
 
+		for (auto & [e, bullet, noPhys] : g_em->getEntities<BulletPhysicsComponent, no<PhysicsComponent>>()) {
+			onEntityRemoved(e);
+			e.detach<BulletPhysicsComponent>();
+		}
+
 		dynamicsWorld.setGravity({ 0.f, -GRAVITY, 0.f });
 		dynamicsWorld.stepSimulation(deltaTime);
 
