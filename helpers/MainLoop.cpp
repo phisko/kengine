@@ -3,7 +3,6 @@
 #include "MainLoop.hpp"
 #include "EntityManager.hpp"
 #include "functions/Execute.hpp"
-#include "Timer.hpp"
 
 namespace kengine::MainLoop {
 	void run(EntityManager & em) {
