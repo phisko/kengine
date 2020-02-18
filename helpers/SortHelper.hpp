@@ -35,11 +35,17 @@ namespace kengine::SortHelper {
 	auto getSortedEntities(EntityManager & em, Pred && pred) { 
 		using Type = std::tuple<Entity, Comps *...>;
 
-		putils::vector<Type, MaxCount> ret;
+		using Ret = std::conditional_t<
+			MaxCount == 0,
+			std::vector<Type>,
+			putils::vector<Type, MaxCount>
+		>;
+		Ret ret;
 
 		for (const auto & t : em.getEntities<Comps...>()) {
-			if (ret.full())
-				break;
+			if constexpr (putils::is_vector<Ret>())
+				if (ret.full())
+					break;
 			ret.emplace_back();
 			detail::set(ret.back(), t, std::make_index_sequence<sizeof...(Comps)>());
 		}
