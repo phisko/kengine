@@ -13,7 +13,7 @@ namespace kengine {
 			auto & state = *tmp;
 			e += PythonStateComponent{ std::move(tmp) };
 
-			py::globals()["pk"] = state.module;
+			py::globals()["kengine"] = state.module;
 			ScriptSystem::init(em,
 				[&](auto && ... args) {
 					python::registerFunctionWithState(state, FWD(args)...);
