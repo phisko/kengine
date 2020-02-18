@@ -101,7 +101,9 @@ namespace kengine {
 			if (line.separator)
 				ImGui::Separator();
 
+			ImGui::PushTextWrapPos();
 			ImGui::TextColored({ line.color.r, line.color.g, line.color.b, line.color.a }, line.text.c_str());
+			ImGui::PopTextWrapPos();
 			if (ImGui::IsItemClicked(1))
 				ImGui::SetClipboardText(line.text.c_str());
 			if (ImGui::IsItemHovered())
