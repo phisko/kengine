@@ -418,7 +418,6 @@ namespace kengine {
 
 	static void createObject(Entity & e, const ModelDataComponent & modelData) {
 		auto & modelInfo = e.attach<OpenGLModelComponent>();
-		modelInfo.meshes.clear();
 		modelInfo.vertexRegisterFunc = modelData.vertexRegisterFunc;
 
 		for (const auto & meshData : modelData.meshes) {

@@ -435,17 +435,7 @@ namespace kengine {
 
 			auto & model = e.attach<AssImpModelComponent>();
 
-			auto & textures = e.attach<AssImpTexturesModelComponent>();
-			textures.meshes.clear();
-			auto & skeletonNames = e.attach<ModelSkeletonComponent>();
-			skeletonNames.meshes.clear();
-			auto & skeleton = e.attach<AssImpSkeletonComponent>();
-			skeleton.meshes.clear();
-			auto & animList = e.attach<AnimListComponent>();
-			animList.anims.clear();
-
 			bool firstLoad = false;
-
 			if (model.importer.GetScene() == nullptr) {
 				const auto scene = model.importer.ReadFile(f, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals /*| aiProcess_OptimizeMeshes*/ | aiProcess_JoinIdenticalVertices);
 				if (scene == nullptr || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || scene->mRootNode == nullptr) {
@@ -457,12 +447,16 @@ namespace kengine {
 			const auto scene = model.importer.GetScene();
 
 			const auto dir = putils::get_directory(f);
+			auto & textures = e.attach<AssImpTexturesModelComponent>();
 			processNode(model, textures, putils::string<64>(dir), scene->mRootNode, scene, firstLoad);
 
 			std::vector<aiNode *> allNodes;
 			addNode(allNodes, scene->mRootNode);
+
+			auto & skeleton = e.attach<AssImpSkeletonComponent>();
 			skeleton.rootNode = scene->mRootNode;
 
+			auto & skeletonNames = e.attach<ModelSkeletonComponent>();
 			for (unsigned int i = 0; i < scene->mNumMeshes; ++i) {
 				const auto mesh = scene->mMeshes[i];
 
@@ -485,6 +479,7 @@ namespace kengine {
 
 			skeleton.globalInverseTransform = glm::inverse(toglmWeird(scene->mRootNode->mTransformation));
 
+			auto & animList = e.attach<AnimListComponent>();
 			for (unsigned int i = 0; i < scene->mNumAnimations; ++i)
 				addAnim(f, scene->mAnimations[i], skeletonNames, skeleton, animList);
 
