@@ -309,18 +309,20 @@ namespace kengine {
 
 	void detectCollisions(btDynamicsWorld *, btScalar timeStep) {
 		const auto numManifolds = dispatcher.getNumManifolds();
-		for (int i = 0; i < numManifolds; ++i) {
-			const auto contactManifold = dispatcher.getManifoldByIndexInternal(i);
-			const auto objectA = (btCollisionObject *)(contactManifold->getBody0());
-			const auto objectB = (btCollisionObject *)(contactManifold->getBody1());
+		if (numManifolds <= 0)
+			return;
+		for (const auto & [_, onCollision] : g_em->getEntities<functions::OnCollision>())
+			for (int i = 0; i < numManifolds; ++i) {
+				const auto contactManifold = dispatcher.getManifoldByIndexInternal(i);
+				const auto objectA = (btCollisionObject *)(contactManifold->getBody0());
+				const auto objectB = (btCollisionObject *)(contactManifold->getBody1());
 
-			const auto id1 = objectA->getUserIndex();
-			const auto id2 = objectB->getUserIndex();
-			auto e1 = g_em->getEntity(id1);
-			auto e2 = g_em->getEntity(id2);
-			for (const auto & [_, onCollision] : g_em->getEntities<functions::OnCollision>())
+				const auto id1 = objectA->getUserIndex();
+				const auto id2 = objectB->getUserIndex();
+				auto e1 = g_em->getEntity(id1);
+				auto e2 = g_em->getEntity(id2);
 				onCollision(e1, e2);
-		}
+			}
 	}
 
 	static void updateBulletComponent(Entity & e, const TransformComponent & transform, PhysicsComponent & physics, const Entity & modelEntity) {
