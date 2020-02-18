@@ -35,6 +35,7 @@ namespace kengine {
 		struct MetadataBase {
 			size_t id = detail::INVALID;
 			size_t typeEntityID = detail::INVALID;
+			virtual void reset(size_t id) = 0;
 			virtual ~MetadataBase() = default;
 		};
 
@@ -53,6 +54,12 @@ namespace kengine {
 		struct Metadata : detail::MetadataBase {
 			std::vector<Chunk> chunks;
 			mutable detail::Mutex _mutex;
+
+			virtual void reset(size_t id) {
+				auto & val = get(id);
+				val.~Comp();
+				new(&val) Comp;
+			}
 		};
 
 	public:

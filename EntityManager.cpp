@@ -37,6 +37,12 @@ namespace kengine {
 		for (const auto & [_, func] : getEntities<functions::OnEntityRemoved>())
 			func(e);
 
+		{
+			detail::ReadLock l(detail::components->mutex);
+			for (const auto & [_, comp] : detail::components->map)
+				comp->reset(id);
+		}
+
 		Entity::Mask mask;
 		{
 			detail::ReadLock entities(_entitiesMutex);
