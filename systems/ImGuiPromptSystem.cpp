@@ -117,13 +117,15 @@ namespace kengine {
 	}
 
 	static bool prompt() {
-		if (putils::reflection::imguiEnumCombo("##Language", g_selectedLanguage)) {
+		static bool first = true;
+		if (putils::reflection::imguiEnumCombo("##Language", g_selectedLanguage) || first) {
 			g_history.addLine(
 				std::string(putils::magic_enum::enum_names<Language>()[(int)g_selectedLanguage]),
 				true,
 				putils::NormalizedColor{ 1.f, 1.f, 0.f }
 			);
 			g_shouldScrollDown = true;
+			first = false;
 		}
 
 		const bool ret = ImGui::InputTextMultiline("##Prompt", g_buff, lengthof(g_buff), { -1.f, -1.f }, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AllowTabInput);
