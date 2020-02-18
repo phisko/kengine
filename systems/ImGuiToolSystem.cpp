@@ -1,6 +1,8 @@
 #include "ImGuiToolSystem.hpp"
 #include "EntityManager.hpp"
 
+#include "helpers/SortHelper.hpp"
+
 #include "functions/OnTerminate.hpp"
 #include "data/ImGuiComponent.hpp"
 #include "data/ImGuiToolComponent.hpp"
@@ -11,6 +13,10 @@
 
 #ifndef KENGINE_IMGUI_TOOLS_SAVE_FILE
 # define KENGINE_IMGUI_TOOLS_SAVE_FILE "tools.cnf"
+#endif
+
+#ifndef KENGINE_IMGUI_MAX_TOOLS
+# define KENGINE_IMGUI_MAX_TOOLS 0 // no limit by default
 #endif
 
 namespace kengine {
@@ -48,9 +54,10 @@ namespace kengine {
 							for (auto & [e, tool] : em.getEntities<ImGuiToolComponent>())
 								tool.enabled = false;
 
-						for (auto & [e, name, tool] : em.getEntities<NameComponent, ImGuiToolComponent>())
-							if (ImGui::MenuItem(name.name)) {
-								tool.enabled = !tool.enabled;
+						const auto sorted = SortHelper::getNameSortedEntities<KENGINE_IMGUI_MAX_TOOLS, ImGuiToolComponent>(em);
+						for (auto & [e, name, tool] : sorted)
+							if (ImGui::MenuItem(name->name)) {
+								tool->enabled = !tool->enabled;
 								mustSave = true;
 							}
 						ImGui::EndMenu();
@@ -76,8 +83,9 @@ namespace kengine {
 	static void saveTools(EntityManager & em) {
 		std::ofstream f(KENGINE_IMGUI_TOOLS_SAVE_FILE);
 		assert(f);
-		for (const auto & [e, name, tool] : em.getEntities<NameComponent, ImGuiToolComponent>())
-			f << name.name << ';' << std::boolalpha << tool.enabled << std::noboolalpha << '\n';
+		const auto sorted = SortHelper::getNameSortedEntities<KENGINE_IMGUI_MAX_TOOLS, ImGuiToolComponent>(em);
+		for (const auto & [e, name, tool] : sorted)
+			f << name->name << ';' << std::boolalpha << tool->enabled << std::noboolalpha << '\n';
 		f.flush();
 	}
 
