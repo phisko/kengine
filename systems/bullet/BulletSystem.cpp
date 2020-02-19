@@ -354,7 +354,10 @@ namespace kengine {
 				comp.body->getCollisionShape()->calculateLocalInertia(physics.mass, localInertia);
 			comp.body->setMassProps(physics.mass, localInertia);
 
-			comp.body->forceActivationState(first ? ISLAND_SLEEPING : ACTIVE_TAG);
+			comp.body->forceActivationState(kinematic ? ISLAND_SLEEPING : ACTIVE_TAG);
+			comp.body->setWorldTransform(toBullet(transform));
+		}
+		else if (kinematic) {
 			comp.body->setWorldTransform(toBullet(transform));
 		}
 		else if (!kinematic) {
