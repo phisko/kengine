@@ -346,8 +346,8 @@ namespace kengine {
 
 		if (physics.changed || first) {
 			// comp.body->clearForces();
-			comp.body->setLinearVelocity(toBullet(physics.movement * physics.speed));
-			comp.body->setAngularVelocity(btVector3{ physics.pitch, physics.yaw, physics.roll } * physics.speed);
+			comp.body->setLinearVelocity(toBullet(physics.movement));
+			comp.body->setAngularVelocity(btVector3{ physics.pitch, physics.yaw, physics.roll });
 
 			btVector3 localInertia{ 0.f, 0.f, 0.f };
 			if (physics.mass != 0.f)
@@ -361,7 +361,7 @@ namespace kengine {
 			comp.body->setWorldTransform(toBullet(transform));
 		}
 		else if (!kinematic) {
-			physics.movement = toPutils(comp.body->getLinearVelocity()) / physics.speed;
+			physics.movement = toPutils(comp.body->getLinearVelocity());
 			physics.pitch = comp.body->getAngularVelocity().x();
 			physics.yaw = comp.body->getAngularVelocity().y();
 			physics.roll = comp.body->getAngularVelocity().z();

@@ -21,10 +21,10 @@ namespace kengine {
 
 	static void execute(EntityManager & em, float deltaTime) {
 		for (const auto & [e, transform, physics, kinematic] : em.getEntities<TransformComponent, PhysicsComponent, KinematicComponent>()) {
-			transform.boundingBox.position += physics.movement * physics.speed * deltaTime;
+			transform.boundingBox.position += physics.movement * deltaTime;
 
-			const auto applyRotation = [&](float & transformMember, float physicsMember) {
-				transformMember += physicsMember * physics.speed * deltaTime;
+			const auto applyRotation = [deltaTime](float & transformMember, float physicsMember) {
+				transformMember += physicsMember * deltaTime;
 				transformMember = putils::constrainAngle(transformMember);
 			};
 
