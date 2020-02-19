@@ -4,6 +4,7 @@
 #include "data/DefaultShadowComponent.hpp"
 #include "data/ModelComponent.hpp"
 #include "data/GraphicsComponent.hpp"
+#include "data/NoShadowComponent.hpp"
 
 #include "ShaderHelper.hpp"
 #include "helpers/LightHelper.hpp"
@@ -21,7 +22,7 @@ namespace kengine::Shaders {
 	}
 
 	void ShadowCube::drawObjects() {
-		for (const auto &[e, graphics, transform, shadow] : _em.getEntities<GraphicsComponent, TransformComponent, DefaultShadowComponent>()) {
+		for (const auto &[e, graphics, transform, shadow, noNoShadow] : _em.getEntities<GraphicsComponent, TransformComponent, DefaultShadowComponent, no<NoShadowComponent>>()) {
 			if (graphics.model == Entity::INVALID_ID)
 				continue;
 

@@ -4,6 +4,7 @@
 #include "data/SkeletonComponent.hpp"
 #include "data/ModelComponent.hpp"
 #include "data/OpenGLModelComponent.hpp"
+#include "data/NoShadowComponent.hpp"
 
 #include "helpers/LightHelper.hpp"
 #include "systems/opengl/shaders/ShaderHelper.hpp"
@@ -29,7 +30,7 @@ namespace kengine {
 		uniforms.model = _model;
 		uniforms.bones = _bones;
 
-		for (const auto & [e, textured, graphics, transform, skeleton] : _em.getEntities<AssImpObjectComponent, GraphicsComponent, TransformComponent, SkeletonComponent>())
+		for (const auto & [e, textured, graphics, transform, skeleton, noNoShadow] : _em.getEntities<AssImpObjectComponent, GraphicsComponent, TransformComponent, SkeletonComponent, no<NoShadowComponent>>())
 			AssImpHelper::drawModel(_em, graphics, transform, skeleton, false, uniforms);
 	}
 }

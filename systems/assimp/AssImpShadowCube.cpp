@@ -3,6 +3,7 @@
 #include "EntityManager.hpp"
 
 #include "data/SkeletonComponent.hpp"
+#include "data/NoShadowComponent.hpp"
 
 #include "systems/opengl/shaders/ShaderHelper.hpp"
 #include "helpers/LightHelper.hpp"
@@ -25,7 +26,7 @@ namespace kengine {
 	}
 
 	void AssImpShadowCube::drawObjects() {
-		for (const auto &[e, textured, graphics, transform, skeleton] : _em.getEntities<AssImpObjectComponent, GraphicsComponent, TransformComponent, SkeletonComponent>()) {
+		for (const auto &[e, textured, graphics, transform, skeleton, noNoShadow] : _em.getEntities<AssImpObjectComponent, GraphicsComponent, TransformComponent, SkeletonComponent, no<NoShadowComponent>>()) {
 			AssImpHelper::Uniforms uniforms;
 			uniforms.model = _model;
 			uniforms.bones = _bones;
