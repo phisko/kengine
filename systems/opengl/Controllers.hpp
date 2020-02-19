@@ -75,7 +75,7 @@ namespace kengine {
 									if (ImGui::Begin(putils::string<64>("%d [%s]", e.id, name), &enabled[i])) {
 										const auto start = ImGui::GetWindowContentRegionMin();
 										const auto end = ImGui::GetWindowContentRegionMax();
-										ImGui::Image((ImTextureID)gbuffer.textures[i], { end.x - start.x, end.y - start.y }, { 0, 1 }, { 1, 0 });
+										ImGui::Image((ImTextureID)gbuffer.textures[i].get(), { end.x - start.x, end.y - start.y }, { 0, 1 }, { 1, 0 });
 									}
 									ImGui::End();
 									++i;

@@ -4,9 +4,7 @@
 # define KENGINE_TEXTURE_MODEL_COMPONENT_PATH_MAX_LENGTH 64
 #endif
 
-#include <gl/glew.h>
-#include <GL/GL.h>
-
+#include "opengl/RAII.hpp"
 #include "reflection.hpp"
 #include "string.hpp"
 
@@ -16,7 +14,7 @@ namespace kengine {
 		using string = putils::string<KENGINE_TEXTURE_MODEL_COMPONENT_PATH_MAX_LENGTH, stringName>;
 		string file;
 
-		GLuint texture = (GLuint)-1;
+		putils::gl::Texture texture;
 
 		putils_reflection_class_name(TextureModelComponent);
 		putils_reflection_attributes(

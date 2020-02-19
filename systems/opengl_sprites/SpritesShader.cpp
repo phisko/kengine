@@ -98,11 +98,10 @@ namespace kengine {
 		const auto & modelEntity = em.getEntity(graphics.model);
 		if (!modelEntity.has<TextureModelComponent>())
 			return;
-		const auto texture = modelEntity.get<TextureModelComponent>().texture;
 
 		uniforms.color = graphics.color;
 
-		glBindTexture(GL_TEXTURE_2D, texture);
+		glBindTexture(GL_TEXTURE_2D, modelEntity.get<TextureModelComponent>().texture);
 
 		{
 			const auto & box =

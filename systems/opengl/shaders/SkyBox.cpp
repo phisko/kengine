@@ -4,10 +4,11 @@
 #include "data/SkyBoxComponent.hpp"
 
 #include "ShaderHelper.hpp"
+#include "opengl/RAII.hpp"
 #include "stb_image.h"
 
 struct SkyBoxOpenGLComponent {
-	GLuint textureID;
+	putils::gl::Texture textureID;
 };
 
 static const auto vert = R"(
@@ -58,9 +59,7 @@ namespace kengine::Shaders {
 
 	static void loadSkyBox(Entity & e, const SkyBoxComponent & comp) {
 		auto & skyBox = e.attach<SkyBoxOpenGLComponent>();
-
-		if (skyBox.textureID == -1)
-			glGenTextures(1, &skyBox.textureID);
+		skyBox.textureID.generate();
 		glBindTexture(GL_TEXTURE_CUBE_MAP, skyBox.textureID);
 
 		unsigned int i = 0;

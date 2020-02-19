@@ -38,13 +38,12 @@ namespace kengine::Shaders {
 	}
 
 	static void createCSM(CSMComponent & depthMap) {
-		if (depthMap.fbo == -1) {
-			glGenFramebuffers(1, &depthMap.fbo);
-			glGenTextures(lengthof(depthMap.textures), depthMap.textures);
-		}
+		depthMap.fbo.generate();
+		for (auto & t : depthMap.textures)
+			t.generate();
 
 		ShaderHelper::BindFramebuffer __f(depthMap.fbo);
-		for (const auto texture : depthMap.textures)
+		for (const auto & texture : depthMap.textures)
 			initTexture(texture, depthMap.size);
 
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap.textures[0], 0);
@@ -77,10 +76,8 @@ namespace kengine::Shaders {
 	}
 
 	static void createShadowMap(DepthMapComponent & depthMap) {
-		if (depthMap.fbo == -1) {
-			glGenFramebuffers(1, &depthMap.fbo);
-			glGenTextures(1, &depthMap.texture);
-		}
+		depthMap.fbo.generate();
+		depthMap.texture.generate();
 
 		ShaderHelper::BindFramebuffer __f(depthMap.fbo);
 		initTexture(depthMap.texture, depthMap.size);
@@ -115,12 +112,10 @@ namespace kengine::Shaders {
 		if (depthCube.size != light.shadowMapSize) {
 			depthCube.size = light.shadowMapSize;
 
-			if (depthCube.fbo == -1)
-				glGenFramebuffers(1, &depthCube.fbo);
+			depthCube.fbo.generate();
 			ShaderHelper::BindFramebuffer __f(depthCube.fbo);
 
-			if (depthCube.texture == -1)
-				glGenTextures(1, &depthCube.texture);
+			depthCube.texture.generate();
 
 			glBindTexture(GL_TEXTURE_CUBE_MAP, depthCube.texture);
 			for (size_t i = 0; i < 6; ++i)

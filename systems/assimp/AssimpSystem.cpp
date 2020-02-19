@@ -245,7 +245,7 @@ namespace kengine {
 						comp.file = fullPath.c_str();
 
 						TextureDataComponent textureLoader; {
-							textureLoader.textureID = &comp.texture;
+							textureLoader.textureID = &comp.texture.get();
 
 							textureLoader.data = stbi_load(fullPath.c_str(), &textureLoader.width, &textureLoader.height, &textureLoader.components, 0);
 							assert(textureLoader.data != nullptr);

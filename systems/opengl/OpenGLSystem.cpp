@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 
 #include "opengl/Program.hpp"
+#include "opengl/RAII.hpp"
 
 #include "imgui.h"
 #include "examples/imgui_impl_glfw.h"
@@ -384,6 +385,14 @@ namespace kengine {
 	}
 
 	static void onEntityRemoved(Entity & e) {
+		if (e.has<ViewportComponent>()) {
+			auto & viewport = e.get<ViewportComponent>();
+			if (viewport.window == g_window.id) {
+				GLuint texture = (GLuint)viewport.renderTexture;
+				glDeleteTextures(1, &texture);
+			}
+		}
+
 		if (!e.has<WindowComponent>() || e.id != g_window.id)
 			return;
 		g_window.id = Entity::INVALID_ID;
@@ -422,14 +431,14 @@ namespace kengine {
 
 		for (const auto & meshData : modelData.meshes) {
 			OpenGLModelComponent::Mesh meshInfo;
-			glGenVertexArrays(1, &meshInfo.vertexArrayObject);
+			meshInfo.vertexArrayObject.generate();
 			glBindVertexArray(meshInfo.vertexArrayObject);
 
-			glGenBuffers(1, &meshInfo.vertexBuffer);
+			meshInfo.vertexBuffer.generate();
 			glBindBuffer(GL_ARRAY_BUFFER, meshInfo.vertexBuffer);
 			glBufferData(GL_ARRAY_BUFFER, meshData.vertices.nbElements * meshData.vertices.elementSize, meshData.vertices.data, GL_STATIC_DRAW);
 
-			glGenBuffers(1, &meshInfo.indexBuffer);
+			meshInfo.indexBuffer.generate();
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshInfo.indexBuffer);
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, meshData.indices.nbElements * meshData.indices.elementSize, meshData.indices.data, GL_STATIC_DRAW);
 
@@ -438,7 +447,7 @@ namespace kengine {
 			meshInfo.nbIndices = meshData.indices.nbElements;
 			meshInfo.indexType = meshData.indexType;
 
-			modelInfo.meshes.push_back(meshInfo);
+			modelInfo.meshes.push_back(std::move(meshInfo));
 		}
 
 		modelData.free();
@@ -446,8 +455,8 @@ namespace kengine {
 	}
 
 	static void loadTexture(Entity & e, TextureDataComponent & textureData) {
-		if (*textureData.textureID == -1)
-			glGenTextures(1, textureData.textureID);
+		assert(*textureData.textureID == -1);
+		glGenTextures(1, textureData.textureID);
 
 		if (textureData.data != nullptr) {
 			GLenum format;
@@ -571,8 +580,8 @@ namespace kengine {
 	}
 
 	struct CameraFramebufferComponent {
-		GLuint fbo = (GLuint)-1;
-		GLuint depthTexture = (GLuint)-1;
+		putils::gl::FrameBuffer fbo;
+		putils::gl::Texture depthTexture;
 		putils::Point2i resolution;
 	};
 
@@ -654,8 +663,7 @@ namespace kengine {
 		auto & fb = e.attach<CameraFramebufferComponent>();
 		fb.resolution = viewport.resolution;
 
-		if (fb.fbo == -1)
-			glGenFramebuffers(1, &fb.fbo);
+		fb.fbo.generate();
 		glBindFramebuffer(GL_FRAMEBUFFER, fb.fbo);
 
 		GLuint texture = (GLuint)viewport.renderTexture;
@@ -669,8 +677,7 @@ namespace kengine {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
 
-		if (fb.depthTexture == -1)
-			glGenTextures(1, &fb.depthTexture);
+		fb.depthTexture.generate();
 		glBindTexture(GL_TEXTURE_2D, fb.depthTexture);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, viewport.resolution.x, viewport.resolution.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, fb.depthTexture, 0);

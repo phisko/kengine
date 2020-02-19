@@ -62,7 +62,7 @@ namespace kengine::Shaders {
 				if (e.has<CSMComponent>()) {
 					const auto & depthMap = e.get<CSMComponent>();
 					ShaderHelper::BindFramebuffer b(depthMap.fbo);
-					for (const auto texture : depthMap.textures) {
+					for (const auto & texture : depthMap.textures) {
 						glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture, 0);
 						glClear(GL_DEPTH_BUFFER_BIT);
 					}

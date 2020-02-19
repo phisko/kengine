@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "putils/opengl/Program.hpp"
+#include "putils/opengl/RAII.hpp"
 #include "data/LightComponent.hpp"
 
 namespace kengine {
@@ -48,22 +49,22 @@ namespace kengine {
 	}
 
 	struct DepthMapComponent {
-		GLuint fbo = (GLuint)-1;
-		GLuint texture = (GLuint)-1;
+		putils::gl::FrameBuffer fbo;
+		putils::gl::Texture texture;
 		int size = -1;
 		putils_reflection_class_name(DepthMapComponent);
 	};
 
 	struct CSMComponent {
-		GLuint fbo = (GLuint)-1;
-		GLuint textures[KENGINE_CSM_COUNT];
+		putils::gl::FrameBuffer fbo;
+		putils::gl::Texture textures[KENGINE_CSM_COUNT];
 		int size = -1;
 		putils_reflection_class_name(CSMComponent);
 	};
 
 	struct DepthCubeComponent {
-		GLuint fbo = (GLuint)-1;
-		GLuint texture = (GLuint)-1;
+		putils::gl::FrameBuffer fbo;
+		putils::gl::Texture texture;
 		int size = -1;
 		putils_reflection_class_name(DepthCubeComponent);
 	};

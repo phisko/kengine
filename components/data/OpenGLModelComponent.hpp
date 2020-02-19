@@ -1,8 +1,7 @@
 #pragma once
 
 #include <vector>
-#include <gl/glew.h>
-#include <GL/GL.h>
+#include "opengl/RAII.hpp"
 
 namespace putils::gl { class Program; }
 
@@ -10,9 +9,9 @@ namespace kengine {
 	// Used only by shaders, built from a ModelDataComponent
 	struct OpenGLModelComponent {
 		struct Mesh {
-			GLuint vertexArrayObject = -1;
-			GLuint vertexBuffer = -1;
-			GLuint indexBuffer = -1;
+			putils::gl::VertexArray vertexArrayObject;
+			putils::gl::Buffer vertexBuffer;
+			putils::gl::Buffer indexBuffer;
 			size_t nbIndices = 0;
 			GLenum indexType = GL_UNSIGNED_INT;
 		};

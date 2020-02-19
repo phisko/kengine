@@ -56,7 +56,7 @@ namespace kengine {
 			comp.file = file;
 
 			TextureDataComponent textureLoader; {
-				textureLoader.textureID = &comp.texture;
+				textureLoader.textureID = &comp.texture.get();
 
 				textureLoader.data = data;
 				textureLoader.width = width;
