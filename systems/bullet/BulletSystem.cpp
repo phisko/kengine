@@ -354,8 +354,7 @@ namespace kengine {
 				comp.body->getCollisionShape()->calculateLocalInertia(physics.mass, localInertia);
 			comp.body->setMassProps(physics.mass, localInertia);
 
-			comp.body->forceActivationState(ACTIVE_TAG);
-			comp.body->setDeactivationTime(0.f);
+			comp.body->forceActivationState(first ? ISLAND_SLEEPING : ACTIVE_TAG);
 			comp.body->setWorldTransform(toBullet(transform));
 		}
 		else if (!kinematic) {
@@ -369,10 +368,9 @@ namespace kengine {
 			comp.body->setCollisionFlags(comp.body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
 			comp.body->setActivationState(WANTS_DEACTIVATION);
 		}
-		else if (comp.body->getCollisionFlags() & btCollisionObject::CF_KINEMATIC_OBJECT) {
+		else if (comp.body->getCollisionFlags() & btCollisionObject::CF_KINEMATIC_OBJECT) { // Kinematic -> not kinematic
 			comp.body->setCollisionFlags(comp.body->getCollisionFlags() & ~btCollisionObject::CF_KINEMATIC_OBJECT);
-			comp.body->forceActivationState(ACTIVE_TAG);
-			comp.body->setDeactivationTime(0.f);
+			comp.body->setActivationState(ACTIVE_TAG);
 		}
 
 		physics.changed = false;
