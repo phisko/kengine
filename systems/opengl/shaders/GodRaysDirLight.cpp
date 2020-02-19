@@ -58,12 +58,13 @@ namespace kengine::Shaders {
 		_color = light.color;
 		_direction = light.direction;
 
-		for (int i = 0; i < lengthof(depthMap.textures); ++i) {
-			glActiveTexture(GL_TEXTURE0 + _shadowMapTextureID + i);
+		for (size_t i = 0; i < light.cascadeEnds.size(); ++i) {
+			glActiveTexture((GLenum)(GL_TEXTURE0 + _shadowMapTextureID + i));
 			glBindTexture(GL_TEXTURE_2D, depthMap.textures[i]);
 			_lightSpaceMatrix[i] = LightHelper::getCSMLightSpaceMatrix(light, params, i);
 			_cascadeEnd[i] = LightHelper::getCSMCascadeEnd(light, i);
 		}
+		_cascadeCount = light.cascadeEnds.size();
 
 		ShaderHelper::shapes::drawQuad();
 	}

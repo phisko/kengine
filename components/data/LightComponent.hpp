@@ -3,9 +3,10 @@
 #include "reflection.hpp"
 #include "Point.hpp"
 #include "Color.hpp"
+#include "vector.hpp"
 
-#ifndef KENGINE_CSM_COUNT
-# define KENGINE_CSM_COUNT 3
+#ifndef KENGINE_MAX_CSM_COUNT
+# define KENGINE_MAX_CSM_COUNT 5
 #endif
 
 namespace kengine {
@@ -30,20 +31,26 @@ namespace kengine {
 	};
 
 	struct DirLightComponent : LightComponent {
+		static constexpr char vectorName[] = "DirLightComponentCascadeVector";
+		using vector = putils::vector<float, KENGINE_MAX_CSM_COUNT, vectorName>;
+
 		putils::Vector3f direction = { 0.f, -1.f, 0.f };
 		float ambientStrength = .1f;
-		float cascadeEnds[KENGINE_CSM_COUNT] = { 50.f };
+		vector cascadeEnds = { 50.f };
 		float shadowCasterMaxDistance = 100.f;
 
 		putils_reflection_class_name(DirLightComponent);
 		putils_reflection_attributes(
-			putils_reflection_attribute(&DirLightComponent::shadowCasterMaxDistance),
 			putils_reflection_attribute(&DirLightComponent::direction),
 			putils_reflection_attribute(&DirLightComponent::ambientStrength),
-			putils_reflection_attribute(&DirLightComponent::cascadeEnds)
+			putils_reflection_attribute(&DirLightComponent::cascadeEnds),
+			putils_reflection_attribute(&DirLightComponent::shadowCasterMaxDistance)
 		);
 		putils_reflection_parents(
 			putils_reflection_type(LightComponent)
+		);
+		putils_reflection_used_types(
+			putils_reflection_type(vector)
 		);
 	};
 

@@ -65,7 +65,7 @@ namespace kengine::Shaders {
 		}
 
 		runImpl(depthMap, [&] {
-			for (size_t i = 0; i < lengthof(depthMap.textures); ++i) {
+			for (size_t i = 0; i < light.cascadeEnds.size(); ++i) {
 				const float cascadeStart = (i == 0 ? params.nearPlane : LightHelper::getCSMCascadeEnd(light, i - 1));
 				const float cascadeEnd = LightHelper::getCSMCascadeEnd(light, i);
 				if (cascadeStart >= cascadeEnd)

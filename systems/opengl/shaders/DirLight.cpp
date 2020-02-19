@@ -78,7 +78,7 @@ namespace kengine::Shaders {
 			setLight(light);
 
 			const auto & depthMap = e.get<CSMComponent>();
-			for (size_t i = 0; i < lengthof(_shadowMap); ++i) {
+			for (size_t i = 0; i < light.cascadeEnds.size(); ++i) {
 				glActiveTexture((GLenum)(GL_TEXTURE0 + _shadowMapTextureID + i));
 				glBindTexture(GL_TEXTURE_2D, depthMap.textures[i]);
 				_lightSpaceMatrix[i] = LightHelper::getCSMLightSpaceMatrix(light, params, i);
@@ -98,7 +98,11 @@ namespace kengine::Shaders {
 		_pcfSamples = light.shadowPCFSamples;
 		_bias = light.shadowMapBias;
 
-		for (size_t i = 0; i < KENGINE_CSM_COUNT; ++i)
-			_cascadeEnd[i] = LightHelper::getCSMCascadeEnd(light, i);
+		size_t i = 0;
+		for (const auto cascadeEnd : light.cascadeEnds) {
+			_cascadeEnd[i] = cascadeEnd;
+			++i;
+		}
+		_cascadeCount = (int)light.cascadeEnds.size();
 	}
 }

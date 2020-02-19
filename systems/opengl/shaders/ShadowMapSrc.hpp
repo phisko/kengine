@@ -29,9 +29,10 @@ namespace kengine::Shaders::src {
 			extern const char * glsl;
 
 			struct Uniforms {
-				putils::gl::Uniform<size_t> _shadowMap[KENGINE_CSM_COUNT];
-				putils::gl::Uniform<glm::mat4> _lightSpaceMatrix[KENGINE_CSM_COUNT];
-				putils::gl::Uniform<float> _cascadeEnd[KENGINE_CSM_COUNT];
+				putils::gl::Uniform<size_t> _shadowMap[KENGINE_MAX_CSM_COUNT];
+				putils::gl::Uniform<glm::mat4> _lightSpaceMatrix[KENGINE_MAX_CSM_COUNT];
+				putils::gl::Uniform<float> _cascadeEnd[KENGINE_MAX_CSM_COUNT];
+				putils::gl::Uniform<int> _cascadeCount;
 				putils::gl::Uniform<float> _bias;
 				putils::gl::Uniform<int> _pcfSamples;
 
@@ -42,6 +43,7 @@ namespace kengine::Shaders::src {
 					putils_reflection_attribute_private(&Uniforms::_shadowMap), 
 					putils_reflection_attribute_private(&Uniforms::_lightSpaceMatrix), 
 					putils_reflection_attribute_private(&Uniforms::_cascadeEnd), 
+					putils_reflection_attribute_private(&Uniforms::_cascadeCount), 
 					putils_reflection_attribute_private(&Uniforms::_bias), 
 					putils_reflection_attribute_private(&Uniforms::_pcfSamples), 
 					putils_reflection_attribute_private(&Uniforms::_proj), 

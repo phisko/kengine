@@ -57,7 +57,7 @@ namespace kengine {
 
 	struct CSMComponent {
 		putils::gl::FrameBuffer fbo;
-		putils::gl::Texture textures[KENGINE_CSM_COUNT];
+		putils::gl::Texture textures[KENGINE_MAX_CSM_COUNT];
 		int size = -1;
 		putils_reflection_class_name(CSMComponent);
 	};

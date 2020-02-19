@@ -798,7 +798,7 @@ namespace kengine {
 		auto & gbuffer = camera.get<GBufferComponent>();
 
 		const putils::Point2ui gBufferSize = gbuffer.getSize();
-		const auto pixelInGBuffer = putils::Point2i(viewportInfo.viewportPercent * gBufferSize);
+		const auto pixelInGBuffer = putils::Point2ui(viewportInfo.viewportPercent * gBufferSize);
 		if (pixelInGBuffer.x >= gBufferSize.x || pixelInGBuffer.y > gBufferSize.y || pixelInGBuffer.y == 0)
 			return Entity::INVALID_ID;
 

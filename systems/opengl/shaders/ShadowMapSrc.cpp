@@ -55,10 +55,11 @@ float calcShadow(vec3 worldPos, vec3 normal, vec3 lightDir) {
 			const char * glsl = R"(
 #version 330
 
-const int CSM_COUNT = )" putils_macro_as_string(KENGINE_CSM_COUNT) R"(;
+const int CSM_COUNT = )" putils_macro_as_string(KENGINE_MAX_CSM_COUNT) R"(;
 uniform sampler2D shadowMap[CSM_COUNT];
 uniform mat4 lightSpaceMatrix[CSM_COUNT];
 uniform float cascadeEnd[CSM_COUNT];
+uniform int cascadeCount;
 uniform float bias;
 uniform int pcfSamples;
 
@@ -67,7 +68,7 @@ uniform mat4 view;
 
 int getCascadeIndex(vec3 worldPos) {
 	float clipSpacePosZ = (proj * view * vec4(worldPos, 1.0)).z;
-	for (int i = 0; i < CSM_COUNT; ++i)
+	for (int i = 0; i < cascadeCount; ++i)
 		if (clipSpacePosZ <= cascadeEnd[i])
 			return i;
 	return -1;
