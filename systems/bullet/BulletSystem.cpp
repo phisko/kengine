@@ -21,7 +21,6 @@
 #include "data/TransformComponent.hpp"
 
 #include "functions/Execute.hpp"
-#include "functions/OnEntityRemoved.hpp"
 #include "functions/OnCollision.hpp"
 #include "functions/QueryPosition.hpp"
 
@@ -33,11 +32,6 @@
 
 #include "btBulletDynamicsCommon.h"
 #include "BulletCollision/CollisionDispatch/btGhostObject.h"
-
-struct BulletPhysicsComponent {
-	btCompoundShape * shape;
-	btRigidBody * body;
-};
 
 static glm::vec3 toVec(const putils::Point3f & p) { return { p.x, p.y, p.z }; }
 static putils::Point3f toPutils(const btVector3 & vec) { return { vec.getX(), vec.getY(), vec.getZ() }; }
@@ -156,11 +150,45 @@ namespace kengine {
 
 	static btDiscreteDynamicsWorld dynamicsWorld(&dispatcher, &overlappingPairCache, &solver, &collisionConfiguration);
 
+	struct BulletPhysicsComponent {
+		struct MotionState : public btMotionState {
+			void getWorldTransform(btTransform & worldTrans) const final {
+				worldTrans = toBullet(*transform);
+			}
+
+			void setWorldTransform(const btTransform & worldTrans) final {
+				transform->boundingBox.position = toPutils(worldTrans.getOrigin());
+
+				btScalar xRotation, yRotation, zRotation;
+				worldTrans.getRotation().getEulerZYX(zRotation, yRotation, xRotation);
+
+				transform->pitch = xRotation;
+				transform->yaw = yRotation;
+				transform->roll = zRotation;
+			}
+
+			TransformComponent * transform;
+		};
+
+		btCompoundShape shape{ false };
+		btRigidBody body{ { 0.f, nullptr, nullptr } };
+		MotionState motionState;
+		bool active = false;
+
+		~BulletPhysicsComponent() noexcept {
+			if (active)
+				dynamicsWorld.removeRigidBody(&body);
+		}
+
+		BulletPhysicsComponent() = default;
+		BulletPhysicsComponent(BulletPhysicsComponent &&) = default;
+		BulletPhysicsComponent & operator=(BulletPhysicsComponent &&) = default;
+	};
+
 	static EntityManager * g_em;
 
 	// declarations
 	static void execute(float deltaTime);
-	static void onEntityRemoved(Entity & e);
 	static putils::vector<Entity::ID, KENGINE_QUERY_POSITION_MAX_RESULTS> queryPosition(const putils::Point3f & pos, float radius);
 	//
 	EntityCreator * BulletSystem(EntityManager & em) {
@@ -168,7 +196,6 @@ namespace kengine {
 
 		return [](Entity & e) {
 			e += functions::Execute{ execute };
-			e += functions::OnEntityRemoved{ onEntityRemoved };
 			e += functions::QueryPosition{ queryPosition };
 
 			e += AdjustableComponent{
@@ -204,10 +231,8 @@ namespace kengine {
 				updateBulletComponent(e, transform, physics, modelEntity);
 		}
 
-		for (auto & [e, bullet, noPhys] : g_em->getEntities<BulletPhysicsComponent, no<PhysicsComponent>>()) {
-			onEntityRemoved(e);
+		for (auto & [e, bullet, noPhys] : g_em->getEntities<BulletPhysicsComponent, no<PhysicsComponent>>())
 			e.detach<BulletPhysicsComponent>();
-		}
 
 		dynamicsWorld.setGravity({ 0.f, -GRAVITY, 0.f });
 		dynamicsWorld.stepSimulation(deltaTime);
@@ -233,6 +258,8 @@ namespace kengine {
 
 	static void addBulletComponent(Entity & e, TransformComponent & transform, PhysicsComponent & physics, const Entity & modelEntity) {
 		auto & comp = e.attach<BulletPhysicsComponent>();
+		comp.active = true;
+		comp.motionState.transform = &transform;
 
 		const auto & modelCollider = modelEntity.get<ModelColliderComponent>();
 
@@ -243,7 +270,6 @@ namespace kengine {
 		const ModelComponent * modelComponent = modelEntity.has<ModelComponent>() ?
 			&modelEntity.get<ModelComponent>() : nullptr;
 
-		comp.shape = new btCompoundShape(false);
 		for (const auto & collider : modelCollider.colliders) {
 			const auto size = collider.boundingBox.size;
 
@@ -280,43 +306,20 @@ namespace kengine {
 					break;
 				}
 			}
-			comp.shape->addChildShape(toBullet(transform, collider, skeleton, modelSkeleton, modelComponent), shape);
+			comp.shape.addChildShape(toBullet(transform, collider, skeleton, modelSkeleton, modelComponent), shape);
 		}
 
 		btVector3 localInertia{ 0.f, 0.f, 0.f }; {
 			if (physics.mass != 0.f)
-				comp.shape->calculateLocalInertia(physics.mass, localInertia);
+				comp.shape.calculateLocalInertia(physics.mass, localInertia);
 		}
 
-		struct KengineMotionState : public btMotionState {
-			KengineMotionState(TransformComponent & transform) : transform(transform) {}
+		btRigidBody::btRigidBodyConstructionInfo rbInfo(physics.mass, &comp.motionState, &comp.shape, localInertia);
+		comp.body = btRigidBody(rbInfo);
+		comp.body.setUserIndex((int)e.id);
 
-			void getWorldTransform(btTransform & worldTrans) const final {
-				worldTrans = toBullet(transform);
-			}
-
-			void setWorldTransform(const btTransform & worldTrans) final {
-				transform.boundingBox.position = toPutils(worldTrans.getOrigin());
-
-				btScalar xRotation, yRotation, zRotation;
-				worldTrans.getRotation().getEulerZYX(zRotation, yRotation, xRotation);
-
-				transform.pitch = xRotation;
-				transform.yaw = yRotation;
-				transform.roll = zRotation;
-			}
-
-			TransformComponent & transform;
-		};
-
-		const auto motionState = new KengineMotionState(transform);
-		btRigidBody::btRigidBodyConstructionInfo rbInfo(physics.mass, motionState, comp.shape, localInertia);
-		// btRigidBody::btRigidBodyConstructionInfo rbInfo(physics.mass, motionState, mass != 0.f ? (btCollisionShape*)(new btSphereShape(.5f)) : (btCollisionShape*)(new btBoxShape({ 6.25, 0.125, 6.05 })), localInertia);
-		comp.body = new btRigidBody(rbInfo);
-		comp.body->setUserIndex((int)e.id);
-
-		dynamicsWorld.addRigidBody(comp.body);
 		updateBulletComponent(e, transform, physics, modelEntity, true);
+		dynamicsWorld.addRigidBody(&comp.body);
 	}
 
 	void detectCollisions(btDynamicsWorld *, btScalar timeStep) {
@@ -344,34 +347,34 @@ namespace kengine {
 
 		if (physics.changed || first) {
 			// comp.body->clearForces();
-			comp.body->setLinearVelocity(toBullet(physics.movement));
-			comp.body->setAngularVelocity(btVector3{ physics.pitch, physics.yaw, physics.roll });
+			comp.body.setLinearVelocity(toBullet(physics.movement));
+			comp.body.setAngularVelocity(btVector3{ physics.pitch, physics.yaw, physics.roll });
 
 			btVector3 localInertia{ 0.f, 0.f, 0.f };
 			if (physics.mass != 0.f)
-				comp.body->getCollisionShape()->calculateLocalInertia(physics.mass, localInertia);
-			comp.body->setMassProps(physics.mass, localInertia);
+				comp.body.getCollisionShape()->calculateLocalInertia(physics.mass, localInertia);
+			comp.body.setMassProps(physics.mass, localInertia);
 
-			comp.body->forceActivationState(kinematic ? ISLAND_SLEEPING : ACTIVE_TAG);
-			comp.body->setWorldTransform(toBullet(transform));
+			comp.body.forceActivationState(kinematic ? ISLAND_SLEEPING : ACTIVE_TAG);
+			comp.body.setWorldTransform(toBullet(transform));
 		}
 		else if (kinematic) {
-			comp.body->setWorldTransform(toBullet(transform));
+			comp.body.setWorldTransform(toBullet(transform));
 		}
 		else if (!kinematic) {
-			physics.movement = toPutils(comp.body->getLinearVelocity());
-			physics.pitch = comp.body->getAngularVelocity().x();
-			physics.yaw = comp.body->getAngularVelocity().y();
-			physics.roll = comp.body->getAngularVelocity().z();
+			physics.movement = toPutils(comp.body.getLinearVelocity());
+			physics.pitch = comp.body.getAngularVelocity().x();
+			physics.yaw = comp.body.getAngularVelocity().y();
+			physics.roll = comp.body.getAngularVelocity().z();
 		}
 
 		if (kinematic) {
-			comp.body->setCollisionFlags(comp.body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
-			comp.body->setActivationState(WANTS_DEACTIVATION);
+			comp.body.setCollisionFlags(comp.body.getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
+			comp.body.setActivationState(WANTS_DEACTIVATION);
 		}
-		else if (comp.body->getCollisionFlags() & btCollisionObject::CF_KINEMATIC_OBJECT) { // Kinematic -> not kinematic
-			comp.body->setCollisionFlags(comp.body->getCollisionFlags() & ~btCollisionObject::CF_KINEMATIC_OBJECT);
-			comp.body->setActivationState(ACTIVE_TAG);
+		else if (comp.body.getCollisionFlags() & btCollisionObject::CF_KINEMATIC_OBJECT) { // Kinematic -> not kinematic
+			comp.body.setCollisionFlags(comp.body.getCollisionFlags() & ~btCollisionObject::CF_KINEMATIC_OBJECT);
+			comp.body.setActivationState(ACTIVE_TAG);
 		}
 
 		physics.changed = false;
@@ -383,20 +386,10 @@ namespace kengine {
 
 			int i = 0;
 			for (const auto & collider : modelEntity.get<ModelColliderComponent>().colliders) {
-				comp.shape->updateChildTransform(i, toBullet(transform, collider, &skeleton, &modelSkeleton, &modelComponent));
+				comp.shape.updateChildTransform(i, toBullet(transform, collider, &skeleton, &modelSkeleton, &modelComponent));
 				++i;
 			}
 		}
-	}
-
-	static void onEntityRemoved(Entity & e) {
-		if (!e.has<BulletPhysicsComponent>())
-			return;
-		auto & comp = e.get<BulletPhysicsComponent>();
-		dynamicsWorld.removeRigidBody(comp.body);
-		delete comp.body->getMotionState();
-		delete comp.body;
-		delete comp.shape;
 	}
 
 	static putils::vector<Entity::ID, KENGINE_QUERY_POSITION_MAX_RESULTS> queryPosition(const putils::Point3f & pos, float radius) {
