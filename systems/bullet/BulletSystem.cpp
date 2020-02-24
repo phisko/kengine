@@ -215,20 +215,25 @@ namespace kengine {
 
 	// declarations
 	static void addBulletComponent(Entity & e, TransformComponent & transform, PhysicsComponent & physics, const Entity & modelEntity);
-	static void updateBulletComponent(Entity & e, const TransformComponent & transform, PhysicsComponent & physics, const Entity & modelEntity, bool first = false);
+	static void updateBulletComponent(Entity & e, BulletPhysicsComponent & comp, const TransformComponent & transform, PhysicsComponent & physics, const Entity & modelEntity, bool first = false);
 	//
 	static void execute(float deltaTime) {
-		for (auto & [e, graphics, transform, physics] : g_em->getEntities<GraphicsComponent, TransformComponent, PhysicsComponent>()) {
+		for (auto & [e, graphics, transform, physics, comp] : g_em->getEntities<GraphicsComponent, TransformComponent, PhysicsComponent, BulletPhysicsComponent>()) {
 			if (graphics.model == Entity::INVALID_ID)
 				continue;
-
 			const auto & modelEntity = g_em->getEntity(graphics.model);
 			if (!modelEntity.has<ModelColliderComponent>())
 				continue;
-			if (!e.has<BulletPhysicsComponent>())
-				addBulletComponent(e, transform, physics, modelEntity);
-			else
-				updateBulletComponent(e, transform, physics, modelEntity);
+			updateBulletComponent(e, comp, transform, physics, modelEntity);
+		}
+
+		for (auto & [e, graphics, transform, physics, noComp] : g_em->getEntities<GraphicsComponent, TransformComponent, PhysicsComponent, no<BulletPhysicsComponent>>()) {
+			if (graphics.model == Entity::INVALID_ID)
+				continue;
+			const auto & modelEntity = g_em->getEntity(graphics.model);
+			if (!modelEntity.has<ModelColliderComponent>())
+				continue;
+			addBulletComponent(e, transform, physics, modelEntity);
 		}
 
 		for (auto & [e, bullet, noPhys] : g_em->getEntities<BulletPhysicsComponent, no<PhysicsComponent>>())
@@ -318,7 +323,7 @@ namespace kengine {
 		comp.body = btRigidBody(rbInfo);
 		comp.body.setUserIndex((int)e.id);
 
-		updateBulletComponent(e, transform, physics, modelEntity, true);
+		updateBulletComponent(e, comp, transform, physics, modelEntity, true);
 		dynamicsWorld.addRigidBody(&comp.body);
 	}
 
@@ -340,9 +345,7 @@ namespace kengine {
 			}
 	}
 
-	static void updateBulletComponent(Entity & e, const TransformComponent & transform, PhysicsComponent & physics, const Entity & modelEntity, bool first) {
-		auto & comp = e.get<BulletPhysicsComponent>();
-
+	static void updateBulletComponent(Entity & e, BulletPhysicsComponent & comp, const TransformComponent & transform, PhysicsComponent & physics, const Entity & modelEntity, bool first) {
 		const bool kinematic = e.has<KinematicComponent>();
 
 		if (physics.changed || first) {
