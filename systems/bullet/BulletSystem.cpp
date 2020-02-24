@@ -47,8 +47,8 @@ static btTransform toBullet(const kengine::TransformComponent & transform) {
 	glm::mat4 mat(1.f);
 
 	mat = glm::translate(mat, toVec(transform.boundingBox.position));
-	mat = glm::rotate(mat, transform.pitch, { 1.f, 0.f, 0.f });
 	mat = glm::rotate(mat, transform.yaw, { 0.f, 1.f, 0.f });
+	mat = glm::rotate(mat, transform.pitch, { 1.f, 0.f, 0.f });
 	mat = glm::rotate(mat, transform.roll, { 0.f, 0.f, 1.f });
 	mat = glm::scale(mat, toVec(transform.boundingBox.size));
 
@@ -59,30 +59,28 @@ static btTransform toBullet(const kengine::TransformComponent & transform) {
 }
 
 static btTransform toBullet(const kengine::TransformComponent & parent, const kengine::ModelColliderComponent::Collider & collider, const kengine::SkeletonComponent * skeleton, const kengine::ModelSkeletonComponent * modelSkeleton, const kengine::ModelComponent * model) {
-	glm::mat4 mat(1.f);
+	glm::mat4 parentMat(1.f);
+	parentMat = glm::scale(parentMat, { -1.f, 1.f, -1.f });
 
 	if (!collider.boneName.empty()) {
+		// Apply model scale to bone transformation
 		assert(skeleton != nullptr && modelSkeleton != nullptr && model != nullptr);
 
-		mat = glm::scale(mat, { -1.f, 1.f, -1.f });
 		const auto worldSpaceBone = kengine::SkeletonHelper::getBoneMatrix(collider.boneName.c_str(), *skeleton, *modelSkeleton);
 		const auto pos = kengine::MatrixHelper::getPos(worldSpaceBone);
-		mat = glm::translate(mat, toVec(pos * model->boundingBox.size));
-		mat = glm::translate(mat, -toVec(pos));
-		mat *= worldSpaceBone;
+		parentMat = glm::translate(parentMat, toVec(pos * model->boundingBox.size));
+		parentMat = glm::translate(parentMat, -toVec(pos));
+		parentMat *= worldSpaceBone;
 	}
+	
 
-	mat = glm::rotate(mat, parent.pitch, { 1.f, 0.f, 0.f });
-	mat = glm::rotate(mat, parent.yaw, { 0.f, 1.f, 0.f });
-	mat = glm::rotate(mat, parent.roll, { 0.f, 0.f, 1.f });
-	if (collider.boneName.empty()) // Otherwise, scale was embedded in bone matrix
-		mat = glm::scale(mat, toVec(parent.boundingBox.size));
+	glm::mat4 colliderMat(1.f);
+	colliderMat = glm::translate(colliderMat, toVec(collider.boundingBox.position));
+	colliderMat = glm::rotate(colliderMat, collider.yaw, { 0.f, 1.f, 0.f });
+	colliderMat = glm::rotate(colliderMat, collider.pitch, { 1.f, 0.f, 0.f });
+	colliderMat = glm::rotate(colliderMat, collider.roll, { 0.f, 0.f, 1.f });
 
-	mat = glm::translate(mat, toVec(collider.boundingBox.position));
-	mat = glm::rotate(mat, collider.pitch, { 1.f, 0.f, 0.f });
-	mat = glm::rotate(mat, collider.yaw, { 0.f, 1.f, 0.f });
-	mat = glm::rotate(mat, collider.roll, { 0.f, 0.f, 1.f });
-
+	const auto mat = parentMat * colliderMat;
 	btTransform ret;
 	ret.setFromOpenGLMatrix(glm::value_ptr(mat));
 
@@ -121,7 +119,7 @@ namespace debug {
 
 		void draw3dText(const btVector3 & location, const char * textString) override {}
 
-		void reportErrorWarning(const char * warningString) override { std::cout << putils::termcolor::red << "[Bullet] " << warningString << putils::termcolor::reset; }
+		void reportErrorWarning(const char * warningString) override { std::cerr << putils::termcolor::red << "[Bullet] " << warningString << putils::termcolor::reset; }
 
 		void setDebugMode(int debugMode) override {}
 		int getDebugMode() const override { return DBG_DrawWireframe; }

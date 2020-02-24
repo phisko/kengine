@@ -82,9 +82,9 @@ namespace kengine::Shaders {
 			if (referenceSpace == DebugGraphicsComponent::ReferenceSpace::World)
 				return;
 			model = glm::translate(model, ShaderHelper::toVec(transform.boundingBox.position));
-			model = glm::rotate(model, transform.roll, { 0.f, 0.f, 1.f });
 			model = glm::rotate(model, transform.yaw, { 0.f, 1.f, 0.f });
 			model = glm::rotate(model, transform.pitch, { 1.f, 0.f, 0.f });
+			model = glm::rotate(model, transform.roll, { 0.f, 0.f, 1.f });
 		};
 
 		for (const auto &[e, debug, transform] : _em.getEntities<DebugGraphicsComponent, TransformComponent>()) {
