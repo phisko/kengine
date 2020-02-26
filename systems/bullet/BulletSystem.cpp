@@ -218,21 +218,20 @@ namespace kengine {
 	static void updateBulletComponent(Entity & e, BulletPhysicsComponent & comp, const TransformComponent & transform, PhysicsComponent & physics, const Entity & modelEntity, bool first = false);
 	//
 	static void execute(float deltaTime) {
+#define GetModelOrContinue \
+			if (graphics.model == Entity::INVALID_ID) \
+				continue; \
+			const auto & modelEntity = g_em->getEntity(graphics.model); \
+			if (!modelEntity.has<ModelColliderComponent>()) \
+				continue;
+
 		for (auto & [e, graphics, transform, physics, comp] : g_em->getEntities<GraphicsComponent, TransformComponent, PhysicsComponent, BulletPhysicsComponent>()) {
-			if (graphics.model == Entity::INVALID_ID)
-				continue;
-			const auto & modelEntity = g_em->getEntity(graphics.model);
-			if (!modelEntity.has<ModelColliderComponent>())
-				continue;
+			GetModelOrContinue;
 			updateBulletComponent(e, comp, transform, physics, modelEntity);
 		}
 
 		for (auto & [e, graphics, transform, physics, noComp] : g_em->getEntities<GraphicsComponent, TransformComponent, PhysicsComponent, no<BulletPhysicsComponent>>()) {
-			if (graphics.model == Entity::INVALID_ID)
-				continue;
-			const auto & modelEntity = g_em->getEntity(graphics.model);
-			if (!modelEntity.has<ModelColliderComponent>())
-				continue;
+			GetModelOrContinue;
 			addBulletComponent(e, transform, physics, modelEntity);
 		}
 
