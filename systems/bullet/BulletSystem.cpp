@@ -44,7 +44,6 @@ static btTransform toBullet(const kengine::TransformComponent & transform) {
 	mat = glm::rotate(mat, transform.yaw, { 0.f, 1.f, 0.f });
 	mat = glm::rotate(mat, transform.pitch, { 1.f, 0.f, 0.f });
 	mat = glm::rotate(mat, transform.roll, { 0.f, 0.f, 1.f });
-	mat = glm::scale(mat, toVec(transform.boundingBox.size));
 
 	btTransform ret;
 	ret.setFromOpenGLMatrix(glm::value_ptr(mat));
@@ -62,14 +61,13 @@ static btTransform toBullet(const kengine::TransformComponent & parent, const ke
 
 		const auto worldSpaceBone = kengine::SkeletonHelper::getBoneMatrix(collider.boneName.c_str(), *skeleton, *modelSkeleton);
 		const auto pos = kengine::MatrixHelper::getPos(worldSpaceBone);
-		parentMat = glm::translate(parentMat, toVec(pos * model->boundingBox.size));
+		parentMat = glm::translate(parentMat, toVec(pos * model->boundingBox.size * parent.boundingBox.size));
 		parentMat = glm::translate(parentMat, -toVec(pos));
 		parentMat *= worldSpaceBone;
 	}
-	
 
 	glm::mat4 colliderMat(1.f);
-	colliderMat = glm::translate(colliderMat, toVec(collider.boundingBox.position));
+	colliderMat = glm::translate(colliderMat, toVec(collider.boundingBox.position * parent.boundingBox.size));
 	colliderMat = glm::rotate(colliderMat, collider.yaw, { 0.f, 1.f, 0.f });
 	colliderMat = glm::rotate(colliderMat, collider.pitch, { 1.f, 0.f, 0.f });
 	colliderMat = glm::rotate(colliderMat, collider.roll, { 0.f, 0.f, 1.f });
@@ -275,7 +273,7 @@ namespace kengine {
 			&modelEntity.get<ModelComponent>() : nullptr;
 
 		for (const auto & collider : modelCollider.colliders) {
-			const auto size = collider.boundingBox.size;
+			const auto size = collider.boundingBox.size * transform.boundingBox.size;
 
 			btCollisionShape * shape; {
 				switch (collider.shape) {
