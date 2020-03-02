@@ -156,13 +156,9 @@ namespace kengine {
 
 			void setWorldTransform(const btTransform & worldTrans) final {
 				transform->boundingBox.position = toPutils(worldTrans.getOrigin());
-
-				btScalar xRotation, yRotation, zRotation;
-				worldTrans.getRotation().getEulerZYX(zRotation, yRotation, xRotation);
-
-				transform->pitch = xRotation;
-				transform->yaw = yRotation;
-				transform->roll = zRotation;
+				glm::mat4 mat;
+				worldTrans.getOpenGLMatrix(glm::value_ptr(mat));
+				glm::extractEulerAngleYXZ(mat, transform->yaw, transform->pitch, transform->roll);
 			}
 
 			TransformComponent * transform;
@@ -178,7 +174,7 @@ namespace kengine {
 				dynamicsWorld.removeRigidBody(&body);
 		}
 
-		BulletPhysicsComponent() = default;
+		BulletPhysicsComponent() noexcept = default;
 		BulletPhysicsComponent(BulletPhysicsComponent &&) = default;
 		BulletPhysicsComponent & operator=(BulletPhysicsComponent &&) = default;
 	};
