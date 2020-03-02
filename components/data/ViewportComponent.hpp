@@ -14,6 +14,10 @@ namespace kengine {
 		float zOrder = 1.f;
 		RenderTexture renderTexture = (RenderTexture)-1;
 
+		ViewportComponent() noexcept {
+			coordinateType = CoordinateType::ScreenPercentage;
+		}
+
 		putils_reflection_class_name(ViewportComponent);
 		putils_reflection_attributes(
 			putils_reflection_attribute(&ViewportComponent::window),
