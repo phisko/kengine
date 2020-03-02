@@ -98,12 +98,12 @@ namespace kengine {
 			const float * data;
 
 			// Impl
-			Texture(GLuint pbo) : _pbo(pbo) {
+			Texture(GLuint pbo) noexcept : _pbo(pbo) {
 				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
 				data = (const float *)glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
 			}
 
-			~Texture() {
+			~Texture() noexcept {
 				glBindBuffer(GL_PIXEL_PACK_BUFFER, _pbo);
 				glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
 				glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
