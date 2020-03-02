@@ -210,6 +210,7 @@ namespace kengine {
 	// declarations
 	static void addBulletComponent(Entity & e, TransformComponent & transform, PhysicsComponent & physics, const Entity & modelEntity);
 	static void updateBulletComponent(Entity & e, BulletPhysicsComponent & comp, const TransformComponent & transform, PhysicsComponent & physics, const Entity & modelEntity, bool first = false);
+	static void detectCollisions();
 	//
 	static void execute(float deltaTime) {
 #define GetModelOrContinue \
@@ -234,6 +235,7 @@ namespace kengine {
 
 		dynamicsWorld.setGravity({ 0.f, -GRAVITY, 0.f });
 		dynamicsWorld.stepSimulation(deltaTime);
+		detectCollisions();
 
 #ifndef KENGINE_NDEBUG
 		debug::drawer->cleanup();
@@ -320,24 +322,6 @@ namespace kengine {
 		dynamicsWorld.addRigidBody(&comp.body);
 	}
 
-	void detectCollisions(btDynamicsWorld *, btScalar timeStep) {
-		const auto numManifolds = dispatcher.getNumManifolds();
-		if (numManifolds <= 0)
-			return;
-		for (const auto & [_, onCollision] : g_em->getEntities<functions::OnCollision>())
-			for (int i = 0; i < numManifolds; ++i) {
-				const auto contactManifold = dispatcher.getManifoldByIndexInternal(i);
-				const auto objectA = (btCollisionObject *)(contactManifold->getBody0());
-				const auto objectB = (btCollisionObject *)(contactManifold->getBody1());
-
-				const auto id1 = objectA->getUserIndex();
-				const auto id2 = objectB->getUserIndex();
-				auto e1 = g_em->getEntity(id1);
-				auto e2 = g_em->getEntity(id2);
-				onCollision(e1, e2);
-			}
-	}
-
 	static void updateBulletComponent(Entity & e, BulletPhysicsComponent & comp, const TransformComponent & transform, PhysicsComponent & physics, const Entity & modelEntity, bool first) {
 		const bool kinematic = e.has<KinematicComponent>();
 
@@ -386,6 +370,24 @@ namespace kengine {
 				++i;
 			}
 		}
+	}
+
+	static void detectCollisions() {
+		const auto numManifolds = dispatcher.getNumManifolds();
+		if (numManifolds <= 0)
+			return;
+		for (const auto & [_, onCollision] : g_em->getEntities<functions::OnCollision>())
+			for (int i = 0; i < numManifolds; ++i) {
+				const auto contactManifold = dispatcher.getManifoldByIndexInternal(i);
+				const auto objectA = (btCollisionObject *)(contactManifold->getBody0());
+				const auto objectB = (btCollisionObject *)(contactManifold->getBody1());
+
+				const auto id1 = objectA->getUserIndex();
+				const auto id2 = objectB->getUserIndex();
+				auto e1 = g_em->getEntity(id1);
+				auto e2 = g_em->getEntity(id2);
+				onCollision(e1, e2);
+			}
 	}
 
 	static putils::vector<Entity::ID, KENGINE_QUERY_POSITION_MAX_RESULTS> queryPosition(const putils::Point3f & pos, float radius) {
