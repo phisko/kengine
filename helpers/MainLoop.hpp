@@ -1,7 +1,13 @@
 #pragma once
 
-namespace kengine { class EntityManager; }
+namespace kengine {
+	class EntityManager;
 
-namespace kengine::MainLoop {
-	void run(EntityManager & em);
+	namespace MainLoop {
+		void run(EntityManager & em);
+
+		namespace TimeModulated {
+			void run(EntityManager & em);
+		}
+	}
 }
