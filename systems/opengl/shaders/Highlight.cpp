@@ -78,7 +78,7 @@ namespace kengine::Shaders {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		_viewPos = params.camPos;
-		_screenSize = putils::Point2f(params.viewPort.size);
+		_screenSize = putils::Point2f(params.viewport.size);
 
 		for (const auto & [e, highlight] : _em.getEntities<HighlightComponent>()) {
 			_entityID = (float)e.id;

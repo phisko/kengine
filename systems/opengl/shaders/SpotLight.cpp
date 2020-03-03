@@ -31,7 +31,7 @@ namespace kengine::Shaders {
 
 		use();
 		_viewPos = params.camPos;
-		_screenSize = putils::Point2f(params.viewPort.size);
+		_screenSize = putils::Point2f(params.viewport.size);
 
 
 		glActiveTexture((GLenum)(GL_TEXTURE0 + _shadowMapTextureID));

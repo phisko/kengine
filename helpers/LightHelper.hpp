@@ -36,7 +36,7 @@ namespace kengine::LightHelper {
 	}
 
 	static glm::mat4 getCSMLightSpaceMatrix(const DirLightComponent & light, const putils::gl::Program::Parameters & params, size_t csmIndex) {
-		const float ar = (float)params.viewPort.size.x / (float)params.viewPort.size.y;
+		const float ar = (float)params.viewport.size.x / (float)params.viewport.size.y;
 		const float tanHalfHFOV = std::tan(params.camFOV * ar / 2.f);
 		const float tanHalfVFOV = std::tan(params.camFOV / 2.f);
 
@@ -92,7 +92,7 @@ namespace kengine::LightHelper {
 	}
 
 	static glm::mat4 getLightSpaceMatrix(const SpotLightComponent & light, const glm::vec3 & pos, const putils::gl::Program::Parameters & params) {
-		const auto lightProjection = glm::perspective(45.f, (float)params.viewPort.size.x / (float)params.viewPort.size.y, SHADOW_MAP_NEAR_PLANE, SHADOW_MAP_FAR_PLANE);
+		const auto lightProjection = glm::perspective(45.f, (float)params.viewport.size.x / (float)params.viewport.size.y, SHADOW_MAP_NEAR_PLANE, SHADOW_MAP_FAR_PLANE);
 
 		const auto dir = getCorrectDirection(toVec(light.direction));
 		const auto lightView = glm::lookAt(pos, pos + dir, glm::vec3(0.f, 1.f, 0.f));

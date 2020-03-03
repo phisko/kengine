@@ -215,7 +215,7 @@ namespace kengine::Shaders {
 		if (comp != nullptr) {
 			switch (comp->coordinateType) {
 			case TextComponent2D::CoordinateType::Pixels:
-				scale /= params.viewPort.size.y;
+				scale /= params.viewport.size.y;
 				break;
 			case TextComponent2D::CoordinateType::ScreenPercentage:
 			default:
@@ -228,7 +228,7 @@ namespace kengine::Shaders {
 			const auto & box =
 				comp == nullptr ?
 				transform.boundingBox : // 3D
-				CameraHelper::convertToScreenPercentage(transform.boundingBox, params.viewPort.size, *comp); // 2D
+				CameraHelper::convertToScreenPercentage(transform.boundingBox, params.viewport.size, *comp); // 2D
 
 			auto centre = ShaderHelper::toVec(box.position);
 
@@ -333,14 +333,14 @@ namespace kengine::Shaders {
 		_proj = glm::mat4(1.f);
 		for (const auto &[e, text, transform] : _em.getEntities<TextComponent2D, TransformComponent>()) {
 			_entityID = (float)e.id;
-			drawObject(params, text, transform, uniforms, glm::vec2(params.viewPort.size.x, params.viewPort.size.y), &text);
+			drawObject(params, text, transform, uniforms, glm::vec2(params.viewport.size.x, params.viewport.size.y), &text);
 		}
 
 		_view = params.view;
 		_proj = params.proj;
 		for (const auto &[e, text, transform] : _em.getEntities<TextComponent3D, TransformComponent>()) {
 			_entityID = (float)e.id;
-			drawObject(params, text, transform, uniforms, glm::vec2(params.viewPort.size.x, params.viewPort.size.y));
+			drawObject(params, text, transform, uniforms, glm::vec2(params.viewport.size.x, params.viewport.size.y));
 		}
 	}
 }

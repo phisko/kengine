@@ -608,6 +608,7 @@ namespace kengine {
 			else if (viewport.window != g_window.id)
 				return;
 
+			g_params.viewportID = e.id;
 			setupParams(cam, viewport);
 			fillGBuffer(*g_em, e, viewport);
 
@@ -629,8 +630,8 @@ namespace kengine {
 	}
 
 	static void setupParams(const CameraComponent & cam, const ViewportComponent & viewport) {
-		g_params.viewPort.size = viewport.resolution;
-		putils::gl::setViewPort(g_params.viewPort);
+		g_params.viewport.size = viewport.resolution;
+		putils::gl::setViewPort(g_params.viewport);
 
 		g_params.camPos = ShaderHelper::toVec(cam.frustum.position);
 		g_params.camFOV = cam.frustum.size.y;
@@ -650,7 +651,7 @@ namespace kengine {
 
 		g_params.proj = glm::perspective(
 			g_params.camFOV,
-			(float)g_params.viewPort.size.x / (float)g_params.viewPort.size.y,
+			(float)g_params.viewport.size.x / (float)g_params.viewport.size.y,
 			g_params.nearPlane, g_params.farPlane
 		);
 	}
@@ -733,7 +734,7 @@ namespace kengine {
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb.fbo);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glBlitFramebuffer(0, 0, (GLint)g_params.viewPort.size.x, (GLint)g_params.viewPort.size.y, 0, 0, (GLint)g_params.viewPort.size.x, (GLint)g_params.viewPort.size.y, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+		glBlitFramebuffer(0, 0, (GLint)g_params.viewport.size.x, (GLint)g_params.viewport.size.y, 0, 0, (GLint)g_params.viewport.size.x, (GLint)g_params.viewport.size.y, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
 		runShaders(em.getEntities<LightingShaderComponent>());
 		runShaders(em.getEntities<PostLightingShaderComponent>());

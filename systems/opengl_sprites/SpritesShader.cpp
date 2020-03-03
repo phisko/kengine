@@ -107,7 +107,7 @@ namespace kengine {
 			const auto & box =
 				comp == nullptr ?
 				transform.boundingBox : // 3D
-				CameraHelper::convertToScreenPercentage(transform.boundingBox, params.viewPort.size, *comp); // 2D
+				CameraHelper::convertToScreenPercentage(transform.boundingBox, params.viewport.size, *comp); // 2D
 
 			auto centre = ShaderHelper::toVec(box.position);
 			const auto size = ShaderHelper::toVec(box.size);

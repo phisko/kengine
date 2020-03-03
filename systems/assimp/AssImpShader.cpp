@@ -37,7 +37,7 @@ namespace kengine {
 
 		for (const auto &[e, textured, graphics, transform, skeleton] : _em.getEntities<AssImpObjectComponent, GraphicsComponent, TransformComponent, SkeletonComponent>()) {
 			if (graphics.model == Entity::INVALID_ID)
-				return;
+				continue;
 
 			_entityID = (float)e.id;
 			_color = graphics.color;

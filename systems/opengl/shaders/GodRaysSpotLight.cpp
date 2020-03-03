@@ -42,7 +42,7 @@ namespace kengine::Shaders {
 		_inverseView = glm::inverse(params.view);
 		_inverseProj = glm::inverse(params.proj);
 		_viewPos = params.camPos;
-		_screenSize = putils::Point2f(params.viewPort.size);
+		_screenSize = putils::Point2f(params.viewport.size);
 
 		for (const auto &[e, light, depthMap, transform, comp] : _em.getEntities<SpotLightComponent, DepthMapComponent, TransformComponent, GodRaysComponent>()) {
 			_scattering = comp.scattering;

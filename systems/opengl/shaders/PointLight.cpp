@@ -32,7 +32,7 @@ namespace kengine::Shaders {
 		use();
 		src::ShadowCube::Frag::Uniforms::_viewPos = params.camPos;
 		assert(src::ShadowCube::Frag::Uniforms::_viewPos.location == src::PointLight::Frag::Uniforms::_viewPos.location);
-		_screenSize = putils::Point2f(params.viewPort.size);
+		_screenSize = putils::Point2f(params.viewport.size);
 
 		glActiveTexture((GLenum)(GL_TEXTURE0 + _shadowMapTextureID));
 

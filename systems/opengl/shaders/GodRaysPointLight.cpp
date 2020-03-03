@@ -43,14 +43,14 @@ namespace kengine::Shaders {
 		_inverseProj = glm::inverse(params.proj);
 		src::ShadowCube::Frag::Uniforms::_viewPos = params.camPos;
 		assert(src::ShadowCube::Frag::Uniforms::_viewPos.location == src::GodRays::Frag::Uniforms::_viewPos.location);
-		_screenSize = putils::Point2f(params.viewPort.size);
+		_screenSize = putils::Point2f(params.viewport.size);
 
 		for (const auto &[e, light, depthMap, transform, comp] : _em.getEntities<PointLightComponent, DepthCubeComponent, TransformComponent, GodRaysComponent>()) {
 			_scattering = comp.scattering;
 			_nbSteps = comp.nbSteps;
 			_defaultStepLength = comp.defaultStepLength;
 			_intensity = comp.intensity;
-			drawLight(params.camPos, light, transform.boundingBox.position, depthMap, (size_t)params.viewPort.size.x, (size_t)params.viewPort.size.y);
+			drawLight(params.camPos, light, transform.boundingBox.position, depthMap, (size_t)params.viewport.size.x, (size_t)params.viewport.size.y);
 		}
 	}
 

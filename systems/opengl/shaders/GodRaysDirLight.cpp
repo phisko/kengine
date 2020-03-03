@@ -42,7 +42,7 @@ namespace kengine::Shaders {
 		_inverseView = glm::inverse(params.view);
 		_inverseProj = glm::inverse(params.proj);
 		_viewPos = params.camPos;
-		_screenSize = putils::Point2f(params.viewPort.size);
+		_screenSize = putils::Point2f(params.viewport.size);
 
 		for (const auto &[e, light, depthMap, comp] : _em.getEntities<DirLightComponent, CSMComponent, GodRaysComponent>()) {
 			_scattering = comp.scattering;
@@ -64,7 +64,7 @@ namespace kengine::Shaders {
 			_lightSpaceMatrix[i] = LightHelper::getCSMLightSpaceMatrix(light, params, i);
 			_cascadeEnd[i] = LightHelper::getCSMCascadeEnd(light, i);
 		}
-		_cascadeCount = light.cascadeEnds.size();
+		_cascadeCount = (int)light.cascadeEnds.size();
 
 		ShaderHelper::shapes::drawQuad();
 	}

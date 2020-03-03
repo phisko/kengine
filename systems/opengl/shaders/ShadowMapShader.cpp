@@ -23,7 +23,7 @@ namespace kengine::Shaders {
 		draw();
 
 		glCullFace(GL_BACK);
-		putils::gl::setViewPort(params.viewPort);
+		putils::gl::setViewPort(params.viewport);
 	}
 
 	static void initTexture(GLuint texture, size_t size) {
@@ -161,7 +161,7 @@ namespace kengine::Shaders {
 
 		drawObjects();
 
-		putils::gl::setViewPort(params.viewPort);
+		putils::gl::setViewPort(params.viewport);
 		glCullFace(GL_BACK);
 	}
 }
