@@ -20,7 +20,7 @@ namespace kengine::Shaders {
 		ShadowCube(EntityManager & em) : ShadowCubeShader(false, putils_nameof(ShadowCube)), _em(em) {}
 
 		void init(size_t firstTextureID) override;
-		void drawObjects() override;
+		void drawObjects(const Parameters & params) override;
 
 	private:
 		EntityManager & _em;

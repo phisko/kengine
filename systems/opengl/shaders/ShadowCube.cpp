@@ -21,9 +21,11 @@ namespace kengine::Shaders {
 		_view = glm::mat4(1.f);
 	}
 
-	void ShadowCube::drawObjects() {
+	void ShadowCube::drawObjects(const Parameters & params) {
 		for (const auto &[e, graphics, transform, shadow, noNoShadow] : _em.getEntities<GraphicsComponent, TransformComponent, DefaultShadowComponent, no<NoShadowComponent>>()) {
 			if (graphics.model == Entity::INVALID_ID)
+				continue;
+			if (!ShaderHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			const auto & modelInfoEntity = _em.getEntity(graphics.model);

@@ -88,6 +88,9 @@ namespace kengine::Shaders {
 		};
 
 		for (const auto &[e, debug, transform] : _em.getEntities<DebugGraphicsComponent, TransformComponent>()) {
+			if (!ShaderHelper::entityAppearsInViewport(e, params.viewportID))
+				continue;
+
 			for (const auto & element : debug.elements) {
 				_color = element.color;
 				_entityID = (float)e.id;

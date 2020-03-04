@@ -162,6 +162,9 @@ namespace kengine {
 		_view = glm::mat4(1.f);
 		_proj = glm::mat4(1.f);
 		for (const auto &[e, graphics, transform, sprite] : _em.getEntities<GraphicsComponent, TransformComponent, SpriteComponent2D>()) {
+			if (!ShaderHelper::entityAppearsInViewport(e, params.viewportID))
+				continue;
+
 			_entityID = (float)e.id;
 			drawObject(_em, params, graphics, transform, uniforms, &sprite);
 		}
@@ -169,6 +172,9 @@ namespace kengine {
 		_view = params.view;
 		_proj = params.proj;
 		for (const auto &[e, graphics, transform, sprite] : _em.getEntities<GraphicsComponent, TransformComponent, SpriteComponent3D>()) {
+			if (!ShaderHelper::entityAppearsInViewport(e, params.viewportID))
+				continue;
+
 			_entityID = (float)e.id;
 			drawObject(_em, params, graphics, transform, uniforms);
 		}

@@ -25,8 +25,10 @@ namespace kengine {
 		_view = glm::mat4(1.f);
 	}
 
-	void AssImpShadowCube::drawObjects() {
+	void AssImpShadowCube::drawObjects(const Parameters & params) {
 		for (const auto &[e, textured, graphics, transform, skeleton, noNoShadow] : _em.getEntities<AssImpObjectComponent, GraphicsComponent, TransformComponent, SkeletonComponent, no<NoShadowComponent>>()) {
+			if (!ShaderHelper::entityAppearsInViewport(e, params.viewportID))
+				continue;
 			AssImpHelper::Uniforms uniforms;
 			uniforms.model = _model;
 			uniforms.bones = _bones;

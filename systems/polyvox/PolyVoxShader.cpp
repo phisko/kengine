@@ -90,6 +90,8 @@ namespace kengine {
 		for (const auto &[e, poly, graphics, transform] : _em.getEntities<PolyVoxObjectComponent, GraphicsComponent, TransformComponent>()) {
 			if (graphics.model == Entity::INVALID_ID)
 				continue;
+			if (!ShaderHelper::entityAppearsInViewport(e, params.viewportID))
+				continue;
 
 			const auto & modelInfoEntity = _em.getEntity(graphics.model);
 			if (!modelInfoEntity.has<OpenGLModelComponent>() || !modelInfoEntity.has<ModelComponent>())

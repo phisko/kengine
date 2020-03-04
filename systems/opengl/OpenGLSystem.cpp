@@ -690,26 +690,30 @@ namespace kengine {
 
 	template<typename Shaders>
 	static void runShaders(Shaders && shaders) {
-		for (auto & [e, comp] : shaders)
-			if (comp.enabled) {
+		for (auto & [e, comp] : shaders) {
+			if (!ShaderHelper::entityAppearsInViewport(e, g_params.viewportID))
+				continue;
+			if (!comp.enabled)
+				continue;
+
 #ifndef KENGINE_NDEBUG
-				struct ShaderProfiler {
-					ShaderProfiler(Entity & e) {
-						_comp = &e.attach<Controllers::ShaderProfileComponent>();
-						_timer.restart();
-					}
+			struct ShaderProfiler {
+				ShaderProfiler(Entity & e) {
+					_comp = &e.attach<Controllers::ShaderProfileComponent>();
+					_timer.restart();
+				}
 
-					~ShaderProfiler() {
-						_comp->executionTime = _timer.getTimeSinceStart().count();
-					}
+				~ShaderProfiler() {
+					_comp->executionTime = _timer.getTimeSinceStart().count();
+				}
 
-					Controllers::ShaderProfileComponent * _comp;
-					putils::Timer _timer;
-				};
-				ShaderProfiler _(e);
+				Controllers::ShaderProfileComponent * _comp;
+				putils::Timer _timer;
+			};
+			ShaderProfiler _(e);
 #endif
-				comp.shader->run(g_params);
-			}
+			comp.shader->run(g_params);
+		}
 	}
 
 	static void fillGBuffer(EntityManager & em, Entity & e, const ViewportComponent & viewport) noexcept {

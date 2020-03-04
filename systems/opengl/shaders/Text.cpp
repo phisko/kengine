@@ -332,6 +332,9 @@ namespace kengine::Shaders {
 		_view = glm::mat4(1.f);
 		_proj = glm::mat4(1.f);
 		for (const auto &[e, text, transform] : _em.getEntities<TextComponent2D, TransformComponent>()) {
+			if (!ShaderHelper::entityAppearsInViewport(e, params.viewportID))
+				continue;
+
 			_entityID = (float)e.id;
 			drawObject(params, text, transform, uniforms, glm::vec2(params.viewport.size.x, params.viewport.size.y), &text);
 		}
@@ -339,6 +342,9 @@ namespace kengine::Shaders {
 		_view = params.view;
 		_proj = params.proj;
 		for (const auto &[e, text, transform] : _em.getEntities<TextComponent3D, TransformComponent>()) {
+			if (!ShaderHelper::entityAppearsInViewport(e, params.viewportID))
+				continue;
+
 			_entityID = (float)e.id;
 			drawObject(params, text, transform, uniforms, glm::vec2(params.viewport.size.x, params.viewport.size.y));
 		}

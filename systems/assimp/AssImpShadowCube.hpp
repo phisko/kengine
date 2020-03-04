@@ -18,7 +18,7 @@ namespace kengine {
 		{}
 
 		void init(size_t firstTextureID) override;
-		void drawObjects() override;
+		void drawObjects(const Parameters & params) override;
 
 	private:
 		EntityManager & _em;

@@ -18,7 +18,7 @@ namespace kengine::Shaders {
 		ShadowMapShader(bool usesGBuffer = false, const char * name = "") : Program(usesGBuffer, name) {}
 		virtual ~ShadowMapShader() {}
 
-		virtual void drawToTexture(GLuint texture, const glm::mat4 & lightSpaceMatrix) {}
+		virtual void drawToTexture(GLuint texture, const glm::mat4 & lightSpaceMatrix, const Parameters & params) {}
 		void run(const Parameters & params) override {}
 
 		virtual void run(Entity & e, DirLightComponent & light, const Parameters & params);
@@ -40,7 +40,7 @@ namespace kengine::Shaders {
 		void run(const Parameters & params) override {}
 		virtual void run(Entity & e, PointLightComponent & light, const putils::Point3f & pos, float radius, const Parameters & params);
 
-		virtual void drawObjects() {}
+		virtual void drawObjects(const Parameters & params) {}
 
 	protected:
 		putils::gl::Uniform<glm::mat4> _proj;

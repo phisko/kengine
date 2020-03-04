@@ -21,7 +21,7 @@ namespace kengine::Shaders {
 		ShadowMap(EntityManager & em, Entity & parent);
 
 		void init(size_t firstTextureID) override;
-		void drawToTexture(GLuint texture, const glm::mat4 & lightSpaceMatrix) override;
+		void drawToTexture(GLuint texture, const glm::mat4 & lightSpaceMatrix, const Parameters & params) override;
 
 	private:
 		EntityManager & _em;

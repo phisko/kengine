@@ -45,6 +45,9 @@ namespace kengine::Shaders {
 		_screenSize = putils::Point2f(params.viewport.size);
 
 		for (const auto &[e, light, depthMap, transform, comp] : _em.getEntities<SpotLightComponent, DepthMapComponent, TransformComponent, GodRaysComponent>()) {
+			if (!ShaderHelper::entityAppearsInViewport(e, params.viewportID))
+				continue;
+
 			_scattering = comp.scattering;
 			_nbSteps = comp.nbSteps;
 			_defaultStepLength = comp.defaultStepLength;

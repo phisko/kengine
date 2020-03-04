@@ -36,13 +36,15 @@ namespace kengine::Shaders {
 		_proj = glm::mat4(1.f);
 	}
 
-	void ShadowMap::drawToTexture(GLuint texture, const glm::mat4 & lightSpaceMatrix) {
+	void ShadowMap::drawToTexture(GLuint texture, const glm::mat4 & lightSpaceMatrix, const Parameters & params) {
 		_view = lightSpaceMatrix;
 
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture, 0);
 
 		for (const auto & [e, graphics, transform, shadow, noNoShadow] : _em.getEntities<GraphicsComponent, TransformComponent, DefaultShadowComponent, no<NoShadowComponent>>()) {
 			if (graphics.model == Entity::INVALID_ID)
+				continue;
+			if (!ShaderHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			const auto & modelInfoEntity = _em.getEntity(graphics.model);

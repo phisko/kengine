@@ -81,6 +81,9 @@ namespace kengine::Shaders {
 		_screenSize = putils::Point2f(params.viewport.size);
 
 		for (const auto & [e, highlight] : _em.getEntities<HighlightComponent>()) {
+			if (!ShaderHelper::entityAppearsInViewport(e, params.viewportID))
+				continue;
+
 			_entityID = (float)e.id;
 			_highlightColor = highlight.color;
 			_intensity = highlight.intensity * 2.f - 1.f; // convert from [0,1] to [-1,1]

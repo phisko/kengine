@@ -37,6 +37,9 @@ namespace kengine::Shaders {
 		glActiveTexture((GLenum)(GL_TEXTURE0 + _shadowMapTextureID));
 
 		for (auto &[e, light, transform] : _em.getEntities<SpotLightComponent, TransformComponent>()) {
+			if (!ShaderHelper::entityAppearsInViewport(e, params.viewportID))
+				continue;
+
 			const auto & centre = transform.boundingBox.position;
 			setLight(light, centre);
 

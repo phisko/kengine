@@ -165,6 +165,9 @@ namespace kengine::Shaders {
 		glActiveTexture((GLenum)(GL_TEXTURE0 + _textureID));
 
 		for (auto & [e, comp] : _em.getEntities<SkyBoxComponent>()) {
+			if (!ShaderHelper::entityAppearsInViewport(e, params.viewportID))
+				continue;
+
 			_color = comp.color;
 
 			if (!e.has<SkyBoxOpenGLComponent>())

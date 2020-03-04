@@ -43,15 +43,25 @@ namespace kengine::Shaders {
 		_proj = params.proj;
 		_view = params.view;
 
-		for (const auto & [e, light] : _em.getEntities<DirLightComponent>())
+		for (const auto & [e, light] : _em.getEntities<DirLightComponent>()) {
+			if (!ShaderHelper::entityAppearsInViewport(e, params.viewportID))
+				continue;
+
 			drawLight(light, params.camPos - toVec(light.direction) * SUN_DIST, SUN_SIZE);
+		}
 
 		for (const auto & [e, light, transform] : _em.getEntities<PointLightComponent, TransformComponent>()) {
+			if (!ShaderHelper::entityAppearsInViewport(e, params.viewportID))
+				continue;
+
 			const auto & pos = transform.boundingBox.position;
 			drawLight(light, toVec(pos), SPHERE_SIZE);
 		}
 
 		for (const auto & [e, light, transform] : _em.getEntities<SpotLightComponent, TransformComponent>()) {
+			if (!ShaderHelper::entityAppearsInViewport(e, params.viewportID))
+				continue;
+
 			const auto & pos = transform.boundingBox.position;
 			const bool isFacingLight = glm::dot(toVec(pos), params.camPos) < 0;
 			if (isFacingLight)

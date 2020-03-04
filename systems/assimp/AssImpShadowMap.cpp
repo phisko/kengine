@@ -21,7 +21,7 @@ namespace kengine {
 		_proj = glm::mat4(1.f);
 	}
 
-	void AssImpShadowMap::drawToTexture(GLuint texture, const glm::mat4 & lightSpaceMatrix) {
+	void AssImpShadowMap::drawToTexture(GLuint texture, const glm::mat4 & lightSpaceMatrix, const Parameters & params) {
 		_view = lightSpaceMatrix;
 
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture, 0);
@@ -30,7 +30,10 @@ namespace kengine {
 		uniforms.model = _model;
 		uniforms.bones = _bones;
 
-		for (const auto & [e, textured, graphics, transform, skeleton, noNoShadow] : _em.getEntities<AssImpObjectComponent, GraphicsComponent, TransformComponent, SkeletonComponent, no<NoShadowComponent>>())
+		for (const auto & [e, textured, graphics, transform, skeleton, noNoShadow] : _em.getEntities<AssImpObjectComponent, GraphicsComponent, TransformComponent, SkeletonComponent, no<NoShadowComponent>>()) {
+			if (!ShaderHelper::entityAppearsInViewport(e, params.viewportID))
+				continue;
 			AssImpHelper::drawModel(_em, graphics, transform, skeleton, false, uniforms);
+		}
 	}
 }

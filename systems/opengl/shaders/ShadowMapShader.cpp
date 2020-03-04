@@ -70,7 +70,7 @@ namespace kengine::Shaders {
 				const float cascadeEnd = LightHelper::getCSMCascadeEnd(light, i);
 				if (cascadeStart >= cascadeEnd)
 					continue;
-				drawToTexture(depthMap.textures[i], LightHelper::getCSMLightSpaceMatrix(light, params, i));
+				drawToTexture(depthMap.textures[i], LightHelper::getCSMLightSpaceMatrix(light, params, i), params);
 			}
 		}, params);
 	}
@@ -100,7 +100,7 @@ namespace kengine::Shaders {
 		}
 
 		runImpl(depthMap, [&] {
-			drawToTexture(depthMap.texture, LightHelper::getLightSpaceMatrix(light, ShaderHelper::toVec(pos), params));
+			drawToTexture(depthMap.texture, LightHelper::getLightSpaceMatrix(light, ShaderHelper::toVec(pos), params), params);
 		}, params);
 	}
 
@@ -159,7 +159,7 @@ namespace kengine::Shaders {
 		_lightPos = pos;
 		_farPlane = radius;
 
-		drawObjects();
+		drawObjects(params);
 
 		putils::gl::setViewPort(params.viewport);
 		glCullFace(GL_BACK);
