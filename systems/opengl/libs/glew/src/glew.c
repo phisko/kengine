@@ -30,10 +30,12 @@
 ** THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+// phisko, kengine: add this to avoid undefined reference to memset
 #pragma function(memset)
 void * __cdecl memset(void * ptr, int value, size_t num) {
 	for (size_t i = 0; i < num; ++i)
-		((int *)ptr)[i] = value;
+		((char *)ptr)[i] = value;
+    return ptr;
 }
 
 #ifndef GLEW_INCLUDE
