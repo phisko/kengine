@@ -162,6 +162,8 @@ namespace kengine {
 						for (++currentType; currentType < em._archetypes.size(); ++currentType)
 							if (em._archetypes[currentType].matches<Comps...>())
 								break;
+						if (currentType >= em._archetypes.size())
+							currentType = (size_t)-1;
 					}
 
 					return *this;
@@ -213,12 +215,12 @@ namespace kengine {
 					++archetypeIndex;
 				}
 
-				return ComponentIterator{ em, em._archetypes.size(), 0 };
+				return ComponentIterator{ em, (size_t)-1, 0 };
 			}
 
 			auto end() const {
 				detail::ReadLock l(em._archetypesMutex);
-				return ComponentIterator{ em, em._archetypes.size(), 0 };
+				return ComponentIterator{ em, (size_t)-1, 0 };
 			}
 
 			EntityManager & em;
