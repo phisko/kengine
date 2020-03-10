@@ -1,6 +1,7 @@
-if ( NOT DEFINED CMAKE_BUILD_TYPE )
-  set( CMAKE_BUILD_TYPE Release CACHE STRING "Build type" )
-endif ()
+# phisko, kengine: don't force build type
+# if ( NOT DEFINED CMAKE_BUILD_TYPE )
+#   set( CMAKE_BUILD_TYPE Release CACHE STRING "Build type" )
+# endif ()
 
 project (glew C)
 
