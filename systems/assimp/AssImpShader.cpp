@@ -24,9 +24,8 @@ namespace kengine {
 
 		_diffuseTextureID = firstTextureID;
 		_texture_diffuse = _diffuseTextureID;
-
-		// _specularTextureID = _diffuseTextureID + 1;
-		// _texture_specular = _specularTextureID;
+		_specularTextureID = _diffuseTextureID + 1;
+		_texture_specular = _specularTextureID;
 	}
 
 	void AssImpShader::run(const Parameters & params) {

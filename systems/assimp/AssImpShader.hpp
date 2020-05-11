@@ -40,9 +40,9 @@ namespace kengine {
 
 			putils_reflection_attribute_private(&AssImpShader::_hasTexture),
 			putils_reflection_attribute_private(&AssImpShader::_texture_diffuse),
-			// putils_reflection_attribute_private(&TexturedShader::texture_specular),
+			putils_reflection_attribute_private(&AssImpShader::_texture_specular),
 			putils_reflection_attribute_private(&AssImpShader::_diffuseColor),
-			// putils_reflection_attribute_private(&TexturedShader::specularColor),
+			putils_reflection_attribute_private(&AssImpShader::_specularColor),
 
 			putils_reflection_attribute_private(&AssImpShader::_entityID),
 			putils_reflection_attribute_private(&AssImpShader::_color)
