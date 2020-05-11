@@ -4,7 +4,7 @@ namespace kengine::Shaders::src {
 #version 330
 
 uniform sampler2D gposition;
-uniform sampler2D gcolor;
+uniform sampler2D gdiffuse;
 
 uniform float scattering;
 uniform float nbSteps;
@@ -45,11 +45,12 @@ vec3 getRayToPixel(vec2 screenSize) {
 
 void main() {	
    	vec2 texCoord = gl_FragCoord.xy / screenSize;
-    vec4 worldPos = texture(gposition, texCoord);
-	vec4 objectColor = texture(gcolor, texCoord);
-	if (objectColor.a == 1) // don't apply lighting
+
+	float shouldIgnoreLighting = texture(gdiffuse, texCoord).a;
+	if (shouldIgnoreLighting == 1) // don't apply lighting
 		discard;
 
+    vec4 worldPos = texture(gposition, texCoord);
     vec3 lightDir = getLightDirection(worldPos.xyz);
 
     vec3 rayDir;

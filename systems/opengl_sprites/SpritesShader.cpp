@@ -50,8 +50,9 @@ in vec2 TexCoords;
 
 layout (location = 0) out vec4 gposition;
 layout (location = 1) out vec3 gnormal;
-layout (location = 2) out vec4 gcolor;
-layout (location = 3) out float gentityID;
+layout (location = 2) out vec4 gdiffuse;
+layout (location = 3) out vec4 gspecular;
+layout (location = 4) out float gentityID;
 
 void applyTransparency(float alpha);
 
@@ -63,7 +64,8 @@ void main() {
 
     gposition = WorldPosition;
     gnormal = -normalize(cross(dFdy(EyeRelativePos), dFdx(EyeRelativePos)));
-	gcolor = vec4(pix.rgb, 1.0); // don't apply lighting
+	gdiffuse = vec4(pix.rgb, 1.0); // don't apply lighting
+	gspecular = vec4(0.0); // don't apply lighting
 	gentityID = entityID;
 }
         )";

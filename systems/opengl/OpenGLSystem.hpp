@@ -16,13 +16,15 @@ namespace kengine {
 
 		float position[4]; // x, y, z, depth
 		float normal[4]; // x, y, z, ignore
-		float color[4]; // r, g, b, shouldIgnoreLighting
+		float diffuse[4]; // r, g, b, shouldIgnoreLighting
+		float specular[4]; // r, g, b, ignore
 		float entityID[4]; // id, ignore, ignore, ignore
 
 		putils_reflection_attributes(
 			putils_reflection_attribute(&GBufferTextures::position),
 			putils_reflection_attribute(&GBufferTextures::normal),
-			putils_reflection_attribute(&GBufferTextures::color),
+			putils_reflection_attribute(&GBufferTextures::diffuse),
+			putils_reflection_attribute(&GBufferTextures::specular),
 			putils_reflection_attribute(&GBufferTextures::entityID)
 		);
 	};

@@ -787,7 +787,7 @@ namespace kengine {
 
 	static Entity::ID getEntityInPixel(Entity::ID window, const putils::Point2ui & pixel) {
 		static constexpr auto GBUFFER_TEXTURE_COMPONENTS = 4;
-		static constexpr auto GBUFFER_ENTITY_LOCATION = 3;
+		static constexpr auto GBUFFER_ENTITY_LOCATION = offsetof(GBufferTextures, entityID) / sizeof(GBufferTextures::entityID);
 
 		if (window != Entity::INVALID_ID && window != g_window.id)
 			return Entity::INVALID_ID;

@@ -48,8 +48,9 @@ in vec2 TexCoords;
 
 layout (location = 0) out vec4 gposition;
 layout (location = 1) out vec3 gnormal;
-layout (location = 2) out vec4 gcolor;
-layout (location = 3) out float gentityID;
+layout (location = 2) out vec4 gdiffuse;
+layout (location = 3) out vec4 gspecular;
+layout (location = 4) out float gentityID;
 
 uniform int hasTexture;
 uniform sampler2D texture_diffuse;
@@ -63,20 +64,27 @@ uniform vec4 color;
 void applyTransparency(float a);
 
 void main() {
-	vec4 totalColor;
-	if (hasTexture == 0)
-		totalColor = diffuseColor;
-	else
-		totalColor = texture(texture_diffuse, TexCoords);
+	vec4 totalDiffuse;
+	vec4 totalSpecular;
+	if (hasTexture == 0) {
+		totalDiffuse = diffuseColor;
+		totalSpecular = specularColor;
+	}
+	else {
+		totalDiffuse = texture(texture_diffuse, TexCoords);
+		totalSpecular = texture(texture_specular, TexCoords);
+	}
 
-	totalColor *= color;
+	totalDiffuse *= color;
+	totalSpecular *= color;
 
-	applyTransparency(totalColor.a);
+	applyTransparency(totalDiffuse.a);
 
 	gposition = WorldPosition;
 	gnormal = Normal;
 	gentityID = entityID;
-	gcolor = vec4(totalColor.xyz, 0.0);
+	gdiffuse = vec4(totalDiffuse.xyz, 0.0);
+	gspecular = vec4(totalSpecular.xyz, 0.0);
 }
 	)";
 		}
