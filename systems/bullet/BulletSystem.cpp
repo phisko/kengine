@@ -183,7 +183,7 @@ namespace kengine {
 
 	// declarations
 	static void execute(float deltaTime);
-	static putils::vector<Entity::ID, KENGINE_QUERY_POSITION_MAX_RESULTS> queryPosition(const putils::Point3f & pos, float radius);
+	static void queryPosition(const putils::Point3f & pos, float radius, const EntityIteratorFunc & func);
 	//
 	EntityCreator * BulletSystem(EntityManager & em) {
 		g_em = &em;
@@ -390,9 +390,7 @@ namespace kengine {
 			}
 	}
 
-	static putils::vector<Entity::ID, KENGINE_QUERY_POSITION_MAX_RESULTS> queryPosition(const putils::Point3f & pos, float radius) {
-		putils::vector<Entity::ID, KENGINE_QUERY_POSITION_MAX_RESULTS> ret;
-
+	static void queryPosition(const putils::Point3f & pos, float radius, const EntityIteratorFunc & func) {
 		btSphereShape sphere(radius);
 		btPairCachingGhostObject ghost;
 		btTransform transform;
@@ -403,27 +401,20 @@ namespace kengine {
 		ghost.activate(true);
 
 		struct Callback : btCollisionWorld::ContactResultCallback {
-			Callback(btPairCachingGhostObject & ghost, decltype(ret) & results) : ghost(ghost), results(results) {}
-
-			bool needsCollision(btBroadphaseProxy * proxy0) const final {
-				return !results.full() && btCollisionWorld::ContactResultCallback::needsCollision(proxy0);
-			}
+			Callback(btPairCachingGhostObject & ghost, const EntityIteratorFunc & func) : ghost(ghost), func(func) {}
 
 			btScalar addSingleResult(btManifoldPoint & cp, const btCollisionObjectWrapper * colObj0Wrap, int partId0, int index0, const btCollisionObjectWrapper * colObj1Wrap, int partId1, int index1) final {
 				assert(colObj1Wrap->m_collisionObject == &ghost);
 				const auto id = colObj0Wrap->m_collisionObject->getUserIndex();
-				if (std::find(results.begin(), results.end(), id) == results.end())
-					results.push_back(id);
+				func(g_em->getEntity(id));
 				return 1.f;
 			}
 
 			btPairCachingGhostObject & ghost;
-			decltype(ret) & results;
+			const EntityIteratorFunc & func;
 		};
 
-		Callback callback(ghost, ret);
+		Callback callback(ghost, func);
 		dynamicsWorld.contactTest(&ghost, callback);
-
-		return ret;
 	}
 }

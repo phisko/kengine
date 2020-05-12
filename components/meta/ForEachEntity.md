@@ -5,13 +5,11 @@
 ## Prototype
 
 ```cpp
-using EntityIteratorFunc = putils::function<void(Entity &), KENGINE_ENTITY_ITERATOR_FUNC_SIZE>;
-void (EntityManager & em, const EntityIteratorFunc & func);
+void (const EntityIteratorFunc & func);
 ```
 
 ### Parameters
 
-* `em`: `EntityManager` holding the `Entities` to iterate over
 * `func`: function that will be called for each `Entity`. Its maximum size defaults to 64 and can be adjusted by defining the `KENGINE_ITERATOR_FUNC_SIZE` macro
 
 ## Usage

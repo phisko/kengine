@@ -7,7 +7,15 @@
 # define KENGINE_FUNCTION_MAX_SIZE 64
 #endif
 
+#ifndef KENGINE_ENTITY_ITERATOR_FUNC_SIZE
+# define KENGINE_ENTITY_ITERATOR_FUNC_SIZE 64
+#endif
+
 namespace kengine {
+	// Helper type when a callback is needed as an iterator
+	class Entity;
+	using EntityIteratorFunc = putils::function<void(Entity &), KENGINE_ENTITY_ITERATOR_FUNC_SIZE>;
+
 	namespace functions {
 		template<typename>
 		struct BaseFunction;
