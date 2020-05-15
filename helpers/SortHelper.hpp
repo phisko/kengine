@@ -43,7 +43,7 @@ namespace kengine::SortHelper {
 		Ret ret;
 
 		for (const auto & t : em.getEntities<Comps...>()) {
-			if constexpr (putils::is_vector<Ret>())
+			if constexpr (putils::is_vector<Ret>{})
 				if (ret.full())
 					break;
 			ret.emplace_back();
