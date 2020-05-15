@@ -8,6 +8,7 @@
 
 #ifdef kengine_ndebug
 # define kengine_assert(em, x) (void)0
+# define kengine_assert_with_message(em, x, message) (void)0
 # define kengine_assert_failed(em, x) (void)0
 # define kengine_debug_break (void)0
 #else
@@ -22,14 +23,16 @@
 		if (kengine::AssertHelper::isDebuggerPresent()) \
 			kengine_debug_break; \
 	} while(false)
-# define kengine_assert(em, x) \
+# define kengine_assert_with_message(em, x, message) \
 	do {\
 		if (!!(x)) \
 			(void)0; \
 		else \
-			kengine_assert_failed(em, #x); \
+			kengine_assert_failed(em, message); \
 		kengine_assume(!!(x)); \
 	} while (false)
+# define kengine_assert(em, x) \
+	kengine_assert_with_message(em, x, #x)
 #endif
 
 namespace kengine {
