@@ -180,7 +180,7 @@ namespace kengine {
 		return EntityCollection{ *this };
 	}
 
-	EntityManager::EntityCollection::EntityIterator & EntityManager::EntityCollection::EntityIterator::operator++() {
+	EntityManager::EntityCollection::Iterator & EntityManager::EntityCollection::Iterator::operator++() {
 		++index;
 		detail::ReadLock l(em._entitiesMutex);
 		while (index < em._entities.size() && (em._entities[index].mask == 0 || !em._entities[index].active))
@@ -188,27 +188,32 @@ namespace kengine {
 		return *this;
 	}
 
-	bool EntityManager::EntityCollection::EntityIterator::operator!=(const EntityIterator & rhs) const {
+	bool EntityManager::EntityCollection::Iterator::operator!=(const Iterator & rhs) const {
 		// Use `<` as it will only be compared with `end()`, and there is a risk that new entities have been added since `end()` was called
 		return index < rhs.index;
 	}
 
-	Entity EntityManager::EntityCollection::EntityIterator::operator*() const {
+	bool EntityManager::EntityCollection::Iterator::operator==(const Iterator & rhs) const {
+		return !(*this != rhs);
+	}
+
+
+	Entity EntityManager::EntityCollection::Iterator::operator*() const {
 		detail::ReadLock l(em._entitiesMutex);
 		return Entity(index, em._entities[index].mask, &em);
 	}
 
-	EntityManager::EntityCollection::EntityIterator EntityManager::EntityCollection::begin() const {
+	EntityManager::EntityCollection::Iterator EntityManager::EntityCollection::begin() const {
 		size_t i = 0;
 		detail::ReadLock l(em._entitiesMutex);
 		while (i < em._entities.size() && (em._entities[i].mask == 0 || !em._entities[i].active))
 			++i;
-		return EntityIterator{ i, em };
+		return { i, em };
 	}
 
-	EntityManager::EntityCollection::EntityIterator EntityManager::EntityCollection::end() const {
+	EntityManager::EntityCollection::Iterator EntityManager::EntityCollection::end() const {
 		detail::ReadLock l(em._entitiesMutex);
-		return EntityIterator{ em._entities.size(), em };
+		return { em._entities.size(), em };
 	}
 
 	/*

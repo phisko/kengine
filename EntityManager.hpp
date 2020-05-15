@@ -113,36 +113,54 @@ namespace kengine {
 			}
 		};
 
+	public:
 		struct EntityCollection {
-			struct EntityIterator {
-				EntityIterator & operator++();
-				bool operator!=(const EntityIterator & rhs) const;
+			struct Iterator {
+				using iterator_category = std::forward_iterator_tag;
+				using value_type = Entity;
+				using reference = value_type &;
+				using pointer = value_type *;
+				using difference_type = size_t;
+
+				Iterator & operator++();
+				bool operator!=(const Iterator & rhs) const;
+				bool operator==(const Iterator & rhs) const;
 				Entity operator*() const;
+
+				Iterator(size_t index, EntityManager & em) : index(index), em(em) {}
+				Iterator(const Iterator &) = default;
+				Iterator & operator=(const Iterator & rhs) {
+					index = rhs.index; return *this;
+				}
 
 				size_t index;
 				EntityManager & em;
 			};
 
-			EntityIterator begin() const;
-			EntityIterator end() const;
+			using value_type = Iterator::value_type;
+			using reference = Iterator::reference;
+			using iterator = Iterator;
+
+			Iterator begin() const;
+			Iterator end() const;
 
 			EntityManager & em;
+
+			putils_reflection_class_name(EntityManagerEntityCollection);
 		};
 
-	public:
 		EntityCollection getEntities();
 
-	private:
 		template<typename ... Comps>
 		struct ComponentCollection {
-			struct ComponentIterator {
+			struct Iterator {
 				using iterator_category = std::forward_iterator_tag;
-				using value_type = std::tuple<Entity, Comps & ...>;
-				using reference = const value_type &;
-				using pointer = const value_type *;
+				using value_type = std::tuple<Entity, Comps & ...> &;
+				using reference = value_type &;
+				using pointer = std::tuple<Entity, Comps & ...> *;
 				using difference_type = size_t;
 
-				ComponentIterator & operator++() {
+				Iterator & operator++() {
 					++currentEntity;
 					auto & archetype = em._archetypes[currentType];
 
@@ -170,7 +188,8 @@ namespace kengine {
 				}
 
 				// Use `<` as it will only be compared with `end()`, and there is a risk that new entities have been added since `end()` was called
-				bool operator!=(const ComponentIterator & rhs) const { return currentType < rhs.currentType || currentEntity < rhs.currentEntity; }
+				bool operator!=(const Iterator & rhs) const { return currentType < rhs.currentType || currentEntity < rhs.currentEntity; }
+				bool operator==(const Iterator & rhs) const { return !(*this != rhs); }
 
 				template<typename T>
 				static T & get(Entity & e) {
@@ -191,10 +210,22 @@ namespace kengine {
 					return std::make_tuple(e, std::ref(get<Comps>(e))...);
 				}
 
+				Iterator(EntityManager & em, size_t currentType, size_t currentEntity) : em(em), currentType(currentType), currentEntity(currentEntity) {}
+				Iterator(const Iterator &) = default;
+				Iterator & operator=(const Iterator & rhs) {
+					currentType = rhs.currentType;
+					currentEntity = rhs.currentEntity;
+					return *this;
+				}
+
 				EntityManager & em;
 				size_t currentType;
 				size_t currentEntity;
 			};
+
+			using value_type = typename Iterator::value_type;
+			using reference = typename Iterator::reference;
+			using iterator = Iterator;
 
 			auto begin() const {
 				detail::ReadLock l(em._archetypesMutex);
@@ -208,25 +239,33 @@ namespace kengine {
 						size_t entityIndex = 0;
 						for (const auto entityID : archetype.entities) {
 							if (em._entities[entityID].active)
-								return ComponentIterator{ em, archetypeIndex, entityIndex };
+								return Iterator{ em, archetypeIndex, entityIndex };
 							++entityIndex;
 						}
 					}
 					++archetypeIndex;
 				}
 
-				return ComponentIterator{ em, (size_t)-1, 0 };
+				return Iterator{ em, (size_t)-1, 0 };
 			}
 
 			auto end() const {
 				detail::ReadLock l(em._archetypesMutex);
-				return ComponentIterator{ em, (size_t)-1, 0 };
+				return Iterator{ em, (size_t)-1, 0 };
 			}
 
 			EntityManager & em;
+
+			template<typename T>
+			static std::string getClassName() {
+				return putils::reflection::get_class_name<T>();
+			}
+			static const auto reflection_get_class_name() {
+				static std::string ret("EntityManagerComponentCollection" + (getClassName<Comps>() + ...));
+				return ret.c_str();
+			}
 		};
 
-    public:
 		template<typename ... Comps>
 		auto getEntities() {
 			return ComponentCollection<Comps...>{ *this };
