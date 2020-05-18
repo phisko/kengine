@@ -40,8 +40,12 @@ namespace kengine {
 		};
 
 		struct GlobalCompMap {
-			std::unordered_map<putils::meta::type_index, std::unique_ptr<MetadataBase>> map;
-			detail::Mutex mutex;
+			// Members use this _horrible_ "heap reference" pattern because components in the 
+			// global pools may need to access these during program shutdown, after the
+			// EntityManager (which contains this) has been destroyed, so this pattern lets them
+			// stay alive. Sorry! Feel free to submit a pull request if you have a better solution
+			std::unordered_map<putils::meta::type_index, std::unique_ptr<MetadataBase>> & map = *(new std::remove_reference_t<decltype(map)>);
+			detail::Mutex & mutex = *(new std::remove_reference_t<decltype(mutex)>);
 		};
 		extern GlobalCompMap * components;
 	}
