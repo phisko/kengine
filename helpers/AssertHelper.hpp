@@ -17,9 +17,9 @@
 # else
 #  define kengine_debub_break (void)0
 # endif
-# define kengine_assert_failed(em, x) \
+# define kengine_assert_failed(em, message) \
 	do {\
-		kengine::AssertHelper::assertFailed(em, __FILE__, __LINE__, x); \
+		kengine::AssertHelper::assertFailed(em, __FILE__, __LINE__, message); \
 		if (kengine::AssertHelper::isDebuggerPresent()) \
 			kengine_debug_break; \
 	} while(false)
