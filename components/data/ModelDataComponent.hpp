@@ -25,9 +25,18 @@ namespace kengine {
 		std::vector<Mesh> meshes;
 
 		using FreeFunc = putils::function<void(), KENGINE_MODEL_LOADER_FUNCTION_SIZE>;
-		FreeFunc free;
+		FreeFunc free = nullptr;
 
 		using VertexRegisterFunc = void(*)();
 		VertexRegisterFunc vertexRegisterFunc;
+
+		ModelDataComponent() = default;
+		ModelDataComponent(ModelDataComponent &&) = default;
+		ModelDataComponent & operator=(ModelDataComponent &&) = default;
+
+		~ModelDataComponent() {
+			if (free != nullptr)
+				free();
+		}
 	};
 }
