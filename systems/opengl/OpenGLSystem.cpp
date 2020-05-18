@@ -449,9 +449,6 @@ namespace kengine {
 
 			modelInfo.meshes.push_back(std::move(meshInfo));
 		}
-
-		modelData.free();
-		e.detach<ModelDataComponent>();
 	}
 
 	static void loadTexture(Entity & e, TextureDataComponent & textureData) {
@@ -515,11 +512,8 @@ namespace kengine {
 		if (g_window.id == Entity::INVALID_ID) // window closed
 			return;
 
-		for (auto &[e, modelData] : g_em->getEntities<ModelDataComponent>()) {
+		for (auto &[e, modelData, noOpenGL] : g_em->getEntities<ModelDataComponent, no<OpenGLModelComponent>>())
 			createObject(e, modelData);
-			if (e.componentMask == 0)
-				g_em->removeEntity(e);
-		}
 
 		for (auto &[e, textureLoader] : g_em->getEntities<TextureDataComponent>()) {
 			loadTexture(e, textureLoader);
