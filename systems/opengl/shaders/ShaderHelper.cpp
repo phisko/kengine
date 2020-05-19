@@ -321,7 +321,7 @@ namespace kengine::ShaderHelper {
 				to.x, to.y, to.z
 			};
 			glBindBuffer(GL_ARRAY_BUFFER, vbo);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_DYNAMIC_DRAW);
 
 			glDrawArrays(GL_LINES, 0, 2);
 		}
