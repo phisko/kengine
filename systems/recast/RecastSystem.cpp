@@ -1,8 +1,11 @@
 #include <GL/glew.h>
 #include <GL/GL.h>
 
-#include "RecastSystem.hpp"
 #include "EntityManager.hpp"
+
+#include "RecastSystem.hpp"
+#include "RecastComponent.hpp"
+#include "RecastDebugShader.hpp"
 
 #include "data/AdjustableComponent.hpp"
 #include "data/ModelDataComponent.hpp"
@@ -13,34 +16,13 @@
 #include "angle.hpp"
 #include "with.hpp"
 
-#include <Recast.h>
-#include <DetourNavMesh.h>
-#include <DetourNavMeshBuilder.h>
-#include <DetourNavMeshQuery.h>
+#include "data/ShaderComponent.hpp"
 
 namespace Flags {
 	enum {
 		Walk = 1,
 	};
 }
-
-#pragma region RAII
-template<typename T, void (*FreeFunc)(T *)>
-struct Deleter {
-	void operator()(T * ptr) { FreeFunc(ptr); }
-};
-
-template<typename T, void(*FreeFunc)(T *)>
-using UniquePtr = std::unique_ptr<T, Deleter<T, FreeFunc>>;
-
-using HeightfieldPtr = UniquePtr<rcHeightfield, rcFreeHeightField>;
-using CompactHeightfieldPtr = UniquePtr<rcCompactHeightfield, rcFreeCompactHeightfield>;
-using ContourSetPtr = UniquePtr<rcContourSet, rcFreeContourSet>;
-using PolyMeshPtr = UniquePtr<rcPolyMesh, rcFreePolyMesh>;
-using PolyMeshDetailPtr = UniquePtr<rcPolyMeshDetail, rcFreePolyMeshDetail>;
-using NavMeshPtr = UniquePtr<dtNavMesh, dtFreeNavMesh>;
-using NavMeshQueryPtr = UniquePtr<dtNavMeshQuery, dtFreeNavMeshQuery>;
-#pragma endregion
 
 namespace kengine {
 	static EntityManager * g_em;
@@ -91,19 +73,10 @@ namespace kengine {
 					{ "Query max search nodes", &g_adjustables.queryMaxSearchNodes }
 				}
 			};
+
+			e += makeGBufferShaderComponent<RecastDebugShader>(*g_em);
 		};
 	}
-
-	struct RecastComponent {
-		struct Mesh {
-			PolyMeshPtr polyMesh;
-			PolyMeshDetailPtr polyMeshDetail;
-			NavMeshPtr navMesh;
-			NavMeshQueryPtr navMeshQuery;
-		};
-
-		std::vector<Mesh> meshes;
-	};
 
 	// declarations
 	static void createNavMesh(RecastComponent::Mesh & navMesh, const ModelDataComponent::Mesh & meshData);
