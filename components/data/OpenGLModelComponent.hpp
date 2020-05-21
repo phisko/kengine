@@ -18,6 +18,6 @@ namespace kengine {
 
 		std::vector<Mesh> meshes;
 
-		void (*vertexRegisterFunc)() = nullptr;
+		void (*registerVertexAttributes)() = nullptr;
 	};
 }

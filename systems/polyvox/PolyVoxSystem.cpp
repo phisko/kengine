@@ -70,7 +70,7 @@ namespace kengine {
 			modelData.meshes.push_back(meshData);
 
 			modelData.free = FreePolyVoxMeshData(e.id, *g_em);
-			modelData.vertexRegisterFunc =putils::gl::setPolyvoxVertexType<PolyVoxMeshContainerComponent::MeshType::VertexType>; 
+			modelData.init<PolyVoxMeshContainerComponent::MeshType::VertexType>();
 
 			e += std::move(modelData);
 		}

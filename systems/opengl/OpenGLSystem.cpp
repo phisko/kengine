@@ -380,7 +380,7 @@ namespace kengine {
 		for (const auto & [e, modelInfo] : g_em->getEntities<OpenGLModelComponent>())
 			for (const auto & meshInfo : modelInfo.meshes) {
 				glBindBuffer(GL_ARRAY_BUFFER, meshInfo.vertexBuffer);
-				modelInfo.vertexRegisterFunc();
+				modelInfo.registerVertexAttributes();
 			}
 	}
 
@@ -427,7 +427,7 @@ namespace kengine {
 
 	static void createObject(Entity & e, const ModelDataComponent & modelData) {
 		auto & modelInfo = e.attach<OpenGLModelComponent>();
-		modelInfo.vertexRegisterFunc = modelData.vertexRegisterFunc;
+		modelInfo.registerVertexAttributes = modelData.registerVertexAttributes;
 
 		for (const auto & meshData : modelData.meshes) {
 			OpenGLModelComponent::Mesh meshInfo;
@@ -442,7 +442,7 @@ namespace kengine {
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshInfo.indexBuffer);
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, meshData.indices.nbElements * meshData.indices.elementSize, meshData.indices.data, GL_STATIC_DRAW);
 
-			modelData.vertexRegisterFunc();
+			modelData.registerVertexAttributes();
 
 			meshInfo.nbIndices = meshData.indices.nbElements;
 			meshInfo.indexType = meshData.indexType;

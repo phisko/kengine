@@ -197,7 +197,7 @@ namespace kengine {
 		meshData.indexType = sizeof(putils_typeof(mesh)::IndexType) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
 
 		modelData.free = release(e.id, *g_em);
-		modelData.vertexRegisterFunc = putils::gl::setPolyvoxVertexType<MeshType::VertexType>;
+		modelData.init<MeshType::VertexType>();
 
 		return modelData;
 	}
@@ -264,7 +264,7 @@ namespace kengine {
 		modelData.meshes.push_back({});
 		unserialize(binaryFile, modelData.meshes.back(), size);
 		modelData.free = release(e.id, *g_em);
-		modelData.vertexRegisterFunc = putils::gl::setPolyvoxVertexType<MeshType::VertexType>;
+		modelData.init<MeshType::VertexType>();
 		e += std::move(modelData);
 
 		auto & box = e.get<ModelComponent>().boundingBox;

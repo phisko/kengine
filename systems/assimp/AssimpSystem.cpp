@@ -556,9 +556,8 @@ namespace kengine {
 			modelData.meshes.push_back(meshData);
 		}
 		
+		modelData.init<AssImp::AssImpModelComponent::Mesh::Vertex>();
 		modelData.free = AssImp::release(e.id);
-		modelData.vertexRegisterFunc = putils::gl::setVertexType<AssImp::AssImpModelComponent::Mesh::Vertex>;
-
 		e += std::move(modelData);
 	}
 
