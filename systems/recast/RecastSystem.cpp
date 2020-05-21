@@ -18,6 +18,8 @@
 
 #include "data/ShaderComponent.hpp"
 
+#include "data/ModelComponent.hpp"
+
 namespace Flags {
 	enum {
 		Walk = 1,
@@ -79,22 +81,22 @@ namespace kengine {
 	}
 
 	// declarations
-	static void createNavMesh(RecastComponent::Mesh & navMesh, const ModelDataComponent::Mesh & meshData);
+	static void createNavMesh(RecastComponent::Mesh & navMesh, const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData);
 	//
 	static void execute(float deltaTime) {
 		kengine_assert(*g_em, g_adjustables.vertsPerPoly <= DT_VERTS_PER_POLYGON);
 
-		for (auto & [e, modelData, noRecast] : g_em->getEntities<ModelDataComponent, no<RecastComponent>>()) {
+		for (auto & [e, modelData, noRecast, model] : g_em->getEntities<ModelDataComponent, no<RecastComponent>, ModelComponent>()) {
 			auto & comp = e.attach<RecastComponent>();
 			for (const auto & mesh : modelData.meshes) {
 				comp.meshes.emplace_back();
-				createNavMesh(comp.meshes.back(), mesh);
+				createNavMesh(comp.meshes.back(), modelData, mesh);
 			}
 		}
 	}
 
 	// declarations
-	static rcConfig getConfig(const ModelDataComponent::Mesh & meshData);
+	static rcConfig getConfig(const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData);
 	static HeightfieldPtr createHeightField(rcContext & ctx, const rcConfig & cfg, const kengine::ModelDataComponent::Mesh & meshData);
 	static CompactHeightfieldPtr createCompactHeightField(rcContext & ctx, const rcConfig & cfg, rcHeightfield & heightField);
 	static ContourSetPtr createContourSet(rcContext & ctx, const rcConfig & cfg, rcCompactHeightfield & chf);
@@ -103,34 +105,34 @@ namespace kengine {
 	static NavMeshPtr createNavMesh(const rcConfig & cfg, const rcPolyMesh & polyMesh, const rcPolyMeshDetail & polyMeshDetail);
 	static NavMeshQueryPtr createNavMeshQuery(const dtNavMesh & navMesh);
 	//
-	static void createNavMesh(RecastComponent::Mesh & navMeshComp, const ModelDataComponent::Mesh & meshData) {
-		const auto cfg = getConfig(meshData);
+	static void createNavMesh(RecastComponent::Mesh & navMeshComp, const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData) {
+		const auto cfg = getConfig(modelData, meshData);
 
 		rcContext ctx;
 		ctx.resetTimers();
 		ctx.startTimer(RC_TIMER_TOTAL);
 
-		const auto heightField = createHeightField(ctx, cfg, meshData);
-		if (heightField == nullptr)
+		navMeshComp.heightField = createHeightField(ctx, cfg, meshData);
+		if (navMeshComp.heightField == nullptr)
 			return;
 
-		rcFilterLowHangingWalkableObstacles(&ctx, cfg.walkableClimb, *heightField);
-		rcFilterLedgeSpans(&ctx, cfg.walkableHeight, cfg.walkableClimb, *heightField);
-		rcFilterWalkableLowHeightSpans(&ctx, cfg.walkableHeight, *heightField);
+		rcFilterLowHangingWalkableObstacles(&ctx, cfg.walkableClimb, *navMeshComp.heightField);
+		rcFilterLedgeSpans(&ctx, cfg.walkableHeight, cfg.walkableClimb, *navMeshComp.heightField);
+		rcFilterWalkableLowHeightSpans(&ctx, cfg.walkableHeight, *navMeshComp.heightField);
 
-		const auto compactHeightField = createCompactHeightField(ctx, cfg, *heightField);
-		if (compactHeightField == nullptr)
+		navMeshComp.compactHeightField = createCompactHeightField(ctx, cfg, *navMeshComp.heightField);
+		if (navMeshComp.compactHeightField == nullptr)
 			return;
 
-		const auto contourSet = createContourSet(ctx, cfg, *compactHeightField);
-		if (contourSet == nullptr)
+		navMeshComp.contourSet = createContourSet(ctx, cfg, *navMeshComp.compactHeightField);
+		if (navMeshComp.contourSet == nullptr)
 			return;
 
-		navMeshComp.polyMesh = createPolyMesh(ctx, cfg, *contourSet);
+		navMeshComp.polyMesh = createPolyMesh(ctx, cfg, *navMeshComp.contourSet);
 		if (navMeshComp.polyMesh == nullptr)
 			return;
 
-		navMeshComp.polyMeshDetail = createPolyMeshDetail(ctx, cfg, *navMeshComp.polyMesh, *compactHeightField);
+		navMeshComp.polyMeshDetail = createPolyMeshDetail(ctx, cfg, *navMeshComp.polyMesh, *navMeshComp.compactHeightField);
 		if (navMeshComp.polyMeshDetail == nullptr)
 			return;
 
@@ -155,7 +157,10 @@ namespace kengine {
 		ctx.stopTimer(RC_TIMER_TOTAL);
 	}
 
-	static rcConfig getConfig(const ModelDataComponent::Mesh & meshData) {
+	// declarations
+	std::unique_ptr<float[]> getVertices(const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData);
+	//
+	static rcConfig getConfig(const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData) {
 		rcConfig cfg;
 		memset(&cfg, 0, sizeof(cfg));
 
@@ -200,10 +205,49 @@ namespace kengine {
 			kengine_assert(*g_em, cfg.detailSampleMaxError >= 0.f);
 		} }
 
-		rcCalcBounds((const float *)meshData.vertices.data, (int)meshData.vertices.nbElements, cfg.bmin, cfg.bmax);
+		const auto vertices = getVertices(modelData, meshData);
+		if (vertices == nullptr)
+			return cfg;
+
+		rcCalcBounds(vertices.get(), (int)meshData.vertices.nbElements, cfg.bmin, cfg.bmax);
 		rcCalcGridSize(cfg.bmin, cfg.bmax, cfg.cs, &cfg.width, &cfg.height);
 
 		return cfg;
+	}
+
+	// declarations
+	const float * getVertexPosition(const ModelDataComponent & modelData, const void * vertices, size_t vertex);
+	//
+	std::unique_ptr<float[]> getVertices(const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData) {
+		auto vertices = std::unique_ptr<float[]>(new float[meshData.vertices.nbElements * 3]);
+
+		for (size_t vertex = 0; vertex < meshData.vertices.nbElements; ++vertex) {
+			const auto pos = getVertexPosition(modelData, meshData.vertices.data, vertex);
+			if (pos == nullptr)
+				return nullptr;
+			for (size_t i = 0; i < 3; ++i)
+				vertices[vertex * 3 + i] = pos[i];
+		}
+
+		return vertices;
+	}
+
+	const float * getVertexPosition(const ModelDataComponent & modelData, const void * vertices, size_t vertex) {
+		static const char * potentialNames[] = { "pos", "position" };
+
+		const void * pos = nullptr;
+		for (const auto name : potentialNames) {
+			pos = modelData.getVertexAttribute(vertices, vertex, name);
+			if (pos != nullptr)
+				break;
+		}
+
+		if (pos == nullptr) {
+			kengine_assert_failed(*g_em, "[Recast] Could not find vertex position");
+			return nullptr;
+		}
+
+		return (const float *)pos;
 	}
 
 	static HeightfieldPtr createHeightField(rcContext & ctx, const rcConfig & cfg, const kengine::ModelDataComponent::Mesh & meshData) {

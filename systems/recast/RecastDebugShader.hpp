@@ -2,11 +2,7 @@
 
 #include "RecastComponent.hpp"
 
-#include <RecastDump.h>
 #include <DebugDraw.h>
-#include <RecastDebugDraw.h>
-#include <DetourDebugDraw.h>
-
 #include "opengl/Program.hpp"
 
 namespace kengine {

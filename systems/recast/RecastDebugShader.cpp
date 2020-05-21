@@ -3,12 +3,14 @@
 #include "RecastDebugShader.hpp"
 #include "EntityManager.hpp"
 
+#include <RecastDebugDraw.h>
+#include <DetourDebugDraw.h>
+
 #include "data/AdjustableComponent.hpp"
 #include "data/ModelComponent.hpp"
-
 #include "data/ImGuiComponent.hpp"
-#include "imgui.h"
 
+#include "imgui.h"
 #include "helpers/AssertHelper.hpp"
 #include "systems/opengl/shaders/ApplyTransparencySrc.hpp"
 
@@ -60,9 +62,18 @@ void main() {
 )";
 
 namespace kengine {
+	enum class Element {
+		Heightfield,
+		CompactHeightfield,
+		ContourSet,
+		PolyMesh,
+		PolyMeshDetail,
+		NavMesh
+	};
 	static struct {
 		bool enabled = false;
 		std::string fileName;
+		Element toDebug = Element::Heightfield;
 	} g_adjustables;
 
 	RecastDebugShader::RecastDebugShader(EntityManager & em)
@@ -79,9 +90,17 @@ namespace kengine {
 			e += ImGuiComponent([&] {
 				if (ImGui::Begin("RecastShader")) {
 					if (ImGui::BeginCombo("File", g_adjustables.fileName.c_str())) {
-						for (const auto & [e, model] : em.getEntities<ModelComponent>())
+						for (const auto & [e, model, recast] : em.getEntities<ModelComponent, RecastComponent>())
 							if (ImGui::Selectable(model.file))
 								g_adjustables.fileName = model.file;
+						ImGui::EndCombo();
+					}
+
+					const auto names = putils::magic_enum::enum_names<Element>();
+					if (ImGui::BeginCombo("Element", names[(int)g_adjustables.toDebug].data())) {
+						for (Element element : putils::magic_enum::enum_values<Element>())
+							if (ImGui::Selectable(names[(int)element].data()))
+								g_adjustables.toDebug = element;
 						ImGui::EndCombo();
 					}
 				}
@@ -101,10 +120,7 @@ namespace kengine {
 		glGenBuffers(1, &_vbo);
 		glBindVertexArray(_vao);
 		glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-		glEnableVertexAttribArray(0);
 		putils::gl::setVertexType<Vertex>();
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
-		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(putils::NormalizedColor), (void *)putils::member_offset(&Vertex::color));
 	}
 
 	void RecastDebugShader::run(const Parameters & params) {
@@ -119,8 +135,31 @@ namespace kengine {
 			if (model.file != g_adjustables.fileName)
 				continue;
 
-			for (const auto & mesh : comp.meshes)
-				duDebugDrawPolyMesh(this, *mesh.polyMesh);
+			for (const auto & mesh : comp.meshes) {
+				switch (g_adjustables.toDebug) {
+				case Element::Heightfield:
+					duDebugDrawHeightfieldWalkable(this, *mesh.heightField);
+					break;
+				case Element::CompactHeightfield:
+					duDebugDrawCompactHeightfieldRegions(this, *mesh.compactHeightField);
+					break;
+				case Element::ContourSet:
+					duDebugDrawContours(this, *mesh.contourSet);
+					break;
+				case Element::PolyMesh:
+					duDebugDrawPolyMesh(this, *mesh.polyMesh);
+					break;
+				case Element::PolyMeshDetail:
+					duDebugDrawPolyMeshDetail(this, *mesh.polyMeshDetail);
+					break;
+				case Element::NavMesh:
+					duDebugDrawNavMesh(this, *mesh.navMesh, 0);
+					break;
+				default:
+					kengine_assert_failed(_em, "Non-exhaustive switch");
+					break;
+				}
+			}
 		}
 	}
 

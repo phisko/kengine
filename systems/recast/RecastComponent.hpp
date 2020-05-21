@@ -27,6 +27,10 @@ using NavMeshQueryPtr = UniquePtr<dtNavMeshQuery, dtFreeNavMeshQuery>;
 namespace kengine {
 	struct RecastComponent {
 		struct Mesh {
+			HeightfieldPtr heightField;
+			CompactHeightfieldPtr compactHeightField;
+			ContourSetPtr contourSet;
+
 			PolyMeshPtr polyMesh;
 			PolyMeshDetailPtr polyMeshDetail;
 			NavMeshPtr navMesh;
