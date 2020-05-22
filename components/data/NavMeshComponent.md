@@ -2,12 +2,6 @@
 
 `Component` for a [model Entity](ModelComponent.md) holding the information required to build a navmesh for the given model.
 
-## Members
+# RebuildNavMeshComponent
 
-### mustRebuild
-
-```cpp
-bool mustRebuild = true;
-```
-
-Indicates whether the navmesh should be rebuilt.
+`Component` that indicates that the navmesh for the `Entity` should be rebuilt. This `Component` is automatically removed once the navmesh has been built.

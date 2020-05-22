@@ -4,9 +4,13 @@
 #include "angle.hpp"
 
 namespace kengine {
+	struct RebuildNavMeshComponent { // Indicates that the navmesh should be rebuilt
+		putils_reflection_class_name(RebuildNavMeshComponent);
+	};
+
 	struct NavMeshComponent {
-		bool mustRebuild = true;
 		float cellSize = .25f;
+		float cellHeight = .25f;
 		float walkableSlope = putils::pi / 4.f;
 		float characterHeight = 1.f;
 		float characterClimb = .75f;
@@ -22,8 +26,8 @@ namespace kengine {
 
 		putils_reflection_class_name(NavMeshComponent);
 		putils_reflection_attributes(
-			putils_reflection_attribute(&NavMeshComponent::mustRebuild),
 			putils_reflection_attribute(&NavMeshComponent::cellSize),
+			putils_reflection_attribute(&NavMeshComponent::cellHeight),
 			putils_reflection_attribute(&NavMeshComponent::walkableSlope),
 			putils_reflection_attribute(&NavMeshComponent::characterHeight),
 			putils_reflection_attribute(&NavMeshComponent::characterClimb),
