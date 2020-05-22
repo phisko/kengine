@@ -1,5 +1,5 @@
 #include "PySystem.hpp"
-#include "ScriptSystem.hpp"
+#include "helpers/PythonHelper.hpp"
 #include "data/PyComponent.hpp"
 #include "functions/Execute.hpp"
 
@@ -14,13 +14,13 @@ namespace kengine {
 			e += PythonStateComponent{ std::move(tmp) };
 
 			py::globals()["kengine"] = state.module;
-			ScriptSystem::init(em,
+			ScriptLanguageHelper::init(em,
 				[&](auto && ... args) {
-					python::registerFunctionWithState(state, FWD(args)...);
+					PythonHelper::detail::registerFunctionWithState(state, FWD(args)...);
 				},
 				[&](auto type) {
 					using T = putils_wrapped_type(type);
-					python::registerTypeWithState<T>(em, state);
+					PythonHelper::detail::registerTypeWithState<T>(em, state);
 				}
 			);
 

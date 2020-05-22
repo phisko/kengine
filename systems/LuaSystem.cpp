@@ -1,9 +1,7 @@
 #include "LuaSystem.hpp"
-#include "ScriptSystem.hpp"
+#include "helpers/LuaHelper.hpp"
 #include "data/LuaComponent.hpp"
 #include "functions/Execute.hpp"
-
-#include "meta/type.hpp"
 
 namespace kengine {
 	// declarations
@@ -16,13 +14,13 @@ namespace kengine {
 
 			auto & state = *tmp;
 			state.open_libraries();
-			ScriptSystem::init(em,
+			ScriptLanguageHelper::init(em,
 				[&](auto && ... args) {
-					lua::registerFunctionWithState(state, FWD(args)...);
+					LuaHelper::detail::registerFunctionWithState(state, FWD(args)...);
 				},
 				[&](auto type) {
 					using T = putils_wrapped_type(type);
-					lua::registerTypeWithState<T>(em, state);
+					LuaHelper::detail::registerTypeWithState<T>(em, state);
 				}
 			);
 

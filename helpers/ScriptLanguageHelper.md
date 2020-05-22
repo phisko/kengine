@@ -1,4 +1,4 @@
-# [ScriptSystem](ScriptSystem.hpp)
+# [ScriptLanguageHelper](ScriptLanguageHelper.hpp)
 
 Set of helper functions meant to be used by language-specific scripting systems (e.g. the [LuaSystem](LuaSystem.md) or the [PySystem](PySystem.md)).
 

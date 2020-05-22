@@ -9,7 +9,7 @@
 # define KENGINE_SCRIPT_SYSTEM_MAX_FUNCTION_SIZE 64
 #endif
 
-namespace kengine::ScriptSystem {
+namespace kengine::ScriptLanguageHelper {
 	template<typename Func>
 	using function = putils::function<Func, KENGINE_SCRIPT_SYSTEM_MAX_FUNCTION_SIZE>;
 
