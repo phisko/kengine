@@ -96,8 +96,9 @@ namespace kengine {
 	}
 
 	// declarations
-	static rcConfig getConfig(const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData);
-	static HeightfieldPtr createHeightField(rcContext & ctx, const rcConfig & cfg, const kengine::ModelDataComponent::Mesh & meshData);
+	std::unique_ptr<float[]> getVertices(const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData);
+	static rcConfig getConfig(const ModelDataComponent::Mesh & meshData, const float * vertices);
+	static HeightfieldPtr createHeightField(rcContext & ctx, const rcConfig & cfg, const kengine::ModelDataComponent::Mesh & meshData, const float * vertices);
 	static CompactHeightfieldPtr createCompactHeightField(rcContext & ctx, const rcConfig & cfg, rcHeightfield & heightField);
 	static ContourSetPtr createContourSet(rcContext & ctx, const rcConfig & cfg, rcCompactHeightfield & chf);
 	static PolyMeshPtr createPolyMesh(rcContext & ctx, const rcConfig & cfg, rcContourSet & contourSet);
@@ -106,13 +107,15 @@ namespace kengine {
 	static NavMeshQueryPtr createNavMeshQuery(const dtNavMesh & navMesh);
 	//
 	static void createNavMesh(RecastComponent::Mesh & navMeshComp, const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData) {
-		const auto cfg = getConfig(modelData, meshData);
+		const auto vertices = getVertices(modelData, meshData);
+
+		const auto cfg = getConfig(meshData, vertices.get());
 
 		rcContext ctx;
 		ctx.resetTimers();
 		ctx.startTimer(RC_TIMER_TOTAL);
 
-		navMeshComp.heightField = createHeightField(ctx, cfg, meshData);
+		navMeshComp.heightField = createHeightField(ctx, cfg, meshData, vertices.get());
 		if (navMeshComp.heightField == nullptr)
 			return;
 
@@ -158,9 +161,45 @@ namespace kengine {
 	}
 
 	// declarations
-	std::unique_ptr<float[]> getVertices(const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData);
+	const std::ptrdiff_t getVertexPositionOffset(const ModelDataComponent & modelData);
+	const float * getVertexPosition(const void * vertices, size_t index, size_t vertexSize, std::ptrdiff_t positionOffset);
 	//
-	static rcConfig getConfig(const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData) {
+	std::unique_ptr<float[]> getVertices(const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData) {
+		const auto vertexSize = modelData.getVertexSize();
+		const auto positionOffset = getVertexPositionOffset(modelData);
+		if (positionOffset == -1)
+			return nullptr;
+
+		auto vertices = std::unique_ptr<float[]>(new float[meshData.vertices.nbElements * 3]);
+
+		for (size_t vertex = 0; vertex < meshData.vertices.nbElements; ++vertex) {
+			const auto pos = getVertexPosition(meshData.vertices.data, vertex, vertexSize, positionOffset);
+			for (size_t i = 0; i < 3; ++i)
+				vertices[vertex * 3 + i] = pos[i];
+		}
+
+		return vertices;
+	}
+
+	const std::ptrdiff_t getVertexPositionOffset(const ModelDataComponent & modelData) {
+		static const char * potentialNames[] = { "pos", "position" };
+
+		for (const auto name : potentialNames) {
+			const auto offset = modelData.getVertexAttributeOffset(name);
+			if (offset >= 0)
+				return offset;
+		}
+
+		kengine_assert_failed(*g_em, "[Recast] Could not find vertex position");
+		return -1;
+	}
+
+	const float * getVertexPosition(const void * vertices, size_t index, size_t vertexSize, std::ptrdiff_t positionOffset) {
+		const auto vertex = (const char *)vertices + index * vertexSize;
+		return (const float *)(vertex + positionOffset);
+	}
+
+	static rcConfig getConfig(const ModelDataComponent::Mesh & meshData, const float * vertices) {
 		rcConfig cfg;
 		memset(&cfg, 0, sizeof(cfg));
 
@@ -205,52 +244,13 @@ namespace kengine {
 			kengine_assert(*g_em, cfg.detailSampleMaxError >= 0.f);
 		} }
 
-		const auto vertices = getVertices(modelData, meshData);
-		if (vertices == nullptr)
-			return cfg;
-
-		rcCalcBounds(vertices.get(), (int)meshData.vertices.nbElements, cfg.bmin, cfg.bmax);
+		rcCalcBounds(vertices, (int)meshData.vertices.nbElements, cfg.bmin, cfg.bmax);
 		rcCalcGridSize(cfg.bmin, cfg.bmax, cfg.cs, &cfg.width, &cfg.height);
 
 		return cfg;
 	}
 
-	// declarations
-	const float * getVertexPosition(const ModelDataComponent & modelData, const void * vertices, size_t vertex);
-	//
-	std::unique_ptr<float[]> getVertices(const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData) {
-		auto vertices = std::unique_ptr<float[]>(new float[meshData.vertices.nbElements * 3]);
-
-		for (size_t vertex = 0; vertex < meshData.vertices.nbElements; ++vertex) {
-			const auto pos = getVertexPosition(modelData, meshData.vertices.data, vertex);
-			if (pos == nullptr)
-				return nullptr;
-			for (size_t i = 0; i < 3; ++i)
-				vertices[vertex * 3 + i] = pos[i];
-		}
-
-		return vertices;
-	}
-
-	const float * getVertexPosition(const ModelDataComponent & modelData, const void * vertices, size_t vertex) {
-		static const char * potentialNames[] = { "pos", "position" };
-
-		const void * pos = nullptr;
-		for (const auto name : potentialNames) {
-			pos = modelData.getVertexAttribute(vertices, vertex, name);
-			if (pos != nullptr)
-				break;
-		}
-
-		if (pos == nullptr) {
-			kengine_assert_failed(*g_em, "[Recast] Could not find vertex position");
-			return nullptr;
-		}
-
-		return (const float *)pos;
-	}
-
-	static HeightfieldPtr createHeightField(rcContext & ctx, const rcConfig & cfg, const kengine::ModelDataComponent::Mesh & meshData) {
+	static HeightfieldPtr createHeightField(rcContext & ctx, const rcConfig & cfg, const kengine::ModelDataComponent::Mesh & meshData, const float * vertices) {
 		HeightfieldPtr heightField{ rcAllocHeightfield() };
 
 		if (heightField == nullptr) {
@@ -274,21 +274,18 @@ namespace kengine {
 			mustDeleteIndices = true;
 			const auto unsignedIndices = (const unsigned int *)meshData.indices.data;
 			for (int i = 0; i < meshData.indices.nbElements; ++i)
-			{
 				indices[i] = (int)unsignedIndices[i];
-				assert(indices[i] >= 0 && indices[i] < meshData.vertices.nbElements);
-			}
 		}
 
 		rcMarkWalkableTriangles(&ctx, cfg.walkableSlopeAngle,
-			(const float *)meshData.vertices.data, (int)meshData.vertices.nbElements,
+			vertices, (int)meshData.vertices.nbElements,
 			indices, (int)nbTriangles,
 			triangleAreas);
 
 		if (mustDeleteIndices)
 			delete[] indices;
 
-		if (!rcRasterizeTriangles(&ctx, (const float *)meshData.vertices.data, triangleAreas, (int)nbTriangles, *heightField, cfg.walkableClimb)) {
+		if (!rcRasterizeTriangles(&ctx, vertices, triangleAreas, (int)nbTriangles, *heightField, cfg.walkableClimb)) {
 			kengine_assert_failed(*g_em, "[Recast] Failed to rasterize triangles");
 			delete[] triangleAreas;
 			return nullptr;
