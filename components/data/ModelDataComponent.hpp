@@ -58,7 +58,7 @@ namespace kengine {
 
 			getVertexAttributeOffset = [](const char * attributeName) {
 				const auto * vertex = (const VertexType *)nullptr;
-				const void * attribute = nullptr;
+				const void * attribute = (const char *)nullptr + sizeof(VertexType);
 
 				if constexpr (isPolyVoxType) {
 					if (strcmp("position", attributeName) == 0)
@@ -79,7 +79,10 @@ namespace kengine {
 						attribute = &(vertex->*member);
 					});
 
-				return (const char *)attribute - (const char *)vertex;
+				std::ptrdiff_t ret = (const char *)attribute - (const char *)vertex;
+				if (ret >= sizeof(VertexType))
+					ret = -1;
+				return ret;
 			};
 		}
 
