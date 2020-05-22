@@ -39,11 +39,11 @@ namespace kengine {
 		using RegisterVertexAttributesFunc = void();
 		RegisterVertexAttributesFunc * registerVertexAttributes = nullptr;
 
-		using VertexGetterFunc = const void * (const void * vertices, size_t index);
-		VertexGetterFunc * getVertex = nullptr;
+		using VertexSizeFunc = size_t();
+		VertexSizeFunc * getVertexSize = nullptr;
 
-		using AttributeGetterFunc = const void * (const void * vertices, size_t index, const char * attributeName);
-		AttributeGetterFunc * getVertexAttribute = nullptr;
+		using AttributeOffsetFunc = std::ptrdiff_t(const char * attributeName);
+		AttributeOffsetFunc * getVertexAttributeOffset = nullptr;
 
 		template<typename VertexType>
 		void init() {
@@ -54,36 +54,32 @@ namespace kengine {
 			else
 				registerVertexAttributes = putils::gl::setVertexType<VertexType>;
 
-			getVertex = [](const void * vertices, size_t index) {
-				const auto * ptr = (const VertexType *)vertices;
-				return (const void *)&ptr[index];
-			};
+			getVertexSize = [] { return sizeof(VertexType); };
 
-			getVertexAttribute = [](const void * vertices, size_t index, const char * attributeName) {
-				const auto * ptr = (const VertexType *)vertices;
-				const auto & vertex = ptr[index];
-
-				const void * ret = nullptr;
+			getVertexAttributeOffset = [](const char * attributeName) {
+				const auto * vertex = (const VertexType *)nullptr;
+				const void * attribute = nullptr;
 
 				if constexpr (isPolyVoxType) {
 					if (strcmp("position", attributeName) == 0)
-						ret = &vertex.position;
+						attribute = &vertex->position;
 					else if (strcmp("normal", attributeName) == 0)
-						ret = &vertex.normal;
+						attribute = &vertex->normal;
 					else
 						putils::reflection::for_each_attribute<VertexType::DataType>([&](const auto name, const auto member) {
 							if (strcmp(name, attributeName) != 0)
 								return;
-							ret = &(vertex.data.*member);
+							attribute = &(vertex->data.*member);
 						});
 				}
 				else
 					putils::reflection::for_each_attribute<VertexType>([&](const auto name, const auto member) {
 						if (strcmp(name, attributeName) != 0)
 							return;
-						ret = &(vertex.*member);
+						attribute = &(vertex->*member);
 					});
-				return ret;
+
+				return (const char *)attribute - (const char *)vertex;
 			};
 		}
 
