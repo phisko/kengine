@@ -110,6 +110,10 @@ namespace kengine {
 		const auto vertices = getVertices(modelData, meshData);
 
 		const auto cfg = getConfig(meshData, vertices.get());
+		if (cfg.width == 0 || cfg.height == 0) {
+			kengine_assert_failed(*g_em, "[Recast] Mesh was 0 height or width?");
+			return;
+		}
 
 		rcContext ctx;
 		ctx.resetTimers();
@@ -282,14 +286,14 @@ namespace kengine {
 			indices, (int)nbTriangles,
 			triangleAreas);
 
-		if (mustDeleteIndices)
-			delete[] indices;
-
-		if (!rcRasterizeTriangles(&ctx, vertices, triangleAreas, (int)nbTriangles, *heightField, cfg.walkableClimb)) {
+		if (!rcRasterizeTriangles(&ctx, vertices, (int)meshData.vertices.nbElements, indices, triangleAreas, (int)nbTriangles, *heightField, cfg.walkableClimb)) {
 			kengine_assert_failed(*g_em, "[Recast] Failed to rasterize triangles");
 			delete[] triangleAreas;
 			return nullptr;
 		}
+
+		if (mustDeleteIndices)
+			delete[] indices;
 
 		delete[] triangleAreas;
 
