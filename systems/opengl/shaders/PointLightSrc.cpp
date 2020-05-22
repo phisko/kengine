@@ -52,13 +52,15 @@ void main() {
 
     vec4 diffuseAndShouldIgnoreLighting = texture(gdiffuse, texCoord);
 
+    vec3 diffuse = diffuseAndShouldIgnoreLighting.rgb;
     float shouldIgnoreLighting = diffuseAndShouldIgnoreLighting.a;
-    if (shouldIgnoreLighting == 1.0)
+    if (shouldIgnoreLighting == 1.0) {
+        outputColor = vec4(diffuse, 1.0);
         return;
+    }
 
    	vec3 worldPos = texture(gposition, texCoord).xyz;
    	vec3 normal = texture(gnormal, texCoord).xyz;
-    vec3 diffuse = diffuseAndShouldIgnoreLighting.rgb;
     vec3 specular = texture(gspecular, texCoord).rgb;
 
 	outputColor = vec4(calcPointLight(worldPos, normal, diffuse, specular), 1.0);

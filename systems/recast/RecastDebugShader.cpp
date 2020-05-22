@@ -48,6 +48,7 @@ layout (location = 0) out vec4 gposition;
 layout (location = 1) out vec3 gnormal;
 layout (location = 2) out vec4 gdiffuse;
 layout (location = 3) out vec4 gspecular;
+layout (location = 4) out float gentityid;
 
 void applyTransparency(float alpha);
 
@@ -58,6 +59,7 @@ void main() {
     gnormal = -normalize(cross(dFdy(EyeRelativePos), dFdx(EyeRelativePos)));
 	gdiffuse = vec4(Color.rgb, 1.0); // don't apply lighting
 	gspecular = vec4(0.0);
+	gentityid = 0.0;
 }
 )";
 
