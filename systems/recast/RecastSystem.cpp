@@ -7,6 +7,7 @@
 #include "RecastComponent.hpp"
 #include "RecastDebugShader.hpp"
 
+#include "data/NavMeshComponent.hpp"
 #include "data/AdjustableComponent.hpp"
 #include "data/ModelDataComponent.hpp"
 #include "functions/Execute.hpp"
@@ -29,25 +30,6 @@ namespace Flags {
 namespace kengine {
 	static EntityManager * g_em;
 
-	// Adjustables
-	static struct {
-		float cellSize = .25f;
-		float cellHeight = .25f;
-		float walkableSlope = putils::pi / 4.f;
-		float characterHeight = 1.f;
-		float characterClimb = .75f;
-		float characterRadius = .5f;
-		int maxEdgeLength = 80;
-		float maxSimplificationError = 1.1f;
-		float minRegionArea = 9.f;
-		float mergeRegionArea = 25.f;
-		int vertsPerPoly = 6;
-		float detailSampleDist = 75.f;
-		float detailSampleMaxError = 20.f;
-		int queryMaxSearchNodes = 65535;
-	} g_adjustables;
-	//
-
 	// declarations
 	static void execute(float deltaTime);
 	//
@@ -56,60 +38,44 @@ namespace kengine {
 
 		return [](Entity & e) {
 			e += functions::Execute{ execute };
-
-			e += AdjustableComponent{
-				"Navmesh", {
-					{ "Cell size", &g_adjustables.cellSize },
-					{ "Cell height", &g_adjustables.cellHeight },
-					{ "Walkable slope", &g_adjustables.walkableSlope },
-					{ "Character height", &g_adjustables.characterHeight },
-					{ "Character climb", &g_adjustables.characterClimb },
-					{ "Character radius", &g_adjustables.characterRadius },
-					{ "Max edge length", &g_adjustables.maxEdgeLength },
-					{ "Max simplification error", &g_adjustables.maxSimplificationError },
-					{ "Min region area", &g_adjustables.minRegionArea },
-					{ "Merge region area", &g_adjustables.mergeRegionArea },
-					{ "Verts per poly", &g_adjustables.vertsPerPoly },
-					{ "Detail sample dist", &g_adjustables.detailSampleDist },
-					{ "Detail sample max error", &g_adjustables.detailSampleMaxError },
-					{ "Query max search nodes", &g_adjustables.queryMaxSearchNodes }
-				}
-			};
-
 			e += makeGBufferShaderComponent<RecastDebugShader>(*g_em);
 		};
 	}
 
 	// declarations
-	static void createNavMesh(RecastComponent::Mesh & navMesh, const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData);
+	static void createRecastMesh(RecastComponent::Mesh & recast, const NavMeshComponent & navMesh, const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData);
 	//
 	static void execute(float deltaTime) {
-		kengine_assert(*g_em, g_adjustables.vertsPerPoly <= DT_VERTS_PER_POLYGON);
-
-		for (auto & [e, modelData, noRecast, model] : g_em->getEntities<ModelDataComponent, no<RecastComponent>, ModelComponent>()) {
-			auto & comp = e.attach<RecastComponent>();
-			for (const auto & mesh : modelData.meshes) {
-				comp.meshes.emplace_back();
-				createNavMesh(comp.meshes.back(), modelData, mesh);
+		static const auto buildRecastComponent = [](auto && entities) {
+			for (auto & [e, modelData, navMesh, _] : entities) {
+				kengine_assert(*g_em, navMesh.vertsPerPoly <= DT_VERTS_PER_POLYGON);
+				auto & comp = e.attach<RecastComponent>();
+				for (const auto & mesh : modelData.meshes) {
+					comp.meshes.emplace_back();
+					createRecastMesh(comp.meshes.back(), navMesh, modelData, mesh);
+				}
 			}
-		}
+		};
+
+		buildRecastComponent(g_em->getEntities<ModelDataComponent, NavMeshComponent, no<RecastComponent>>());
+		buildRecastComponent(g_em->getEntities<ModelDataComponent, NavMeshComponent, RebuildNavMeshComponent>());
 	}
 
 	// declarations
 	std::unique_ptr<float[]> getVertices(const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData);
-	static rcConfig getConfig(const ModelDataComponent::Mesh & meshData, const float * vertices);
+	static rcConfig getConfig(const NavMeshComponent & navMesh, const ModelDataComponent::Mesh & meshData, const float * vertices);
 	static HeightfieldPtr createHeightField(rcContext & ctx, const rcConfig & cfg, const kengine::ModelDataComponent::Mesh & meshData, const float * vertices);
 	static CompactHeightfieldPtr createCompactHeightField(rcContext & ctx, const rcConfig & cfg, rcHeightfield & heightField);
 	static ContourSetPtr createContourSet(rcContext & ctx, const rcConfig & cfg, rcCompactHeightfield & chf);
 	static PolyMeshPtr createPolyMesh(rcContext & ctx, const rcConfig & cfg, rcContourSet & contourSet);
 	static PolyMeshDetailPtr createPolyMeshDetail(rcContext & ctx, const rcConfig & cfg, const rcPolyMesh & polyMesh, const rcCompactHeightfield & chf);
 	static NavMeshPtr createNavMesh(const rcConfig & cfg, const rcPolyMesh & polyMesh, const rcPolyMeshDetail & polyMeshDetail);
-	static NavMeshQueryPtr createNavMeshQuery(const dtNavMesh & navMesh);
+	static NavMeshQueryPtr createNavMeshQuery(const NavMeshComponent & params, const dtNavMesh & navMesh);
 	//
-	static void createNavMesh(RecastComponent::Mesh & navMeshComp, const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData) {
+	static void createRecastMesh(RecastComponent::Mesh & recast, const NavMeshComponent & navMesh, const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData) {
 		const auto vertices = getVertices(modelData, meshData);
 
-		const auto cfg = getConfig(meshData, vertices.get());
+		const auto cfg = getConfig(navMesh, meshData, vertices.get());
 		if (cfg.width == 0 || cfg.height == 0) {
 			kengine_assert_failed(*g_em, "[Recast] Mesh was 0 height or width?");
 			return;
@@ -119,46 +85,46 @@ namespace kengine {
 		ctx.resetTimers();
 		ctx.startTimer(RC_TIMER_TOTAL);
 
-		navMeshComp.heightField = createHeightField(ctx, cfg, meshData, vertices.get());
-		if (navMeshComp.heightField == nullptr)
+		recast.heightField = createHeightField(ctx, cfg, meshData, vertices.get());
+		if (recast.heightField == nullptr)
 			return;
 
-		rcFilterLowHangingWalkableObstacles(&ctx, cfg.walkableClimb, *navMeshComp.heightField);
-		rcFilterLedgeSpans(&ctx, cfg.walkableHeight, cfg.walkableClimb, *navMeshComp.heightField);
-		rcFilterWalkableLowHeightSpans(&ctx, cfg.walkableHeight, *navMeshComp.heightField);
+		rcFilterLowHangingWalkableObstacles(&ctx, cfg.walkableClimb, *recast.heightField);
+		rcFilterLedgeSpans(&ctx, cfg.walkableHeight, cfg.walkableClimb, *recast.heightField);
+		rcFilterWalkableLowHeightSpans(&ctx, cfg.walkableHeight, *recast.heightField);
 
-		navMeshComp.compactHeightField = createCompactHeightField(ctx, cfg, *navMeshComp.heightField);
-		if (navMeshComp.compactHeightField == nullptr)
+		recast.compactHeightField = createCompactHeightField(ctx, cfg, *recast.heightField);
+		if (recast.compactHeightField == nullptr)
 			return;
 
-		navMeshComp.contourSet = createContourSet(ctx, cfg, *navMeshComp.compactHeightField);
-		if (navMeshComp.contourSet == nullptr)
+		recast.contourSet = createContourSet(ctx, cfg, *recast.compactHeightField);
+		if (recast.contourSet == nullptr)
 			return;
 
-		navMeshComp.polyMesh = createPolyMesh(ctx, cfg, *navMeshComp.contourSet);
-		if (navMeshComp.polyMesh == nullptr)
+		recast.polyMesh = createPolyMesh(ctx, cfg, *recast.contourSet);
+		if (recast.polyMesh == nullptr)
 			return;
 
-		navMeshComp.polyMeshDetail = createPolyMeshDetail(ctx, cfg, *navMeshComp.polyMesh, *navMeshComp.compactHeightField);
-		if (navMeshComp.polyMeshDetail == nullptr)
+		recast.polyMeshDetail = createPolyMeshDetail(ctx, cfg, *recast.polyMesh, *recast.compactHeightField);
+		if (recast.polyMeshDetail == nullptr)
 			return;
 
 		// Build for detour
 		bool found = false;
-		for (int i = 0; i < navMeshComp.polyMesh->npolys; ++i)
-			if (navMeshComp.polyMesh->areas[i] == RC_WALKABLE_AREA) {
-				navMeshComp.polyMesh->flags[i] = Flags::Walk;
+		for (int i = 0; i < recast.polyMesh->npolys; ++i)
+			if (recast.polyMesh->areas[i] == RC_WALKABLE_AREA) {
+				recast.polyMesh->flags[i] = Flags::Walk;
 				found = true;
 			}
 		if (!found)
 			return;
 
-		navMeshComp.navMesh = createNavMesh(cfg, *navMeshComp.polyMesh, *navMeshComp.polyMeshDetail);
-		if (navMeshComp.navMesh == nullptr)
+		recast.navMesh = createNavMesh(cfg, *recast.polyMesh, *recast.polyMeshDetail);
+		if (recast.navMesh == nullptr)
 			return;
 
-		navMeshComp.navMeshQuery = createNavMeshQuery(*navMeshComp.navMesh);
-		if (navMeshComp.navMeshQuery == nullptr)
+		recast.navMeshQuery = createNavMeshQuery(navMesh, *recast.navMesh);
+		if (recast.navMeshQuery == nullptr)
 			return;
 
 		ctx.stopTimer(RC_TIMER_TOTAL);
@@ -203,11 +169,11 @@ namespace kengine {
 		return (const float *)(vertex + positionOffset);
 	}
 
-	static rcConfig getConfig(const ModelDataComponent::Mesh & meshData, const float * vertices) {
+	static rcConfig getConfig(const NavMeshComponent & navMesh, const ModelDataComponent::Mesh & meshData, const float * vertices) {
 		rcConfig cfg;
 		memset(&cfg, 0, sizeof(cfg));
 
-		{ putils_with(g_adjustables) {
+		{ putils_with(navMesh) {
 			cfg.cs = _.cellSize;
 			kengine_assert(*g_em, cfg.cs > 0);
 
@@ -431,7 +397,7 @@ namespace kengine {
 		return navMesh;
 	}
 
-	static NavMeshQueryPtr createNavMeshQuery(const dtNavMesh & navMesh) {
+	static NavMeshQueryPtr createNavMeshQuery(const NavMeshComponent & params, const dtNavMesh & navMesh) {
 		NavMeshQueryPtr navMeshQuery{ dtAllocNavMeshQuery() };
 
 		if (navMeshQuery == nullptr) {
@@ -439,7 +405,7 @@ namespace kengine {
 			return nullptr;
 		}
 
-		const auto maxNodes = g_adjustables.queryMaxSearchNodes;
+		const auto maxNodes = params.queryMaxSearchNodes;
 		kengine_assert(*g_em, 0 < maxNodes && maxNodes <= 65535);
 		const auto status = navMeshQuery->init(&navMesh, maxNodes);
 		if (dtStatusFailed(status)) {
