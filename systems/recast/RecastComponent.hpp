@@ -16,9 +16,6 @@ struct Deleter {
 template<typename T, void(*FreeFunc)(T *)>
 using UniquePtr = std::unique_ptr<T, Deleter<T, FreeFunc>>;
 
-using HeightfieldPtr = UniquePtr<rcHeightfield, rcFreeHeightField>;
-using CompactHeightfieldPtr = UniquePtr<rcCompactHeightfield, rcFreeCompactHeightfield>;
-using ContourSetPtr = UniquePtr<rcContourSet, rcFreeContourSet>;
 using PolyMeshPtr = UniquePtr<rcPolyMesh, rcFreePolyMesh>;
 using PolyMeshDetailPtr = UniquePtr<rcPolyMeshDetail, rcFreePolyMeshDetail>;
 using NavMeshPtr = UniquePtr<dtNavMesh, dtFreeNavMesh>;
@@ -27,10 +24,6 @@ using NavMeshQueryPtr = UniquePtr<dtNavMeshQuery, dtFreeNavMeshQuery>;
 namespace kengine {
 	struct RecastComponent {
 		struct Mesh {
-			HeightfieldPtr heightField;
-			CompactHeightfieldPtr compactHeightField;
-			ContourSetPtr contourSet;
-
 			PolyMeshPtr polyMesh;
 			PolyMeshDetailPtr polyMeshDetail;
 			NavMeshPtr navMesh;

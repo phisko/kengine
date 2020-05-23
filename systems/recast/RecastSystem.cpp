@@ -43,9 +43,16 @@ namespace kengine {
 	}
 
 	// declarations
-	static void createRecastMesh(RecastComponent::Mesh & recast, const NavMeshComponent & navMesh, const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData);
+	static void buildNavMeshes();
 	//
 	static void execute(float deltaTime) {
+		buildNavMeshes();
+	}
+
+	// declarations
+	static void createRecastMesh(RecastComponent::Mesh & recast, const NavMeshComponent & navMesh, const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData);
+	//
+	static void buildNavMeshes() {
 		static const auto buildRecastComponent = [](auto && entities) {
 			for (auto & [e, modelData, navMesh, _] : entities) {
 				kengine_assert(*g_em, navMesh.vertsPerPoly <= DT_VERTS_PER_POLYGON);
@@ -64,6 +71,10 @@ namespace kengine {
 	}
 
 	// declarations
+	using HeightfieldPtr = UniquePtr<rcHeightfield, rcFreeHeightField>;
+	using CompactHeightfieldPtr = UniquePtr<rcCompactHeightfield, rcFreeCompactHeightfield>;
+	using ContourSetPtr = UniquePtr<rcContourSet, rcFreeContourSet>;
+
 	std::unique_ptr<float[]> getVertices(const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData);
 	static rcConfig getConfig(const NavMeshComponent & navMesh, const ModelDataComponent::Mesh & meshData, const float * vertices);
 	static HeightfieldPtr createHeightField(rcContext & ctx, const rcConfig & cfg, const kengine::ModelDataComponent::Mesh & meshData, const float * vertices);
@@ -87,27 +98,27 @@ namespace kengine {
 		ctx.resetTimers();
 		ctx.startTimer(RC_TIMER_TOTAL);
 
-		recast.heightField = createHeightField(ctx, cfg, meshData, vertices.get());
-		if (recast.heightField == nullptr)
+		const auto heightField = createHeightField(ctx, cfg, meshData, vertices.get());
+		if (heightField == nullptr)
 			return;
 
-		rcFilterLowHangingWalkableObstacles(&ctx, cfg.walkableClimb, *recast.heightField);
-		rcFilterLedgeSpans(&ctx, cfg.walkableHeight, cfg.walkableClimb, *recast.heightField);
-		rcFilterWalkableLowHeightSpans(&ctx, cfg.walkableHeight, *recast.heightField);
+		rcFilterLowHangingWalkableObstacles(&ctx, cfg.walkableClimb, *heightField);
+		rcFilterLedgeSpans(&ctx, cfg.walkableHeight, cfg.walkableClimb, *heightField);
+		rcFilterWalkableLowHeightSpans(&ctx, cfg.walkableHeight, *heightField);
 
-		recast.compactHeightField = createCompactHeightField(ctx, cfg, *recast.heightField);
-		if (recast.compactHeightField == nullptr)
+		const auto compactHeightField = createCompactHeightField(ctx, cfg, *heightField);
+		if (compactHeightField == nullptr)
 			return;
 
-		recast.contourSet = createContourSet(ctx, cfg, *recast.compactHeightField);
-		if (recast.contourSet == nullptr)
+		const auto contourSet = createContourSet(ctx, cfg, *compactHeightField);
+		if (contourSet == nullptr)
 			return;
 
-		recast.polyMesh = createPolyMesh(ctx, cfg, *recast.contourSet);
+		recast.polyMesh = createPolyMesh(ctx, cfg, *contourSet);
 		if (recast.polyMesh == nullptr)
 			return;
 
-		recast.polyMeshDetail = createPolyMeshDetail(ctx, cfg, *recast.polyMesh, *recast.compactHeightField);
+		recast.polyMeshDetail = createPolyMeshDetail(ctx, cfg, *recast.polyMesh, *compactHeightField);
 		if (recast.polyMeshDetail == nullptr)
 			return;
 

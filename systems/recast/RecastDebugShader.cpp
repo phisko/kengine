@@ -68,9 +68,6 @@ void main() {
 
 namespace kengine {
 	enum class Element {
-		Heightfield,
-		CompactHeightfield,
-		ContourSet,
 		PolyMesh,
 		PolyMeshDetail,
 		NavMesh
@@ -78,7 +75,7 @@ namespace kengine {
 	static struct {
 		bool enabled = false;
 		std::string fileName;
-		Element toDebug = Element::Heightfield;
+		Element toDebug = Element::PolyMesh;
 	} g_adjustables;
 
 	RecastDebugShader::RecastDebugShader(EntityManager & em)
@@ -145,15 +142,6 @@ namespace kengine {
 			const auto & comp = model.get<RecastComponent>();
 			for (const auto & mesh : comp.meshes) {
 				switch (g_adjustables.toDebug) {
-				case Element::Heightfield:
-					duDebugDrawHeightfieldWalkable(this, *mesh.heightField);
-					break;
-				case Element::CompactHeightfield:
-					duDebugDrawCompactHeightfieldRegions(this, *mesh.compactHeightField);
-					break;
-				case Element::ContourSet:
-					duDebugDrawContours(this, *mesh.contourSet);
-					break;
 				case Element::PolyMesh:
 					duDebugDrawPolyMesh(this, *mesh.polyMesh);
 					break;
