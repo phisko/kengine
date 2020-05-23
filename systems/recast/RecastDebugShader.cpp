@@ -67,15 +67,9 @@ void main() {
 )";
 
 namespace kengine {
-	enum class Element {
-		PolyMesh,
-		PolyMeshDetail,
-		NavMesh
-	};
 	static struct {
 		bool enabled = false;
 		std::string fileName;
-		Element toDebug = Element::PolyMesh;
 	} g_adjustables;
 
 	RecastDebugShader::RecastDebugShader(EntityManager & em)
@@ -97,17 +91,9 @@ namespace kengine {
 								g_adjustables.fileName = model.file;
 						ImGui::EndCombo();
 					}
-
-					const auto names = putils::magic_enum::enum_names<Element>();
-					if (ImGui::BeginCombo("Element", names[(int)g_adjustables.toDebug].data())) {
-						for (Element element : putils::magic_enum::enum_values<Element>())
-							if (ImGui::Selectable(names[(int)element].data()))
-								g_adjustables.toDebug = element;
-						ImGui::EndCombo();
-					}
 				}
 				ImGui::End();
-				});
+			});
 		};
 	}
 
@@ -140,22 +126,8 @@ namespace kengine {
 			_model = shaderHelper::getModelMatrix(model.get<ModelComponent>(), transform);
 
 			const auto & comp = model.get<RecastComponent>();
-			for (const auto & mesh : comp.meshes) {
-				switch (g_adjustables.toDebug) {
-				case Element::PolyMesh:
-					duDebugDrawPolyMesh(this, *mesh.polyMesh);
-					break;
-				case Element::PolyMeshDetail:
-					duDebugDrawPolyMeshDetail(this, *mesh.polyMeshDetail);
-					break;
-				case Element::NavMesh:
-					duDebugDrawNavMesh(this, *mesh.navMesh, 0);
-					break;
-				default:
-					kengine_assert_failed(_em, "Non-exhaustive switch");
-					break;
-				}
-			}
+			for (const auto & mesh : comp.meshes)
+				duDebugDrawNavMesh(this, *mesh.navMesh, 0);
 		}
 	}
 

@@ -55,15 +55,18 @@ namespace kengine {
 	static void buildNavMeshes() {
 		static const auto buildRecastComponent = [](auto && entities) {
 			for (auto & [e, modelData, navMesh, _] : entities) {
-				kengine_assert(*g_em, navMesh.vertsPerPoly <= DT_VERTS_PER_POLYGON);
-				auto & comp = e.attach<RecastComponent>();
-				for (const auto & mesh : modelData.meshes) {
-					comp.meshes.emplace_back();
-					createRecastMesh(comp.meshes.back(), navMesh, modelData, mesh);
-				}
-				if constexpr (std::is_same<RebuildNavMeshComponent, putils_typeof(_)>())
-					e.detach<RebuildNavMeshComponent>();
+				g_em->runTask([&] {
+					kengine_assert(*g_em, navMesh.vertsPerPoly <= DT_VERTS_PER_POLYGON);
+					auto & comp = e.attach<RecastComponent>();
+					for (const auto & mesh : modelData.meshes) {
+						comp.meshes.emplace_back();
+						createRecastMesh(comp.meshes.back(), navMesh, modelData, mesh);
+					}
+					if constexpr (std::is_same<RebuildNavMeshComponent, putils_typeof(_)>())
+						e.detach<RebuildNavMeshComponent>();
+				});
 			}
+			g_em->completeTasks();
 		};
 
 		buildRecastComponent(g_em->getEntities<ModelDataComponent, NavMeshComponent, no<RecastComponent>>());
@@ -74,6 +77,8 @@ namespace kengine {
 	using HeightfieldPtr = UniquePtr<rcHeightfield, rcFreeHeightField>;
 	using CompactHeightfieldPtr = UniquePtr<rcCompactHeightfield, rcFreeCompactHeightfield>;
 	using ContourSetPtr = UniquePtr<rcContourSet, rcFreeContourSet>;
+	using PolyMeshPtr = UniquePtr<rcPolyMesh, rcFreePolyMesh>;
+	using PolyMeshDetailPtr = UniquePtr<rcPolyMeshDetail, rcFreePolyMeshDetail>;
 
 	std::unique_ptr<float[]> getVertices(const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData);
 	static rcConfig getConfig(const NavMeshComponent & navMesh, const ModelDataComponent::Mesh & meshData, const float * vertices);
@@ -114,25 +119,15 @@ namespace kengine {
 		if (contourSet == nullptr)
 			return;
 
-		recast.polyMesh = createPolyMesh(ctx, cfg, *contourSet);
-		if (recast.polyMesh == nullptr)
+		const auto polyMesh = createPolyMesh(ctx, cfg, *contourSet);
+		if (polyMesh == nullptr)
 			return;
 
-		recast.polyMeshDetail = createPolyMeshDetail(ctx, cfg, *recast.polyMesh, *compactHeightField);
-		if (recast.polyMeshDetail == nullptr)
+		const auto polyMeshDetail = createPolyMeshDetail(ctx, cfg, *polyMesh, *compactHeightField);
+		if (polyMeshDetail == nullptr)
 			return;
 
-		// Build for detour
-		bool found = false;
-		for (int i = 0; i < recast.polyMesh->npolys; ++i)
-			if (recast.polyMesh->areas[i] == RC_WALKABLE_AREA) {
-				recast.polyMesh->flags[i] = Flags::Walk;
-				found = true;
-			}
-		if (!found)
-			return;
-
-		recast.navMesh = createNavMesh(cfg, *recast.polyMesh, *recast.polyMeshDetail);
+		recast.navMesh = createNavMesh(cfg, *polyMesh, *polyMeshDetail);
 		if (recast.navMesh == nullptr)
 			return;
 
