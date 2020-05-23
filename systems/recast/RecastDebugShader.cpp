@@ -7,12 +7,15 @@
 #include <DetourDebugDraw.h>
 
 #include "data/AdjustableComponent.hpp"
+#include "data/TransformComponent.hpp"
 #include "data/ModelComponent.hpp"
+#include "data/GraphicsComponent.hpp"
 #include "data/ImGuiComponent.hpp"
 
 #include "imgui.h"
 #include "helpers/assertHelper.hpp"
 #include "systems/opengl/shaders/ApplyTransparencySrc.hpp"
+#include "systems/opengl/shaders/shaderHelper.hpp"
 
 static const char * vert = R"(
 #version 330
@@ -130,13 +133,16 @@ namespace kengine {
 
 		_view = params.view;
 		_proj = params.proj;
-		_model = glm::mat4(1.f);
 		_viewPos = params.camPos;
 
-		for (const auto & [e, comp, model] : _em.getEntities<RecastComponent, ModelComponent>()) {
-			if (model.file != g_adjustables.fileName)
+		for (const auto & [e, graphics, transform] : _em.getEntities<GraphicsComponent, TransformComponent>()) {
+			if (graphics.appearance != g_adjustables.fileName)
 				continue;
 
+			const auto model = _em.getEntity(graphics.model);
+			_model = shaderHelper::getModelMatrix(model.get<ModelComponent>(), transform);
+
+			const auto & comp = model.get<RecastComponent>();
 			for (const auto & mesh : comp.meshes) {
 				switch (g_adjustables.toDebug) {
 				case Element::Heightfield:
