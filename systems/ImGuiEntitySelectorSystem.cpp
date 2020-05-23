@@ -5,12 +5,12 @@
 #include "data/NameComponent.hpp"
 #include "data/SelectedComponent.hpp"
 
-#include "helpers/TypeHelper.hpp"
-#include "helpers/SortHelper.hpp"
+#include "helpers/typeHelper.hpp"
+#include "helpers/sortHelper.hpp"
 #include "meta/Has.hpp"
 #include "meta/MatchString.hpp"
 
-#include "helpers/ImGuiHelper.hpp"
+#include "helpers/imguiHelper.hpp"
 #include "imgui.h"
 
 #include "string.hpp"
@@ -65,7 +65,7 @@ namespace kengine {
 				displayText += "ID";
 			}
 			else {
-				const auto types = SortHelper::getNameSortedEntities<KENGINE_COMPONENT_COUNT,
+				const auto types = sortHelper::getNameSortedEntities<KENGINE_COMPONENT_COUNT,
 					meta::Has, meta::MatchString
 				>(em);
 
@@ -96,7 +96,7 @@ namespace kengine {
 		}
 
 		if (ImGui::TreeNode(displayText + "##" + e.id)) {
-			ImGuiHelper::displayEntity(em, e);
+			imguiHelper::displayEntity(em, e);
 			ImGui::TreePop();
 		}
 

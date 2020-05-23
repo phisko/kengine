@@ -4,7 +4,7 @@
 #include "data/HighlightComponent.hpp"
 
 #include "QuadSrc.hpp"
-#include "ShaderHelper.hpp"
+#include "shaderHelper.hpp"
 
 static const auto frag = R"(
 #version 330
@@ -73,7 +73,7 @@ namespace kengine::Shaders {
 	void Highlight::run(const Parameters & params) {
 		use();
 
-		ShaderHelper::Enable _(GL_BLEND);
+		shaderHelper::Enable _(GL_BLEND);
 		glBlendEquation(GL_FUNC_ADD);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -81,13 +81,13 @@ namespace kengine::Shaders {
 		_screenSize = putils::Point2f(params.viewport.size);
 
 		for (const auto & [e, highlight] : _em.getEntities<HighlightComponent>()) {
-			if (!ShaderHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			_entityID = (float)e.id;
 			_highlightColor = highlight.color;
 			_intensity = highlight.intensity * 2.f - 1.f; // convert from [0,1] to [-1,1]
-			ShaderHelper::shapes::drawQuad();
+			shaderHelper::shapes::drawQuad();
 		}
 	}
 }

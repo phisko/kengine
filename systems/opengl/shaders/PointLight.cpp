@@ -7,8 +7,8 @@
 #include "data/LightComponent.hpp"
 #include "data/ShaderComponent.hpp"
 
-#include "helpers/LightHelper.hpp"
-#include "ShaderHelper.hpp"
+#include "helpers/lightHelper.hpp"
+#include "shaderHelper.hpp"
 
 namespace kengine::Shaders {
 	void PointLight::init(size_t firstTextureID) {
@@ -24,8 +24,8 @@ namespace kengine::Shaders {
 	}
 
 	void PointLight::run(const Parameters & params) {
-		ShaderHelper::Enable __c(GL_CULL_FACE);
-		ShaderHelper::Enable __b(GL_BLEND);
+		shaderHelper::Enable __c(GL_CULL_FACE);
+		shaderHelper::Enable __b(GL_BLEND);
 		glBlendEquation(GL_FUNC_ADD);
 		glBlendFunc(GL_ONE, GL_ONE);
 
@@ -37,15 +37,15 @@ namespace kengine::Shaders {
 		glActiveTexture((GLenum)(GL_TEXTURE0 + _shadowMapTextureID));
 
 		for (auto & [e, light, transform] : _em.getEntities<PointLightComponent, TransformComponent>()) {
-			if (!ShaderHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
-			const auto radius = LightHelper::getRadius(light);
+			const auto radius = lightHelper::getRadius(light);
 			const auto & centre = transform.boundingBox.position;
 
 			if (light.castShadows) {
 				if (e.has<DepthCubeComponent>()) {
-					ShaderHelper::BindFramebuffer b(e.get<DepthCubeComponent>().fbo);
+					shaderHelper::BindFramebuffer b(e.get<DepthCubeComponent>().fbo);
 					glClear(GL_DEPTH_BUFFER_BIT);
 				}
 
@@ -75,7 +75,7 @@ namespace kengine::Shaders {
 
 			glBindTexture(GL_TEXTURE_CUBE_MAP, e.get<DepthCubeComponent>().texture);
 
-			ShaderHelper::shapes::drawSphere();
+			shaderHelper::shapes::drawSphere();
 		}
 
 		glCullFace(GL_BACK);

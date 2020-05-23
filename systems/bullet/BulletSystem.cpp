@@ -24,8 +24,8 @@
 #include "functions/OnCollision.hpp"
 #include "functions/QueryPosition.hpp"
 
-#include "helpers/MatrixHelper.hpp"
-#include "helpers/SkeletonHelper.hpp"
+#include "helpers/matrixHelper.hpp"
+#include "helpers/skeletonHelper.hpp"
 
 #include "termcolor.hpp"
 #include "magic_enum.hpp"
@@ -59,8 +59,8 @@ static btTransform toBullet(const kengine::TransformComponent & parent, const ke
 		// Apply model scale to bone transformation
 		assert(skeleton != nullptr && modelSkeleton != nullptr && model != nullptr);
 
-		const auto worldSpaceBone = kengine::SkeletonHelper::getBoneMatrix(collider.boneName.c_str(), *skeleton, *modelSkeleton);
-		const auto pos = kengine::MatrixHelper::getPos(worldSpaceBone);
+		const auto worldSpaceBone = kengine::skeletonHelper::getBoneMatrix(collider.boneName.c_str(), *skeleton, *modelSkeleton);
+		const auto pos = kengine::matrixHelper::getPos(worldSpaceBone);
 		parentMat = glm::translate(parentMat, toVec(pos * model->boundingBox.size * parent.boundingBox.size));
 		parentMat = glm::translate(parentMat, -toVec(pos));
 		parentMat *= worldSpaceBone;

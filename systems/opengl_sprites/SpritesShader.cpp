@@ -9,9 +9,9 @@
 #include "data/SpriteComponent.hpp"
 
 #include "systems/opengl/shaders/ApplyTransparencySrc.hpp"
-#include "systems/opengl/shaders/ShaderHelper.hpp"
+#include "systems/opengl/shaders/shaderHelper.hpp"
 
-#include "helpers/CameraHelper.hpp"
+#include "helpers/cameraHelper.hpp"
 
 static inline const char * vert = R"(
 #version 330
@@ -109,10 +109,10 @@ namespace kengine {
 			const auto & box =
 				comp == nullptr ?
 				transform.boundingBox : // 3D
-				CameraHelper::convertToScreenPercentage(transform.boundingBox, params.viewport.size, *comp); // 2D
+				cameraHelper::convertToScreenPercentage(transform.boundingBox, params.viewport.size, *comp); // 2D
 
-			auto centre = ShaderHelper::toVec(box.position);
-			const auto size = ShaderHelper::toVec(box.size);
+			auto centre = shaderHelper::toVec(box.position);
+			const auto size = shaderHelper::toVec(box.size);
 
 			glm::mat4 model(1.f);
 
@@ -150,7 +150,7 @@ namespace kengine {
 			uniforms.model = model;
 		}
 
-		ShaderHelper::shapes::drawTexturedQuad();
+		shaderHelper::shapes::drawTexturedQuad();
 	}
 
 	void SpritesShader::run(const Parameters & params) {
@@ -164,7 +164,7 @@ namespace kengine {
 		_view = glm::mat4(1.f);
 		_proj = glm::mat4(1.f);
 		for (const auto &[e, graphics, transform, sprite] : _em.getEntities<GraphicsComponent, TransformComponent, SpriteComponent2D>()) {
-			if (!ShaderHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			_entityID = (float)e.id;
@@ -174,7 +174,7 @@ namespace kengine {
 		_view = params.view;
 		_proj = params.proj;
 		for (const auto &[e, graphics, transform, sprite] : _em.getEntities<GraphicsComponent, TransformComponent, SpriteComponent3D>()) {
-			if (!ShaderHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			_entityID = (float)e.id;

@@ -104,7 +104,7 @@ execute.call(42.f); // Alternatively
 
 ### Meta components
 
-These provide a type-specific implementation of a generic function for a given `Component` type. They are attached to "type entities", i.e. `Entities` used to represent a `Component` type. These entities can be obtained by calling the `getTypeEntity<T>()` function from [TypeHelper](helpers/TypeHelper.md).
+These provide a type-specific implementation of a generic function for a given `Component` type. They are attached to "type entities", i.e. `Entities` used to represent a `Component` type. These entities can be obtained by calling the `getTypeEntity<T>()` function from [typeHelper](helpers/typeHelper.md).
 
 At their core, meta components are function components: they also inherit from [BaseFunction](components/functions/BaseFunction.hpp) and are used the same way.
 
@@ -260,23 +260,23 @@ pip install conan
 
 These are helper functions to factorize typical manipulations of `Components`.
 
-* [CameraHelper](helpers/CameraHelper.md)
-* [ImGuiHelper](helpers/ImGuiHelper.md): provides helpers to display and edit `Entities` in ImGui
-* [MainLoop](helpers/MainLoop.md)
-* [MatrixHelper](helpers/MatrixHelper.md)
-* [PluginHelper](helpers/PluginHelper.md): provides an `initPlugin` function to be called from DLLs
-* [ShaderHelper](systems/opengl/ShaderHelper.md)
-* [SkeletonHelper](helpers/SkeletonHelper.md)
-* [SortHelper](helpers/SortHelper.md): provides functions to sort `Entities`
-* [TypeHelper](helpers/TypeHelper.md): provides a `getTypeEntity<T>` function to get a "singleton" entity representing a given type
+* [cameraHelper](helpers/cameraHelper.md)
+* [imguiHelper](helpers/imguiHelper.md): provides helpers to display and edit `Entities` in ImGui
+* [mainLoop](helpers/mainLoop.md)
+* [matrixHelper](helpers/matrixHelper.md)
+* [pluginHelper](helpers/pluginHelper.md): provides an `initPlugin` function to be called from DLLs
+* [shaderHelper](systems/opengl/shaderHelper.md)
+* [skeletonHelper](helpers/skeletonHelper.md)
+* [sortHelper](helpers/sortHelper.md): provides functions to sort `Entities`
+* [typeHelper](helpers/typeHelper.md): provides a `getTypeEntity<T>` function to get a "singleton" entity representing a given type
 
 ##### Meta component helpers
 
-* [RegisterComponentFunctions](helpers/RegisterComponentFunctions.md): provides implementations for the [Has](components/meta/Has.md), [AttachTo](components/meta/AttachTo.md) and [DetachFrom](components/meta/DetachFrom.md) meta components
-* [RegisterComponentEntityIterators](helpers/RegisterComponentEntityIterators.md): provides implementations for the [ForEachEntity](components/meta/ForEachEntity.md) and [ForEachEntityWithout](components/meta/ForEachEntity.md) meta components
-* [RegisterComponentJSONLoader](helpers/RegisterComponentJSONLoader.md): provides an implementation for the [LoadFromJSON](components/meta/LoadFromJSON.md)
-* [RegisterComponentEditor](helpers/RegisterComponentEditor.md): provides implementations for the [EditImGui](components/meta/ImGuiEditor.md) and [DisplayImGui](components/meta/ImGuiEditor.md) meta components
-* [RegisterComponentMatcher](helpers/RegisterComponentMatcher.md): provides an implementation for the [MatchString](components/meta/MatchString.md) meta component
+* [registerComponentFunctions](helpers/meta/registerComponentFunctions.md): provides implementations for the [Has](components/meta/Has.md), [AttachTo](components/meta/AttachTo.md) and [DetachFrom](components/meta/DetachFrom.md) meta components
+* [registerComponentEntityIterators](helpers/meta/registerComponentEntityIterators.md): provides implementations for the [ForEachEntity](components/meta/ForEachEntity.md) and [ForEachEntityWithout](components/meta/ForEachEntity.md) meta components
+* [registerComponentJSONLoader](helpers/meta/registerComponentJSONLoader.md): provides an implementation for the [LoadFromJSON](components/meta/LoadFromJSON.md)
+* [registerComponentEditor](helpers/meta/registerComponentEditor.md): provides implementations for the [EditImGui](components/meta/ImGuiEditor.md) and [DisplayImGui](components/meta/ImGuiEditor.md) meta components
+* [registerComponentMatcher](helpers/meta/registerComponentMatcher.md): provides an implementation for the [MatchString](components/meta/MatchString.md) meta component
 
 ## Example
 
@@ -298,7 +298,7 @@ Below is a commented main function that creates an entity and attaches some comp
 #include "data/TransformComponent.hpp"
 #include "functions/Execute.hpp"
 
-#include "helpers/MainLoop.hpp"
+#include "helpers/mainLoop.hpp"
 
 // Simple system that outputs the transform and lua components of each entity that has them
 //- Forward declaration

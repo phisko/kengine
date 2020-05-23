@@ -299,7 +299,7 @@ namespace kengine {
 	private:
 		mutable detail::GlobalCompMap _components; // Mutable to lock mutex
 
-	public: // Reserved to PluginHelper::initPlugin
+	public: // Reserved to pluginHelper::initPlugin
 		detail::GlobalCompMap & _getComponentMap() { return _components; }
 	};
 }

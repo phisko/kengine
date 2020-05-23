@@ -1,13 +1,13 @@
 #include "DirLight.hpp"
 
 #include "EntityManager.hpp"
-#include "helpers/LightHelper.hpp"
+#include "helpers/lightHelper.hpp"
 
 #include "data/LightComponent.hpp"
 #include "data/AdjustableComponent.hpp"
 #include "data/ShaderComponent.hpp"
 
-#include "ShaderHelper.hpp"
+#include "shaderHelper.hpp"
 #include "QuadSrc.hpp"
 #include "ShadowMapShader.hpp"
 
@@ -42,7 +42,7 @@ namespace kengine::Shaders {
 	}
 
 	void DirLight::run(const Parameters & params) {
-		ShaderHelper::Enable __b(GL_BLEND);
+		shaderHelper::Enable __b(GL_BLEND);
 		glBlendEquation(GL_FUNC_ADD);
 		glBlendFunc(GL_ONE, GL_ONE);
 
@@ -56,7 +56,7 @@ namespace kengine::Shaders {
 		_screenSize = putils::Point2f(params.viewport.size);
 
 		for (auto &[e, light] : _em.getEntities<DirLightComponent>()) {
-			if (!ShaderHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			const putils::Point3f pos = { params.camPos.x, params.camPos.y, params.camPos.z };
@@ -64,7 +64,7 @@ namespace kengine::Shaders {
 			if (light.castShadows) {
 				if (e.has<CSMComponent>()) {
 					const auto & depthMap = e.get<CSMComponent>();
-					ShaderHelper::BindFramebuffer b(depthMap.fbo);
+					shaderHelper::BindFramebuffer b(depthMap.fbo);
 					for (const auto & texture : depthMap.textures) {
 						glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture, 0);
 						glClear(GL_DEPTH_BUFFER_BIT);
@@ -84,10 +84,10 @@ namespace kengine::Shaders {
 			for (size_t i = 0; i < light.cascadeEnds.size(); ++i) {
 				glActiveTexture((GLenum)(GL_TEXTURE0 + _shadowMapTextureID + i));
 				glBindTexture(GL_TEXTURE_2D, depthMap.textures[i]);
-				_lightSpaceMatrix[i] = LightHelper::getCSMLightSpaceMatrix(light, params, i);
+				_lightSpaceMatrix[i] = lightHelper::getCSMLightSpaceMatrix(light, params, i);
 			}
 
-			ShaderHelper::shapes::drawQuad();
+			shaderHelper::shapes::drawQuad();
 		}
 	}
 

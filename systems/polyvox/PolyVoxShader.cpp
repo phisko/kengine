@@ -10,7 +10,7 @@
 
 #include "systems/opengl/shaders/ApplyTransparencySrc.hpp"
 
-#include "systems/opengl/shaders/ShaderHelper.hpp"
+#include "systems/opengl/shaders/shaderHelper.hpp"
 
 static inline const char * vert = R"(
 #version 330
@@ -92,7 +92,7 @@ namespace kengine {
 		for (const auto &[e, poly, graphics, transform] : _em.getEntities<PolyVoxObjectComponent, GraphicsComponent, TransformComponent>()) {
 			if (graphics.model == Entity::INVALID_ID)
 				continue;
-			if (!ShaderHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			const auto & modelInfoEntity = _em.getEntity(graphics.model);
@@ -102,11 +102,11 @@ namespace kengine {
 			const auto & modelInfo = modelInfoEntity.get<ModelComponent>();
 			const auto & openGL = modelInfoEntity.get<OpenGLModelComponent>();
 
-			_model = ShaderHelper::getModelMatrix(modelInfo, transform);
+			_model = shaderHelper::getModelMatrix(modelInfo, transform);
 			_entityID = (float)e.id;
 			_color = graphics.color;
 
-			ShaderHelper::drawModel(openGL);
+			shaderHelper::drawModel(openGL);
 		}
 	}
 }

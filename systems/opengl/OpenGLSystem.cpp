@@ -36,9 +36,9 @@
 #include "functions/GetEntityInPixel.hpp"
 #include "functions/InitGBuffer.hpp"
 
-#include "shaders/ShaderHelper.hpp"
+#include "shaders/shaderHelper.hpp"
 
-#include "helpers/CameraHelper.hpp"
+#include "helpers/cameraHelper.hpp"
 #include "rotate.hpp"
 
 #include "OpenGLSystem.hpp"
@@ -627,7 +627,7 @@ namespace kengine {
 		g_params.viewport.size = viewport.resolution;
 		putils::gl::setViewPort(g_params.viewport);
 
-		g_params.camPos = ShaderHelper::toVec(cam.frustum.position);
+		g_params.camPos = shaderHelper::toVec(cam.frustum.position);
 		g_params.camFOV = cam.frustum.size.y;
 
 		g_params.view = [&] {
@@ -685,7 +685,7 @@ namespace kengine {
 	template<typename Shaders>
 	static void runShaders(Shaders && shaders) {
 		for (auto & [e, comp] : shaders) {
-			if (!ShaderHelper::entityAppearsInViewport(e, g_params.viewportID))
+			if (!shaderHelper::entityAppearsInViewport(e, g_params.viewportID))
 				continue;
 			if (!comp.enabled)
 				continue;
@@ -722,7 +722,7 @@ namespace kengine {
 		gbuffer.bindForWriting();
 		{
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			ShaderHelper::Enable depth(GL_DEPTH_TEST);
+			shaderHelper::Enable depth(GL_DEPTH_TEST);
 			runShaders(em.getEntities<GBufferShaderComponent>());
 		}
 		gbuffer.bindForReading();
@@ -743,7 +743,7 @@ namespace kengine {
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, fb.fbo);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
-		const auto box = CameraHelper::convertToScreenPercentage(viewport.boundingBox, g_window.size, viewport);
+		const auto box = cameraHelper::convertToScreenPercentage(viewport.boundingBox, g_window.size, viewport);
 
 		const auto destSizeX = (GLint)(box.size.x * g_window.size.x);
 		const auto destSizeY = (GLint)(box.size.y * g_window.size.y);
@@ -786,7 +786,7 @@ namespace kengine {
 		if (window != Entity::INVALID_ID && window != g_window.id)
 			return Entity::INVALID_ID;
 
-		const auto viewportInfo = CameraHelper::getViewportForPixel(*g_em, g_window.id, pixel);
+		const auto viewportInfo = cameraHelper::getViewportForPixel(*g_em, g_window.id, pixel);
 		if (viewportInfo.camera == Entity::INVALID_ID)
 			return Entity::INVALID_ID;
 

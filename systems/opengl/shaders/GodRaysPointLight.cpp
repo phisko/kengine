@@ -5,8 +5,8 @@
 #include "data/TransformComponent.hpp"
 #include "data/GodRaysComponent.hpp"
 
-#include "helpers/LightHelper.hpp"
-#include "ShaderHelper.hpp"
+#include "helpers/lightHelper.hpp"
+#include "shaderHelper.hpp"
 
 #include "ShadowCube.hpp"
 #include "QuadSrc.hpp"
@@ -33,7 +33,7 @@ namespace kengine::Shaders {
 	void GodRaysPointLight::run(const Parameters & params) {
 		use();
 
-		ShaderHelper::Enable _(GL_BLEND);
+		shaderHelper::Enable _(GL_BLEND);
 		glBlendEquation(GL_FUNC_ADD);
 		glBlendFunc(GL_ONE, GL_ONE);
 
@@ -46,7 +46,7 @@ namespace kengine::Shaders {
 		_screenSize = putils::Point2f(params.viewport.size);
 
 		for (const auto &[e, light, depthMap, transform, comp] : _em.getEntities<PointLightComponent, DepthCubeComponent, TransformComponent, GodRaysComponent>()) {
-			if (!ShaderHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			_scattering = comp.scattering;
@@ -63,8 +63,8 @@ namespace kengine::Shaders {
 		assert(src::ShadowCube::Frag::Uniforms::_position.location == src::PointLight::GetDirection::Uniforms::_position.location);
 
 		glBindTexture(GL_TEXTURE_CUBE_MAP, depthMap.texture);
-		_farPlane = LightHelper::getRadius(light);
+		_farPlane = lightHelper::getRadius(light);
 
-		ShaderHelper::shapes::drawQuad();
+		shaderHelper::shapes::drawQuad();
 	}
 }

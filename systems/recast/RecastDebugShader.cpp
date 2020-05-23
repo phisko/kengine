@@ -11,7 +11,7 @@
 #include "data/ImGuiComponent.hpp"
 
 #include "imgui.h"
-#include "helpers/AssertHelper.hpp"
+#include "helpers/assertHelper.hpp"
 #include "systems/opengl/shaders/ApplyTransparencySrc.hpp"
 
 static const char * vert = R"(

@@ -5,8 +5,8 @@
 #include "data/TransformComponent.hpp"
 #include "data/GodRaysComponent.hpp"
 
-#include "helpers/LightHelper.hpp"
-#include "ShaderHelper.hpp"
+#include "helpers/lightHelper.hpp"
+#include "shaderHelper.hpp"
 
 #include "ShadowMap.hpp"
 #include "QuadSrc.hpp"
@@ -33,7 +33,7 @@ namespace kengine::Shaders {
 	void GodRaysSpotLight::run(const Parameters & params) {
 		use();
 
-		ShaderHelper::Enable _(GL_BLEND);
+		shaderHelper::Enable _(GL_BLEND);
 		glBlendEquation(GL_FUNC_ADD);
 		glBlendFunc(GL_ONE, GL_ONE);
 
@@ -45,7 +45,7 @@ namespace kengine::Shaders {
 		_screenSize = putils::Point2f(params.viewport.size);
 
 		for (const auto &[e, light, depthMap, transform, comp] : _em.getEntities<SpotLightComponent, DepthMapComponent, TransformComponent, GodRaysComponent>()) {
-			if (!ShaderHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			_scattering = comp.scattering;
@@ -61,8 +61,8 @@ namespace kengine::Shaders {
 		_position = pos;
 
 		glBindTexture(GL_TEXTURE_2D, depthMap.texture);
-		_lightSpaceMatrix = LightHelper::getLightSpaceMatrix(light, glm::vec3(pos.x, pos.y, pos.z), params);
+		_lightSpaceMatrix = lightHelper::getLightSpaceMatrix(light, glm::vec3(pos.x, pos.y, pos.z), params);
 
-		ShaderHelper::shapes::drawQuad();
+		shaderHelper::shapes::drawQuad();
 	}
 }

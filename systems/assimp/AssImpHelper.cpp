@@ -4,7 +4,7 @@
 #include "data/ModelComponent.hpp"
 #include "data/TextureModelComponent.hpp"
 #include "data/OpenGLModelComponent.hpp"
-#include "systems/opengl/shaders/ShaderHelper.hpp"
+#include "systems/opengl/shaders/shaderHelper.hpp"
 
 #include "opengl/Program.hpp"
 
@@ -26,7 +26,7 @@ namespace kengine {
 			const auto & modelInfo = modelInfoEntity.get<ModelComponent>();
 			const auto & textures = modelInfoEntity.get<AssImpTexturesModelComponent>();
 
-			uniforms.model = ShaderHelper::getModelMatrix(modelInfo, transform);
+			uniforms.model = shaderHelper::getModelMatrix(modelInfo, transform);
 
 			const bool noSkeleton = skeleton.meshes.empty();
 			if (noSkeleton)

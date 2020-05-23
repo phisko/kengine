@@ -5,8 +5,8 @@
 #include "data/ShaderComponent.hpp"
 #include "data/GodRaysComponent.hpp"
 
-#include "helpers/LightHelper.hpp"
-#include "ShaderHelper.hpp"
+#include "helpers/lightHelper.hpp"
+#include "shaderHelper.hpp"
 
 #include "QuadSrc.hpp"
 #include "ShadowMap.hpp"
@@ -34,7 +34,7 @@ namespace kengine::Shaders {
 	void GodRaysDirLight::run(const Parameters & params) {
 		use();
 
-		ShaderHelper::Enable _(GL_BLEND);
+		shaderHelper::Enable _(GL_BLEND);
 		glBlendEquation(GL_FUNC_ADD);
 		glBlendFunc(GL_ONE, GL_ONE);
 
@@ -45,7 +45,7 @@ namespace kengine::Shaders {
 		_screenSize = putils::Point2f(params.viewport.size);
 
 		for (const auto &[e, light, depthMap, comp] : _em.getEntities<DirLightComponent, CSMComponent, GodRaysComponent>()) {
-			if (!ShaderHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			_scattering = comp.scattering;
@@ -64,11 +64,11 @@ namespace kengine::Shaders {
 		for (size_t i = 0; i < light.cascadeEnds.size(); ++i) {
 			glActiveTexture((GLenum)(GL_TEXTURE0 + _shadowMapTextureID + i));
 			glBindTexture(GL_TEXTURE_2D, depthMap.textures[i]);
-			_lightSpaceMatrix[i] = LightHelper::getCSMLightSpaceMatrix(light, params, i);
-			_cascadeEnd[i] = LightHelper::getCSMCascadeEnd(light, i);
+			_lightSpaceMatrix[i] = lightHelper::getCSMLightSpaceMatrix(light, params, i);
+			_cascadeEnd[i] = lightHelper::getCSMCascadeEnd(light, i);
 		}
 		_cascadeCount = (int)light.cascadeEnds.size();
 
-		ShaderHelper::shapes::drawQuad();
+		shaderHelper::shapes::drawQuad();
 	}
 }

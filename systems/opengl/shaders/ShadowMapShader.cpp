@@ -6,8 +6,8 @@
 #include "data/ShaderComponent.hpp"
 #include "Entity.hpp"
 
-#include "ShaderHelper.hpp"
-#include "helpers/LightHelper.hpp"
+#include "shaderHelper.hpp"
+#include "helpers/lightHelper.hpp"
 
 namespace kengine::Shaders {
 	template<typename T, typename Func>
@@ -15,8 +15,8 @@ namespace kengine::Shaders {
 		glViewport(0, 0, depthMap.size, depthMap.size);
 		glCullFace(GL_FRONT);
 
-		ShaderHelper::BindFramebuffer __f(depthMap.fbo);
-		ShaderHelper::Enable __e(GL_DEPTH_TEST);
+		shaderHelper::BindFramebuffer __f(depthMap.fbo);
+		shaderHelper::Enable __e(GL_DEPTH_TEST);
 
 		use();
 
@@ -42,7 +42,7 @@ namespace kengine::Shaders {
 		for (auto & t : depthMap.textures)
 			t.generate();
 
-		ShaderHelper::BindFramebuffer __f(depthMap.fbo);
+		shaderHelper::BindFramebuffer __f(depthMap.fbo);
 		for (const auto & texture : depthMap.textures)
 			initTexture(texture, depthMap.size);
 
@@ -66,11 +66,11 @@ namespace kengine::Shaders {
 
 		runImpl(depthMap, [&] {
 			for (size_t i = 0; i < light.cascadeEnds.size(); ++i) {
-				const float cascadeStart = (i == 0 ? params.nearPlane : LightHelper::getCSMCascadeEnd(light, i - 1));
-				const float cascadeEnd = LightHelper::getCSMCascadeEnd(light, i);
+				const float cascadeStart = (i == 0 ? params.nearPlane : lightHelper::getCSMCascadeEnd(light, i - 1));
+				const float cascadeEnd = lightHelper::getCSMCascadeEnd(light, i);
 				if (cascadeStart >= cascadeEnd)
 					continue;
-				drawToTexture(depthMap.textures[i], LightHelper::getCSMLightSpaceMatrix(light, params, i), params);
+				drawToTexture(depthMap.textures[i], lightHelper::getCSMLightSpaceMatrix(light, params, i), params);
 			}
 		}, params);
 	}
@@ -79,7 +79,7 @@ namespace kengine::Shaders {
 		depthMap.fbo.generate();
 		depthMap.texture.generate();
 
-		ShaderHelper::BindFramebuffer __f(depthMap.fbo);
+		shaderHelper::BindFramebuffer __f(depthMap.fbo);
 		initTexture(depthMap.texture, depthMap.size);
 
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap.texture, 0);
@@ -100,7 +100,7 @@ namespace kengine::Shaders {
 		}
 
 		runImpl(depthMap, [&] {
-			drawToTexture(depthMap.texture, LightHelper::getLightSpaceMatrix(light, ShaderHelper::toVec(pos), params), params);
+			drawToTexture(depthMap.texture, lightHelper::getLightSpaceMatrix(light, shaderHelper::toVec(pos), params), params);
 		}, params);
 	}
 
@@ -113,7 +113,7 @@ namespace kengine::Shaders {
 			depthCube.size = light.shadowMapSize;
 
 			depthCube.fbo.generate();
-			ShaderHelper::BindFramebuffer __f(depthCube.fbo);
+			shaderHelper::BindFramebuffer __f(depthCube.fbo);
 
 			depthCube.texture.generate();
 
@@ -134,8 +134,8 @@ namespace kengine::Shaders {
 		glViewport(0, 0, depthCube.size, depthCube.size);
 		glCullFace(GL_FRONT);
 
-		ShaderHelper::BindFramebuffer __f(depthCube.fbo);
-		ShaderHelper::Enable __e(GL_DEPTH_TEST);
+		shaderHelper::BindFramebuffer __f(depthCube.fbo);
+		shaderHelper::Enable __e(GL_DEPTH_TEST);
 
 		use();
 

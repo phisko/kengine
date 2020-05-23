@@ -5,7 +5,7 @@
 #include "data/TransformComponent.hpp"
 #include "data/AdjustableComponent.hpp"
 
-#include "ShaderHelper.hpp"
+#include "shaderHelper.hpp"
 
 #include "ColorSrc.hpp"
 
@@ -36,22 +36,22 @@ namespace kengine::Shaders {
 	}
 
 	void LightSphere::run(const Parameters & params) {
-		ShaderHelper::Enable __e(GL_DEPTH_TEST);
-		ShaderHelper::Enable __c(GL_CULL_FACE);
+		shaderHelper::Enable __e(GL_DEPTH_TEST);
+		shaderHelper::Enable __c(GL_CULL_FACE);
 
 		use();
 		_proj = params.proj;
 		_view = params.view;
 
 		for (const auto & [e, light] : _em.getEntities<DirLightComponent>()) {
-			if (!ShaderHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			drawLight(light, params.camPos - toVec(light.direction) * SUN_DIST, SUN_SIZE);
 		}
 
 		for (const auto & [e, light, transform] : _em.getEntities<PointLightComponent, TransformComponent>()) {
-			if (!ShaderHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			const auto & pos = transform.boundingBox.position;
@@ -59,7 +59,7 @@ namespace kengine::Shaders {
 		}
 
 		for (const auto & [e, light, transform] : _em.getEntities<SpotLightComponent, TransformComponent>()) {
-			if (!ShaderHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			const auto & pos = transform.boundingBox.position;
@@ -76,6 +76,6 @@ namespace kengine::Shaders {
 		_model = model;
 		_color = light.color;
 
-		ShaderHelper::shapes::drawSphere();
+		shaderHelper::shapes::drawSphere();
 	}
 }

@@ -7,7 +7,7 @@
 
 #include "systems/opengl/shaders/ApplyTransparencySrc.hpp"
 
-#include "systems/opengl/shaders/ShaderHelper.hpp"
+#include "systems/opengl/shaders/shaderHelper.hpp"
 
 #include "AssImpHelper.hpp"
 
@@ -37,7 +37,7 @@ namespace kengine {
 		for (const auto &[e, textured, graphics, transform, skeleton] : _em.getEntities<AssImpObjectComponent, GraphicsComponent, TransformComponent, SkeletonComponent>()) {
 			if (graphics.model == Entity::INVALID_ID)
 				continue;
-			if (!ShaderHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			_entityID = (float)e.id;

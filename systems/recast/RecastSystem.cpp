@@ -12,7 +12,7 @@
 #include "data/ModelDataComponent.hpp"
 #include "functions/Execute.hpp"
 
-#include "helpers/AssertHelper.hpp"
+#include "helpers/assertHelper.hpp"
 
 #include "angle.hpp"
 #include "with.hpp"

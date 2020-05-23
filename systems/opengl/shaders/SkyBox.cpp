@@ -3,7 +3,7 @@
 
 #include "data/SkyBoxComponent.hpp"
 
-#include "ShaderHelper.hpp"
+#include "shaderHelper.hpp"
 #include "opengl/RAII.hpp"
 #include "stb_image.h"
 
@@ -151,11 +151,11 @@ namespace kengine::Shaders {
 		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
 		assert(fbo != 0);
 
-		ShaderHelper::Enable _(GL_BLEND);
+		shaderHelper::Enable _(GL_BLEND);
 		glBlendEquation(GL_FUNC_ADD);
 		glBlendFunc(GL_ONE, GL_ONE);
 
-		ShaderHelper::Enable depth(GL_DEPTH_TEST);
+		shaderHelper::Enable depth(GL_DEPTH_TEST);
 		glDepthFunc(GL_LEQUAL);
 
 		_view = glm::mat4(glm::mat3(params.view));
@@ -165,7 +165,7 @@ namespace kengine::Shaders {
 		glActiveTexture((GLenum)(GL_TEXTURE0 + _textureID));
 
 		for (auto & [e, comp] : _em.getEntities<SkyBoxComponent>()) {
-			if (!ShaderHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			_color = comp.color;

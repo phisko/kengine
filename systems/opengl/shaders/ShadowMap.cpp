@@ -8,8 +8,8 @@
 #include "data/DefaultShadowComponent.hpp"
 #include "data/NoShadowComponent.hpp"
 
-#include "ShaderHelper.hpp"
-#include "helpers/LightHelper.hpp"
+#include "shaderHelper.hpp"
+#include "helpers/lightHelper.hpp"
 
 namespace kengine {
 	float SHADOW_MAP_NEAR_PLANE = .1f;
@@ -44,7 +44,7 @@ namespace kengine::Shaders {
 		for (const auto & [e, graphics, transform, shadow, noNoShadow] : _em.getEntities<GraphicsComponent, TransformComponent, DefaultShadowComponent, no<NoShadowComponent>>()) {
 			if (graphics.model == Entity::INVALID_ID)
 				continue;
-			if (!ShaderHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			const auto & modelInfoEntity = _em.getEntity(graphics.model);
@@ -54,8 +54,8 @@ namespace kengine::Shaders {
 			const auto & modelInfo = modelInfoEntity.get<ModelComponent>();
 			const auto & openGL = modelInfoEntity.get<OpenGLModelComponent>();
 
-			_model = ShaderHelper::getModelMatrix(modelInfo, transform);
-			ShaderHelper::drawModel(openGL);
+			_model = shaderHelper::getModelMatrix(modelInfo, transform);
+			shaderHelper::drawModel(openGL);
 		}
 	}
 }

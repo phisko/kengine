@@ -20,4 +20,4 @@ A helper [registerComponentEditor](../../helpers/RegisterComponentEditor.md) fun
 
 Note that the implementation provided in `registerComponentEditor` is only a sample, and users may freely replace it with any other implementation they desire.
 
-The [ImGuiHelper::displayEntity](../../helpers/ImGuiHelper.md) function calls this `meta Component` to display `Entities`.
+The [imguiHelper::displayEntity](../../helpers/imguiHelper.md) function calls this `meta Component` to display `Entities`.

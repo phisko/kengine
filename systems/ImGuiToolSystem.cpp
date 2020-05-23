@@ -1,7 +1,7 @@
 #include "ImGuiToolSystem.hpp"
 #include "EntityManager.hpp"
 
-#include "helpers/SortHelper.hpp"
+#include "helpers/sortHelper.hpp"
 
 #include "functions/OnTerminate.hpp"
 #include "data/ImGuiComponent.hpp"
@@ -54,7 +54,7 @@ namespace kengine {
 							for (auto & [e, tool] : em.getEntities<ImGuiToolComponent>())
 								tool.enabled = false;
 
-						const auto sorted = SortHelper::getNameSortedEntities<KENGINE_IMGUI_MAX_TOOLS, ImGuiToolComponent>(em);
+						const auto sorted = sortHelper::getNameSortedEntities<KENGINE_IMGUI_MAX_TOOLS, ImGuiToolComponent>(em);
 						for (auto & [e, name, tool] : sorted)
 							if (ImGui::MenuItem(name->name)) {
 								tool->enabled = !tool->enabled;
@@ -83,7 +83,7 @@ namespace kengine {
 	static void saveTools(EntityManager & em) {
 		std::ofstream f(KENGINE_IMGUI_TOOLS_SAVE_FILE);
 		assert(f);
-		const auto sorted = SortHelper::getNameSortedEntities<KENGINE_IMGUI_MAX_TOOLS, ImGuiToolComponent>(em);
+		const auto sorted = sortHelper::getNameSortedEntities<KENGINE_IMGUI_MAX_TOOLS, ImGuiToolComponent>(em);
 		for (const auto & [e, name, tool] : sorted)
 			f << name->name << ';' << std::boolalpha << tool->enabled << std::noboolalpha << '\n';
 		f.flush();

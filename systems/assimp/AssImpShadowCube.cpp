@@ -5,8 +5,8 @@
 #include "data/SkeletonComponent.hpp"
 #include "data/NoShadowComponent.hpp"
 
-#include "systems/opengl/shaders/ShaderHelper.hpp"
-#include "helpers/LightHelper.hpp"
+#include "systems/opengl/shaders/shaderHelper.hpp"
+#include "helpers/lightHelper.hpp"
 
 #include "systems/opengl/shaders/DepthCubeSrc.hpp"
 #include "AssImpShaderSrc.hpp"
@@ -27,7 +27,7 @@ namespace kengine {
 
 	void AssImpShadowCube::drawObjects(const Parameters & params) {
 		for (const auto &[e, textured, graphics, transform, skeleton, noNoShadow] : _em.getEntities<AssImpObjectComponent, GraphicsComponent, TransformComponent, SkeletonComponent, no<NoShadowComponent>>()) {
-			if (!ShaderHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 			AssImpHelper::Uniforms uniforms;
 			uniforms.model = _model;

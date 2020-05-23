@@ -6,8 +6,8 @@
 #include "data/SelectedComponent.hpp"
 #include "data/NameComponent.hpp"
 
-#include "helpers/TypeHelper.hpp"
-#include "helpers/ImGuiHelper.hpp"
+#include "helpers/typeHelper.hpp"
+#include "helpers/imGuiHelper.hpp"
 #include "imgui.h"
 
 namespace kengine {
@@ -41,7 +41,7 @@ namespace kengine {
 						ImGui::Separator();
 
 						ImGui::BeginChild("##child");
-						ImGuiHelper::editEntity(em, selected);
+						imguiHelper::editEntity(em, selected);
 						ImGui::EndChild();
 					}
 					ImGui::End();

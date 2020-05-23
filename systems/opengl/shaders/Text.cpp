@@ -9,9 +9,9 @@
 
 #include "ApplyTransparencySrc.hpp"
 
-#include "ShaderHelper.hpp"
+#include "shaderHelper.hpp"
 
-#include "helpers/CameraHelper.hpp"
+#include "helpers/cameraHelper.hpp"
 
 #include "termcolor.hpp"
 #include "magic_enum.hpp"
@@ -230,9 +230,9 @@ namespace kengine::Shaders {
 			const auto & box =
 				comp == nullptr ?
 				transform.boundingBox : // 3D
-				CameraHelper::convertToScreenPercentage(transform.boundingBox, params.viewport.size, *comp); // 2D
+				cameraHelper::convertToScreenPercentage(transform.boundingBox, params.viewport.size, *comp); // 2D
 
-			auto centre = ShaderHelper::toVec(box.position);
+			auto centre = shaderHelper::toVec(box.position);
 
 			glm::mat4 model(1.f);
 
@@ -334,7 +334,7 @@ namespace kengine::Shaders {
 		_view = glm::mat4(1.f);
 		_proj = glm::mat4(1.f);
 		for (const auto &[e, text, transform] : _em.getEntities<TextComponent2D, TransformComponent>()) {
-			if (!ShaderHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			_entityID = (float)e.id;
@@ -344,7 +344,7 @@ namespace kengine::Shaders {
 		_view = params.view;
 		_proj = params.proj;
 		for (const auto &[e, text, transform] : _em.getEntities<TextComponent3D, TransformComponent>()) {
-			if (!ShaderHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			_entityID = (float)e.id;

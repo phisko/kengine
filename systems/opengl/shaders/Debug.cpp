@@ -4,7 +4,7 @@
 #include "data/DebugGraphicsComponent.hpp"
 #include "data/TransformComponent.hpp"
 
-#include "ShaderHelper.hpp"
+#include "shaderHelper.hpp"
 #include "ApplyTransparencySrc.hpp"
 #include "visit.hpp"
 #include "static_assert.hpp"
@@ -83,14 +83,14 @@ namespace kengine::Shaders {
 		const auto commonMatrixTransform = [](glm::mat4 & model, const kengine::TransformComponent & transform, DebugGraphicsComponent::ReferenceSpace referenceSpace) {
 			if (referenceSpace == DebugGraphicsComponent::ReferenceSpace::World)
 				return;
-			model = glm::translate(model, ShaderHelper::toVec(transform.boundingBox.position));
+			model = glm::translate(model, shaderHelper::toVec(transform.boundingBox.position));
 			model = glm::rotate(model, transform.yaw, { 0.f, 1.f, 0.f });
 			model = glm::rotate(model, transform.pitch, { 1.f, 0.f, 0.f });
 			model = glm::rotate(model, transform.roll, { 0.f, 0.f, 1.f });
 		};
 
 		for (const auto &[e, debug, transform] : _em.getEntities<DebugGraphicsComponent, TransformComponent>()) {
-			if (!ShaderHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			for (const auto & element : debug.elements) {
@@ -102,21 +102,21 @@ namespace kengine::Shaders {
 					[&](const DebugGraphicsComponent::Line & line) {
 						commonMatrixTransform(model, transform, element.referenceSpace);
 						_model = model;
-						ShaderHelper::shapes::drawLine(ShaderHelper::toVec(element.pos), ShaderHelper::toVec(line.end));
+						shaderHelper::shapes::drawLine(shaderHelper::toVec(element.pos), shaderHelper::toVec(line.end));
 					},
 					[&](const DebugGraphicsComponent::Sphere & sphere) {
-						model = glm::translate(model, ShaderHelper::toVec(element.pos));
+						model = glm::translate(model, shaderHelper::toVec(element.pos));
 						commonMatrixTransform(model, transform, element.referenceSpace);
-						model = glm::scale(model, ShaderHelper::toVec(transform.boundingBox.size * sphere.radius));
+						model = glm::scale(model, shaderHelper::toVec(transform.boundingBox.size * sphere.radius));
 						_model = model;
-						ShaderHelper::shapes::drawSphere();
+						shaderHelper::shapes::drawSphere();
 					},
 					[&](const DebugGraphicsComponent::Box & box) {
-						model = glm::translate(model, ShaderHelper::toVec(element.pos));
+						model = glm::translate(model, shaderHelper::toVec(element.pos));
 						commonMatrixTransform(model, transform, element.referenceSpace);
-						model = glm::scale(model, ShaderHelper::toVec(transform.boundingBox.size * box.size));
+						model = glm::scale(model, shaderHelper::toVec(transform.boundingBox.size * box.size));
 						_model = model;
-						ShaderHelper::shapes::drawCube();
+						shaderHelper::shapes::drawCube();
 					},
 					[&](const DebugGraphicsComponent::Text & text) {
 						// TODO

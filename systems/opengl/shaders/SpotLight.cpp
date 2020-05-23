@@ -6,8 +6,8 @@
 #include "data/LightComponent.hpp"
 #include "data/ShaderComponent.hpp"
 
-#include "helpers/LightHelper.hpp"
-#include "ShaderHelper.hpp"
+#include "helpers/lightHelper.hpp"
+#include "shaderHelper.hpp"
 
 #include "ShadowMapShader.hpp"
 
@@ -24,8 +24,8 @@ namespace kengine::Shaders {
 	}
 
 	void SpotLight::run(const Parameters & params) {
-		ShaderHelper::Enable __c(GL_CULL_FACE);
-		ShaderHelper::Enable __b(GL_BLEND);
+		shaderHelper::Enable __c(GL_CULL_FACE);
+		shaderHelper::Enable __b(GL_BLEND);
 		glBlendEquation(GL_FUNC_ADD);
 		glBlendFunc(GL_ONE, GL_ONE);
 
@@ -37,7 +37,7 @@ namespace kengine::Shaders {
 		glActiveTexture((GLenum)(GL_TEXTURE0 + _shadowMapTextureID));
 
 		for (auto &[e, light, transform] : _em.getEntities<SpotLightComponent, TransformComponent>()) {
-			if (!ShaderHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			const auto & centre = transform.boundingBox.position;
@@ -45,7 +45,7 @@ namespace kengine::Shaders {
 
 			if (light.castShadows) {
 				if (e.has<DepthMapComponent>()) {
-					ShaderHelper::BindFramebuffer b(e.get<DepthMapComponent>().fbo);
+					shaderHelper::BindFramebuffer b(e.get<DepthMapComponent>().fbo);
 					glClear(GL_DEPTH_BUFFER_BIT);
 				}
 
@@ -58,7 +58,7 @@ namespace kengine::Shaders {
 
 			glm::mat4 model(1.f);
 			model = glm::translate(model, { centre.x, centre.y, centre.z });
-			const auto radius = LightHelper::getRadius(light);
+			const auto radius = lightHelper::getRadius(light);
 			model = glm::scale(model, { radius, radius, radius });
 			_proj = params.proj;
 			_view = params.view;
@@ -71,9 +71,9 @@ namespace kengine::Shaders {
 				glCullFace(GL_FRONT);
 
 			glBindTexture(GL_TEXTURE_2D, e.get<DepthMapComponent>().texture);
-			_lightSpaceMatrix = LightHelper::getLightSpaceMatrix(light, { centre.x, centre.y, centre.z }, params);
+			_lightSpaceMatrix = lightHelper::getLightSpaceMatrix(light, { centre.x, centre.y, centre.z }, params);
 
-			ShaderHelper::shapes::drawSphere();
+			shaderHelper::shapes::drawSphere();
 		}
 
 		glCullFace(GL_BACK);
