@@ -1,6 +1,9 @@
 #include <GL/glew.h>
 #include <GL/GL.h>
 
+#include <filesystem>
+#include <fstream>
+
 #include "EntityManager.hpp"
 
 #include "RecastSystem.hpp"
@@ -50,17 +53,17 @@ namespace kengine {
 	}
 
 	// declarations
-	static void createRecastMesh(RecastComponent::Mesh & recast, const NavMeshComponent & navMesh, const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData);
+	static void createRecastMesh(const char * file, RecastComponent::Mesh & recast, const NavMeshComponent & navMesh, const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData);
 	//
 	static void buildNavMeshes() {
 		static const auto buildRecastComponent = [](auto && entities) {
-			for (auto & [e, modelData, navMesh, _] : entities) {
+			for (auto & [e, model, modelData, navMesh, _] : entities) {
 				g_em->runTask([&] {
 					kengine_assert(*g_em, navMesh.vertsPerPoly <= DT_VERTS_PER_POLYGON);
 					auto & comp = e.attach<RecastComponent>();
 					for (const auto & mesh : modelData.meshes) {
 						comp.meshes.emplace_back();
-						createRecastMesh(comp.meshes.back(), navMesh, modelData, mesh);
+						createRecastMesh(model.file, comp.meshes.back(), navMesh, modelData, mesh);
 					}
 					if constexpr (std::is_same<RebuildNavMeshComponent, putils_typeof(_)>())
 						e.detach<RebuildNavMeshComponent>();
@@ -69,8 +72,8 @@ namespace kengine {
 			g_em->completeTasks();
 		};
 
-		buildRecastComponent(g_em->getEntities<ModelDataComponent, NavMeshComponent, no<RecastComponent>>());
-		buildRecastComponent(g_em->getEntities<ModelDataComponent, NavMeshComponent, RebuildNavMeshComponent>());
+		buildRecastComponent(g_em->getEntities<ModelComponent, ModelDataComponent, NavMeshComponent, no<RecastComponent>>());
+		buildRecastComponent(g_em->getEntities<ModelComponent, ModelDataComponent, NavMeshComponent, RebuildNavMeshComponent>());
 	}
 
 	// declarations
@@ -80,32 +83,97 @@ namespace kengine {
 	using PolyMeshPtr = UniquePtr<rcPolyMesh, rcFreePolyMesh>;
 	using PolyMeshDetailPtr = UniquePtr<rcPolyMeshDetail, rcFreePolyMeshDetail>;
 
-	std::unique_ptr<float[]> getVertices(const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData);
+	struct NavMeshData {
+		unsigned char * data = nullptr;
+		int size = 0;
+	};
+
+	static NavMeshData loadBinaryFile(const char * binaryFile, const NavMeshComponent & navMesh);
+	static void saveBinaryFile(const char * binaryFile, const NavMeshData & data, const NavMeshComponent & navMesh);
+	static NavMeshData createNavMeshData(const NavMeshComponent & navMesh, const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData);
+	static NavMeshPtr createNavMesh(const NavMeshData & data);
+	static NavMeshQueryPtr createNavMeshQuery(const NavMeshComponent & params, const dtNavMesh & navMesh);
+	//
+	static void createRecastMesh(const char * file, RecastComponent::Mesh & recast, const NavMeshComponent & navMesh, const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData) {
+		NavMeshData data;
+
+		const putils::string<4096> binaryFile("%s.nav", file);
+		bool mustSave = false;
+		data = loadBinaryFile(binaryFile, navMesh);
+		if (data.data == nullptr) {
+			data = createNavMeshData(navMesh, modelData, meshData);
+			if (data.data == nullptr)
+				return;
+			mustSave = true;
+		}
+
+		recast.navMesh = createNavMesh(data);
+		if (recast.navMesh == nullptr) {
+			dtFree(data.data);
+			return;
+		}
+
+		recast.navMeshQuery = createNavMeshQuery(navMesh, *recast.navMesh);
+		if (recast.navMeshQuery == nullptr) {
+			dtFree(data.data);
+			return;
+		}
+
+		if (mustSave)
+			saveBinaryFile(binaryFile, data, navMesh);
+	}
+
+	static NavMeshData loadBinaryFile(const char * binaryFile, const NavMeshComponent & navMesh) {
+		NavMeshData data;
+
+		std::ifstream f(binaryFile, std::ifstream::binary);
+		if (!f)
+			return data;
+
+		NavMeshComponent header;
+		f.read((char *)&header, sizeof(header));
+		if (std::memcmp(&header, &navMesh, sizeof(header)))
+			return data; // Different parameters
+
+		f.read((char *)&data.size, sizeof(data.size));
+		data.data = (unsigned char *)dtAlloc(data.size, dtAllocHint::DT_ALLOC_PERM);
+		f.read((char *)data.data, data.size);
+
+		return data;
+	}
+
+	static void saveBinaryFile(const char * binaryFile, const NavMeshData & data, const NavMeshComponent & navMesh) {
+		std::ofstream f(binaryFile, std::ofstream::trunc | std::ofstream::binary);
+		f.write((const char *)&navMesh, sizeof(navMesh));
+		f.write((const char *)&data.size, sizeof(data.size));
+		f.write((const char *)data.data, data.size);
+	}
+
+	// declarations
+	static std::unique_ptr<float[]> getVertices(const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData);
 	static rcConfig getConfig(const NavMeshComponent & navMesh, const ModelDataComponent::Mesh & meshData, const float * vertices);
 	static HeightfieldPtr createHeightField(rcContext & ctx, const rcConfig & cfg, const kengine::ModelDataComponent::Mesh & meshData, const float * vertices);
 	static CompactHeightfieldPtr createCompactHeightField(rcContext & ctx, const rcConfig & cfg, rcHeightfield & heightField);
 	static ContourSetPtr createContourSet(rcContext & ctx, const rcConfig & cfg, rcCompactHeightfield & chf);
 	static PolyMeshPtr createPolyMesh(rcContext & ctx, const rcConfig & cfg, rcContourSet & contourSet);
 	static PolyMeshDetailPtr createPolyMeshDetail(rcContext & ctx, const rcConfig & cfg, const rcPolyMesh & polyMesh, const rcCompactHeightfield & chf);
-	static NavMeshPtr createNavMesh(const rcConfig & cfg, const rcPolyMesh & polyMesh, const rcPolyMeshDetail & polyMeshDetail);
-	static NavMeshQueryPtr createNavMeshQuery(const NavMeshComponent & params, const dtNavMesh & navMesh);
 	//
-	static void createRecastMesh(RecastComponent::Mesh & recast, const NavMeshComponent & navMesh, const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData) {
+	static NavMeshData createNavMeshData(const NavMeshComponent & navMesh, const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData) {
+		NavMeshData ret;
+
 		const auto vertices = getVertices(modelData, meshData);
 
 		const auto cfg = getConfig(navMesh, meshData, vertices.get());
 		if (cfg.width == 0 || cfg.height == 0) {
 			kengine_assert_failed(*g_em, "[Recast] Mesh was 0 height or width?");
-			return;
+			return ret;
 		}
 
 		rcContext ctx;
-		ctx.resetTimers();
-		ctx.startTimer(RC_TIMER_TOTAL);
 
 		const auto heightField = createHeightField(ctx, cfg, meshData, vertices.get());
 		if (heightField == nullptr)
-			return;
+			return ret;
 
 		rcFilterLowHangingWalkableObstacles(&ctx, cfg.walkableClimb, *heightField);
 		rcFilterLedgeSpans(&ctx, cfg.walkableHeight, cfg.walkableClimb, *heightField);
@@ -113,29 +181,51 @@ namespace kengine {
 
 		const auto compactHeightField = createCompactHeightField(ctx, cfg, *heightField);
 		if (compactHeightField == nullptr)
-			return;
+			return ret;
 
 		const auto contourSet = createContourSet(ctx, cfg, *compactHeightField);
 		if (contourSet == nullptr)
-			return;
+			return ret;
 
 		const auto polyMesh = createPolyMesh(ctx, cfg, *contourSet);
 		if (polyMesh == nullptr)
-			return;
+			return ret;
 
 		const auto polyMeshDetail = createPolyMeshDetail(ctx, cfg, *polyMesh, *compactHeightField);
 		if (polyMeshDetail == nullptr)
-			return;
+			return ret;
+	
+		dtNavMeshCreateParams params;
+		memset(&params, 0, sizeof(params));
+		{ putils_with(*polyMesh) {
+			params.verts = _.verts;
+			params.vertCount = _.nverts;
+			params.polys = _.polys;
+			params.polyAreas = _.areas;
+			params.polyFlags = _.flags;
+			params.polyCount = _.npolys;
+			params.nvp = _.nvp;
+		} }
 
-		recast.navMesh = createNavMesh(cfg, *polyMesh, *polyMeshDetail);
-		if (recast.navMesh == nullptr)
-			return;
+		{ putils_with(*polyMeshDetail) {
+			params.detailMeshes = _.meshes;
+			params.detailVerts = _.verts;
+			params.detailVertsCount = _.nverts;
+			params.detailTris = _.tris;
+			params.detailTriCount = _.ntris;
+		} }
 
-		recast.navMeshQuery = createNavMeshQuery(navMesh, *recast.navMesh);
-		if (recast.navMeshQuery == nullptr)
-			return;
+		params.walkableHeight = (float)cfg.walkableHeight;
+		params.walkableClimb = (float)cfg.walkableClimb;
+		params.walkableRadius = (float)cfg.walkableRadius;
+		rcVcopy(params.bmin, cfg.bmin);
+		rcVcopy(params.bmax, cfg.bmax);
+		params.cs = cfg.cs;
+		params.ch = cfg.ch;
 
-		ctx.stopTimer(RC_TIMER_TOTAL);
+		if (!dtCreateNavMeshData(&params, &ret.data, &ret.size))
+			kengine_assert_failed(*g_em, "[Recast] Failed to create Detour navmesh data");
+		return ret;
 	}
 
 	// declarations
@@ -353,50 +443,15 @@ namespace kengine {
 		return polyMeshDetail;
 	}
 
-	static NavMeshPtr createNavMesh(const rcConfig & cfg, const rcPolyMesh & polyMesh, const rcPolyMeshDetail & polyMeshDetail) {
-		dtNavMeshCreateParams params;
-		memset(&params, 0, sizeof(params));
-		{ putils_with(polyMesh) {
-			params.verts = _.verts;
-			params.vertCount = _.nverts;
-			params.polys = _.polys;
-			params.polyAreas = _.areas;
-			params.polyFlags = _.flags;
-			params.polyCount = _.npolys;
-			params.nvp = _.nvp;
-		} }
 
-		{ putils_with(polyMeshDetail) {
-			params.detailMeshes = _.meshes;
-			params.detailVerts = _.verts;
-			params.detailVertsCount = _.nverts;
-			params.detailTris = _.tris;
-			params.detailTriCount = _.ntris;
-		} }
-
-		params.walkableHeight = (float)cfg.walkableHeight;
-		params.walkableClimb = (float)cfg.walkableClimb;
-		params.walkableRadius = (float)cfg.walkableRadius;
-		rcVcopy(params.bmin, cfg.bmin);
-		rcVcopy(params.bmax, cfg.bmax);
-		params.cs = cfg.cs;
-		params.ch = cfg.ch;
-
-		unsigned char * navMeshData = nullptr;
-		int navMeshDataSize;
-		if (!dtCreateNavMeshData(&params, &navMeshData, &navMeshDataSize)) {
-			kengine_assert_failed(*g_em, "[Recast] Failed to create Detour navmesh data");
-			return nullptr;
-		}
-
+	static NavMeshPtr createNavMesh(const NavMeshData & data) {
 		NavMeshPtr navMesh{ dtAllocNavMesh() };
 		if (navMesh == nullptr) {
-			dtFree(navMeshData);
 			kengine_assert_failed(*g_em, "[Recast] Failed to allocate Detour navmesh");
 			return nullptr;
 		}
 
-		const auto status = navMesh->init(navMeshData, navMeshDataSize, DT_TILE_FREE_DATA);
+		const auto status = navMesh->init(data.data, data.size, DT_TILE_FREE_DATA);
 		if (dtStatusFailed(status)) {
 			kengine_assert_failed(*g_em, "[Recast] Failed to init Detour navmesh");
 			return nullptr;
