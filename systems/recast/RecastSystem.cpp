@@ -54,6 +54,8 @@ namespace kengine {
 					comp.meshes.emplace_back();
 					createRecastMesh(comp.meshes.back(), navMesh, modelData, mesh);
 				}
+				if constexpr (std::is_same<RebuildNavMeshComponent, putils_typeof(_)>())
+					e.detach<RebuildNavMeshComponent>();
 			}
 		};
 
