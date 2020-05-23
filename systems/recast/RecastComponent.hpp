@@ -21,11 +21,7 @@ using NavMeshQueryPtr = UniquePtr<dtNavMeshQuery, dtFreeNavMeshQuery>;
 
 namespace kengine {
 	struct RecastComponent {
-		struct Mesh {
-			NavMeshPtr navMesh;
-			NavMeshQueryPtr navMeshQuery;
-		};
-
-		std::vector<Mesh> meshes;
+		NavMeshPtr navMesh;
+		NavMeshQueryPtr navMeshQuery;
 	};
 }

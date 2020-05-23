@@ -1,6 +1,3 @@
-#include <GL/glew.h>
-#include <GL/GL.h>
-
 #include <filesystem>
 #include <fstream>
 
@@ -10,19 +7,18 @@
 #include "RecastComponent.hpp"
 #include "RecastDebugShader.hpp"
 
-#include "data/NavMeshComponent.hpp"
 #include "data/AdjustableComponent.hpp"
+#include "data/ModelComponent.hpp"
 #include "data/ModelDataComponent.hpp"
+#include "data/NavMeshComponent.hpp"
+#include "data/ShaderComponent.hpp"
 #include "functions/Execute.hpp"
 
 #include "helpers/assertHelper.hpp"
+#include "systems/opengl/shaders/shaderHelper.hpp"
 
 #include "angle.hpp"
 #include "with.hpp"
-
-#include "data/ShaderComponent.hpp"
-
-#include "data/ModelComponent.hpp"
 
 namespace Flags {
 	enum {
@@ -53,18 +49,14 @@ namespace kengine {
 	}
 
 	// declarations
-	static void createRecastMesh(const char * file, RecastComponent::Mesh & recast, const NavMeshComponent & navMesh, const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData);
+	static void createRecastMesh(const char * file, Entity & model, NavMeshComponent & navMesh, const ModelDataComponent & modelData);
 	//
 	static void buildNavMeshes() {
 		static const auto buildRecastComponent = [](auto && entities) {
 			for (auto & [e, model, modelData, navMesh, _] : entities) {
 				g_em->runTask([&] {
 					kengine_assert(*g_em, navMesh.vertsPerPoly <= DT_VERTS_PER_POLYGON);
-					auto & comp = e.attach<RecastComponent>();
-					for (const auto & mesh : modelData.meshes) {
-						comp.meshes.emplace_back();
-						createRecastMesh(model.file, comp.meshes.back(), navMesh, modelData, mesh);
-					}
+					createRecastMesh(model.file, e, navMesh, modelData);
 					if constexpr (std::is_same<RebuildNavMeshComponent, putils_typeof(_)>())
 						e.detach<RebuildNavMeshComponent>();
 				});
@@ -94,19 +86,20 @@ namespace kengine {
 	static NavMeshPtr createNavMesh(const NavMeshData & data);
 	static NavMeshQueryPtr createNavMeshQuery(const NavMeshComponent & params, const dtNavMesh & navMesh);
 	//
-	static void createRecastMesh(const char * file, RecastComponent::Mesh & recast, const NavMeshComponent & navMesh, const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData) {
+	static void createRecastMesh(const char * file, Entity & e, NavMeshComponent & navMesh, const ModelDataComponent & modelData) {
 		NavMeshData data;
 
 		const putils::string<4096> binaryFile("%s.nav", file);
 		bool mustSave = false;
 		data = loadBinaryFile(binaryFile, navMesh);
 		if (data.data == nullptr) {
-			data = createNavMeshData(navMesh, modelData, meshData);
+			data = createNavMeshData(navMesh, modelData, modelData.meshes[navMesh.concernedMesh]);
 			if (data.data == nullptr)
 				return;
 			mustSave = true;
 		}
 
+		auto & recast = e.attach<RecastComponent>();
 		recast.navMesh = createNavMesh(data);
 		if (recast.navMesh == nullptr) {
 			dtFree(data.data);
@@ -121,6 +114,71 @@ namespace kengine {
 
 		if (mustSave)
 			saveBinaryFile(binaryFile, data, navMesh);
+
+		const auto & model = e.get<ModelComponent>();
+		navMesh.getPath = [&](const Entity & e, const putils::Point3f & startWorldSpace, const putils::Point3f & endWorldSpace) {
+			const auto mat = shaderHelper::getModelMatrix(model, e.get<TransformComponent>());
+
+			float start[3];
+			{
+				auto tmp = glm::vec4(shaderHelper::toVec(startWorldSpace), 1.f);
+				tmp *= glm::inverse(mat);
+				start[0] = tmp.x;
+				start[1] = tmp.y;
+				start[2] = tmp.z;
+			}
+
+			float end[3];
+			{
+				auto tmp = glm::vec4(shaderHelper::toVec(endWorldSpace), 1.f);
+				tmp *= glm::inverse(mat);
+				end[0] = tmp.x;
+				end[1] = tmp.y;
+				end[2] = tmp.z;
+			}
+
+
+			NavMeshComponent::Path ret;
+
+			const float extents[3] = { navMesh.characterRadius * 2.f, navMesh.characterHeight, navMesh.characterRadius * 2.f };
+
+			dtPolyRef startRef;
+			float startPt[3];
+			auto status = recast.navMeshQuery->findNearestPoly(start, extents, nullptr, &startRef, startPt);
+			if (dtStatusFailed(status) || startRef == 0) {
+				kengine_assert_failed(*g_em, "[Recast] Failed to find nearest poly");
+				return ret;
+			}
+
+			dtPolyRef endRef;
+			float endPt[3];
+			status = recast.navMeshQuery->findNearestPoly(end, extents, nullptr, &endRef, endPt);
+			if (dtStatusFailed(status) || endRef == 0) {
+				kengine_assert_failed(*g_em, "[Recast] Failed to find nearest poly");
+				return ret;
+			}
+
+			dtPolyRef path[KENGINE_NAVMESH_MAX_PATH_LENGTH];
+			int pathCount = 0;
+			status = recast.navMeshQuery->findPath(startRef, endRef, startPt, endPt, nullptr, path, &pathCount, lengthof(path));
+			if (dtStatusFailed(status)) {
+				kengine_assert_failed(*g_em, "[Recast] Failed to find path");
+				return ret;
+			}
+
+			static_assert(sizeof(putils::Point3f) == sizeof(float[3]));
+			ret.resize(ret.capacity());
+
+			int straightPathCount = 0;
+			status = recast.navMeshQuery->findStraightPath(startPt, endPt, path, pathCount, ret[0].raw, nullptr, nullptr, &straightPathCount, ret.capacity());
+			if (dtStatusFailed(status)) {
+				kengine_assert_failed(*g_em, "[Recast] Failed to find straight path");
+				return ret;
+			}
+			ret.resize(straightPathCount);
+
+			return ret;
+		};
 	}
 
 	static NavMeshData loadBinaryFile(const char * binaryFile, const NavMeshComponent & navMesh) {

@@ -126,8 +126,7 @@ namespace kengine {
 			_model = shaderHelper::getModelMatrix(model.get<ModelComponent>(), transform);
 
 			const auto & comp = model.get<RecastComponent>();
-			for (const auto & mesh : comp.meshes)
-				duDebugDrawNavMesh(this, *mesh.navMesh, 0);
+			duDebugDrawNavMesh(this, *comp.navMesh, 0);
 		}
 	}
 
