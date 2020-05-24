@@ -95,6 +95,9 @@ namespace kengine {
 				continue;
 
 			const auto model = _em.getEntity(instance.model);
+			if (!model.has<OpenGLModelComponent>())
+				continue;
+
 			_model = shaderHelper::getModelMatrix(model.get<ModelComponent>(), transform);
 			_entityID = (float)e.id;
 			_color = graphics.color;

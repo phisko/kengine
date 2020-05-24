@@ -16,6 +16,8 @@ namespace kengine {
 		//
 		void drawModel(EntityManager & em, const InstanceComponent & instance, const TransformComponent & transform, const SkeletonComponent & skeleton, bool useTextures, const Uniforms & uniforms) {
 			const auto model = em.getEntity(instance.model);
+			if (!model.has<OpenGLModelComponent>())
+				return;
 
 			uniforms.model = shaderHelper::getModelMatrix(model.get<ModelComponent>(), transform);
 
