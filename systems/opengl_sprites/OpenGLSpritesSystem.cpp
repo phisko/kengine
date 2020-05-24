@@ -36,6 +36,9 @@ namespace kengine {
 		if (!e.has<SpriteComponent2D>() && !e.has<SpriteComponent3D>())
 			return;
 
+		if (e.has<InstanceComponent>() && e.get<InstanceComponent>().model != Entity::INVALID_ID)
+			return;
+
 		const auto & file = e.get<GraphicsComponent>().appearance;
 
 		for (const auto &[model, comp] : g_em->getEntities<TextureModelComponent>())

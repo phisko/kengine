@@ -568,6 +568,9 @@ namespace kengine {
 		e += AssImpObjectComponent{};
 		e += SkeletonComponent{};
 
+		if (e.has<InstanceComponent>() && e.get<InstanceComponent>().model != Entity::INVALID_ID)
+			return;
+
 		for (const auto &[model, comp] : g_em->getEntities<ModelComponent>())
 			if (comp.file == graphics.appearance) {
 				e += InstanceComponent{ model.id };
