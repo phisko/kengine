@@ -117,6 +117,8 @@ namespace kengine {
 
 		const auto & model = e.get<ModelComponent>();
 		navMesh.getPath = [&](const Entity & e, const putils::Point3f & startWorldSpace, const putils::Point3f & endWorldSpace) {
+			static const dtQueryFilter filter;
+
 			const auto mat = shaderHelper::getModelMatrix(model, e.get<TransformComponent>());
 
 			float start[3];
@@ -144,7 +146,7 @@ namespace kengine {
 
 			dtPolyRef startRef;
 			float startPt[3];
-			auto status = recast.navMeshQuery->findNearestPoly(start, extents, nullptr, &startRef, startPt);
+			auto status = recast.navMeshQuery->findNearestPoly(start, extents, &filter, &startRef, startPt);
 			if (dtStatusFailed(status) || startRef == 0) {
 				kengine_assert_failed(*g_em, "[Recast] Failed to find nearest poly");
 				return ret;
@@ -152,7 +154,7 @@ namespace kengine {
 
 			dtPolyRef endRef;
 			float endPt[3];
-			status = recast.navMeshQuery->findNearestPoly(end, extents, nullptr, &endRef, endPt);
+			status = recast.navMeshQuery->findNearestPoly(end, extents, &filter, &endRef, endPt);
 			if (dtStatusFailed(status) || endRef == 0) {
 				kengine_assert_failed(*g_em, "[Recast] Failed to find nearest poly");
 				return ret;
@@ -160,7 +162,7 @@ namespace kengine {
 
 			dtPolyRef path[KENGINE_NAVMESH_MAX_PATH_LENGTH];
 			int pathCount = 0;
-			status = recast.navMeshQuery->findPath(startRef, endRef, startPt, endPt, nullptr, path, &pathCount, lengthof(path));
+			status = recast.navMeshQuery->findPath(startRef, endRef, startPt, endPt, &filter, path, &pathCount, lengthof(path));
 			if (dtStatusFailed(status)) {
 				kengine_assert_failed(*g_em, "[Recast] Failed to find path");
 				return ret;
@@ -176,6 +178,12 @@ namespace kengine {
 				return ret;
 			}
 			ret.resize(straightPathCount);
+
+			for (auto & step : ret) {
+				glm::vec4 v(shaderHelper::toVec(step), 1.f);
+				v = mat * v;
+				step = { v.x, v.y, v.z };
+			}
 
 			return ret;
 		};
