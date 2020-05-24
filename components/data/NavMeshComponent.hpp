@@ -20,7 +20,8 @@ namespace kengine {
 	};
 
 	struct NavMeshComponent {
-		using Path = putils::vector<putils::Point3f, KENGINE_NAVMESH_MAX_PATH_LENGTH>;
+		static constexpr char PathName[] = "NavMeshComponentPath";
+		using Path = putils::vector<putils::Point3f, KENGINE_NAVMESH_MAX_PATH_LENGTH, PathName>;
 		using GetPathFunc = putils::function<Path(const Entity & e, const putils::Point3f & start, const putils::Point3f & end), KENGINE_NAVMESH_FUNC_SIZE>;
 		// `e` is the entity instantiating the `model Entity` this component is attached to
 
