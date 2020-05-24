@@ -11,6 +11,7 @@
 #include "systems/opengl/shaders/ApplyTransparencySrc.hpp"
 #include "systems/opengl/shaders/shaderHelper.hpp"
 
+#include "helpers/instanceHelper.hpp"
 #include "helpers/cameraHelper.hpp"
 
 static inline const char * vert = R"(
@@ -93,15 +94,12 @@ namespace kengine {
 		putils::gl::Uniform<glm::mat4> model;
 	};
 
-	static void drawObject(EntityManager & em, const putils::gl::Program::Parameters & params, const GraphicsComponent & graphics, const TransformComponent & transform, Uniforms uniforms, const SpriteComponent2D * comp = nullptr) {
-		if (graphics.model == Entity::INVALID_ID)
-			return;
+	static void drawObject(EntityManager & em, const putils::gl::Program::Parameters & params, const GraphicsComponent & graphics, const InstanceComponent & instance, const TransformComponent & transform, Uniforms uniforms, const SpriteComponent2D * comp = nullptr) {
+		uniforms.color = graphics.color;
 
-		const auto & modelEntity = em.getEntity(graphics.model);
+		const auto modelEntity = em.getEntity(instance.model);
 		if (!modelEntity.has<TextureModelComponent>())
 			return;
-
-		uniforms.color = graphics.color;
 
 		glBindTexture(GL_TEXTURE_2D, modelEntity.get<TextureModelComponent>().texture);
 
@@ -163,22 +161,22 @@ namespace kengine {
 
 		_view = glm::mat4(1.f);
 		_proj = glm::mat4(1.f);
-		for (const auto &[e, graphics, transform, sprite] : _em.getEntities<GraphicsComponent, TransformComponent, SpriteComponent2D>()) {
+		for (const auto &[e, instance, graphics, transform, sprite] : _em.getEntities<InstanceComponent, GraphicsComponent, TransformComponent, SpriteComponent2D>()) {
 			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			_entityID = (float)e.id;
-			drawObject(_em, params, graphics, transform, uniforms, &sprite);
+			drawObject(_em, params, graphics, instance, transform, uniforms, &sprite);
 		}
 
 		_view = params.view;
 		_proj = params.proj;
-		for (const auto &[e, graphics, transform, sprite] : _em.getEntities<GraphicsComponent, TransformComponent, SpriteComponent3D>()) {
+		for (const auto &[e, instance, graphics, transform, sprite] : _em.getEntities<InstanceComponent, GraphicsComponent, TransformComponent, SpriteComponent3D>()) {
 			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			_entityID = (float)e.id;
-			drawObject(_em, params, graphics, transform, uniforms);
+			drawObject(_em, params, graphics, instance, transform, uniforms);
 		}
 	}
 }

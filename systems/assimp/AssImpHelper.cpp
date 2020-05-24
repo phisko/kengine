@@ -14,23 +14,19 @@ namespace kengine {
 		static void uploadDefaultBones(const SkeletonComponent & skeleton, const Uniforms & uniforms);
 		static void bindTextures(EntityManager & em, unsigned int meshIndex, const AssImpTexturesModelComponent & textures, const Uniforms & uniforms);
 		//
-		void drawModel(EntityManager & em, const GraphicsComponent & graphics, const TransformComponent & transform, const SkeletonComponent & skeleton, bool useTextures, const Uniforms & uniforms) {
-			if (graphics.model == Entity::INVALID_ID)
+		void drawModel(EntityManager & em, const InstanceComponent & instance, const TransformComponent & transform, const SkeletonComponent & skeleton, bool useTextures, const Uniforms & uniforms) {
+			const auto model = em.getEntity(instance.model);
+			if (!model.has<OpenGLModelComponent>())
 				return;
 
-			const auto & modelInfoEntity = em.getEntity(graphics.model);
-			if (!modelInfoEntity.has<ModelComponent>() || !modelInfoEntity.has<OpenGLModelComponent>() || !modelInfoEntity.has<AssImpTexturesModelComponent>())
-				return;
-
-			const auto & openGL = modelInfoEntity.get<OpenGLModelComponent>();
-			const auto & modelInfo = modelInfoEntity.get<ModelComponent>();
-			const auto & textures = modelInfoEntity.get<AssImpTexturesModelComponent>();
-
-			uniforms.model = shaderHelper::getModelMatrix(modelInfo, transform);
+			uniforms.model = shaderHelper::getModelMatrix(model.get<ModelComponent>(), transform);
 
 			const bool noSkeleton = skeleton.meshes.empty();
 			if (noSkeleton)
 				uploadDefaultBones(skeleton, uniforms);
+
+			const auto & openGL = model.get<OpenGLModelComponent>();
+			const auto & textures = model.get<AssImpTexturesModelComponent>();
 
 			for (unsigned int i = 0; i < openGL.meshes.size(); ++i) {
 				if (!noSkeleton)

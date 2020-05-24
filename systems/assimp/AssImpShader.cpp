@@ -1,5 +1,6 @@
 #include "AssImpShader.hpp"
 
+#include "data/GraphicsComponent.hpp"
 #include "data/TransformComponent.hpp"
 #include "data/ModelComponent.hpp"
 #include "data/OpenGLModelComponent.hpp"
@@ -34,9 +35,7 @@ namespace kengine {
 		_view = params.view;
 		_proj = params.proj;
 
-		for (const auto &[e, textured, graphics, transform, skeleton] : _em.getEntities<AssImpObjectComponent, GraphicsComponent, TransformComponent, SkeletonComponent>()) {
-			if (graphics.model == Entity::INVALID_ID)
-				continue;
+		for (const auto &[e, assimp, instance, graphics, transform, skeleton] : _em.getEntities<AssImpObjectComponent, InstanceComponent, GraphicsComponent, TransformComponent, SkeletonComponent>()) {
 			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
@@ -52,7 +51,7 @@ namespace kengine {
 			uniforms.specularColor = _specularColor;
 			uniforms.diffuseColor = _diffuseColor;
 
-			AssImpHelper::drawModel(_em, graphics, transform, skeleton, true, uniforms);
+			AssImpHelper::drawModel(_em, instance, transform, skeleton, true, uniforms);
 		}
 	}
 }

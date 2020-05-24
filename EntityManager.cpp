@@ -49,7 +49,7 @@ namespace kengine {
 			mask = _entities[id].mask;
 		}
 
-		{
+		if (mask != 0) {
 			detail::ReadLock archetypes(_archetypesMutex);
 			const auto archetype = std::find_if(
 				_archetypes.begin(), _archetypes.end(),

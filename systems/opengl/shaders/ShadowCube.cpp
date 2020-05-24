@@ -3,7 +3,7 @@
 #include "data/LightComponent.hpp"
 #include "data/DefaultShadowComponent.hpp"
 #include "data/ModelComponent.hpp"
-#include "data/GraphicsComponent.hpp"
+#include "data/InstanceComponent.hpp"
 #include "data/NoShadowComponent.hpp"
 
 #include "shaderHelper.hpp"
@@ -22,21 +22,16 @@ namespace kengine::Shaders {
 	}
 
 	void ShadowCube::drawObjects(const Parameters & params) {
-		for (const auto &[e, graphics, transform, shadow, noNoShadow] : _em.getEntities<GraphicsComponent, TransformComponent, DefaultShadowComponent, no<NoShadowComponent>>()) {
-			if (graphics.model == Entity::INVALID_ID)
-				continue;
+		for (const auto &[e, instance, transform, shadow, noNoShadow] : _em.getEntities<InstanceComponent, TransformComponent, DefaultShadowComponent, no<NoShadowComponent>>()) {
 			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
-			const auto & modelInfoEntity = _em.getEntity(graphics.model);
-			if (!modelInfoEntity.has<OpenGLModelComponent>() || !modelInfoEntity.has<ModelComponent>())
+			const auto & model = _em.getEntity(instance.model);
+			if (!model.has<OpenGLModelComponent>())
 				continue;
 
-			const auto & modelInfo = modelInfoEntity.get<ModelComponent>();
-			const auto & openGL = modelInfoEntity.get<OpenGLModelComponent>();
-
-			_model = shaderHelper::getModelMatrix(modelInfo, transform);
-			shaderHelper::drawModel(openGL);
+			_model = shaderHelper::getModelMatrix(model.get<ModelComponent>(), transform);
+			shaderHelper::drawModel(model.get<OpenGLModelComponent>());
 		}
 	}
 }

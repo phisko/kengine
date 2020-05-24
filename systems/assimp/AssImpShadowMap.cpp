@@ -30,10 +30,10 @@ namespace kengine {
 		uniforms.model = _model;
 		uniforms.bones = _bones;
 
-		for (const auto & [e, textured, graphics, transform, skeleton, noNoShadow] : _em.getEntities<AssImpObjectComponent, GraphicsComponent, TransformComponent, SkeletonComponent, no<NoShadowComponent>>()) {
+		for (const auto & [e, textured, instance, transform, skeleton, noNoShadow] : _em.getEntities<AssImpObjectComponent, InstanceComponent, TransformComponent, SkeletonComponent, no<NoShadowComponent>>()) {
 			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
-			AssImpHelper::drawModel(_em, graphics, transform, skeleton, false, uniforms);
+			AssImpHelper::drawModel(_em, instance, transform, skeleton, false, uniforms);
 		}
 	}
 }

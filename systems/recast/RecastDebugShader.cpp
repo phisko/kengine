@@ -13,6 +13,7 @@
 #include "data/ImGuiComponent.hpp"
 
 #include "imgui.h"
+#include "helpers/instanceHelper.hpp"
 #include "helpers/assertHelper.hpp"
 #include "systems/opengl/shaders/ApplyTransparencySrc.hpp"
 #include "systems/opengl/shaders/shaderHelper.hpp"
@@ -118,11 +119,14 @@ namespace kengine {
 		_proj = params.proj;
 		_viewPos = params.camPos;
 
-		for (const auto & [e, graphics, transform] : _em.getEntities<GraphicsComponent, TransformComponent>()) {
+		for (const auto & [e, graphics, instance, transform] : _em.getEntities<GraphicsComponent, InstanceComponent, TransformComponent>()) {
 			if (graphics.appearance != g_adjustables.fileName)
 				continue;
 
-			const auto model = _em.getEntity(graphics.model);
+			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
+				continue;
+
+			const auto model = _em.getEntity(instance.model);
 			_model = shaderHelper::getModelMatrix(model.get<ModelComponent>(), transform);
 
 			const auto & comp = model.get<RecastComponent>();

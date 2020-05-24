@@ -2,6 +2,7 @@
 
 #include "EntityManager.hpp"
 
+#include "data/InstanceComponent.hpp"
 #include "data/TransformComponent.hpp"
 #include "data/PolyVoxComponent.hpp"
 #include "data/GraphicsComponent.hpp"
@@ -89,24 +90,19 @@ namespace kengine {
 		_proj = params.proj;
 		_viewPos = params.camPos;
 
-		for (const auto &[e, poly, graphics, transform] : _em.getEntities<PolyVoxObjectComponent, GraphicsComponent, TransformComponent>()) {
-			if (graphics.model == Entity::INVALID_ID)
-				continue;
+		for (const auto &[e, poly, graphics, instance, transform] : _em.getEntities<PolyVoxObjectComponent, GraphicsComponent, InstanceComponent, TransformComponent>()) {
 			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
-			const auto & modelInfoEntity = _em.getEntity(graphics.model);
-			if (!modelInfoEntity.has<OpenGLModelComponent>() || !modelInfoEntity.has<ModelComponent>())
+			const auto model = _em.getEntity(instance.model);
+			if (!model.has<OpenGLModelComponent>())
 				continue;
 
-			const auto & modelInfo = modelInfoEntity.get<ModelComponent>();
-			const auto & openGL = modelInfoEntity.get<OpenGLModelComponent>();
-
-			_model = shaderHelper::getModelMatrix(modelInfo, transform);
+			_model = shaderHelper::getModelMatrix(model.get<ModelComponent>(), transform);
 			_entityID = (float)e.id;
 			_color = graphics.color;
 
-			shaderHelper::drawModel(openGL);
+			shaderHelper::drawModel(model.get<OpenGLModelComponent>());
 		}
 	}
 }

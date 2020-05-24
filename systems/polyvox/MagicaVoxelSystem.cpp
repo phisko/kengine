@@ -10,6 +10,7 @@
 
 #include "EntityManager.hpp"
 
+#include "data/InstanceComponent.hpp"
 #include "data/ModelDataComponent.hpp"
 #include "data/ModelComponent.hpp"
 #include "data/GraphicsComponent.hpp"
@@ -57,16 +58,15 @@ namespace kengine {
 		e += PolyVoxObjectComponent{};
 		e += DefaultShadowComponent{};
 
-		graphics.model = Entity::INVALID_ID;
-		for (const auto &[e, model] : g_em->getEntities<ModelComponent>())
-			if (model.file == graphics.appearance) {
-				graphics.model = e.id;
+		for (const auto &[model, comp] : g_em->getEntities<ModelComponent>())
+			if (comp.file == graphics.appearance) {
+				e += InstanceComponent{ model.id };
 				return;
 			}
 
-		*g_em += [&](Entity & e) {
-			e += ModelComponent{ graphics.appearance.c_str() };
-			graphics.model = e.id;
+		*g_em += [&](Entity & model) {
+			model += ModelComponent{ graphics.appearance.c_str() };
+			e += InstanceComponent{ model.id };
 		};
 	}
 

@@ -12,6 +12,7 @@
 #include "data/AdjustableComponent.hpp"
 #include "data/DebugGraphicsComponent.hpp"
 #include "data/GraphicsComponent.hpp"
+#include "data/InstanceComponent.hpp"
 #include "data/KinematicComponent.hpp"
 #include "data/ModelColliderComponent.hpp"
 #include "data/ModelComponent.hpp"
@@ -213,21 +214,18 @@ namespace kengine {
 	static void detectCollisions();
 	//
 	static void execute(float deltaTime) {
-#define GetModelOrContinue \
-			if (graphics.model == Entity::INVALID_ID) \
-				continue; \
-			const auto & modelEntity = g_em->getEntity(graphics.model); \
-			if (!modelEntity.has<ModelColliderComponent>()) \
+		for (auto & [e, instance, transform, physics, comp] : g_em->getEntities<InstanceComponent, TransformComponent, PhysicsComponent, BulletPhysicsComponent>()) {
+			const auto model = g_em->getEntity(instance.model);
+			if (!model.has<ModelColliderComponent>())
 				continue;
-
-		for (auto & [e, graphics, transform, physics, comp] : g_em->getEntities<GraphicsComponent, TransformComponent, PhysicsComponent, BulletPhysicsComponent>()) {
-			GetModelOrContinue;
-			updateBulletComponent(e, comp, transform, physics, modelEntity);
+			updateBulletComponent(e, comp, transform, physics, model);
 		}
 
-		for (auto & [e, graphics, transform, physics, noComp] : g_em->getEntities<GraphicsComponent, TransformComponent, PhysicsComponent, no<BulletPhysicsComponent>>()) {
-			GetModelOrContinue;
-			addBulletComponent(e, transform, physics, modelEntity);
+		for (auto & [e, instance, transform, physics, noComp] : g_em->getEntities<InstanceComponent, TransformComponent, PhysicsComponent, no<BulletPhysicsComponent>>()) {
+			const auto model = g_em->getEntity(instance.model);
+			if (!model.has<ModelColliderComponent>())
+				continue;
+			addBulletComponent(e, transform, physics, model);
 		}
 
 		for (auto & [e, bullet, noPhys] : g_em->getEntities<BulletPhysicsComponent, no<PhysicsComponent>>())

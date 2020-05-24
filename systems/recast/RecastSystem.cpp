@@ -122,7 +122,7 @@ namespace kengine {
 			float start[3];
 			{
 				auto tmp = glm::vec4(shaderHelper::toVec(startWorldSpace), 1.f);
-				tmp *= glm::inverse(mat);
+				tmp = glm::inverse(mat) * tmp;
 				start[0] = tmp.x;
 				start[1] = tmp.y;
 				start[2] = tmp.z;
@@ -131,7 +131,7 @@ namespace kengine {
 			float end[3];
 			{
 				auto tmp = glm::vec4(shaderHelper::toVec(endWorldSpace), 1.f);
-				tmp *= glm::inverse(mat);
+				tmp = glm::inverse(mat) * tmp;
 				end[0] = tmp.x;
 				end[1] = tmp.y;
 				end[2] = tmp.z;

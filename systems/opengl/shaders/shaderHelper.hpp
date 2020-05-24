@@ -44,7 +44,7 @@ namespace kengine {
 
 		static glm::vec3 toVec(const putils::Point3f & p) { return { p.x, p.y, p.z }; }
 		void drawModel(const OpenGLModelComponent & openGL);
-		glm::mat4 getModelMatrix(const ModelComponent & modelInfo, const TransformComponent & transform);
+		glm::mat4 getModelMatrix(const ModelComponent & model, const TransformComponent & transform);
 
 		static bool entityAppearsInViewport(const Entity & e, Entity::ID viewport) {
 			return !e.has<functions::AppearsInViewport>() || e.get<functions::AppearsInViewport>()(viewport);

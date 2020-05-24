@@ -15,6 +15,7 @@
 #include "AssImpShadowCube.hpp"
 
 #include "data/GraphicsComponent.hpp"
+#include "data/InstanceComponent.hpp"
 #include "data/ModelDataComponent.hpp"
 #include "data/TextureDataComponent.hpp"
 #include "data/TextureModelComponent.hpp"
@@ -512,12 +513,9 @@ namespace kengine {
 	}
 
 	static void execute(float deltaTime) {
-		for (auto & [e, graphics, skeleton, anim] : g_em->getEntities<GraphicsComponent, SkeletonComponent, AnimationComponent>())
+		for (auto & [e, instance, skeleton, anim] : g_em->getEntities<InstanceComponent, SkeletonComponent, AnimationComponent>())
 			g_em->runTask([&] {
-				if (graphics.model == Entity::INVALID_ID)
-					return;
-
-				auto & modelEntity = g_em->getEntity(graphics.model);
+				auto & modelEntity = g_em->getEntity(instance.model);
 				if (!modelEntity.has<ModelComponent>() || !modelEntity.has<AssImp::AssImpSkeletonComponent>())
 					return;
 
@@ -562,7 +560,7 @@ namespace kengine {
 	}
 
 	static void setModel(Entity & e) {
-		auto & graphics = e.get<GraphicsComponent>();
+		const auto & graphics = e.get<GraphicsComponent>();
 
 		if (!g_importer.IsExtensionSupported(putils::file_extension(graphics.appearance.c_str()).data()))
 			return;
@@ -570,16 +568,15 @@ namespace kengine {
 		e += AssImpObjectComponent{};
 		e += SkeletonComponent{};
 
-		graphics.model = Entity::INVALID_ID;
-		for (const auto &[e, model] : g_em->getEntities<ModelComponent>())
-			if (model.file == graphics.appearance) {
-				graphics.model = e.id;
+		for (const auto &[model, comp] : g_em->getEntities<ModelComponent>())
+			if (comp.file == graphics.appearance) {
+				e += InstanceComponent{ model.id };
 				return;
 			}
 
-		*g_em += [&](Entity & e) {
-			e += ModelComponent{ graphics.appearance.c_str() };
-			graphics.model = e.id;
+		*g_em += [&](Entity & model) {
+			model += ModelComponent{ graphics.appearance.c_str() };
+			e += InstanceComponent{ model.id };
 		};
 	}
 }

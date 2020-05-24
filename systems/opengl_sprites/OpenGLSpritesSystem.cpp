@@ -2,6 +2,7 @@
 
 #include "EntityManager.hpp"
 #include "SpritesShader.hpp"
+#include "data/InstanceComponent.hpp"
 #include "data/ModelComponent.hpp"
 #include "data/TextureModelComponent.hpp"
 #include "data/TextureDataComponent.hpp"
@@ -35,12 +36,11 @@ namespace kengine {
 		if (!e.has<SpriteComponent2D>() && !e.has<SpriteComponent3D>())
 			return;
 
-		auto & graphics = e.get<GraphicsComponent>();
-		const auto & file = graphics.appearance;
+		const auto & file = e.get<GraphicsComponent>().appearance;
 
-		for (const auto &[e, model] : g_em->getEntities<TextureModelComponent>())
-			if (model.file == file) {
-				graphics.model = e.id;
+		for (const auto &[model, comp] : g_em->getEntities<TextureModelComponent>())
+			if (comp.file == file) {
+				e += InstanceComponent{ model.id };
 				return;
 			}
 
@@ -49,10 +49,10 @@ namespace kengine {
 		if (data == nullptr)
 			return; // Not supported image type
 
-		*g_em += [&](Entity & e) {
-			graphics.model = e.id;
+		*g_em += [&](Entity & model) {
+			e += InstanceComponent{ model.id };
 
-			auto & comp = e.attach<TextureModelComponent>();
+			auto & comp = model.attach<TextureModelComponent>();
 			comp.file = file;
 
 			TextureDataComponent textureLoader; {
@@ -64,7 +64,8 @@ namespace kengine {
 				textureLoader.components = components;
 
 				textureLoader.free = stbi_image_free;
-			} e += textureLoader;
+			}
+			model += textureLoader;
 		};
 	}
 }
