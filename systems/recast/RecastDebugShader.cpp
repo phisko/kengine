@@ -85,6 +85,8 @@ namespace kengine {
 			};
 
 			e += ImGuiComponent([&] {
+				if (!g_adjustables.enabled)
+					return;
 				if (ImGui::Begin("RecastShader")) {
 					if (ImGui::BeginCombo("File", g_adjustables.fileName.c_str())) {
 						for (const auto & [e, model, recast] : em.getEntities<ModelComponent, RecastComponent>())
@@ -113,6 +115,9 @@ namespace kengine {
 	}
 
 	void RecastDebugShader::run(const Parameters & params) {
+		if (!g_adjustables.enabled)
+			return;
+
 		use();
 
 		_view = params.view;
