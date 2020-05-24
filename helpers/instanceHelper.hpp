@@ -11,9 +11,9 @@ namespace kengine::instanceHelper {
 	bool modelHas(EntityManager & em, const InstanceComponent & instance);
 
 	template<typename Comp>
-	Comp & getModel(EntityManager & em, Entity & instance);
+	const Comp & getModel(EntityManager & em, const Entity & instance);
 	template<typename Comp>
-	Comp & getModel(EntityManager & em, const InstanceComponent & instance);
+	const Comp & getModel(EntityManager & em, const InstanceComponent & instance);
 }
 
 // impl
@@ -31,14 +31,14 @@ namespace kengine::instanceHelper {
 	}
 
 	template<typename Comp>
-	Comp & getModel(EntityManager & em, const InstanceComponent & instance) {
+	const Comp & getModel(EntityManager & em, const InstanceComponent & instance) {
 		kengine_assert(em, instance.model != Entity::INVALID_ID);
 		auto model = em.getEntity(instance.model);
 		return model.get<Comp>();
 	}
 
 	template<typename Comp>
-	Comp & getModel(EntityManager & em, Entity & e) {
+	const Comp & getModel(EntityManager & em, const Entity & e) {
 		return getModel<Comp>(em, e.get<InstanceComponent>());
 	}
 }

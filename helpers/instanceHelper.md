@@ -19,9 +19,9 @@ Returns whether the `model Entity` for `instance` has a `Comp` component.
 
 ```cpp
 template<typename Comp>
-Comp & getModel(EntityManager & em, Entity & instance);
+const Comp & getModel(EntityManager & em, const Entity & instance);
 template<typename Comp>
-Comp & getModel(EntityManager & em, const InstanceComponent & instance);
+const Comp & getModel(EntityManager & em, const InstanceComponent & instance);
 ```
 
 Returns the `Comp` component of the `model Entity` for instance.
