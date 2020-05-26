@@ -179,7 +179,7 @@ namespace kengine {
 		glBindVertexArray(_vao);
 		glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 		glBufferData(GL_ARRAY_BUFFER, _currentMesh.size() * sizeof(Vertex), _currentMesh.data(), GL_DYNAMIC_DRAW);
-		glDrawArrays(_currentVertexType, 0, _currentMesh.size());
+		glDrawArrays(_currentVertexType, 0, (GLsizei)_currentMesh.size());
 		_currentMesh.clear();
 	}
 }
