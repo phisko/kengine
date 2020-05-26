@@ -34,6 +34,7 @@
 #include "functions/OnMouseCaptured.hpp"
 #include "functions/GetImGuiScale.hpp"
 #include "functions/GetEntityInPixel.hpp"
+#include "functions/GetPositionInPixel.hpp"
 #include "functions/InitGBuffer.hpp"
 
 #include "shaders/shaderHelper.hpp"
@@ -83,6 +84,7 @@ namespace kengine {
 	static void terminate();
 	static void onMouseCaptured(Entity::ID window, bool captured);
 	static Entity::ID getEntityInPixel(Entity::ID window, const putils::Point2ui & pixel);
+	static putils::Point3f getPositionInPixel(Entity::ID window, const putils::Point2ui & pixel);
 	static void initGBuffer(size_t nbAttributes, const functions::GBufferAttributeIterator & iterator);
 	//
 	EntityCreator * OpenGLSystem(EntityManager & em) {
@@ -117,6 +119,7 @@ namespace kengine {
 			e += functions::OnMouseCaptured{ onMouseCaptured };
 			e += functions::GetImGuiScale{ [] { return g_dpiScale; } };
 			e += functions::GetEntityInPixel{ getEntityInPixel };
+			e += functions::GetPositionInPixel{ getPositionInPixel };
 			e += functions::InitGBuffer{ initGBuffer };
 
 			e += AdjustableComponent{
@@ -779,36 +782,74 @@ namespace kengine {
 		}
 	}
 
+	// declarations
+	struct GBufferInfo {
+		GBufferComponent * gBuffer = nullptr;
+		size_t indexForPixel = 0;
+	};
+	static GBufferInfo getGBufferInfo(Entity::ID window, const putils::Point2ui & pixel);
+	//
 	static Entity::ID getEntityInPixel(Entity::ID window, const putils::Point2ui & pixel) {
-		static constexpr auto GBUFFER_TEXTURE_COMPONENTS = 4;
 		static constexpr auto GBUFFER_ENTITY_LOCATION = offsetof(GBufferTextures, entityID) / sizeof(GBufferTextures::entityID);
 
-		if (window != Entity::INVALID_ID && window != g_window.id)
+		const auto info = getGBufferInfo(window, pixel);
+		if (info.gBuffer == nullptr)
 			return Entity::INVALID_ID;
 
-		const auto viewportInfo = cameraHelper::getViewportForPixel(*g_em, g_window.id, pixel);
-		if (viewportInfo.camera == Entity::INVALID_ID)
-			return Entity::INVALID_ID;
-
-		auto & camera = g_em->getEntity(viewportInfo.camera);
-		if (!camera.has<GBufferComponent>())
-			return Entity::INVALID_ID;
-
-		auto & gbuffer = camera.get<GBufferComponent>();
-
-		const putils::Point2ui gBufferSize = gbuffer.getSize();
-		const auto pixelInGBuffer = putils::Point2ui(viewportInfo.viewportPercent * gBufferSize);
-		if (pixelInGBuffer.x >= gBufferSize.x || pixelInGBuffer.y > gBufferSize.y || pixelInGBuffer.y == 0)
-			return Entity::INVALID_ID;
-
-		const auto index = (pixelInGBuffer.x + (gBufferSize.y - pixelInGBuffer.y) * gBufferSize.x) * GBUFFER_TEXTURE_COMPONENTS;
 		Entity::ID ret;
 		{ // Release texture asap
-			const auto texture = gbuffer.getTexture(GBUFFER_ENTITY_LOCATION);
-			ret = (Entity::ID)texture.data[index];
+			const auto texture = info.gBuffer->getTexture(GBUFFER_ENTITY_LOCATION);
+			const auto & size = info.gBuffer->getSize();
+			for (size_t i = 0; i < size.x * size.y; ++i)
+				if (texture.data[i] != 0.f)
+					break;
+			ret = (Entity::ID)texture.data[info.indexForPixel];
 		}
 		if (ret == 0)
 			ret = Entity::INVALID_ID;
+		return ret;
+	}
+
+	static putils::Point3f getPositionInPixel(Entity::ID window, const putils::Point2ui & pixel) {
+		static constexpr auto GBUFFER_POSITION_LOCATION = offsetof(GBufferTextures, position) / sizeof(GBufferTextures::position);
+
+		const auto info = getGBufferInfo(window, pixel);
+		if (info.gBuffer == nullptr)
+			return {};
+
+		const auto texture = info.gBuffer->getTexture(GBUFFER_POSITION_LOCATION);
+		const auto & size = info.gBuffer->getSize();
+
+		static_assert(sizeof(putils::Point3f) == sizeof(float[3]));
+		return texture.data + info.indexForPixel;
+	}
+
+	static GBufferInfo getGBufferInfo(Entity::ID window, const putils::Point2ui & pixel) {
+		static constexpr auto GBUFFER_TEXTURE_COMPONENTS = 4;
+
+		GBufferInfo ret;
+
+		if (window != Entity::INVALID_ID && window != g_window.id)
+			return ret;
+
+		const auto viewportInfo = cameraHelper::getViewportForPixel(*g_em, g_window.id, pixel);
+		if (viewportInfo.camera == Entity::INVALID_ID)
+			return ret;
+
+		auto & camera = g_em->getEntity(viewportInfo.camera);
+		if (!camera.has<GBufferComponent>())
+			return ret;
+
+		auto & gBuffer = camera.get<GBufferComponent>();
+		
+		const putils::Point2ui gBufferSize = gBuffer.getSize();
+		const auto pixelInGBuffer = putils::Point2ui(viewportInfo.viewportPercent * gBufferSize);
+		if (pixelInGBuffer.x >= gBufferSize.x || pixelInGBuffer.y > gBufferSize.y || pixelInGBuffer.y == 0)
+			return ret;
+
+		ret.gBuffer = &gBuffer;
+		ret.indexForPixel = (pixelInGBuffer.x + (gBufferSize.y - pixelInGBuffer.y) * gBufferSize.x) * GBUFFER_TEXTURE_COMPONENTS;
+
 		return ret;
 	}
 }
