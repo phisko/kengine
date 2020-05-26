@@ -148,36 +148,29 @@ namespace kengine {
 			dtPolyRef startRef;
 			float startPt[3];
 			auto status = recast.navMeshQuery->findNearestPoly(start, extents, &filter, &startRef, startPt);
-			if (dtStatusFailed(status) || startRef == 0) {
-				kengine_assert_failed(*g_em, "[Recast] Failed to find nearest poly");
+			if (dtStatusFailed(status) || startRef == 0)
 				return ret;
-			}
 
 			dtPolyRef endRef;
 			float endPt[3];
 			status = recast.navMeshQuery->findNearestPoly(end, extents, &filter, &endRef, endPt);
-			if (dtStatusFailed(status) || endRef == 0) {
-				kengine_assert_failed(*g_em, "[Recast] Failed to find nearest poly");
+			if (dtStatusFailed(status) || endRef == 0)
 				return ret;
-			}
 
 			dtPolyRef path[KENGINE_NAVMESH_MAX_PATH_LENGTH];
 			int pathCount = 0;
 			status = recast.navMeshQuery->findPath(startRef, endRef, startPt, endPt, &filter, path, &pathCount, lengthof(path));
-			if (dtStatusFailed(status)) {
-				kengine_assert_failed(*g_em, "[Recast] Failed to find path");
+			if (dtStatusFailed(status))
 				return ret;
-			}
+
+			ret.resize(ret.capacity());
+			int straightPathCount = 0;
 
 			static_assert(sizeof(putils::Point3f) == sizeof(float[3]));
-			ret.resize(ret.capacity());
-
-			int straightPathCount = 0;
 			status = recast.navMeshQuery->findStraightPath(startPt, endPt, path, pathCount, ret[0].raw, nullptr, nullptr, &straightPathCount, (int)ret.capacity());
-			if (dtStatusFailed(status)) {
-				kengine_assert_failed(*g_em, "[Recast] Failed to find straight path");
+			if (dtStatusFailed(status))
 				return ret;
-			}
+
 			ret.resize(straightPathCount);
 
 			for (auto & step : ret) {
