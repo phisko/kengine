@@ -142,7 +142,8 @@ namespace kengine {
 
 			NavMeshComponent::Path ret;
 
-			const float extents[3] = { navMesh.characterRadius * 2.f, navMesh.characterHeight, navMesh.characterRadius * 2.f };
+			const auto maxExtent = std::max(navMesh.characterRadius * 2.f, navMesh.characterHeight);
+			const float extents[3] = { maxExtent, maxExtent, maxExtent };
 
 			dtPolyRef startRef;
 			float startPt[3];
@@ -172,7 +173,7 @@ namespace kengine {
 			ret.resize(ret.capacity());
 
 			int straightPathCount = 0;
-			status = recast.navMeshQuery->findStraightPath(startPt, endPt, path, pathCount, ret[0].raw, nullptr, nullptr, &straightPathCount, ret.capacity());
+			status = recast.navMeshQuery->findStraightPath(startPt, endPt, path, pathCount, ret[0].raw, nullptr, nullptr, &straightPathCount, (int)ret.capacity());
 			if (dtStatusFailed(status)) {
 				kengine_assert_failed(*g_em, "[Recast] Failed to find straight path");
 				return ret;
@@ -260,6 +261,10 @@ namespace kengine {
 		const auto polyMeshDetail = createPolyMeshDetail(ctx, cfg, *polyMesh, *compactHeightField);
 		if (polyMeshDetail == nullptr)
 			return ret;
+
+		for (int i = 0; i < polyMesh->npolys; ++i)
+			if (polyMesh->areas[i] == RC_WALKABLE_AREA)
+				polyMesh->flags[i] = Flags::Walk;
 	
 		dtNavMeshCreateParams params;
 		memset(&params, 0, sizeof(params));
