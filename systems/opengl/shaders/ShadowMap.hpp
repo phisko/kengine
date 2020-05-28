@@ -26,10 +26,12 @@ namespace kengine::Shaders {
 	private:
 		EntityManager & _em;
 
+#pragma region Uniforms
 	public:
 		putils_reflection_parents(
 			putils_reflection_type(src::ProjViewModel::Vert::Uniforms)
 		);
+#pragma endregion Uniforms
 	};
 
 }

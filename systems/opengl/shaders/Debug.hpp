@@ -17,6 +17,7 @@ namespace kengine::Shaders {
 	private:
 		EntityManager & _em;
 
+#pragma region Uniforms
 	public:
 		putils::gl::Uniform<glm::mat4> _model;
 		putils::gl::Uniform<glm::mat4> _view;
@@ -35,5 +36,6 @@ namespace kengine::Shaders {
 			putils_reflection_attribute_private(&Debug::_entityID),
 			putils_reflection_attribute_private(&Debug::_color)
 		);
+#pragma endregion Uniforms
 	};
 }

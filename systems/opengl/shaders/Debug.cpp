@@ -9,6 +9,7 @@
 #include "visit.hpp"
 #include "static_assert.hpp"
 
+#pragma region GLSL
 static const char * vert = R"(
 #version 330
 
@@ -57,6 +58,7 @@ void main() {
 	gentityID = entityID;
 }
 )";
+#pragma endregion GLSL
 
 namespace kengine::Shaders {
 	Debug::Debug(EntityManager & em)

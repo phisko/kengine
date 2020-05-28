@@ -6,6 +6,7 @@
 #include "QuadSrc.hpp"
 #include "shaderHelper.hpp"
 
+#pragma region GLSL
 static const auto frag = R"(
 #version 330
 
@@ -55,6 +56,7 @@ void main() {
 	outColor = highlight * highlightColor;
 }
 )";
+#pragma endregion GLSL
 
 namespace kengine::Shaders {
 	Highlight::Highlight(EntityManager & em)

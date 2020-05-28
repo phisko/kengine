@@ -77,7 +77,19 @@ namespace kengine {
 	static size_t g_gBufferTextureCount = 0;
 	static functions::GBufferAttributeIterator g_gBufferIterator = nullptr;
 
-	// declarations
+	static bool g_init = false;
+	static struct {
+		Entity::ID id = Entity::INVALID_ID;
+		WindowComponent::string name;
+		GLFWWindowComponent * glfw = nullptr;
+		WindowComponent * comp = nullptr;
+		putils::Point2i size;
+		bool fullScreen;
+	} g_window;
+
+
+#pragma region OpenGLSystem
+#pragma region declarations
 	static void execute(float deltaTime);
 	static void onEntityCreated(Entity & e);
 	static void onEntityRemoved(Entity & e);
@@ -86,7 +98,7 @@ namespace kengine {
 	static Entity::ID getEntityInPixel(Entity::ID window, const putils::Point2ui & pixel);
 	static putils::Point3f getPositionInPixel(Entity::ID window, const putils::Point2ui & pixel);
 	static void initGBuffer(size_t nbAttributes, const functions::GBufferAttributeIterator & iterator);
-	//
+#pragma endregion
 	EntityCreator * OpenGLSystem(EntityManager & em) {
 		g_em = &em;
 
@@ -131,16 +143,7 @@ namespace kengine {
 		};
 	}
 
-	static bool g_init = false;
-	static struct {
-		Entity::ID id = Entity::INVALID_ID;
-		WindowComponent::string name;
-		GLFWWindowComponent * glfw = nullptr;
-		WindowComponent * comp = nullptr;
-		putils::Point2i size;
-		bool fullScreen;
-	} g_window;
-
+#pragma region Input
 	namespace Input {
 		static void onKey(GLFWwindow *, int key, int scancode, int action, int mods) {
 			if (g_buffer == nullptr || (GImGui != nullptr && ImGui::GetIO().WantCaptureKeyboard))
@@ -187,6 +190,7 @@ namespace kengine {
 			g_buffer->scrolls.try_push_back(InputBufferComponent::MouseScrollEvent{ g_window.id, (float)xoffset, (float)yoffset, lastPos });
 		}
 	}
+#pragma endregion Input
 
 	static void terminate() {
 		ImGui_ImplOpenGL3_Shutdown();
@@ -198,66 +202,12 @@ namespace kengine {
 		glfwTerminate();
 	}
 
-	static void initWindow() noexcept {
-		glfwInit();
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
-#ifndef KENGINE_NDEBUG
-		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
-#endif
-		// TODO: depend on g_windowComponent->fullscreen
-		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-
-		g_window.glfw->window = glfwCreateWindow((int)g_window.comp->size.x, (int)g_window.comp->size.y, g_window.comp->name, nullptr, nullptr);
-		// Desired size may not have been available, update to actual size
-		glfwGetWindowSize(g_window.glfw->window, &g_window.size.x, &g_window.size.y);
-		g_window.comp->size = g_window.size;
-		glfwSetWindowAspectRatio(g_window.glfw->window, g_window.size.x, g_window.size.y);
-
-		glfwMakeContextCurrent(g_window.glfw->window);
-		glfwSetWindowSizeCallback(g_window.glfw->window, [](auto window, int width, int height) {
-			g_window.size = { width, height };
-			g_window.comp->size = g_window.size;
-		});
-
-		glfwSetMouseButtonCallback(g_window.glfw->window, Input::onClick);
-		glfwSetCursorPosCallback(g_window.glfw->window, Input::onMouseMove);
-		glfwSetScrollCallback(g_window.glfw->window, Input::onScroll);
-		glfwSetKeyCallback(g_window.glfw->window, Input::onKey);
-	}
-
-	static void initImGui() noexcept {
-		ImGui::CreateContext();
-		auto & io = ImGui::GetIO();
-		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-		io.ConfigViewportsNoTaskBarIcon = true;
-
-		{ // Stolen from ImGui_ImplOpenGL3_CreateFontsTexture
-			ImFontConfig config;
-			config.SizePixels = 13.f * g_dpiScale;
-			io.Fonts->AddFontDefault(&config);
-			unsigned char * pixels;
-			int width, height;
-			io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
-
-			GLint last_texture;
-			glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_texture);
-			glBindTexture(GL_TEXTURE_2D, (GLuint)io.Fonts->TexID);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-			ImGui::GetStyle().ScaleAllSizes(g_dpiScale);
-			glBindTexture(GL_TEXTURE_2D, last_texture);
-		}
-
-		ImGui_ImplGlfw_InitForOpenGL(g_window.glfw->window, true);
-		ImGui_ImplOpenGL3_Init();
-	}
-
-	// declarations
+#pragma region init
+#pragma region declarations
+	static void initWindow();
+	static void initImGui();
 	static void addShaders();
-	//
+#pragma endregion
 	static void init() noexcept {
 		g_init = true;
 
@@ -312,6 +262,63 @@ namespace kengine {
 #endif
 	}
 
+	static void initWindow() {
+		glfwInit();
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+#ifndef KENGINE_NDEBUG
+		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+#endif
+		// TODO: depend on g_windowComponent->fullscreen
+		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+
+		g_window.glfw->window = glfwCreateWindow((int)g_window.comp->size.x, (int)g_window.comp->size.y, g_window.comp->name, nullptr, nullptr);
+		// Desired size may not have been available, update to actual size
+		glfwGetWindowSize(g_window.glfw->window, &g_window.size.x, &g_window.size.y);
+		g_window.comp->size = g_window.size;
+		glfwSetWindowAspectRatio(g_window.glfw->window, g_window.size.x, g_window.size.y);
+
+		glfwMakeContextCurrent(g_window.glfw->window);
+		glfwSetWindowSizeCallback(g_window.glfw->window, [](auto window, int width, int height) {
+			g_window.size = { width, height };
+			g_window.comp->size = g_window.size;
+		});
+
+		glfwSetMouseButtonCallback(g_window.glfw->window, Input::onClick);
+		glfwSetCursorPosCallback(g_window.glfw->window, Input::onMouseMove);
+		glfwSetScrollCallback(g_window.glfw->window, Input::onScroll);
+		glfwSetKeyCallback(g_window.glfw->window, Input::onKey);
+	}
+
+	static void initImGui() {
+		ImGui::CreateContext();
+		auto & io = ImGui::GetIO();
+		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+		io.ConfigViewportsNoTaskBarIcon = true;
+
+		{ // Stolen from ImGui_ImplOpenGL3_CreateFontsTexture
+			ImFontConfig config;
+			config.SizePixels = 13.f * g_dpiScale;
+			io.Fonts->AddFontDefault(&config);
+			unsigned char * pixels;
+			int width, height;
+			io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
+
+			GLint last_texture;
+			glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_texture);
+			glBindTexture(GL_TEXTURE_2D, (GLuint)io.Fonts->TexID);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+			ImGui::GetStyle().ScaleAllSizes(g_dpiScale);
+			glBindTexture(GL_TEXTURE_2D, last_texture);
+		}
+
+		ImGui_ImplGlfw_InitForOpenGL(g_window.glfw->window, true);
+		ImGui_ImplOpenGL3_Init();
+	}
+
 	static void addShaders() {
 		{ // GBuffer
 			*g_em += [=](Entity & e) { e += makeGBufferShaderComponent<Shaders::Debug>(*g_em); };
@@ -346,10 +353,12 @@ namespace kengine {
 			*g_em += [=](Entity & e) { e += makePostProcessShaderComponent<Shaders::SkyBox>(*g_em); };
 		}
 	}
+#pragma endregion init
 
-	// declarations
+#pragma region onEntityCreated
+#pragma region declarations
 	static void initShader(putils::gl::Program & program);
-	//
+#pragma endregion
 	static void onEntityCreated(Entity & e) {
 		if (g_gBufferIterator == nullptr)
 			return;
@@ -367,25 +376,16 @@ namespace kengine {
 			initShader(*e.get<PostProcessShaderComponent>().shader);
 	}
 
-	static void initGBuffer(size_t nbAttributes, const functions::GBufferAttributeIterator & iterator) {
-		g_gBufferTextureCount = nbAttributes;
-		g_gBufferIterator = iterator;
+	static void initShader(putils::gl::Program & p) {
+		p.init(g_gBufferTextureCount);
 
-		for (const auto & [e, shader] : g_em->getEntities<GBufferShaderComponent>())
-			initShader(*shader.shader);
-		for (const auto & [e, shader] : g_em->getEntities<LightingShaderComponent>())
-			initShader(*shader.shader);
-		for (const auto & [e, shader] : g_em->getEntities<PostLightingShaderComponent>())
-			initShader(*shader.shader);
-		for (const auto & [e, shader] : g_em->getEntities<PostProcessShaderComponent>())
-			initShader(*shader.shader);
-
-		for (const auto & [e, modelInfo] : g_em->getEntities<OpenGLModelComponent>())
-			for (const auto & meshInfo : modelInfo.meshes) {
-				glBindBuffer(GL_ARRAY_BUFFER, meshInfo.vertexBuffer);
-				modelInfo.registerVertexAttributes();
-			}
+		assert(g_gBufferIterator != nullptr);
+		int texture = 0;
+		g_gBufferIterator([&](const char * name) {
+			p.addGBufferTexture(name, texture++);
+		});
 	}
+#pragma endregion onEntityCreated
 
 	static void onEntityRemoved(Entity & e) {
 		if (e.has<ViewportComponent>()) {
@@ -418,84 +418,14 @@ namespace kengine {
 		}
 	}
 
-	static void initShader(putils::gl::Program & p) {
-		p.init(g_gBufferTextureCount);
-
-		assert(g_gBufferIterator != nullptr);
-		int texture = 0;
-		g_gBufferIterator([&](const char * name) {
-			p.addGBufferTexture(name, texture++);
-		});
-	}
-
-	static void createObject(Entity & e, const ModelDataComponent & modelData) {
-		auto & modelInfo = e.attach<OpenGLModelComponent>();
-		modelInfo.registerVertexAttributes = modelData.registerVertexAttributes;
-
-		for (const auto & meshData : modelData.meshes) {
-			OpenGLModelComponent::Mesh meshInfo;
-			meshInfo.vertexArrayObject.generate();
-			glBindVertexArray(meshInfo.vertexArrayObject);
-
-			meshInfo.vertexBuffer.generate();
-			glBindBuffer(GL_ARRAY_BUFFER, meshInfo.vertexBuffer);
-			glBufferData(GL_ARRAY_BUFFER, meshData.vertices.nbElements * meshData.vertices.elementSize, meshData.vertices.data, GL_STATIC_DRAW);
-
-			meshInfo.indexBuffer.generate();
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshInfo.indexBuffer);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, meshData.indices.nbElements * meshData.indices.elementSize, meshData.indices.data, GL_STATIC_DRAW);
-
-			modelData.registerVertexAttributes();
-
-			meshInfo.nbIndices = meshData.indices.nbElements;
-			meshInfo.indexType = meshData.indexType;
-
-			modelInfo.meshes.push_back(std::move(meshInfo));
-		}
-	}
-
-	static void loadTexture(Entity & e, TextureDataComponent & textureData) {
-		assert(*textureData.textureID == -1);
-		glGenTextures(1, textureData.textureID);
-
-		if (textureData.data != nullptr) {
-			GLenum format;
-
-			switch (textureData.components) {
-			case 1:
-				format = GL_RED;
-				break;
-			case 3:
-				format = GL_RGB;
-				break;
-			case 4:
-				format = GL_RGBA;
-				break;
-			default:
-				assert(false);
-			}
-
-			glBindTexture(GL_TEXTURE_2D, *textureData.textureID);
-			glTexImage2D(GL_TEXTURE_2D, 0, format, textureData.width, textureData.height, 0, format, GL_UNSIGNED_BYTE, textureData.data);
-			glGenerateMipmap(GL_TEXTURE_2D);
-
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-			if (textureData.free != nullptr)
-				textureData.free(textureData.data);
-		}
-
-		e.detach<TextureDataComponent>();
-	}
-
-	// declarations
+#pragma region execute
+#pragma region declarations
 	static void updateWindowProperties();
+	static void createObject(Entity & e, const ModelDataComponent & modelData);
+	static void loadTexture(Entity & e, TextureDataComponent & textureData);
 	static void doOpenGL();
 	static void doImGui();
-	//
+#pragma endregion
 	static void execute(float deltaTime) {
 		static bool first = true;
 		if (first) {
@@ -576,19 +506,83 @@ namespace kengine {
 		}
 	}
 
+	static void createObject(Entity & e, const ModelDataComponent & modelData) {
+		auto & modelInfo = e.attach<OpenGLModelComponent>();
+		modelInfo.registerVertexAttributes = modelData.registerVertexAttributes;
+
+		for (const auto & meshData : modelData.meshes) {
+			OpenGLModelComponent::Mesh meshInfo;
+			meshInfo.vertexArrayObject.generate();
+			glBindVertexArray(meshInfo.vertexArrayObject);
+
+			meshInfo.vertexBuffer.generate();
+			glBindBuffer(GL_ARRAY_BUFFER, meshInfo.vertexBuffer);
+			glBufferData(GL_ARRAY_BUFFER, meshData.vertices.nbElements * meshData.vertices.elementSize, meshData.vertices.data, GL_STATIC_DRAW);
+
+			meshInfo.indexBuffer.generate();
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshInfo.indexBuffer);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, meshData.indices.nbElements * meshData.indices.elementSize, meshData.indices.data, GL_STATIC_DRAW);
+
+			modelData.registerVertexAttributes();
+
+			meshInfo.nbIndices = meshData.indices.nbElements;
+			meshInfo.indexType = meshData.indexType;
+
+			modelInfo.meshes.push_back(std::move(meshInfo));
+		}
+	}
+
+	static void loadTexture(Entity & e, TextureDataComponent & textureData) {
+		assert(*textureData.textureID == -1);
+		glGenTextures(1, textureData.textureID);
+
+		if (textureData.data != nullptr) {
+			GLenum format;
+
+			switch (textureData.components) {
+			case 1:
+				format = GL_RED;
+				break;
+			case 3:
+				format = GL_RGB;
+				break;
+			case 4:
+				format = GL_RGBA;
+				break;
+			default:
+				assert(false);
+			}
+
+			glBindTexture(GL_TEXTURE_2D, *textureData.textureID);
+			glTexImage2D(GL_TEXTURE_2D, 0, format, textureData.width, textureData.height, 0, format, GL_UNSIGNED_BYTE, textureData.data);
+			glGenerateMipmap(GL_TEXTURE_2D);
+
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+			if (textureData.free != nullptr)
+				textureData.free(textureData.data);
+		}
+
+		e.detach<TextureDataComponent>();
+	}
+
 	struct CameraFramebufferComponent {
 		putils::gl::FrameBuffer fbo;
 		putils::gl::Texture depthTexture;
 		putils::Point2i resolution;
 	};
 
-	// declarations
+#pragma region doOpenGL
+#pragma region declarations
 	static void setupParams(const CameraComponent & cam, const ViewportComponent & viewport);
 	static void initFramebuffer(Entity & e);
 	static void fillGBuffer(EntityManager & em, Entity & e, const ViewportComponent & viewport) noexcept;
 	static void renderToTexture(EntityManager & em, const CameraFramebufferComponent & fb) noexcept;
 	static void blitTextureToViewport(const CameraFramebufferComponent & fb, const ViewportComponent & viewport);
-	//
+#pragma endregion
 	static void doOpenGL() {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -763,6 +757,7 @@ namespace kengine {
 			GL_COLOR_BUFFER_BIT, GL_LINEAR
 		);
 	}
+#pragma endregion doOpenGL
 
 	static void doImGui() {
 		ImGui_ImplOpenGL3_NewFrame();
@@ -781,14 +776,17 @@ namespace kengine {
 			glfwMakeContextCurrent(backup_current_context);
 		}
 	}
+#pragma endregion execute
 
-	// declarations
+
+#pragma region getEntityInPixel / getPositionInPixel
+#pragma region declarations
 	struct GBufferInfo {
 		GBufferComponent * gBuffer = nullptr;
 		size_t indexForPixel = 0;
 	};
 	static GBufferInfo getGBufferInfo(Entity::ID window, const putils::Point2ui & pixel);
-	//
+#pragma endregion
 	static Entity::ID getEntityInPixel(Entity::ID window, const putils::Point2ui & pixel) {
 		static constexpr auto GBUFFER_ENTITY_LOCATION = offsetof(GBufferTextures, entityID) / sizeof(GBufferTextures::entityID);
 
@@ -852,4 +850,26 @@ namespace kengine {
 
 		return ret;
 	}
+#pragma endregion getEntityInPixel / getPositionInPixel
+
+	static void initGBuffer(size_t nbAttributes, const functions::GBufferAttributeIterator & iterator) {
+		g_gBufferTextureCount = nbAttributes;
+		g_gBufferIterator = iterator;
+
+		for (const auto & [e, shader] : g_em->getEntities<GBufferShaderComponent>())
+			initShader(*shader.shader);
+		for (const auto & [e, shader] : g_em->getEntities<LightingShaderComponent>())
+			initShader(*shader.shader);
+		for (const auto & [e, shader] : g_em->getEntities<PostLightingShaderComponent>())
+			initShader(*shader.shader);
+		for (const auto & [e, shader] : g_em->getEntities<PostProcessShaderComponent>())
+			initShader(*shader.shader);
+
+		for (const auto & [e, modelInfo] : g_em->getEntities<OpenGLModelComponent>())
+			for (const auto & meshInfo : modelInfo.meshes) {
+				glBindBuffer(GL_ARRAY_BUFFER, meshInfo.vertexBuffer);
+				modelInfo.registerVertexAttributes();
+			}
+	}
+#pragma endregion OpenGLSystem
 }

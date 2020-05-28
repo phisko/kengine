@@ -24,10 +24,10 @@ namespace kengine::Shaders {
 	private:
 		void drawLight(const LightComponent & light, const glm::vec3 & pos, float size);
 
+#pragma region Uniforms
 	public:
 		putils::gl::Uniform<putils::NormalizedColor> _color;
 
-	public:
 		putils_reflection_parents(
 			putils_reflection_type(src::ProjViewModel::Vert::Uniforms)
 		);
@@ -35,6 +35,7 @@ namespace kengine::Shaders {
 		putils_reflection_attributes(
 			putils_reflection_attribute_private(&LightSphere::_color)
 		);
+#pragma endregion Uniforms
 
 	private:
 		EntityManager & _em;

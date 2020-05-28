@@ -11,6 +11,7 @@ struct SkyBoxOpenGLComponent {
 	putils::gl::Texture textureID;
 };
 
+#pragma region GLSL
 static const auto vert = R"(
 #version 330 core
 layout (location = 0) in vec3 pos;
@@ -40,6 +41,7 @@ void main() {
     FragColor = texture(tex, TexCoords) * color;
 }
 )";
+#pragma endregion GLSL
 
 namespace kengine::Shaders {
 	SkyBox::SkyBox(EntityManager & em)

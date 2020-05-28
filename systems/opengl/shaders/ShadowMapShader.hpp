@@ -42,6 +42,7 @@ namespace kengine::Shaders {
 
 		virtual void drawObjects(const Parameters & params) {}
 
+#pragma region Uniforms
 	protected:
 		putils::gl::Uniform<glm::mat4> _proj;
 		putils::gl::Uniform<glm::mat4> _view;
@@ -58,5 +59,6 @@ namespace kengine::Shaders {
 			putils_reflection_type(Shaders::src::DepthCube::Geom::Uniforms),
 			putils_reflection_type(Shaders::src::DepthCube::Frag::Uniforms)
 		);
+#pragma endregion Uniforms
 	};
 }

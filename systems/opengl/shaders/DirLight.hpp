@@ -24,11 +24,13 @@ namespace kengine::Shaders {
 	private:
 		void setLight(const DirLightComponent & light); 
 
+#pragma region Uniforms
 	public:
 		putils_reflection_parents(
 			putils_reflection_type(src::CSM::Frag::Uniforms),
 			putils_reflection_type(src::DirLight::Frag::Uniforms)
 		);
+#pragma endregion Uniforms
 
 	private:
 		EntityManager & _em;

@@ -30,11 +30,13 @@ namespace kengine::Shaders {
 		EntityManager & _em;
 		GLuint _shadowMapTextureID;
 
+#pragma region Uniforms
 	public:
 		putils_reflection_parents(
 			putils_reflection_type(src::ShadowCube::Frag::Uniforms),
 			putils_reflection_type(src::GodRays::Frag::Uniforms),
 			putils_reflection_type(src::PointLight::GetDirection::Uniforms)
 		);
+#pragma endregion Uniforms
 	};
 }

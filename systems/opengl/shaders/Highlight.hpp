@@ -17,6 +17,7 @@ namespace kengine::Shaders {
 	private:
 		EntityManager & _em;
 
+#pragma region Uniforms
 	public:
 		putils::gl::Uniform<glm::vec3> _viewPos;
 		putils::gl::Uniform<putils::Point2f> _screenSize;
@@ -33,5 +34,6 @@ namespace kengine::Shaders {
 			putils_reflection_attribute_private(&Highlight::_highlightColor),
 			putils_reflection_attribute_private(&Highlight::_intensity)
 		);
+#pragma endregion Uniforms
 	};
 }

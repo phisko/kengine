@@ -18,6 +18,7 @@ namespace kengine::Shaders {
 		EntityManager & _em;
 		size_t _textureID;
 
+#pragma region Uniforms
 	public:
 		putils::gl::Uniform<glm::mat4> _view;
 		putils::gl::Uniform<glm::mat4> _proj;
@@ -36,5 +37,6 @@ namespace kengine::Shaders {
 			putils_reflection_attribute_private(&SkyBox::_entityID),
 			putils_reflection_attribute_private(&SkyBox::_color)
 		);
+#pragma endregion Uniforms
 	};
 }

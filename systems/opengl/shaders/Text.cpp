@@ -19,6 +19,7 @@
 static FT_Library g_ft;
 static GLuint g_vao, g_vbo;
 
+#pragma region GLSL
 static const auto vert = R"(
 #version 330 core
 
@@ -74,6 +75,7 @@ void main() {
 	gentityID = entityID;
 }
 )";
+#pragma endregion GLSL
 
 namespace kengine::Shaders {
 	struct Font {
@@ -121,22 +123,6 @@ namespace kengine::Shaders {
 
 	static std::unordered_map<TextComponent::string, FontSizes> g_fonts;
 
-	static auto createFont(const char * file, size_t size) {
-		Font font;
-
-		if (FT_New_Face(g_ft, file, 0, &font.face)) {
-			std::cerr << putils::termcolor::red << "[FreeType] Error loading font `" << file << "`\n" << putils::termcolor::reset;
-			return g_fonts[file].sizes.end();
-		}
-
-		if (FT_Set_Pixel_Sizes(font.face, 0, (FT_UInt)size)) {
-			std::cerr << putils::termcolor::red << "[FreeType] Error setting size `" << size << "` for font `" << file << "`\n" << putils::termcolor::red;
-			return g_fonts[file].sizes.end();
-		}
-
-		return g_fonts[file].sizes.insert(std::make_pair(size, std::move(font))).first;
-	}
-
 	Text::Text(EntityManager & em)
 		: Program(false, putils_nameof(Text)),
 		_em(em)
@@ -178,29 +164,46 @@ namespace kengine::Shaders {
 		putils::gl::Uniform<glm::mat4> model;
 	};
 
-	static putils::Point2f getSizeAndGenerateCharacters(const TextComponent & text, Font & font, float scaleX, float scaleY) {
-		putils::Point2f size;
+#pragma region declarations
+	static void drawObject(const putils::gl::Program::Parameters & params, const TextComponent & text, const TransformComponent & transform, Uniforms uniforms, const glm::vec2 & screenSize, const TextComponent2D * comp = nullptr);
+#pragma endregion
+	void Text::run(const Parameters & params) {
+		const Uniforms uniforms{ _textureID, _color, _model };
 
-		for (const auto c : text.text) {
-			auto it = font.characters.find(c);
-			if (it == font.characters.end()) {
-				it = font.createCharacter(c);
-				if (it == font.characters.end())
-					continue;
-			}
+		use();
 
-			const auto & character = it->second;
-			size.x += (float)(character.advance >> 6) * scaleX;
+		_viewPos = params.camPos;
+		glActiveTexture((GLenum)(GL_TEXTURE0 + uniforms.textureID));
+		glBindVertexArray(g_vao);
+		glBindBuffer(GL_ARRAY_BUFFER, g_vbo);
 
-			if (character.size.y > size.y)
-				size.y = (float)character.size.y;
+		_view = glm::mat4(1.f);
+		_proj = glm::mat4(1.f);
+		for (const auto &[e, text, transform] : _em.getEntities<TextComponent2D, TransformComponent>()) {
+			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
+				continue;
+
+			_entityID = (float)e.id;
+			drawObject(params, text, transform, uniforms, glm::vec2(params.viewport.size.x, params.viewport.size.y), &text);
 		}
 
-		size.y *= scaleY;
-		return size;
+		_view = params.view;
+		_proj = params.proj;
+		for (const auto &[e, text, transform] : _em.getEntities<TextComponent3D, TransformComponent>()) {
+			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
+				continue;
+
+			_entityID = (float)e.id;
+			drawObject(params, text, transform, uniforms, glm::vec2(params.viewport.size.x, params.viewport.size.y));
+		}
 	}
 
-	static void drawObject(const putils::gl::Program::Parameters & params, const TextComponent & text, const TransformComponent & transform, Uniforms uniforms, const glm::vec2 & screenSize, const TextComponent2D * comp = nullptr) {
+#pragma region drawObject
+#pragma region declarations
+	static decltype(FontSizes::sizes)::iterator createFont(const char * file, size_t size);
+	static putils::Point2f getSizeAndGenerateCharacters(const TextComponent & text, Font & font, float scaleX, float scaleY);
+#pragma endregion
+	static void drawObject(const putils::gl::Program::Parameters & params, const TextComponent & text, const TransformComponent & transform, Uniforms uniforms, const glm::vec2 & screenSize, const TextComponent2D * comp) {
 		uniforms.color = text.color;
 
 		auto & fontSizes = g_fonts[text.font];
@@ -321,34 +324,42 @@ namespace kengine::Shaders {
 		}
 	}
 
-	void Text::run(const Parameters & params) {
-		const Uniforms uniforms{ _textureID, _color, _model };
+	static decltype(FontSizes::sizes)::iterator createFont(const char * file, size_t size) {
+		Font font;
 
-		use();
-
-		_viewPos = params.camPos;
-		glActiveTexture((GLenum)(GL_TEXTURE0 + uniforms.textureID));
-		glBindVertexArray(g_vao);
-		glBindBuffer(GL_ARRAY_BUFFER, g_vbo);
-
-		_view = glm::mat4(1.f);
-		_proj = glm::mat4(1.f);
-		for (const auto &[e, text, transform] : _em.getEntities<TextComponent2D, TransformComponent>()) {
-			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
-				continue;
-
-			_entityID = (float)e.id;
-			drawObject(params, text, transform, uniforms, glm::vec2(params.viewport.size.x, params.viewport.size.y), &text);
+		if (FT_New_Face(g_ft, file, 0, &font.face)) {
+			std::cerr << putils::termcolor::red << "[FreeType] Error loading font `" << file << "`\n" << putils::termcolor::reset;
+			return g_fonts[file].sizes.end();
 		}
 
-		_view = params.view;
-		_proj = params.proj;
-		for (const auto &[e, text, transform] : _em.getEntities<TextComponent3D, TransformComponent>()) {
-			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
-				continue;
-
-			_entityID = (float)e.id;
-			drawObject(params, text, transform, uniforms, glm::vec2(params.viewport.size.x, params.viewport.size.y));
+		if (FT_Set_Pixel_Sizes(font.face, 0, (FT_UInt)size)) {
+			std::cerr << putils::termcolor::red << "[FreeType] Error setting size `" << size << "` for font `" << file << "`\n" << putils::termcolor::red;
+			return g_fonts[file].sizes.end();
 		}
+
+		return g_fonts[file].sizes.insert(std::make_pair(size, std::move(font))).first;
 	}
+
+	static putils::Point2f getSizeAndGenerateCharacters(const TextComponent & text, Font & font, float scaleX, float scaleY) {
+		putils::Point2f size;
+
+		for (const auto c : text.text) {
+			auto it = font.characters.find(c);
+			if (it == font.characters.end()) {
+				it = font.createCharacter(c);
+				if (it == font.characters.end())
+					continue;
+			}
+
+			const auto & character = it->second;
+			size.x += (float)(character.advance >> 6) * scaleX;
+
+			if (character.size.y > size.y)
+				size.y = (float)character.size.y;
+		}
+
+		size.y *= scaleY;
+		return size;
+	}
+#pragma endregion drawObject
 }

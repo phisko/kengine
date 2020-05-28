@@ -27,12 +27,14 @@ namespace kengine::Shaders {
 		void init(size_t firstTextureID) override;
 		void run(const Parameters & params) override;
 
+#pragma region Uniforms
 	public:
 		putils_reflection_parents(
 			putils_reflection_type(src::ProjViewModel::Vert::Uniforms),
 			putils_reflection_type(src::ShadowMap::Frag::Uniforms),
 			putils_reflection_type(src::SpotLight::Frag::Uniforms)
 		);
+#pragma endregion Uniforms
 
 	private:
 		EntityManager & _em;
