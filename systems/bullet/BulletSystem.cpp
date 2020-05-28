@@ -34,6 +34,7 @@
 #include "btBulletDynamicsCommon.h"
 #include "BulletCollision/CollisionDispatch/btGhostObject.h"
 
+#pragma region Helpers
 static glm::vec3 toVec(const putils::Point3f & p) { return { p.x, p.y, p.z }; }
 static putils::Point3f toPutils(const btVector3 & vec) { return { vec.getX(), vec.getY(), vec.getZ() }; }
 static btVector3 toBullet(const putils::Point3f & p) { return { p.x, p.y, p.z }; }
@@ -80,6 +81,20 @@ static btTransform toBullet(const kengine::TransformComponent & parent, const ke
 	return ret;
 }
 
+namespace putils {
+	inline bool operator<(const Point3f & lhs, const Point3f & rhs) {
+		if (lhs.x < rhs.x) return true;
+		if (lhs.x > rhs.x) return false;
+		if (lhs.y < rhs.y) return true;
+		if (lhs.y > rhs.y) return false;
+		if (lhs.z < rhs.z) return true;
+		if (lhs.z > rhs.z) return false;
+		return false;
+	}
+}
+#pragma endregion Helpers
+
+#pragma region Debug Drawer
 #ifndef KENGINE_NDEBUG
 namespace debug {
 	class Drawer : public btIDebugDraw {
@@ -125,29 +140,22 @@ namespace debug {
 	static Drawer * drawer = nullptr;
 }
 #endif
-
-namespace putils {
-	inline bool operator<(const Point3f & lhs, const Point3f & rhs) {
-		if (lhs.x < rhs.x) return true;
-		if (lhs.x > rhs.x) return false;
-		if (lhs.y < rhs.y) return true;
-		if (lhs.y > rhs.y) return false;
-		if (lhs.z < rhs.z) return true;
-		if (lhs.z > rhs.z) return false;
-		return false;
-	}
-}
+#pragma endregion Debug Drawer
 
 namespace kengine {
+#pragma region Adjustables
 	static auto ENABLE_DEBUG = false;
 	static auto GRAVITY = 1.f;
+#pragma endregion Adjustables
 
-	static btDefaultCollisionConfiguration collisionConfiguration;
-	static btCollisionDispatcher dispatcher(&collisionConfiguration);
-	static btDbvtBroadphase overlappingPairCache;
-	static btSequentialImpulseConstraintSolver solver;
+#pragma region Globals
+	static btDefaultCollisionConfiguration g_collisionConfiguration;
+	static btCollisionDispatcher g_dispatcher(&g_collisionConfiguration);
+	static btDbvtBroadphase g_overlappingPairCache;
+	static btSequentialImpulseConstraintSolver g_solver;
 
-	static btDiscreteDynamicsWorld dynamicsWorld(&dispatcher, &overlappingPairCache, &solver, &collisionConfiguration);
+	static btDiscreteDynamicsWorld g_dynamicsWorld(&g_dispatcher, &g_overlappingPairCache, &g_solver, &g_collisionConfiguration);
+#pragma endregion Globals
 
 	struct BulletPhysicsComponent {
 		struct MotionState : public btMotionState {
@@ -172,7 +180,7 @@ namespace kengine {
 
 		~BulletPhysicsComponent() noexcept {
 			if (active)
-				dynamicsWorld.removeRigidBody(&body);
+				g_dynamicsWorld.removeRigidBody(&body);
 		}
 
 		BulletPhysicsComponent() noexcept = default;
@@ -182,10 +190,10 @@ namespace kengine {
 
 	static EntityManager * g_em;
 
-	// declarations
+#pragma region declarations
 	static void execute(float deltaTime);
 	static void queryPosition(const putils::Point3f & pos, float radius, const EntityIteratorFunc & func);
-	//
+#pragma endregion
 	EntityCreator * BulletSystem(EntityManager & em) {
 		g_em = &em;
 
@@ -208,11 +216,12 @@ namespace kengine {
 		};
 	}
 
-	// declarations
+#pragma region execute
+#pragma region declarations
 	static void addBulletComponent(Entity & e, TransformComponent & transform, PhysicsComponent & physics, const Entity & modelEntity);
 	static void updateBulletComponent(Entity & e, BulletPhysicsComponent & comp, const TransformComponent & transform, PhysicsComponent & physics, const Entity & modelEntity, bool first = false);
 	static void detectCollisions();
-	//
+#pragma endregion
 	static void execute(float deltaTime) {
 		for (auto & [e, instance, transform, physics, comp] : g_em->getEntities<InstanceComponent, TransformComponent, PhysicsComponent, BulletPhysicsComponent>()) {
 			const auto model = g_em->getEntity(instance.model);
@@ -231,14 +240,14 @@ namespace kengine {
 		for (auto & [e, bullet, noPhys] : g_em->getEntities<BulletPhysicsComponent, no<PhysicsComponent>>())
 			e.detach<BulletPhysicsComponent>();
 
-		dynamicsWorld.setGravity({ 0.f, -GRAVITY, 0.f });
-		dynamicsWorld.stepSimulation(deltaTime);
+		g_dynamicsWorld.setGravity({ 0.f, -GRAVITY, 0.f });
+		g_dynamicsWorld.stepSimulation(deltaTime);
 		detectCollisions();
 
 #ifndef KENGINE_NDEBUG
 		debug::drawer->cleanup();
-		dynamicsWorld.setDebugDrawer(ENABLE_DEBUG ? debug::drawer : nullptr);
-		dynamicsWorld.debugDrawWorld();
+		g_dynamicsWorld.setDebugDrawer(ENABLE_DEBUG ? debug::drawer : nullptr);
+		g_dynamicsWorld.debugDrawWorld();
 #endif
 	}
 
@@ -317,7 +326,7 @@ namespace kengine {
 		comp.body.setUserIndex((int)e.id);
 
 		updateBulletComponent(e, comp, transform, physics, modelEntity, true);
-		dynamicsWorld.addRigidBody(&comp.body);
+		g_dynamicsWorld.addRigidBody(&comp.body);
 	}
 
 	static void updateBulletComponent(Entity & e, BulletPhysicsComponent & comp, const TransformComponent & transform, PhysicsComponent & physics, const Entity & modelEntity, bool first) {
@@ -371,12 +380,12 @@ namespace kengine {
 	}
 
 	static void detectCollisions() {
-		const auto numManifolds = dispatcher.getNumManifolds();
+		const auto numManifolds = g_dispatcher.getNumManifolds();
 		if (numManifolds <= 0)
 			return;
 		for (const auto & [_, onCollision] : g_em->getEntities<functions::OnCollision>())
 			for (int i = 0; i < numManifolds; ++i) {
-				const auto contactManifold = dispatcher.getManifoldByIndexInternal(i);
+				const auto contactManifold = g_dispatcher.getManifoldByIndexInternal(i);
 				const auto objectA = (btCollisionObject *)(contactManifold->getBody0());
 				const auto objectB = (btCollisionObject *)(contactManifold->getBody1());
 
@@ -387,6 +396,7 @@ namespace kengine {
 				onCollision(e1, e2);
 			}
 	}
+#pragma endregion execute
 
 	static void queryPosition(const putils::Point3f & pos, float radius, const EntityIteratorFunc & func) {
 		btSphereShape sphere(radius);
@@ -413,6 +423,6 @@ namespace kengine {
 		};
 
 		Callback callback(ghost, func);
-		dynamicsWorld.contactTest(&ghost, callback);
+		g_dynamicsWorld.contactTest(&ghost, callback);
 	}
 }
