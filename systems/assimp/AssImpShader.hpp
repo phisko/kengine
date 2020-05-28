@@ -15,6 +15,7 @@ namespace kengine {
 		void init(size_t firstTextureID) override;
 		void run(const Parameters & params) override;
 
+#pragma region Uniforms
 	public:
 		putils::gl::Uniform<glm::mat4> _model;
 		putils::gl::Uniform<glm::mat4> _view;
@@ -47,6 +48,7 @@ namespace kengine {
 			putils_reflection_attribute_private(&AssImpShader::_entityID),
 			putils_reflection_attribute_private(&AssImpShader::_color)
 		);
+#pragma endregion Uniforms
 
 	private:
 		EntityManager & _em;

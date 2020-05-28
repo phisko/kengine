@@ -18,6 +18,7 @@ namespace kengine {
 	private:
 		EntityManager & _em;
 
+#pragma region Uniforms
 	public:
 		putils::gl::Uniform<glm::mat4> _proj;
 		putils::gl::Uniform<glm::mat4> _view;
@@ -32,5 +33,6 @@ namespace kengine {
 
 			putils_reflection_attribute_private(&AssImpShadowMap::_bones)
 		);
+#pragma endregion Uniforms
 	};
 }

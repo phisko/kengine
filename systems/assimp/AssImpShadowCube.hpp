@@ -23,6 +23,7 @@ namespace kengine {
 	private:
 		EntityManager & _em;
 
+#pragma region Uniforms
 	public:
 		GLint _bones;
 
@@ -33,5 +34,6 @@ namespace kengine {
 		putils_reflection_parents(
 			putils_reflection_type(Shaders::ShadowCubeShader)
 		);
+#pragma endregion Uniforms
 	};
 }
