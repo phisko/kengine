@@ -18,6 +18,7 @@
 #include "systems/opengl/shaders/ApplyTransparencySrc.hpp"
 #include "systems/opengl/shaders/shaderHelper.hpp"
 
+#pragma region GLSL
 static const char * vert = R"(
 #version 330
 
@@ -66,6 +67,7 @@ void main() {
 	gentityid = 0.0;
 }
 )";
+#pragma endregion GLSL
 
 namespace kengine {
 	static struct {
@@ -89,7 +91,7 @@ namespace kengine {
 					return;
 				if (ImGui::Begin("RecastShader")) {
 					if (ImGui::BeginCombo("File", g_adjustables.fileName.c_str())) {
-						for (const auto & [e, model, recast] : em.getEntities<ModelComponent, RecastComponent>())
+						for (const auto & [e, model, recast] : em.getEntities<ModelComponent, RecastNavMeshComponent>())
 							if (ImGui::Selectable(model.file))
 								g_adjustables.fileName = model.file;
 						ImGui::EndCombo();
@@ -100,6 +102,7 @@ namespace kengine {
 		};
 	}
 
+#pragma region Program
 	void RecastDebugShader::init(size_t firstTexture) {
 		initWithShaders<RecastDebugShader>(putils::make_vector(
 			ShaderDescription{ vert, GL_VERTEX_SHADER },
@@ -134,11 +137,13 @@ namespace kengine {
 			const auto model = _em.getEntity(instance.model);
 			_model = shaderHelper::getModelMatrix(model.get<ModelComponent>(), transform);
 
-			const auto & comp = model.get<RecastComponent>();
+			const auto & comp = model.get<RecastNavMeshComponent>();
 			duDebugDrawNavMesh(this, *comp.navMesh, 0);
 		}
 	}
+#pragma endregion Program
 
+#pragma region duDebugDraw
 	void RecastDebugShader::begin(duDebugDrawPrimitives prim, float size) {
 		switch (prim) {
 		case duDebugDrawPrimitives::DU_DRAW_LINES:
@@ -182,6 +187,7 @@ namespace kengine {
 		glDrawArrays(_currentVertexType, 0, (GLsizei)_currentMesh.size());
 		_currentMesh.clear();
 	}
+#pragma endregion duDebugDraw
 }
 
 #endif
