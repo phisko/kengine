@@ -27,9 +27,9 @@
 namespace kengine {
 	static EntityManager * g_em;
 
-	// declarations
+#pragma region declarations
 	static void onEntityCreated(Entity & e);
-	//
+#pragma endregion
 	EntityCreator * MagicaVoxelSystem(EntityManager & em) {
 		g_em = &em;
 
@@ -38,10 +38,11 @@ namespace kengine {
 		};
 	}
 
-	// declarations
+#pragma region onEntityCreated
+#pragma region declarations
 	static void loadModel(Entity & e);
 	static void setModel(Entity & e);
-	//
+#pragma endregion
 	static void onEntityCreated(Entity & e) {
 		if (e.has<ModelComponent>())
 			loadModel(e);
@@ -73,6 +74,8 @@ namespace kengine {
 		};
 	}
 
+#pragma region loadModel
+#pragma region declarations
 	namespace detailMagicaVoxel {
 		static auto buildMesh(PolyVox::RawVolume<PolyVoxComponent::VertexData> & volume) {
 			const auto encodedMesh = PolyVox::extractCubicMesh(&volume, volume.getEnclosingRegion());
@@ -89,13 +92,12 @@ namespace kengine {
 		MagicaVoxel::ChunkContent::Size size;
 	};
 
-	// declarations
 	static void loadBinaryModel(Entity & e, const char * binaryFile);
 	static MeshInfo loadVoxModel(const char * f);
 	static ModelDataComponent generateModelData(Entity & e, const MeshType & mesh);
 	static void serialize(const char * f, const ModelDataComponent & modelData, const MagicaVoxel::ChunkContent::Size & size);
 	static void applyOffset(Entity & e, const MagicaVoxel::ChunkContent::Size & size);
-	//
+#pragma endregion
 	static void loadModel(Entity & e) {
 		const auto & f = e.get<ModelComponent>().file.c_str();
 		if (putils::file_extension(f) != "vox")
@@ -126,7 +128,74 @@ namespace kengine {
 #endif
 	}
 
-	// declarations
+#pragma region loadBinaryModel
+#pragma region declarations
+	static void unserialize(const char * f, ModelDataComponent::Mesh & meshData, MagicaVoxel::ChunkContent::Size & size);
+	static ModelDataComponent::FreeFunc release(Entity::ID id, EntityManager & em);
+#pragma endregion
+	static void loadBinaryModel(Entity & e, const char * binaryFile) {
+		MagicaVoxel::ChunkContent::Size size;
+
+		ModelDataComponent modelData;
+		modelData.meshes.push_back({});
+		unserialize(binaryFile, modelData.meshes.back(), size);
+		modelData.free = release(e.id, *g_em);
+		modelData.init<MeshType::VertexType>();
+		e += std::move(modelData);
+
+		auto & box = e.get<ModelComponent>().boundingBox;
+		box.position.x += size.x / 2.f * box.size.x;
+		box.position.z += size.y / 2.f * box.size.z;
+	}
+
+	static void unserialize(const char * f, ModelDataComponent::Mesh & meshData, MagicaVoxel::ChunkContent::Size & size) {
+		std::ifstream file(f, std::ofstream::binary);
+		assert(f);
+
+		const auto parse = [&](auto & val) {
+			file.read((char *)&val, sizeof(val));
+		};
+
+		{
+			parse(meshData.vertices.nbElements);
+			parse(meshData.vertices.elementSize);
+			const auto vertexBufferSize = meshData.vertices.nbElements * meshData.vertices.elementSize;
+			meshData.vertices.data = new char[vertexBufferSize];
+			file.read((char *)meshData.vertices.data, vertexBufferSize);
+		}
+
+		{
+			parse(meshData.indices.nbElements);
+			parse(meshData.indices.elementSize);
+			const auto indexBufferSize = meshData.indices.nbElements * meshData.indices.elementSize;
+			meshData.indices.data = new char[indexBufferSize];
+			file.read((char *)meshData.indices.data, indexBufferSize);
+		}
+
+		parse(meshData.indexType);
+
+		parse(size);
+	}
+
+	static ModelDataComponent::FreeFunc release(Entity::ID id, EntityManager & em) {
+		return [&em, id] {
+			auto & e = em.getEntity(id);
+			if (e.has<MagicaVoxelModelComponent>()) {
+				auto & model = e.get<MagicaVoxelModelComponent>();
+				model.mesh.clear();
+				e.detach<MagicaVoxelModelComponent>();
+			}
+			else { // Was unserialized and we (violently) `new`-ed the data buffers
+				const auto & modelData = e.get<ModelDataComponent>();
+				delete[] modelData.meshes[0].vertices.data;
+				delete[] modelData.meshes[0].indices.data;
+			}
+		};
+	}
+#pragma endregion loadBinaryModel
+
+#pragma region loadVoxModel
+#pragma region declarations
 	static void checkHeader(std::istream & s);
 	static bool idMatches(const char * s1, const char * s2);
 	template<typename T>
@@ -134,7 +203,7 @@ namespace kengine {
 		s.read((char *)&header, sizeof(header));
 		assert(s.gcount() == sizeof(header));
 	}
-	//
+#pragma endregion
 	static MeshInfo loadVoxModel(const char * f) {
 		std::ifstream stream(f, std::ios::binary);
 		assert(stream);
@@ -187,10 +256,8 @@ namespace kengine {
 		assert(idMatches(header.id, "VOX "));
 		assert(header.versionNumber == 150);
 	}
+#pragma endregion loadVoxModel
 
-	// declarations
-	static ModelDataComponent::FreeFunc release(Entity::ID id, EntityManager & em);
-	//
 	static ModelDataComponent generateModelData(Entity & e, const MeshType & mesh) {
 		ModelDataComponent modelData;
 		modelData.meshes.push_back({});
@@ -204,23 +271,6 @@ namespace kengine {
 
 		return modelData;
 	}
-
-	static ModelDataComponent::FreeFunc release(Entity::ID id, EntityManager & em) {
-		return [&em, id] {
-			auto & e = em.getEntity(id);
-			if (e.has<MagicaVoxelModelComponent>()) {
-				auto & model = e.get<MagicaVoxelModelComponent>();
-				model.mesh.clear();
-				e.detach<MagicaVoxelModelComponent>();
-			}
-			else { // Was unserialized and we (violently) `new`-ed the data buffers
-				const auto & modelData = e.get<ModelDataComponent>();
-				delete[] modelData.meshes[0].vertices.data;
-				delete[] modelData.meshes[0].indices.data;
-			}
-		};
-	}
-
 
 	static void applyOffset(Entity & e, const MagicaVoxel::ChunkContent::Size & size) {
 		auto & box = e.get<ModelComponent>().boundingBox;
@@ -256,51 +306,7 @@ namespace kengine {
 
 		write(size);
 	}
-
-	// declarations
-	static void unserialize(const char * f, ModelDataComponent::Mesh & meshData, MagicaVoxel::ChunkContent::Size & size);
-	//
-	static void loadBinaryModel(Entity & e, const char * binaryFile) {
-		MagicaVoxel::ChunkContent::Size size;
-
-		ModelDataComponent modelData;
-		modelData.meshes.push_back({});
-		unserialize(binaryFile, modelData.meshes.back(), size);
-		modelData.free = release(e.id, *g_em);
-		modelData.init<MeshType::VertexType>();
-		e += std::move(modelData);
-
-		auto & box = e.get<ModelComponent>().boundingBox;
-		box.position.x += size.x / 2.f * box.size.x;
-		box.position.z += size.y / 2.f * box.size.z;
-	}
-
-	static void unserialize(const char * f, ModelDataComponent::Mesh & meshData, MagicaVoxel::ChunkContent::Size & size) {
-		std::ifstream file(f, std::ofstream::binary);
-		assert(f);
-
-		const auto parse = [&](auto & val) {
-			file.read((char *)&val, sizeof(val));
-		};
-
-		{
-			parse(meshData.vertices.nbElements);
-			parse(meshData.vertices.elementSize);
-			const auto vertexBufferSize = meshData.vertices.nbElements * meshData.vertices.elementSize;
-			meshData.vertices.data = new char[vertexBufferSize];
-			file.read((char *)meshData.vertices.data, vertexBufferSize);
-		}
-
-		{
-			parse(meshData.indices.nbElements);
-			parse(meshData.indices.elementSize);
-			const auto indexBufferSize = meshData.indices.nbElements * meshData.indices.elementSize;
-			meshData.indices.data = new char[indexBufferSize];
-			file.read((char *)meshData.indices.data, indexBufferSize);
-		}
-
-		parse(meshData.indexType);
-
-		parse(size);
-	}
+#pragma endregion loadModel
 }
+
+#pragma endregion onEntityCreated

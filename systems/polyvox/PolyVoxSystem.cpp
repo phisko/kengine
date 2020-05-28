@@ -14,9 +14,9 @@
 namespace kengine {
 	static EntityManager * g_em;
 
-	// declarations
+#pragma region declarations
 	static void execute(float deltaTime);
-	//
+#pragma endregion
 	EntityCreator * PolyVoxSystem(EntityManager & em) {
 		g_em = &em;
 
@@ -26,6 +26,8 @@ namespace kengine {
 		};
 	}
 
+#pragma region execute
+#pragma region declarations
 	namespace detailPolyVox {
 		static auto buildMesh(PolyVox::RawVolume<PolyVoxComponent::VertexData> & volume) {
 			const auto encodedMesh = PolyVox::extractCubicMesh(&volume, volume.getEnclosingRegion());
@@ -39,15 +41,8 @@ namespace kengine {
 		MeshType mesh;
 	};
 
-	static auto FreePolyVoxMeshData(Entity::ID id, EntityManager & em) {
-		return [id, &em] {
-			auto & e = em.getEntity(id);
-			auto & mesh = e.attach<PolyVoxMeshContainerComponent>().mesh; // previous `attach` hasn't been processed yet, so `get` would assert
-			mesh.clear();
-			e.detach<PolyVoxMeshContainerComponent>();
-		};
-	}
-
+	static ModelDataComponent::FreeFunc FreePolyVoxMeshData(Entity::ID id, EntityManager & em);
+#pragma endregion
 	static void execute(float deltaTime) {
 		for (auto &[e, poly] : g_em->getEntities<PolyVoxComponent>()) {
 			if (!poly.changed)
@@ -75,4 +70,14 @@ namespace kengine {
 			e += std::move(modelData);
 		}
 	}
+
+	static ModelDataComponent::FreeFunc FreePolyVoxMeshData(Entity::ID id, EntityManager & em) {
+		return [id, &em] {
+			auto & e = em.getEntity(id);
+			auto & mesh = e.attach<PolyVoxMeshContainerComponent>().mesh; // previous `attach` hasn't been processed yet, so `get` would assert
+			mesh.clear();
+			e.detach<PolyVoxMeshContainerComponent>();
+		};
+	}
+#pragma endregion execute
 }

@@ -13,6 +13,7 @@
 
 #include "systems/opengl/shaders/shaderHelper.hpp"
 
+#pragma region GLSL
 static inline const char * vert = R"(
 #version 330
 
@@ -66,6 +67,7 @@ void main() {
 	gentityID = entityID;
 }
         )";
+#pragma endregion GLSL
 
 namespace kengine {
 	static glm::vec3 toVec(const putils::Point3f & p) { return { p.x, p.y, p.z }; }
