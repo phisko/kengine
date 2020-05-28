@@ -20,9 +20,9 @@ namespace kengine {
 	static EntityManager * g_em;
 	static bool * g_enabled;
 
-	// declarations
+#pragma region declarations
 	static void draw();
-	//
+#pragma endregion
 	EntityCreator * ImGuiPromptSystem(EntityManager & em) {
 		g_em = &em;
 
@@ -39,6 +39,7 @@ namespace kengine {
 		Python
 	};
 
+#pragma region Globals
 	static Language g_selectedLanguage = Language::Lua;
 	static int g_maxLines = 128;
 	static char g_buff[1024];
@@ -64,12 +65,14 @@ namespace kengine {
 	};
 
 	static History g_history;
+#pragma endregion
 
-	// declarations
+#pragma region draw
+#pragma region declarations
 	static void history();
 	static bool prompt();
 	static void eval();
-	//
+#pragma endregion
 	static void draw() {
 		if (!*g_enabled)
 			return;
@@ -141,10 +144,11 @@ namespace kengine {
 		return ret;
 	}
 
-	// declarations
+#pragma region eval
+#pragma region declarations
 	static void evalLua();
 	static void evalPython();
-	//
+#pragma endregion
 	static void eval() {
 		switch (g_selectedLanguage) {
 		case Language::Lua:
@@ -158,10 +162,11 @@ namespace kengine {
 		}
 	}
 
-	// declarations
+#pragma region evalLua
+#pragma region declarations
 	static void setupOutputRedirect(sol::state & state);
 	static bool g_bActive = false;
-	//
+#pragma endregion
 	static void evalLua() {
 #ifndef KENGINE_LUA
 		addLineToHistory(
@@ -190,9 +195,10 @@ namespace kengine {
 #endif
 	}
 
-	// declarations
+#pragma region setupOutputRedirect
+#pragma region declarations
 	static int addToHistoryOrPrint(lua_State * L, const putils::NormalizedColor & color);
-	//
+#pragma endregion
 	static void setupOutputRedirect(sol::state & state) {
 		static const luaL_Reg printlib[] = {
 			{ "print", [](lua_State * L) { return addToHistoryOrPrint(L, {}); } },
@@ -230,7 +236,11 @@ namespace kengine {
 			std::cout << line << '\n';
 		return 0;
 	}
+#pragma endregion setupOutputRedirect
+#pragma endregion evalLua
 
+#pragma region evalPython
+#pragma region PythonRedirectHelper
 #ifdef KENGINE_PYTHON
 	// Stolen from https://github.com/pybind/pybind11/issues/1622
 	class PyStdErrOutStreamRedirect {
@@ -264,7 +274,7 @@ namespace kengine {
 		}
 	};
 #endif
-
+#pragma endregion PythonRedirectHelper
 	static void evalPython() {
 #ifndef KENGINE_PYTHON
 		addLineToHistory(
@@ -290,4 +300,7 @@ namespace kengine {
 			g_history.addError(std::move(err));
 #endif
 	}
+#pragma endregion evalPython
+#pragma endregion eval
+#pragma endregion draw
 }
