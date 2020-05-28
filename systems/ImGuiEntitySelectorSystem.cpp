@@ -17,9 +17,9 @@
 #include "to_string.hpp"
 
 namespace kengine {
-	// declarations
+#pragma region declarations
 	static bool matches(const Entity & e, const char * str, EntityManager & em);
-	//
+#pragma endregion
 	EntityCreatorFunctor<64> ImGuiEntitySelectorSystem(EntityManager & em) {
 		return [&](Entity & e) {
 			e += NameComponent{ "Entity selector" };
