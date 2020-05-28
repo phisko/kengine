@@ -20,23 +20,39 @@
 #endif
 
 namespace kengine {
-	// cnf file helper
+#pragma region cnf file helper
 	class ConfFile {
 	public:
-		void parse();
-		void addLine(const std::string & line);
-		bool getValue(const char * name) const;
+		void parse() {
+			std::ifstream f(KENGINE_IMGUI_TOOLS_SAVE_FILE);
+			if (!f)
+				return;
+			for (std::string line; std::getline(f, line);)
+				addLine(line);
+		}
+
+		void addLine(const std::string & line) {
+			const auto index = line.find(';');
+			_values[line.substr(0, index)] = putils::parse<bool>(line.substr(index + 1).c_str());
+		}
+
+		bool getValue(const char * name) const {
+			const auto it = _values.find(name);
+			if (it == _values.end())
+				return false;
+			return it->second;
+		}
 
 	private:
 		std::unordered_map<std::string, bool> _values;
 	};
 	static ConfFile g_confFile;
-	//
+#pragma endregion cnf file helper
 
-	// declarations
+#pragma region declarations
 	static void onEntityCreated(Entity & e);
 	static void saveTools(EntityManager & em);
-	//
+#pragma endregion
 	EntityCreatorFunctor<64> ImGuiToolSystem(EntityManager & em) {
 		g_confFile.parse();
 		for (const auto & [e, name, tool] : em.getEntities<NameComponent, ImGuiToolComponent>())
@@ -87,25 +103,5 @@ namespace kengine {
 		for (const auto & [e, name, tool] : sorted)
 			f << name->name << ';' << std::boolalpha << tool->enabled << std::noboolalpha << '\n';
 		f.flush();
-	}
-
-	void ConfFile::parse() {
-		std::ifstream f(KENGINE_IMGUI_TOOLS_SAVE_FILE);
-		if (!f)
-			return;
-		for (std::string line; std::getline(f, line);)
-			addLine(line);
-	}
-
-	void ConfFile::addLine(const std::string & line) {
-		const auto index = line.find(';');
-		_values[line.substr(0, index)] = putils::parse<bool>(line.substr(index + 1).c_str());
-	}
-
-	bool ConfFile::getValue(const char * name) const {
-		const auto it = _values.find(name);
-		if (it == _values.end())
-			return false;
-		return it->second;
 	}
 }
