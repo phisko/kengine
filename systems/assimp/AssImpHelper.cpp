@@ -10,10 +10,11 @@
 
 namespace kengine {
 	namespace AssImpHelper {
-		// declarations
+#pragma region drawModel
+#pragma region declarations
 		static void uploadDefaultBones(const SkeletonComponent & skeleton, const Uniforms & uniforms);
 		static void bindTextures(EntityManager & em, unsigned int meshIndex, const AssImpTexturesModelComponent & textures, const Uniforms & uniforms);
-		//
+#pragma endregion
 		void drawModel(EntityManager & em, const InstanceComponent & instance, const TransformComponent & transform, const SkeletonComponent & skeleton, bool useTextures, const Uniforms & uniforms) {
 			const auto model = em.getEntity(instance.model);
 			if (!model.has<OpenGLModelComponent>())
@@ -53,9 +54,10 @@ namespace kengine {
 			glUniformMatrix4fv(uniforms.bones, KENGINE_SKELETON_MAX_BONES, GL_FALSE, glm::value_ptr(defaultMats[0]));
 		}
 
-		// declaration
+#pragma region bindTextures
+#pragma region declarations
 		static void bindTexture(EntityManager & em, size_t texture, Entity::ID modelID);
-		//
+#pragma endregion
 		static void bindTextures(EntityManager & em, unsigned int meshIndex, const AssImpTexturesModelComponent & textures, const Uniforms & uniforms) {
 			const auto & meshTextures = textures.meshes[meshIndex];
 
@@ -84,5 +86,8 @@ namespace kengine {
 			const auto & modelEntity = em.getEntity(modelID);
 			glBindTexture(GL_TEXTURE_2D, modelEntity.get<TextureModelComponent>().texture);
 		}
+#pragma endregion bindTextures
+
+#pragma endregion drawModel
 	}
 }
