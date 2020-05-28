@@ -43,18 +43,16 @@
 namespace kengine {
 	using string = AdjustableComponent::string;
 
-	// declarations
+	using IniSection = std::unordered_map<string, string>;
+	using IniFile = std::unordered_map<string, IniSection>;
+	static IniFile g_loadedFile;
+
+#pragma region declarations
 	static void onEntityCreated(Entity & e);
 	static void save(EntityManager & em);
 	static void load(EntityManager & em);
-	//
-	static std::pair<string, string> getNameAndSection(const string & fullName);
-	using Sections = putils::vector<string, KENGINE_MAX_ADJUSTABLES_SECTIONS>;
-	static Sections split(const string & s, char delim);
-	static size_t updateImGuiTree(bool & hidden, const Sections & subs, const Sections & previousSubsections);
-	static string reconstitutePath(const Sections & subSections);
-	static void draw(const char * name, AdjustableComponent::Value & comp);
-	//
+	static void drawImGui(EntityManager & em, bool & enabled);
+#pragma endregion
 	EntityCreatorFunctor<64> ImGuiAdjustableSystem(EntityManager & em) {
 		return [&](Entity & e) {
 			load(em);
@@ -68,180 +66,91 @@ namespace kengine {
 			e += ImGuiComponent([&] {
 				if (!tool.enabled)
 					return;
+				drawImGui(em, tool.enabled);
 
-				if (ImGui::Begin("Adjustables", &tool.enabled)) {
-					static char nameSearch[1024] = "";
-
-					ImGui::Columns(2);
-					if (ImGui::Button("Save"))
-						save(em);
-					ImGui::NextColumn();
-					if (ImGui::Button("Load"))
-						load(em);
-					ImGui::Columns();
-
-					ImGui::Separator();
-					ImGui::InputText("Name", nameSearch, sizeof(nameSearch));
-					ImGui::Separator();
-
-					if (ImGui::BeginChild("##adjustables")) {
-						putils::vector<AdjustableComponent *, KENGINE_MAX_ADJUSTABLES> comps;
-							
-						for (const auto & [e, comp] : em.getEntities<AdjustableComponent>()) {
-							if (comp.section.find(nameSearch) != std::string::npos) {
-								comps.emplace_back(&comp);
-								continue;
-							}
-
-							for (const auto & value : comp.values)
-								if (value.name.find(nameSearch) != std::string::npos) {
-									comps.emplace_back(&comp);
-									continue;
-								}
-						}
-
-						std::sort(comps.begin(), comps.end(), [](const auto lhs, const auto rhs) {
-							return strcmp(lhs->section.c_str(), rhs->section.c_str()) < 0;
-						});
-
-						Sections previousSubsections;
-						string previousSection;
-						bool hidden = false;
-						for (const auto comp : comps) {
-							const bool sectionMatches = comp->section.find(nameSearch) != std::string::npos;
-
-							if (comp->section != previousSection) {
-								const auto subs = split(comp->section, '/');
-								const auto current = updateImGuiTree(hidden, subs, previousSubsections);
-								previousSubsections = subs;
-								if (current < previousSubsections.size())
-									previousSubsections.erase(previousSubsections.begin() + current + 1, previousSubsections.end());
-								previousSection = reconstitutePath(previousSubsections);
-							}
-
-							if (hidden)
-								continue;
-
-							for (auto & value : comp->values)
-								if (sectionMatches || value.name.find(nameSearch) != std::string::npos)
-									draw(value.name.c_str(), value);
-						}
-						for (size_t i = hidden ? 1 : 0; i < previousSubsections.size(); ++i)
-							ImGui::TreePop();
-					}
-					ImGui::EndChild();
-				}
-				ImGui::End();
 			});
 		};
 	}
 
-	// declarations
-	static void initAdjustable(AdjustableComponent & comp);
-	using IniSection = std::unordered_map<string, string>;
-	using IniFile = std::unordered_map<string, IniSection>;
-	static IniFile g_loadedFile;
-	//
-	static void onEntityCreated(Entity & e) {
-		if (!e.has<AdjustableComponent>())
-			return;
+#pragma region drawImGui
+#pragma region declarations
+	static putils::vector<AdjustableComponent *, KENGINE_MAX_ADJUSTABLES> getFilteredComps(EntityManager & em, const char * nameSearch);
+	using Sections = putils::vector<string, KENGINE_MAX_ADJUSTABLES_SECTIONS>;
+	static Sections split(const string & s, char delim);
+	static size_t updateImGuiTree(bool & hidden, const Sections & subs, const Sections & previousSubsections);
+	static string reconstitutePath(const Sections & subSections);
+	static void draw(const char * name, AdjustableComponent::Value & comp);
+#pragma endregion
+	static void drawImGui(EntityManager & em, bool & enabled) {
+		if (ImGui::Begin("Adjustables", &enabled)) {
+			static char nameSearch[1024] = "";
 
-		initAdjustable(e.get<AdjustableComponent>());
-	}
+			ImGui::Columns(2);
+			if (ImGui::Button("Save"))
+				save(em);
+			ImGui::NextColumn();
+			if (ImGui::Button("Load"))
+				load(em);
+			ImGui::Columns();
 
-	static void load(EntityManager & em) {
-		std::ifstream f(KENGINE_ADJUSTABLE_SAVE_FILE);
-		if (!f)
-			return;
-		IniSection * currentSection = nullptr;
-		for (std::string line; std::getline(f, line);) {
-			using namespace putils::regex;
-			static const auto pattern = "^\\[(.*)\\]$"_m;
-			const auto match = (line.c_str() == pattern);
-			if (!match.empty()) {
-				currentSection = &g_loadedFile[match[1].str()];
-				continue;
-			}
-			else if (currentSection == nullptr) {
-				assert(!"Invalid INI file, should start with a section");
-				continue;
-			}
+			ImGui::Separator();
+			ImGui::InputText("Name", nameSearch, sizeof(nameSearch));
+			ImGui::Separator();
 
-			if (putils::chop(line).empty())
-				continue;
+			if (ImGui::BeginChild("##adjustables")) {
+				const auto comps = getFilteredComps(em, nameSearch);
 
-			const auto index = line.find('=');
-			if (index == std::string::npos) {
-				assert(!"Invalid INI file, line should match 'key = value' format");
-				continue;
-			}
+				Sections previousSubsections;
+				string previousSection;
+				bool hidden = false;
+				for (const auto comp : comps) {
+					const bool sectionMatches = comp->section.find(nameSearch) != std::string::npos;
 
-			const auto key = putils::chop(line.substr(0, index));
-			const auto value = putils::chop(line.substr(index + 1));
-			(*currentSection)[key] = value;
-		}
-
-		for (auto & [e, comp] : em.getEntities<AdjustableComponent>())
-			initAdjustable(comp);
-	}
-
-	// declarations
-	static void setValue(AdjustableComponent::Value & value, const char * s);
-	//
-	static void initAdjustable(AdjustableComponent & comp) {
-		const auto it = g_loadedFile.find(comp.section);
-		if (it == g_loadedFile.end())
-			return;
-		const auto & section = it->second;
-		for (auto & value : comp.values) {
-			const auto it = section.find(value.name);
-			if (it != section.end())
-				setValue(value, it->second);
-		}
-	}
-
-	static void save(EntityManager & em) {
-		std::ofstream f(KENGINE_ADJUSTABLE_SAVE_FILE, std::ofstream::trunc);
-		assert(f);
-		for (const auto & [e, comp] : em.getEntities<AdjustableComponent>()) {
-			f << '[' << comp.section << ']' << std::endl;
-			for (const auto & value : comp.values) {
-				f << value.name << '=';
-				std::visit(putils::overloaded{
-					[&](const AdjustableComponent::Value::IntStorage & s) {
-						f << s.value;
-					},
-					[&](const AdjustableComponent::Value::FloatStorage & s) {
-						f << s.value;
-					},
-					[&](const AdjustableComponent::Value::BoolStorage & s) {
-						f << std::boolalpha << s.value << std::noboolalpha;
-					},
-					[&](const AdjustableComponent::Value::ColorStorage & s) {
-						f << putils::toRGBA(s.value);
-					},
-					[&](auto && t) {
-						static_assert(putils::always_false<decltype(t)>(), "Non exhaustive visitor");
+					if (comp->section != previousSection) {
+						const auto subs = split(comp->section, '/');
+						const auto current = updateImGuiTree(hidden, subs, previousSubsections);
+						previousSubsections = subs;
+						if (current < previousSubsections.size())
+							previousSubsections.erase(previousSubsections.begin() + current + 1, previousSubsections.end());
+						previousSection = reconstitutePath(previousSubsections);
 					}
-				}, value.storage);
-				f << std::endl;
+
+					if (hidden)
+						continue;
+
+					for (auto & value : comp->values)
+						if (sectionMatches || value.name.find(nameSearch) != std::string::npos)
+							draw(value.name.c_str(), value);
+				}
+				for (size_t i = hidden ? 1 : 0; i < previousSubsections.size(); ++i)
+					ImGui::TreePop();
 			}
-			f << std::endl;
+			ImGui::EndChild();
 		}
+		ImGui::End();
 	}
 
-	static std::pair<string, string> getNameAndSection(const string & fullName) {
-		std::pair<string, string> ret;
+	static putils::vector<AdjustableComponent *, KENGINE_MAX_ADJUSTABLES> getFilteredComps(EntityManager & em, const char * nameSearch) {
+		putils::vector<AdjustableComponent *, KENGINE_MAX_ADJUSTABLES> comps;
 
-		const auto sectionEnd = fullName.find(']');
-		if (fullName.at(0) == '[' && sectionEnd != string::npos) {
-			ret.first = fullName.substr(sectionEnd + 1);
-			ret.second = fullName.substr(1, sectionEnd - 1);
+		for (const auto & [e, comp] : em.getEntities<AdjustableComponent>()) {
+			if (comp.section.find(nameSearch) != std::string::npos) {
+				comps.emplace_back(&comp);
+				continue;
+			}
+
+			for (const auto & value : comp.values)
+				if (value.name.find(nameSearch) != std::string::npos) {
+					comps.emplace_back(&comp);
+					continue;
+				}
 		}
-		else
-			ret.first = fullName;
 
-		return ret;
+		std::sort(comps.begin(), comps.end(), [](const auto lhs, const auto rhs) {
+			return strcmp(lhs->section.c_str(), rhs->section.c_str()) < 0;
+		});
+
+		return comps;
 	}
 
 	static Sections split(const string & s, char delim) {
@@ -367,6 +276,34 @@ namespace kengine {
 
 		ImGui::Columns();
 	}
+#pragma endregion drawImGui
+
+#pragma region onEntityCreated
+#pragma region declarations
+	static void initAdjustable(AdjustableComponent & comp);
+#pragma endregion
+	static void onEntityCreated(Entity & e) {
+		if (!e.has<AdjustableComponent>())
+			return;
+
+		initAdjustable(e.get<AdjustableComponent>());
+	}
+
+#pragma region initAdjustable
+#pragma region declarations
+	static void setValue(AdjustableComponent::Value & value, const char * s);
+#pragma endregion
+	static void initAdjustable(AdjustableComponent & comp) {
+		const auto it = g_loadedFile.find(comp.section);
+		if (it == g_loadedFile.end())
+			return;
+		const auto & section = it->second;
+		for (auto & value : comp.values) {
+			const auto it = section.find(value.name);
+			if (it != section.end())
+				setValue(value, it->second);
+		}
+	}
 
 	static void setValue(AdjustableComponent::Value & value, const char * s) {
 		const auto assignPtr = [](auto & storage) {
@@ -398,4 +335,74 @@ namespace kengine {
 			}
 		}, value.storage);
 	}
+#pragma endregion initAdjustable
+
+#pragma endregion onEntityCreated
+
+	static void load(EntityManager & em) {
+		std::ifstream f(KENGINE_ADJUSTABLE_SAVE_FILE);
+		if (!f)
+			return;
+		IniSection * currentSection = nullptr;
+		for (std::string line; std::getline(f, line);) {
+			using namespace putils::regex;
+			static const auto pattern = "^\\[(.*)\\]$"_m;
+			const auto match = (line.c_str() == pattern);
+			if (!match.empty()) {
+				currentSection = &g_loadedFile[match[1].str()];
+				continue;
+			}
+			else if (currentSection == nullptr) {
+				assert(!"Invalid INI file, should start with a section");
+				continue;
+			}
+
+			if (putils::chop(line).empty())
+				continue;
+
+			const auto index = line.find('=');
+			if (index == std::string::npos) {
+				assert(!"Invalid INI file, line should match 'key = value' format");
+				continue;
+			}
+
+			const auto key = putils::chop(line.substr(0, index));
+			const auto value = putils::chop(line.substr(index + 1));
+			(*currentSection)[key] = value;
+		}
+
+		for (auto & [e, comp] : em.getEntities<AdjustableComponent>())
+			initAdjustable(comp);
+	}
+
+	static void save(EntityManager & em) {
+		std::ofstream f(KENGINE_ADJUSTABLE_SAVE_FILE, std::ofstream::trunc);
+		assert(f);
+		for (const auto & [e, comp] : em.getEntities<AdjustableComponent>()) {
+			f << '[' << comp.section << ']' << std::endl;
+			for (const auto & value : comp.values) {
+				f << value.name << '=';
+				std::visit(putils::overloaded{
+					[&](const AdjustableComponent::Value::IntStorage & s) {
+						f << s.value;
+					},
+					[&](const AdjustableComponent::Value::FloatStorage & s) {
+						f << s.value;
+					},
+					[&](const AdjustableComponent::Value::BoolStorage & s) {
+						f << std::boolalpha << s.value << std::noboolalpha;
+					},
+					[&](const AdjustableComponent::Value::ColorStorage & s) {
+						f << putils::toRGBA(s.value);
+					},
+					[&](auto && t) {
+						static_assert(putils::always_false<decltype(t)>(), "Non exhaustive visitor");
+					}
+				}, value.storage);
+				f << std::endl;
+			}
+			f << std::endl;
+		}
+	}
+
 }
