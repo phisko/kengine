@@ -1,3 +1,7 @@
+#ifndef KENGINE_RECAST_MAX_AGENTS
+# define KENGINE_RECAST_MAX_AGENTS 1024
+#endif
+
 #include <filesystem>
 #include <fstream>
 
@@ -11,46 +15,214 @@
 #include "data/ModelComponent.hpp"
 #include "data/ModelDataComponent.hpp"
 #include "data/NavMeshComponent.hpp"
+#include "data/PathfindingComponent.hpp"
+#include "data/PhysicsComponent.hpp"
 #include "data/ShaderComponent.hpp"
+
 #include "functions/Execute.hpp"
+#include "functions/OnEntityRemoved.hpp"
 
 #include "helpers/assertHelper.hpp"
+#include "helpers/instanceHelper.hpp"
 #include "systems/opengl/shaders/shaderHelper.hpp"
 
 #include "angle.hpp"
 #include "with.hpp"
 
-namespace Flags {
-	enum {
-		Walk = 1,
-	};
-}
-
 namespace kengine {
 	static EntityManager * g_em;
 
-	// declarations
+	namespace Flags {
+		enum {
+			Walk = 1,
+		};
+	}
+
+	struct {
+		float pathOptimizationRange = 2.f;
+	} g_adjustables;
+
+#pragma region RecastSystem
+#pragma region declarations
+	static void onEntityRemoved(Entity & e);
 	static void execute(float deltaTime);
+#pragma endregion
 	//
 	EntityCreator * RecastSystem(EntityManager & em) {
 		g_em = &em;
 
 		return [](Entity & e) {
+			e += functions::OnEntityRemoved{ onEntityRemoved };
 			e += functions::Execute{ execute };
 			e += makeGBufferShaderComponent<RecastDebugShader>(*g_em);
+
+			e += AdjustableComponent{
+				"Recast", {
+					{ "[Recast] Path optimization range", &g_adjustables.pathOptimizationRange }
+				}
+			};
 		};
 	}
 
-	// declarations
-	static void buildNavMeshes();
-	//
-	static void execute(float deltaTime) {
-		buildNavMeshes();
+	static void onEntityRemoved(Entity & e) {
+		if (e.has<RecastAgentComponent>()) {
+			const auto & agent = e.get<RecastAgentComponent>();
+			auto environment = g_em->getEntity(agent.crowd);
+			environment.get<RecastCrowdComponent>().crowd->removeAgent(agent.index);
+		}
+
+		// It doesn't cost us anything to have floating RecastAgentComponents, so we don't remove them when the RecastCrowdComponent is removed
 	}
 
-	// declarations
+#pragma region execute
+#pragma region declarations
+	static void buildNavMeshes();
+	static void doPathfinding(float deltaTime);
+#pragma endregion
+	static void execute(float deltaTime) {
+		buildNavMeshes();
+		doPathfinding(deltaTime);
+	}
+
+#pragma region doPathfinding
+#pragma region declarations
+	static putils::Point3f convertPosToReferencial(const putils::Point3f & pos, const glm::mat4 & worldToModel);
+	static void attachCrowdComponent(Entity & e, const RecastNavMeshComponent & navMesh);
+	static void attachAgentComponent(Entity & e, const putils::Rect3f & objectInNavMesh, const RecastCrowdComponent & crowd, Entity::ID crowdId, float maxAcceleration);
+	static void updateAgentComponent(Entity & e, const putils::Rect3f & objectInNavMesh, const RecastCrowdComponent & crowd, Entity::ID crowdId, float maxAcceleration);
+	static void updateDestination(Entity & e, const RecastNavMeshComponent & navMesh, const RecastCrowdComponent & crowd, const putils::Point3f & destinationInModel, const putils::Point3f & searchExtents);
+#pragma endregion declarations
+	static void doPathfinding(float deltaTime) {
+		for (auto & [e, pathfinding, transform, physics] : g_em->getEntities<PathfindingComponent, TransformComponent, PhysicsComponent>()) {
+			if (pathfinding.environment == Entity::INVALID_ID)
+				continue;
+
+			auto environment = g_em->getEntity(pathfinding.environment);
+			const auto & navMesh = instanceHelper::getModel<RecastNavMeshComponent>(*g_em, environment);
+
+			if (!environment.has<RecastCrowdComponent>())
+				attachCrowdComponent(environment, navMesh);
+
+			auto & crowd = environment.get<RecastCrowdComponent>();
+
+			const auto & model = instanceHelper::getModel<ModelComponent>(*g_em, environment);
+			const auto & environmentTransform = environment.get<TransformComponent>();
+			const auto environmentScale = model.boundingBox.size * environmentTransform.boundingBox.size;
+
+			const auto modelToWorld = shaderHelper::getModelMatrix(model, environmentTransform);
+			const auto worldToModel = glm::inverse(modelToWorld);
+
+			const putils::Rect3f objectInNavMesh = {
+				convertPosToReferencial(transform.boundingBox.position, worldToModel),
+				transform.boundingBox.size / environmentScale
+			};
+
+			// const auto maxSpeed = (physics.movement / environmentScale).getLength();
+			const auto maxSpeed = (putils::Point3f{ 1.f, 1.f, 1.f } / environmentScale).getLength();
+			if (!e.has<RecastAgentComponent>())
+				attachAgentComponent(e, objectInNavMesh, crowd, environment.id, maxSpeed);
+			else
+				updateAgentComponent(e, objectInNavMesh, crowd, environment.id, maxSpeed);
+
+			const auto destinationInModel = convertPosToReferencial(pathfinding.destination, worldToModel);
+			const auto searchExtents = putils::Point3f{ pathfinding.searchDistance, pathfinding.searchDistance, pathfinding.searchDistance } / environmentScale;
+			updateDestination(e, navMesh, crowd, destinationInModel, searchExtents);
+		}
+
+		for (const auto & [environment, crowd, environmentTransform] : g_em->getEntities<RecastCrowdComponent, TransformComponent>()) {
+			crowd.crowd->update(deltaTime, nullptr);
+
+			const auto & model = instanceHelper::getModel<ModelComponent>(*g_em, environment);
+			const auto environmentScale = model.boundingBox.size * environmentTransform.boundingBox.size;
+
+			const auto modelToWorld = shaderHelper::getModelMatrix(model, environmentTransform);
+
+			static dtCrowdAgent * activeAgents[KENGINE_RECAST_MAX_AGENTS];
+			const auto nbAgents = crowd.crowd->getActiveAgents(activeAgents, lengthof(activeAgents));
+			for (int i = 0; i < nbAgents; ++i) {
+				const auto agent = activeAgents[i];
+
+				auto e = g_em->getEntity((Entity::ID)agent->params.userData);
+
+				auto & physics = e.get<PhysicsComponent>();
+				physics.movement = environmentScale * putils::Point3f{ agent->vel };
+
+				auto & transform = e.get<TransformComponent>();
+				transform.boundingBox.position = convertPosToReferencial(agent->npos, modelToWorld);
+			}
+		}
+	}
+
+	static putils::Point3f convertPosToReferencial(const putils::Point3f & pos, const glm::mat4 & worldToModel) {
+		const auto tmp = worldToModel * glm::vec4(shaderHelper::toVec(pos), 1.f);
+		return { tmp.x, tmp.y, tmp.z };
+	}
+
+	static void attachCrowdComponent(Entity & e, const RecastNavMeshComponent & navMesh) {
+		auto & crowd = e.attach<RecastCrowdComponent>();
+		crowd.crowd.reset(dtAllocCrowd());
+		crowd.crowd->init(KENGINE_RECAST_MAX_AGENTS, navMesh.navMesh->getParams()->tileWidth, navMesh.navMesh.get());
+	}
+
+	static void attachAgentComponent(Entity & e, const putils::Rect3f & objectInNavMesh, const RecastCrowdComponent & crowd, Entity::ID crowdId, float maxAcceleration) {
+		dtCrowdAgentParams params;
+
+		params.radius = std::max(objectInNavMesh.size.x, objectInNavMesh.size.z);
+		params.height = objectInNavMesh.size.y;
+		params.maxAcceleration = maxAcceleration;
+		params.maxSpeed = params.maxAcceleration;
+
+		params.collisionQueryRange = params.radius * 2.f;
+		params.pathOptimizationRange = params.collisionQueryRange * g_adjustables.pathOptimizationRange;
+
+		params.separationWeight = 0.f;
+		params.updateFlags = ~0; // All flags seem to be optimizations, enable them
+
+		params.obstacleAvoidanceType = 0; // Default params, might want to change?
+		params.queryFilterType = 0; // Default query type, might want to change?
+
+		params.userData = (void *)e.id;
+
+		const auto idx = crowd.crowd->addAgent(objectInNavMesh.position, &params);
+		kengine_assert(*g_em, idx >= 0);
+
+		e += RecastAgentComponent{ idx, crowdId };
+	}
+
+	static void updateAgentComponent(Entity & e, const putils::Rect3f & objectInNavMesh, const RecastCrowdComponent & crowd, Entity::ID crowdId, float maxAcceleration) {
+		const auto & agent = e.get<RecastAgentComponent>();
+
+		dtCrowdAgentParams params = crowd.crowd->getAgent(agent.index)->params;
+
+		params.radius = std::max(objectInNavMesh.size.x, objectInNavMesh.size.z);
+		params.height = objectInNavMesh.size.y;
+		params.maxAcceleration = maxAcceleration;
+		params.maxSpeed = params.maxAcceleration;
+
+		params.collisionQueryRange = params.radius * 2.f;
+		params.pathOptimizationRange = params.collisionQueryRange * g_adjustables.pathOptimizationRange;
+
+		crowd.crowd->updateAgentParameters(agent.index, &params);
+	}
+
+	static void updateDestination(Entity & e, const RecastNavMeshComponent & navMesh, const RecastCrowdComponent & crowd, const putils::Point3f & destinationInModel, const putils::Point3f & searchExtents) {
+		static const dtQueryFilter filter;
+		dtPolyRef nearestPoly;
+		float nearestPt[3];
+		const auto status = navMesh.navMeshQuery->findNearestPoly(destinationInModel, searchExtents, &filter, &nearestPoly, nearestPt);
+		if (dtStatusFailed(status) || nearestPoly == 0)
+			return;
+
+		const auto & agent = e.get<RecastAgentComponent>();
+		if (!crowd.crowd->requestMoveTarget(agent.index, nearestPoly, nearestPt))
+			kengine_assert_failed(*g_em, "[Recast] Failed to request move");
+	}
+#pragma endregion doPathfinding
+
+#pragma region buildNavMeshes
+#pragma region declarations
 	static void createRecastMesh(const char * file, Entity & model, NavMeshComponent & navMesh, const ModelDataComponent & modelData);
-	//
+#pragma endregion
 	static void buildNavMeshes() {
 		static const auto buildRecastComponent = [](auto && entities) {
 			for (auto & [e, model, modelData, navMesh, _] : entities) {
@@ -64,10 +236,11 @@ namespace kengine {
 			g_em->completeTasks();
 		};
 
-		buildRecastComponent(g_em->getEntities<ModelComponent, ModelDataComponent, NavMeshComponent, no<RecastComponent>>());
+		buildRecastComponent(g_em->getEntities<ModelComponent, ModelDataComponent, NavMeshComponent, no<RecastNavMeshComponent>>());
 		buildRecastComponent(g_em->getEntities<ModelComponent, ModelDataComponent, NavMeshComponent, RebuildNavMeshComponent>());
 	}
 
+#pragma region createRecastMesh
 	// declarations
 	using HeightfieldPtr = UniquePtr<rcHeightfield, rcFreeHeightField>;
 	using CompactHeightfieldPtr = UniquePtr<rcCompactHeightfield, rcFreeCompactHeightfield>;
@@ -78,6 +251,7 @@ namespace kengine {
 	struct NavMeshData {
 		unsigned char * data = nullptr;
 		int size = 0;
+		float areaSize = 0.f;
 	};
 
 	static NavMeshData loadBinaryFile(const char * binaryFile, const NavMeshComponent & navMesh);
@@ -85,6 +259,7 @@ namespace kengine {
 	static NavMeshData createNavMeshData(const NavMeshComponent & navMesh, const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData);
 	static NavMeshPtr createNavMesh(const NavMeshData & data);
 	static NavMeshQueryPtr createNavMeshQuery(const NavMeshComponent & params, const dtNavMesh & navMesh);
+	static NavMeshComponent::GetPathFunc getPath(const ModelComponent & model, const NavMeshComponent & navMesh, const RecastNavMeshComponent & recast);
 	//
 	static void createRecastMesh(const char * file, Entity & e, NavMeshComponent & navMesh, const ModelDataComponent & modelData) {
 		NavMeshData data;
@@ -99,7 +274,7 @@ namespace kengine {
 			mustSave = true;
 		}
 
-		auto & recast = e.attach<RecastComponent>();
+		auto & recast = e.attach<RecastNavMeshComponent>();
 		recast.navMesh = createNavMesh(data);
 		if (recast.navMesh == nullptr) {
 			dtFree(data.data);
@@ -115,72 +290,7 @@ namespace kengine {
 		if (mustSave)
 			saveBinaryFile(binaryFile, data, navMesh);
 
-		const auto & model = e.get<ModelComponent>();
-		navMesh.getPath = [&](const Entity & e, const putils::Point3f & startWorldSpace, const putils::Point3f & endWorldSpace) {
-			static const dtQueryFilter filter;
-
-			const auto mat = shaderHelper::getModelMatrix(model, e.get<TransformComponent>());
-
-			float start[3];
-			{
-				auto tmp = glm::vec4(shaderHelper::toVec(startWorldSpace), 1.f);
-				tmp = glm::inverse(mat) * tmp;
-				start[0] = tmp.x;
-				start[1] = tmp.y;
-				start[2] = tmp.z;
-			}
-
-			float end[3];
-			{
-				auto tmp = glm::vec4(shaderHelper::toVec(endWorldSpace), 1.f);
-				tmp = glm::inverse(mat) * tmp;
-				end[0] = tmp.x;
-				end[1] = tmp.y;
-				end[2] = tmp.z;
-			}
-
-
-			NavMeshComponent::Path ret;
-
-			const auto maxExtent = std::max(navMesh.characterRadius * 2.f, navMesh.characterHeight);
-			const float extents[3] = { maxExtent, maxExtent, maxExtent };
-
-			dtPolyRef startRef;
-			float startPt[3];
-			auto status = recast.navMeshQuery->findNearestPoly(start, extents, &filter, &startRef, startPt);
-			if (dtStatusFailed(status) || startRef == 0)
-				return ret;
-
-			dtPolyRef endRef;
-			float endPt[3];
-			status = recast.navMeshQuery->findNearestPoly(end, extents, &filter, &endRef, endPt);
-			if (dtStatusFailed(status) || endRef == 0)
-				return ret;
-
-			dtPolyRef path[KENGINE_NAVMESH_MAX_PATH_LENGTH];
-			int pathCount = 0;
-			status = recast.navMeshQuery->findPath(startRef, endRef, startPt, endPt, &filter, path, &pathCount, lengthof(path));
-			if (dtStatusFailed(status))
-				return ret;
-
-			ret.resize(ret.capacity());
-			int straightPathCount = 0;
-
-			static_assert(sizeof(putils::Point3f) == sizeof(float[3]));
-			status = recast.navMeshQuery->findStraightPath(startPt, endPt, path, pathCount, ret[0].raw, nullptr, nullptr, &straightPathCount, (int)ret.capacity());
-			if (dtStatusFailed(status))
-				return ret;
-
-			ret.resize(straightPathCount);
-
-			for (auto & step : ret) {
-				glm::vec4 v(shaderHelper::toVec(step), 1.f);
-				v = mat * v;
-				step = { v.x, v.y, v.z };
-			}
-
-			return ret;
-		};
+		navMesh.getPath = getPath(e.get<ModelComponent>(), navMesh, recast);
 	}
 
 	static NavMeshData loadBinaryFile(const char * binaryFile, const NavMeshComponent & navMesh) {
@@ -209,6 +319,7 @@ namespace kengine {
 		f.write((const char *)data.data, data.size);
 	}
 
+#pragma region createNavMeshData
 	// declarations
 	static std::unique_ptr<float[]> getVertices(const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData);
 	static rcConfig getConfig(const NavMeshComponent & navMesh, const ModelDataComponent::Mesh & meshData, const float * vertices);
@@ -289,9 +400,12 @@ namespace kengine {
 
 		if (!dtCreateNavMeshData(&params, &ret.data, &ret.size))
 			kengine_assert_failed(*g_em, "[Recast] Failed to create Detour navmesh data");
+
+		ret.areaSize = (putils::Point3f(cfg.bmax) - putils::Point3f(cfg.bmin)).getLength();
 		return ret;
 	}
 
+#pragma region getVertices
 	// declarations
 	const std::ptrdiff_t getVertexPositionOffset(const ModelDataComponent & modelData);
 	const float * getVertexPosition(const void * vertices, size_t index, size_t vertexSize, std::ptrdiff_t positionOffset);
@@ -330,6 +444,7 @@ namespace kengine {
 		const auto vertex = (const char *)vertices + index * vertexSize;
 		return (const float *)(vertex + positionOffset);
 	}
+#pragma endregion getVertices
 
 	static rcConfig getConfig(const NavMeshComponent & navMesh, const ModelDataComponent::Mesh & meshData, const float * vertices) {
 		rcConfig cfg;
@@ -506,7 +621,7 @@ namespace kengine {
 
 		return polyMeshDetail;
 	}
-
+#pragma endregion createNavMeshData
 
 	static NavMeshPtr createNavMesh(const NavMeshData & data) {
 		NavMeshPtr navMesh{ dtAllocNavMesh() };
@@ -542,4 +657,80 @@ namespace kengine {
 
 		return navMeshQuery;
 	}
+
+#pragma region getPath
+	// declarations
+	static putils::Point3f getPositionInModelSpace(const putils::Point3f & pos, const glm::mat4 & worldToModel);
+	static void convertToWorldSpace(NavMeshComponent::Path & path, const glm::mat4 & modelToWorld);
+	//
+	static NavMeshComponent::GetPathFunc getPath(const ModelComponent & model, const NavMeshComponent & navMesh, const RecastNavMeshComponent & recast) {
+		return [&](const Entity & environment, const putils::Point3f & startWorldSpace, const putils::Point3f & endWorldSpace) {
+			static const dtQueryFilter filter;
+
+			const auto modelToWorld = shaderHelper::getModelMatrix(model, environment.get<TransformComponent>());
+			const auto worldToModel = glm::inverse(modelToWorld);
+
+			const auto start = getPositionInModelSpace(startWorldSpace, worldToModel);
+			const auto end = getPositionInModelSpace(endWorldSpace, worldToModel);
+
+			NavMeshComponent::Path ret;
+
+			const auto maxExtent = std::max(navMesh.characterRadius * 2.f, navMesh.characterHeight);
+			const float extents[3] = { maxExtent, maxExtent, maxExtent };
+
+			dtPolyRef startRef;
+			float startPt[3];
+			auto status = recast.navMeshQuery->findNearestPoly(start, extents, &filter, &startRef, startPt);
+			if (dtStatusFailed(status) || startRef == 0)
+				return ret;
+
+			dtPolyRef endRef;
+			float endPt[3];
+			status = recast.navMeshQuery->findNearestPoly(end, extents, &filter, &endRef, endPt);
+			if (dtStatusFailed(status) || endRef == 0)
+				return ret;
+
+			dtPolyRef path[KENGINE_NAVMESH_MAX_PATH_LENGTH];
+			int pathCount = 0;
+			status = recast.navMeshQuery->findPath(startRef, endRef, startPt, endPt, &filter, path, &pathCount, lengthof(path));
+			if (dtStatusFailed(status))
+				return ret;
+
+			ret.resize(ret.capacity());
+			int straightPathCount = 0;
+
+			static_assert(sizeof(putils::Point3f) == sizeof(float[3]));
+			status = recast.navMeshQuery->findStraightPath(startPt, endPt, path, pathCount, ret[0].raw, nullptr, nullptr, &straightPathCount, (int)ret.capacity());
+			if (dtStatusFailed(status))
+				return ret;
+
+			ret.resize(straightPathCount);
+			convertToWorldSpace(ret, modelToWorld);
+
+			return ret;
+		};
+	}
+
+	static putils::Point3f getPositionInModelSpace(const putils::Point3f & pos, const glm::mat4 & worldToModel) {
+		auto tmp = glm::vec4(shaderHelper::toVec(pos), 1.f);
+		tmp = worldToModel * tmp;
+		return { tmp.x, tmp.y, tmp.z };
+	}
+
+	static void convertToWorldSpace(NavMeshComponent::Path & path, const glm::mat4 & modelToWorld) {
+		for (auto & step : path) { // Convert positions to world space
+			glm::vec4 v(shaderHelper::toVec(step), 1.f);
+			v = modelToWorld * v;
+			step = { v.x, v.y, v.z };
+		}
+	}
+#pragma endregion getPath
+
+#pragma endregion createRecastMesh
+
+#pragma endregion buildNavMeshes
+
+#pragma endregion execute
+
+#pragma endregion RecastSystem
 }
