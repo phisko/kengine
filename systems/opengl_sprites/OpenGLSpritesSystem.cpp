@@ -17,9 +17,9 @@
 namespace kengine {
 	static EntityManager * g_em;
 
-	// declarations
+#pragma region declarations
 	static void onEntityCreated(Entity & e);
-	//
+#pragma endregion
 	EntityCreator * OpenGLSpritesSystem(EntityManager & em) {
 		g_em = &em;
 
