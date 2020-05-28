@@ -30,3 +30,11 @@ Destination (in world coordinates) for the pathfinding.
 float searchDistance = 2.f;
 ```
 Maximum distance `destination` can be from the navmesh. Increasing this will cost performance.
+
+### maxSpeed
+
+```cpp
+float maxSpeed = 1.f;
+```
+
+Maximum speed at which the `Entity` may move.
