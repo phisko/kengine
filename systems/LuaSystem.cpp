@@ -4,9 +4,9 @@
 #include "functions/Execute.hpp"
 
 namespace kengine {
-	// declarations
+#pragma region declarations
 	static void execute(EntityManager & em, sol::state & state, float deltaTime);
-	//
+#pragma endregion
 	EntityCreatorFunctor<64> LuaSystem(EntityManager & em) {
 		return [&](Entity & e) {
 			auto tmp = new sol::state;
