@@ -22,8 +22,8 @@ namespace kengine {
 	struct NavMeshComponent {
 		static constexpr char PathName[] = "NavMeshComponentPath";
 		using Path = putils::vector<putils::Point3f, KENGINE_NAVMESH_MAX_PATH_LENGTH, PathName>;
-		using GetPathFunc = putils::function<Path(const Entity & e, const putils::Point3f & start, const putils::Point3f & end), KENGINE_NAVMESH_FUNC_SIZE>;
-		// `e` is the entity instantiating the `model Entity` this component is attached to
+		using GetPathFunc = putils::function<Path(const Entity & environment, const putils::Point3f & start, const putils::Point3f & end), KENGINE_NAVMESH_FUNC_SIZE>;
+		// `environment` is the entity instantiating the `model Entity` this component is attached to
 
 		GetPathFunc getPath = nullptr; // Filled by System that generates navmesh
 		size_t concernedMesh = 0; // Index into ModelDataComponent::meshes, pointing to the mesh for which to generate the navmesh
@@ -60,6 +60,9 @@ namespace kengine {
 			putils_reflection_attribute(&NavMeshComponent::detailSampleDist),
 			putils_reflection_attribute(&NavMeshComponent::detailSampleMaxError),
 			putils_reflection_attribute(&NavMeshComponent::queryMaxSearchNodes)
+		);
+		putils_reflection_used_types(
+			putils_reflection_type(Path)
 		);
 	};
 }
