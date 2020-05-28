@@ -5,18 +5,19 @@
 #include "data/CollisionComponent.hpp"
 
 namespace kengine {
-	// declarations
+#pragma region declarations
 	static void onCollision(Entity & first, Entity & second);
-	//
+#pragma endregion
 	EntityCreator * CollisionSystem(EntityManager & em) {
 		return [](Entity & e) {
 			e += functions::OnCollision{ onCollision };
 		};
 	}
 
-	// declarations
+#pragma region onCollision
+#pragma region declarations
 	static void trigger(Entity & first, Entity & second);
-	//
+#pragma endregion
 	static void onCollision(Entity & first, Entity & second) {
 		trigger(first, second);
 		trigger(second, first);
@@ -30,4 +31,5 @@ namespace kengine {
 		if (comp.onCollide != nullptr)
 			comp.onCollide(first, second);
 	}
+#pragma endregion onCollision
 }
