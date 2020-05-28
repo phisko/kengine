@@ -42,12 +42,10 @@ namespace kengine {
 		float pathOptimizationRange = 2.f;
 	} g_adjustables;
 
-#pragma region RecastSystem
 #pragma region declarations
 	static void onEntityRemoved(Entity & e);
 	static void execute(float deltaTime);
 #pragma endregion
-	//
 	EntityCreator * RecastSystem(EntityManager & em) {
 		g_em = &em;
 
@@ -86,94 +84,105 @@ namespace kengine {
 
 #pragma region doPathfinding
 #pragma region declarations
-	static putils::Point3f convertPosToReferencial(const putils::Point3f & pos, const glm::mat4 & worldToModel);
-	static void attachCrowdComponent(Entity & e, const RecastNavMeshComponent & navMesh);
-	static void attachAgentComponent(Entity & e, const putils::Rect3f & objectInNavMesh, const RecastCrowdComponent & crowd, Entity::ID crowdId, float maxAcceleration);
-	static void updateAgentComponent(Entity & e, const putils::Rect3f & objectInNavMesh, const RecastCrowdComponent & crowd, Entity::ID crowdId, float maxAcceleration);
-	static void updateDestination(Entity & e, const RecastNavMeshComponent & navMesh, const RecastCrowdComponent & crowd, const putils::Point3f & destinationInModel, const putils::Point3f & searchExtents);
-#pragma endregion declarations
+	static void removeOldAgents();
+	static void createNewAgents();
+	static void moveChangedAgents();
+	static void updateCrowds(float deltaTime);
+#pragma endregion
 	static void doPathfinding(float deltaTime) {
-		for (auto & [e, pathfinding, transform, physics] : g_em->getEntities<PathfindingComponent, TransformComponent, PhysicsComponent>()) {
+		removeOldAgents();
+		moveChangedAgents();
+		createNewAgents();
+		updateCrowds(deltaTime);
+	}
+
+	static void removeOldAgents() {
+		for (auto & [e, agent, noPathfinding] : g_em->getEntities<RecastAgentComponent, no<PathfindingComponent>>()) {
+			auto environment = g_em->getEntity(agent.crowd);
+			auto & crowd = environment.get<RecastCrowdComponent>();
+			crowd.crowd->removeAgent(agent.index);
+			e.detach<RecastAgentComponent>();
+		}
+	}
+
+#pragma region createNewAgents
+#pragma region declarations
+	struct EnvironmentInfo {
+		putils::Vector3f environmentScale;
+		glm::mat4 modelToWorld;
+		glm::mat4 worldToModel;
+	};
+	static EnvironmentInfo getEnvironmentInfo(const Entity & environment);
+
+	struct ObjectInfo {
+		putils::Rect3f objectInNavMesh;
+		float maxSpeed;
+	};
+	static ObjectInfo getObjectInfo(const EnvironmentInfo & environment, const TransformComponent & transform, const PathfindingComponent & pathfinding);
+
+	static putils::Point3f convertPosToReferencial(const putils::Point3f & pos, const glm::mat4 & worldToModel);
+	static void attachCrowdComponent(Entity & e);
+	static void attachAgentComponent(Entity & e, const ObjectInfo & objectInfo, const RecastCrowdComponent & crowd, Entity::ID crowdId);
+#pragma endregion
+	static void createNewAgents() {
+		for (auto & [e, pathfinding, transform, noRecast] : g_em->getEntities<PathfindingComponent, TransformComponent, no<RecastAgentComponent>>()) {
 			if (pathfinding.environment == Entity::INVALID_ID)
 				continue;
 
 			auto environment = g_em->getEntity(pathfinding.environment);
-			const auto & navMesh = instanceHelper::getModel<RecastNavMeshComponent>(*g_em, environment);
 
 			if (!environment.has<RecastCrowdComponent>())
-				attachCrowdComponent(environment, navMesh);
+				attachCrowdComponent(environment);
 
 			auto & crowd = environment.get<RecastCrowdComponent>();
 
-			const auto & model = instanceHelper::getModel<ModelComponent>(*g_em, environment);
-			const auto & environmentTransform = environment.get<TransformComponent>();
-			const auto environmentScale = model.boundingBox.size * environmentTransform.boundingBox.size;
-
-			const auto modelToWorld = shaderHelper::getModelMatrix(model, environmentTransform);
-			const auto worldToModel = glm::inverse(modelToWorld);
-
-			const putils::Rect3f objectInNavMesh = {
-				convertPosToReferencial(transform.boundingBox.position, worldToModel),
-				transform.boundingBox.size / environmentScale
-			};
-
-			// const auto maxSpeed = (physics.movement / environmentScale).getLength();
-			const auto maxSpeed = (putils::Point3f{ 1.f, 1.f, 1.f } / environmentScale).getLength();
-			if (!e.has<RecastAgentComponent>())
-				attachAgentComponent(e, objectInNavMesh, crowd, environment.id, maxSpeed);
-			else
-				updateAgentComponent(e, objectInNavMesh, crowd, environment.id, maxSpeed);
-
-			const auto destinationInModel = convertPosToReferencial(pathfinding.destination, worldToModel);
-			const auto searchExtents = putils::Point3f{ pathfinding.searchDistance, pathfinding.searchDistance, pathfinding.searchDistance } / environmentScale;
-			updateDestination(e, navMesh, crowd, destinationInModel, searchExtents);
-		}
-
-		for (const auto & [environment, crowd, environmentTransform] : g_em->getEntities<RecastCrowdComponent, TransformComponent>()) {
-			crowd.crowd->update(deltaTime, nullptr);
-
-			const auto & model = instanceHelper::getModel<ModelComponent>(*g_em, environment);
-			const auto environmentScale = model.boundingBox.size * environmentTransform.boundingBox.size;
-
-			const auto modelToWorld = shaderHelper::getModelMatrix(model, environmentTransform);
-
-			static dtCrowdAgent * activeAgents[KENGINE_RECAST_MAX_AGENTS];
-			const auto nbAgents = crowd.crowd->getActiveAgents(activeAgents, lengthof(activeAgents));
-			for (int i = 0; i < nbAgents; ++i) {
-				const auto agent = activeAgents[i];
-
-				auto e = g_em->getEntity((Entity::ID)agent->params.userData);
-
-				auto & physics = e.get<PhysicsComponent>();
-				physics.movement = environmentScale * putils::Point3f{ agent->vel };
-
-				auto & transform = e.get<TransformComponent>();
-				transform.boundingBox.position = convertPosToReferencial(agent->npos, modelToWorld);
-			}
+			const auto objectInfo = getObjectInfo(getEnvironmentInfo(environment), transform, pathfinding);
+			attachAgentComponent(e, objectInfo, crowd, environment.id);
 		}
 	}
 
-	static putils::Point3f convertPosToReferencial(const putils::Point3f & pos, const glm::mat4 & worldToModel) {
-		const auto tmp = worldToModel * glm::vec4(shaderHelper::toVec(pos), 1.f);
+	static EnvironmentInfo getEnvironmentInfo(const Entity & environment) {
+		EnvironmentInfo ret;
+
+		const auto & model = instanceHelper::getModel<ModelComponent>(*g_em, environment);
+		const auto & environmentTransform = environment.get<TransformComponent>();
+
+		ret.environmentScale = model.boundingBox.size * environmentTransform.boundingBox.size;
+		ret.modelToWorld = shaderHelper::getModelMatrix(model, environmentTransform);
+		ret.worldToModel = glm::inverse(ret.modelToWorld);
+		return ret;
+	}
+
+	static ObjectInfo getObjectInfo(const EnvironmentInfo & environment, const TransformComponent & transform, const PathfindingComponent & pathfinding) {
+		ObjectInfo ret;
+		ret.objectInNavMesh = {
+			convertPosToReferencial(transform.boundingBox.position, environment.worldToModel),
+			transform.boundingBox.size / environment.environmentScale
+		};
+		ret.maxSpeed = (putils::Point3f{ pathfinding.maxSpeed, 0.f, 0.f } / environment.environmentScale).getLength();
+		return ret;
+	}
+
+	static putils::Point3f convertPosToReferencial(const putils::Point3f & pos, const glm::mat4 & conversionMatrix) {
+		const auto tmp = conversionMatrix * glm::vec4(shaderHelper::toVec(pos), 1.f);
 		return { tmp.x, tmp.y, tmp.z };
 	}
 
-	static void attachCrowdComponent(Entity & e, const RecastNavMeshComponent & navMesh) {
+	static void attachCrowdComponent(Entity & e) {
 		auto & crowd = e.attach<RecastCrowdComponent>();
 		crowd.crowd.reset(dtAllocCrowd());
+
+		const auto & navMesh = instanceHelper::getModel<RecastNavMeshComponent>(*g_em, e);
 		crowd.crowd->init(KENGINE_RECAST_MAX_AGENTS, navMesh.navMesh->getParams()->tileWidth, navMesh.navMesh.get());
 	}
 
-	static void attachAgentComponent(Entity & e, const putils::Rect3f & objectInNavMesh, const RecastCrowdComponent & crowd, Entity::ID crowdId, float maxAcceleration) {
+#pragma region attachAgentComponent
+#pragma region declarations
+	static void fillCrowdAgentParams(dtCrowdAgentParams & params, const ObjectInfo & objectInfo);
+#pragma endregion
+	static void attachAgentComponent(Entity & e, const ObjectInfo & objectInfo, const RecastCrowdComponent & crowd, Entity::ID crowdId) {
 		dtCrowdAgentParams params;
-
-		params.radius = std::max(objectInNavMesh.size.x, objectInNavMesh.size.z);
-		params.height = objectInNavMesh.size.y;
-		params.maxAcceleration = maxAcceleration;
-		params.maxSpeed = params.maxAcceleration;
-
-		params.collisionQueryRange = params.radius * 2.f;
-		params.pathOptimizationRange = params.collisionQueryRange * g_adjustables.pathOptimizationRange;
+		fillCrowdAgentParams(params, objectInfo);
 
 		params.separationWeight = 0.f;
 		params.updateFlags = ~0; // All flags seem to be optimizations, enable them
@@ -183,25 +192,92 @@ namespace kengine {
 
 		params.userData = (void *)e.id;
 
-		const auto idx = crowd.crowd->addAgent(objectInNavMesh.position, &params);
+		const auto idx = crowd.crowd->addAgent(objectInfo.objectInNavMesh.position, &params);
 		kengine_assert(*g_em, idx >= 0);
 
 		e += RecastAgentComponent{ idx, crowdId };
 	}
 
-	static void updateAgentComponent(Entity & e, const putils::Rect3f & objectInNavMesh, const RecastCrowdComponent & crowd, Entity::ID crowdId, float maxAcceleration) {
-		const auto & agent = e.get<RecastAgentComponent>();
-
-		dtCrowdAgentParams params = crowd.crowd->getAgent(agent.index)->params;
-
-		params.radius = std::max(objectInNavMesh.size.x, objectInNavMesh.size.z);
-		params.height = objectInNavMesh.size.y;
-		params.maxAcceleration = maxAcceleration;
+	static void fillCrowdAgentParams(dtCrowdAgentParams & params, const ObjectInfo & objectInfo) {
+		params.radius = std::max(objectInfo.objectInNavMesh.size.x, objectInfo.objectInNavMesh.size.z);
+		params.height = objectInfo.objectInNavMesh.size.y;
+		params.maxAcceleration = objectInfo.maxSpeed;
 		params.maxSpeed = params.maxAcceleration;
 
 		params.collisionQueryRange = params.radius * 2.f;
 		params.pathOptimizationRange = params.collisionQueryRange * g_adjustables.pathOptimizationRange;
+	}
 
+#pragma endregion attachAgentComponent
+#pragma endregion createNewAgents
+
+	static void moveChangedAgents() {
+		for (auto & [e, pathfinding, agent] : g_em->getEntities<PathfindingComponent, RecastAgentComponent>()) {
+			if (pathfinding.environment == agent.crowd)
+				continue;
+
+			auto oldEnvironment = g_em->getEntity(agent.crowd);
+			auto & oldCrowd = oldEnvironment.get<RecastCrowdComponent>();
+			oldCrowd.crowd->removeAgent(agent.index);
+
+			auto newEnvironment = g_em->getEntity(pathfinding.environment);
+			if (!newEnvironment.has<RecastCrowdComponent>())
+				attachCrowdComponent(newEnvironment);
+			auto & newCrowd = newEnvironment.get<RecastCrowdComponent>();
+			
+			const auto objectInfo = getObjectInfo(getEnvironmentInfo(newEnvironment), e.get<TransformComponent>(), pathfinding);
+			attachAgentComponent(e, objectInfo, newCrowd, newEnvironment.id);
+		}
+	}
+
+#pragma region updateCrowds
+#pragma region declarations
+	static void readFromAgent(TransformComponent & transform, PhysicsComponent & physics, const dtCrowdAgent & agent, const EnvironmentInfo & environmentInfo);
+	static void writeToAgent(Entity & e, const TransformComponent & transform, const PathfindingComponent & pathfinding, const EnvironmentInfo & environmentInfo, const RecastNavMeshComponent & navMesh, const RecastCrowdComponent & crowd);
+#pragma endregion
+	static void updateCrowds(float deltaTime) {
+		for (const auto & [environment, crowd, environmentTransform] : g_em->getEntities<RecastCrowdComponent, TransformComponent>()) {
+			crowd.crowd->update(deltaTime, nullptr);
+
+			const auto & navMesh = instanceHelper::getModel<RecastNavMeshComponent>(*g_em, environment);
+			const auto environmentInfo = getEnvironmentInfo(environment);
+
+			static dtCrowdAgent * activeAgents[KENGINE_RECAST_MAX_AGENTS];
+			const auto nbAgents = crowd.crowd->getActiveAgents(activeAgents, lengthof(activeAgents));
+			for (int i = 0; i < nbAgents; ++i) {
+				const auto agent = activeAgents[i];
+				auto e = g_em->getEntity((Entity::ID)agent->params.userData);
+				auto & transform = e.get<TransformComponent>();
+
+				readFromAgent(transform, e.get<PhysicsComponent>(), *agent, environmentInfo);
+				writeToAgent(e, transform, e.get<PathfindingComponent>(), environmentInfo, navMesh, crowd);
+			}
+		}
+	}
+
+	static void readFromAgent(TransformComponent & transform, PhysicsComponent & physics, const dtCrowdAgent & agent, const EnvironmentInfo & environmentInfo) {
+		physics.movement = environmentInfo.environmentScale * putils::Point3f{ agent.vel };
+		transform.boundingBox.position = convertPosToReferencial(agent.npos, environmentInfo.modelToWorld);
+	}
+
+#pragma region writeToAgent
+#pragma region declarations
+	static void updateAgentComponent(Entity & e, const ObjectInfo & objectInfo, const RecastCrowdComponent & crowd);
+	static void updateDestination(Entity & e, const RecastNavMeshComponent & navMesh, const RecastCrowdComponent & crowd, const putils::Point3f & destinationInModel, const putils::Point3f & searchExtents);
+#pragma endregion
+	static void writeToAgent(Entity & e, const TransformComponent & transform, const PathfindingComponent & pathfinding, const EnvironmentInfo & environmentInfo, const RecastNavMeshComponent & navMesh, const RecastCrowdComponent & crowd) {
+		const auto objectInfo = getObjectInfo(environmentInfo, transform, pathfinding);
+		updateAgentComponent(e, objectInfo, crowd);
+
+		const auto destinationInModel = convertPosToReferencial(pathfinding.destination, environmentInfo.worldToModel);
+		const auto searchExtents = putils::Point3f{ pathfinding.searchDistance, pathfinding.searchDistance, pathfinding.searchDistance } / environmentInfo.environmentScale;
+		updateDestination(e, navMesh, crowd, destinationInModel, searchExtents);
+	}
+	
+	static void updateAgentComponent(Entity & e, const ObjectInfo & objectInfo, const RecastCrowdComponent & crowd) {
+		const auto & agent = e.get<RecastAgentComponent>();
+		dtCrowdAgentParams params = crowd.crowd->getAgent(agent.index)->params;
+		fillCrowdAgentParams(params, objectInfo);
 		crowd.crowd->updateAgentParameters(agent.index, &params);
 	}
 
@@ -217,6 +293,8 @@ namespace kengine {
 		if (!crowd.crowd->requestMoveTarget(agent.index, nearestPoly, nearestPt))
 			kengine_assert_failed(*g_em, "[Recast] Failed to request move");
 	}
+#pragma endregion writeToAgent
+#pragma endregion updateCrowds
 #pragma endregion doPathfinding
 
 #pragma region buildNavMeshes
@@ -727,10 +805,6 @@ namespace kengine {
 #pragma endregion getPath
 
 #pragma endregion createRecastMesh
-
 #pragma endregion buildNavMeshes
-
 #pragma endregion execute
-
-#pragma endregion RecastSystem
 }
