@@ -7,9 +7,9 @@
 namespace kengine {
 	static InputBufferComponent * g_buffer;
 
-	// declarations
+#pragma region declarations
 	static void execute(EntityManager & em);
-	//
+#pragma endregion
 	EntityCreatorFunctor<64> InputSystem(EntityManager & em) {
 		return [&](Entity & e) {
 			e += functions::Execute{ [&](float deltaTime) { execute(em); } };
