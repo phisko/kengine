@@ -10,9 +10,9 @@
 #include "angle.hpp"
 
 namespace kengine {
-	// declarations
+#pragma region declarations
 	static void execute(EntityManager & em, float deltaTime);
-	//
+#pragma endregion
 	EntityCreatorFunctor<64> KinematicSystem(EntityManager & em) {
 		return [&](Entity & e) {
 			e += functions::Execute{ [&](float deltaTime) { execute(em, deltaTime); } };
