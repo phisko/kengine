@@ -1,6 +1,7 @@
 #pragma once
 
 #include "EntityCreator.hpp"
+#include "reflection.hpp"
 
 namespace kengine {
 
