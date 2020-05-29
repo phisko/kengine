@@ -15,6 +15,8 @@
 #include "function.hpp"
 
 namespace kengine {
+	class Entity;
+
 	struct RebuildNavMeshComponent { // Indicates that the navmesh should be rebuilt
 		putils_reflection_class_name(RebuildNavMeshComponent);
 	};
