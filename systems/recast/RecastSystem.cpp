@@ -237,22 +237,31 @@ namespace kengine {
 #pragma endregion
 	static void updateCrowds(float deltaTime) {
 		for (const auto & [environment, crowd, environmentTransform] : g_em->getEntities<RecastCrowdComponent, TransformComponent>()) {
-			crowd.crowd->update(deltaTime, nullptr);
+			g_em->runTask([&, environment] {
+				const auto & navMesh = instanceHelper::getModel<RecastNavMeshComponent>(*g_em, environment);
+				const auto environmentInfo = getEnvironmentInfo(environment);
 
-			const auto & navMesh = instanceHelper::getModel<RecastNavMeshComponent>(*g_em, environment);
-			const auto environmentInfo = getEnvironmentInfo(environment);
+				static dtCrowdAgent * activeAgents[KENGINE_RECAST_MAX_AGENTS];
+				const auto nbAgents = crowd.crowd->getActiveAgents(activeAgents, lengthof(activeAgents));
 
-			static dtCrowdAgent * activeAgents[KENGINE_RECAST_MAX_AGENTS];
-			const auto nbAgents = crowd.crowd->getActiveAgents(activeAgents, lengthof(activeAgents));
-			for (int i = 0; i < nbAgents; ++i) {
-				const auto agent = activeAgents[i];
-				auto e = g_em->getEntity((Entity::ID)agent->params.userData);
-				auto & transform = e.get<TransformComponent>();
+				// Overwrite agent with user-updated components
+				for (int i = 0; i < nbAgents; ++i) {
+					const auto agent = activeAgents[i];
+					auto e = g_em->getEntity((Entity::ID)agent->params.userData);
+					writeToAgent(e, e.get<TransformComponent>(), e.get<PathfindingComponent>(), environmentInfo, navMesh, crowd);
+				}
 
-				readFromAgent(transform, e.get<PhysicsComponent>(), *agent, environmentInfo);
-				writeToAgent(e, transform, e.get<PathfindingComponent>(), environmentInfo, navMesh, crowd);
-			}
+				crowd.crowd->update(deltaTime, nullptr);
+
+				// Update user components with agent info
+				for (int i = 0; i < nbAgents; ++i) {
+					const auto agent = activeAgents[i];
+					auto e = g_em->getEntity((Entity::ID)agent->params.userData);
+					readFromAgent(e.get<TransformComponent>(), e.get<PhysicsComponent>(), *agent, environmentInfo);
+				}
+			});
 		}
+		g_em->completeTasks();
 	}
 
 	static void readFromAgent(TransformComponent & transform, PhysicsComponent & physics, const dtCrowdAgent & agent, const EnvironmentInfo & environmentInfo) {
@@ -304,22 +313,22 @@ namespace kengine {
 	static void buildNavMeshes() {
 		static const auto buildRecastComponent = [](auto && entities) {
 			for (auto & [e, model, modelData, navMesh, _] : entities) {
-				g_em->runTask([&] {
+				g_em->runTask([&, id = e.id] {
 					kengine_assert(*g_em, navMesh.vertsPerPoly <= DT_VERTS_PER_POLYGON);
-					createRecastMesh(model.file, e, navMesh, modelData);
+					createRecastMesh(model.file, g_em->getEntity(id), navMesh, modelData);
 					if constexpr (std::is_same<RebuildNavMeshComponent, putils_typeof(_)>())
 						e.detach<RebuildNavMeshComponent>();
 				});
 			}
-			g_em->completeTasks();
 		};
 
 		buildRecastComponent(g_em->getEntities<ModelComponent, ModelDataComponent, NavMeshComponent, no<RecastNavMeshComponent>>());
 		buildRecastComponent(g_em->getEntities<ModelComponent, ModelDataComponent, NavMeshComponent, RebuildNavMeshComponent>());
+		g_em->completeTasks();
 	}
 
 #pragma region createRecastMesh
-	// declarations
+#pragma region declarations
 	using HeightfieldPtr = UniquePtr<rcHeightfield, rcFreeHeightField>;
 	using CompactHeightfieldPtr = UniquePtr<rcCompactHeightfield, rcFreeCompactHeightfield>;
 	using ContourSetPtr = UniquePtr<rcContourSet, rcFreeContourSet>;
@@ -338,7 +347,7 @@ namespace kengine {
 	static NavMeshPtr createNavMesh(const NavMeshData & data);
 	static NavMeshQueryPtr createNavMeshQuery(const NavMeshComponent & params, const dtNavMesh & navMesh);
 	static NavMeshComponent::GetPathFunc getPath(const ModelComponent & model, const NavMeshComponent & navMesh, const RecastNavMeshComponent & recast);
-	//
+#pragma endregion
 	static void createRecastMesh(const char * file, Entity & e, NavMeshComponent & navMesh, const ModelDataComponent & modelData) {
 		NavMeshData data;
 
@@ -398,7 +407,7 @@ namespace kengine {
 	}
 
 #pragma region createNavMeshData
-	// declarations
+#pragma region declarations
 	static std::unique_ptr<float[]> getVertices(const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData);
 	static rcConfig getConfig(const NavMeshComponent & navMesh, const ModelDataComponent::Mesh & meshData, const float * vertices);
 	static HeightfieldPtr createHeightField(rcContext & ctx, const rcConfig & cfg, const kengine::ModelDataComponent::Mesh & meshData, const float * vertices);
@@ -406,7 +415,7 @@ namespace kengine {
 	static ContourSetPtr createContourSet(rcContext & ctx, const rcConfig & cfg, rcCompactHeightfield & chf);
 	static PolyMeshPtr createPolyMesh(rcContext & ctx, const rcConfig & cfg, rcContourSet & contourSet);
 	static PolyMeshDetailPtr createPolyMeshDetail(rcContext & ctx, const rcConfig & cfg, const rcPolyMesh & polyMesh, const rcCompactHeightfield & chf);
-	//
+#pragma endregion
 	static NavMeshData createNavMeshData(const NavMeshComponent & navMesh, const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData) {
 		NavMeshData ret;
 
@@ -736,11 +745,6 @@ namespace kengine {
 		return navMeshQuery;
 	}
 
-#pragma region getPath
-	// declarations
-	static putils::Point3f getPositionInModelSpace(const putils::Point3f & pos, const glm::mat4 & worldToModel);
-	static void convertToWorldSpace(NavMeshComponent::Path & path, const glm::mat4 & modelToWorld);
-	//
 	static NavMeshComponent::GetPathFunc getPath(const ModelComponent & model, const NavMeshComponent & navMesh, const RecastNavMeshComponent & recast) {
 		return [&](const Entity & environment, const putils::Point3f & startWorldSpace, const putils::Point3f & endWorldSpace) {
 			static const dtQueryFilter filter;
@@ -748,8 +752,8 @@ namespace kengine {
 			const auto modelToWorld = shaderHelper::getModelMatrix(model, environment.get<TransformComponent>());
 			const auto worldToModel = glm::inverse(modelToWorld);
 
-			const auto start = getPositionInModelSpace(startWorldSpace, worldToModel);
-			const auto end = getPositionInModelSpace(endWorldSpace, worldToModel);
+			const auto start = convertPosToReferencial(startWorldSpace, worldToModel);
+			const auto end = convertPosToReferencial(endWorldSpace, worldToModel);
 
 			NavMeshComponent::Path ret;
 
@@ -783,27 +787,12 @@ namespace kengine {
 				return ret;
 
 			ret.resize(straightPathCount);
-			convertToWorldSpace(ret, modelToWorld);
+			for (auto & step : ret)
+				step = convertPosToReferencial(step, modelToWorld);
 
 			return ret;
 		};
 	}
-
-	static putils::Point3f getPositionInModelSpace(const putils::Point3f & pos, const glm::mat4 & worldToModel) {
-		auto tmp = glm::vec4(shaderHelper::toVec(pos), 1.f);
-		tmp = worldToModel * tmp;
-		return { tmp.x, tmp.y, tmp.z };
-	}
-
-	static void convertToWorldSpace(NavMeshComponent::Path & path, const glm::mat4 & modelToWorld) {
-		for (auto & step : path) { // Convert positions to world space
-			glm::vec4 v(shaderHelper::toVec(step), 1.f);
-			v = modelToWorld * v;
-			step = { v.x, v.y, v.z };
-		}
-	}
-#pragma endregion getPath
-
 #pragma endregion createRecastMesh
 #pragma endregion buildNavMeshes
 #pragma endregion execute
