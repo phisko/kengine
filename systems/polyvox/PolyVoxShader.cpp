@@ -9,8 +9,9 @@
 #include "data/ModelComponent.hpp"
 #include "data/OpenGLModelComponent.hpp"
 
+#include "helpers/cameraHelper.hpp"
+#include "helpers/matrixHelper.hpp"
 #include "systems/opengl/shaders/ApplyTransparencySrc.hpp"
-
 #include "systems/opengl/shaders/shaderHelper.hpp"
 
 #pragma region GLSL
@@ -93,14 +94,14 @@ namespace kengine {
 		_viewPos = params.camPos;
 
 		for (const auto &[e, poly, graphics, instance, transform] : _em.getEntities<PolyVoxObjectComponent, GraphicsComponent, InstanceComponent, TransformComponent>()) {
-			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			const auto model = _em.getEntity(instance.model);
 			if (!model.has<OpenGLModelComponent>())
 				continue;
 
-			_model = shaderHelper::getModelMatrix(model.get<ModelComponent>(), transform);
+			_model = matrixHelper::getModelMatrix(model.get<ModelComponent>(), transform);
 			_entityID = (float)e.id;
 			_color = graphics.color;
 

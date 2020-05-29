@@ -1,16 +1,17 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include "OpenGLSystem.hpp"
+#include "Controllers.hpp"
+
+#include "EntityManager.hpp"
+
 #include "opengl/Program.hpp"
 #include "opengl/RAII.hpp"
 
 #include "imgui.h"
 #include "examples/imgui_impl_glfw.h"
 #include "examples/imgui_impl_opengl3.h"
-
-#include "EntityManager.hpp"
-
-#include "systems/InputSystem.hpp"
 
 #include "data/ModelDataComponent.hpp"
 #include "data/TextureDataComponent.hpp"
@@ -38,12 +39,9 @@
 #include "functions/InitGBuffer.hpp"
 
 #include "shaders/shaderHelper.hpp"
-
 #include "helpers/cameraHelper.hpp"
-#include "rotate.hpp"
 
-#include "OpenGLSystem.hpp"
-#include "Controllers.hpp"
+#include "rotate.hpp"
 
 #include "shaders/ShadowMap.hpp"
 #include "shaders/ShadowCube.hpp"
@@ -116,8 +114,8 @@ namespace kengine {
 		};
 
 #if !defined(KENGINE_NDEBUG) && !defined(KENGINE_OPENGL_NO_DEBUG_TOOLS)
-		em += Controllers::ShaderController(em);
-		em += Controllers::GBufferDebugger(em, g_gBufferIterator);
+		em += opengl::ShaderController(em);
+		em += opengl::GBufferDebugger(em, g_gBufferIterator);
 #endif
 
 		g_params.nearPlane = 1.f;
@@ -682,7 +680,7 @@ namespace kengine {
 	template<typename Shaders>
 	static void runShaders(Shaders && shaders) {
 		for (auto & [e, comp] : shaders) {
-			if (!shaderHelper::entityAppearsInViewport(e, g_params.viewportID))
+			if (!cameraHelper::entityAppearsInViewport(e, g_params.viewportID))
 				continue;
 			if (!comp.enabled)
 				continue;
@@ -690,7 +688,7 @@ namespace kengine {
 #ifndef KENGINE_NDEBUG
 			struct ShaderProfiler {
 				ShaderProfiler(Entity & e) {
-					_comp = &e.attach<Controllers::ShaderProfileComponent>();
+					_comp = &e.attach<opengl::ShaderProfileComponent>();
 					_timer.restart();
 				}
 
@@ -698,7 +696,7 @@ namespace kengine {
 					_comp->executionTime = _timer.getTimeSinceStart().count();
 				}
 
-				Controllers::ShaderProfileComponent * _comp;
+				opengl::ShaderProfileComponent * _comp;
 				putils::Timer _timer;
 			};
 			ShaderProfiler _(e);

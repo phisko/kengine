@@ -3,8 +3,10 @@
 
 #include "data/HighlightComponent.hpp"
 
-#include "QuadSrc.hpp"
+#include "helpers/cameraHelper.hpp"
 #include "shaderHelper.hpp"
+
+#include "QuadSrc.hpp"
 
 #pragma region GLSL
 static const auto frag = R"(
@@ -83,7 +85,7 @@ namespace kengine::Shaders {
 		_screenSize = putils::Point2f(params.viewport.size);
 
 		for (const auto & [e, highlight] : _em.getEntities<HighlightComponent>()) {
-			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			_entityID = (float)e.id;

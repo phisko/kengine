@@ -6,6 +6,7 @@
 #include "data/LightComponent.hpp"
 #include "data/ShaderComponent.hpp"
 
+#include "helpers/cameraHelper.hpp"
 #include "helpers/lightHelper.hpp"
 #include "shaderHelper.hpp"
 
@@ -37,7 +38,7 @@ namespace kengine::Shaders {
 		glActiveTexture((GLenum)(GL_TEXTURE0 + _shadowMapTextureID));
 
 		for (auto &[e, light, transform] : _em.getEntities<SpotLightComponent, TransformComponent>()) {
-			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			const auto & centre = transform.boundingBox.position;

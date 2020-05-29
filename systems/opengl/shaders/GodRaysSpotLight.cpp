@@ -5,6 +5,7 @@
 #include "data/TransformComponent.hpp"
 #include "data/GodRaysComponent.hpp"
 
+#include "helpers/cameraHelper.hpp"
 #include "helpers/lightHelper.hpp"
 #include "shaderHelper.hpp"
 
@@ -45,7 +46,7 @@ namespace kengine::Shaders {
 		_screenSize = putils::Point2f(params.viewport.size);
 
 		for (const auto &[e, light, depthMap, transform, comp] : _em.getEntities<SpotLightComponent, DepthMapComponent, TransformComponent, GodRaysComponent>()) {
-			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			_scattering = comp.scattering;

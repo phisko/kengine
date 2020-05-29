@@ -4,8 +4,10 @@
 #include "data/DebugGraphicsComponent.hpp"
 #include "data/TransformComponent.hpp"
 
+#include "helpers/cameraHelper.hpp"
 #include "shaderHelper.hpp"
 #include "ApplyTransparencySrc.hpp"
+
 #include "visit.hpp"
 #include "static_assert.hpp"
 
@@ -92,7 +94,7 @@ namespace kengine::Shaders {
 		};
 
 		for (const auto &[e, debug, transform] : _em.getEntities<DebugGraphicsComponent, TransformComponent>()) {
-			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			for (const auto & element : debug.elements) {

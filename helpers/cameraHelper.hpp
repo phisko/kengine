@@ -3,6 +3,7 @@
 #include "Entity.hpp"
 #include "EntityManager.hpp"
 #include "Point.hpp"
+#include "functions/AppearsInViewport.hpp"
 
 namespace kengine {
 	struct OnScreenComponent;
@@ -15,6 +16,13 @@ namespace kengine::cameraHelper {
 		putils::Point2f viewportPercent = { -1.f, -1.f }; // [0,1]
 	};
 
+	inline bool entityAppearsInViewport(const Entity & e, Entity::ID viewport);
 	ViewportInfo getViewportForPixel(EntityManager & em, Entity::ID windowID, const putils::Point2ui & pixel); 
 	putils::Rect3f convertToScreenPercentage(const putils::Rect3f & rect, const putils::Point2f & screenSize, const OnScreenComponent & comp);
+
+	// Impl
+
+	inline bool entityAppearsInViewport(const Entity & e, Entity::ID viewport) {
+		return !e.has<functions::AppearsInViewport>() || e.get<functions::AppearsInViewport>()(viewport);
+	}
 }

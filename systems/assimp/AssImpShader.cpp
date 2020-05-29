@@ -6,12 +6,10 @@
 #include "data/OpenGLModelComponent.hpp"
 #include "data/SkeletonComponent.hpp"
 
-#include "systems/opengl/shaders/ApplyTransparencySrc.hpp"
-
-#include "systems/opengl/shaders/shaderHelper.hpp"
-
+#include "helpers/cameraHelper.hpp"
 #include "AssImpHelper.hpp"
 
+#include "systems/opengl/shaders/ApplyTransparencySrc.hpp"
 #include "AssImpShaderSrc.hpp"
 static_assert(KENGINE_ASSIMP_BONE_INFO_PER_VERTEX == 4, "This shader assumes only 4 bones per vertex");
 
@@ -36,7 +34,7 @@ namespace kengine {
 		_proj = params.proj;
 
 		for (const auto &[e, assimp, instance, graphics, transform, skeleton] : _em.getEntities<AssImpObjectComponent, InstanceComponent, GraphicsComponent, TransformComponent, SkeletonComponent>()) {
-			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			_entityID = (float)e.id;

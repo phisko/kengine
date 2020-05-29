@@ -7,11 +7,10 @@
 #include "data/TextComponent.hpp"
 #include "data/TransformComponent.hpp"
 
-#include "ApplyTransparencySrc.hpp"
-
+#include "helpers/cameraHelper.hpp"
 #include "shaderHelper.hpp"
 
-#include "helpers/cameraHelper.hpp"
+#include "ApplyTransparencySrc.hpp"
 
 #include "termcolor.hpp"
 #include "magic_enum.hpp"
@@ -180,7 +179,7 @@ namespace kengine::Shaders {
 		_view = glm::mat4(1.f);
 		_proj = glm::mat4(1.f);
 		for (const auto &[e, text, transform] : _em.getEntities<TextComponent2D, TransformComponent>()) {
-			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			_entityID = (float)e.id;
@@ -190,7 +189,7 @@ namespace kengine::Shaders {
 		_view = params.view;
 		_proj = params.proj;
 		for (const auto &[e, text, transform] : _em.getEntities<TextComponent3D, TransformComponent>()) {
-			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			_entityID = (float)e.id;

@@ -15,8 +15,11 @@
 #include "imgui.h"
 #include "helpers/instanceHelper.hpp"
 #include "helpers/assertHelper.hpp"
+#include "helpers/matrixHelper.hpp"
+#include "helpers/cameraHelper.hpp"
 #include "systems/opengl/shaders/ApplyTransparencySrc.hpp"
-#include "systems/opengl/shaders/shaderHelper.hpp"
+
+#include "RecastNavMeshComponent.hpp"
 
 #pragma region GLSL
 static const char * vert = R"(
@@ -131,11 +134,11 @@ namespace kengine {
 			if (graphics.appearance != g_adjustables.fileName)
 				continue;
 
-			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			const auto model = _em.getEntity(instance.model);
-			_model = shaderHelper::getModelMatrix(model.get<ModelComponent>(), transform);
+			_model = matrixHelper::getModelMatrix(model.get<ModelComponent>(), transform);
 
 			const auto & comp = model.get<RecastNavMeshComponent>();
 			duDebugDrawNavMesh(this, *comp.navMesh, 0);

@@ -2,12 +2,9 @@
 #include "EntityManager.hpp"
 
 #include "data/SkeletonComponent.hpp"
-#include "data/ModelComponent.hpp"
-#include "data/OpenGLModelComponent.hpp"
 #include "data/NoShadowComponent.hpp"
 
-#include "helpers/lightHelper.hpp"
-#include "systems/opengl/shaders/shaderHelper.hpp"
+#include "helpers/cameraHelper.hpp"
 
 #include "AssImpShaderSrc.hpp"
 #include "AssImpHelper.hpp"
@@ -31,7 +28,7 @@ namespace kengine {
 		uniforms.bones = _bones;
 
 		for (const auto & [e, textured, instance, transform, skeleton, noNoShadow] : _em.getEntities<AssImpObjectComponent, InstanceComponent, TransformComponent, SkeletonComponent, no<NoShadowComponent>>()) {
-			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 			AssImpHelper::drawModel(_em, instance, transform, skeleton, false, uniforms);
 		}

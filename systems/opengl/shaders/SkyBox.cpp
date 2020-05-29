@@ -3,7 +3,9 @@
 
 #include "data/SkyBoxComponent.hpp"
 
+#include "helpers/cameraHelper.hpp"
 #include "shaderHelper.hpp"
+
 #include "opengl/RAII.hpp"
 #include "stb_image.h"
 
@@ -167,7 +169,7 @@ namespace kengine::Shaders {
 		glActiveTexture((GLenum)(GL_TEXTURE0 + _textureID));
 
 		for (auto & [e, comp] : _em.getEntities<SkyBoxComponent>()) {
-			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			_color = comp.color;

@@ -110,7 +110,7 @@ namespace kengine {
 		_view = glm::mat4(1.f);
 		_proj = glm::mat4(1.f);
 		for (const auto &[e, instance, graphics, transform, sprite] : _em.getEntities<InstanceComponent, GraphicsComponent, TransformComponent, SpriteComponent2D>()) {
-			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			_entityID = (float)e.id;
@@ -120,7 +120,7 @@ namespace kengine {
 		_view = params.view;
 		_proj = params.proj;
 		for (const auto &[e, instance, graphics, transform, sprite] : _em.getEntities<InstanceComponent, GraphicsComponent, TransformComponent, SpriteComponent3D>()) {
-			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			_entityID = (float)e.id;

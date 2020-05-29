@@ -7,7 +7,9 @@
 #include "data/AdjustableComponent.hpp"
 #include "data/ShaderComponent.hpp"
 
+#include "helpers/cameraHelper.hpp"
 #include "shaderHelper.hpp"
+
 #include "QuadSrc.hpp"
 #include "ShadowMapShader.hpp"
 
@@ -56,7 +58,7 @@ namespace kengine::Shaders {
 		_screenSize = putils::Point2f(params.viewport.size);
 
 		for (auto &[e, light] : _em.getEntities<DirLightComponent>()) {
-			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			const putils::Point3f pos = { params.camPos.x, params.camPos.y, params.camPos.z };

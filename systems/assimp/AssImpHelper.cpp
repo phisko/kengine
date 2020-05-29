@@ -4,7 +4,7 @@
 #include "data/ModelComponent.hpp"
 #include "data/TextureModelComponent.hpp"
 #include "data/OpenGLModelComponent.hpp"
-#include "systems/opengl/shaders/shaderHelper.hpp"
+#include "helpers/matrixHelper.hpp"
 
 #include "opengl/Program.hpp"
 
@@ -20,7 +20,7 @@ namespace kengine {
 			if (!model.has<OpenGLModelComponent>())
 				return;
 
-			uniforms.model = shaderHelper::getModelMatrix(model.get<ModelComponent>(), transform);
+			uniforms.model = matrixHelper::getModelMatrix(model.get<ModelComponent>(), transform);
 
 			const bool noSkeleton = skeleton.meshes.empty();
 			if (noSkeleton)

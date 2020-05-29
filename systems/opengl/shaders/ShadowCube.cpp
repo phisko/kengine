@@ -6,8 +6,10 @@
 #include "data/InstanceComponent.hpp"
 #include "data/NoShadowComponent.hpp"
 
-#include "shaderHelper.hpp"
+#include "helpers/cameraHelper.hpp"
 #include "helpers/lightHelper.hpp"
+#include "helpers/matrixHelper.hpp"
+#include "shaderHelper.hpp"
 
 namespace kengine::Shaders {
 	void ShadowCube::init(size_t firstTextureID) {
@@ -23,14 +25,14 @@ namespace kengine::Shaders {
 
 	void ShadowCube::drawObjects(const Parameters & params) {
 		for (const auto &[e, instance, transform, shadow, noNoShadow] : _em.getEntities<InstanceComponent, TransformComponent, DefaultShadowComponent, no<NoShadowComponent>>()) {
-			if (!shaderHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			const auto & model = _em.getEntity(instance.model);
 			if (!model.has<OpenGLModelComponent>())
 				continue;
 
-			_model = shaderHelper::getModelMatrix(model.get<ModelComponent>(), transform);
+			_model = matrixHelper::getModelMatrix(model.get<ModelComponent>(), transform);
 			shaderHelper::drawModel(model.get<OpenGLModelComponent>());
 		}
 	}

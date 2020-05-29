@@ -5,16 +5,16 @@
 
 #include <cmath>
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 #include "data/ModelComponent.hpp"
 #include "data/OpenGLModelComponent.hpp"
 #include "data/TransformComponent.hpp"
-#include "functions/AppearsInViewport.hpp"
 
 namespace kengine {
 	namespace shaderHelper {
+		inline glm::vec3 toVec(const putils::Point3f & p);
+		void drawModel(const OpenGLModelComponent & openGL);
+
 		namespace shapes {
 			void drawSphere();
 			void drawQuad();
@@ -42,12 +42,9 @@ namespace kengine {
 			GLenum feature;
 		};
 
-		static glm::vec3 toVec(const putils::Point3f & p) { return { p.x, p.y, p.z }; }
-		void drawModel(const OpenGLModelComponent & openGL);
-		glm::mat4 getModelMatrix(const ModelComponent & model, const TransformComponent & transform);
-
-		static bool entityAppearsInViewport(const Entity & e, Entity::ID viewport) {
-			return !e.has<functions::AppearsInViewport>() || e.get<functions::AppearsInViewport>()(viewport);
+		// Impl
+		inline glm::vec3 toVec(const putils::Point3f & p) {
+			return { p.x, p.y, p.z };
 		}
 	}
 }
