@@ -12,6 +12,8 @@
 # define kengine_assert_failed(em, x) (void)0
 # define kengine_debug_break (void)0
 #else
+# include <string>
+
 # ifdef WIN32
 #  define kengine_debug_break DebugBreak()
 # else
@@ -33,13 +35,13 @@
 	} while (false)
 # define kengine_assert(em, x) \
 	kengine_assert_with_message(em, x, #x)
-#endif
 
 namespace kengine {
 	class EntityManager;
 
 	namespace assertHelper {
-		void assertFailed(EntityManager & em, const char * file, int line, const char * expr);
+		void assertFailed(EntityManager & em, const char * file, int line, const std::string & expr);
 		bool isDebuggerPresent();
 	}
 }
+#endif

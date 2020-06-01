@@ -212,7 +212,8 @@ namespace kengine {
 			const auto scene = model.importer.ReadFile(f, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals /*| aiProcess_OptimizeMeshes*/ | aiProcess_JoinIdenticalVertices);
 			if (scene == nullptr || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || scene->mRootNode == nullptr) {
 				std::cerr << putils::termcolor::red << model.importer.GetErrorString() << '\n' << putils::termcolor::reset;
-				kengine_assert_failed(*g_em, putils::string<1024>("Error loading %s: %s", f, model.importer.GetErrorString()));
+				kengine_assert_failed(*g_em, putils::string<1024>("Error loading %s: %s", f, model.importer.GetErrorString()).c_str());
+				return false;
 			}
 			firstLoad = true;
 		}
@@ -266,7 +267,7 @@ namespace kengine {
 				const auto scene = importer.ReadFile(f.c_str(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals /*| aiProcess_OptimizeMeshes*/ | aiProcess_JoinIdenticalVertices);
 				if (scene == nullptr || scene->mRootNode == nullptr) {
 					std::cerr << '\n' << putils::termcolor::red << importer.GetErrorString() << '\n' << putils::termcolor::reset;
-					kengine_assert_failed(*g_em, putils::string<1024>("Error loading anims from %s: %s", f.c_str(), importer.GetErrorString()));
+					kengine_assert_failed(*g_em, putils::string<1024>("Error loading anims from %s: %s", f.c_str(), importer.GetErrorString()).c_str());
 				}
 
 				for (unsigned int i = 0; i < scene->mNumAnimations; ++i)
@@ -473,7 +474,7 @@ namespace kengine {
 				textureLoader.textureID = &comp.texture.get();
 
 				textureLoader.data = stbi_load(fullPath.c_str(), &textureLoader.width, &textureLoader.height, &textureLoader.components, 0);
-				kengine_assert_with_message(*g_em, textureLoader.data != nullptr, putils::string<1024>("Error loading texture file %s", fullPath.c_str()));
+				kengine_assert_with_message(*g_em, textureLoader.data != nullptr, putils::string<1024>("Error loading texture file %s", fullPath.c_str()).c_str());
 				textureLoader.free = stbi_image_free;
 			} e += textureLoader;
 		};
@@ -495,7 +496,7 @@ namespace kengine {
 		for (const auto node : allNodes)
 			if (strcmp(node->mName.data, name) == 0)
 				return node;
-		kengine_assert_failed(*g_em, putils::string<1024>("Error finding node %s", name));
+		kengine_assert_failed(*g_em, putils::string<1024>("Error finding node %s", name).c_str());
 		return nullptr;
 	}
 

@@ -15,7 +15,7 @@
 struct AssertInfo {
 	const char * file;
 	int line;
-	const char * expr;
+	std::string expr;
 	std::string stack;
 };
 
@@ -31,7 +31,7 @@ static void ignore(kengine::EntityManager & em, const char * file, int line);
 
 namespace kengine {
 	namespace assertHelper {
-		void assertFailed(EntityManager & em, const char * file, int line, const char * expr) {
+		void assertFailed(EntityManager & em, const char * file, int line, const std::string & expr) {
 			if (isIgnored(em, file, line))
 				return;
 
@@ -55,7 +55,7 @@ namespace kengine {
 						{
 							ImGui::Text("%s l.%d", info.file, info.line);
 							ImGui::Separator();
-							ImGui::Text(info.expr);
+							ImGui::Text(info.expr.c_str());
 							ImGui::Separator();
 							ImGui::Text(info.stack.c_str());
 							if (ImGui::IsItemClicked(1))
