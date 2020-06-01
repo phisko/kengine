@@ -145,8 +145,8 @@ namespace kengine {
 			std::vector<unsigned int> indices;
 		};
 
-		Assimp::Importer importer;
-		std::vector<Assimp::Importer> animImporters;
+		std::unique_ptr<Assimp::Importer> importer;
+		std::vector<std::unique_ptr<Assimp::Importer>> animImporters;
 		std::vector<Mesh> meshes;
 	};
 
@@ -206,18 +206,19 @@ namespace kengine {
 #endif
 
 		auto & model = e.attach<AssImpModelComponent>();
+		model.importer = std::make_unique<Assimp::Importer>();
 
 		bool firstLoad = false;
-		if (model.importer.GetScene() == nullptr) {
-			const auto scene = model.importer.ReadFile(f, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals /*| aiProcess_OptimizeMeshes*/ | aiProcess_JoinIdenticalVertices);
+		if (model.importer->GetScene() == nullptr) {
+			const auto scene = model.importer->ReadFile(f, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals /*| aiProcess_OptimizeMeshes*/ | aiProcess_JoinIdenticalVertices);
 			if (scene == nullptr || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || scene->mRootNode == nullptr) {
-				std::cerr << putils::termcolor::red << model.importer.GetErrorString() << '\n' << putils::termcolor::reset;
-				kengine_assert_failed(*g_em, putils::string<1024>("Error loading %s: %s", f, model.importer.GetErrorString()).c_str());
+				std::cerr << putils::termcolor::red << model.importer->GetErrorString() << '\n' << putils::termcolor::reset;
+				kengine_assert_failed(*g_em, putils::string<1024>("Error loading %s: %s", f, model.importer->GetErrorString()).c_str());
 				return false;
 			}
 			firstLoad = true;
 		}
-		const auto scene = model.importer.GetScene();
+		const auto scene = model.importer->GetScene();
 
 		const auto dir = putils::get_directory(f);
 		auto & textures = e.attach<AssImpTexturesModelComponent>();
@@ -258,16 +259,17 @@ namespace kengine {
 
 		if (e.has<AnimFilesComponent>()) {
 			const auto & animFiles = e.get<AnimFilesComponent>();
-			model.animImporters.resize(animFiles.files.size());
+			for (size_t i = 0; i < animFiles.files.size(); ++i)
+				model.animImporters.push_back(std::make_unique<Assimp::Importer>());
 
 			size_t i = 0;
 			for (const auto & f : animFiles.files) {
 				auto & importer = model.animImporters[i];
 
-				const auto scene = importer.ReadFile(f.c_str(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals /*| aiProcess_OptimizeMeshes*/ | aiProcess_JoinIdenticalVertices);
+				const auto scene = importer->ReadFile(f.c_str(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals /*| aiProcess_OptimizeMeshes*/ | aiProcess_JoinIdenticalVertices);
 				if (scene == nullptr || scene->mRootNode == nullptr) {
-					std::cerr << '\n' << putils::termcolor::red << importer.GetErrorString() << '\n' << putils::termcolor::reset;
-					kengine_assert_failed(*g_em, putils::string<1024>("Error loading anims from %s: %s", f.c_str(), importer.GetErrorString()).c_str());
+					std::cerr << '\n' << putils::termcolor::red << importer->GetErrorString() << '\n' << putils::termcolor::reset;
+					kengine_assert_failed(*g_em, putils::string<1024>("Error loading anims from %s: %s", f.c_str(), importer->GetErrorString()).c_str());
 				}
 
 				for (unsigned int i = 0; i < scene->mNumAnimations; ++i)
@@ -395,7 +397,7 @@ namespace kengine {
 
 #pragma region loadMaterialTextures
 #pragma region declarations
-	static Entity::ID loadEmbeddedTexture(const char * path, const aiMaterial * mat, const aiScene * scene);
+	static Entity::ID loadEmbeddedTexture(const aiTexture * texture);
 	static Entity::ID loadFromDisk(const char * directory, const char * file);
 #pragma endregion
 	static void loadMaterialTextures(std::vector<Entity::ID> & textures, const char * directory, const aiMaterial * mat, aiTextureType type, const aiScene * scene) {
@@ -405,8 +407,8 @@ namespace kengine {
 			const auto cPath = path.C_Str();
 
 			Entity::ID modelID = Entity::INVALID_ID;
-			if (cPath[0] == '*')
-				modelID = loadEmbeddedTexture(cPath, mat, scene);
+			if (const auto texture = scene->GetEmbeddedTexture(cPath))
+				modelID = loadEmbeddedTexture(texture);
 			else
 				modelID = loadFromDisk(directory, cPath);
 
@@ -414,11 +416,7 @@ namespace kengine {
 		}
 	}
 
-	static Entity::ID loadEmbeddedTexture(const char * path, const aiMaterial * mat, const aiScene * scene) {
-
-		const auto idx = atoi(path + 1);
-		const auto texture = scene->mTextures[idx];
-
+	static Entity::ID loadEmbeddedTexture(const aiTexture * texture) {
 		struct AssimpTextureModelComponent {
 			const aiTexture * texture = nullptr;
 		};
@@ -540,9 +538,9 @@ namespace kengine {
 		return [id] {
 			auto e = g_em->getEntity(id);
 			auto & model = e.get<AssImpModelComponent>(); // previous attach hasn't been processed yet, so `get` would assert
-			model.importer.FreeScene();
+			model.importer->FreeScene();
 			for (auto & importer : model.animImporters)
-				importer.FreeScene();
+				importer->FreeScene();
 			e.detach<AssImpModelComponent>();
 		};
 	}
