@@ -31,6 +31,7 @@
 #include "functions/Execute.hpp"
 #include "functions/OnEntityCreated.hpp"
 
+#include "helpers/assertHelper.hpp"
 #include "AssImpHelper.hpp"
 
 namespace kengine {
@@ -211,7 +212,7 @@ namespace kengine {
 			const auto scene = model.importer.ReadFile(f, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals /*| aiProcess_OptimizeMeshes*/ | aiProcess_JoinIdenticalVertices);
 			if (scene == nullptr || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || scene->mRootNode == nullptr) {
 				std::cerr << putils::termcolor::red << model.importer.GetErrorString() << '\n' << putils::termcolor::reset;
-				assert(false);
+				kengine_assert_failed(*g_em, putils::string<1024>("Error loading %s: %s", f, model.importer.GetErrorString()));
 			}
 			firstLoad = true;
 		}
@@ -265,7 +266,7 @@ namespace kengine {
 				const auto scene = importer.ReadFile(f.c_str(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals /*| aiProcess_OptimizeMeshes*/ | aiProcess_JoinIdenticalVertices);
 				if (scene == nullptr || scene->mRootNode == nullptr) {
 					std::cerr << '\n' << putils::termcolor::red << importer.GetErrorString() << '\n' << putils::termcolor::reset;
-					assert(false);
+					kengine_assert_failed(*g_em, putils::string<1024>("Error loading anims from %s: %s", f.c_str(), importer.GetErrorString()));
 				}
 
 				for (unsigned int i = 0; i < scene->mNumAnimations; ++i)
@@ -341,7 +342,7 @@ namespace kengine {
 						vertex.boneIDs[k] = i;
 						break;
 					}
-				assert(found); // too many bones have info for a single vertex
+				kengine_assert_with_message(*g_em, found, "Not enough boneWeights available for animation");
 				if (!found) {
 					float smallestWeight = FLT_MAX;
 					unsigned int smallestIndex = 0;
@@ -371,14 +372,14 @@ namespace kengine {
 
 #pragma region processMeshTextures
 #pragma region declarations
-	static void loadMaterialTextures(std::vector<Entity::ID> & textures, const char * directory, const aiMaterial * mat, aiTextureType type);
+	static void loadMaterialTextures(std::vector<Entity::ID> & textures, const char * directory, const aiMaterial * mat, aiTextureType type, const aiScene * scene);
 #pragma endregion
 	static AssImpTexturesModelComponent::MeshTextures processMeshTextures(const char * directory, const aiMesh * mesh, const aiScene * scene) {
 		AssImpTexturesModelComponent::MeshTextures meshTextures;
 		if (mesh->mMaterialIndex >= 0) {
 			const auto material = scene->mMaterials[mesh->mMaterialIndex];
-			loadMaterialTextures(meshTextures.diffuse, directory, material, aiTextureType_DIFFUSE);
-			loadMaterialTextures(meshTextures.specular, directory, material, aiTextureType_SPECULAR);
+			loadMaterialTextures(meshTextures.diffuse, directory, material, aiTextureType_DIFFUSE, scene);
+			loadMaterialTextures(meshTextures.specular, directory, material, aiTextureType_SPECULAR, scene);
 
 			aiColor3D color{ 0.f, 0.f, 0.f };
 			material->Get(AI_MATKEY_COLOR_DIFFUSE, color);
@@ -387,44 +388,99 @@ namespace kengine {
 			meshTextures.specularColor = { color.r, color.g, color.b };
 		}
 		else
-			assert(false);
+			kengine_assert_failed(*g_em, "Unkown material");
 		return meshTextures;
 	}
 
-	static void loadMaterialTextures(std::vector<Entity::ID> & textures, const char * directory, const aiMaterial * mat, aiTextureType type) {
+#pragma region loadMaterialTextures
+#pragma region declarations
+	static Entity::ID loadEmbeddedTexture(const char * path, const aiMaterial * mat, const aiScene * scene);
+	static Entity::ID loadFromDisk(const char * directory, const char * file);
+#pragma endregion
+	static void loadMaterialTextures(std::vector<Entity::ID> & textures, const char * directory, const aiMaterial * mat, aiTextureType type, const aiScene * scene) {
 		for (unsigned int i = 0; i < mat->GetTextureCount(type); ++i) {
 			aiString path;
 			mat->GetTexture(type, i, &path);
-
-			const putils::string<KENGINE_TEXTURE_PATH_MAX_LENGTH> fullPath("%s/%s", directory, path.C_Str());
+			const auto cPath = path.C_Str();
 
 			Entity::ID modelID = Entity::INVALID_ID;
-			for (const auto & [e, model] : g_em->getEntities<TextureModelComponent>())
-				if (model.file == fullPath) {
-					modelID = e.id;
-					break;
-				}
-
-			if (modelID == Entity::INVALID_ID) {
-				*g_em += [&](Entity & e) {
-					modelID = e.id;
-
-					auto & comp = e.attach<TextureModelComponent>();
-					comp.file = fullPath.c_str();
-
-					TextureDataComponent textureLoader; {
-						textureLoader.textureID = &comp.texture.get();
-
-						textureLoader.data = stbi_load(fullPath.c_str(), &textureLoader.width, &textureLoader.height, &textureLoader.components, 0);
-						assert(textureLoader.data != nullptr);
-						textureLoader.free = stbi_image_free;
-					} e += textureLoader;
-				};
-			}
+			if (cPath[0] == '*')
+				modelID = loadEmbeddedTexture(cPath, mat, scene);
+			else
+				modelID = loadFromDisk(directory, cPath);
 
 			textures.push_back(modelID);
 		}
 	}
+
+	static Entity::ID loadEmbeddedTexture(const char * path, const aiMaterial * mat, const aiScene * scene) {
+
+		const auto idx = atoi(path + 1);
+		const auto texture = scene->mTextures[idx];
+
+		struct AssimpTextureModelComponent {
+			const aiTexture * texture = nullptr;
+		};
+
+		for (const auto & [e, model] : g_em->getEntities<AssimpTextureModelComponent>())
+			if (model.texture == texture)
+				return e.id;
+
+		Entity::ID modelID;
+
+		*g_em += [&](Entity & e) {
+			static constexpr auto expectedChannels = 4;
+			modelID = e.id;
+
+			e.attach<AssimpTextureModelComponent>().texture = texture;
+			auto & comp = e.attach<TextureModelComponent>();
+			comp.file = "assimp embedded";
+			TextureDataComponent textureLoader; {
+				textureLoader.textureID = &comp.texture.get();
+				if (texture->mHeight == 0) { // Compressed format
+					textureLoader.data = stbi_load_from_memory((unsigned char *)texture->pcData, texture->mWidth, &textureLoader.width, &textureLoader.height, &textureLoader.components, expectedChannels);
+					kengine_assert_with_message(*g_em, textureLoader.data != nullptr, "Error loading data from assimp embedded texture");
+					textureLoader.free = stbi_image_free;
+				}
+				else {
+					textureLoader.data = texture->pcData;
+					textureLoader.width = texture->mWidth;
+					textureLoader.height = texture->mHeight;
+					textureLoader.components = expectedChannels;
+				}
+			} e += textureLoader;
+		};
+
+		return modelID;
+	}
+
+	static Entity::ID loadFromDisk(const char * directory, const char * file) {
+		const putils::string<KENGINE_TEXTURE_PATH_MAX_LENGTH> fullPath("%s/%s", directory, file);
+
+		for (const auto & [e, model] : g_em->getEntities<TextureModelComponent>())
+			if (model.file == fullPath)
+				return e.id;
+
+		Entity::ID modelID;
+
+		*g_em += [&](Entity & e) {
+			modelID = e.id;
+
+			auto & comp = e.attach<TextureModelComponent>();
+			comp.file = fullPath.c_str();
+
+			TextureDataComponent textureLoader; {
+				textureLoader.textureID = &comp.texture.get();
+
+				textureLoader.data = stbi_load(fullPath.c_str(), &textureLoader.width, &textureLoader.height, &textureLoader.components, 0);
+				kengine_assert_with_message(*g_em, textureLoader.data != nullptr, putils::string<1024>("Error loading texture file %s", fullPath.c_str()));
+				textureLoader.free = stbi_image_free;
+			} e += textureLoader;
+		};
+
+		return modelID;
+	}
+#pragma endregion loadMaterialTextures
 #pragma endregion processMeshTextures
 
 #pragma endregion processNode
@@ -439,7 +495,7 @@ namespace kengine {
 		for (const auto node : allNodes)
 			if (strcmp(node->mName.data, name) == 0)
 				return node;
-		assert(false);
+		kengine_assert_failed(*g_em, putils::string<1024>("Error finding node %s", name));
 		return nullptr;
 	}
 
@@ -539,7 +595,7 @@ namespace kengine {
 			const auto & input = assimp.meshes[i];
 			auto & output = comp.meshes[i];
 
-			assert(input.bones.size() < lengthof(output.boneMatsBoneSpace)); // Need to increase KENGINE_SKELETON_MAX_BONES
+			kengine_assert_with_message(*g_em, input.bones.size() < lengthof(output.boneMatsBoneSpace), "Not enough bones in SkeletonComponent. You need to increase KENGIEN_SKELETON_MAX_BONES");
 
 			size_t boneIndex = 0;
 			for (const auto & bone : input.bones) {
