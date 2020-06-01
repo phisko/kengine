@@ -122,6 +122,19 @@ namespace kengine {
 
 #pragma region loadModel
 #pragma region declarations
+	struct AssImpAnimComponent {
+		std::string fileName;
+		std::unique_ptr<Assimp::Importer> importer;
+	};
+
+	struct AssImpAnimFilesComponent {
+		struct AnimEntity {
+			Entity::ID id;
+			size_t nbAnims;
+		};
+		std::vector<AnimEntity> animEntities;
+	};
+
 	struct AssImpModelComponent {
 		struct Mesh {
 			struct Vertex {
@@ -146,7 +159,6 @@ namespace kengine {
 		};
 
 		std::unique_ptr<Assimp::Importer> importer;
-		std::vector<std::unique_ptr<Assimp::Importer>> animImporters;
 		std::vector<Mesh> meshes;
 	};
 
@@ -154,7 +166,6 @@ namespace kengine {
 		struct Mesh {
 			struct Bone {
 				aiNode * node = nullptr;
-				std::vector<const aiNodeAnim *> animNodes;
 				glm::mat4 offset;
 			};
 			std::vector<Bone> bones;
@@ -194,7 +205,9 @@ namespace kengine {
 	static void processNode(AssImpModelComponent & modelData, AssImpTexturesModelComponent & textures, const char * directory, const aiNode * node, const aiScene * scene, bool firstLoad);
 	static void addNode(std::vector<aiNode *> & allNodes, aiNode * node);
 	static aiNode * findNode(const std::vector<aiNode *> & allNodes, const char * name);
-	static void addAnim(const char * animFile, aiAnimation * aiAnim, const ModelSkeletonComponent & model, AssImpSkeletonComponent & skeleton, AnimListComponent & animList);
+	static AssImpAnimFilesComponent::AnimEntity loadAnimFile(const char * file);
+	static void addAnims(const char * animFile, const aiScene * scene, AnimListComponent & animList);
+
 #pragma endregion
 	static bool loadFile(Entity & e) {
 		const auto & f = e.get<ModelComponent>().file.c_str();
@@ -220,10 +233,12 @@ namespace kengine {
 		}
 		const auto scene = model.importer->GetScene();
 
+		// Load actual meshes (vertices etc)
 		const auto dir = putils::get_directory(f);
 		auto & textures = e.attach<AssImpTexturesModelComponent>();
 		processNode(model, textures, putils::string<64>(dir), scene->mRootNode, scene, firstLoad);
 
+		// Load skeleton
 		std::vector<aiNode *> allNodes;
 		addNode(allNodes, scene->mRootNode);
 
@@ -253,29 +268,20 @@ namespace kengine {
 
 		skeleton.globalInverseTransform = glm::inverse(toglmWeird(scene->mRootNode->mTransformation));
 
+		// Load animations
 		auto & animList = e.attach<AnimListComponent>();
-		for (unsigned int i = 0; i < scene->mNumAnimations; ++i)
-			addAnim(f, scene->mAnimations[i], skeletonNames, skeleton, animList);
+		addAnims(f, scene, animList);
 
 		if (e.has<AnimFilesComponent>()) {
 			const auto & animFiles = e.get<AnimFilesComponent>();
-			for (size_t i = 0; i < animFiles.files.size(); ++i)
-				model.animImporters.push_back(std::make_unique<Assimp::Importer>());
+			auto & assimpAnimFiles = e.attach<AssImpAnimFilesComponent>();
 
-			size_t i = 0;
 			for (const auto & f : animFiles.files) {
-				auto & importer = model.animImporters[i];
+				const auto animEntity = loadAnimFile(f.c_str());
+				assimpAnimFiles.animEntities.push_back(animEntity);
 
-				const auto scene = importer->ReadFile(f.c_str(), aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals /*| aiProcess_OptimizeMeshes*/ | aiProcess_JoinIdenticalVertices);
-				if (scene == nullptr || scene->mRootNode == nullptr) {
-					std::cerr << '\n' << putils::termcolor::red << importer->GetErrorString() << '\n' << putils::termcolor::reset;
-					kengine_assert_failed(*g_em, putils::string<1024>("Error loading anims from %s: %s", f.c_str(), importer->GetErrorString()).c_str());
-				}
-
-				for (unsigned int i = 0; i < scene->mNumAnimations; ++i)
-					addAnim(f.c_str(), scene->mAnimations[i], skeletonNames, skeleton, animList);
-
-				++i;
+				const auto & assimpAnim = g_em->getEntity(animEntity.id).get<AssImpAnimComponent>();
+				addAnims(f.c_str(), assimpAnim.importer->GetScene(), animList);
 			}
 		}
 
@@ -285,6 +291,47 @@ namespace kengine {
 		return true;
 	}
 
+	static AssImpAnimFilesComponent::AnimEntity loadAnimFile(const char * file) {
+		AssImpAnimFilesComponent::AnimEntity ret;
+
+		for (const auto & [e, anim] : g_em->getEntities<AssImpAnimComponent>())
+			if (anim.fileName == file) {
+				ret.id = e.id;
+				ret.nbAnims = anim.importer->GetScene()->mNumAnimations;
+				return ret;
+			}
+
+		*g_em += [&](Entity & e) {
+			ret.id = e.id;
+
+			auto & comp = e.attach<AssImpAnimComponent>();
+			comp.fileName = file;
+			comp.importer = std::make_unique<Assimp::Importer>();
+
+			const auto scene = comp.importer->ReadFile(file, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals /*| aiProcess_OptimizeMeshes*/ | aiProcess_JoinIdenticalVertices);
+			if (scene == nullptr || scene->mRootNode == nullptr) {
+				std::cerr << '\n' << putils::termcolor::red << comp.importer->GetErrorString() << '\n' << putils::termcolor::reset;
+				kengine_assert_failed(*g_em, putils::string<1024>("Error loading anims from %s: %s", file, comp.importer->GetErrorString()).c_str());
+			}
+			else
+				ret.nbAnims = scene->mNumAnimations;
+		};
+
+		return ret;
+	}	
+
+	static void addAnims(const char * animFile, const aiScene * scene, AnimListComponent & animList) {
+		for (unsigned int i = 0; i < scene->mNumAnimations; ++i) {
+			const auto aiAnim = scene->mAnimations[i];
+			AnimListComponent::Anim anim;
+			anim.name = animFile;
+			anim.name += '/'; 
+			anim.name += aiAnim->mName.C_Str();
+			anim.ticksPerSecond = (float)(aiAnim->mTicksPerSecond != 0 ? aiAnim->mTicksPerSecond : 25.0);
+			anim.totalTime = (float)aiAnim->mDuration / anim.ticksPerSecond;
+			animList.anims.emplace_back(std::move(anim));
+		}
+	}
 #pragma region processNode
 #pragma region declarations
 	static AssImpModelComponent::Mesh processMesh(const aiMesh * mesh);
@@ -497,41 +544,6 @@ namespace kengine {
 		kengine_assert_failed(*g_em, putils::string<1024>("Error finding node %s", name).c_str());
 		return nullptr;
 	}
-
-#pragma region addAnim
-#pragma region declarations
-	static aiNodeAnim * findNodeAnim(const std::vector<aiNodeAnim *> & allNodes, const char * name);
-#pragma endregion
-	static void addAnim(const char * animFile, aiAnimation * aiAnim, const ModelSkeletonComponent & model, AssImpSkeletonComponent & skeleton, AnimListComponent & animList) {
-		AnimListComponent::Anim anim;
-		anim.name = animFile;
-		anim.name += "/";
-		anim.name += aiAnim->mName.data;
-		anim.ticksPerSecond = (float)(aiAnim->mTicksPerSecond != 0 ? aiAnim->mTicksPerSecond : 25.0);
-		anim.totalTime = (float)aiAnim->mDuration / anim.ticksPerSecond;
-		animList.anims.push_back(std::move(anim));
-
-		std::vector<aiNodeAnim *> allNodeAnims;
-		for (unsigned int i = 0; i < aiAnim->mNumChannels; ++i)
-			allNodeAnims.push_back(aiAnim->mChannels[i]);
-
-		for (unsigned int i = 0; i < skeleton.meshes.size(); ++i) {
-			auto & mesh = skeleton.meshes[i];
-			for (unsigned int j = 0; j < mesh.bones.size(); ++j) {
-				auto & bone = mesh.bones[j];
-				const auto & boneName = model.meshes[i].boneNames[j];
-				bone.animNodes.push_back(findNodeAnim(allNodeAnims, boneName.c_str()));
-			}
-		}
-	}
-
-	static aiNodeAnim * findNodeAnim(const std::vector<aiNodeAnim *> & allNodes, const char * name) {
-		for (const auto node : allNodes)
-			if (strcmp(node->mNodeName.data, name) == 0)
-				return node;
-		return nullptr;
-	}
-#pragma endregion addAnim
 #pragma endregion loadFile
 
 	static ModelDataComponent::FreeFunc release(Entity::ID id) {
@@ -539,8 +551,6 @@ namespace kengine {
 			auto e = g_em->getEntity(id);
 			auto & model = e.get<AssImpModelComponent>(); // previous attach hasn't been processed yet, so `get` would assert
 			model.importer->FreeScene();
-			for (auto & importer : model.animImporters)
-				importer->FreeScene();
 			e.detach<AssImpModelComponent>();
 		};
 	}
@@ -551,11 +561,11 @@ namespace kengine {
 
 #pragma region execute
 #pragma region declarations
-	static void updateBoneMats(const aiNode * node, float time, size_t currentAnim, const AssImpSkeletonComponent & assimp, SkeletonComponent & comp, const glm::mat4 & parentTransform);
+	static void updateBoneMats(const aiNode * node, const aiAnimation * anim, float time, const AssImpSkeletonComponent & assimp, SkeletonComponent & comp, const glm::mat4 & parentTransform);
 #pragma endregion
 	static void execute(float deltaTime) {
 		for (auto & [e, instance, skeleton, anim] : g_em->getEntities<InstanceComponent, SkeletonComponent, AnimationComponent>())
-			g_em->runTask([&] {
+			/* g_em->runTask([&] */ {
 				auto & modelEntity = g_em->getEntity(instance.model);
 				if (!modelEntity.has<ModelComponent>() || !modelEntity.has<AssImpSkeletonComponent>())
 					return;
@@ -566,34 +576,75 @@ namespace kengine {
 					return;
 				const auto & currentAnim = animList.anims[anim.currentAnim];
 
-				auto & assimp = modelEntity.get<AssImpSkeletonComponent>();
+				const aiAnimation * assimpAnim = nullptr;
+
+				const auto & assimpModel = modelEntity.get<AssImpModelComponent>();
+				const auto scene = assimpModel.importer->GetScene();
+				const auto nbAnimsInModel = scene->mNumAnimations;
+				if (anim.currentAnim < nbAnimsInModel)
+					assimpAnim = scene->mAnimations[anim.currentAnim];
+				else { // Find anim in AnimFilesComponent
+					const auto & assimpAnimFiles = modelEntity.get<AssImpAnimFilesComponent>();
+					size_t i = nbAnimsInModel;
+					for (const auto & e : assimpAnimFiles.animEntities) {
+						const auto maxAnimInEntity = i + e.nbAnims;
+						if (anim.currentAnim < maxAnimInEntity) {
+							const auto animIndex = anim.currentAnim - i;
+							assimpAnim = g_em->getEntity(e.id).get<AssImpAnimComponent>().importer->GetScene()->mAnimations[animIndex];
+							break;
+						}
+						i = maxAnimInEntity;
+					}
+				}
+				kengine_assert(*g_em, assimpAnim != nullptr);
+
+				auto & assimpSkeleton = modelEntity.get<AssImpSkeletonComponent>();
 
 				if (skeleton.meshes.empty())
-					skeleton.meshes.resize(assimp.meshes.size());
+					skeleton.meshes.resize(assimpSkeleton.meshes.size());
 
-				updateBoneMats(assimp.rootNode, anim.currentTime * currentAnim.ticksPerSecond, anim.currentAnim, assimp, skeleton, glm::mat4(1.f));
+				updateBoneMats(assimpSkeleton.rootNode, assimpAnim, anim.currentTime * currentAnim.ticksPerSecond, assimpSkeleton, skeleton, glm::mat4(1.f));
 
 				anim.currentTime += deltaTime * anim.speed;
 				anim.currentTime = fmodf(anim.currentTime, currentAnim.totalTime);
-			});
+			}//);
 
 		g_em->completeTasks();
 	}
 
 #pragma region updateBoneMats
 #pragma region declarations
-	static glm::vec3 calculateInterpolatedPosition(const AssImpSkeletonComponent::Mesh::Bone & bone, float time, size_t currentAnim);
-	static glm::quat calculateInterpolatedRotation(const AssImpSkeletonComponent::Mesh::Bone & bone, float time, size_t currentAnim);
-	static glm::vec3 calculateInterpolatedScale(const AssImpSkeletonComponent::Mesh::Bone & bone, float time, size_t currentAnim);
+	static const aiNodeAnim * getNodeAnim(const aiAnimation *anim, const char * name) {
+		for (size_t i = 0; i < anim->mNumChannels; ++i)
+			if (strcmp(anim->mChannels[i]->mNodeName.C_Str(), name) == 0)
+				return anim->mChannels[i];
+		return nullptr;
+	}
+	static glm::vec3 calculateInterpolatedPosition(const aiNodeAnim * nodeAnim, float time);
+	static glm::quat calculateInterpolatedRotation(const aiNodeAnim * nodeAnim, float time);
+	static glm::vec3 calculateInterpolatedScale(const aiNodeAnim * nodeAnim, float time);
 #pragma endregion
-	static void updateBoneMats(const aiNode * node, float time, size_t currentAnim, const AssImpSkeletonComponent & assimp, SkeletonComponent & comp, const glm::mat4 & parentTransform) {
+	static void updateBoneMats(const aiNode * node, const aiAnimation * anim, float time, const AssImpSkeletonComponent & assimpSkeleton, SkeletonComponent & comp, const glm::mat4 & parentTransform) {
 		bool firstCalc = true;
 		glm::mat4 totalTransform = parentTransform * toglmWeird(node->mTransformation);
 
-		for (unsigned int i = 0; i < assimp.meshes.size(); ++i) {
-			const auto & input = assimp.meshes[i];
-			auto & output = comp.meshes[i];
+		const auto nodeAnim = getNodeAnim(anim, node->mName.C_Str());
+		if (nodeAnim != nullptr) {
+			glm::mat4 mat(1.f);
+			const auto pos = calculateInterpolatedPosition(nodeAnim, time);
+			const auto rot = calculateInterpolatedRotation(nodeAnim, time);
+			const auto scale = calculateInterpolatedScale(nodeAnim, time);
 
+			mat = glm::translate(mat, pos);
+			mat *= glm::mat4_cast(rot);
+			mat = glm::scale(mat, scale);
+			totalTransform = parentTransform * mat;
+		}
+
+
+		for (unsigned int i = 0; i < assimpSkeleton.meshes.size(); ++i) {
+			const auto & input = assimpSkeleton.meshes[i];
+			auto & output = comp.meshes[i];
 			kengine_assert_with_message(*g_em, input.bones.size() < lengthof(output.boneMatsBoneSpace), "Not enough bones in SkeletonComponent. You need to increase KENGIEN_SKELETON_MAX_BONES");
 
 			size_t boneIndex = 0;
@@ -605,30 +656,13 @@ namespace kengine {
 
 			if (boneIndex != input.bones.size()) {
 				const auto & modelBone = input.bones[boneIndex];
-
-				if (firstCalc) {
-					glm::mat4 mat(1.f);
-					if (modelBone.animNodes[currentAnim] != nullptr) {
-						const auto pos = calculateInterpolatedPosition(modelBone, time, currentAnim);
-						const auto rot = calculateInterpolatedRotation(modelBone, time, currentAnim);
-						const auto scale = calculateInterpolatedScale(modelBone, time, currentAnim);
-
-						mat = glm::translate(mat, pos);
-						mat *= glm::mat4_cast(rot);
-						mat = glm::scale(mat, scale);
-					}
-					totalTransform = parentTransform * mat;
-
-					firstCalc = false;
-				}
-
 				output.boneMatsMeshSpace[boneIndex] = totalTransform;
 				output.boneMatsBoneSpace[boneIndex] = totalTransform * modelBone.offset;
 			}
 		}
 
 		for (size_t i = 0; i < node->mNumChildren; ++i)
-			updateBoneMats(node->mChildren[i], time, currentAnim, assimp, comp, totalTransform);
+			updateBoneMats(node->mChildren[i], anim, time, assimpSkeleton, comp, totalTransform);
 	}
 
 #pragma region Template helper
@@ -660,16 +694,16 @@ namespace kengine {
 	}
 #pragma endregion Template helper
 
-	static glm::vec3 calculateInterpolatedPosition(const AssImpSkeletonComponent::Mesh::Bone & bone, float time, size_t currentAnim) {
-		return calculateInterpolatedValue(bone.animNodes[currentAnim]->mPositionKeys, bone.animNodes[currentAnim]->mNumPositionKeys, time, [](const glm::vec3 & v1, const glm::vec3 & v2, float f) { return glm::mix(v1, v2, f); });
+	static glm::vec3 calculateInterpolatedPosition(const aiNodeAnim * nodeAnim, float time) {
+		return calculateInterpolatedValue(nodeAnim->mPositionKeys, nodeAnim->mNumPositionKeys, time, [](const glm::vec3 & v1, const glm::vec3 & v2, float f) { return glm::mix(v1, v2, f); });
 	}
 
-	static glm::quat calculateInterpolatedRotation(const AssImpSkeletonComponent::Mesh::Bone & bone, float time, size_t currentAnim) {
-		return calculateInterpolatedValue(bone.animNodes[currentAnim]->mRotationKeys, bone.animNodes[currentAnim]->mNumRotationKeys, time, glm::slerp<float, glm::defaultp>);
+	static glm::quat calculateInterpolatedRotation(const aiNodeAnim * nodeAnim, float time) {
+		return calculateInterpolatedValue(nodeAnim->mRotationKeys, nodeAnim->mNumRotationKeys, time, glm::slerp<float, glm::defaultp>);
 	}
 
-	static glm::vec3 calculateInterpolatedScale(const AssImpSkeletonComponent::Mesh::Bone & bone, float time, size_t currentAnim) {
-		return calculateInterpolatedValue(bone.animNodes[currentAnim]->mScalingKeys, bone.animNodes[currentAnim]->mNumScalingKeys, time, [](const glm::vec3 & v1, const glm::vec3 & v2, float f) { return glm::mix(v1, v2, f); });
+	static glm::vec3 calculateInterpolatedScale(const aiNodeAnim * nodeAnim, float time) {
+		return calculateInterpolatedValue(nodeAnim->mScalingKeys, nodeAnim->mNumScalingKeys, time, [](const glm::vec3 & v1, const glm::vec3 & v2, float f) { return glm::mix(v1, v2, f); });
 	}
 #pragma endregion updateBoneMats
 #pragma endregion execute
