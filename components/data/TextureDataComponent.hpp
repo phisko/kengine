@@ -6,14 +6,14 @@
 
 namespace kengine {
 	struct TextureDataComponent {
-		void * data;
-		GLuint * textureID;
+		void * data = nullptr;
+		GLuint * textureID = nullptr;
 
-		int width;
-		int height;
-		int components;
+		int width = 0;
+		int height = 0;
+		int components = 0;
 
 		using FreeFunc = void(*)(void * data);
-		FreeFunc free;
+		FreeFunc free = nullptr;
 	};
 }
