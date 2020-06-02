@@ -202,12 +202,9 @@ namespace kengine {
 
 #pragma region loadFile
 #pragma region declarations
-	static void processNode(AssImpModelComponent & modelData, AssImpTexturesModelComponent & textures, const char * directory, const aiNode * node, const aiScene * scene, bool firstLoad);
-	static void addNode(std::vector<aiNode *> & allNodes, aiNode * node);
-	static aiNode * findNode(const std::vector<aiNode *> & allNodes, const char * name);
-	static AssImpAnimFilesComponent::AnimEntity loadAnimFile(const char * file);
-	static void addAnims(const char * animFile, const aiScene * scene, AnimListComponent & animList);
-
+	static void loadMeshes(Entity & e, AssImpModelComponent & model, const char * file, const aiScene * scene);
+	static void loadSkeleton(Entity & e, const aiScene * scene);
+	static void loadAnims(Entity & e, const char * file, const aiScene * scene);
 #pragma endregion
 	static bool loadFile(Entity & e) {
 		const auto & f = e.get<ModelComponent>().file.c_str();
@@ -221,7 +218,6 @@ namespace kengine {
 		auto & model = e.attach<AssImpModelComponent>();
 		model.importer = std::make_unique<Assimp::Importer>();
 
-		bool firstLoad = false;
 		if (model.importer->GetScene() == nullptr) {
 			const auto scene = model.importer->ReadFile(f, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals /*| aiProcess_OptimizeMeshes*/ | aiProcess_JoinIdenticalVertices);
 			if (scene == nullptr || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || scene->mRootNode == nullptr) {
@@ -229,124 +225,44 @@ namespace kengine {
 				kengine_assert_failed(*g_em, putils::string<1024>("Error loading %s: %s", f, model.importer->GetErrorString()).c_str());
 				return false;
 			}
-			firstLoad = true;
 		}
 		const auto scene = model.importer->GetScene();
 
-		// Load actual meshes (vertices etc)
-		const auto dir = putils::get_directory(f);
-		auto & textures = e.attach<AssImpTexturesModelComponent>();
-		processNode(model, textures, putils::string<64>(dir), scene->mRootNode, scene, firstLoad);
-
-		// Load skeleton
-		std::vector<aiNode *> allNodes;
-		addNode(allNodes, scene->mRootNode);
-
-		auto & skeleton = e.attach<AssImpSkeletonComponent>();
-		skeleton.rootNode = scene->mRootNode;
-
-		auto & skeletonNames = e.attach<ModelSkeletonComponent>();
-		for (unsigned int i = 0; i < scene->mNumMeshes; ++i) {
-			const auto mesh = scene->mMeshes[i];
-
-			ModelSkeletonComponent::Mesh meshNames;
-			AssImpSkeletonComponent::Mesh meshBones;
-			for (unsigned int i = 0; i < mesh->mNumBones; ++i) {
-				const auto aiBone = mesh->mBones[i];
-				const auto name = aiBone->mName.data;
-
-				AssImpSkeletonComponent::Mesh::Bone bone;
-				bone.node = findNode(allNodes, name);
-				bone.offset = toglmWeird(aiBone->mOffsetMatrix);
-				meshBones.bones.push_back(bone);
-
-				meshNames.boneNames.push_back(name);
-			}
-			skeleton.meshes.emplace_back(std::move(meshBones));
-			skeletonNames.meshes.emplace_back(std::move(meshNames));
-		}
-
-		skeleton.globalInverseTransform = glm::inverse(toglmWeird(scene->mRootNode->mTransformation));
+		loadMeshes(e, model, f, scene);
+		loadSkeleton(e, scene);
+		loadAnims(e, f, scene);
 
 		// Load animations
-		auto & animList = e.attach<AnimListComponent>();
-		addAnims(f, scene, animList);
-
-		if (e.has<AnimFilesComponent>()) {
-			const auto & animFiles = e.get<AnimFilesComponent>();
-			auto & assimpAnimFiles = e.attach<AssImpAnimFilesComponent>();
-
-			for (const auto & f : animFiles.files) {
-				const auto animEntity = loadAnimFile(f.c_str());
-				assimpAnimFiles.animEntities.push_back(animEntity);
-
-				const auto & assimpAnim = g_em->getEntity(animEntity.id).get<AssImpAnimComponent>();
-				addAnims(f.c_str(), assimpAnim.importer->GetScene(), animList);
-			}
-		}
-
 #ifndef KENGINE_NDEBUG
 		std::cout << putils::termcolor::green << "Done\n" << putils::termcolor::reset;
 #endif
 		return true;
 	}
 
-	static AssImpAnimFilesComponent::AnimEntity loadAnimFile(const char * file) {
-		AssImpAnimFilesComponent::AnimEntity ret;
-
-		for (const auto & [e, anim] : g_em->getEntities<AssImpAnimComponent>())
-			if (anim.fileName == file) {
-				ret.id = e.id;
-				ret.nbAnims = anim.importer->GetScene()->mNumAnimations;
-				return ret;
-			}
-
-		*g_em += [&](Entity & e) {
-			ret.id = e.id;
-
-			auto & comp = e.attach<AssImpAnimComponent>();
-			comp.fileName = file;
-			comp.importer = std::make_unique<Assimp::Importer>();
-
-			const auto scene = comp.importer->ReadFile(file, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals /*| aiProcess_OptimizeMeshes*/ | aiProcess_JoinIdenticalVertices);
-			if (scene == nullptr || scene->mRootNode == nullptr) {
-				std::cerr << '\n' << putils::termcolor::red << comp.importer->GetErrorString() << '\n' << putils::termcolor::reset;
-				kengine_assert_failed(*g_em, putils::string<1024>("Error loading anims from %s: %s", file, comp.importer->GetErrorString()).c_str());
-			}
-			else
-				ret.nbAnims = scene->mNumAnimations;
-		};
-
-		return ret;
-	}	
-
-	static void addAnims(const char * animFile, const aiScene * scene, AnimListComponent & animList) {
-		for (unsigned int i = 0; i < scene->mNumAnimations; ++i) {
-			const auto aiAnim = scene->mAnimations[i];
-			AnimListComponent::Anim anim;
-			anim.name = animFile;
-			anim.name += '/'; 
-			anim.name += aiAnim->mName.C_Str();
-			anim.ticksPerSecond = (float)(aiAnim->mTicksPerSecond != 0 ? aiAnim->mTicksPerSecond : 25.0);
-			anim.totalTime = (float)aiAnim->mDuration / anim.ticksPerSecond;
-			animList.anims.emplace_back(std::move(anim));
-		}
+#pragma region loadMeshes
+#pragma region declarations
+	static void processNode(AssImpModelComponent & modelData, AssImpTexturesModelComponent & textures, const char * directory, const aiNode * node, const aiScene * scene);
+#pragma endregion
+	static void loadMeshes(Entity & e, AssImpModelComponent & model, const char * file, const aiScene * scene) {
+		const auto dir = putils::get_directory(file);
+		auto & textures = e.attach<AssImpTexturesModelComponent>();
+		processNode(model, textures, putils::string<1024>(dir), scene->mRootNode, scene);
 	}
+
 #pragma region processNode
 #pragma region declarations
 	static AssImpModelComponent::Mesh processMesh(const aiMesh * mesh);
 	static AssImpTexturesModelComponent::MeshTextures processMeshTextures(const char * directory, const aiMesh * mesh, const aiScene * scene);
 #pragma endregion
-	static void processNode(AssImpModelComponent & modelData, AssImpTexturesModelComponent & textures, const char * directory, const aiNode * node, const aiScene * scene, bool firstLoad) {
+	static void processNode(AssImpModelComponent & modelData, AssImpTexturesModelComponent & textures, const char * directory, const aiNode * node, const aiScene * scene) {
 		for (unsigned int i = 0; i < node->mNumMeshes; ++i) {
 			const aiMesh * mesh = scene->mMeshes[node->mMeshes[i]];
-			if (firstLoad)
-				modelData.meshes.push_back(processMesh(mesh));
+			modelData.meshes.push_back(processMesh(mesh));
 			textures.meshes.push_back(processMeshTextures(directory, mesh, scene));
 		}
 
 		for (unsigned int i = 0; i < node->mNumChildren; ++i)
-			processNode(modelData, textures, directory, node->mChildren[i], scene, firstLoad);
+			processNode(modelData, textures, directory, node->mChildren[i], scene);
 	}
 
 	static AssImpModelComponent::Mesh processMesh(const aiMesh * mesh) {
@@ -528,8 +444,44 @@ namespace kengine {
 	}
 #pragma endregion loadMaterialTextures
 #pragma endregion processMeshTextures
-
 #pragma endregion processNode
+#pragma endregion loadMeshes
+
+#pragma region loadSkeleton
+#pragma region declarations
+	static void addNode(std::vector<aiNode *> & allNodes, aiNode * node);
+	static aiNode * findNode(const std::vector<aiNode *> & allNodes, const char * name);
+#pragma endregion
+	static void loadSkeleton(Entity & e, const aiScene * scene) {
+		std::vector<aiNode *> allNodes;
+		addNode(allNodes, scene->mRootNode);
+
+		auto & skeleton = e.attach<AssImpSkeletonComponent>();
+		skeleton.rootNode = scene->mRootNode;
+
+		auto & skeletonNames = e.attach<ModelSkeletonComponent>();
+		for (unsigned int i = 0; i < scene->mNumMeshes; ++i) {
+			const auto mesh = scene->mMeshes[i];
+
+			ModelSkeletonComponent::Mesh meshNames;
+			AssImpSkeletonComponent::Mesh meshBones;
+			for (unsigned int i = 0; i < mesh->mNumBones; ++i) {
+				const auto aiBone = mesh->mBones[i];
+				const auto name = aiBone->mName.data;
+
+				AssImpSkeletonComponent::Mesh::Bone bone;
+				bone.node = findNode(allNodes, name);
+				bone.offset = toglmWeird(aiBone->mOffsetMatrix);
+				meshBones.bones.push_back(bone);
+
+				meshNames.boneNames.push_back(name);
+			}
+			skeleton.meshes.emplace_back(std::move(meshBones));
+			skeletonNames.meshes.emplace_back(std::move(meshNames));
+		}
+
+		skeleton.globalInverseTransform = glm::inverse(toglmWeird(scene->mRootNode->mTransformation));
+	}
 
 	static void addNode(std::vector<aiNode *> & allNodes, aiNode * node) {
 		allNodes.push_back(node);
@@ -544,6 +496,74 @@ namespace kengine {
 		kengine_assert_failed(*g_em, putils::string<1024>("Error finding node %s", name).c_str());
 		return nullptr;
 	}
+#pragma endregion loadSkeleton
+
+#pragma region loadAnims
+#pragma region declarations
+	static AssImpAnimFilesComponent::AnimEntity loadAnimFile(const char * file);
+	static void addAnims(const char * animFile, const aiScene * scene, AnimListComponent & animList);
+#pragma endregion
+	static void loadAnims(Entity & e, const char * file, const aiScene * scene) {
+		auto & animList = e.attach<AnimListComponent>();
+		addAnims(file, scene, animList);
+
+		if (e.has<AnimFilesComponent>()) {
+			const auto & animFiles = e.get<AnimFilesComponent>();
+			auto & assimpAnimFiles = e.attach<AssImpAnimFilesComponent>();
+
+			for (const auto & f : animFiles.files) {
+				const auto animEntity = loadAnimFile(f.c_str());
+				assimpAnimFiles.animEntities.push_back(animEntity);
+
+				const auto & assimpAnim = g_em->getEntity(animEntity.id).get<AssImpAnimComponent>();
+				addAnims(f.c_str(), assimpAnim.importer->GetScene(), animList);
+			}
+		}
+	}
+
+	static AssImpAnimFilesComponent::AnimEntity loadAnimFile(const char * file) {
+		AssImpAnimFilesComponent::AnimEntity ret;
+
+		for (const auto & [e, anim] : g_em->getEntities<AssImpAnimComponent>())
+			if (anim.fileName == file) {
+				ret.id = e.id;
+				ret.nbAnims = anim.importer->GetScene()->mNumAnimations;
+				return ret;
+			}
+
+		*g_em += [&](Entity & e) {
+			ret.id = e.id;
+
+			auto & comp = e.attach<AssImpAnimComponent>();
+			comp.fileName = file;
+			comp.importer = std::make_unique<Assimp::Importer>();
+
+			const auto scene = comp.importer->ReadFile(file, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals /*| aiProcess_OptimizeMeshes*/ | aiProcess_JoinIdenticalVertices);
+			if (scene == nullptr || scene->mRootNode == nullptr) {
+				std::cerr << '\n' << putils::termcolor::red << comp.importer->GetErrorString() << '\n' << putils::termcolor::reset;
+				kengine_assert_failed(*g_em, putils::string<1024>("Error loading anims from %s: %s", file, comp.importer->GetErrorString()).c_str());
+			}
+			else
+				ret.nbAnims = scene->mNumAnimations;
+		};
+
+		return ret;
+	}	
+
+	static void addAnims(const char * animFile, const aiScene * scene, AnimListComponent & animList) {
+		for (unsigned int i = 0; i < scene->mNumAnimations; ++i) {
+			const auto aiAnim = scene->mAnimations[i];
+			AnimListComponent::Anim anim;
+			anim.name = animFile;
+			anim.name += '/'; 
+			anim.name += aiAnim->mName.C_Str();
+			anim.ticksPerSecond = (float)(aiAnim->mTicksPerSecond != 0 ? aiAnim->mTicksPerSecond : 25.0);
+			anim.totalTime = (float)aiAnim->mDuration / anim.ticksPerSecond;
+			animList.anims.emplace_back(std::move(anim));
+		}
+	}
+#pragma endregion loadAnims
+
 #pragma endregion loadFile
 
 	static ModelDataComponent::FreeFunc release(Entity::ID id) {
