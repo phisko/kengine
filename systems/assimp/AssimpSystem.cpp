@@ -710,9 +710,10 @@ namespace kengine {
 #pragma region declarations
 	struct LastFrameMovementComponent {
 		unsigned int anim = (unsigned int)-1;
-		glm::vec3 pos = glm::vec3(0.f);
-		glm::vec3 rot = glm::vec3(0.f);
-		glm::vec3 scale = glm::vec3(1.f);
+		putils::Point3f pos;
+		putils::Vector3f rot;
+		putils::Vector3f scale = { 1.f, 1.f, 1.f };
+		float time = 0.f;
 	};
 	static void updateBoneMats(const aiNode * node, const aiAnimation * anim, float time, const AssImpSkeletonComponent & assimp, SkeletonComponent & comp, const glm::mat4 & parentTransform, const AnimationComponent & animComponent, TransformComponent & transform, LastFrameMovementComponent & lastFrame, const glm::mat4 & modelMatrix, bool firstNodeAnim);
 #pragma endregion
@@ -740,7 +741,8 @@ namespace kengine {
 				if (lastFrame.anim != anim.currentAnim) {
 					lastFrame = LastFrameMovementComponent{};
 					lastFrame.anim = anim.currentAnim;
-					lastFrame.pos = matrixHelper::toVec(modelAnims.getAnimationMovementUntilTime(e, anim.currentAnim, 0.f));
+					lastFrame.time = anim.currentTime;
+					lastFrame.pos = modelAnims.getAnimationMovementUntilTime(e, anim.currentAnim, anim.currentTime);
 				}
 
 				const auto & assimpSkeleton = modelEntity.get<AssImpSkeletonComponent>();
@@ -772,15 +774,19 @@ namespace kengine {
 			const auto rot = calculateInterpolatedRotation(nodeAnim, time);
 			const auto scale = calculateInterpolatedScale(nodeAnim, time);
 
-			const auto rotation = matrixHelper::toVec(matrixHelper::getRotation(parentTransform * modelMatrix * glm::mat4_cast(rot)));
+			const auto rotation = matrixHelper::getRotation(parentTransform * modelMatrix * glm::mat4_cast(rot));
+
+			const auto posInWorldSpace = matrixHelper::convertToReferencial(glm::value_ptr(pos), parentTransform * modelMatrix);
+			const auto rotInWorldSpace = matrixHelper::convertToReferencial(rotation, parentTransform * modelMatrix);
+			const auto scaleInWorldSpace = matrixHelper::convertToReferencial(glm::value_ptr(scale), parentTransform * modelMatrix);
 
 			if (firstNodeAnim) {
 				firstNodeAnim = false;
 
 				switch (animComponent.positionMoverBehavior) {
 				case AnimationComponent::MoverBehavior::UpdateTransformComponent: {
-					const auto movementSinceLastFrame = pos - lastFrame.pos;
-					transform.boundingBox.position += matrixHelper::convertToReferencial(glm::value_ptr(movementSinceLastFrame), parentTransform * modelMatrix);
+					const auto movementSinceLastFrame = posInWorldSpace - lastFrame.pos;
+					transform.boundingBox.position += movementSinceLastFrame;
 					break;
 				}
 				case AnimationComponent::MoverBehavior::UpdateBones:
@@ -793,7 +799,7 @@ namespace kengine {
 
 				switch (animComponent.rotationMoverBehavior) {
 				case AnimationComponent::MoverBehavior::UpdateTransformComponent: {
-					const auto rotSinceLastFrame = rotation - lastFrame.rot;
+					const auto rotSinceLastFrame = rotInWorldSpace - lastFrame.rot;
 					transform.yaw += rotSinceLastFrame.y;
 					transform.pitch += rotSinceLastFrame.x;
 					transform.roll += rotSinceLastFrame.z;
@@ -809,8 +815,8 @@ namespace kengine {
 
 				switch (animComponent.scaleMoverBehavior) {
 				case AnimationComponent::MoverBehavior::UpdateTransformComponent: {
-					const auto scaleSinceLastFrame = scale / lastFrame.scale;
-					transform.boundingBox.size *= matrixHelper::convertToReferencial(glm::value_ptr(scaleSinceLastFrame), parentTransform * modelMatrix);
+					const auto scaleSinceLastFrame = scaleInWorldSpace / lastFrame.scale;
+					transform.boundingBox.size *= scaleSinceLastFrame;
 					break;
 				}
 				case AnimationComponent::MoverBehavior::UpdateBones:
@@ -821,9 +827,9 @@ namespace kengine {
 					break;
 				}
 
-				lastFrame.pos = pos;
-				lastFrame.rot = rotation;
-				lastFrame.scale = scale;
+				lastFrame.pos = posInWorldSpace;
+				lastFrame.rot = rotInWorldSpace;
+				lastFrame.scale = scaleInWorldSpace;
 			}
 			else {
 				mat = glm::translate(mat, pos);
