@@ -62,7 +62,7 @@ static btTransform toBullet(const kengine::TransformComponent & parent, const ke
 		assert(skeleton != nullptr && modelSkeleton != nullptr && model != nullptr);
 
 		const auto worldSpaceBone = kengine::skeletonHelper::getBoneMatrix(collider.boneName.c_str(), *skeleton, *modelSkeleton);
-		const auto pos = kengine::matrixHelper::getPos(worldSpaceBone);
+		const auto pos = kengine::matrixHelper::getPosition(worldSpaceBone);
 		parentMat = glm::translate(parentMat, toVec(pos * model->boundingBox.size * parent.boundingBox.size));
 		parentMat = glm::translate(parentMat, -toVec(pos));
 		parentMat *= worldSpaceBone;

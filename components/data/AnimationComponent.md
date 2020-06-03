@@ -42,62 +42,61 @@ bool loop = true;
 
 Whether the animation should loop or not.
 
-# [AnimFilesComponent](AnimationComponent.hpp)
+# [ModelAnimationComponent](AnimationComponent.hpp)
 
-`Component` providing a list of animation files to be loaded for a [model](ModelComponent.md) `Entity`.
-It is used to populate the `Entity`'s `AnimListComponent`.
+`Component` providing a list of animation files to be loaded for a [model](ModelComponent.md) `Entity`. Once processed by an animation system, it holds a list of all the animations that were loaded, along with functions to extract information from the animations.
 
 ## Specs
 
 * [Reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
-* Serializable (POD)
+* Not serializable (holds dynamic pointers)
 
 ## Members
 
 ### files
 
 ```cpp
-putils::vector<putils::string<KENGINE_ANIMATION_FILE_PATH_LENGTH>, KENGINE_MAX_ANIMATION_FILES> files;
+std::vector<std::string>> files;
 ```
 
-List of all animation files.
+List of all animation files to be loaded for the model.
 
-The maximum length of a file path defaults to 128 and can be adjusted by defining the `KENGINE_ANIMATION_FILE_PATH_LENGTH` macro.
-
-The maximum number of files defaults to 16 and can be adjusted by defining the `KENGINE_MAX_ANIMATION_FILES` macro.
-
-# [AnimListComponent](AnimationComponent.hpp)
-
-`Component` providing a list of animations that can be applied to a given model.
-Attached to a [model](ModelComponent.md) `Entity`, this information is shared by all `Entities` using that model.
-
-## Specs
-
-* [Reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
-* Serializable (POD)
-
-## Anim type
+### Anim type
 
 Describes an animation.
 
 ```cpp
 struct Anim {
-    putils::string<KENGINE_ANIMATION_FILE_PATH_LENGTH> name;
+    std::string name;
     float totalTime;
     float ticksPerSecond;
 };
 ```
 
-The maximum length of an animation name defaults to 128 and can be adjusted by defining the `KENGINE_ANIMATION_FILE_PATH_LENGTH` macro.
-
-## Members
-
-### anims
+### animations
 
 ```cpp
-putils::vector<Anim, KENGINE_MAX_ANIMATION_FILES> anims;
+std::vector<Anim> animations;
 ```
 
-List of all animations that can be applied to a model.
+List of all animations that were loaded from `files`.
 
-The maximum number of files defaults to 8 and can be adjusted by defining the `KENGINE_MAX_ANIMATION_FILES` macro.
+### ExtractedMotionGetter type
+
+```cpp
+using ExtractedMotionGetter = putils::function<putils::Point3f(const Entity & e, size_t anim, float time), KENGINE_ANIMATION_EXTRACTED_MOTION_FUNC_SIZE>;
+```
+
+Function that, given an animation index and a time, returns one of the motion components from that animation until that time, scaled according to `e`'s [TransformComponent](TransformComponent.md).
+
+The maximum size for this functor defaults to 64 and can be adjusted by defining the KENGINE_ANIMATION_EXTRACTED_MOTION_FUNC_SIZE macro.
+
+### Motion extracting functions
+
+```cpp
+ExtractedMotionGetter getAnimationMovementUntilTime;
+ExtractedMotionGetter getAnimationRotationUntilTime;
+ExtractedMotionGetter getAnimationScalingUntilTime;
+```
+
+Functors that will return, respectively, the movement, rotation and scaling components of a given animation until a given time.
