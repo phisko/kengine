@@ -711,9 +711,7 @@ namespace kengine {
 	struct LastFrameMovementComponent {
 		unsigned int anim = (unsigned int)-1;
 		glm::vec3 pos = glm::vec3(0.f);
-		float yaw = 0.f;
-		float pitch = 0.f;
-		float roll = 0.f;
+		glm::vec3 rot = glm::vec3(0.f);
 		glm::vec3 scale = glm::vec3(1.f);
 	};
 	static void updateBoneMats(const aiNode * node, const aiAnimation * anim, float time, const AssImpSkeletonComponent & assimp, SkeletonComponent & comp, const glm::mat4 & parentTransform, const AnimationComponent & animComponent, TransformComponent & transform, LastFrameMovementComponent & lastFrame, const glm::mat4 & modelMatrix, bool firstNodeAnim);
@@ -774,6 +772,8 @@ namespace kengine {
 			const auto rot = calculateInterpolatedRotation(nodeAnim, time);
 			const auto scale = calculateInterpolatedScale(nodeAnim, time);
 
+			const auto rotation = matrixHelper::toVec(matrixHelper::getRotation(parentTransform * modelMatrix * glm::mat4_cast(rot)));
+
 			if (firstNodeAnim) {
 				firstNodeAnim = false;
 
@@ -781,7 +781,6 @@ namespace kengine {
 				case AnimationComponent::MoverBehavior::UpdateTransformComponent: {
 					const auto movementSinceLastFrame = pos - lastFrame.pos;
 					transform.boundingBox.position += matrixHelper::convertToReferencial(glm::value_ptr(movementSinceLastFrame), parentTransform * modelMatrix);
-					lastFrame.pos = pos;
 					break;
 				}
 				case AnimationComponent::MoverBehavior::UpdateBones:
@@ -794,15 +793,10 @@ namespace kengine {
 
 				switch (animComponent.rotationMoverBehavior) {
 				case AnimationComponent::MoverBehavior::UpdateTransformComponent: {
-					const auto rotation = matrixHelper::getRotation(parentTransform * glm::mat4_cast(rot));
-					transform.yaw += rotation.y - lastFrame.yaw;
-					lastFrame.yaw = rotation.y;
-
-					transform.pitch += rotation.x - lastFrame.pitch;
-					lastFrame.pitch = rotation.x;
-
-					transform.roll += rotation.z - lastFrame.roll;
-					lastFrame.roll = rotation.z;
+					const auto rotSinceLastFrame = rotation - lastFrame.rot;
+					transform.yaw += rotSinceLastFrame.y;
+					transform.pitch += rotSinceLastFrame.x;
+					transform.roll += rotSinceLastFrame.z;
 					break;
 				}
 				case AnimationComponent::MoverBehavior::UpdateBones:
@@ -817,7 +811,6 @@ namespace kengine {
 				case AnimationComponent::MoverBehavior::UpdateTransformComponent: {
 					const auto scaleSinceLastFrame = scale / lastFrame.scale;
 					transform.boundingBox.size *= matrixHelper::convertToReferencial(glm::value_ptr(scaleSinceLastFrame), parentTransform * modelMatrix);
-					lastFrame.scale = scale;
 					break;
 				}
 				case AnimationComponent::MoverBehavior::UpdateBones:
@@ -828,14 +821,17 @@ namespace kengine {
 					break;
 				}
 
-				totalTransform = parentTransform * mat;
+				lastFrame.pos = pos;
+				lastFrame.rot = rotation;
+				lastFrame.scale = scale;
 			}
 			else {
 				mat = glm::translate(mat, pos);
 				mat *= glm::mat4_cast(rot);
 				mat = glm::scale(mat, scale);
-				totalTransform = parentTransform * mat;
 			}
+
+			totalTransform = parentTransform * mat;
 		}
 
 		for (unsigned int i = 0; i < assimpSkeleton.meshes.size(); ++i) {
