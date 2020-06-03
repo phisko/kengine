@@ -6,6 +6,8 @@
 #include "data/SelectedComponent.hpp"
 #include "data/NameComponent.hpp"
 
+#include "functions/GetImGuiScale.hpp"
+
 #include "helpers/typeHelper.hpp"
 #include "helpers/imGuiHelper.hpp"
 #include "imgui.h"
@@ -21,10 +23,14 @@ namespace kengine {
 				if (!tool.enabled)
 					return;
 
+				float scale = 1.f;
+				for (const auto & [e, getScale] : em.getEntities<functions::GetImGuiScale>())
+					scale = getScale();
+
 				for (auto & [selected, _] : em.getEntities<SelectedComponent>()) {
 					bool open = true;
 
-					ImGui::SetNextWindowSize({ 200.f, 200.f }, ImGuiCond_FirstUseEver);
+					ImGui::SetNextWindowSize({ 200.f * scale, 200.f * scale}, ImGuiCond_FirstUseEver);
 
 					const auto beginWindow = [&] {
 						if (selected.has<NameComponent>())
