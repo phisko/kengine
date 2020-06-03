@@ -15,6 +15,7 @@
 #include "data/GraphicsComponent.hpp"
 #include "data/ImGuiComponent.hpp"
 #include "data/InstanceComponent.hpp"
+#include "data/ModelAnimationComponent.hpp"
 #include "data/ModelComponent.hpp"
 #include "data/ModelDataComponent.hpp"
 #include "data/ModelSkeletonComponent.hpp"
@@ -121,12 +122,12 @@ namespace kengine {
 
 #pragma region loadModel
 #pragma region declarations
-	struct AssImpAnimComponent {
+	struct AssImpAnimFileComponent { // Entity that represents an animation file
 		std::string fileName;
 		std::unique_ptr<Assimp::Importer> importer;
 	};
 
-	struct AssImpAnimFilesComponent {
+	struct AssImpModelAnimComponent {
 		struct AnimEntity {
 			Entity::ID id;
 			size_t nbAnims;
@@ -161,7 +162,7 @@ namespace kengine {
 		std::vector<Mesh> meshes;
 	};
 
-	struct AssImpSkeletonComponent {
+	struct AssImpModelSkeletonComponent {
 		struct Mesh {
 			struct Bone {
 				aiNode * node = nullptr;
@@ -455,7 +456,7 @@ namespace kengine {
 		std::vector<aiNode *> allNodes;
 		addNode(allNodes, scene->mRootNode);
 
-		auto & skeleton = e.attach<AssImpSkeletonComponent>();
+		auto & skeleton = e.attach<AssImpModelSkeletonComponent>();
 		skeleton.rootNode = scene->mRootNode;
 
 		auto & skeletonNames = e.attach<ModelSkeletonComponent>();
@@ -463,12 +464,12 @@ namespace kengine {
 			const auto mesh = scene->mMeshes[i];
 
 			ModelSkeletonComponent::Mesh meshNames;
-			AssImpSkeletonComponent::Mesh meshBones;
+			AssImpModelSkeletonComponent::Mesh meshBones;
 			for (unsigned int i = 0; i < mesh->mNumBones; ++i) {
 				const auto aiBone = mesh->mBones[i];
 				const auto name = aiBone->mName.data;
 
-				AssImpSkeletonComponent::Mesh::Bone bone;
+				AssImpModelSkeletonComponent::Mesh::Bone bone;
 				bone.node = findNode(allNodes, name);
 				bone.offset = toglmWeird(aiBone->mOffsetMatrix);
 				meshBones.bones.push_back(bone);
@@ -499,32 +500,32 @@ namespace kengine {
 
 #pragma region loadAnims
 #pragma region declarations
-	static AssImpAnimFilesComponent::AnimEntity loadAnimFile(const char * file);
+	static AssImpModelAnimComponent::AnimEntity loadAnimFile(const char * file);
 	static void addAnims(const char * animFile, const aiScene * scene, ModelAnimationComponent & animList);
-	static void initExtractedMotionGetters(const Entity & e, ModelAnimationComponent & anims, const AssImpAnimFilesComponent & assimpAnimFiles);
+	static void initExtractedMotionGetters(const Entity & e, ModelAnimationComponent & anims, const AssImpModelAnimComponent & assimpAnimFiles);
 
 #pragma endregion
 	static void loadAnims(Entity & e, const char * file, const aiScene * scene) {
 		auto & anims = e.attach<ModelAnimationComponent>();
 		addAnims(file, scene, anims);
 
-		auto & assimpAnimFiles = e.attach<AssImpAnimFilesComponent>();
+		auto & assimpAnimFiles = e.attach<AssImpModelAnimComponent>();
 
 		for (const auto & f : anims.files) {
 			const auto animEntity = loadAnimFile(f.c_str());
 			assimpAnimFiles.animEntities.push_back(animEntity);
 
-			const auto & assimpAnim = g_em->getEntity(animEntity.id).get<AssImpAnimComponent>();
+			const auto & assimpAnim = g_em->getEntity(animEntity.id).get<AssImpAnimFileComponent>();
 			addAnims(f.c_str(), assimpAnim.importer->GetScene(), anims);
 		}
 
 		initExtractedMotionGetters(e, anims, assimpAnimFiles);
 	}
 
-	static AssImpAnimFilesComponent::AnimEntity loadAnimFile(const char * file) {
-		AssImpAnimFilesComponent::AnimEntity ret;
+	static AssImpModelAnimComponent::AnimEntity loadAnimFile(const char * file) {
+		AssImpModelAnimComponent::AnimEntity ret;
 
-		for (const auto & [e, anim] : g_em->getEntities<AssImpAnimComponent>())
+		for (const auto & [e, anim] : g_em->getEntities<AssImpAnimFileComponent>())
 			if (anim.fileName == file) {
 				ret.id = e.id;
 				ret.nbAnims = anim.importer->GetScene()->mNumAnimations;
@@ -534,7 +535,7 @@ namespace kengine {
 		*g_em += [&](Entity & e) {
 			ret.id = e.id;
 
-			auto & comp = e.attach<AssImpAnimComponent>();
+			auto & comp = e.attach<AssImpAnimFileComponent>();
 			comp.fileName = file;
 			comp.importer = std::make_unique<Assimp::Importer>();
 
@@ -570,7 +571,7 @@ namespace kengine {
 	static glm::quat calculateInterpolatedRotation(const aiNodeAnim * nodeAnim, float time);
 	static glm::vec3 calculateInterpolatedScale(const aiNodeAnim * nodeAnim, float time);
 #pragma endregion
-	static void initExtractedMotionGetters(const Entity & e, ModelAnimationComponent & anims, const AssImpAnimFilesComponent & assimpAnimFiles) {
+	static void initExtractedMotionGetters(const Entity & e, ModelAnimationComponent & anims, const AssImpModelAnimComponent & assimpAnimFiles) {
 		struct MovementExtractorParams {
 			glm::mat4 toWorldSpace;
 			const aiNodeAnim * nodeAnim;
@@ -598,7 +599,7 @@ namespace kengine {
 		anims.getAnimationRotationUntilTime = [getExtractorParams](const Entity & e, size_t anim, float time) {
 			const auto params = getExtractorParams(e, anim);
 			const auto rot = calculateInterpolatedRotation(params.nodeAnim, time);
-			return matrixHelper::getRotation(params.toWorldSpace * glm::mat4_cast(rot));
+			return matrixHelper::getRotation(glm::mat4_cast(rot));
 		};
 
 		anims.getAnimationScalingUntilTime = [getExtractorParams](const Entity & e, size_t anim, float time) {
@@ -616,13 +617,13 @@ namespace kengine {
 			return scene->mAnimations[anim];
 
 		// Find anim in AnimFilesComponent
-		const auto & assimpAnimFiles = modelEntity.get<AssImpAnimFilesComponent>();
+		const auto & assimpAnimFiles = modelEntity.get<AssImpModelAnimComponent>();
 		size_t i = nbAnimsInModel;
 		for (const auto & e : assimpAnimFiles.animEntities) {
 			const auto maxAnimInEntity = i + e.nbAnims;
 			if (anim < maxAnimInEntity) {
 				const auto animIndex = anim - i;
-				return g_em->getEntity(e.id).get<AssImpAnimComponent>().importer->GetScene()->mAnimations[animIndex];
+				return g_em->getEntity(e.id).get<AssImpAnimFileComponent>().importer->GetScene()->mAnimations[animIndex];
 			}
 			i = maxAnimInEntity;
 		}
@@ -635,7 +636,7 @@ namespace kengine {
 	static const aiNodeAnim * findNodeAnimForNode(const aiNode * node, const aiAnimation * anim, const glm::mat4 & parentTransform, glm::mat4 & outTotalParentTransform);
 #pragma endregion
 	static const aiNodeAnim * getRootNodeAnim(const Entity & modelEntity, const aiAnimation * anim, glm::mat4 & parentTransform) {
-		const auto & assimpSkeleton = modelEntity.get<AssImpSkeletonComponent>();
+		const auto & assimpSkeleton = modelEntity.get<AssImpModelSkeletonComponent>();
 		return findNodeAnimForNode(assimpSkeleton.rootNode, anim, parentTransform, parentTransform);
 	}
 
@@ -737,13 +738,13 @@ namespace kengine {
 		putils::Vector3f scale = { 1.f, 1.f, 1.f };
 		float time = 0.f;
 	};
-	static void updateBoneMats(const aiNode * node, const aiAnimation * anim, float time, const AssImpSkeletonComponent & assimp, SkeletonComponent & comp, const glm::mat4 & parentTransform, const AnimationComponent & animComponent, TransformComponent & transform, LastFrameMovementComponent & lastFrame, const glm::mat4 & modelMatrix, bool firstNodeAnim);
+	static void updateBoneMats(const aiNode * node, const aiAnimation * anim, float time, const AssImpModelSkeletonComponent & assimp, SkeletonComponent & comp, const glm::mat4 & parentTransform, const AnimationComponent & animComponent, TransformComponent & transform, LastFrameMovementComponent & lastFrame, const glm::mat4 & modelMatrix, bool firstNodeAnim);
 #pragma endregion
 	static void execute(float deltaTime) {
 		for (auto & [e, instance, skeleton, anim, transform] : g_em->getEntities<InstanceComponent, SkeletonComponent, AnimationComponent, TransformComponent>())
 			/* g_em->runTask([&] */ {
 				const auto & modelEntity = g_em->getEntity(instance.model);
-				if (!modelEntity.has<AssImpSkeletonComponent>())
+				if (!modelEntity.has<AssImpModelSkeletonComponent>())
 					return;
 
 				auto & lastFrame = e.attach<LastFrameMovementComponent>();
@@ -769,7 +770,7 @@ namespace kengine {
 					lastFrame.scale = modelAnims.getAnimationScalingUntilTime(e, anim.currentAnim, anim.currentTime);
 				}
 
-				const auto & assimpSkeleton = modelEntity.get<AssImpSkeletonComponent>();
+				const auto & assimpSkeleton = modelEntity.get<AssImpModelSkeletonComponent>();
 				if (skeleton.meshes.empty())
 					skeleton.meshes.resize(assimpSkeleton.meshes.size());
 
@@ -787,7 +788,7 @@ namespace kengine {
 		g_em->completeTasks();
 	}
 
-	static void updateBoneMats(const aiNode * node, const aiAnimation * anim, float time, const AssImpSkeletonComponent & assimpSkeleton, SkeletonComponent & comp, const glm::mat4 & parentTransform, const AnimationComponent & animComponent, TransformComponent & transform, LastFrameMovementComponent & lastFrame, const glm::mat4 & modelMatrix, bool firstNodeAnim) {
+	static void updateBoneMats(const aiNode * node, const aiAnimation * anim, float time, const AssImpModelSkeletonComponent & assimpSkeleton, SkeletonComponent & comp, const glm::mat4 & parentTransform, const AnimationComponent & animComponent, TransformComponent & transform, LastFrameMovementComponent & lastFrame, const glm::mat4 & modelMatrix, bool firstNodeAnim) {
 		bool firstCalc = true;
 		glm::mat4 totalTransform = parentTransform * toglmWeird(node->mTransformation);
 
@@ -798,10 +799,8 @@ namespace kengine {
 			const auto rot = calculateInterpolatedRotation(nodeAnim, time);
 			const auto scale = calculateInterpolatedScale(nodeAnim, time);
 
-			const auto rotation = matrixHelper::getRotation(parentTransform * modelMatrix * glm::mat4_cast(rot));
-
 			const auto posInWorldSpace = matrixHelper::convertToReferencial(glm::value_ptr(pos), parentTransform * modelMatrix);
-			const auto rotInWorldSpace = matrixHelper::convertToReferencial(rotation, parentTransform * modelMatrix);
+			const auto rotInWorldSpace = matrixHelper::getRotation(glm::mat4_cast(rot));
 			const auto scaleInWorldSpace = matrixHelper::convertToReferencial(glm::value_ptr(scale), parentTransform * modelMatrix);
 
 			if (firstNodeAnim) {
@@ -867,7 +866,7 @@ namespace kengine {
 		for (unsigned int i = 0; i < assimpSkeleton.meshes.size(); ++i) {
 			const auto & input = assimpSkeleton.meshes[i];
 			auto & output = comp.meshes[i];
-			kengine_assert_with_message(*g_em, input.bones.size() < lengthof(output.boneMatsBoneSpace), "Not enough bones in SkeletonComponent. You need to increase KENGIEN_SKELETON_MAX_BONES");
+			kengine_assert_with_message(*g_em, input.bones.size() < lengthof(output.boneMatsBoneSpace), "Not enough bones in SkeletonComponent. You need to increase KENGINE_SKELETON_MAX_BONES");
 
 			size_t boneIndex = 0;
 			for (const auto & bone : input.bones) {
