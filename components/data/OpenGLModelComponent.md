@@ -6,7 +6,7 @@
 
 * Not reflectible
 * Not serializable (holds OpenGL identifiers)
-* Initialized by the [OpenGLSystem](../../systems/OpenGLSystem.md) and used by shaders
+* Initialized by the [OpenGLSystem](../../systems/opengl/OpenGLSystem.md) and used by shaders
 
 ## Members
 

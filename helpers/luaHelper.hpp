@@ -8,6 +8,9 @@ namespace kengine::luaHelper {
 	template<typename T>
 	void registerType(EntityManager & em);
 
+	template<typename ... Types>
+	void registerTypes(EntityManager & em);
+
 	template<typename Func>
 	void registerFunction(EntityManager & em, const char * name, Func && func);
 }
@@ -44,6 +47,14 @@ namespace kengine::luaHelper {
 	void registerType(EntityManager & em) {
 		for (const auto & [e, comp] : em.getEntities<LuaStateComponent>())
 			detail::registerTypeWithState<T>(em, *comp.state);
+	}
+
+	template<typename ...Types>
+	void registerTypes(EntityManager & em) {
+		putils::for_each_type<Types...>([&](auto && t) {
+			using T = putils_wrapped_type(t);
+			registerType<T>(em);
+		});
 	}
 
 	template<typename Func>

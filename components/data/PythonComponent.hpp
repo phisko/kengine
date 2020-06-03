@@ -12,17 +12,17 @@
 #include "vector.hpp"
 
 namespace kengine {
-    struct PyComponent {
-		static constexpr char stringName[] = "PyComponentString";
+    struct PythonComponent {
+		static constexpr char stringName[] = "PythonComponentString";
 		using script = putils::string<KENGINE_MAX_PYTHON_SCRIPT_PATH, stringName>;
-		static constexpr char vectorName[] = "PyComponentVector";
+		static constexpr char vectorName[] = "PythonComponentVector";
 		using script_vector = putils::vector<script, KENGINE_MAX_PYTHON_SCRIPTS, vectorName>;
 
         script_vector scripts;
 
-        putils_reflection_class_name(PyComponent);
+        putils_reflection_class_name(PythonComponent);
         putils_reflection_attributes(
-                putils_reflection_attribute(&PyComponent::scripts)
+                putils_reflection_attribute(&PythonComponent::scripts)
         );
         putils_reflection_used_types(
             putils_reflection_type(script),

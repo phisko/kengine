@@ -1,6 +1,6 @@
 # [scriptLanguageHelper](scriptLanguageHelper.hpp)
 
-Set of helper functions meant to be used by language-specific scripting systems (e.g. the [LuaSystem](LuaSystem.md) or the [PySystem](PySystem.md)).
+Set of helper functions meant to be used by language-specific scripting systems (e.g. the [LuaSystem](LuaSystem.md) or the [PythonSystem](PythonSystem.md)).
 
 ## Members
 

@@ -6,7 +6,7 @@
 
 * [Reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
 * Not serializable as it contains a functor
-* Processed by graphics systems (such as the [OpenGLSystem](../../systems/OpenGLSystem.md))
+* Processed by graphics systems (such as the [OpenGLSystem](../../systems/opengl/OpenGLSystem.md))
 
 ## Usage
 

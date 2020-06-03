@@ -148,14 +148,14 @@ These are pre-built, extensible and pluggable elements that can be used to boots
 ##### Behaviors
 * [LuaComponent](components/data/LuaComponent.md): defines the lua scripts to be run by the `LuaSystem` for an `Entity`
 * [LuaTableComponent](components/data/LuaTableComponent.md): holds a [sol::table](https://github.com/ThePhD/sol2) that lua scripts can use to hold any information related to an `Entity`
-* [PyComponent](components/data/PyComponent.md): defines the Python scripts to be run by the `PySystem` for an `Entity`
+* [PythonComponent](components/data/PythonComponent.md): defines the Python scripts to be run by the `PythonSystem` for an `Entity`
 * [CollisionComponent](components/data/CollisionComponent.md): defines a function to be called when an `Entity` collides with another
 * [OnClickComponent](components/data/OnClickComponent.md): defines a function to be called when an `Entity` is clicked
 
 ##### Debug tools
-* [AdjustableComponent](components/data/AdjustableComponent.md): lets users modify variables through a GUI (such as the [ImGuiAdjustableSystem](systems/ImGuiAdjustableSystem.md))
+* [AdjustableComponent](components/data/AdjustableComponent.md): lets users modify variables through a GUI (such as the [ImGuiAdjustableSystem](systems/imgui_adjustable/ImGuiAdjustableSystem.md))
 * [ImGuiComponent](components/data/ImGuiComponent.md): lets `Entities` render debug elements using [ImGui](https://github.com/ocornut/imgui/)
-* [ImGuiToolComponent](components/data/ImGuiToolComponent.md): indicates that an `Entity`'s `ImGuiComponent` is a tool that can be enabled or disabled by the [ImGuiToolSystem](systems/ImGuiToolSystem.md)
+* [ImGuiToolComponent](components/data/ImGuiToolComponent.md): indicates that an `Entity`'s `ImGuiComponent` is a tool that can be enabled or disabled by the [ImGuiToolSystem](systems/imgui_tool/ImGuiToolSystem.md)
 * [DebugGraphicsComponent](components/data/DebugGraphicsComponent.md): lets an `Entity` be used to draw debug information (such as lines, rectangles or spheres)
 
 ##### Graphics
@@ -211,47 +211,60 @@ In all following descriptions, the "parent" `Component` refers to the `Component
 ### Systems
 
 #### Behaviors
-* [LuaSystem](systems/LuaSystem.md): executes lua scripts attached to `Entities`
-* [PySystem](systems/PySystem.md): executes Python scripts attached to `Entities`
-* [CollisionSystem](systems/CollisionSystem.md): forwards collision notifications to `Entities`
-* [OnClickSystem](systems/OnClickSystem.md): forwards click notifications to `Entities`
-* [InputSystem](systems/InputSystem.md): forwards input events buffered by graphics systems to `Entities`
+* [LuaSystem](systems/lua/LuaSystem.md): executes lua scripts attached to `Entities`
+* [PythonSystem](systems/python/PythonSystem.md): executes Python scripts attached to `Entities`
+* [CollisionSystem](systems/collision/CollisionSystem.md): forwards collision notifications to `Entities`
+* [OnClickSystem](systems/onclick/OnClickSystem.md): forwards click notifications to `Entities`
+* [InputSystem](systems/input/InputSystem.md): forwards input events buffered by graphics systems to `Entities`
 
 #### Debug tools
-* [ImGuiAdjustableSystem](systems/ImGuiAdjustableSystem.md): displays an ImGui window to edit `AdjustableComponents`
-* [ImGuiEntityEditorSystem](systems/ImGuiEntityEditorSystem.md): displays ImGui windows to edit `Entities` with a `SelectedComponent`
-* [ImGuiEntitySelectorSystem](systems/ImGuiEntitySelectorSystem.md): displays an ImGui window that lets users search for and select `Entities`
-* [ImGuiToolSystem](systems/ImGuiToolSystem.md): manages ImGui [tool windows](components/data/ImGuiToolComponent.md) through ImGui's MainMenuBar
+* [ImGuiAdjustableSystem](systems/imgui_adjustable/ImGuiAdjustableSystem.md): displays an ImGui window to edit `AdjustableComponents`
+* [ImGuiEntityEditorSystem](systems/imgui_entity_editor/ImGuiEntityEditorSystem.md): displays ImGui windows to edit `Entities` with a `SelectedComponent`
+* [ImGuiEntitySelectorSystem](systems/imgui_entity_selector/ImGuiEntitySelectorSystem.md): displays an ImGui window that lets users search for and select `Entities`
+* [ImGuiToolSystem](systems/imgui_tool/ImGuiToolSystem.md): manages ImGui [tool windows](components/data/ImGuiToolComponent.md) through ImGui's MainMenuBar
 
 #### 3D Graphics
 * [OpenGLSystem](systems/opengl/OpenGLSystem.md): displays entities in an OpenGL render window
 * [OpenGLSpritesSystem](systems/opengl_sprites/OpenGLSpritesSystem.md): loads sprites and provides shaders to render them 
 * [AssimpSystem](systems/assimp/AssimpSystem.md): loads 3D models using the assimp library, animates them and provides shaders to render them
 * [PolyVoxSystem](systems/polyvox/PolyVoxSystem.md): generates 3D models based on `PolyVoxComponents` and provides shaders to render them
-* [MagicaVoxelSystem](systems/polyvox/PolyVoxSystem.md): loads 3D models in the MagicaVoxel ".vox" format, which can then be drawn by the `PolyVoxSystem`'s shader
-
-#### 2D Graphics
-This system hasn't been updated in a while and won't currently compile. Let me know if you have an urgent need for it, but you're probably better off writing your own simplistic graphics system
-* [SfSystem](systems/sfml/SfSystem.md): displays entities in an SFML render window
+* [MagicaVoxelSystem](systems/polyvox/MagicaVoxelSystem.md): loads 3D models in the MagicaVoxel ".vox" format, which can then be drawn by the `PolyVoxSystem`'s shader
 
 #### Physics
 * [BulletSystem](systems/bullet/BulletSystem.md): simulates physics using Bullet Physics
-* [KinematicSystem](systems/bullet/KinematicSystem.md): moves kinematic `Entities`
+* [KinematicSystem](systems/kinematic/KinematicSystem.md): moves kinematic `Entities`
 
-Some of these systems make use of external libraries which you may not want to depend upon, and are therefore disabled by default. To enable them, set the corresponding CMake variable to `true` in your `CMakeLists.txt`:
+These systems must be enabled by setting the corresponding CMake variable to `true` in your `CMakeLists.txt`. Alternatively, you can set `KENGINE_ALL_SYSTEMS` to build them all.
 
-| System         | Variable        |
-|----------------|-----------------|
-| AssimpSystem   | KENGINE_ASSIMP  |
-| BulletSystem   | KENGINE_BULLET  |
-| MagicaVoxelSystem | KENGINE_POLYVOX |
-| OpenGLSystem   | KENGINE_OPENGL  |
-| PolyVoxSystem  | KENGINE_POLYVOX |
-| SfSystem       | KENGINE_SFML    |
-| lua library    | KENGINE_LUA     |
-| python library | KENGINE_PYTHON  |
+| System                    | Variable                      |
+|---------------------------|-------------------------------|
+| AssimpSystem              | KENGINE_ASSIMP                |
+| BulletSystem              | KENGINE_BULLET                |
+| CollisionSytem            | KENGINE_COLLISION             |
+| ImGuiAdjustableSystem     | KENGINE_IMGUI_ADJUSTABLE      |
+| ImGuiEntityEditorSystem   | KENGINE_IMGUI_ENTITY_EDITOR   |
+| ImGuiEntitySelectorSystem | KENGINE_IMGUI_ENTITY_SELECTOR |
+| ImGuiPromptSystem         | KENGINE_IMGUI_PROMPT          |
+| ImGuiToolSystem           | KENGINE_IMGUI_TOOL            |
+| InputSystem               | KENGINE_INPUT                 |
+| KinematicSystem           | KENGINE_KINEMATIC             |
+| LuaSystem                 | KENGINE_LUA                   |
+| OnClickSystem             | KENGINE_ONCLICK               |
+| OpenGLSystem              | KENGINE_OPENGL                |
+| OpenGLSpritesSystem       | KENGINE_OPENGL_SPRITES        |
+| PolyVoxSystem             | KENGINE_POLYVOX               |
+| MagicaVoxelSystem         | KENGINE_POLYVOX               |
+| PythonSystem              | KENGINE_PYTHON                |
+| RecastSystem              | KENGINE_RECAST                |
 
-These systems make use of [Conan](https://conan.io/) for dependency management. The necessary packages will be automatically downloaded when you run CMake, but Conan must be installed separately by running:
+It is possible to test for the existence of these systems during compilation thanks to C++ define macros. These have the same name as the CMake variables, e.g.:
+```cpp
+#ifdef KENGINE_LUA
+// The LuaSystem exists, and we can safely use the lua library
+#endif
+```
+
+Some of these systems make use of [Conan](https://conan.io/) for dependency management. The necessary packages will be automatically downloaded when you run CMake, but Conan must be installed separately by running:
 ```
 pip install conan
 ```
@@ -292,13 +305,14 @@ Below is a commented main function that creates an entity and attaches some comp
 #include "EntityManager.hpp"
 #include "Entity.hpp"
 
-#include "systems/LuaSystem.hpp"
+#include "systems/lua/LuaSystem.hpp"
 
 #include "data/GraphicsComponent.hpp"
 #include "data/TransformComponent.hpp"
 #include "functions/Execute.hpp"
 
 #include "helpers/mainLoop.hpp"
+#include "helpers/luaHelper.hpp"
 
 // Simple system that outputs the transform and lua components of each entity that has them
 //- Forward declaration
@@ -347,10 +361,10 @@ int main(int, char **av) {
     };
 
 	// Register types to be used in lua
-    kengine::lua::registerTypes<
+    kengine::luaHelper::registerTypes<
         kengine::TransformComponent, putils::Point3f, putils::Rect3f,
         kengine::LuaComponent
-    >();
+    >(em);
 
     // Start game
     kengine::MainLoop::run(em);

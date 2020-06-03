@@ -6,7 +6,7 @@
 
 * [Reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
 * Serializable (POD)
-* Processed by the [InputSystem](../../systems/InputSystem.md), filled in by graphics systems (such as the [OpenGLSystem](../../systems/opengl/OpenGLSystem.md))
+* Processed by the [InputSystem](../../systems/input/InputSystem.md), filled in by graphics systems (such as the [OpenGLSystem](../../systems/opengl/OpenGLSystem.md))
 
 ## Members
 

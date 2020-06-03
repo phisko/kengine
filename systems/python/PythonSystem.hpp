@@ -4,5 +4,5 @@
 
 namespace kengine {
 	class EntityManager;
-	EntityCreatorFunctor<64> PySystem(EntityManager & em);
+	EntityCreatorFunctor<64> PythonSystem(EntityManager & em);
 }

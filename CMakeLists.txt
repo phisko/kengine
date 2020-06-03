@@ -1,5 +1,28 @@
 cmake_minimum_required(VERSION 3.0)
 project(kengine)
+
+# Options
+
+if (KENGINE_ALL_SYSTEMS)
+    set(KENGINE_ASSIMP TRUE)
+    set(KENGINE_BULLET TRUE)
+    set(KENGINE_COLLISION TRUE)
+    set(KENGINE_IMGUI_ADJUSTABLE TRUE)
+    set(KENGINE_IMGUI_ENTITY_EDITOR TRUE)
+    set(KENGINE_IMGUI_ENTITY_SELECTOR TRUE)
+    set(KENGINE_IMGUI_PROMPT TRUE)
+    set(KENGINE_IMGUI_TOOL TRUE)
+    set(KENGINE_INPUT TRUE)
+    set(KENGINE_KINEMATIC TRUE)
+    set(KENGINE_LUA TRUE)
+    set(KENGINE_ONCLICK TRUE)
+    set(KENGINE_OPENGL TRUE)
+    set(KENGINE_OPENGL_SPRITES TRUE)
+    set(KENGINE_POLYVOX TRUE)
+    set(KENGINE_PYTHON TRUE)
+    set(KENGINE_RECAST TRUE)
+endif()
+
 set(CMAKE_CXX_STANDARD 17)
 if (WIN32)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /DNOMINMAX")
@@ -11,68 +34,17 @@ set(PUTILS_BUILD_PYTHON ${KENGINE_PYTHON})
 set(PUTILS_NO_SHADER_DEBUG ${KENGINE_NO_SHADER_DEBUG})
 add_subdirectory(putils)
 
-if (KENGINE_LUA)
-    add_compile_definitions(KENGINE_LUA)
-endif()
-
-if (KENGINE_PYTHON)
-    add_compile_definitions(KENGINE_PYTHON)
-endif()
+# Add C++ macros
 
 file(GLOB src_files
     *.cpp *.hpp
     components/data/*.cpp components/data/*.hpp
     components/functions/*.cpp components/functions/*.hpp
     components/meta/*.cpp components/meta/*.hpp
-    systems/*.cpp systems/*.hpp
     helpers/*.cpp helpers/*.hpp)
 
 add_library(kengine STATIC ${src_files})
 target_link_libraries(kengine PUBLIC putils)
-
-if (KENGINE_SFML)
-    add_subdirectory(systems/sfml)
-    target_link_libraries(kengine PUBLIC kengine_sfml)
-endif ()
-
-if (KENGINE_OPENGL)
-    set(BUILD_UTILS FALSE)
-    set(GLEW_PATH systems/opengl/libs/glew)
-    add_subdirectory(${GLEW_PATH}/build/cmake)
-    target_link_libraries(kengine PUBLIC glew)
-    target_include_directories(kengine PUBLIC ${GLEW_PATH}/include)
-
-    putils_conan(glm/0.9.9.5@g-truc/stable)
-    target_link_libraries(kengine PUBLIC CONAN_PKG::glm)
-
-    add_subdirectory(systems/opengl)
-    target_link_libraries(kengine PUBLIC kengine_opengl)
-
-    if (NOT KENGINE_OPENGL_NO_DEFAULT_SHADERS)
-        add_subdirectory(systems/opengl_sprites)
-        target_link_libraries(kengine PUBLIC kengine_opengl_sprites)
-    endif()
-endif ()
-
-if (KENGINE_ASSIMP)
-    add_subdirectory(systems/assimp)
-    target_link_libraries(kengine PUBLIC kengine_assimp)
-endif()
-
-if (KENGINE_POLYVOX)
-    add_subdirectory(systems/polyvox)
-    target_link_libraries(kengine PUBLIC kengine_polyvox)
-endif()
-
-if (KENGINE_BULLET)
-    add_subdirectory(systems/bullet)
-    target_link_libraries(kengine PUBLIC kengine_bullet)
-endif()
-
-if (KENGINE_RECAST)
-    add_subdirectory(systems/recast)
-    target_link_libraries(kengine PUBLIC kengine_recast)
-endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} PARENT_SCOPE)
 target_include_directories(kengine PUBLIC . components)
@@ -83,3 +55,30 @@ if (WIN32)
     endif()
 endif()
 
+# Add systems
+
+macro(ADD_SYSTEM)
+    if (${ARGV0})
+        target_compile_definitions(kengine PUBLIC ${ARGV0})
+        add_subdirectory(${ARGV1})
+        target_link_libraries(kengine PUBLIC ${ARGV2})
+    endif()
+endmacro()
+
+ADD_SYSTEM(KENGINE_ASSIMP systems/assimp kengine_assimp)
+ADD_SYSTEM(KENGINE_BULLET systems/bullet kengine_bullet)
+ADD_SYSTEM(KENGINE_COLLISION systems/collision kengine_collision)
+ADD_SYSTEM(KENGINE_IMGUI_ADJUSTABLE systems/imgui_adjustable kengine_imgui_adjustable)
+ADD_SYSTEM(KENGINE_IMGUI_ENTITY_EDITOR systems/imgui_entity_editor kengine_imgui_entity_editor)
+ADD_SYSTEM(KENGINE_IMGUI_ENTITY_SELECTOR systems/imgui_entity_selector kengine_imgui_entity_selector)
+ADD_SYSTEM(KENGINE_IMGUI_PROMPT systems/imgui_prompt kengine_imgui_prompt)
+ADD_SYSTEM(KENGINE_IMGUI_TOOL systems/imgui_tool kengine_imgui_tool)
+ADD_SYSTEM(KENGINE_INPUT systems/input kengine_input)
+ADD_SYSTEM(KENGINE_KINEMATIC systems/kinematic kengine_kinematic)
+ADD_SYSTEM(KENGINE_LUA systems/lua kengine_lua)
+ADD_SYSTEM(KENGINE_ONCLICK systems/onclick kengine_onclick)
+ADD_SYSTEM(KENGINE_OPENGL systems/opengl kengine_opengl)
+ADD_SYSTEM(KENGINE_OPENGL_SPRITES systems/opengl_sprites kengine_opengl_sprites)
+ADD_SYSTEM(KENGINE_POLYVOX systems/polyvox kengine_polyvox)
+ADD_SYSTEM(KENGINE_PYTHON systems/python kengine_python)
+ADD_SYSTEM(KENGINE_RECAST systems/recast kengine_recast)

@@ -1,6 +1,6 @@
 # [AdjustableComponent](AdjustableComponent.hpp)
 
-Utility `Component` that provides access to "global" values that may be adjusted at runtime, e.g. by an [ImGuiAdjustableManager](../../systems/ImGuiAdjustableSystem.md).
+Utility `Component` that provides access to "global" values that may be adjusted at runtime, e.g. by an [ImGuiAdjustableManager](../../systems/imgui_adjustable/ImGuiAdjustableSystem.md).
 
 Currently supported types are `bool`, `int`, `float`, [putils::NormalizedColor](https://github.com/phisko/putils/blob/master/Color.md) and `enum` types.
 
@@ -10,7 +10,7 @@ The maximum length of the adjustable's name (stored as a [putils::string](https:
 
 * [Reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
 * Not serializable as it contains pointers, but the adjustable system you use may externally save adjustable values
-* Processed by the [ImGuiAdjustableSystem](../../systems/ImGuiAdjustableSystem.md)
+* Processed by the [ImGuiAdjustableSystem](../../systems/imgui_adjustable/ImGuiAdjustableSystem.md)
 
 ## Usage
 

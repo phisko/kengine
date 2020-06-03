@@ -1,13 +1,13 @@
-#include "PySystem.hpp"
+#include "PythonSystem.hpp"
 #include "helpers/pythonHelper.hpp"
-#include "data/PyComponent.hpp"
+#include "data/PythonComponent.hpp"
 #include "functions/Execute.hpp"
 
 namespace kengine {
 #pragma region declarations
 	static void execute(EntityManager & em, py::module & module, float deltaTime);
 #pragma endregion
-	EntityCreatorFunctor<64> PySystem(EntityManager & em) {
+	EntityCreatorFunctor<64> PythonSystem(EntityManager & em) {
 		return [&](Entity & e) {
 			auto tmp = std::make_unique<PythonStateComponent::Data>();
 			auto & state = *tmp;
@@ -30,7 +30,7 @@ namespace kengine {
 
 	static void execute(EntityManager & em, py::module & module, float deltaTime) {
 		module.attr("deltaTime") = deltaTime;
-		for (auto & [e, comp] : em.getEntities<PyComponent>()) {
+		for (auto & [e, comp] : em.getEntities<PythonComponent>()) {
 			module.attr("self") = &e;
 			for (const auto & s : comp.scripts)
 				py::eval_file(s.c_str(), py::globals());

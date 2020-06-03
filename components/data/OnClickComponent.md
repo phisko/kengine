@@ -6,7 +6,7 @@
 
 * [Reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
 * Not serializable (contains a functor)
-* Processed by the [OnClickSystem](../../systems/OnClickSystem.md)
+* Processed by the [OnClickSystem](../../systems/onclick/OnClickSystem.md)
 
 ## Members
 

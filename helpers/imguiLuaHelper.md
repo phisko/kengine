@@ -10,4 +10,4 @@ Helper function to quickly initialize imgui bindings for Lua.
 void initBindings(EntityManager & em);
 ```
 
-Initializes the bindings. Should be called after having added the [LuaSystem](../systems/LuaSystem.md).
+Initializes the bindings. Should be called after having added the [LuaSystem](../systems/lua/LuaSystem.md).

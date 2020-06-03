@@ -1,4 +1,4 @@
-set(name kengine_opengl_sprites)
+set(name kengine_imgui_entity_selector)
 
 file(GLOB src *.cpp *.hpp)
 add_library(${name} STATIC ${src})

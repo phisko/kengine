@@ -1,4 +1,4 @@
-set(name kengine_opengl_sprites)
+set(name kengine_kinematic)
 
 file(GLOB src *.cpp *.hpp)
 add_library(${name} STATIC ${src})

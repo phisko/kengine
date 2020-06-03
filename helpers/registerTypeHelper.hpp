@@ -4,6 +4,7 @@
 
 #include "pythonHelper.hpp"
 #include "luaHelper.hpp"
+#include "assertHelper.hpp"
 
 #include "meta/registerComponentFunctions.hpp"
 #include "meta/registerComponentEditor.hpp"
@@ -32,15 +33,17 @@ namespace kengine {
 		putils::for_each_type<Types...>([&](auto && t) {
 			using T = putils_wrapped_type(t);
 
-			try {
-				pythonHelper::registerType<T>(em);
-				luaHelper::registerType<T>(em);
-			}
-			catch (const std::exception & e) {
-				std::cerr << putils::termcolor::red <<
-					"Error registering [" << putils::reflection::get_class_name<T>() << "]: " << e.what()
-					<< putils::termcolor::reset << '\n';
-			}
+			const auto registerWithLanguage = [&](const auto func, const char * name) {
+				try {
+					func(em);
+				}
+				catch (const std::exception & e) {
+					kengine_assert_failed(em, std::string("[") + name + "] Error registering [" + putils::reflection::get_class_name<T>() + "] " + e.what());
+				}
+			};
+
+			registerWithLanguage(pythonHelper::registerType<T>, "Python");
+			registerWithLanguage(luaHelper::registerType<T>, "Lua");
 
 			putils::reflection::for_each_used_type<T>([&](const char *, auto && type) {
 				using Used = putils_wrapped_type(type);

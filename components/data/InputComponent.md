@@ -6,7 +6,7 @@
 
 * [Reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
 * Not serializable as it contains functors
-* Processed by the [InputSystem](../../systems/InputSystem.md)
+* Processed by the [InputSystem](../../systems/input/InputSystem.md)
 
 ## Members
 

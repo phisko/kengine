@@ -6,4 +6,4 @@
 
 * [Reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
 * Serializable (empty)
-* Used by the [ImGuiEntityEditorSystem](../../systems/ImGuiEntityEditorSystem.md) and the [ImGuiEntitySelectorSystem](../../systems/ImGuiEntitySelectorSystem.md)
+* Used by the [ImGuiEntityEditorSystem](../../systems/imgui_entity_editor/ImGuiEntityEditorSystem.md) and the [ImGuiEntitySelectorSystem](../../systems/imgui_entity_selector/ImGuiEntitySelectorSystem.md)
