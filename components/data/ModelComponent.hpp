@@ -13,8 +13,8 @@ namespace kengine {
 		putils::string<KENGINE_MODEL_STRING_MAX_LENGTH, stringName> file;
 
 		putils::Rect3f boundingBox = { {}, { 1, 1, 1 } };
-		float pitch = 0.f;
 		float yaw = 0.f;
+		float pitch = 0.f;
 		float roll = 0.f;
 		bool mirrored = false;
 
@@ -24,8 +24,8 @@ namespace kengine {
 
 			putils_reflection_attribute(&ModelComponent::boundingBox),
 
-			putils_reflection_attribute(&ModelComponent::pitch),
 			putils_reflection_attribute(&ModelComponent::yaw),
+			putils_reflection_attribute(&ModelComponent::pitch),
 			putils_reflection_attribute(&ModelComponent::roll),
 
 			putils_reflection_attribute(&ModelComponent::mirrored)
