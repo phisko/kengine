@@ -571,18 +571,40 @@ namespace kengine {
 	static glm::vec3 calculateInterpolatedScale(const aiNodeAnim * nodeAnim, float time);
 #pragma endregion
 	static void initExtractedMotionGetters(const Entity & e, ModelAnimationComponent & anims, const AssImpAnimFilesComponent & assimpAnimFiles) {
-		anims.getAnimationMovementUntilTime = [&assimpAnimFiles, modelID = e.id](const Entity & e, size_t anim, float time) {
-			const auto modelEntity = g_em->getEntity(modelID);
+		struct MovementExtractorParams {
+			glm::mat4 toWorldSpace;
+			const aiNodeAnim * nodeAnim;
+		};
 
-			glm::mat4 parentTransform(1.f);
-			const auto nodeAnim = getRootNodeAnim(modelEntity, getAnimation(modelEntity, anim), parentTransform);
-			const auto pos = calculateInterpolatedPosition(nodeAnim, time);
+		const auto getExtractorParams = [&assimpAnimFiles, modelID = e.id](const Entity & e, size_t anim) {
+			const auto modelEntity = g_em->getEntity(modelID);
 
 			auto noTranslateTransform = e.get<TransformComponent>();
 			noTranslateTransform.boundingBox.position = putils::Point3f{};
 			const auto modelMatrix = matrixHelper::getModelMatrix(modelEntity.get<ModelComponent>(), noTranslateTransform);
 
-			return matrixHelper::convertToReferencial(glm::value_ptr(pos), parentTransform * modelMatrix);
+			glm::mat4 parentTransform(1.f);
+			const auto nodeAnim = getRootNodeAnim(modelEntity, getAnimation(modelEntity, anim), parentTransform);
+
+			return MovementExtractorParams{ parentTransform * modelMatrix, nodeAnim };
+		};
+
+		anims.getAnimationMovementUntilTime = [getExtractorParams](const Entity & e, size_t anim, float time) {
+			const auto params = getExtractorParams(e, anim);
+			const auto pos = calculateInterpolatedPosition(params.nodeAnim, time);
+			return matrixHelper::convertToReferencial(glm::value_ptr(pos), params.toWorldSpace);
+		};
+
+		anims.getAnimationRotationUntilTime = [getExtractorParams](const Entity & e, size_t anim, float time) {
+			const auto params = getExtractorParams(e, anim);
+			const auto rot = calculateInterpolatedRotation(params.nodeAnim, time);
+			return matrixHelper::getRotation(params.toWorldSpace * glm::mat4_cast(rot));
+		};
+
+		anims.getAnimationScalingUntilTime = [getExtractorParams](const Entity & e, size_t anim, float time) {
+			const auto params = getExtractorParams(e, anim);
+			const auto scale = calculateInterpolatedScale(params.nodeAnim, time);
+			return matrixHelper::convertToReferencial(glm::value_ptr(scale), params.toWorldSpace);
 		};
 	}
 
@@ -743,6 +765,8 @@ namespace kengine {
 					lastFrame.anim = anim.currentAnim;
 					lastFrame.time = anim.currentTime;
 					lastFrame.pos = modelAnims.getAnimationMovementUntilTime(e, anim.currentAnim, anim.currentTime);
+					lastFrame.rot = modelAnims.getAnimationRotationUntilTime(e, anim.currentAnim, anim.currentTime);
+					lastFrame.scale = modelAnims.getAnimationScalingUntilTime(e, anim.currentAnim, anim.currentTime);
 				}
 
 				const auto & assimpSkeleton = modelEntity.get<AssImpSkeletonComponent>();
