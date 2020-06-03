@@ -781,7 +781,7 @@ namespace kengine {
 				const auto wrappedTime = fmodf(anim.currentTime, currentAnim.totalTime);
 				if (std::abs(wrappedTime - anim.currentTime) > 0.001f) { // We've looped
 					anim.currentTime = wrappedTime;
-					lastFrame = LastFrameMovementComponent{};
+					lastFrame = {};
 				}
 			}//);
 
@@ -838,8 +838,8 @@ namespace kengine {
 
 				switch (animComponent.scaleMoverBehavior) {
 				case AnimationComponent::MoverBehavior::UpdateTransformComponent: {
-					const auto scaleSinceLastFrame = scaleInWorldSpace / lastFrame.scale;
-					transform.boundingBox.size *= scaleSinceLastFrame;
+					const auto scaleSinceLastFrame = scaleInWorldSpace - lastFrame.scale;
+					transform.boundingBox.size += scaleSinceLastFrame;
 					break;
 				}
 				case AnimationComponent::MoverBehavior::UpdateBones:
