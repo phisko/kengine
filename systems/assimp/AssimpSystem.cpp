@@ -780,7 +780,12 @@ namespace kengine {
 				anim.currentTime += deltaTime * anim.speed;
 				const auto wrappedTime = fmodf(anim.currentTime, currentAnim.totalTime);
 				if (std::abs(wrappedTime - anim.currentTime) > 0.001f) { // We've looped
-					anim.currentTime = wrappedTime;
+					if (anim.loop)
+						anim.currentTime = wrappedTime;
+					else {
+						anim.speed = 0.f;
+						anim.currentTime = 0.f;
+					}
 					lastFrame = {};
 				}
 			}//);
