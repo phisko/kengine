@@ -40,11 +40,11 @@ namespace kengine {
 					};
 
 					if (beginWindow()) {
-						if (!selected.has<NameComponent>()) // no title bar
+						if (!selected.has<NameComponent>()) { // no title bar
 							if (ImGui::Button("x"))
 								selected.detach<SelectedComponent>();
-
-						ImGui::Separator();
+							ImGui::Separator();
+						}
 
 						ImGui::BeginChild("##child");
 						imguiHelper::editEntity(em, selected);

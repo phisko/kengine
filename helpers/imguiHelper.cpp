@@ -25,39 +25,38 @@ namespace kengine::imguiHelper {
 	}
 
 	void editEntity(EntityManager & em, Entity & e) {
-		if (ImGui::CollapsingHeader("Edit")) {
-			const auto types = sortHelper::getNameSortedEntities<KENGINE_COMPONENT_COUNT,
-				meta::Has, meta::EditImGui
-			>(em);
-
-			for (const auto & [_, name, has, edit] : types)
-				if (has->call(e))
-					if (ImGui::TreeNode(name->name + "##edit")) {
-						edit->call(e);
-						ImGui::TreePop();
-					}
-		}
-
-		if (ImGui::CollapsingHeader("Add")) {
+		if (ImGui::BeginPopupContextWindow()) {
 			const auto types = sortHelper::getNameSortedEntities<KENGINE_COMPONENT_COUNT,
 				meta::Has, meta::AttachTo
 			>(em);
 
 			for (const auto & [_, name, has, add] : types)
 				if (!has->call(e))
-					if (ImGui::Button(name->name + "##add"))
+					if (ImGui::MenuItem(name->name))
 						add->call(e);
+
+			ImGui::EndPopup();
 		}
 
-		if (ImGui::CollapsingHeader("Remove")) {
-			const auto types = sortHelper::getNameSortedEntities<KENGINE_COMPONENT_COUNT,
-				meta::Has, meta::DetachFrom
-			>(em);
+		const auto types = sortHelper::getNameSortedEntities<KENGINE_COMPONENT_COUNT,
+			meta::Has, meta::EditImGui
+		>(em);
 
-			for (const auto & [_, name, has, remove] : types)
-				if (has->call(e))
-					if (ImGui::Button(name->name + "##remove"))
-						remove->call(e);
+		for (const auto & [_, name, has, edit] : types) {
+			if (!has->call(e))
+				continue;
+			const auto treeNodeOpen = ImGui::TreeNode(name->name + "##edit");
+			if (_.has<meta::DetachFrom>()) {
+				if (ImGui::BeginPopupContextItem()) {
+					if (ImGui::MenuItem("Remove"))
+						_.get<meta::DetachFrom>()(e);
+					ImGui::EndPopup();
+				}
+			}
+			if (treeNodeOpen) {
+				edit->call(e);
+				ImGui::TreePop();
+			}
 		}
 	}
 }
