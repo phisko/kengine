@@ -17,7 +17,7 @@
 
 namespace kengine {
 	template<typename ... Comps>
-	void registerComponents(kengine::EntityManager & em);
+	void registerComponents(EntityManager & em);
 
 	template<typename ...Types>
 	void registerTypes(EntityManager & em);
@@ -33,12 +33,19 @@ namespace kengine {
 		putils::for_each_type<Types...>([&](auto && t) {
 			using T = putils_wrapped_type(t);
 
+			auto type = typeHelper::getTypeEntity<T>(em);
+			if (type.has<NameComponent>())
+				return; // Type has already been registered
+			type += NameComponent{
+				putils::reflection::get_class_name<T>()
+			};
+
 			const auto registerWithLanguage = [&](const auto func, const char * name) {
 				try {
 					func(em);
 				}
 				catch (const std::exception & e) {
-					kengine_assert_failed(em, std::string("[") + name + "] Error registering [" + putils::reflection::get_class_name<T>() + "] " + e.what());
+					kengine_assert_failed(em, std::string("[") + name + "] Error registering [" + putils::reflection::get_class_name<T>() + "]: " + e.what());
 				}
 			};
 
@@ -55,15 +62,6 @@ namespace kengine {
 	template<typename ... Comps>
 	void registerComponents(EntityManager & em) {
 		registerTypes<Comps...>(em);
-
-		putils::for_each_type<Comps...>([&](auto && t) {
-			using T = putils_wrapped_type(t);
-			auto type = typeHelper::getTypeEntity<T>(em);
-			type += kengine::NameComponent{
-				putils::reflection::get_class_name<T>()
-			};
-		});
-
 		registerComponentsFunctions<Comps...>(em);
 		registerComponentEditors<Comps...>(em);
 		registerComponentMatchers<Comps...>(em);
