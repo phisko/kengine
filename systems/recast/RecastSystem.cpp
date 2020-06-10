@@ -32,7 +32,7 @@ namespace kengine {
 
 			e += AdjustableComponent{
 				"Recast", {
-					{ "[Recast] Path optimization range", &g_adjustables.pathOptimizationRange }
+					{ "Path optimization range", &g_adjustables.pathOptimizationRange }
 				}
 			};
 		};
