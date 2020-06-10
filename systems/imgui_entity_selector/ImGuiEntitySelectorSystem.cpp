@@ -33,9 +33,7 @@ namespace kengine {
 				if (ImGui::Begin("Entity selector", &tool.enabled)) {
 					static char nameSearch[1024];
 					ImGui::InputText("Search", nameSearch, sizeof(nameSearch));
-					ImGui::SameLine();
-					if (ImGui::Button("New"))
-						em += [](Entity & e) { e += SelectedComponent{}; };
+
 					ImGui::Separator();
 
 					ImGui::BeginChild("child");
@@ -54,10 +52,15 @@ namespace kengine {
 	}
 
 	static bool matches(const Entity & e, const char * str, EntityManager & em) {
-		putils::string<1024> displayText("[%d]", e.id);
+		putils::string<1024> displayText("[%d]", e.id);;
+		if (e.has<NameComponent>()) {
+			displayText += " ";
+			displayText += e.get<NameComponent>().name;
+		}
+		
 
 		if (strlen(str) != 0) {
-			displayText += " Matches in ";
+			displayText += " -- ";
 
 			bool matches = false;
 			if (str[0] >= '0' && str[0] <= '9' && putils::parse<Entity::ID>(str) == e.id) {
@@ -87,15 +90,17 @@ namespace kengine {
 		}
 
 		bool ret = false;
-		if (ImGui::Button(putils::string<64>("Select##") + e.id))
-			ret = true;
-		ImGui::SameLine();
-		if (ImGui::Button(putils::string<64>("Remove##") + e.id)) {
-			em.removeEntity(e);
-			return false;
+		const auto openTreeNode = ImGui::TreeNode(displayText + "##" + e.id);
+		if (ImGui::BeginPopupContextItem()) {
+			if (ImGui::MenuItem("Select"))
+				ret = true;
+			if (ImGui::MenuItem("Remove")) {
+				em.removeEntity(e);
+				return false;
+			}
+			ImGui::EndPopup();
 		}
-
-		if (ImGui::TreeNode(displayText + "##" + e.id)) {
+		if (openTreeNode) {
 			imguiHelper::displayEntity(em, e);
 			ImGui::TreePop();
 		}
