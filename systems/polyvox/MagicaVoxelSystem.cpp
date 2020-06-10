@@ -19,6 +19,8 @@
 
 #include "functions/OnEntityCreated.hpp"
 
+#include "helpers/assertHelper.hpp"
+
 #include "string.hpp"
 #include "Export.hpp"
 #include "file_extension.hpp"
@@ -150,7 +152,10 @@ namespace kengine {
 
 	static void unserialize(const char * f, ModelDataComponent::Mesh & meshData, MagicaVoxel::ChunkContent::Size & size) {
 		std::ifstream file(f, std::ofstream::binary);
-		assert(f);
+		if (!file) {
+			kengine_assert_failed(*g_em, std::string("[MagicaVoxel] Failed to load ") + f);
+			return;
+		}
 
 		const auto parse = [&](auto & val) {
 			file.read((char *)&val, sizeof(val));
@@ -201,23 +206,33 @@ namespace kengine {
 	template<typename T>
 	static void readFromStream(T & header, std::istream & s) {
 		s.read((char *)&header, sizeof(header));
-		assert(s.gcount() == sizeof(header));
+		kengine_assert(*g_em, s.gcount() == sizeof(header));
 	}
 #pragma endregion
 	static MeshInfo loadVoxModel(const char * f) {
 		std::ifstream stream(f, std::ios::binary);
-		assert(stream);
+		if (!stream) {
+			kengine_assert_failed(*g_em, std::string("[MagicaVoxel] Failed to load ") + f);
+			return MeshInfo{};
+		}
+
 		checkHeader(stream);
 
 		MagicaVoxel::ChunkHeader main;
 		readFromStream(main, stream);
-		assert(idMatches(main.id, "MAIN"));
+		if (!idMatches(main.id, "MAIN")) {
+			kengine_assert_failed(*g_em, std::string("[MagicaVoxel] Expected 'MAIN' chunk header in ") + f);
+			return MeshInfo{};
+		}
 
 		MagicaVoxel::ChunkHeader first;
 		readFromStream(first, stream);
-		assert(idMatches(first.id, "SIZE")); // "PACK" not yet supported
-		assert(first.childrenBytes == 0);
-		assert(first.contentBytes == sizeof(MagicaVoxel::ChunkContent::Size));
+		if (!idMatches(first.id, "SIZE")) {
+			kengine_assert_failed(*g_em, std::string("[MagicaVoxel] Expected 'SIZE' chunk header in ") + f);
+			return MeshInfo{};
+		}
+		kengine_assert(*g_em, first.childrenBytes == 0);
+		kengine_assert(*g_em, first.contentBytes == sizeof(MagicaVoxel::ChunkContent::Size));
 
 		MagicaVoxel::ChunkContent::Size size;
 		readFromStream(size, stream);
@@ -226,13 +241,16 @@ namespace kengine {
 
 		MagicaVoxel::ChunkHeader voxelsHeader;
 		readFromStream(voxelsHeader, stream);
-		assert(idMatches(voxelsHeader.id, "XYZI"));
+		if (!idMatches(voxelsHeader.id, "XYZI")) {
+			kengine_assert_failed(*g_em, std::string("[MagicaVoxel] Expected 'XYZI' chunk header in ") + f);
+			return MeshInfo{};
+		}
 
 		MagicaVoxel::ChunkContent::RGBA rgba;
 
 		MagicaVoxel::ChunkContent::XYZI xyzi;
 		readFromStream(xyzi, stream);
-		assert(voxelsHeader.contentBytes == sizeof(xyzi) + xyzi.numVoxels * sizeof(int));
+		kengine_assert(*g_em, voxelsHeader.contentBytes == sizeof(xyzi) + xyzi.numVoxels * sizeof(int));
 
 		for (int i = 0; i < xyzi.numVoxels; ++i) {
 			MagicaVoxel::ChunkContent::XYZI::Voxel voxel;
@@ -253,8 +271,8 @@ namespace kengine {
 	static void checkHeader(std::istream & s) {
 		MagicaVoxel::FileHeader header;
 		readFromStream(header, s);
-		assert(idMatches(header.id, "VOX "));
-		assert(header.versionNumber == 150);
+		kengine_assert(*g_em, idMatches(header.id, "VOX "));
+		kengine_assert(*g_em, header.versionNumber == 150);
 	}
 #pragma endregion loadVoxModel
 
@@ -280,7 +298,10 @@ namespace kengine {
 
 	static void serialize(const char * f, const ModelDataComponent & modelData, const MagicaVoxel::ChunkContent::Size & size) {
 		std::ofstream file(f, std::ofstream::binary | std::ofstream::trunc);
-		assert(f);
+		if (!file) {
+			kengine_assert_failed(*g_em, std::string("[MagicaVoxel] Failed to serialize to ") + f);
+			return;
+		}
 
 		const auto write = [&](const auto & val) {
 			file.write((const char *)&val, sizeof(val));
