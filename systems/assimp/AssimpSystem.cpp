@@ -742,7 +742,7 @@ namespace kengine {
 #pragma endregion
 	static void execute(float deltaTime) {
 		for (auto & [e, instance, skeleton, anim, transform] : g_em->getEntities<InstanceComponent, SkeletonComponent, AnimationComponent, TransformComponent>())
-			/* g_em->runTask([&] */ {
+			g_em->runTask([&] {
 				const auto & modelEntity = g_em->getEntity(instance.model);
 				if (!modelEntity.has<AssImpModelSkeletonComponent>())
 					return;
@@ -788,7 +788,7 @@ namespace kengine {
 					}
 					lastFrame = {};
 				}
-			}//);
+			});
 
 		g_em->completeTasks();
 	}
