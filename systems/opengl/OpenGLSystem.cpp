@@ -40,8 +40,7 @@
 
 #include "shaders/shaderHelper.hpp"
 #include "helpers/cameraHelper.hpp"
-
-#include "rotate.hpp"
+#include "helpers/matrixHelper.hpp"
 
 #include "shaders/ShadowMap.hpp"
 #include "shaders/ShadowCube.hpp"
@@ -625,24 +624,8 @@ namespace kengine {
 		g_params.camPos = shaderHelper::toVec(cam.frustum.position);
 		g_params.camFOV = cam.frustum.size.y;
 
-		g_params.view = [&] {
-			const auto front = glm::normalize(glm::vec3{
-				std::sin(cam.yaw) * std::cos(cam.pitch),
-				std::sin(cam.pitch),
-				std::cos(cam.yaw) * std::cos(cam.pitch)
-				});
-			const auto right = glm::normalize(glm::cross(front, { 0.f, 1.f, 0.f }));
-			auto up = glm::normalize(glm::cross(right, front));
-			detail::rotate(up, front, cam.roll);
-
-			return glm::lookAt(g_params.camPos, g_params.camPos + front, up);
-		}();
-
-		g_params.proj = glm::perspective(
-			g_params.camFOV,
-			(float)g_params.viewport.size.x / (float)g_params.viewport.size.y,
-			g_params.nearPlane, g_params.farPlane
-		);
+		g_params.proj = matrixHelper::getProjMatrix(cam, viewport, g_params.nearPlane, g_params.farPlane);
+		g_params.view = matrixHelper::getViewMatrix(cam, viewport);
 	}
 
 	static void initFramebuffer(Entity & e) {

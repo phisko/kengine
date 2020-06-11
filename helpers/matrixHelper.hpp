@@ -9,6 +9,8 @@
 namespace kengine {
 	struct ModelComponent;
 	struct TransformComponent;
+	struct CameraComponent;
+	struct ViewportComponent;
 
 	namespace matrixHelper {
 		inline glm::vec3 toVec(const putils::Point3f & pos);
@@ -19,6 +21,9 @@ namespace kengine {
 		inline putils::Point3f convertToReferencial(const putils::Point3f & pos, const glm::mat4 & conversionMatrix);
 
 		glm::mat4 getModelMatrix(const ModelComponent & model, const TransformComponent & transform);
+
+		glm::mat4 getProjMatrix(const CameraComponent & cam, const ViewportComponent & viewport, float nearPlane, float farPlane);
+		glm::mat4 getViewMatrix(const CameraComponent & cam, const ViewportComponent & viewport);
 
 		// Impl
 		inline glm::vec3 toVec(const putils::Point3f & pos) {

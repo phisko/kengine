@@ -5,6 +5,10 @@
 
 #include "data/ModelComponent.hpp"
 #include "data/TransformComponent.hpp"
+#include "data/CameraComponent.hpp"
+#include "data/ViewportComponent.hpp"
+
+#include "helpers/cameraHelper.hpp"
 
 namespace kengine::matrixHelper {
 	glm::mat4 getModelMatrix(const ModelComponent & modelInfo, const TransformComponent & transform) {
@@ -49,5 +53,19 @@ namespace kengine::matrixHelper {
 		}
 
 		return model;
+	}
+
+	glm::mat4 getProjMatrix(const CameraComponent & cam, const ViewportComponent & viewport, float nearPlane, float farPlane) {
+		return glm::perspective(
+			cam.frustum.size.y,
+			(float)viewport.resolution.x / (float)viewport.resolution.y,
+			nearPlane, farPlane
+		);
+	}
+
+	glm::mat4 getViewMatrix(const CameraComponent & cam, const ViewportComponent & viewport) {
+		const auto facings = cameraHelper::getFacings(cam);
+		const auto camPos = toVec(cam.frustum.position);
+		return glm::lookAt(camPos, camPos + toVec(facings.front), toVec(facings.up));
 	}
 }
