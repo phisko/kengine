@@ -1,7 +1,7 @@
 #pragma once
 
 #ifndef KENGINE_MODEL_STRING_MAX_LENGTH
-# define KENGINE_MODEL_STRING_MAX_LENGTH 64
+# define KENGINE_MODEL_STRING_MAX_LENGTH 128
 #endif
 
 #include "string.hpp"
