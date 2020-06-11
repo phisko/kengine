@@ -58,4 +58,23 @@ namespace kengine::cameraHelper {
 			return rect;
 		}
 	}
+
+	Facings getFacings(const CameraComponent & camera) {
+		Facings ret;
+
+		ret.front = {
+			std::sin(camera.yaw) * std::cos(camera.pitch),
+			std::sin(camera.pitch),
+			std::cos(camera.yaw) * std::cos(camera.pitch)
+		};
+		ret.front.normalize();
+
+		ret.right = putils::cross(ret.front, { 0.f, 1.f, 0.f });
+		ret.right.normalize();
+
+		ret.up = putils::cross(ret.right, ret.front);
+		ret.up.normalize();
+
+		return ret;
+	}
 }
