@@ -8,10 +8,10 @@ namespace kengine {
 	struct ViewportComponent : OnScreenComponent {
 		using RenderTexture = void *;
 
-		Entity::ID window = Entity::INVALID_ID;
 		putils::Rect2f boundingBox = { { 0.f, 0.f }, { 1.f, 1.f } };
 		putils::Point2i resolution = { 1280, 720 };
 		float zOrder = 1.f;
+		Entity::ID window = Entity::INVALID_ID;
 		RenderTexture renderTexture = (RenderTexture)-1;
 
 		ViewportComponent() noexcept {
