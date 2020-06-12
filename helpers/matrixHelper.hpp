@@ -16,6 +16,7 @@ namespace kengine {
 		inline glm::vec3 toVec(const putils::Point3f & pos);
 
 		inline putils::Point3f getPosition(const glm::mat4 & mat);
+		inline putils::Vector3f getScale(const glm::mat4 & mat);
 		inline putils::Vector3f getRotation(const glm::mat4 & mat);
 
 		inline putils::Point3f convertToReferencial(const putils::Point3f & pos, const glm::mat4 & conversionMatrix);
@@ -34,9 +35,17 @@ namespace kengine {
 			return { mat[3][0], mat[3][1], mat[3][2] };
 		}
 
+		inline putils::Vector3f getScale(const glm::mat4 & mat) {
+			return {
+				putils::Vector3f{ mat[0][0], mat[0][1], mat[0][2] }.getLength(),
+				putils::Vector3f{ mat[1][0], mat[1][1], mat[1][2] }.getLength(),
+				putils::Vector3f{ mat[2][0], mat[2][1], mat[2][2] }.getLength()
+			};
+		}
+
 		inline putils::Vector3f getRotation(const glm::mat4 & mat) {
 			putils::Point3f ret;
-			glm::extractEulerAngleXYZ(mat, ret.x, ret.y, ret.z);
+			glm::extractEulerAngleYXZ(mat, ret.y, ret.x, ret.z);
 			return ret;
 		}
 
