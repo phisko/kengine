@@ -71,6 +71,7 @@ namespace kengine {
 	void registerComponents(EntityManager & em) {
 		detail::registerTypes<Comps...>(em, [&](auto && t) {
 			using T = putils_wrapped_type(t);
+			typeHelper::getTypeEntity<T>(em) += kengine::NameComponent{ putils::reflection::get_class_name<T>() };
 			detail::registerWithLanguage<T>(em, pythonHelper::registerComponent<T>, "Python");
 			detail::registerWithLanguage<T>(em, luaHelper::registerComponent<T>, "Lua");
 		});
