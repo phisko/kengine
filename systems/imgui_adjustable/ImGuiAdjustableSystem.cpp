@@ -11,6 +11,8 @@
 #include "functions/OnTerminate.hpp"
 #include "functions/OnEntityCreated.hpp"
 
+#include "helpers/sortHelper.hpp"
+
 #include "imgui.h"
 #include "vector.hpp"
 #include "to_string.hpp"
@@ -378,9 +380,20 @@ namespace kengine {
 	static void save(EntityManager & em) {
 		std::ofstream f(KENGINE_ADJUSTABLE_SAVE_FILE, std::ofstream::trunc);
 		assert(f);
-		for (const auto & [e, comp] : em.getEntities<AdjustableComponent>()) {
-			f << '[' << comp.section << ']' << std::endl;
-			for (const auto & value : comp.values) {
+
+		const auto entities = sortHelper::getSortedEntities<0, AdjustableComponent>(em, [](const auto & a, const auto & b) {
+			return strcmp(std::get<1>(a)->section.c_str(), std::get<1>(b)->section.c_str()) < 0;
+		});
+
+		for (const auto & [e, comp] : entities) {
+			f << '[' << comp->section << ']' << std::endl;
+
+			auto values = comp->values;
+			std::sort(values.begin(), values.end(), [](const auto & lhs, const auto & rhs) {
+				return strcmp(lhs.name.c_str(), rhs.name.c_str()) < 0;
+			});
+
+			for (const auto & value : values) {
 				f << value.name << '=';
 				std::visit(putils::overloaded{
 					[&](const AdjustableComponent::Value::IntStorage & s) {
