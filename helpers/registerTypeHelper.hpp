@@ -28,40 +28,52 @@ namespace kengine {
 
 // Impl
 namespace kengine {
+	namespace detail {
+		template<typename T, typename Func>
+		void registerWithLanguage(EntityManager & em, Func && func, const char * name) {
+			try {
+				func(em);
+			}
+			catch (const std::exception & e) {
+				kengine_assert_failed(em, std::string("[") + name + "] Error registering [" + putils::reflection::get_class_name<T>() + "]: " + e.what());
+			}
+		}
+
+		template<typename ...Types, typename Func>
+		void registerTypes(EntityManager & em, Func && registerWithLanguages) {
+			putils::for_each_type<Types...>([&](auto && t) {
+				static bool registered = false;
+				if (registered)
+					return;
+				registered = true;
+
+				registerWithLanguages(t);
+
+				using T = putils_wrapped_type(t);
+				putils::reflection::for_each_used_type<T>([&](const char *, auto && type) {
+					using Used = putils_wrapped_type(type);
+					kengine::registerTypes<Used>(em);
+				});
+			});
+		}
+	}
+
 	template<typename ...Types>
 	void registerTypes(EntityManager & em) {
-		putils::for_each_type<Types...>([&](auto && t) {
+		detail::registerTypes<Types...>(em, [&](auto && t) {
 			using T = putils_wrapped_type(t);
-
-			auto type = typeHelper::getTypeEntity<T>(em);
-			if (type.has<NameComponent>())
-				return; // Type has already been registered
-			type += NameComponent{
-				putils::reflection::get_class_name<T>()
-			};
-
-			const auto registerWithLanguage = [&](const auto func, const char * name) {
-				try {
-					func(em);
-				}
-				catch (const std::exception & e) {
-					kengine_assert_failed(em, std::string("[") + name + "] Error registering [" + putils::reflection::get_class_name<T>() + "]: " + e.what());
-				}
-			};
-
-			registerWithLanguage(pythonHelper::registerType<T>, "Python");
-			registerWithLanguage(luaHelper::registerType<T>, "Lua");
-
-			putils::reflection::for_each_used_type<T>([&](const char *, auto && type) {
-				using Used = putils_wrapped_type(type);
-				registerTypes<Used>(em);
-			});
+			detail::registerWithLanguage<T>(em, pythonHelper::registerType<T>, "Python");
+			detail::registerWithLanguage<T>(em, luaHelper::registerType<T>, "Lua");
 		});
 	}
 
 	template<typename ... Comps>
 	void registerComponents(EntityManager & em) {
-		registerTypes<Comps...>(em);
+		detail::registerTypes<Comps...>(em, [&](auto && t) {
+			using T = putils_wrapped_type(t);
+			detail::registerWithLanguage<T>(em, pythonHelper::registerComponent<T>, "Python");
+			detail::registerWithLanguage<T>(em, luaHelper::registerComponent<T>, "Lua");
+		});
 		registerComponentsFunctions<Comps...>(em);
 		registerComponentEditors<Comps...>(em);
 		registerComponentMatchers<Comps...>(em);

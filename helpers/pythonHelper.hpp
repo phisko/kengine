@@ -7,9 +7,13 @@
 namespace kengine::pythonHelper {
 	template<typename T>
 	void registerType(EntityManager & em);
-
 	template<typename ... Types>
 	void registerTypes(EntityManager & em);
+
+	template<typename Comp>
+	void registerComponent(EntityManager & em);
+	template<typename ... Comps>
+	void registerComponents(EntityManager & em);
 
 	template<typename Ret, typename ...Args>
 	void registerFunction(EntityManager & em, const char * name, const scriptLanguageHelper::function<Ret(Args...)> & func);
@@ -47,7 +51,11 @@ namespace kengine::pythonHelper {
 			}
 			else
 				putils::python::registerType<T>(state.module);
+		}
 
+		template<typename T>
+		void registerComponentWithState(EntityManager & em, PythonStateComponent::Data & state) {
+			registerTypeWithState<T>(em, state);
 			scriptLanguageHelper::registerComponent<T>(
 				em,
 				[&](auto && ... args) {
@@ -71,6 +79,20 @@ namespace kengine::pythonHelper {
 		putils::for_each_type<Types...>([&](auto && t) {
 			using T = putils_wrapped_type(t);
 			registerType<T>(em);
+		});
+	}
+
+	template<typename Comp>
+	void registerComponent(EntityManager & em) {
+		for (const auto & [e, comp] : em.getEntities<PythonStateComponent>())
+			detail::registerComponentWithState<Comp>(em, *comp.data);
+	}
+
+	template<typename ... Comps>
+	void registerComponents(EntityManager & em) {
+		putils::for_each_type<Comps...>([&](auto && t) {
+			using T = putils_wrapped_type(t);
+			registerComponent<T>(em);
 		});
 	}
 
