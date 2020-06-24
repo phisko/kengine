@@ -61,8 +61,7 @@ namespace kengine {
 
 			virtual void reset(size_t id) {
 				auto & val = get(id);
-				val.~Comp();
-				new(&val) Comp;
+				val = Comp{};
 			}
 		};
 
