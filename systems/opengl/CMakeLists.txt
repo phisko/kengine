@@ -30,5 +30,6 @@ putils_conan(
 	freetype/2.10.0@bincrafters/stable
 	glfw/3.3@bincrafters/stable
 	glm/0.9.9.5@g-truc/stable
+	OPTIONS glfw:shared=True
 )
 target_link_libraries(${name} kengine glew CONAN_PKG::glfw CONAN_PKG::freetype CONAN_PKG::glm)
