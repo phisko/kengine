@@ -40,7 +40,8 @@ namespace kengine {
 		{
 			detail::ReadLock l(detail::components->mutex);
 			for (const auto & [_, comp] : detail::components->map)
-				comp->reset(id);
+				if (e.componentMask[comp->id])
+					comp->reset(id);
 		}
 
 		Entity::Mask mask;
