@@ -742,53 +742,53 @@ namespace kengine {
 #pragma endregion
 	static void execute(float deltaTime) {
 		for (auto & [e, instance, skeleton, anim, transform] : g_em->getEntities<InstanceComponent, SkeletonComponent, AnimationComponent, TransformComponent>())
-			g_em->runTask([&] {
-				const auto & modelEntity = g_em->getEntity(instance.model);
-				if (!modelEntity.has<AssImpModelSkeletonComponent>())
-					return;
+		{// g_em->runTask([&] {
+			const auto & modelEntity = g_em->getEntity(instance.model);
+			if (!modelEntity.has<AssImpModelSkeletonComponent>())
+				return;
 
-				auto & lastFrame = e.attach<LastFrameMovementComponent>();
+			auto & lastFrame = e.attach<LastFrameMovementComponent>();
 
-				auto noTranslateTransform = transform;
-				noTranslateTransform.boundingBox.position = putils::Point3f{ 0.f, 0.f, 0.f };
+			auto noTranslateTransform = transform;
+			noTranslateTransform.boundingBox.position = putils::Point3f{ 0.f, 0.f, 0.f };
 
-				const auto modelMatrix = matrixHelper::getModelMatrix(modelEntity.get<ModelComponent>(), noTranslateTransform);
+			const auto modelMatrix = matrixHelper::getModelMatrix(modelEntity.get<ModelComponent>(), noTranslateTransform);
 
-				const auto & modelAnims = modelEntity.get<ModelAnimationComponent>();
-				if (anim.currentAnim >= modelAnims.animations.size())
-					return;
+			const auto & modelAnims = modelEntity.get<ModelAnimationComponent>();
+			if (anim.currentAnim >= modelAnims.animations.size())
+				return;
 
-				const auto assimpAnim = getAnimation(modelEntity, anim.currentAnim);
-				kengine_assert(*g_em, assimpAnim != nullptr);
+			const auto assimpAnim = getAnimation(modelEntity, anim.currentAnim);
+			kengine_assert(*g_em, assimpAnim != nullptr);
 
-				if (lastFrame.anim != anim.currentAnim) {
-					lastFrame = LastFrameMovementComponent{};
-					lastFrame.anim = anim.currentAnim;
-					lastFrame.time = anim.currentTime;
-					lastFrame.pos = modelAnims.getAnimationMovementUntilTime(e, anim.currentAnim, anim.currentTime);
-					lastFrame.rot = modelAnims.getAnimationRotationUntilTime(e, anim.currentAnim, anim.currentTime);
-					lastFrame.scale = modelAnims.getAnimationScalingUntilTime(e, anim.currentAnim, anim.currentTime);
+			if (lastFrame.anim != anim.currentAnim) {
+				lastFrame = LastFrameMovementComponent{};
+				lastFrame.anim = anim.currentAnim;
+				lastFrame.time = anim.currentTime;
+				lastFrame.pos = modelAnims.getAnimationMovementUntilTime(e, anim.currentAnim, anim.currentTime);
+				lastFrame.rot = modelAnims.getAnimationRotationUntilTime(e, anim.currentAnim, anim.currentTime);
+				lastFrame.scale = modelAnims.getAnimationScalingUntilTime(e, anim.currentAnim, anim.currentTime);
+			}
+
+			const auto & assimpSkeleton = modelEntity.get<AssImpModelSkeletonComponent>();
+			if (skeleton.meshes.empty())
+				skeleton.meshes.resize(assimpSkeleton.meshes.size());
+
+			const auto & currentAnim = modelAnims.animations[anim.currentAnim];
+			updateBoneMats(assimpSkeleton.rootNode, assimpAnim, anim.currentTime * currentAnim.ticksPerSecond, assimpSkeleton, skeleton, glm::mat4(1.f), anim, transform, lastFrame, modelMatrix, true);
+
+			anim.currentTime += deltaTime * anim.speed;
+			const auto wrappedTime = fmodf(anim.currentTime, currentAnim.totalTime);
+			if (std::abs(wrappedTime - anim.currentTime) > 0.001f) { // We've looped
+				if (anim.loop)
+					anim.currentTime = wrappedTime;
+				else {
+					anim.speed = 0.f;
+					anim.currentTime = 0.f;
 				}
-
-				const auto & assimpSkeleton = modelEntity.get<AssImpModelSkeletonComponent>();
-				if (skeleton.meshes.empty())
-					skeleton.meshes.resize(assimpSkeleton.meshes.size());
-
-				const auto & currentAnim = modelAnims.animations[anim.currentAnim];
-				updateBoneMats(assimpSkeleton.rootNode, assimpAnim, anim.currentTime * currentAnim.ticksPerSecond, assimpSkeleton, skeleton, glm::mat4(1.f), anim, transform, lastFrame, modelMatrix, true);
-
-				anim.currentTime += deltaTime * anim.speed;
-				const auto wrappedTime = fmodf(anim.currentTime, currentAnim.totalTime);
-				if (std::abs(wrappedTime - anim.currentTime) > 0.001f) { // We've looped
-					if (anim.loop)
-						anim.currentTime = wrappedTime;
-					else {
-						anim.speed = 0.f;
-						anim.currentTime = 0.f;
-					}
-					lastFrame = {};
-				}
-			});
+				lastFrame = {};
+			}
+		}//});
 
 		g_em->completeTasks();
 	}
