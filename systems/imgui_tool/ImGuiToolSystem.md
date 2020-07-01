@@ -17,13 +17,13 @@ em += [](Entity & e) {
     tool.name = "My tool";
     tool.enabled = true;
 
-    e += ImGuiComponent([] {
+    e += functions::Execute{[&](float deltaTime) {
         if (!tool.enabled) // May be set to false by the ImGuiToolSystem
             return;
 
         if (ImGui::Begin("My window", &tool.enabled)) // This will make the ImGui window have a "close" button
             ImGui::Text("Content");
         ImGui::End();
-    });
+    }};
 };
 ```

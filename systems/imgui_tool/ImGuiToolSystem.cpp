@@ -4,7 +4,7 @@
 #include "helpers/sortHelper.hpp"
 
 #include "functions/OnTerminate.hpp"
-#include "data/ImGuiComponent.hpp"
+#include "functions/Execute.hpp"
 #include "data/ImGuiToolComponent.hpp"
 #include "data/NameComponent.hpp"
 #include "imgui.h"
@@ -62,7 +62,7 @@ namespace kengine {
 			e += functions::OnEntityCreated{ onEntityCreated };
 			e += functions::OnTerminate{ [&] { saveTools(em); } };
 
-			e += ImGuiComponent([&] {
+			e += functions::Execute{[&](float deltaTime) {
 				if (ImGui::BeginMainMenuBar()) {
 					bool mustSave = false;
 					if (ImGui::BeginMenu("Tools")) {
@@ -83,7 +83,7 @@ namespace kengine {
 						saveTools(em);
 				}
 				ImGui::EndMainMenuBar();
-			});
+			}};
 		};
 	}
 

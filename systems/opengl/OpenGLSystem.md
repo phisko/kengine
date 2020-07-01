@@ -76,11 +76,10 @@ The shader [Programs](../../putils/opengl/Program.md) for the various [ShaderCom
 
 ### ImGui
 
-ImGui elements can be rendered by [ImGuiComponents](../../components/data/ImGuiComponent.md).
+The `OpenGLSystem` initializes an ImGui context which can be retrieved through its [ImGuiContextComponent](../../components/data/ImGuiContextComponent.hpp).
 
 If building in debug mode, the following debug elements are automatically added (from [Controllers.hpp](Controllers.hpp)):
 * A shader controller, letting you enable/disable individual shaders
-* A light debugger, letting you adjust the properties of [LightComponents](../../components/data/LightComponent.md)
 * A texture debugger, letting you draw the individual components of the GBuffer or any texture registered by shaders
 
 ### Input

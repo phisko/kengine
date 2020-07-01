@@ -10,7 +10,8 @@
 #include "data/TransformComponent.hpp"
 #include "data/ModelComponent.hpp"
 #include "data/GraphicsComponent.hpp"
-#include "data/ImGuiComponent.hpp"
+
+#include "functions/Execute.hpp"
 
 #include "imgui.h"
 #include "helpers/instanceHelper.hpp"
@@ -89,7 +90,7 @@ namespace kengine {
 				}
 			};
 
-			e += ImGuiComponent([&] {
+			e += functions::Execute{[&](float deltaTime) {
 				if (!g_adjustables.enabled)
 					return;
 				if (ImGui::Begin("RecastShader")) {
@@ -101,7 +102,7 @@ namespace kengine {
 					}
 				}
 				ImGui::End();
-			});
+			}};
 		};
 	}
 

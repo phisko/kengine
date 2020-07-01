@@ -1,11 +1,11 @@
 #include "Controllers.hpp"
 
-#include "data/ImGuiComponent.hpp"
 #include "data/ImGuiToolComponent.hpp"
 #include "data/GBufferComponent.hpp"
 #include "data/LightComponent.hpp"
 #include "data/NameComponent.hpp"
 #include "data/ShaderComponent.hpp"
+#include "functions/Execute.hpp"
 
 #include "imgui.h"
 
@@ -17,7 +17,7 @@ namespace kengine::opengl {
 			auto & tool = e.attach<ImGuiToolComponent>();
 			tool.enabled = false;
 
-			e += ImGuiComponent([&] {
+			e += functions::Execute{[&](float deltaTime) {
 				if (!tool.enabled)
 					return;
 
@@ -40,7 +40,7 @@ namespace kengine::opengl {
 					displayShaders("Post process", em.getEntities<PostProcessShaderComponent>());
 				}
 				ImGui::End();
-			});
+			}};
 		};
 	}
 
@@ -51,7 +51,7 @@ namespace kengine::opengl {
 			auto & tool = e.attach<ImGuiToolComponent>();
 			tool.enabled = false;
 
-			e += ImGuiComponent([&] {
+			e += functions::Execute{[&](float deltaTime) {
 				if (!tool.enabled)
 					return;
 
@@ -81,7 +81,7 @@ namespace kengine::opengl {
 					}
 				}
 				ImGui::End();
-				});
+			} };
 		};
 	}
 }

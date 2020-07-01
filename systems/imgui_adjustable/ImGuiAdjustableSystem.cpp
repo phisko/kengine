@@ -4,10 +4,10 @@
 #include <fstream>
 
 #include "data/AdjustableComponent.hpp"
-#include "data/ImGuiComponent.hpp"
 #include "data/ImGuiToolComponent.hpp"
 #include "data/NameComponent.hpp"
 
+#include "functions/Execute.hpp"
 #include "functions/OnTerminate.hpp"
 #include "functions/OnEntityCreated.hpp"
 
@@ -65,12 +65,11 @@ namespace kengine {
 			auto & tool = e.attach<ImGuiToolComponent>();
 			tool.enabled = true;
 
-			e += ImGuiComponent([&] {
+			e += functions::Execute{[&](float deltaTime) {
 				if (!tool.enabled)
 					return;
 				drawImGui(em, tool.enabled);
-
-			});
+			}};
 		};
 	}
 

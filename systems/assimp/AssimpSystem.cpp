@@ -13,7 +13,6 @@
 
 #include "data/AnimationComponent.hpp"
 #include "data/GraphicsComponent.hpp"
-#include "data/ImGuiComponent.hpp"
 #include "data/InstanceComponent.hpp"
 #include "data/ModelAnimationComponent.hpp"
 #include "data/ModelComponent.hpp"

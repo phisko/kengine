@@ -1,9 +1,9 @@
 #include "ImGuiEntitySelectorSystem.hpp"
 
-#include "data/ImGuiComponent.hpp"
 #include "data/ImGuiToolComponent.hpp"
 #include "data/NameComponent.hpp"
 #include "data/SelectedComponent.hpp"
+#include "functions/Execute.hpp"
 
 #include "helpers/typeHelper.hpp"
 #include "helpers/sortHelper.hpp"
@@ -26,7 +26,7 @@ namespace kengine {
 			auto & tool = e.attach<ImGuiToolComponent>();
 			tool.enabled = true;
 
-			e += ImGuiComponent([&] {
+			e += functions::Execute{[&](float deltaTime) {
 				if (!tool.enabled)
 					return;
 
@@ -47,7 +47,7 @@ namespace kengine {
 					ImGui::EndChild();
 				}
 				ImGui::End();
-			});
+			}};
 		};
 	}
 

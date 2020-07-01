@@ -4,7 +4,7 @@
 #include "EntityManager.hpp"
 
 #include "data/TimeModulatorComponent.hpp"
-#include "data/ImGuiComponent.hpp"
+#include "functions/Execute.hpp"
 #include "imgui.h"
 #include "lengthof.hpp"
 
@@ -45,7 +45,7 @@ namespace kengine {
 				e += TimeModulatorComponent{ 0.f };
 
 				Entity::ID id = e.id;
-				e += ImGuiComponent([&em, id, &info] {
+				e += functions::Execute{[&em, id, &info](float deltaTime) {
 					bool open = true;
 					ImGui::SetNextWindowPosCenter(ImGuiCond_Appearing);
 					ImGui::SetNextWindowSize({ 300, 400 }, ImGuiCond_Appearing);
@@ -78,7 +78,7 @@ namespace kengine {
 
 					if (!open)
 						em.removeEntity(id);
-				});
+				}};
 			};
 		}
 

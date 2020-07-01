@@ -17,7 +17,7 @@
 #include "data/TextureDataComponent.hpp"
 #include "data/ModelComponent.hpp"
 #include "data/OpenGLModelComponent.hpp"
-#include "data/ImGuiComponent.hpp"
+#include "data/ImGuiContextComponent.hpp"
 #include "data/InputBufferComponent.hpp"
 #include "data/AdjustableComponent.hpp"
 #include "data/InputComponent.hpp"
@@ -87,6 +87,7 @@ namespace kengine {
 
 #pragma region OpenGLSystem
 #pragma region declarations
+	static void init() noexcept;
 	static void execute(float deltaTime);
 	static void onEntityCreated(Entity & e);
 	static void onEntityRemoved(Entity & e);
@@ -110,6 +111,8 @@ namespace kengine {
 					{ "Scale", &g_dpiScale }
 				}
 			};
+
+			e += functions::InitGBuffer{ initGBuffer };
 		};
 
 #if !defined(KENGINE_NDEBUG) && !defined(KENGINE_OPENGL_NO_DEBUG_TOOLS)
@@ -120,6 +123,12 @@ namespace kengine {
 		g_params.nearPlane = 1.f;
 		g_params.farPlane = 1000.f;
 
+		init();
+
+#ifndef KENGINE_NO_DEFAULT_GBUFFER
+		initGBuffer<GBufferTextures>(*g_em);
+#endif
+
 		return [](Entity & e) {
 			e += functions::Execute{ execute };
 			e += functions::OnEntityCreated{ onEntityCreated };
@@ -129,7 +138,6 @@ namespace kengine {
 			e += functions::GetImGuiScale{ [] { return g_dpiScale; } };
 			e += functions::GetEntityInPixel{ getEntityInPixel };
 			e += functions::GetPositionInPixel{ getPositionInPixel };
-			e += functions::InitGBuffer{ initGBuffer };
 
 			e += AdjustableComponent{
 				"Render/Planes", {
@@ -143,7 +151,7 @@ namespace kengine {
 #pragma region Input
 	namespace Input {
 		static void onKey(GLFWwindow *, int key, int scancode, int action, int mods) {
-			if (g_buffer == nullptr || (GImGui != nullptr && ImGui::GetIO().WantCaptureKeyboard))
+			if (g_buffer == nullptr || (ImGui::GetCurrentContext() != nullptr && ImGui::GetIO().WantCaptureKeyboard))
 				return;
 
 			if (action == GLFW_PRESS)
@@ -155,7 +163,7 @@ namespace kengine {
 		static putils::Point2f lastPos{ FLT_MAX, FLT_MAX };
 
 		static void onClick(GLFWwindow *, int button, int action, int mods) {
-			if (g_buffer == nullptr || (GImGui != nullptr && ImGui::GetIO().WantCaptureMouse))
+			if (g_buffer == nullptr || (ImGui::GetCurrentContext() != nullptr && ImGui::GetIO().WantCaptureMouse))
 				return;
 
 			if (action == GLFW_PRESS)
@@ -176,13 +184,13 @@ namespace kengine {
 			info.rel = { (float)xpos - lastPos.x, (float)ypos - lastPos.y };
 			lastPos = info.pos;
 
-			if (g_buffer == nullptr || (GImGui != nullptr && ImGui::GetIO().WantCaptureMouse))
+			if (g_buffer == nullptr || (ImGui::GetCurrentContext() != nullptr && ImGui::GetIO().WantCaptureMouse))
 				return;
 			g_buffer->moves.try_push_back(info);
 		}
 
 		static void onScroll(GLFWwindow *, double xoffset, double yoffset) {
-			if (g_buffer == nullptr || (GImGui != nullptr && ImGui::GetIO().WantCaptureMouse))
+			if (g_buffer == nullptr || (ImGui::GetCurrentContext() != nullptr && ImGui::GetIO().WantCaptureMouse))
 				return;
 			g_buffer->scrolls.try_push_back(InputBufferComponent::MouseScrollEvent{ g_window.id, (float)xoffset, (float)yoffset, lastPos });
 		}
@@ -235,11 +243,12 @@ namespace kengine {
 		g_window.name = g_window.comp->name;
 
 		initWindow();
-		initImGui();
 
 		glewExperimental = true;
 		const bool ret = glewInit();
 		assert(ret == GLEW_OK);
+
+		initImGui();
 
 #ifndef KENGINE_NDEBUG
 		glEnable(GL_DEBUG_OUTPUT);
@@ -290,7 +299,10 @@ namespace kengine {
 	}
 
 	static void initImGui() {
-		ImGui::CreateContext();
+		g_em->getEntity(g_window.id) += ImGuiContextComponent{
+			ImGui::CreateContext()
+		};
+
 		auto & io = ImGui::GetIO();
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
@@ -314,6 +326,10 @@ namespace kengine {
 
 		ImGui_ImplGlfw_InitForOpenGL(g_window.glfw->window, true);
 		ImGui_ImplOpenGL3_Init();
+
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
 	}
 
 	static void addShaders() {
@@ -424,16 +440,6 @@ namespace kengine {
 	static void doImGui();
 #pragma endregion
 	static void execute(float deltaTime) {
-		static bool first = true;
-		if (first) {
-			init();
-
-#ifndef KENGINE_NO_DEFAULT_GBUFFER
-			initGBuffer<GBufferTextures>(*g_em);
-#endif
-			first = false;
-		}
-
 		if (g_window.id == Entity::INVALID_ID)
 			return;
 
@@ -741,12 +747,6 @@ namespace kengine {
 #pragma endregion doOpenGL
 
 	static void doImGui() {
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
-
-		for (const auto &[e, comp] : g_em->getEntities<ImGuiComponent>())
-			comp.display(GImGui);
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -756,6 +756,10 @@ namespace kengine {
 			ImGui::RenderPlatformWindowsDefault();
 			glfwMakeContextCurrent(backup_current_context);
 		}
+
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
 	}
 #pragma endregion execute
 

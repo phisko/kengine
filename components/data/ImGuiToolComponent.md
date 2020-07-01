@@ -1,6 +1,6 @@
 # [ImGuiToolComponent](ImGuiToolComponent.hpp)
 
-`Component` that marks an `Entity`'s [ImGuiComponent](ImGuiComponent.md) as a "tool", i.e. a window that the user may want to enable and disable. These tools can then be controlled through ImGui's "MainMenuBar" thanks to the [ImGuiToolSystem](../../systems/imgui_tool/ImGuiToolSystem.md).
+`Component` that marks an `Entity` as a "tool", i.e. a window that the user may want to enable and disable. These tools can then be controlled through ImGui's "MainMenuBar" thanks to the [ImGuiToolSystem](../../systems/imgui_tool/ImGuiToolSystem.md).
 
 ## Specs
 

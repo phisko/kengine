@@ -1,9 +1,9 @@
 #include "ImGuiPromptSystem.hpp"
 #include "EntityManager.hpp"
 
-#include "data/ImGuiComponent.hpp"
 #include "data/NameComponent.hpp"
 #include "data/ImGuiToolComponent.hpp"
+#include "functions/Execute.hpp"
 
 #ifdef KENGINE_LUA
 # include "data/LuaStateComponent.hpp"
@@ -21,7 +21,7 @@ namespace kengine {
 	static bool * g_enabled;
 
 #pragma region declarations
-	static void draw();
+	static void draw(float deltaTime);
 #pragma endregion
 	EntityCreator * ImGuiPromptSystem(EntityManager & em) {
 		g_em = &em;
@@ -30,7 +30,7 @@ namespace kengine {
 			auto & tool = sys.attach<ImGuiToolComponent>();
 			g_enabled = &tool.enabled;
 			sys += NameComponent{ "Prompt" };
-			sys += ImGuiComponent( draw );
+			sys += functions::Execute{ draw };
 		};
 	}
 
@@ -73,7 +73,7 @@ namespace kengine {
 	static bool prompt();
 	static void eval();
 #pragma endregion
-	static void draw() {
+	static void draw(float deltaTime) {
 		if (!*g_enabled)
 			return;
 
