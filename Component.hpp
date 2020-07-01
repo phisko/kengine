@@ -22,11 +22,21 @@
 #include "vector.hpp"
 #include "termcolor.hpp"
 
+#ifdef KENGINE_USE_SPINLOCK
+#include "SpinLock.hpp"
+#endif
+
 namespace kengine {
 	namespace detail {
+#ifdef KENGINE_USE_SPINLOCK
+		using Mutex = putils::SpinLock;
+		using ReadLock = Mutex::SharedLock;
+		using WriteLock = Mutex::Lock;
+#else
 		using Mutex = std::shared_mutex;
 		using ReadLock = std::shared_lock<Mutex>;
 		using WriteLock = std::lock_guard<Mutex>;
+#endif
 	}
 
 	namespace detail {
