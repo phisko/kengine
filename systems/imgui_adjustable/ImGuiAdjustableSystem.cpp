@@ -17,9 +17,8 @@
 #include "vector.hpp"
 #include "to_string.hpp"
 #include "magic_enum.hpp"
-#include "regex.hpp"
-#include "chop.hpp"
 #include "visit.hpp"
+#include "IniFile.hpp"
 #include "static_assert.hpp"
 
 #ifndef KENGINE_DEFAULT_ADJUSTABLE_SAVE_PATH
@@ -45,9 +44,7 @@
 namespace kengine {
 	using string = AdjustableComponent::string;
 
-	using IniSection = std::unordered_map<string, string>;
-	using IniFile = std::unordered_map<string, IniSection>;
-	static IniFile g_loadedFile;
+	static putils::IniFile g_loadedFile;
 
 #pragma region declarations
 	static void onEntityCreated(Entity & e);
@@ -295,14 +292,14 @@ namespace kengine {
 	static void setValue(AdjustableComponent::Value & value, const char * s);
 #pragma endregion
 	static void initAdjustable(AdjustableComponent & comp) {
-		const auto it = g_loadedFile.find(comp.section);
-		if (it == g_loadedFile.end())
+		const auto it = g_loadedFile.sections.find(comp.section.c_str());
+		if (it == g_loadedFile.sections.end())
 			return;
 		const auto & section = it->second;
 		for (auto & value : comp.values) {
-			const auto it = section.find(value.name);
-			if (it != section.end())
-				setValue(value, it->second);
+			const auto it = section.values.find(value.name.c_str());
+			if (it != section.values.end())
+				setValue(value, it->second.c_str());
 		}
 	}
 
@@ -341,37 +338,7 @@ namespace kengine {
 #pragma endregion onEntityCreated
 
 	static void load(EntityManager & em) {
-		std::ifstream f(KENGINE_ADJUSTABLE_SAVE_FILE);
-		if (!f)
-			return;
-		IniSection * currentSection = nullptr;
-		for (std::string line; std::getline(f, line);) {
-			using namespace putils::regex;
-			static const auto pattern = "^\\[(.*)\\]$"_m;
-			const auto match = (line.c_str() == pattern);
-			if (!match.empty()) {
-				currentSection = &g_loadedFile[match[1].str()];
-				continue;
-			}
-			else if (currentSection == nullptr) {
-				assert(!"Invalid INI file, should start with a section");
-				continue;
-			}
-
-			if (putils::chop(line).empty())
-				continue;
-
-			const auto index = line.find('=');
-			if (index == std::string::npos) {
-				assert(!"Invalid INI file, line should match 'key = value' format");
-				continue;
-			}
-
-			const auto key = putils::chop(line.substr(0, index));
-			const auto value = putils::chop(line.substr(index + 1));
-			(*currentSection)[key] = value;
-		}
-
+		g_loadedFile = putils::parseIniFile(KENGINE_ADJUSTABLE_SAVE_FILE);
 		for (auto & [e, comp] : em.getEntities<AdjustableComponent>())
 			initAdjustable(comp);
 	}
