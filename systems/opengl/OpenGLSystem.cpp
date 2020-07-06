@@ -466,13 +466,12 @@ namespace kengine {
 		glfwSwapBuffers(g_window.glfw->window);
 
 		glfwPollEvents();
-		updateWindowProperties();
-		if (g_window.id == Entity::INVALID_ID) // window closed
-			return;
 
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
+
+		updateWindowProperties();
 	}
 
 	static void updateWindowProperties() {
