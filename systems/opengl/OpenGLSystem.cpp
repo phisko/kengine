@@ -437,15 +437,9 @@ namespace kengine {
 	static void createObject(Entity & e, const ModelDataComponent & modelData);
 	static void loadTexture(Entity & e, TextureDataComponent & textureData);
 	static void doOpenGL();
-	static void doImGui();
 #pragma endregion
 	static void execute(float deltaTime) {
 		if (g_window.id == Entity::INVALID_ID)
-			return;
-
-		glfwPollEvents();
-		updateWindowProperties();
-		if (g_window.id == Entity::INVALID_ID) // window closed
 			return;
 
 		for (auto &[e, modelData, noOpenGL] : g_em->getEntities<ModelDataComponent, no<OpenGLModelComponent>>())
@@ -458,8 +452,27 @@ namespace kengine {
 		}
 
 		doOpenGL();
-		doImGui();
+
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+			GLFWwindow* backup_current_context = glfwGetCurrentContext();
+			ImGui::UpdatePlatformWindows();
+			ImGui::RenderPlatformWindowsDefault();
+			glfwMakeContextCurrent(backup_current_context);
+		}
+
 		glfwSwapBuffers(g_window.glfw->window);
+
+		glfwPollEvents();
+		updateWindowProperties();
+		if (g_window.id == Entity::INVALID_ID) // window closed
+			return;
+
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
 	}
 
 	static void updateWindowProperties() {
@@ -745,22 +758,6 @@ namespace kengine {
 		);
 	}
 #pragma endregion doOpenGL
-
-	static void doImGui() {
-		ImGui::Render();
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-		if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-			GLFWwindow* backup_current_context = glfwGetCurrentContext();
-			ImGui::UpdatePlatformWindows();
-			ImGui::RenderPlatformWindowsDefault();
-			glfwMakeContextCurrent(backup_current_context);
-		}
-
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
-	}
 #pragma endregion execute
 
 
