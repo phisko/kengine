@@ -66,17 +66,17 @@ namespace kengine {
 					else if (strcmp("normal", attributeName) == 0)
 						attribute = &vertex->normal;
 					else
-						putils::reflection::for_each_attribute<VertexType::DataType>([&](const auto name, const auto member) {
+						putils::reflection::for_each_attribute(vertex->data, [&](const auto name, auto && member) {
 							if (strcmp(name, attributeName) != 0)
 								return;
-							attribute = &(vertex->data.*member);
+							attribute = &member;
 						});
 				}
 				else
-					putils::reflection::for_each_attribute<VertexType>([&](const auto name, const auto member) {
+					putils::reflection::for_each_attribute(*vertex, [&](const auto name, auto && member) {
 						if (strcmp(name, attributeName) != 0)
 							return;
-						attribute = &(vertex->*member);
+						attribute = &member;
 					});
 
 				std::ptrdiff_t ret = (const char *)attribute - (const char *)vertex;

@@ -12,9 +12,8 @@ namespace kengine {
 		type += meta::ForEachAttribute{
 			[](Entity & e, auto && func) {
 				auto & comp = e.get<Comp>();
-				putils::reflection::for_each_attribute<Comp>(
-					[&](const char * name, const auto memberPtr) {
-						auto & member = comp.*memberPtr;
+				putils::reflection::for_each_attribute(comp,
+					[&](const char * name, auto && member) {
 						const auto typeIndex = putils::meta::type<putils_typeof(member)>::index;
 						func(name, &member, typeIndex);
 					}
