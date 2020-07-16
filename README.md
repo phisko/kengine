@@ -88,7 +88,7 @@ These are simply holders for functors that can be attached as `Components` to `E
 * to register callbacks for system-wide events (for instance, the [OnEntityCreated](components/functions/OnEntityCreated.md) function gets called whenever a new `Entity` is created)
 * to provide new functionality that is implemented in a specific system (for instance, the [QueryPosition](components/functions/QueryPosition.md) function can only be implemented in a physics system)
 
-Function components are types that inherit from [BaseFunction](components/functions/BaseFunction.hpp), giving it the function signature as a template parameter.
+Function components are types that inherit from [BaseFunction](components/BaseFunction.hpp), giving it the function signature as a template parameter.
 
 To call a function component, one can use its `operator()` or its `call` function.
 
@@ -106,7 +106,7 @@ execute.call(42.f); // Alternatively
 
 These provide a type-specific implementation of a generic function for a given `Component` type. They are attached to "type entities", i.e. `Entities` used to represent a `Component` type. These entities can be obtained by calling the `getTypeEntity<T>()` function from [typeHelper](helpers/typeHelper.md).
 
-At their core, meta components are function components: they also inherit from [BaseFunction](components/functions/BaseFunction.hpp) and are used the same way.
+At their core, meta components are function components: they also inherit from [BaseFunction](components/BaseFunction.hpp) and are used the same way.
 
 As an example, the [Has](components/meta/Has.md) meta component, attached to the type entity for `T`, takes an `Entity` as parameter and returns whether it has a `T` component.
 
