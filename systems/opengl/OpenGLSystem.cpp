@@ -308,22 +308,6 @@ namespace kengine {
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 		io.ConfigViewportsNoTaskBarIcon = true;
 
-		{ // Stolen from ImGui_ImplOpenGL3_CreateFontsTexture
-			ImFontConfig config;
-			config.SizePixels = 13.f * g_dpiScale;
-			io.Fonts->AddFontDefault(&config);
-			unsigned char * pixels;
-			int width, height;
-			io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
-
-			GLint last_texture;
-			glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_texture);
-			glBindTexture(GL_TEXTURE_2D, (GLuint)io.Fonts->TexID);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-			ImGui::GetStyle().ScaleAllSizes(g_dpiScale);
-			glBindTexture(GL_TEXTURE_2D, last_texture);
-		}
-
 		ImGui_ImplGlfw_InitForOpenGL(g_window.glfw->window, true);
 		ImGui_ImplOpenGL3_Init();
 
@@ -452,6 +436,11 @@ namespace kengine {
 		}
 
 		doOpenGL();
+
+		static float lastScale = 1.f;
+		ImGui::GetIO().FontGlobalScale = g_dpiScale;
+		ImGui::GetStyle().ScaleAllSizes(g_dpiScale / lastScale);
+		lastScale = g_dpiScale;
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
