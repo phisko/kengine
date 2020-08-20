@@ -14,14 +14,18 @@ namespace kengine {
 
 		string appearance;
 		putils::NormalizedColor color = { 1.f, 1.f, 1.f, 1.f };
-
-        putils_reflection_class_name(GraphicsComponent);
-        putils_reflection_attributes(
-			putils_reflection_attribute(&GraphicsComponent::appearance),
-			putils_reflection_attribute(&GraphicsComponent::color)
-        );
-		putils_reflection_used_types(
-			putils_reflection_type(string)
-		);
-    };
+	};
 }
+
+#define refltype kengine::GraphicsComponent
+putils_reflection_info{
+	putils_reflection_class_name;
+	putils_reflection_attributes(
+		putils_reflection_attribute(appearance),
+		putils_reflection_attribute(color)
+	);
+	putils_reflection_used_types(
+		putils_reflection_type(refltype::string)
+	);
+};
+#undef refltype

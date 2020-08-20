@@ -20,19 +20,23 @@ namespace kengine {
 		string back;
 
 		putils::NormalizedColor color;
-
-		putils_reflection_class_name(SkyBoxComponent);
-		putils_reflection_attributes(
-			putils_reflection_attribute(&SkyBoxComponent::right),
-			putils_reflection_attribute(&SkyBoxComponent::left),
-			putils_reflection_attribute(&SkyBoxComponent::top),
-			putils_reflection_attribute(&SkyBoxComponent::bottom),
-			putils_reflection_attribute(&SkyBoxComponent::front),
-			putils_reflection_attribute(&SkyBoxComponent::back),
-			putils_reflection_attribute(&SkyBoxComponent::color)
-		);
-		putils_reflection_used_types(
-			putils_reflection_type(string)
-		);
 	};
 }
+
+#define refltype kengine::SkyBoxComponent
+putils_reflection_info{
+	putils_reflection_class_name;
+	putils_reflection_attributes(
+		putils_reflection_attribute(right),
+		putils_reflection_attribute(left),
+		putils_reflection_attribute(top),
+		putils_reflection_attribute(bottom),
+		putils_reflection_attribute(front),
+		putils_reflection_attribute(back),
+		putils_reflection_attribute(color)
+	);
+	putils_reflection_used_types(
+		putils_reflection_type(refltype::string)
+	);
+};
+#undef refltype

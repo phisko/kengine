@@ -145,8 +145,6 @@ namespace kengine {
 			Iterator end() const;
 
 			EntityManager & em;
-
-			putils_reflection_class_name(EntityManagerEntityCollection);
 		};
 
 		EntityCollection getEntities();
@@ -255,15 +253,6 @@ namespace kengine {
 			}
 
 			EntityManager & em;
-
-			template<typename T>
-			static std::string getClassName() {
-				return putils::reflection::get_class_name<T>();
-			}
-			static const auto reflection_get_class_name() {
-				static std::string ret("EntityManagerComponentCollection" + (getClassName<Comps>() + ...));
-				return ret.c_str();
-			}
 		};
 
 		template<typename ... Comps>
@@ -303,3 +292,21 @@ namespace kengine {
 		detail::GlobalCompMap & _getComponentMap() { return _components; }
 	};
 }
+
+#define refltype kengine::EntityManager::EntityCollection
+putils_reflection_info{
+	putils_reflection_custom_class_name(EntityManagerEntityCollection);
+};
+#undef refltype
+
+template<typename ... Comps>
+#define refltype kengine::EntityManager::ComponentCollection<Comps...>
+putils_reflection_info_template {
+	template<typename T>
+	static constexpr std::string getClassName() {
+		return putils::reflection::get_class_name<T>();
+	}
+
+	static constexpr auto class_name = "EntityManagerComponentCollection" + (getClassName<Comps>() + ...);
+};
+#undef refltype

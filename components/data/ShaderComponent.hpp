@@ -14,19 +14,10 @@ namespace kengine {
 		bool enabled = true;
 	};
 
-	struct GBufferShaderComponent : ShaderComponent {
-		putils_reflection_class_name(GBufferShaderComponent);
-	};
-	struct LightingShaderComponent : ShaderComponent {
-		putils_reflection_class_name(LightingShaderComponent);
-	};
-	struct PostLightingShaderComponent : ShaderComponent {
-		putils_reflection_class_name(PostLightingShaderComponent);
-	};
-
-	struct PostProcessShaderComponent : ShaderComponent {
-		putils_reflection_class_name(PostProcessShaderComponent);
-	};
+	struct GBufferShaderComponent : ShaderComponent {};
+	struct LightingShaderComponent : ShaderComponent {};
+	struct PostLightingShaderComponent : ShaderComponent {};
+	struct PostProcessShaderComponent : ShaderComponent {};
 
 	template<typename T, typename ...Args>
 	static inline GBufferShaderComponent makeGBufferShaderComponent(Args && ... args) {
@@ -52,28 +43,75 @@ namespace kengine {
 		putils::gl::FrameBuffer fbo;
 		putils::gl::Texture texture;
 		int size = -1;
-		putils_reflection_class_name(DepthMapComponent);
 	};
 
 	struct CSMComponent {
 		putils::gl::FrameBuffer fbo;
 		putils::gl::Texture textures[KENGINE_MAX_CSM_COUNT];
 		int size = -1;
-		putils_reflection_class_name(CSMComponent);
 	};
 
 	struct DepthCubeComponent {
 		putils::gl::FrameBuffer fbo;
 		putils::gl::Texture texture;
 		int size = -1;
-		putils_reflection_class_name(DepthCubeComponent);
 	};
 
-	struct ShadowMapShaderComponent {
-		putils_reflection_class_name(ShadowMapShaderComponent);
-	};
+	struct ShadowMapShaderComponent {};
 
-	struct ShadowCubeShaderComponent {
-		putils_reflection_class_name(ShadowCubeShaderComponent);
-	};
+	struct ShadowCubeShaderComponent {};
 }
+
+#define refltype kengine::GBufferShaderComponent 
+putils_reflection_info{
+	putils_reflection_class_name;
+};
+#undef refltype
+
+#define refltype kengine::LightingShaderComponent 
+putils_reflection_info{
+	putils_reflection_class_name;
+};
+#undef refltype
+
+#define refltype kengine::PostLightingShaderComponent 
+putils_reflection_info{
+	putils_reflection_class_name;
+};
+#undef refltype
+
+#define refltype kengine::PostProcessShaderComponent 
+putils_reflection_info{
+	putils_reflection_class_name;
+};
+#undef refltype
+
+#define refltype kengine::DepthMapComponent 
+putils_reflection_info{
+	putils_reflection_class_name;
+};
+#undef refltype
+
+#define refltype kengine::CSMComponent 
+putils_reflection_info {
+	putils_reflection_class_name;
+};
+#undef refltype
+
+#define refltype kengine::DepthCubeComponent
+putils_reflection_info {
+	putils_reflection_class_name;
+};
+#undef refltype
+
+#define refltype kengine::ShadowMapShaderComponent
+putils_reflection_info {
+	putils_reflection_class_name;
+};
+#undef refltype
+
+#define refltype kengine::ShadowCubeShaderComponent
+putils_reflection_info {
+	putils_reflection_class_name;
+};
+#undef refltype

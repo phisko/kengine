@@ -17,18 +17,22 @@ namespace kengine {
 		float pitch = 0.f;
 		float roll = 0.f;
 		bool mirrored = false;
-
-		putils_reflection_class_name(ModelComponent);
-		putils_reflection_attributes(
-			putils_reflection_attribute(&ModelComponent::file),
-
-			putils_reflection_attribute(&ModelComponent::boundingBox),
-
-			putils_reflection_attribute(&ModelComponent::yaw),
-			putils_reflection_attribute(&ModelComponent::pitch),
-			putils_reflection_attribute(&ModelComponent::roll),
-
-			putils_reflection_attribute(&ModelComponent::mirrored)
-		);
 	};
 }
+
+#define refltype kengine::ModelComponent
+putils_reflection_info {
+	putils_reflection_class_name;
+	putils_reflection_attributes(
+		putils_reflection_attribute(file),
+
+		putils_reflection_attribute(boundingBox),
+
+		putils_reflection_attribute(yaw),
+		putils_reflection_attribute(pitch),
+		putils_reflection_attribute(roll),
+
+		putils_reflection_attribute(mirrored)
+	);
+};
+#undef refltype

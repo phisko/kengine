@@ -24,20 +24,22 @@ namespace kengine::Shaders {
 	private:
 		void drawLight(const LightComponent & light, const glm::vec3 & pos, float size);
 
-#pragma region Uniforms
 	public:
 		putils::gl::Uniform<putils::NormalizedColor> _color;
-
-		putils_reflection_parents(
-			putils_reflection_type(src::ProjViewModel::Vert::Uniforms)
-		);
-
-		putils_reflection_attributes(
-			putils_reflection_attribute_private(&LightSphere::_color)
-		);
-#pragma endregion Uniforms
 
 	private:
 		EntityManager & _em;
 	};
 }
+
+#define refltype kengine::Shaders::LightSphere
+putils_reflection_info{
+	putils_reflection_parents(
+		putils_reflection_type(kengine::Shaders::src::ProjViewModel::Vert::Uniforms)
+	);
+
+	putils_reflection_attributes(
+		putils_reflection_attribute_private(_color)
+	);
+};
+#undef refltype

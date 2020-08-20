@@ -13,15 +13,19 @@ namespace kengine::Shaders::src {
 				putils::gl::Uniform<glm::vec3> _viewPos;
 				putils::gl::Uniform<float> _farPlane;
 				putils::gl::Uniform<float> _bias;
-
-				putils_reflection_attributes(
-					putils_reflection_attribute_private(&Uniforms::_shadowMap), 
-					putils_reflection_attribute_private(&Uniforms::_position), 
-					putils_reflection_attribute_private(&Uniforms::_viewPos), 
-					putils_reflection_attribute_private(&Uniforms::_farPlane), 
-					putils_reflection_attribute_private(&Uniforms::_bias)
-				);
 			};
 		}
 	}
 }
+
+#define refltype kengine::Shaders::src::ShadowCube::Frag::Uniforms
+putils_reflection_info{
+	putils_reflection_attributes(
+		putils_reflection_attribute_private(_shadowMap), 
+		putils_reflection_attribute_private(_position), 
+		putils_reflection_attribute_private(_viewPos), 
+		putils_reflection_attribute_private(_farPlane), 
+		putils_reflection_attribute_private(_bias)
+	);
+};
+#undef refltype

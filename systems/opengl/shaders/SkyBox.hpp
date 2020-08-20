@@ -27,16 +27,20 @@ namespace kengine::Shaders {
 
 		putils::gl::Uniform<float> _entityID;
 		putils::gl::Uniform<putils::NormalizedColor> _color;
-
-		putils_reflection_attributes(
-			putils_reflection_attribute_private(&SkyBox::_view),
-			putils_reflection_attribute_private(&SkyBox::_proj),
-
-			putils_reflection_attribute_private(&SkyBox::_tex),
-
-			putils_reflection_attribute_private(&SkyBox::_entityID),
-			putils_reflection_attribute_private(&SkyBox::_color)
-		);
 #pragma endregion Uniforms
 	};
 }
+
+#define refltype kengine::Shaders::SkyBox
+putils_reflection_info{
+	putils_reflection_attributes(
+		putils_reflection_attribute_private(_view),
+		putils_reflection_attribute_private(_proj),
+
+		putils_reflection_attribute_private(_tex),
+
+		putils_reflection_attribute_private(_entityID),
+		putils_reflection_attribute_private(_color)
+	);
+};
+#undef refltype

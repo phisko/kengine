@@ -15,8 +15,33 @@ namespace kengine {
 	struct AdjustableComponent {
 		static constexpr char stringName[] = "AdjustableComponentString";
 		using string = putils::string<KENGINE_ADJUSTABLE_NAME_MAX_LENGTH, stringName>;
+		struct Value;
+
+		string section;
+		std::vector<Value> values;
 
 		struct Value {
+			template<typename T, const char * Name, typename = std::enable_if_t < !std::is_pointer<T>{} >>
+				struct Storage {
+				Storage() = default;
+				explicit Storage(T * ptr) : ptr(ptr), value(*ptr) {}
+				explicit Storage(T value) : value(value) {}
+				T * ptr = nullptr;
+				T value;
+			};
+
+			static constexpr char _boolStorageName[] = "AdjustableComponentStorageBool";
+			using BoolStorage = Storage<bool, _boolStorageName>;
+
+			static constexpr char _floatStorageName[] = "AdjustableComponentStorageFloat";
+			using FloatStorage = Storage<float, _floatStorageName>;
+
+			static constexpr char _intStorageName[] = "AdjustableComponentStorageInt";
+			using IntStorage = Storage<int, _intStorageName>;
+
+			static constexpr char _colorStorageName[] = "AdjustableComponentStorageColor";
+			using ColorStorage = Storage<putils::NormalizedColor, _colorStorageName>;
+
 			Value() = default;
 			Value(const Value &) = default;
 			Value & operator=(const Value &) = default;
@@ -67,62 +92,52 @@ namespace kengine {
 
 			string name;
 
-			template<typename T, const char * Name, typename = std::enable_if_t<!std::is_pointer<T>{}>>
-			struct Storage {
-				Storage() = default;
-				explicit Storage(T * ptr) : ptr(ptr), value(*ptr) {}
-				explicit Storage(T value) : value(value) {}
-				T * ptr = nullptr;
-				T value;
-
-				static const auto reflection_get_class_name() { return Name; }
-				putils_reflection_attributes(
-					putils_reflection_attribute(&Storage::value)
-				);
-			};
-
-			static constexpr char _boolStorageName[] = "AdjustableComponentStorageBool";
-			using BoolStorage = Storage<bool, _boolStorageName>;
-
-			static constexpr char _floatStorageName[] = "AdjustableComponentStorageFloat";
-			using FloatStorage = Storage<float, _floatStorageName>;
-
-			static constexpr char _intStorageName[] = "AdjustableComponentStorageInt";
-			using IntStorage = Storage<int, _intStorageName>;
-
-			static constexpr char _colorStorageName[] = "AdjustableComponentStorageColor";
-			using ColorStorage = Storage<putils::NormalizedColor, _colorStorageName>;
-
 			std::variant<BoolStorage, FloatStorage, IntStorage, ColorStorage> storage;
 
 			using EnumNameFunc = const char ** ();
 			EnumNameFunc * getEnumNames = nullptr;
 			size_t enumCount = 0;
-
-			putils_reflection_class_name(AdjustableComponentValue);
-			putils_reflection_attributes(
-				putils_reflection_attribute(&Value::name),
-				putils_reflection_attribute(&Value::storage)
-			);
-			putils_reflection_used_types(
-				putils_reflection_type(BoolStorage),
-				putils_reflection_type(FloatStorage),
-				putils_reflection_type(IntStorage),
-				putils_reflection_type(ColorStorage)
-			);
 		};
-
-		string section;
-		std::vector<Value> values;
-
-		putils_reflection_class_name(AdjustableComponent);
-		putils_reflection_attributes(
-			putils_reflection_attribute(&AdjustableComponent::section),
-			putils_reflection_attribute(&AdjustableComponent::values)
-		);
-		putils_reflection_used_types(
-			putils_reflection_type(string),
-			putils_reflection_type(Value)
-		);
 	};
 }
+
+#define refltype kengine::AdjustableComponent
+putils_reflection_info {
+	putils_reflection_class_name;
+	putils_reflection_attributes(
+		putils_reflection_attribute(section),
+		putils_reflection_attribute(values)
+	);
+	putils_reflection_used_types(
+		putils_reflection_type(refltype::string),
+		putils_reflection_type(refltype::Value)
+	);
+};
+#undef refltype
+
+#define refltype kengine::AdjustableComponent::Value
+putils_reflection_info {
+	putils_reflection_custom_class_name(AdjustableComponentValue);
+	putils_reflection_attributes(
+		putils_reflection_attribute(name),
+		putils_reflection_attribute(storage)
+	);
+	putils_reflection_used_types(
+		putils_reflection_type(refltype::BoolStorage),
+		putils_reflection_type(refltype::FloatStorage),
+		putils_reflection_type(refltype::IntStorage),
+		putils_reflection_type(refltype::ColorStorage)
+	);
+};
+#undef refltype
+
+template<typename T, const char * Name, typename E>
+#define refltype kengine::AdjustableComponent::Value::Storage<T, Name, E>
+putils_reflection_info_template {
+	static constexpr auto class_name = Name;
+	putils_reflection_attributes(
+		putils_reflection_attribute(value)
+	);
+};
+#undef refltype
+

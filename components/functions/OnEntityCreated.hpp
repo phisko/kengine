@@ -8,6 +8,11 @@ namespace kengine::functions {
     struct OnEntityCreated : BaseFunction<
         void(Entity & e)
     > {
-        putils_reflection_class_name(OnEntityCreated);
     };
 }
+
+#define refltype kengine::functions::OnEntityCreated
+putils_reflection_info{
+    putils_reflection_class_name;
+};
+#undef refltype

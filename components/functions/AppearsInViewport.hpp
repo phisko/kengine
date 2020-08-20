@@ -6,7 +6,11 @@
 namespace kengine::functions {
 	struct AppearsInViewport : BaseFunction<
 		bool(Entity::ID)
-	> {
-		putils_reflection_class_name(AppearsInViewport);
-	};
+	> {};
 }
+
+#define refltype kengine::functions::AppearsInViewport
+putils_reflection_info{
+	putils_reflection_class_name;
+};
+#undef refltype

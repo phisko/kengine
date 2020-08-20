@@ -11,42 +11,19 @@ namespace kengine {
 			std::string text;
 			std::string font;
 			float size = 1.f;
-
-			putils_reflection_class_name(DebugGraphicsComponentText);
-			putils_reflection_attributes(
-				putils_reflection_attribute(&Text::text),
-				putils_reflection_attribute(&Text::font),
-				putils_reflection_attribute(&Text::size)
-			);
 		};
 
 		struct Line {
 			putils::Point3f end = {};
 			float thickness = 1.f;
-
-			putils_reflection_class_name(DebugGraphicsComponentLine);
-			putils_reflection_attributes(
-				putils_reflection_attribute(&Line::end),
-				putils_reflection_attribute(&Line::thickness)
-			);
 		};
 
 		struct Sphere {
 			float radius = .5f;
-
-			putils_reflection_class_name(DebugGraphicsComponentSphere);
-			putils_reflection_attributes(
-				putils_reflection_attribute(&Sphere::radius)
-			);
 		};
 
 		struct Box {
 			putils::Vector3f size = { 1.f, 1.f, 1.f };
-
-			putils_reflection_class_name(DebugGraphicsComponentBox);
-			putils_reflection_attributes(
-				putils_reflection_attribute(&Box::size)
-			);
 		};
 
 		enum class ReferenceSpace {
@@ -70,27 +47,74 @@ namespace kengine {
 			explicit Element(T && val, const putils::Point3f & pos = {}, const putils::NormalizedColor & color = {}, ReferenceSpace referenceSpace = ReferenceSpace::Object)
 				: data(FWD(val)), pos(pos), color(color), referenceSpace(referenceSpace)
 			{}
-
-			putils_reflection_class_name(DebugGraphicsComponentElement);
-			putils_reflection_attributes(
-				putils_reflection_attribute(&Element::pos),
-				putils_reflection_attribute(&Element::color),
-				putils_reflection_attribute(&Element::data)
-			);
 		};
 
 		std::vector<Element> elements;
-
-		putils_reflection_class_name(DebugGraphicsComponent);
-		putils_reflection_attributes(
-			putils_reflection_attribute(&DebugGraphicsComponent::elements)
-		);
-		putils_reflection_used_types(
-			putils_reflection_type(Element),
-			putils_reflection_type(Text),
-			putils_reflection_type(Line),
-			putils_reflection_type(Sphere),
-			putils_reflection_type(Box)
-		);
 	};
 }
+
+#define refltype kengine::DebugGraphicsComponent
+putils_reflection_info{
+	putils_reflection_class_name;
+	putils_reflection_attributes(
+		putils_reflection_attribute(elements)
+	);
+	putils_reflection_used_types(
+		putils_reflection_type(refltype::Element),
+		putils_reflection_type(refltype::Text),
+		putils_reflection_type(refltype::Line),
+		putils_reflection_type(refltype::Sphere),
+		putils_reflection_type(refltype::Box)
+	);
+};
+#undef refltype
+
+#define refltype kengine::DebugGraphicsComponent::Element
+putils_reflection_info{
+	putils_reflection_custom_class_name(DebugGraphicsComponentElement);
+	putils_reflection_attributes(
+		putils_reflection_attribute(pos),
+		putils_reflection_attribute(color),
+		putils_reflection_attribute(data)
+	);
+};
+#undef refltype
+
+#define refltype kengine::DebugGraphicsComponent::Box
+putils_reflection_info{
+	putils_reflection_custom_class_name(DebugGraphicsComponentBox);
+	putils_reflection_attributes(
+		putils_reflection_attribute(size)
+	);
+};
+#undef refltype
+
+#define refltype kengine::DebugGraphicsComponent::Sphere
+putils_reflection_info{
+	putils_reflection_custom_class_name(DebugGraphicsComponentSphere);
+	putils_reflection_attributes(
+		putils_reflection_attribute(radius)
+	);
+};
+#undef refltype
+
+#define refltype kengine::DebugGraphicsComponent::Line
+putils_reflection_info{
+	putils_reflection_custom_class_name(DebugGraphicsComponentLine);
+	putils_reflection_attributes(
+		putils_reflection_attribute(end),
+		putils_reflection_attribute(thickness)
+	);
+};
+#undef refltype
+
+#define refltype kengine::DebugGraphicsComponent::Text
+putils_reflection_info{
+	putils_reflection_custom_class_name(DebugGraphicsComponentText);
+	putils_reflection_attributes(
+		putils_reflection_attribute(text),
+		putils_reflection_attribute(font),
+		putils_reflection_attribute(size)
+	);
+};
+#undef refltype

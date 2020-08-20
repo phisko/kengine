@@ -45,13 +45,6 @@ namespace kengine {
 		putils::gl::Uniform<glm::vec3> _viewPos;
 
 		putils::gl::Uniform<putils::NormalizedColor> _color;
-
-		putils_reflection_attributes(
-			putils_reflection_attribute_private(&RecastDebugShader::_model),
-			putils_reflection_attribute_private(&RecastDebugShader::_view),
-			putils_reflection_attribute_private(&RecastDebugShader::_proj),
-			putils_reflection_attribute_private(&RecastDebugShader::_viewPos)
-		);
 #pragma endregion Uniforms
 
 #pragma region Attributes
@@ -61,12 +54,8 @@ namespace kengine {
 		struct Vertex {
 			float pos[3];
 			float color[4];
-
-			putils_reflection_attributes(
-				putils_reflection_attribute(&Vertex::pos),
-				putils_reflection_attribute(&Vertex::color)
-			);
 		};
+		putils_reflection_friend(Vertex);
 
 		std::vector<Vertex> _currentMesh;
 		GLenum _currentVertexType;
@@ -75,3 +64,23 @@ namespace kengine {
 #pragma endregion Attributes
 	};
 }
+
+#define refltype kengine::RecastDebugShader 
+putils_reflection_info {
+	putils_reflection_attributes(
+		putils_reflection_attribute_private(_model),
+		putils_reflection_attribute_private(_view),
+		putils_reflection_attribute_private(_proj),
+		putils_reflection_attribute_private(_viewPos)
+	);
+};
+#undef refltype
+
+#define refltype kengine::RecastDebugShader::Vertex
+putils_reflection_info {
+	putils_reflection_attributes(
+		putils_reflection_attribute(pos),
+		putils_reflection_attribute(color)
+	);
+};
+#undef refltype

@@ -7,7 +7,11 @@
 namespace kengine::functions {
     struct GetEntityInPixel : BaseFunction<
         Entity::ID(Entity::ID window, const putils::Point2ui & pixel)
-    > {
-        putils_reflection_class_name(GetEntityInPixel);
-    };
+    > {};
 }
+
+#define refltype kengine::functions::GetEntityInPixel
+putils_reflection_info{
+    putils_reflection_class_name;
+};
+#undef refltype

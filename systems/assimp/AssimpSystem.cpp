@@ -79,7 +79,7 @@ namespace kengine {
 	}
 
 	static glm::quat toglm(const aiQuaternion & quat) {
-		return { quat.w, quat.x, quat.y, quat.z }; 
+		return { quat.w, quat.x, quat.y, quat.z };
 	}
 #pragma endregion Helpers
 
@@ -142,15 +142,6 @@ namespace kengine {
 				float texCoords[2];
 				float boneWeights[KENGINE_ASSIMP_BONE_INFO_PER_VERTEX] = { 0.f };
 				unsigned int boneIDs[KENGINE_ASSIMP_BONE_INFO_PER_VERTEX] = { 0 };
-
-				putils_reflection_attributes(
-					putils_reflection_attribute(&Vertex::position),
-					putils_reflection_attribute(&Vertex::normal),
-					putils_reflection_attribute(&Vertex::texCoords),
-
-					putils_reflection_attribute(&Vertex::boneWeights),
-					putils_reflection_attribute(&Vertex::boneIDs)
-				);
 			};
 
 			std::vector<Vertex> vertices;
@@ -160,7 +151,22 @@ namespace kengine {
 		std::unique_ptr<Assimp::Importer> importer;
 		std::vector<Mesh> meshes;
 	};
+}
 
+#define refltype kengine::AssImpModelComponent::Mesh::Vertex
+putils_reflection_info {
+	putils_reflection_attributes(
+		putils_reflection_attribute(position),
+		putils_reflection_attribute(normal),
+		putils_reflection_attribute(texCoords),
+
+		putils_reflection_attribute(boneWeights),
+		putils_reflection_attribute(boneIDs)
+	);
+};
+#undef refltype
+
+namespace kengine {
 	struct AssImpModelSkeletonComponent {
 		struct Mesh {
 			struct Bone {

@@ -9,11 +9,15 @@ namespace kengine::Shaders::src {
 
 			struct Uniforms {
 				putils::gl::Uniform<putils::NormalizedColor> _color;
-
-				putils_reflection_attributes(
-					putils_reflection_attribute_private(&Uniforms::_color)
-				);
 			};
 		}
 	}
 }
+
+#define refltype kengine::Shaders::src::Color::Frag::Uniforms
+putils_reflection_info{
+	putils_reflection_attributes(
+		putils_reflection_attribute_private(_color)
+	);
+};
+#undef refltype

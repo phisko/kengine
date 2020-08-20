@@ -24,12 +24,13 @@ namespace kengine::Shaders {
 
 	private:
 		EntityManager & _em;
-
-#pragma region Uniforms
-	public:
-		putils_reflection_parents(
-			putils_reflection_type(ShadowCubeShader)
-		);
-#pragma endregion Uniforms
 	};
 }
+
+#define refltype kengine::Shaders::ShadowCube
+putils_reflection_info {
+	putils_reflection_parents(
+		putils_reflection_type(kengine::Shaders::ShadowCubeShader)
+	);
+};
+#undef refltype

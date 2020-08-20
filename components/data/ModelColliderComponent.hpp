@@ -33,31 +33,39 @@ namespace kengine {
 			float yaw = 0.f;
 			float pitch = 0.f;
 			float roll = 0.f;
-
-			putils_reflection_class_name(ModelColliderComponentCollider);
-			putils_reflection_attributes(
-				putils_reflection_attribute(&Collider::shape),
-				putils_reflection_attribute(&Collider::boneName),
-				putils_reflection_attribute(&Collider::boundingBox),
-				putils_reflection_attribute(&Collider::yaw),
-				putils_reflection_attribute(&Collider::pitch),
-				putils_reflection_attribute(&Collider::roll)
-			);
-			putils_reflection_used_types(
-				putils_reflection_type(string)
-			);
 		};
 
 		static constexpr char vectorName[] = "ModelColliderComponentVector";
 		using vector = putils::vector<Collider, KENGINE_MAX_MODEL_COLLIDERS, vectorName>;
 		vector colliders;
-
-		putils_reflection_class_name(ModelColliderComponent);
-		putils_reflection_attributes(
-			putils_reflection_attribute(&ModelColliderComponent::colliders)
-		);
-		putils_reflection_used_types(
-			putils_reflection_type(Collider)
-		);
 	};
 }
+
+#define refltype kengine::ModelColliderComponent
+putils_reflection_info {
+	putils_reflection_class_name;
+	putils_reflection_attributes(
+		putils_reflection_attribute(colliders)
+	);
+	putils_reflection_used_types(
+		putils_reflection_type(refltype::Collider)
+	);
+};
+#undef refltype
+
+#define refltype kengine::ModelColliderComponent::Collider
+putils_reflection_info {
+	putils_reflection_custom_class_name(ModelColliderComponentCollider);
+	putils_reflection_attributes(
+		putils_reflection_attribute(shape),
+		putils_reflection_attribute(boneName),
+		putils_reflection_attribute(boundingBox),
+		putils_reflection_attribute(yaw),
+		putils_reflection_attribute(pitch),
+		putils_reflection_attribute(roll)
+	);
+	putils_reflection_used_types(
+		putils_reflection_type(refltype::string)
+	);
+};
+#undef refltype

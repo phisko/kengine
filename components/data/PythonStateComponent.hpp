@@ -12,6 +12,11 @@ namespace kengine {
 		};
 
 		std::unique_ptr<Data> data = nullptr;
-		putils_reflection_class_name(PythonStateComponent);
 	};
 }
+
+#define refltype kengine::PythonStateComponent
+putils_reflection_info{
+	putils_reflection_class_name;
+};
+#undef refltype

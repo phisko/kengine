@@ -1,5 +1,6 @@
 #pragma once
 
+#include <utility>
 #include "BaseFunction.hpp"
 #include "EntityManager.hpp"
 
@@ -13,16 +14,14 @@ namespace kengine::functions {
 
 	struct InitGBuffer : BaseFunction<
 		void(size_t nbAttributes, const GBufferAttributeIterator & iterator)
-	> {
-		putils_reflection_class_name(InitGBuffer);
-	};
+	> {};
 }
 
 namespace kengine {
 	template<typename Textures>
 	void initGBuffer(EntityManager & em) {
 		for (const auto & [e, initGBuffer] : em.getEntities<functions::InitGBuffer>()) {
-			initGBuffer(putils::reflection::get_attributes<Textures>().size,
+			initGBuffer(std::tuple_size_v<putils_typeof(putils::reflection::get_attributes<Textures>())>,
 				[](auto func) {
 					putils::reflection::for_each_attribute<Textures>([&](auto name, auto member) {
 						func(name);
@@ -32,3 +31,9 @@ namespace kengine {
 		}
 	}
 }
+
+#define refltype kengine::functions::InitGBuffer
+putils_reflection_info{
+	putils_reflection_class_name;
+};
+#undef refltype

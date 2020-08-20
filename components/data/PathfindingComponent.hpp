@@ -10,13 +10,17 @@ namespace kengine {
 		putils::Point3f destination;
 		float searchDistance = 2.f;
 		float maxSpeed = 1.f;
-
-		putils_reflection_class_name(PathfindingComponent);
-		putils_reflection_attributes(
-			putils_reflection_attribute(&PathfindingComponent::environment),
-			putils_reflection_attribute(&PathfindingComponent::destination),
-			putils_reflection_attribute(&PathfindingComponent::searchDistance),
-			putils_reflection_attribute(&PathfindingComponent::maxSpeed)
-		);
 	};
 }
+
+#define refltype kengine::PathfindingComponent
+putils_reflection_info{
+	putils_reflection_class_name;
+	putils_reflection_attributes(
+		putils_reflection_attribute(environment),
+		putils_reflection_attribute(destination),
+		putils_reflection_attribute(searchDistance),
+		putils_reflection_attribute(maxSpeed)
+	);
+};
+#undef refltype

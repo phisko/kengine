@@ -6,10 +6,14 @@
 namespace kengine {
 	struct InstanceComponent {
 		Entity::ID model = Entity::INVALID_ID;
-
-		putils_reflection_class_name(InstanceComponent);
-		putils_reflection_attributes(
-			putils_reflection_attribute(&InstanceComponent::model)
-		);
 	};
 }
+
+#define refltype kengine::InstanceComponent
+putils_reflection_info{
+	putils_reflection_class_name;
+	putils_reflection_attributes(
+		putils_reflection_attribute(model)
+	);
+};
+#undef refltype

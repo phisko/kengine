@@ -19,19 +19,23 @@ namespace kengine::Shaders::src {
 				putils::gl::Uniform<putils::Point2f> _screenSize;
 
 				putils::gl::Uniform<putils::NormalizedColor> _color;
-
-				putils_reflection_attributes(
-					putils_reflection_attribute_private(&Uniforms::_scattering), 
-					putils_reflection_attribute_private(&Uniforms::_nbSteps), 
-					putils_reflection_attribute_private(&Uniforms::_defaultStepLength), 
-					putils_reflection_attribute_private(&Uniforms::_intensity), 
-					putils_reflection_attribute_private(&Uniforms::_inverseView), 
-					putils_reflection_attribute_private(&Uniforms::_inverseProj), 
-					putils_reflection_attribute_private(&Uniforms::_viewPos), 
-					putils_reflection_attribute_private(&Uniforms::_screenSize), 
-					putils_reflection_attribute_private(&Uniforms::_color)
-				);
 			};
 		}
 	}
 }
+
+#define refltype kengine::Shaders::src::GodRays::Frag::Uniforms
+putils_reflection_info{
+	putils_reflection_attributes(
+		putils_reflection_attribute_private(_scattering), 
+		putils_reflection_attribute_private(_nbSteps), 
+		putils_reflection_attribute_private(_defaultStepLength), 
+		putils_reflection_attribute_private(_intensity), 
+		putils_reflection_attribute_private(_inverseView), 
+		putils_reflection_attribute_private(_inverseProj), 
+		putils_reflection_attribute_private(_viewPos), 
+		putils_reflection_attribute_private(_screenSize), 
+		putils_reflection_attribute_private(_color)
+	);
+};
+#undef refltype

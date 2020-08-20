@@ -9,13 +9,17 @@ namespace kengine {
         float yaw = 0; // Radians
         float pitch = 0; // Radians
 		float roll = 0; // Radians
-
-        putils_reflection_class_name(TransformComponent);
-        putils_reflection_attributes(
-                putils_reflection_attribute(&TransformComponent::boundingBox),
-                putils_reflection_attribute(&TransformComponent::yaw),
-                putils_reflection_attribute(&TransformComponent::pitch),
-                putils_reflection_attribute(&TransformComponent::roll)
-        );
-    };
+	};
 };
+
+#define refltype kengine::TransformComponent
+putils_reflection_info{
+	putils_reflection_class_name;
+	putils_reflection_attributes(
+		putils_reflection_attribute(boundingBox),
+		putils_reflection_attribute(yaw),
+		putils_reflection_attribute(pitch),
+		putils_reflection_attribute(roll)
+	);
+};
+#undef refltype

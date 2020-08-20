@@ -5,6 +5,11 @@
 namespace kengine {
 	struct LuaStateComponent {
 		sol::state * state = nullptr;
-		putils_reflection_class_name(LuaStateComponent);
 	};
 }
+
+#define refltype kengine::LuaStateComponent
+putils_reflection_info {
+	putils_reflection_class_name;
+};
+#undef refltype

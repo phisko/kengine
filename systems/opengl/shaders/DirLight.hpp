@@ -24,16 +24,17 @@ namespace kengine::Shaders {
 	private:
 		void setLight(const DirLightComponent & light); 
 
-#pragma region Uniforms
-	public:
-		putils_reflection_parents(
-			putils_reflection_type(src::CSM::Frag::Uniforms),
-			putils_reflection_type(src::DirLight::Frag::Uniforms)
-		);
-#pragma endregion Uniforms
-
 	private:
 		EntityManager & _em;
 		size_t _shadowMapTextureID;
 	};
 }
+
+#define refltype kengine::Shaders::DirLight
+putils_reflection_info{
+	putils_reflection_parents(
+		putils_reflection_type(kengine::Shaders::src::CSM::Frag::Uniforms),
+		putils_reflection_type(kengine::Shaders::src::DirLight::Frag::Uniforms)
+	);
+};
+#undef refltype

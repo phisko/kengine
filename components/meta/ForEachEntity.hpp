@@ -6,14 +6,22 @@ namespace kengine {
 	namespace meta {
 		struct ForEachEntity : functions::BaseFunction<
 			void(const EntityIteratorFunc & func)
-		> {
-			putils_reflection_class_name(ForEachEntity);
-		};
+		> {};
 
 		struct ForEachEntityWithout : functions::BaseFunction<
 			void(const EntityIteratorFunc & func)
-		> {
-			putils_reflection_class_name(ForEachEntityWithout);
-		};
+		> {};
 	}
 }
+
+#define refltype kengine::meta::ForEachEntity
+putils_reflection_info {
+	putils_reflection_class_name;
+};
+#undef refltype
+
+#define refltype kengine::meta::ForEachEntityWithout
+putils_reflection_info {
+	putils_reflection_class_name;
+};
+#undef refltype

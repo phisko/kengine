@@ -19,14 +19,18 @@ namespace kengine {
 		using script_vector = putils::vector<script, KENGINE_MAX_PYTHON_SCRIPTS, vectorName>;
 
         script_vector scripts;
-
-        putils_reflection_class_name(PythonComponent);
-        putils_reflection_attributes(
-                putils_reflection_attribute(&PythonComponent::scripts)
-        );
-        putils_reflection_used_types(
-            putils_reflection_type(script),
-            putils_reflection_type(script_vector)
-        );
-    };
+	};
 }
+
+#define refltype kengine::PythonComponent
+putils_reflection_info{
+	putils_reflection_class_name;
+	putils_reflection_attributes(
+			putils_reflection_attribute(scripts)
+	);
+	putils_reflection_used_types(
+		putils_reflection_type(refltype::script),
+		putils_reflection_type(refltype::script_vector)
+	);
+};
+#undef refltype

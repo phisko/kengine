@@ -25,15 +25,19 @@ namespace kengine::Shaders {
 		putils::gl::Uniform<float> _entityID;
 		putils::gl::Uniform<putils::NormalizedColor> _highlightColor;
 		putils::gl::Uniform<float> _intensity;
-
-		putils_reflection_attributes(
-			putils_reflection_attribute_private(&Highlight::_viewPos),
-			putils_reflection_attribute_private(&Highlight::_screenSize),
-
-			putils_reflection_attribute_private(&Highlight::_entityID),
-			putils_reflection_attribute_private(&Highlight::_highlightColor),
-			putils_reflection_attribute_private(&Highlight::_intensity)
-		);
 #pragma endregion Uniforms
 	};
 }
+
+#define refltype kengine::Shaders::Highlight
+putils_reflection_info{
+	putils_reflection_attributes(
+		putils_reflection_attribute_private(_viewPos),
+		putils_reflection_attribute_private(_screenSize),
+
+		putils_reflection_attribute_private(_entityID),
+		putils_reflection_attribute_private(_highlightColor),
+		putils_reflection_attribute_private(_intensity)
+	);
+};
+#undef refltype

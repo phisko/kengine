@@ -419,7 +419,7 @@ namespace kengine {
 #pragma region declarations
 	static void updateWindowProperties();
 	static void createObject(Entity & e, const ModelDataComponent & modelData);
-	static void loadTexture(Entity & e, TextureDataComponent & textureData);
+	static void loadTexture(const TextureDataComponent & textureData);
 	static void doOpenGL();
 #pragma endregion
 	static void execute(float deltaTime) {
@@ -430,7 +430,8 @@ namespace kengine {
 			createObject(e, modelData);
 
 		for (auto &[e, textureLoader] : g_em->getEntities<TextureDataComponent>()) {
-			loadTexture(e, textureLoader);
+			loadTexture(textureLoader);
+			e.detach<TextureDataComponent>();
 			if (e.componentMask == 0)
 				g_em->removeEntity(e);
 		}
@@ -536,7 +537,7 @@ namespace kengine {
 		}
 	}
 
-	static void loadTexture(Entity & e, TextureDataComponent & textureData) {
+	static void loadTexture(const TextureDataComponent & textureData) {
 		assert(*textureData.textureID == -1);
 		glGenTextures(1, textureData.textureID);
 
@@ -569,8 +570,6 @@ namespace kengine {
 			if (textureData.free != nullptr)
 				textureData.free(textureData.data);
 		}
-
-		e.detach<TextureDataComponent>();
 	}
 
 	struct CameraFramebufferComponent {

@@ -23,17 +23,19 @@ namespace kengine {
 	private:
 		EntityManager & _em;
 
-#pragma region Uniforms
 	public:
 		GLint _bones;
-
-		putils_reflection_attributes(
-			putils_reflection_attribute_private(&AssImpShadowCube::_bones)
-		);
-
-		putils_reflection_parents(
-			putils_reflection_type(Shaders::ShadowCubeShader)
-		);
-#pragma endregion Uniforms
 	};
 }
+
+#define refltype kengine::AssImpShadowCube
+putils_reflection_info {
+	putils_reflection_attributes(
+		putils_reflection_attribute_private(_bones)
+	);
+
+	putils_reflection_parents(
+		putils_reflection_type(kengine::Shaders::ShadowCubeShader)
+	);
+};
+#undef refltype

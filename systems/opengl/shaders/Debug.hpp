@@ -26,16 +26,20 @@ namespace kengine::Shaders {
 
 		putils::gl::Uniform<float> _entityID;
 		putils::gl::Uniform<putils::NormalizedColor> _color;
-
-		putils_reflection_attributes(
-			putils_reflection_attribute_private(&Debug::_model),
-			putils_reflection_attribute_private(&Debug::_view),
-			putils_reflection_attribute_private(&Debug::_proj),
-			putils_reflection_attribute_private(&Debug::_viewPos),
-
-			putils_reflection_attribute_private(&Debug::_entityID),
-			putils_reflection_attribute_private(&Debug::_color)
-		);
 #pragma endregion Uniforms
 	};
 }
+
+#define refltype kengine::Shaders::Debug
+putils_reflection_info{
+	putils_reflection_attributes(
+		putils_reflection_attribute_private(_model),
+		putils_reflection_attribute_private(_view),
+		putils_reflection_attribute_private(_proj),
+		putils_reflection_attribute_private(_viewPos),
+
+		putils_reflection_attribute_private(_entityID),
+		putils_reflection_attribute_private(_color)
+	);
+};
+#undef refltype

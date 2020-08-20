@@ -52,15 +52,6 @@ namespace kengine {
 			assert("You are using too many component types." && id < KENGINE_COMPONENT_COUNT);
 			return id;
 		}
-
-	public:
-		putils_reflection_class_name(EntityView);
-		putils_reflection_attributes(
-			putils_reflection_attribute(&EntityView::id),
-			putils_reflection_attribute(&EntityView::componentMask)
-		);
-		putils_reflection_methods();
-		putils_reflection_parents();
 	};
 
 	class Entity : public EntityView {
@@ -89,6 +80,16 @@ namespace kengine {
 	};
 }
 
+#define refltype kengine::Entity
+putils_reflection_info{
+	putils_reflection_class_name;
+	putils_reflection_attributes(
+		putils_reflection_attribute(id),
+		putils_reflection_attribute(componentMask)
+	);
+};
+#undef refltype
+
 #include "EntityManager.hpp"
 
 template<typename T>
@@ -112,7 +113,6 @@ void kengine::Entity::attach(T && comp) {
 		manager->addComponent(id, component);
 	}
 }
-
 
 template<typename T>
 void kengine::Entity::detach() {

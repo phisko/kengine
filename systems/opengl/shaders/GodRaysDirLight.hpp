@@ -30,14 +30,15 @@ namespace kengine::Shaders {
 	private:
 		EntityManager & _em;
 		GLuint _shadowMapTextureID;
-
-#pragma region Uniforms
-	public:
-		putils_reflection_parents(
-			putils_reflection_type(src::GodRays::Frag::Uniforms),
-			putils_reflection_type(src::CSM::Frag::Uniforms),
-			putils_reflection_type(src::DirLight::GetDirection::Uniforms)
-		);
-#pragma endregion Uniforms
 	};
 }
+
+#define refltype kengine::Shaders::GodRaysDirLight
+putils_reflection_info{
+	putils_reflection_parents(
+		putils_reflection_type(kengine::Shaders::src::GodRays::Frag::Uniforms),
+		putils_reflection_type(kengine::Shaders::src::CSM::Frag::Uniforms),
+		putils_reflection_type(kengine::Shaders::src::DirLight::GetDirection::Uniforms)
+	);
+};
+#undef refltype

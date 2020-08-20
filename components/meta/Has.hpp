@@ -7,7 +7,11 @@ namespace kengine { class Entity; }
 namespace kengine::meta {
     struct Has : functions::BaseFunction<
         bool(const Entity &)
-    > {
-        putils_reflection_class_name(Has)
-    };
-} // namespace functions
+    > {};
+}
+
+#define refltype kengine::meta::Has
+putils_reflection_info{
+    putils_reflection_class_name;
+};
+#undef refltype

@@ -17,9 +17,8 @@
 namespace kengine {
 	class Entity;
 
-	struct RebuildNavMeshComponent { // Indicates that the navmesh should be rebuilt
-		putils_reflection_class_name(RebuildNavMeshComponent);
-	};
+	// Indicates that the navmesh should be rebuilt
+	struct RebuildNavMeshComponent {};
 
 	struct NavMeshComponent {
 		static constexpr char PathName[] = "NavMeshComponentPath";
@@ -43,28 +42,38 @@ namespace kengine {
 		float detailSampleDist = 75.f;
 		float detailSampleMaxError = 20.f;
 		int queryMaxSearchNodes = 65535;
-
-		putils_reflection_class_name(NavMeshComponent);
-		putils_reflection_attributes(
-			putils_reflection_attribute(&NavMeshComponent::getPath),
-			putils_reflection_attribute(&NavMeshComponent::concernedMesh),
-			putils_reflection_attribute(&NavMeshComponent::cellSize),
-			putils_reflection_attribute(&NavMeshComponent::cellHeight),
-			putils_reflection_attribute(&NavMeshComponent::walkableSlope),
-			putils_reflection_attribute(&NavMeshComponent::characterHeight),
-			putils_reflection_attribute(&NavMeshComponent::characterClimb),
-			putils_reflection_attribute(&NavMeshComponent::characterRadius),
-			putils_reflection_attribute(&NavMeshComponent::maxEdgeLength),
-			putils_reflection_attribute(&NavMeshComponent::maxSimplificationError),
-			putils_reflection_attribute(&NavMeshComponent::minRegionArea),
-			putils_reflection_attribute(&NavMeshComponent::mergeRegionArea),
-			putils_reflection_attribute(&NavMeshComponent::vertsPerPoly),
-			putils_reflection_attribute(&NavMeshComponent::detailSampleDist),
-			putils_reflection_attribute(&NavMeshComponent::detailSampleMaxError),
-			putils_reflection_attribute(&NavMeshComponent::queryMaxSearchNodes)
-		);
-		putils_reflection_used_types(
-			putils_reflection_type(Path)
-		);
 	};
 }
+
+#define refltype kengine::RebuildNavMeshComponent
+putils_reflection_info {
+	putils_reflection_class_name;
+};
+#undef refltype
+
+#define refltype kengine::NavMeshComponent
+putils_reflection_info {
+	putils_reflection_class_name;
+	putils_reflection_attributes(
+		putils_reflection_attribute(getPath),
+		putils_reflection_attribute(concernedMesh),
+		putils_reflection_attribute(cellSize),
+		putils_reflection_attribute(cellHeight),
+		putils_reflection_attribute(walkableSlope),
+		putils_reflection_attribute(characterHeight),
+		putils_reflection_attribute(characterClimb),
+		putils_reflection_attribute(characterRadius),
+		putils_reflection_attribute(maxEdgeLength),
+		putils_reflection_attribute(maxSimplificationError),
+		putils_reflection_attribute(minRegionArea),
+		putils_reflection_attribute(mergeRegionArea),
+		putils_reflection_attribute(vertsPerPoly),
+		putils_reflection_attribute(detailSampleDist),
+		putils_reflection_attribute(detailSampleMaxError),
+		putils_reflection_attribute(queryMaxSearchNodes)
+	);
+	putils_reflection_used_types(
+		putils_reflection_type(kengine::NavMeshComponent::Path)
+	);
+};
+#undef refltype

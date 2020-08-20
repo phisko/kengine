@@ -6,7 +6,11 @@
 namespace kengine::functions {
     struct QueryPosition : BaseFunction<
         void (const putils::Point3f & pos, float radius, const EntityIteratorFunc & func)
-    > {
-        putils_reflection_class_name(QueryPosition);
-    };
+    > {};
 }
+
+#define refltype kengine::functions::QueryPosition
+putils_reflection_info {
+	putils_reflection_class_name;
+};
+#undef refltype

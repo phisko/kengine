@@ -17,18 +17,6 @@ namespace kengine::Shaders::src {
 				putils::gl::Uniform<float> _attenuationConstant;
 				putils::gl::Uniform<float> _attenuationLinear;
 				putils::gl::Uniform<float> _attenuationQuadratic;
-
-				putils_reflection_attributes(
-					putils_reflection_attribute_private(&Uniforms::_viewPos), 
-					putils_reflection_attribute_private(&Uniforms::_screenSize), 
-					putils_reflection_attribute_private(&Uniforms::_color), 
-					putils_reflection_attribute_private(&Uniforms::_position), 
-					putils_reflection_attribute_private(&Uniforms::_diffuseStrength), 
-					putils_reflection_attribute_private(&Uniforms::_specularStrength), 
-					putils_reflection_attribute_private(&Uniforms::_attenuationConstant), 
-					putils_reflection_attribute_private(&Uniforms::_attenuationLinear), 
-					putils_reflection_attribute_private(&Uniforms::_attenuationQuadratic)
-				);
 			};
 		}
 
@@ -37,11 +25,31 @@ namespace kengine::Shaders::src {
 
 			struct Uniforms {
 				putils::gl::Uniform<putils::Point3f> _position;
-
-				putils_reflection_attributes(
-					putils_reflection_attribute_private(&Uniforms::_position)
-				);
 			};
 		}
 	}
 }
+
+#define refltype kengine::Shaders::src::PointLight::Frag::Uniforms
+putils_reflection_info{
+	putils_reflection_attributes(
+		putils_reflection_attribute_private(_viewPos), 
+		putils_reflection_attribute_private(_screenSize), 
+		putils_reflection_attribute_private(_color), 
+		putils_reflection_attribute_private(_position), 
+		putils_reflection_attribute_private(_diffuseStrength), 
+		putils_reflection_attribute_private(_specularStrength), 
+		putils_reflection_attribute_private(_attenuationConstant), 
+		putils_reflection_attribute_private(_attenuationLinear), 
+		putils_reflection_attribute_private(_attenuationQuadratic)
+	);
+};
+#undef refltype
+
+#define refltype kengine::Shaders::src::PointLight::GetDirection::Uniforms
+putils_reflection_info{
+	putils_reflection_attributes(
+		putils_reflection_attribute_private(_position)
+	);
+};
+#undef refltype

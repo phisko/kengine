@@ -47,18 +47,22 @@ namespace kengine::Shaders {
 		putils::gl::Uniform<glm::mat4> _proj;
 		putils::gl::Uniform<glm::mat4> _view;
 		putils::gl::Uniform<glm::mat4> _model;
-
-	public:
-		putils_reflection_attributes(
-			putils_reflection_attribute_private(&ShadowCubeShader::_proj),
-			putils_reflection_attribute_private(&ShadowCubeShader::_view),
-			putils_reflection_attribute_private(&ShadowCubeShader::_model)
-		);
-
-		putils_reflection_parents(
-			putils_reflection_type(Shaders::src::DepthCube::Geom::Uniforms),
-			putils_reflection_type(Shaders::src::DepthCube::Frag::Uniforms)
-		);
+		putils_reflection_friend(ShadowCubeShader);
 #pragma endregion Uniforms
 	};
 }
+
+#define refltype kengine::Shaders::ShadowCubeShader
+putils_reflection_info{
+	putils_reflection_attributes(
+		putils_reflection_attribute_private(_proj),
+		putils_reflection_attribute_private(_view),
+		putils_reflection_attribute_private(_model)
+	);
+
+	putils_reflection_parents(
+		putils_reflection_type(kengine::Shaders::src::DepthCube::Geom::Uniforms),
+		putils_reflection_type(kengine::Shaders::src::DepthCube::Frag::Uniforms)
+	);
+};
+#undef refltype

@@ -7,7 +7,11 @@ namespace kengine { class Entity; }
 namespace kengine::meta {
     struct DetachFrom : functions::BaseFunction<
         void(Entity &)
-    > {
-        putils_reflection_class_name(DetachFrom)
-    };
-} // namespace functions
+    > {};
+}
+
+#define refltype kengine::meta::DetachFrom
+putils_reflection_info {
+	putils_reflection_class_name
+};
+#undef refltype

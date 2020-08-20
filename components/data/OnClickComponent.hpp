@@ -10,10 +10,14 @@
 namespace kengine {
 	struct OnClickComponent {
 		putils::function<void(), KENGINE_ONCLICK_FUNCTION_SIZE> onClick = nullptr;
-
-		putils_reflection_class_name(OnClickComponent);
-		putils_reflection_attributes(
-			putils_reflection_attribute(&OnClickComponent::onClick)
-		);
 	};
 }
+
+#define refltype kengine::OnClickComponent
+putils_reflection_info {
+	putils_reflection_class_name;
+	putils_reflection_attributes(
+		putils_reflection_attribute(onClick)
+	);
+};
+#undef refltype

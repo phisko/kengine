@@ -7,7 +7,11 @@
 namespace kengine::functions {
     struct GetPositionInPixel : BaseFunction<
         putils::Point3f(Entity::ID window, const putils::Point2ui & pixel)
-    > {
-        putils_reflection_class_name(GetPositionInPixel);
-    };
+    > {};
 }
+
+#define refltype kengine::functions::GetPositionInPixel
+putils_reflection_info{
+	putils_reflection_class_name;
+};
+#undef refltype

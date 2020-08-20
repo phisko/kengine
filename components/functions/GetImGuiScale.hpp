@@ -5,7 +5,11 @@
 namespace kengine::functions {
     struct GetImGuiScale : BaseFunction<
         float()
-    > {
-        putils_reflection_class_name(GetImGuiScale);
-    };
+    > {};
 }
+
+#define refltype kengine::functions::GetImGuiScale
+putils_reflection_info{
+	putils_reflection_class_name;
+};
+#undef refltype

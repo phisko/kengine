@@ -25,19 +25,23 @@ namespace kengine::Shaders {
 		putils::gl::Uniform<putils::NormalizedColor> _color;
 		putils::gl::Uniform<float> _entityID;
 
-		putils_reflection_attributes(
-			putils_reflection_attribute_private(&Text::_model),
-			putils_reflection_attribute_private(&Text::_view),
-			putils_reflection_attribute_private(&Text::_proj),
-			putils_reflection_attribute_private(&Text::_viewPos),
-
-			putils_reflection_attribute_private(&Text::_tex),
-			putils_reflection_attribute_private(&Text::_color),
-			putils_reflection_attribute_private(&Text::_entityID)
-		);
-
 	private:
 		EntityManager & _em;
 		size_t _textureID;
 	};
 }
+
+#define refltype kengine::Shaders::Text
+putils_reflection_info{
+	putils_reflection_attributes(
+		putils_reflection_attribute_private(_model),
+		putils_reflection_attribute_private(_view),
+		putils_reflection_attribute_private(_proj),
+		putils_reflection_attribute_private(_viewPos),
+
+		putils_reflection_attribute_private(_tex),
+		putils_reflection_attribute_private(_color),
+		putils_reflection_attribute_private(_entityID)
+	);
+};
+#undef refltype

@@ -8,8 +8,12 @@ namespace kengine {
 	namespace meta {
 		struct EditImGui : functions::BaseFunction<
 			void(kengine::Entity &)
-		> {
-			putils_reflection_class_name(EditImGui);
-		};
+		> {};
 	}
 }
+
+#define refltype kengine::meta::EditImGui
+putils_reflection_info {
+	putils_reflection_class_name;
+};
+#undef refltype

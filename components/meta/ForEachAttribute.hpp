@@ -16,8 +16,12 @@ namespace kengine {
 
 		struct ForEachAttribute : functions::BaseFunction<
 			void(Entity & e, const AttributeIteratorFunc & func)
-		> {
-			putils_reflection_class_name(ForEachAttribute);
-		};
+		> {};
 	}
 }
+
+#define refltype kengine::meta::ForEachAttribute
+putils_reflection_info {
+	putils_reflection_class_name;
+};
+#undef refltype

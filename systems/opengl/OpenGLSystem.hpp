@@ -20,17 +20,21 @@ namespace kengine {
 		float diffuse[4]; // r, g, b, shouldIgnoreLighting
 		float specular[4]; // r, g, b, ignore
 		float entityID[4]; // id, ignore, ignore, ignore
-
-		putils_reflection_attributes(
-			putils_reflection_attribute(&GBufferTextures::position),
-			putils_reflection_attribute(&GBufferTextures::normal),
-			putils_reflection_attribute(&GBufferTextures::diffuse),
-			putils_reflection_attribute(&GBufferTextures::specular),
-			putils_reflection_attribute(&GBufferTextures::entityID)
-		);
 	};
 
 	class EntityManager;
 
 	EntityCreator * OpenGLSystem(EntityManager & em);
 }
+
+#define refltype kengine::GBufferTextures
+putils_reflection_info{
+	putils_reflection_attributes(
+		putils_reflection_attribute(position),
+		putils_reflection_attribute(normal),
+		putils_reflection_attribute(diffuse),
+		putils_reflection_attribute(specular),
+		putils_reflection_attribute(entityID)
+	);
+};
+#undef refltype

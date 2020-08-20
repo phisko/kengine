@@ -17,16 +17,20 @@ namespace kengine {
 		ViewportComponent() noexcept {
 			coordinateType = CoordinateType::ScreenPercentage;
 		}
-
-		putils_reflection_class_name(ViewportComponent);
-		putils_reflection_attributes(
-			putils_reflection_attribute(&ViewportComponent::window),
-			putils_reflection_attribute(&ViewportComponent::boundingBox),
-			putils_reflection_attribute(&ViewportComponent::resolution),
-			putils_reflection_attribute(&ViewportComponent::zOrder)
-		);
-		putils_reflection_parents(
-			putils_reflection_type(OnScreenComponent)
-		);
 	};
 }
+
+#define refltype kengine::ViewportComponent
+putils_reflection_info{
+	putils_reflection_class_name;
+	putils_reflection_attributes(
+		putils_reflection_attribute(window),
+		putils_reflection_attribute(boundingBox),
+		putils_reflection_attribute(resolution),
+		putils_reflection_attribute(zOrder)
+	);
+	putils_reflection_parents(
+		putils_reflection_type(kengine::OnScreenComponent)
+	);
+};
+#undef refltype

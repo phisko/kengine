@@ -50,7 +50,7 @@ namespace kengine {
 				registerWithLanguages(t);
 
 				using T = putils_wrapped_type(t);
-				putils::reflection::for_each_used_type<T>([&](const char *, auto && type) {
+				putils::reflection::for_each_used_type<T>([&](auto && type) {
 					using Used = putils_wrapped_type(type);
 					kengine::registerTypes<Used>(em);
 				});

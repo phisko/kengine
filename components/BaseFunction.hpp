@@ -23,18 +23,22 @@ namespace kengine {
 
 		template<typename Ret, typename ... Args>
 		struct BaseFunction<Ret(Args...)> {
-			putils::function<Ret(Args...), KENGINE_FUNCTION_MAX_SIZE> func;
+			putils::function<Ret(Args...), KENGINE_FUNCTION_MAX_SIZE> func = nullptr;
 
 			bool operator==(nullptr_t) const { return func == nullptr; }
 			bool operator!=(nullptr_t) const { return func != nullptr; }
 
 			Ret operator()(Args... args) const { return func(args...); }
 			Ret call(Args ... args) const { return func(args...); }
-
-			putils_reflection_attributes(
-				putils_reflection_attribute(&BaseFunction::func)
-			);
 		};
 	}
 }
 
+template<typename Ret, typename ... Args>
+#define refltype kengine::functions::BaseFunction<Ret(Args...)>
+putils_reflection_info_template {
+	putils_reflection_attributes(
+		putils_reflection_attribute(func)
+	);
+};
+#undef refltype

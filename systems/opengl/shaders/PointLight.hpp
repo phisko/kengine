@@ -26,15 +26,6 @@ namespace kengine::Shaders {
 		void init(size_t firstTextureID) override;
 		void run(const Parameters & params) override;
 
-#pragma region Uniforms
-	public:
-		putils_reflection_parents(
-			putils_reflection_type(src::ProjViewModel::Vert::Uniforms),
-			putils_reflection_type(src::ShadowCube::Frag::Uniforms),
-			putils_reflection_type(src::PointLight::Frag::Uniforms)
-		);
-#pragma endregion Uniforms
-
 	private:
 		EntityManager & _em;
 		size_t _shadowMapTextureID;
@@ -42,3 +33,13 @@ namespace kengine::Shaders {
 		void setLight(const PointLightComponent & light, const putils::Point3f & pos, float radius); 
 	};
 }
+
+#define refltype kengine::Shaders::PointLight
+putils_reflection_info {
+	putils_reflection_parents(
+		putils_reflection_type(kengine::Shaders::src::ProjViewModel::Vert::Uniforms),
+		putils_reflection_type(kengine::Shaders::src::ShadowCube::Frag::Uniforms),
+		putils_reflection_type(kengine::Shaders::src::PointLight::Frag::Uniforms)
+	);
+};
+#undef refltype

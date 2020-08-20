@@ -18,17 +18,21 @@ namespace kengine {
 		bool fullscreen = false;
 		bool shutdownOnClose = true;
 		string assignedSystem;
-
-		putils_reflection_class_name(WindowComponent);
-		putils_reflection_attributes(
-			putils_reflection_attribute(&WindowComponent::name),
-			putils_reflection_attribute(&WindowComponent::size),
-			putils_reflection_attribute(&WindowComponent::fullscreen),
-			putils_reflection_attribute(&WindowComponent::shutdownOnClose),
-			putils_reflection_attribute(&WindowComponent::assignedSystem)
-		);
-		putils_reflection_used_types(
-			putils_reflection_type(string)
-		);
 	};
 }
+
+#define refltype kengine::WindowComponent
+putils_reflection_info{
+	putils_reflection_class_name;
+	putils_reflection_attributes(
+		putils_reflection_attribute(name),
+		putils_reflection_attribute(size),
+		putils_reflection_attribute(fullscreen),
+		putils_reflection_attribute(shutdownOnClose),
+		putils_reflection_attribute(assignedSystem)
+	);
+	putils_reflection_used_types(
+		putils_reflection_type(refltype::string)
+	);
+};
+#undef refltype

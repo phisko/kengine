@@ -15,13 +15,17 @@ namespace kengine {
 		string file;
 
 		putils::gl::Texture texture;
-
-		putils_reflection_class_name(TextureModelComponent);
-		putils_reflection_attributes(
-			putils_reflection_attribute(&TextureModelComponent::file)
-		);
-		putils_reflection_used_types(
-			putils_reflection_type(string)
-		);
 	};
 }
+
+#define refltype kengine::TextureModelComponent
+putils_reflection_info{
+	putils_reflection_class_name;
+	putils_reflection_attributes(
+		putils_reflection_attribute(file)
+	);
+	putils_reflection_used_types(
+		putils_reflection_type(refltype::string)
+	);
+};
+#undef refltype
