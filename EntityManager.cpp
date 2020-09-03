@@ -1,5 +1,6 @@
 #include <filesystem>
 #include "EntityManager.hpp"
+#include "string.hpp"
 
 #include "functions/OnTerminate.hpp"
 #include "functions/OnEntityRemoved.hpp"

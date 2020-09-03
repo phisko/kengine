@@ -4,23 +4,20 @@
 # define KENGINE_COMPONENT_CHUNK_SIZE 64
 #endif
 
-#ifndef KENGINE_NDEBUG
-#include <iostream>
-#endif
-
-#include <memory>
 #include <mutex>
 #include <shared_mutex>
-#include <fstream>
 #include <cstddef>
 #include <unordered_map>
 #include <memory>
 #include <vector>
 #include "meta/type.hpp"
-#include "reflection.hpp"
-#include "string.hpp"
 #include "vector.hpp"
+
+#ifndef KENGINE_NDEBUG
+#include <iostream>
+#include "reflection.hpp"
 #include "termcolor.hpp"
+#endif
 
 #ifdef KENGINE_USE_SPINLOCK
 #include "SpinLock.hpp"
@@ -45,7 +42,7 @@ namespace kengine {
 		struct MetadataBase {
 			size_t id = detail::INVALID;
 			size_t typeEntityID = detail::INVALID;
-			virtual void reset(size_t id) = 0;
+			virtual void reset(size_t id) noexcept = 0;
 			virtual ~MetadataBase() = default;
 		};
 
@@ -55,7 +52,7 @@ namespace kengine {
 			// EntityManager (which contains this) has been destroyed, so this pattern lets them
 			// stay alive. Sorry! Feel free to submit a pull request if you have a better solution
 			std::unordered_map<putils::meta::type_index, std::unique_ptr<MetadataBase>> & map = *(new std::remove_reference_t<decltype(map)>);
-			detail::Mutex & mutex = *(new std::remove_reference_t<decltype(mutex)>);
+			detail::Mutex & mutex = *(new detail::Mutex);
 		};
 		extern GlobalCompMap * components;
 	}
@@ -69,7 +66,7 @@ namespace kengine {
 			std::vector<Chunk> chunks;
 			mutable detail::Mutex _mutex;
 
-			virtual void reset(size_t id) {
+			virtual void reset(size_t id) noexcept {
 				auto & val = get(id);
 				val = Comp();
 			}

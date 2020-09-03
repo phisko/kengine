@@ -7,6 +7,7 @@
 #include "functions/Execute.hpp"
 #include "imgui.h"
 #include "lengthof.hpp"
+#include "string.hpp"
 
 #ifdef WIN32
 # include "dbghelp.h"

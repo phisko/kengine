@@ -1,3 +1,5 @@
+#include <fstream>
+
 #include "ImGuiToolSystem.hpp"
 #include "EntityManager.hpp"
 
