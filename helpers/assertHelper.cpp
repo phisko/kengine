@@ -100,7 +100,7 @@ static std::string getCallStack() {
 	SymInitialize(process, nullptr, true);
 
 	void * stack[128];
-	const auto frames = CaptureStackBackTrace(0, lengthof(stack), stack, nullptr);
+	const auto frames = CaptureStackBackTrace(0, (DWORD)putils::lengthof(stack), stack, nullptr);
 
 	char symbolBuffer[sizeof(SYMBOL_INFO) + 256];
 	auto symbol = (SYMBOL_INFO *)symbolBuffer;

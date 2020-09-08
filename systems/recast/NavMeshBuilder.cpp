@@ -491,7 +491,7 @@ namespace kengine::recast {
 
 			dtPolyRef path[KENGINE_NAVMESH_MAX_PATH_LENGTH];
 			int pathCount = 0;
-			status = recast.navMeshQuery->findPath(startRef, endRef, startPt, endPt, &filter, path, &pathCount, lengthof(path));
+			status = recast.navMeshQuery->findPath(startRef, endRef, startPt, endPt, &filter, path, &pathCount, (int)putils::lengthof(path));
 			if (dtStatusFailed(status))
 				return ret;
 

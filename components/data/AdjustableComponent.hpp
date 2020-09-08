@@ -64,10 +64,10 @@ namespace kengine {
 			template<typename E>
 			static const char ** getEnumNamesImpl() {
 				static putils::string<64> names[putils::magic_enum::enum_count<E>()];
-				static const char * ret[lengthof(names)];
+				static const char * ret[putils::lengthof(names)];
 				static bool first = true;
 				if (first) {
-					for (size_t i = 0; i < lengthof(names); ++i) {
+					for (size_t i = 0; i < putils::lengthof(names); ++i) {
 						names[i] = putils::magic_enum::enum_names<E>()[i];
 						ret[i] = names[i];
 					}

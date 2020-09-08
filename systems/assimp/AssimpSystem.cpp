@@ -876,7 +876,7 @@ namespace kengine {
 		for (unsigned int i = 0; i < assimpSkeleton.meshes.size(); ++i) {
 			const auto & input = assimpSkeleton.meshes[i];
 			auto & output = comp.meshes[i];
-			kengine_assert_with_message(*g_em, input.bones.size() < lengthof(output.boneMatsBoneSpace), "Not enough bones in SkeletonComponent. You need to increase KENGINE_SKELETON_MAX_BONES");
+			kengine_assert_with_message(*g_em, input.bones.size() < putils::lengthof(output.boneMatsBoneSpace), "Not enough bones in SkeletonComponent. You need to increase KENGINE_SKELETON_MAX_BONES");
 
 			size_t boneIndex = 0;
 			for (const auto & bone : input.bones) {

@@ -173,7 +173,7 @@ namespace kengine::recast {
 				const auto environmentInfo = getEnvironmentInfo(environment);
 
 				static dtCrowdAgent * activeAgents[KENGINE_RECAST_MAX_AGENTS];
-				const auto nbAgents = crowd.crowd->getActiveAgents(activeAgents, lengthof(activeAgents));
+				const auto nbAgents = crowd.crowd->getActiveAgents(activeAgents, putils::lengthof(activeAgents));
 
 				// Overwrite agent with user-updated components
 				for (int i = 0; i < nbAgents; ++i) {

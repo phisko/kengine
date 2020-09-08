@@ -133,7 +133,7 @@ namespace kengine {
 			first = false;
 		}
 
-		const bool ret = ImGui::InputTextMultiline("##Prompt", g_buff, lengthof(g_buff), { -1.f, -1.f }, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AllowTabInput);
+		const bool ret = ImGui::InputTextMultiline("##Prompt", g_buff, putils::lengthof(g_buff), { -1.f, -1.f }, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AllowTabInput);
 		if (ImGui::IsItemHovered())
 			ImGui::SetTooltip("Ctrl+Enter to execute");
 

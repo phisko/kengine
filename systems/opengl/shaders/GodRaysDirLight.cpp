@@ -28,7 +28,7 @@ namespace kengine::Shaders {
 		));
 
 		_shadowMapTextureID = (GLuint)firstTextureID;
-		for (size_t i = 0; i < lengthof(_shadowMap); ++i)
+		for (size_t i = 0; i < putils::lengthof(_shadowMap); ++i)
 			_shadowMap[i] = _shadowMapTextureID + i;
 	}
 

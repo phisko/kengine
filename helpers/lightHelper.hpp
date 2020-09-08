@@ -75,7 +75,7 @@ namespace kengine::lightHelper {
 		const auto lightView = glm::lookAt({ 0.f, 0.f, 0.f }, dir, { 0.f, 1.f, 0.f });
 		const auto inverseView = glm::inverse(params.view);
 
-		for (size_t i = 0; i < lengthof(frustumCorners); ++i) {
+		for (size_t i = 0; i < putils::lengthof(frustumCorners); ++i) {
 			const auto worldPos = inverseView * glm::vec4(frustumCorners[i], 1.f);
 			const auto lightPos = lightView * worldPos;
 
