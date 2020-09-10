@@ -2,7 +2,7 @@
 
 #include "ScriptLanguageHelper.hpp"
 #include "data/LuaStateComponent.hpp"
-#include "lua/plua.hpp"
+#include "lua_helper.hpp"
 
 namespace kengine::luaHelper {
 	template<typename T>
