@@ -132,10 +132,10 @@ namespace kengine {
 		uniforms.color = graphics.color;
 
 		const auto modelEntity = em.getEntity(instance.model);
-		if (!modelEntity.has<TextureModelComponent>())
+		if (!modelEntity.has<TextureModelComponent<putils::gl::Texture>>())
 			return;
 
-		glBindTexture(GL_TEXTURE_2D, modelEntity.get<TextureModelComponent>().texture);
+		glBindTexture(GL_TEXTURE_2D, modelEntity.get<TextureModelComponent<putils::gl::Texture>>().texture);
 
 		{
 			const auto & box =

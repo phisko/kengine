@@ -24,11 +24,11 @@ namespace kengine::resourceHelper {
 		em += [&](Entity & e) {
 			modelID = e.id;
 
-			auto & comp = e.attach<TextureModelComponent>();
+			auto & comp = e.attach<TextureModelComponent<putils::gl::Texture>>();
 			comp.file = file;
 
-			TextureDataComponent textureLoader;
-			textureLoader.textureID = &comp.texture.get();
+			TextureDataComponent<putils::gl::Texture> textureLoader;
+			textureLoader.textureID = &comp.texture;
 			textureLoader.data = stbi_load(file, &textureLoader.width, &textureLoader.height, &textureLoader.components, 0);
 			kengine_assert_with_message(em, textureLoader.data != nullptr, putils::string<1024>("Error loading texture file [%s]", file).c_str());
 			textureLoader.free = stbi_image_free;
@@ -55,11 +55,11 @@ namespace kengine::resourceHelper {
 			e.attach<LoadedFromMemory>().data = data;
 
 			static constexpr auto expectedChannels = 4;
-			auto & comp = e.attach<TextureModelComponent>();
+			auto & comp = e.attach<TextureModelComponent<putils::gl::Texture>>();
 			comp.file = "loaded from memory";
 
-			TextureDataComponent textureLoader;
-			textureLoader.textureID = &comp.texture.get();
+			TextureDataComponent<putils::gl::Texture> textureLoader;
+			textureLoader.textureID = &comp.texture;
 			if (height == 0) { // Compressed format
 				textureLoader.data = stbi_load_from_memory((const unsigned char *)data, (int)width, &textureLoader.width, &textureLoader.height, &textureLoader.components, expectedChannels);
 				kengine_assert_with_message(em, textureLoader.data != nullptr, "Error loading texture from memory");

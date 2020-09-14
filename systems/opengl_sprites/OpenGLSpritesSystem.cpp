@@ -41,7 +41,7 @@ namespace kengine {
 
 		const auto & file = e.get<GraphicsComponent>().appearance;
 
-		for (const auto &[model, comp] : g_em->getEntities<TextureModelComponent>())
+		for (const auto &[model, comp] : g_em->getEntities<TextureModelComponent<putils::gl::Texture>>())
 			if (comp.file == file) {
 				e += InstanceComponent{ model.id };
 				return;
@@ -55,11 +55,11 @@ namespace kengine {
 		*g_em += [&](Entity & model) {
 			e += InstanceComponent{ model.id };
 
-			auto & comp = model.attach<TextureModelComponent>();
+			auto & comp = model.attach<TextureModelComponent<putils::gl::Texture>>();
 			comp.file = file;
 
-			TextureDataComponent textureLoader; {
-				textureLoader.textureID = &comp.texture.get();
+			TextureDataComponent<putils::gl::Texture> textureLoader; {
+				textureLoader.textureID = &comp.texture;
 
 				textureLoader.data = data;
 				textureLoader.width = width;

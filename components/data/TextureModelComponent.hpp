@@ -9,17 +9,19 @@
 #include "string.hpp"
 
 namespace kengine {
+	template<typename T>
 	struct TextureModelComponent {
 		static constexpr char stringName[] = "TextureModelComponentString";
 		using string = putils::string<KENGINE_TEXTURE_MODEL_COMPONENT_PATH_MAX_LENGTH, stringName>;
 		string file;
 
-		putils::gl::Texture texture;
+		T texture;
 	};
 }
 
-#define refltype kengine::TextureModelComponent
-putils_reflection_info{
+template<typename T>
+#define refltype kengine::TextureModelComponent<T>
+putils_reflection_info_template{
 	putils_reflection_class_name;
 	putils_reflection_attributes(
 		putils_reflection_attribute(file)

@@ -84,7 +84,7 @@ namespace kengine {
 		static void bindTexture(EntityManager & em, size_t texture, Entity::ID modelID) {
 			glActiveTexture((GLenum)(GL_TEXTURE0 + texture));
 			const auto & modelEntity = em.getEntity(modelID);
-			glBindTexture(GL_TEXTURE_2D, modelEntity.get<TextureModelComponent>().texture);
+			glBindTexture(GL_TEXTURE_2D, modelEntity.get<TextureModelComponent<putils::gl::Texture>>().texture);
 		}
 #pragma endregion bindTextures
 

@@ -5,9 +5,10 @@
 #endif
 
 namespace kengine {
+	template<typename T>
 	struct TextureDataComponent {
 		void * data = nullptr;
-		GLuint * textureID = nullptr;
+		T * textureID = nullptr;
 
 		int width = 0;
 		int height = 0;

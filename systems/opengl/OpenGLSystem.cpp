@@ -419,7 +419,7 @@ namespace kengine {
 #pragma region declarations
 	static void updateWindowProperties();
 	static void createObject(Entity & e, const ModelDataComponent & modelData);
-	static void loadTexture(const TextureDataComponent & textureData);
+	static void loadTexture(const TextureDataComponent<putils::gl::Texture> & textureData);
 	static void doOpenGL();
 #pragma endregion
 	static void execute(float deltaTime) {
@@ -429,9 +429,9 @@ namespace kengine {
 		for (auto &[e, modelData, noOpenGL] : g_em->getEntities<ModelDataComponent, no<OpenGLModelComponent>>())
 			createObject(e, modelData);
 
-		for (auto &[e, textureLoader] : g_em->getEntities<TextureDataComponent>()) {
+		for (auto &[e, textureLoader] : g_em->getEntities<TextureDataComponent<putils::gl::Texture>>()) {
 			loadTexture(textureLoader);
-			e.detach<TextureDataComponent>();
+			e.detach<TextureDataComponent<putils::gl::Texture>>();
 			if (e.componentMask == 0)
 				g_em->removeEntity(e);
 		}
@@ -537,9 +537,9 @@ namespace kengine {
 		}
 	}
 
-	static void loadTexture(const TextureDataComponent & textureData) {
+	static void loadTexture(const TextureDataComponent<putils::gl::Texture> & textureData) {
 		assert(*textureData.textureID == -1);
-		glGenTextures(1, textureData.textureID);
+		glGenTextures(1, &textureData.textureID->get());
 
 		if (textureData.data != nullptr) {
 			GLenum format;
