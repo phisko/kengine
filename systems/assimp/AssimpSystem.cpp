@@ -28,6 +28,7 @@
 
 #include "helpers/assertHelper.hpp"
 #include "helpers/matrixHelper.hpp"
+#include "helpers/resourceHelper.hpp"
 #include "AssImpHelper.hpp"
 
 #include "file_extension.hpp"
@@ -363,11 +364,6 @@ namespace kengine {
 		return meshTextures;
 	}
 
-#pragma region loadMaterialTextures
-#pragma region declarations
-	static Entity::ID loadEmbeddedTexture(const aiTexture * texture);
-	static Entity::ID loadFromDisk(const char * directory, const char * file);
-#pragma endregion
 	static void loadMaterialTextures(std::vector<Entity::ID> & textures, const char * directory, const aiMaterial * mat, aiTextureType type, const aiScene * scene) {
 		for (unsigned int i = 0; i < mat->GetTextureCount(type); ++i) {
 			aiString path;
@@ -376,78 +372,13 @@ namespace kengine {
 
 			Entity::ID modelID = Entity::INVALID_ID;
 			if (const auto texture = scene->GetEmbeddedTexture(cPath))
-				modelID = loadEmbeddedTexture(texture);
+				modelID = resourceHelper::loadTexture(*g_em, texture->pcData, texture->mWidth, texture->mHeight);
 			else
-				modelID = loadFromDisk(directory, cPath);
+				modelID = resourceHelper::loadTexture(*g_em, putils::string<KENGINE_TEXTURE_PATH_MAX_LENGTH>("%s/%s", directory, cPath));
 
 			textures.push_back(modelID);
 		}
 	}
-
-	static Entity::ID loadEmbeddedTexture(const aiTexture * texture) {
-		struct AssimpTextureModelComponent {
-			const aiTexture * texture = nullptr;
-		};
-
-		for (const auto & [e, model] : g_em->getEntities<AssimpTextureModelComponent>())
-			if (model.texture == texture)
-				return e.id;
-
-		Entity::ID modelID;
-
-		*g_em += [&](Entity & e) {
-			static constexpr auto expectedChannels = 4;
-			modelID = e.id;
-
-			e.attach<AssimpTextureModelComponent>().texture = texture;
-			auto & comp = e.attach<TextureModelComponent>();
-			comp.file = "assimp embedded";
-			TextureDataComponent textureLoader; {
-				textureLoader.textureID = &comp.texture.get();
-				if (texture->mHeight == 0) { // Compressed format
-					textureLoader.data = stbi_load_from_memory((unsigned char *)texture->pcData, texture->mWidth, &textureLoader.width, &textureLoader.height, &textureLoader.components, expectedChannels);
-					kengine_assert_with_message(*g_em, textureLoader.data != nullptr, "Error loading data from assimp embedded texture");
-					textureLoader.free = stbi_image_free;
-				}
-				else {
-					textureLoader.data = texture->pcData;
-					textureLoader.width = texture->mWidth;
-					textureLoader.height = texture->mHeight;
-					textureLoader.components = expectedChannels;
-				}
-			} e += textureLoader;
-		};
-
-		return modelID;
-	}
-
-	static Entity::ID loadFromDisk(const char * directory, const char * file) {
-		const putils::string<KENGINE_TEXTURE_PATH_MAX_LENGTH> fullPath("%s/%s", directory, file);
-
-		for (const auto & [e, model] : g_em->getEntities<TextureModelComponent>())
-			if (model.file == fullPath)
-				return e.id;
-
-		Entity::ID modelID;
-
-		*g_em += [&](Entity & e) {
-			modelID = e.id;
-
-			auto & comp = e.attach<TextureModelComponent>();
-			comp.file = fullPath.c_str();
-
-			TextureDataComponent textureLoader; {
-				textureLoader.textureID = &comp.texture.get();
-
-				textureLoader.data = stbi_load(fullPath.c_str(), &textureLoader.width, &textureLoader.height, &textureLoader.components, 0);
-				kengine_assert_with_message(*g_em, textureLoader.data != nullptr, putils::string<1024>("Error loading texture file %s", fullPath.c_str()).c_str());
-				textureLoader.free = stbi_image_free;
-			} e += textureLoader;
-		};
-
-		return modelID;
-	}
-#pragma endregion loadMaterialTextures
 #pragma endregion processMeshTextures
 #pragma endregion processNode
 #pragma endregion loadMeshes
