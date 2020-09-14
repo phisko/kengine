@@ -43,6 +43,7 @@
 #include "shaders/shaderHelper.hpp"
 #include "helpers/cameraHelper.hpp"
 #include "helpers/matrixHelper.hpp"
+#include "helpers/assertHelper.hpp"
 
 #include "shaders/ShadowMap.hpp"
 #include "shaders/ShadowCube.hpp"
@@ -531,7 +532,22 @@ namespace kengine {
 			modelData.registerVertexAttributes();
 
 			openglMesh.nbIndices = meshData.indices.nbElements;
-			openglMesh.indexType = meshData.indexType;
+
+			static const std::unordered_map<putils::meta::type_index, GLenum> types = {
+				{ putils::meta::type<char>::index, GL_BYTE },
+				{ putils::meta::type<unsigned char>::index, GL_UNSIGNED_BYTE },
+				{ putils::meta::type<short>::index, GL_SHORT },
+				{ putils::meta::type<unsigned short>::index, GL_UNSIGNED_SHORT },
+				{ putils::meta::type<int>::index, GL_INT },
+				{ putils::meta::type<unsigned int>::index, GL_UNSIGNED_INT },
+				{ putils::meta::type<float>::index, GL_FLOAT },
+				{ putils::meta::type<double>::index, GL_DOUBLE }
+			};
+			const auto it = types.find(meshData.indexType);
+			if (it == types.end())
+				kengine_assert_failed(*g_em, "Unknown index type");
+			else
+				openglMesh.indexType = it->second;
 
 			openglModel.meshes.push_back(std::move(openglMesh));
 		}

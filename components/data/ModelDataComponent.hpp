@@ -23,7 +23,7 @@ namespace kengine {
 
 			DataInfo vertices;
 			DataInfo indices;
-			int indexType; // GLenum (GL_UNSIGNED_SHORT / GL_UNSIGNED_INT / ...)
+			putils::meta::type_index indexType; // unsigned int, unsigned short...
 		};
 
 		std::vector<Mesh> meshes;

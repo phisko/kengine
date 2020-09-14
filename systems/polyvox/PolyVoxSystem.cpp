@@ -61,7 +61,7 @@ namespace kengine {
 			ModelDataComponent::Mesh meshData;
 			meshData.vertices = { mesh.getNoOfVertices(), sizeof(PolyVoxMeshContainerComponent::MeshType::VertexType), mesh.getRawVertexData() };
 			meshData.indices = { mesh.getNoOfIndices(), sizeof(PolyVoxMeshContainerComponent::MeshType::IndexType), mesh.getRawIndexData() };
-			meshData.indexType = sizeof(PolyVoxMeshContainerComponent::MeshType::IndexType) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
+			meshData.indexType = putils::meta::type<PolyVoxMeshContainerComponent::MeshType::IndexType>::index;
 			modelData.meshes.push_back(meshData);
 
 			modelData.free = FreePolyVoxMeshData(e.id, *g_em);

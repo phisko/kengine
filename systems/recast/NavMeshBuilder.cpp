@@ -320,7 +320,7 @@ namespace kengine::recast {
 
 		int * indices = (int *)meshData.indices.data;
 		bool mustDeleteIndices = false;
-		if (meshData.indexType == GL_UNSIGNED_INT) {
+		if (meshData.indexType == putils::meta::type<unsigned int>::index) {
 			indices = new int[meshData.indices.nbElements];
 			mustDeleteIndices = true;
 			const auto unsignedIndices = (const unsigned int *)meshData.indices.data;

@@ -197,7 +197,7 @@ namespace kengine {
 			ModelDataComponent::Mesh meshData;
 			meshData.vertices = { mesh.vertices.size(), sizeof(AssImpModelComponent::Mesh::Vertex), mesh.vertices.data() };
 			meshData.indices = { mesh.indices.size(), sizeof(mesh.indices[0]), mesh.indices.data() };
-			meshData.indexType = GL_UNSIGNED_INT;
+			meshData.indexType = putils::meta::type<unsigned int>::index;
 			modelData.meshes.push_back(meshData);
 		}
 

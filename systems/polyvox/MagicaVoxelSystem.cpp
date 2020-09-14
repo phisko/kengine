@@ -282,7 +282,7 @@ namespace kengine {
 		auto & meshData = modelData.meshes.back();
 		meshData.vertices = { mesh.getNoOfVertices(), sizeof(putils_typeof(mesh)::VertexType), mesh.getRawVertexData() };
 		meshData.indices = { mesh.getNoOfIndices(), sizeof(putils_typeof(mesh)::IndexType), mesh.getRawIndexData() };
-		meshData.indexType = sizeof(putils_typeof(mesh)::IndexType) == 2 ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
+		meshData.indexType = putils::meta::type<putils_typeof(mesh)::IndexType>::index;
 
 		modelData.free = release(e.id, *g_em);
 		modelData.init<MeshType::VertexType>();
