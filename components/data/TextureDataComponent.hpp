@@ -5,16 +5,35 @@
 #endif
 
 namespace kengine {
-	template<typename T>
 	struct TextureDataComponent {
 		void * data = nullptr;
-		T * textureID = nullptr;
-
 		int width = 0;
 		int height = 0;
 		int components = 0;
 
 		using FreeFunc = void(*)(void * data);
 		FreeFunc free = nullptr;
+
+		TextureDataComponent() = default;
+		TextureDataComponent(const TextureDataComponent &) = delete;
+		TextureDataComponent & operator=(const TextureDataComponent &) = delete;
+		TextureDataComponent(TextureDataComponent && rhs)
+			: data(rhs.data), width(rhs.width), height(rhs.height), components(rhs.components), free(rhs.free)
+		{
+			rhs.free = nullptr;
+		}
+		TextureDataComponent & operator=(TextureDataComponent && rhs) {
+			width = rhs.width;
+			height = rhs.height;
+			components = rhs.components;
+			std::swap(data, rhs.data);
+			std::swap(free, rhs.free);
+			return *this;
+		}
+
+		~TextureDataComponent() {
+			if (free != nullptr)
+				free(data);
+		}
 	};
 }

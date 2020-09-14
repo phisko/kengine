@@ -5,6 +5,7 @@
 #include "data/InstanceComponent.hpp"
 #include "data/ModelComponent.hpp"
 #include "data/TextureModelComponent.hpp"
+#include "data/TextureLoaderComponent.hpp"
 #include "data/TextureDataComponent.hpp"
 #include "data/ShaderComponent.hpp"
 #include "data/GraphicsComponent.hpp"
@@ -58,17 +59,14 @@ namespace kengine {
 			auto & comp = model.attach<TextureModelComponent<putils::gl::Texture>>();
 			comp.file = file;
 
-			TextureDataComponent<putils::gl::Texture> textureLoader; {
-				textureLoader.textureID = &comp.texture;
+			auto & textureData = model.attach<TextureDataComponent>();
+			textureData.data = data;
+			textureData.width = width;
+			textureData.height = height;
+			textureData.components = components;
+			textureData.free = stbi_image_free;
 
-				textureLoader.data = data;
-				textureLoader.width = width;
-				textureLoader.height = height;
-				textureLoader.components = components;
-
-				textureLoader.free = stbi_image_free;
-			}
-			model += textureLoader;
+			model += TextureLoaderComponent<putils::gl::Texture>();
 		};
 	}
 }

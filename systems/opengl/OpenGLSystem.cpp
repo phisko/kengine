@@ -14,7 +14,9 @@
 #include "examples/imgui_impl_opengl3.h"
 
 #include "data/ModelDataComponent.hpp"
+#include "data/TextureModelComponent.hpp"
 #include "data/TextureDataComponent.hpp"
+#include "data/TextureLoaderComponent.hpp"
 #include "data/ModelComponent.hpp"
 #include "data/OpenGLModelComponent.hpp"
 #include "data/ImGuiContextComponent.hpp"
@@ -419,7 +421,7 @@ namespace kengine {
 #pragma region declarations
 	static void updateWindowProperties();
 	static void createObject(Entity & e, const ModelDataComponent & modelData);
-	static void loadTexture(const TextureDataComponent<putils::gl::Texture> & textureData);
+	static void loadTexture(const TextureDataComponent & textureData, TextureModelComponent<putils::gl::Texture> & textureModel);
 	static void doOpenGL();
 #pragma endregion
 	static void execute(float deltaTime) {
@@ -429,11 +431,9 @@ namespace kengine {
 		for (auto &[e, modelData, noOpenGL] : g_em->getEntities<ModelDataComponent, no<OpenGLModelComponent>>())
 			createObject(e, modelData);
 
-		for (auto &[e, textureLoader] : g_em->getEntities<TextureDataComponent<putils::gl::Texture>>()) {
-			loadTexture(textureLoader);
-			e.detach<TextureDataComponent<putils::gl::Texture>>();
-			if (e.componentMask == 0)
-				g_em->removeEntity(e);
+		for (auto & [e, textureData, textureModel, textureLoader] : g_em->getEntities<TextureDataComponent, TextureModelComponent<putils::gl::Texture>, TextureLoaderComponent<putils::gl::Texture>>()) {
+			loadTexture(textureData, textureModel);
+			e.detach<TextureLoaderComponent<putils::gl::Texture>>();
 		}
 
 		doOpenGL();
@@ -537,9 +537,8 @@ namespace kengine {
 		}
 	}
 
-	static void loadTexture(const TextureDataComponent<putils::gl::Texture> & textureData) {
-		assert(*textureData.textureID == -1);
-		glGenTextures(1, &textureData.textureID->get());
+	static void loadTexture(const TextureDataComponent & textureData, TextureModelComponent<putils::gl::Texture> & textureModel) {
+		glGenTextures(1, &textureModel.texture.get());
 
 		if (textureData.data != nullptr) {
 			GLenum format;
@@ -558,7 +557,7 @@ namespace kengine {
 				assert(false);
 			}
 
-			glBindTexture(GL_TEXTURE_2D, *textureData.textureID);
+			glBindTexture(GL_TEXTURE_2D, textureModel.texture);
 			glTexImage2D(GL_TEXTURE_2D, 0, format, textureData.width, textureData.height, 0, format, GL_UNSIGNED_BYTE, textureData.data);
 			glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -566,9 +565,6 @@ namespace kengine {
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-			if (textureData.free != nullptr)
-				textureData.free(textureData.data);
 		}
 	}
 

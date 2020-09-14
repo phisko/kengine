@@ -4,7 +4,6 @@
 # define KENGINE_TEXTURE_MODEL_COMPONENT_PATH_MAX_LENGTH 128
 #endif
 
-#include "opengl/RAII.hpp"
 #include "reflection.hpp"
 #include "string.hpp"
 
