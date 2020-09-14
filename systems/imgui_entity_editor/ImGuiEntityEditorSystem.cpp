@@ -32,7 +32,7 @@ namespace kengine {
 
 					ImGui::SetNextWindowSize({ 200.f * scale, 200.f * scale}, ImGuiCond_FirstUseEver);
 
-					const auto beginWindow = [&] {
+					const auto beginWindow = [&selected, &open] {
 						if (selected.has<NameComponent>())
 							return ImGui::Begin(putils::string<64>("%s##[%d]", selected.get<NameComponent>().name.c_str(), selected.id), &open, ImGuiWindowFlags_NoSavedSettings);
 						else

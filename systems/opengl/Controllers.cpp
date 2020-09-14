@@ -45,13 +45,13 @@ namespace kengine::opengl {
 	}
 
 	EntityCreatorFunctor<64> GBufferDebugger(EntityManager & em, const functions::GBufferAttributeIterator & iterator) {
-		return [&](Entity & e) {
-			e += NameComponent{ "GBuffer viewer" };
+		return [&](Entity & debugger) {
+			debugger += NameComponent{ "GBuffer viewer" };
 
-			auto & tool = e.attach<ImGuiToolComponent>();
+			auto & tool = debugger.attach<ImGuiToolComponent>();
 			tool.enabled = false;
 
-			e += functions::Execute{[&](float deltaTime) {
+			debugger += functions::Execute{[&](float deltaTime) {
 				if (!tool.enabled)
 					return;
 
@@ -63,7 +63,7 @@ namespace kengine::opengl {
 								enabled = new bool[gbuffer.getTextureCount()];
 
 							int i = 0;
-							iterator([&](const char * name) {
+							iterator([&i, &e, &gbuffer](const char * name) {
 								ImGui::Checkbox(name, &enabled[i]);
 								if (!enabled[i]) {
 									++i;
