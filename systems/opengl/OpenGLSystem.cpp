@@ -512,28 +512,28 @@ namespace kengine {
 	}
 
 	static void createObject(Entity & e, const ModelDataComponent & modelData) {
-		auto & modelInfo = e.attach<OpenGLModelComponent>();
-		modelInfo.registerVertexAttributes = modelData.registerVertexAttributes;
+		auto & openglModel = e.attach<OpenGLModelComponent>();
+		openglModel.registerVertexAttributes = modelData.registerVertexAttributes;
 
 		for (const auto & meshData : modelData.meshes) {
-			OpenGLModelComponent::Mesh meshInfo;
-			meshInfo.vertexArrayObject.generate();
-			glBindVertexArray(meshInfo.vertexArrayObject);
+			OpenGLModelComponent::Mesh openglMesh;
+			openglMesh.vertexArrayObject.generate();
+			glBindVertexArray(openglMesh.vertexArrayObject);
 
-			meshInfo.vertexBuffer.generate();
-			glBindBuffer(GL_ARRAY_BUFFER, meshInfo.vertexBuffer);
+			openglMesh.vertexBuffer.generate();
+			glBindBuffer(GL_ARRAY_BUFFER, openglMesh.vertexBuffer);
 			glBufferData(GL_ARRAY_BUFFER, meshData.vertices.nbElements * meshData.vertices.elementSize, meshData.vertices.data, GL_STATIC_DRAW);
 
-			meshInfo.indexBuffer.generate();
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, meshInfo.indexBuffer);
+			openglMesh.indexBuffer.generate();
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, openglMesh.indexBuffer);
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, meshData.indices.nbElements * meshData.indices.elementSize, meshData.indices.data, GL_STATIC_DRAW);
 
 			modelData.registerVertexAttributes();
 
-			meshInfo.nbIndices = meshData.indices.nbElements;
-			meshInfo.indexType = meshData.indexType;
+			openglMesh.nbIndices = meshData.indices.nbElements;
+			openglMesh.indexType = meshData.indexType;
 
-			modelInfo.meshes.push_back(std::move(meshInfo));
+			openglModel.meshes.push_back(std::move(openglMesh));
 		}
 	}
 
