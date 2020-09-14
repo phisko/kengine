@@ -211,19 +211,19 @@ namespace kengine::recast {
 
 #pragma region getVertices
 	// declarations
-	const std::ptrdiff_t getVertexPositionOffset(const ModelDataComponent & modelData);
+	std::optional<std::ptrdiff_t> getVertexPositionOffset(const ModelDataComponent & modelData);
 	const float * getVertexPosition(const void * vertices, size_t index, size_t vertexSize, std::ptrdiff_t positionOffset);
 	//
 	std::unique_ptr<float[]> getVertices(const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData) {
 		const auto vertexSize = modelData.getVertexSize();
 		const auto positionOffset = getVertexPositionOffset(modelData);
-		if (positionOffset == -1)
+		if (positionOffset == std::nullopt)
 			return nullptr;
 
 		auto vertices = std::unique_ptr<float[]>(new float[meshData.vertices.nbElements * 3]);
 
 		for (size_t vertex = 0; vertex < meshData.vertices.nbElements; ++vertex) {
-			const auto pos = getVertexPosition(meshData.vertices.data, vertex, vertexSize, positionOffset);
+			const auto pos = getVertexPosition(meshData.vertices.data, vertex, vertexSize, *positionOffset);
 			for (size_t i = 0; i < 3; ++i)
 				vertices[vertex * 3 + i] = pos[i];
 		}
@@ -231,17 +231,17 @@ namespace kengine::recast {
 		return vertices;
 	}
 
-	const std::ptrdiff_t getVertexPositionOffset(const ModelDataComponent & modelData) {
+	std::optional<std::ptrdiff_t> getVertexPositionOffset(const ModelDataComponent & modelData) {
 		static const char * potentialNames[] = { "pos", "position" };
 
 		for (const auto name : potentialNames) {
 			const auto offset = modelData.getVertexAttributeOffset(name);
-			if (offset >= 0)
+			if (offset != std::nullopt)
 				return offset;
 		}
 
 		kengine_assert_failed(*g_em, "[Recast] Could not find vertex position");
-		return -1;
+		return std::nullopt;
 	}
 
 	const float * getVertexPosition(const void * vertices, size_t index, size_t vertexSize, std::ptrdiff_t positionOffset) {

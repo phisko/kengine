@@ -42,7 +42,7 @@ namespace kengine {
 		using VertexSizeFunc = size_t();
 		VertexSizeFunc * getVertexSize = nullptr;
 
-		using AttributeOffsetFunc = std::ptrdiff_t(const char * attributeName);
+		using AttributeOffsetFunc = std::optional<std::ptrdiff_t>(const char * attributeName);
 		AttributeOffsetFunc * getVertexAttributeOffset = nullptr;
 
 		template<typename VertexType>
@@ -79,9 +79,9 @@ namespace kengine {
 						attribute = &member;
 					});
 
-				std::ptrdiff_t ret = (const char *)attribute - (const char *)vertex;
-				if (ret >= sizeof(VertexType))
-					ret = -1;
+				std::optional<std::ptrdiff_t> ret = (const char *)attribute - (const char *)vertex;
+				if (*ret >= sizeof(VertexType))
+					return decltype(ret)(std::nullopt);
 				return ret;
 			};
 		}
