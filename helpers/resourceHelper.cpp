@@ -4,8 +4,6 @@
 
 #include "data/ModelComponent.hpp"
 #include "data/TextureDataComponent.hpp"
-#include "data/TextureLoaderComponent.hpp"
-#include "data/TextureModelComponent.hpp"
 
 #ifdef KENGINE_OPENGL
 #include "opengl/RAII.hpp"
@@ -18,26 +16,6 @@
 #include "stb_image.h"
 
 namespace kengine::resourceHelper {
-	static void attachComponents(Entity & e, const char * file) {
-		const auto f = [&](const auto type) {
-			using T = putils_wrapped_type(type);
-			if constexpr (!std::is_same_v<T, void>) {
-				e.attach<TextureModelComponent<T>>().file = file;
-				e += TextureLoaderComponent<T>{};
-			}
-		};
-
-		putils::for_each_type<
-			void
-#ifdef KENGINE_OPENGL
-			, putils::gl::Texture
-#endif
-#ifdef KENGINE_VULKAN
-			, putils::vulkan::Texture
-#endif
-		>(f);
-	}
-
 	Entity::ID loadTexture(EntityManager & em, const char * file) {
 		const std::filesystem::path path = file;
 
@@ -53,15 +31,12 @@ namespace kengine::resourceHelper {
 		em += [&](Entity & e) {
 			modelID = e.id;
 
+			e.attach<ModelComponent>().file = file;
+
 			auto & textureData = e.attach<TextureDataComponent>();
 			textureData.data = stbi_load(file, &textureData.width, &textureData.height, &textureData.components, 0);
 			kengine_assert_with_message(em, textureData.data != nullptr, putils::string<1024>("Error loading texture file [%s]", file).c_str());
-			textureData.free = [](void * data) {
-				std::cout << "Wtf\n";
-				stbi_image_free(data);
-			};
-
-			attachComponents(e, file);
+			textureData.free = stbi_image_free;
 		};
 
 		return modelID;
@@ -99,8 +74,6 @@ namespace kengine::resourceHelper {
 				textureData.height = (int)height;
 				textureData.components = expectedChannels;
 			}
-
-			attachComponents(e, "loaded from memory");
 		};
 
 		return modelID;

@@ -21,7 +21,7 @@
 #include "data/ShaderComponent.hpp"
 #include "data/SkeletonComponent.hpp"
 #include "data/TextureDataComponent.hpp"
-#include "data/TextureModelComponent.hpp"
+#include "data/SystemSpecificTextureComponent.hpp"
 
 #include "functions/Execute.hpp"
 #include "functions/OnEntityCreated.hpp"

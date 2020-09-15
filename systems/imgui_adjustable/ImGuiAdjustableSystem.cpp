@@ -281,10 +281,11 @@ namespace kengine {
 	static void initAdjustable(AdjustableComponent & comp);
 #pragma endregion
 	static void onEntityCreated(Entity & e) {
-		if (!e.has<AdjustableComponent>())
+		const auto adjustable = e.tryGet<AdjustableComponent>();
+		if (!adjustable)
 			return;
 
-		initAdjustable(e.get<AdjustableComponent>());
+		initAdjustable(*adjustable);
 	}
 
 #pragma region initAdjustable

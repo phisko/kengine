@@ -19,12 +19,6 @@ else()
 endif()
 
 add_library(${name} STATIC ${src})
-target_compile_definitions(${name} PUBLIC IMGUI_IMPL_OPENGL_LOADER_GLEW)
-
-set(BUILD_UTILS FALSE)
-set(GLEW_PATH libs/glew)
-add_subdirectory(${GLEW_PATH}/build/cmake)
-target_include_directories(${name} PUBLIC ${GLEW_PATH}/include)
 
 putils_conan(
 	freetype/2.10.0@bincrafters/stable
@@ -32,4 +26,4 @@ putils_conan(
 	glm/0.9.9.5@g-truc/stable
 	OPTIONS glfw:shared=True
 )
-target_link_libraries(${name} kengine glew CONAN_PKG::glfw CONAN_PKG::freetype CONAN_PKG::glm)
+target_link_libraries(${name} kengine CONAN_PKG::glfw CONAN_PKG::freetype CONAN_PKG::glm)

@@ -39,10 +39,10 @@ namespace kengine {
 	}
 
 	static void onEntityRemoved(Entity & e) {
-		if (e.has<RecastAgentComponent>()) {
-			const auto & agent = e.get<RecastAgentComponent>();
-			auto environment = g_em->getEntity(agent.crowd);
-			environment.get<RecastCrowdComponent>().crowd->removeAgent(agent.index);
+		const auto agent = e.tryGet<RecastAgentComponent>();
+		if (agent) {
+			auto environment = g_em->getEntity(agent->crowd);
+			environment.get<RecastCrowdComponent>().crowd->removeAgent(agent->index);
 		}
 
 		// It doesn't cost us anything to have floating RecastAgentComponents, so we don't remove them when the RecastCrowdComponent is removed

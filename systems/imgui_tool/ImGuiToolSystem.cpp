@@ -90,12 +90,15 @@ namespace kengine {
 	}
 
 	static void onEntityCreated(Entity & e) {
-		if (!e.has<ImGuiToolComponent>() || !e.has<NameComponent>())
+		const auto name = e.tryGet<NameComponent>();
+		if (!name)
 			return;
 
-		const auto & name = e.get<NameComponent>();
-		auto & tool = e.get<ImGuiToolComponent>();
-		tool.enabled = g_confFile.getValue(name.name);
+		const auto tool = e.tryGet<ImGuiToolComponent>();
+		if (!tool)
+			return;
+
+		tool->enabled = g_confFile.getValue(name->name);
 	}
 
 	static void saveTools(EntityManager & em) {

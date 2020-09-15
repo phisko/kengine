@@ -2,14 +2,12 @@
 #include <vector>
 
 #include "shaderHelper.hpp"
+#include "opengl/Mesh.hpp"
 
 namespace kengine::shaderHelper {
-	void drawModel(const OpenGLModelComponent & openGL) {
-		for (const auto & meshInfo : openGL.meshes) {
-			glBindVertexArray(meshInfo.vertexArrayObject);
-			glBindBuffer(GL_ARRAY_BUFFER, meshInfo.vertexBuffer);
-			glDrawElements(GL_TRIANGLES, (GLsizei)meshInfo.nbIndices, meshInfo.indexType, nullptr);
-		}
+	void drawModel(const SystemSpecificModelComponent<putils::gl::Mesh> & openGL) {
+		for (const auto & mesh : openGL.meshes)
+			putils::gl::draw(mesh);
 	}
 
 	namespace shapes {

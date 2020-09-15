@@ -29,11 +29,12 @@ namespace kengine::Shaders {
 				continue;
 
 			const auto & model = _em.getEntity(instance.model);
-			if (!model.has<OpenGLModelComponent>())
+			const auto openGL = model.tryGet<SystemSpecificModelComponent<putils::gl::Mesh>>();
+			if (!openGL)
 				continue;
 
 			_model = matrixHelper::getModelMatrix(model.get<ModelComponent>(), transform);
-			shaderHelper::drawModel(model.get<OpenGLModelComponent>());
+			shaderHelper::drawModel(*openGL);
 		}
 	}
 }

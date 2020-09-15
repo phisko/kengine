@@ -2,11 +2,12 @@
 #include "EntityManager.hpp"
 
 #include "data/ModelComponent.hpp"
-#include "data/TextureModelComponent.hpp"
-#include "data/OpenGLModelComponent.hpp"
+#include "data/SystemSpecificTextureComponent.hpp"
+#include "data/SystemSpecificModelComponent.hpp"
 #include "helpers/matrixHelper.hpp"
 
 #include "opengl/Program.hpp"
+#include "opengl/Mesh.hpp"
 
 namespace kengine {
 	namespace AssImpHelper {
@@ -17,7 +18,9 @@ namespace kengine {
 #pragma endregion
 		void drawModel(EntityManager & em, const InstanceComponent & instance, const TransformComponent & transform, const SkeletonComponent & skeleton, bool useTextures, const Uniforms & uniforms) {
 			const auto model = em.getEntity(instance.model);
-			if (!model.has<OpenGLModelComponent>())
+
+			const auto openGL = model.tryGet<SystemSpecificModelComponent<putils::gl::Mesh>>();
+			if (!openGL)
 				return;
 
 			uniforms.model = matrixHelper::getModelMatrix(model.get<ModelComponent>(), transform);
@@ -26,20 +29,16 @@ namespace kengine {
 			if (noSkeleton)
 				uploadDefaultBones(skeleton, uniforms);
 
-			const auto & openGL = model.get<OpenGLModelComponent>();
 			const auto & textures = model.get<AssImpTexturesModelComponent>();
 
-			for (unsigned int i = 0; i < openGL.meshes.size(); ++i) {
+			for (unsigned int i = 0; i < openGL->meshes.size(); ++i) {
 				if (!noSkeleton)
 					glUniformMatrix4fv(uniforms.bones, KENGINE_SKELETON_MAX_BONES, GL_FALSE, glm::value_ptr(skeleton.meshes[i].boneMatsBoneSpace[0]));
 
 				if (useTextures)
 					bindTextures(em, i, textures, uniforms);
 
-				const auto & meshInfo = openGL.meshes[i];
-				glBindVertexArray(meshInfo.vertexArrayObject);
-				glBindBuffer(GL_ARRAY_BUFFER, meshInfo.vertexBuffer);
-				glDrawElements(GL_TRIANGLES, (GLsizei)meshInfo.nbIndices, meshInfo.indexType, nullptr);
+				putils::gl::draw(openGL->meshes[i]);
 			}
 		}
 
@@ -83,8 +82,10 @@ namespace kengine {
 
 		static void bindTexture(EntityManager & em, size_t texture, Entity::ID modelID) {
 			glActiveTexture((GLenum)(GL_TEXTURE0 + texture));
-			const auto & modelEntity = em.getEntity(modelID);
-			glBindTexture(GL_TEXTURE_2D, modelEntity.get<TextureModelComponent<putils::gl::Texture>>().texture);
+			const auto modelEntity = em.getEntity(modelID);
+			const auto openGL = modelEntity.tryGet<SystemSpecificTextureComponent<putils::gl::Texture>>();
+			if (openGL)
+				glBindTexture(GL_TEXTURE_2D, openGL->texture);
 		}
 #pragma endregion bindTextures
 

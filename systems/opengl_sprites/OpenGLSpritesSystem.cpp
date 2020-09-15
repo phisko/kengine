@@ -4,8 +4,6 @@
 #include "SpritesShader.hpp"
 #include "data/InstanceComponent.hpp"
 #include "data/ModelComponent.hpp"
-#include "data/TextureModelComponent.hpp"
-#include "data/TextureLoaderComponent.hpp"
 #include "data/TextureDataComponent.hpp"
 #include "data/ShaderComponent.hpp"
 #include "data/GraphicsComponent.hpp"
@@ -42,7 +40,7 @@ namespace kengine {
 
 		const auto & file = e.get<GraphicsComponent>().appearance;
 
-		for (const auto &[model, comp] : g_em->getEntities<TextureModelComponent<putils::gl::Texture>>())
+		for (const auto &[model, comp] : g_em->getEntities<ModelComponent>())
 			if (comp.file == file) {
 				e += InstanceComponent{ model.id };
 				return;
@@ -56,17 +54,13 @@ namespace kengine {
 		*g_em += [&](Entity & model) {
 			e += InstanceComponent{ model.id };
 
-			auto & comp = model.attach<TextureModelComponent<putils::gl::Texture>>();
-			comp.file = file;
-
-			auto & textureData = model.attach<TextureDataComponent>();
+			TextureDataComponent textureData;
 			textureData.data = data;
 			textureData.width = width;
 			textureData.height = height;
 			textureData.components = components;
 			textureData.free = stbi_image_free;
-
-			model += TextureLoaderComponent<putils::gl::Texture>();
+			model += std::move(textureData);
 		};
 	}
 }

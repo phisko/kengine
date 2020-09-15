@@ -45,8 +45,9 @@ namespace kengine::Shaders {
 			const auto & centre = transform.boundingBox.position;
 
 			if (light.castShadows) {
-				if (e.has<DepthCubeComponent>()) {
-					shaderHelper::BindFramebuffer b(e.get<DepthCubeComponent>().fbo);
+				const auto depthCube = e.tryGet<DepthCubeComponent>();
+				if (depthCube) {
+					shaderHelper::BindFramebuffer b(depthCube->fbo);
 					glClear(GL_DEPTH_BUFFER_BIT);
 				}
 

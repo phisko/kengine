@@ -1,4 +1,4 @@
-# [OpenGLModelComponent](OpenGLModelComponent.hpp)
+# [SystemSpecificModelComponent](SystemSpecificModelComponent.hpp)
 
 `Component` that holds OpenGL-specific data regarding a ["model" Entity](ModelComponent.md).
 

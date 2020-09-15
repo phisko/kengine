@@ -18,14 +18,16 @@ namespace kengine {
 	namespace detail {
 		template<typename Comp>
 		static void displayComponent(const Entity & e) {
-			if (e.has<Comp>())
-				putils::reflection::imguiDisplay(e.get<Comp>());
+			const auto comp = e.tryGet<Comp>();
+			if (comp)
+				putils::reflection::imguiDisplay(*comp);
 		}
 
 		template<typename Comp>
 		static void editComponent(Entity & e) {
-			if (e.has<Comp>())
-				putils::reflection::imguiEdit(e.get<Comp>());
+			const auto comp = e.tryGet<Comp>();
+			if (comp)
+				putils::reflection::imguiEdit(*comp);
 		}
 	}
 

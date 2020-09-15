@@ -57,7 +57,7 @@ namespace kengine::recast {
 	};
 	static ObjectInfo getObjectInfo(const EnvironmentInfo & environment, const TransformComponent & transform, const PathfindingComponent & pathfinding);
 
-	static void attachCrowdComponent(Entity & e);
+	static RecastCrowdComponent & attachCrowdComponent(Entity & e);
 	static void attachAgentComponent(Entity & e, const ObjectInfo & objectInfo, const RecastCrowdComponent & crowd, Entity::ID crowdId);
 #pragma endregion
 	static void createNewAgents() {
@@ -67,13 +67,12 @@ namespace kengine::recast {
 
 			auto environment = g_em->getEntity(pathfinding.environment);
 
-			if (!environment.has<RecastCrowdComponent>())
-				attachCrowdComponent(environment);
-
-			auto & crowd = environment.get<RecastCrowdComponent>();
+			auto crowd = environment.tryGet<RecastCrowdComponent>();
+			if (!crowd)
+				crowd = &attachCrowdComponent(environment);
 
 			const auto objectInfo = getObjectInfo(getEnvironmentInfo(environment), transform, pathfinding);
-			attachAgentComponent(e, objectInfo, crowd, environment.id);
+			attachAgentComponent(e, objectInfo, *crowd, environment.id);
 		}
 	}
 
@@ -99,12 +98,14 @@ namespace kengine::recast {
 		return ret;
 	}
 
-	static void attachCrowdComponent(Entity & e) {
+	static RecastCrowdComponent & attachCrowdComponent(Entity & e) {
 		auto & crowd = e.attach<RecastCrowdComponent>();
 		crowd.crowd.reset(dtAllocCrowd());
 
 		const auto & navMesh = instanceHelper::getModel<RecastNavMeshComponent>(*g_em, e);
 		crowd.crowd->init(KENGINE_RECAST_MAX_AGENTS, navMesh.navMesh->getParams()->tileWidth, navMesh.navMesh.get());
+
+		return crowd;
 	}
 
 #pragma region attachAgentComponent
@@ -152,12 +153,12 @@ namespace kengine::recast {
 			oldCrowd.crowd->removeAgent(agent.index);
 
 			auto newEnvironment = g_em->getEntity(pathfinding.environment);
-			if (!newEnvironment.has<RecastCrowdComponent>())
-				attachCrowdComponent(newEnvironment);
-			auto & newCrowd = newEnvironment.get<RecastCrowdComponent>();
+			auto newCrowd = newEnvironment.tryGet<RecastCrowdComponent>();
+			if (!newCrowd)
+				newCrowd = &attachCrowdComponent(newEnvironment);
 			
 			const auto objectInfo = getObjectInfo(getEnvironmentInfo(newEnvironment), e.get<TransformComponent>(), pathfinding);
-			attachAgentComponent(e, objectInfo, newCrowd, newEnvironment.id);
+			attachAgentComponent(e, objectInfo, *newCrowd, newEnvironment.id);
 		}
 	}
 

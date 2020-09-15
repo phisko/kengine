@@ -42,6 +42,20 @@ namespace kengine {
 			return componentMask.test(getId<T>());
 		}
 
+		template<typename T>
+		T * tryGet() {
+			if (has<T>())
+				return &get<T>();
+			return nullptr;
+		}
+
+		template<typename T>
+		const T * tryGet() const {
+			if (has<T>())
+				return &get<T>();
+			return nullptr;
+		}
+
 		ID id;
 		Mask componentMask = 0;
 

@@ -1,4 +1,4 @@
-# [TextureModelComponent](TextureModelComponent.hpp)
+# [SystemSpecificTextureComponent](SystemSpecificTextureComponent.hpp)
 
 `Component` that marks an `Entity` as a ["model" Entity](ModelComponent.md) for an OpenGL texture. This is used internally by the [OpenGLSystem](../../systems/opengl/OpenGLSystem.md) and its shaders.
 

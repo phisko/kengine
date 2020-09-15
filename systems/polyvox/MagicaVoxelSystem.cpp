@@ -185,9 +185,9 @@ namespace kengine {
 	static ModelDataComponent::FreeFunc release(Entity::ID id, EntityManager & em) {
 		return [&em, id] {
 			auto & e = em.getEntity(id);
-			if (e.has<MagicaVoxelModelComponent>()) {
-				auto & model = e.get<MagicaVoxelModelComponent>();
-				model.mesh.clear();
+			const auto model = e.tryGet<MagicaVoxelModelComponent>();
+			if (model) {
+				model->mesh.clear();
 				e.detach<MagicaVoxelModelComponent>();
 			}
 			else { // Was unserialized and we (violently) `new`-ed the data buffers

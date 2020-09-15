@@ -55,22 +55,22 @@ namespace kengine::Shaders {
 
 
 	void ShadowMapShader::run(Entity & e, DirLightComponent & light, const Parameters & params) {
-		if (!e.has<CSMComponent>())
-			 e.attach<CSMComponent>();
+		auto depthMap = e.tryGet<CSMComponent>();
+		if (!depthMap)
+			depthMap = &e.attach<CSMComponent>();
 
-		auto & depthMap = e.get<CSMComponent>();
-		if (depthMap.size != light.shadowMapSize) {
-			depthMap.size = light.shadowMapSize;
-			createCSM(depthMap);
+		if (depthMap->size != light.shadowMapSize) {
+			depthMap->size = light.shadowMapSize;
+			createCSM(*depthMap);
 		}
 
-		runImpl(depthMap, [&] {
+		runImpl(*depthMap, [&] {
 			for (size_t i = 0; i < light.cascadeEnds.size(); ++i) {
 				const float cascadeStart = (i == 0 ? params.nearPlane : lightHelper::getCSMCascadeEnd(light, i - 1));
 				const float cascadeEnd = lightHelper::getCSMCascadeEnd(light, i);
 				if (cascadeStart >= cascadeEnd)
 					continue;
-				drawToTexture(depthMap.textures[i], lightHelper::getCSMLightSpaceMatrix(light, params, i), params);
+				drawToTexture(depthMap->textures[i], lightHelper::getCSMLightSpaceMatrix(light, params, i), params);
 			}
 		}, params);
 	}
@@ -90,51 +90,51 @@ namespace kengine::Shaders {
 	}
 
 	void ShadowMapShader::run(Entity & e, SpotLightComponent & light, const putils::Point3f & pos, const Parameters & params) {
-		if (!e.has<DepthMapComponent>())
-			e.attach<DepthMapComponent>();
+		auto depthMap = e.tryGet<DepthMapComponent>();
+		if (!depthMap)
+			depthMap = &e.attach<DepthMapComponent>();
 
-		auto & depthMap = e.get<DepthMapComponent>();
-		if (depthMap.size != light.shadowMapSize) {
-			depthMap.size = light.shadowMapSize;
-			createShadowMap(depthMap);
+		if (depthMap->size != light.shadowMapSize) {
+			depthMap->size = light.shadowMapSize;
+			createShadowMap(*depthMap);
 		}
 
-		runImpl(depthMap, [&] {
-			drawToTexture(depthMap.texture, lightHelper::getLightSpaceMatrix(light, shaderHelper::toVec(pos), params), params);
+		runImpl(*depthMap, [&] {
+			drawToTexture(depthMap->texture, lightHelper::getLightSpaceMatrix(light, shaderHelper::toVec(pos), params), params);
 		}, params);
 	}
 
 	void ShadowCubeShader::run(Entity & e, PointLightComponent & light, const putils::Point3f & pos, float radius, const Parameters & params) {
-		if (!e.has<DepthCubeComponent>())
-			e.attach<DepthCubeComponent>();
+		auto depthCube = e.tryGet<DepthCubeComponent>();
+		if (!depthCube)
+			depthCube = &e.attach<DepthCubeComponent>();
 
-		auto & depthCube = e.get<DepthCubeComponent>();
-		if (depthCube.size != light.shadowMapSize) {
-			depthCube.size = light.shadowMapSize;
+		if (depthCube->size != light.shadowMapSize) {
+			depthCube->size = light.shadowMapSize;
 
-			depthCube.fbo.generate();
-			shaderHelper::BindFramebuffer __f(depthCube.fbo);
+			depthCube->fbo.generate();
+			shaderHelper::BindFramebuffer __f(depthCube->fbo);
 
-			depthCube.texture.generate();
+			depthCube->texture.generate();
 
-			glBindTexture(GL_TEXTURE_CUBE_MAP, depthCube.texture);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, depthCube->texture);
 			for (size_t i = 0; i < 6; ++i)
-				glTexImage2D((GLenum)(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i), 0, GL_DEPTH_COMPONENT, depthCube.size, depthCube.size, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+				glTexImage2D((GLenum)(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i), 0, GL_DEPTH_COMPONENT, depthCube->size, depthCube->size, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-			glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCube.texture, 0);
+			glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCube->texture, 0);
 			glDrawBuffer(GL_NONE);
 			glReadBuffer(GL_NONE);
 		}
 
-		glViewport(0, 0, depthCube.size, depthCube.size);
+		glViewport(0, 0, depthCube->size, depthCube->size);
 		glCullFace(GL_FRONT);
 
-		shaderHelper::BindFramebuffer __f(depthCube.fbo);
+		shaderHelper::BindFramebuffer __f(depthCube->fbo);
 		shaderHelper::Enable __e(GL_DEPTH_TEST);
 
 		use();

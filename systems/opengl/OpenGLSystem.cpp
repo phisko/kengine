@@ -8,17 +8,17 @@
 
 #include "opengl/Program.hpp"
 #include "opengl/RAII.hpp"
+#include "opengl/Mesh.hpp"
 
 #include "imgui.h"
 #include "examples/imgui_impl_glfw.h"
 #include "examples/imgui_impl_opengl3.h"
 
 #include "data/ModelDataComponent.hpp"
-#include "data/TextureModelComponent.hpp"
+#include "data/SystemSpecificTextureComponent.hpp"
 #include "data/TextureDataComponent.hpp"
-#include "data/TextureLoaderComponent.hpp"
 #include "data/ModelComponent.hpp"
-#include "data/OpenGLModelComponent.hpp"
+#include "data/SystemSpecificModelComponent.hpp"
 #include "data/ImGuiContextComponent.hpp"
 #include "data/InputBufferComponent.hpp"
 #include "data/AdjustableComponent.hpp"
@@ -363,17 +363,21 @@ namespace kengine {
 		if (g_gBufferIterator == nullptr)
 			return;
 
-		if (e.has<GBufferShaderComponent>())
-			initShader(*e.get<GBufferShaderComponent>().shader);
+		const auto gbuffer = e.tryGet<GBufferShaderComponent>();
+		if (gbuffer)
+			initShader(*gbuffer->shader);
 
-		if (e.has<LightingShaderComponent>())
-			initShader(*e.get<LightingShaderComponent>().shader);
+		const auto lighting = e.tryGet<LightingShaderComponent>();
+		if (lighting)
+			initShader(*lighting->shader);
 
-		if (e.has<PostLightingShaderComponent>())
-			initShader(*e.get<PostLightingShaderComponent>().shader);
+		const auto postLighting = e.tryGet<PostLightingShaderComponent>();
+		if (postLighting)
+			initShader(*postLighting->shader);
 
-		if (e.has<PostProcessShaderComponent>())
-			initShader(*e.get<PostProcessShaderComponent>().shader);
+		const auto postProcess = e.tryGet<PostProcessShaderComponent>();
+		if (postProcess)
+			initShader(*postProcess->shader);
 	}
 
 	static void initShader(putils::gl::Program & p) {
@@ -388,10 +392,10 @@ namespace kengine {
 #pragma endregion onEntityCreated
 
 	static void onEntityRemoved(Entity & e) {
-		if (e.has<ViewportComponent>()) {
-			auto & viewport = e.get<ViewportComponent>();
-			if (viewport.window == g_window.id) {
-				GLuint texture = (GLuint)viewport.renderTexture;
+		const auto viewport = e.tryGet<ViewportComponent>();
+		if (viewport) {
+			if (viewport->window == g_window.id) {
+				GLuint texture = (GLuint)viewport->renderTexture;
 				glDeleteTextures(1, &texture);
 			}
 		}
@@ -422,20 +426,18 @@ namespace kengine {
 #pragma region declarations
 	static void updateWindowProperties();
 	static void createObject(Entity & e, const ModelDataComponent & modelData);
-	static void loadTexture(const TextureDataComponent & textureData, TextureModelComponent<putils::gl::Texture> & textureModel);
+	static void loadTexture(Entity & e, const TextureDataComponent & textureData);
 	static void doOpenGL();
 #pragma endregion
 	static void execute(float deltaTime) {
 		if (g_window.id == Entity::INVALID_ID)
 			return;
 
-		for (auto &[e, modelData, noOpenGL] : g_em->getEntities<ModelDataComponent, no<OpenGLModelComponent>>())
+		for (auto &[e, modelData, noOpenGL] : g_em->getEntities<ModelDataComponent, no<SystemSpecificModelComponent<putils::gl::Mesh>>>())
 			createObject(e, modelData);
 
-		for (auto & [e, textureData, textureModel, textureLoader] : g_em->getEntities<TextureDataComponent, TextureModelComponent<putils::gl::Texture>, TextureLoaderComponent<putils::gl::Texture>>()) {
-			loadTexture(textureData, textureModel);
-			e.detach<TextureLoaderComponent<putils::gl::Texture>>();
-		}
+		for (auto & [e, textureData, noTextureModel] : g_em->getEntities<TextureDataComponent, no<SystemSpecificTextureComponent<putils::gl::Texture>>>())
+			loadTexture(e, textureData);
 
 		doOpenGL();
 
@@ -513,11 +515,11 @@ namespace kengine {
 	}
 
 	static void createObject(Entity & e, const ModelDataComponent & modelData) {
-		auto & openglModel = e.attach<OpenGLModelComponent>();
+		auto & openglModel = e.attach<SystemSpecificModelComponent<putils::gl::Mesh>>();
 		openglModel.registerVertexAttributes = modelData.registerVertexAttributes;
 
 		for (const auto & meshData : modelData.meshes) {
-			OpenGLModelComponent::Mesh openglMesh;
+			putils::gl::Mesh openglMesh;
 			openglMesh.vertexArrayObject.generate();
 			glBindVertexArray(openglMesh.vertexArrayObject);
 
@@ -553,7 +555,9 @@ namespace kengine {
 		}
 	}
 
-	static void loadTexture(const TextureDataComponent & textureData, TextureModelComponent<putils::gl::Texture> & textureModel) {
+	static void loadTexture(Entity & e, const TextureDataComponent & textureData) {
+		auto & textureModel = e.attach<SystemSpecificTextureComponent<putils::gl::Texture>>();
+
 		glGenTextures(1, &textureModel.texture.get());
 
 		if (textureData.data != nullptr) {
@@ -593,7 +597,7 @@ namespace kengine {
 #pragma region doOpenGL
 #pragma region declarations
 	static void setupParams(const CameraComponent & cam, const ViewportComponent & viewport);
-	static void initFramebuffer(Entity & e);
+	static CameraFramebufferComponent * initFramebuffer(Entity & e);
 	static void fillGBuffer(EntityManager & em, Entity & e, const ViewportComponent & viewport) noexcept;
 	static void renderToTexture(EntityManager & em, const CameraFramebufferComponent & fb) noexcept;
 	static void blitTextureToViewport(const CameraFramebufferComponent & fb, const ViewportComponent & viewport);
@@ -612,19 +616,22 @@ namespace kengine {
 			if (viewport.window == Entity::INVALID_ID)
 				viewport.window = g_window.id;
 			else if (viewport.window != g_window.id)
-				return;
+				continue;
 
 			g_params.viewportID = e.id;
 			setupParams(cam, viewport);
 			fillGBuffer(*g_em, e, viewport);
 
-			if (!e.has<CameraFramebufferComponent>() || e.get<CameraFramebufferComponent>().resolution != viewport.resolution)
-				initFramebuffer(e);
-			auto & fb = e.get<CameraFramebufferComponent>();
+			auto fb = e.tryGet<CameraFramebufferComponent>();
+			if (!fb || fb->resolution != viewport.resolution) {
+				fb = initFramebuffer(e);
+				if (!fb)
+					continue;
+			}
 
-			renderToTexture(*g_em, fb);
+			renderToTexture(*g_em, *fb);
 			if (viewport.boundingBox.size.x > 0 && viewport.boundingBox.size.y > 0)
-				toBlit.push_back(ToBlit{ &fb, &viewport });
+				toBlit.push_back(ToBlit{ fb, &viewport });
 		}
 
 		std::sort(toBlit.begin(), toBlit.end(), [](const ToBlit & lhs, const ToBlit & rhs) {
@@ -646,10 +653,10 @@ namespace kengine {
 		g_params.view = matrixHelper::getViewMatrix(cam, viewport);
 	}
 
-	static void initFramebuffer(Entity & e) {
+	static CameraFramebufferComponent * initFramebuffer(Entity & e) {
 		auto & viewport = e.get<ViewportComponent>();
 		if (viewport.resolution.x == 0 || viewport.resolution.y == 0)
-			return;
+			return nullptr;
 
 		auto & fb = e.attach<CameraFramebufferComponent>();
 		fb.resolution = viewport.resolution;
@@ -676,6 +683,8 @@ namespace kengine {
 		assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
 
 		viewport.renderTexture = (ViewportComponent::RenderTexture)texture;
+
+		return &fb;
 	}
 
 	template<typename Shaders>
@@ -707,21 +716,21 @@ namespace kengine {
 	}
 
 	static void fillGBuffer(EntityManager & em, Entity & e, const ViewportComponent & viewport) noexcept {
-		if (!e.has<GBufferComponent>()) {
-			auto & gbuffer = e.attach<GBufferComponent>();
-			gbuffer.init(viewport.resolution.x, viewport.resolution.y, g_gBufferTextureCount);
+		auto gbuffer = e.tryGet<GBufferComponent>();
+		if (!gbuffer) {
+			gbuffer = &e.attach<GBufferComponent>();
+			gbuffer->init(viewport.resolution.x, viewport.resolution.y, g_gBufferTextureCount);
 		}
-		auto & gbuffer = e.get<GBufferComponent>();
-		if (gbuffer.getSize() != viewport.resolution)
-			gbuffer.resize(viewport.resolution.x, viewport.resolution.y);
+		if (gbuffer->getSize() != viewport.resolution)
+			gbuffer->resize(viewport.resolution.x, viewport.resolution.y);
 
-		gbuffer.bindForWriting();
+		gbuffer->bindForWriting();
 		{
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			shaderHelper::Enable depth(GL_DEPTH_TEST);
 			runShaders(em.getEntities<GBufferShaderComponent>());
 		}
-		gbuffer.bindForReading();
+		gbuffer->bindForReading();
 	}
 
 	static void renderToTexture(EntityManager & em, const CameraFramebufferComponent & fb) noexcept {
@@ -815,18 +824,17 @@ namespace kengine {
 		if (viewportInfo.camera == Entity::INVALID_ID)
 			return ret;
 
-		auto & camera = g_em->getEntity(viewportInfo.camera);
-		if (!camera.has<GBufferComponent>())
+		auto camera = g_em->getEntity(viewportInfo.camera);
+		const auto gBuffer = camera.tryGet<GBufferComponent>();
+		if (!gBuffer)
 			return ret;
-
-		auto & gBuffer = camera.get<GBufferComponent>();
 		
-		const putils::Point2ui gBufferSize = gBuffer.getSize();
+		const putils::Point2ui gBufferSize = gBuffer->getSize();
 		const auto pixelInGBuffer = putils::Point2ui(viewportInfo.viewportPercent * gBufferSize);
 		if (pixelInGBuffer.x >= gBufferSize.x || pixelInGBuffer.y > gBufferSize.y || pixelInGBuffer.y == 0)
 			return ret;
 
-		ret.gBuffer = &gBuffer;
+		ret.gBuffer = gBuffer;
 		ret.indexForPixel = (pixelInGBuffer.x + (gBufferSize.y - pixelInGBuffer.y) * gBufferSize.x) * GBUFFER_TEXTURE_COMPONENTS;
 
 		return ret;
@@ -846,7 +854,7 @@ namespace kengine {
 		for (const auto & [e, shader] : g_em->getEntities<PostProcessShaderComponent>())
 			initShader(*shader.shader);
 
-		for (const auto & [e, modelInfo] : g_em->getEntities<OpenGLModelComponent>())
+		for (const auto & [e, modelInfo] : g_em->getEntities<SystemSpecificModelComponent<putils::gl::Mesh>>())
 			for (const auto & meshInfo : modelInfo.meshes) {
 				glBindBuffer(GL_ARRAY_BUFFER, meshInfo.vertexBuffer);
 				modelInfo.registerVertexAttributes();

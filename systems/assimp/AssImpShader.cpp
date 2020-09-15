@@ -3,7 +3,6 @@
 #include "data/GraphicsComponent.hpp"
 #include "data/TransformComponent.hpp"
 #include "data/ModelComponent.hpp"
-#include "data/OpenGLModelComponent.hpp"
 #include "data/SkeletonComponent.hpp"
 
 #include "helpers/cameraHelper.hpp"

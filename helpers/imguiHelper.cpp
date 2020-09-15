@@ -46,10 +46,12 @@ namespace kengine::imguiHelper {
 			if (!has->call(e))
 				continue;
 			const auto treeNodeOpen = ImGui::TreeNode(name->name + "##edit");
-			if (_.has<meta::DetachFrom>()) {
+
+			const auto detachFrom = _.tryGet<meta::DetachFrom>();
+			if (detachFrom) {
 				if (ImGui::BeginPopupContextItem()) {
 					if (ImGui::MenuItem("Remove"))
-						_.get<meta::DetachFrom>()(e);
+						detachFrom->call(e);
 					ImGui::EndPopup();
 				}
 			}

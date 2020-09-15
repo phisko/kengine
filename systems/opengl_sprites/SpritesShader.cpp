@@ -2,10 +2,9 @@
 
 #include "EntityManager.hpp"
 
-#include "data/TextureModelComponent.hpp"
+#include "data/SystemSpecificTextureComponent.hpp"
 #include "data/TransformComponent.hpp"
 #include "data/GraphicsComponent.hpp"
-#include "data/OpenGLModelComponent.hpp"
 #include "data/SpriteComponent.hpp"
 
 #include "systems/opengl/shaders/ApplyTransparencySrc.hpp"
@@ -132,10 +131,11 @@ namespace kengine {
 		uniforms.color = graphics.color;
 
 		const auto modelEntity = em.getEntity(instance.model);
-		if (!modelEntity.has<TextureModelComponent<putils::gl::Texture>>())
+		const auto texture = modelEntity.tryGet<SystemSpecificTextureComponent<putils::gl::Texture>>();
+		if (!texture)
 			return;
 
-		glBindTexture(GL_TEXTURE_2D, modelEntity.get<TextureModelComponent<putils::gl::Texture>>().texture);
+		glBindTexture(GL_TEXTURE_2D, texture->texture);
 
 		{
 			const auto & box =

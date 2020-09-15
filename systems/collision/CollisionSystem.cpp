@@ -24,12 +24,10 @@ namespace kengine {
 	}
 
 	static void trigger(Entity & first, Entity & second) {
-		if (!first.has<CollisionComponent>())
+		const auto collision = first.tryGet<CollisionComponent>();
+		if (!collision || collision->onCollide == nullptr)
 			return;
-
-		const auto & comp = first.get<CollisionComponent>();
-		if (comp.onCollide != nullptr)
-			comp.onCollide(first, second);
+		collision->onCollide(first, second);
 	}
 #pragma endregion onCollision
 }

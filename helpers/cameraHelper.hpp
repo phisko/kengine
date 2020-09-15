@@ -32,6 +32,7 @@ namespace kengine::cameraHelper {
 	// Impl
 
 	inline bool entityAppearsInViewport(const Entity & e, Entity::ID viewport) {
-		return !e.has<functions::AppearsInViewport>() || e.get<functions::AppearsInViewport>()(viewport);
+		const auto appearsInViewport = e.tryGet<functions::AppearsInViewport>();
+		return !appearsInViewport || appearsInViewport->call(viewport);
 	}
 }

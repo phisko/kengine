@@ -33,8 +33,9 @@ namespace kengine {
 					ImGui::SetNextWindowSize({ 200.f * scale, 200.f * scale}, ImGuiCond_FirstUseEver);
 
 					const auto beginWindow = [&selected, &open] {
-						if (selected.has<NameComponent>())
-							return ImGui::Begin(putils::string<64>("%s##[%d]", selected.get<NameComponent>().name.c_str(), selected.id), &open, ImGuiWindowFlags_NoSavedSettings);
+						const auto name = selected.tryGet<NameComponent>();
+						if (name)
+							return ImGui::Begin(putils::string<64>("%s##[%d]", name->name.c_str(), selected.id), &open, ImGuiWindowFlags_NoSavedSettings);
 						else
 							return ImGui::Begin(putils::string<64>("[%d] Entity editor", selected.id), nullptr, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoTitleBar);
 					};

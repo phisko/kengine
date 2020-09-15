@@ -71,6 +71,12 @@ namespace kengine::scriptLanguageHelper {
 			)
 		);
 
+		registerEntityMember(putils::string<128>("tryGet%s", className),
+			function<const T * (Entity &)>(
+				[](Entity & self) { return self.tryGet<T>(); }
+			)
+		);
+
 		registerEntityMember(putils::string<128>("has%s", className),
 			function<bool(Entity &)>(
 				[](Entity & self) { return self.has<T>(); }

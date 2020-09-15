@@ -68,7 +68,7 @@ The default shaders provided with this system assume you make use of a type with
 
 ### Model construction
 
-[ModelDataComponents](../../components/data/ModelDataComponent.md) are processed to generate meshes and transformed into [OpenGLModelComponent](../../components/data/OpenGLModelComponent.md).
+[ModelDataComponents](../../components/data/ModelDataComponent.md) are processed to generate meshes and transformed into [SystemSpecificModelComponent](../../components/data/SystemSpecificModelComponent.md).
 
 ### Shader initialization and vertex type registration
 

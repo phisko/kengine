@@ -53,9 +53,10 @@ namespace kengine {
 
 	static bool matches(const Entity & e, const char * str, EntityManager & em) {
 		putils::string<1024> displayText("[%d]", e.id);;
-		if (e.has<NameComponent>()) {
+		const auto name = e.tryGet<NameComponent>();
+		if (name) {
 			displayText += " ";
-			displayText += e.get<NameComponent>().name;
+			displayText += name->name;
 		}
 		
 

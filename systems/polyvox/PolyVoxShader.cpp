@@ -7,7 +7,7 @@
 #include "data/PolyVoxComponent.hpp"
 #include "data/GraphicsComponent.hpp"
 #include "data/ModelComponent.hpp"
-#include "data/OpenGLModelComponent.hpp"
+#include "data/SystemSpecificModelComponent.hpp"
 
 #include "helpers/cameraHelper.hpp"
 #include "helpers/matrixHelper.hpp"
@@ -98,14 +98,15 @@ namespace kengine {
 				continue;
 
 			const auto model = _em.getEntity(instance.model);
-			if (!model.has<OpenGLModelComponent>())
+			const auto openGL = model.tryGet<SystemSpecificModelComponent<putils::gl::Mesh>>();
+			if (!openGL)
 				continue;
 
 			_model = matrixHelper::getModelMatrix(model.get<ModelComponent>(), transform);
 			_entityID = (float)e.id;
 			_color = graphics.color;
 
-			shaderHelper::drawModel(model.get<OpenGLModelComponent>());
+			shaderHelper::drawModel(*openGL);
 		}
 	}
 }

@@ -270,12 +270,9 @@ namespace kengine {
 
 		const auto & modelCollider = modelEntity.get<ModelColliderComponent>();
 
-		const SkeletonComponent * skeleton = e.has<SkeletonComponent>() ?
-			&e.get<SkeletonComponent>() : nullptr;
-		const ModelSkeletonComponent * modelSkeleton = modelEntity.has<ModelSkeletonComponent>() ?
-			&modelEntity.get<ModelSkeletonComponent>() : nullptr;
-		const ModelComponent * modelComponent = modelEntity.has<ModelComponent>() ?
-			&modelEntity.get<ModelComponent>() : nullptr;
+		const auto skeleton = e.tryGet<SkeletonComponent>();
+		const auto modelSkeleton = modelEntity.tryGet<ModelSkeletonComponent>();
+		const auto modelComponent = modelEntity.tryGet<ModelComponent>();
 
 		for (const auto & collider : modelCollider.colliders) {
 			const auto size = collider.boundingBox.size * transform.boundingBox.size;
@@ -366,14 +363,14 @@ namespace kengine {
 
 		physics.changed = false;
 
-		if (e.has<SkeletonComponent>() && modelEntity.has<ModelSkeletonComponent>()) {
-			const auto & skeleton = e.get<SkeletonComponent>();
-			const auto & modelSkeleton = modelEntity.get<ModelSkeletonComponent>();
+		const auto skeleton = e.tryGet<SkeletonComponent>();
+		const auto modelSkeleton = modelEntity.tryGet<ModelSkeletonComponent>();
+		if (skeleton && modelSkeleton) {
 			const auto & modelComponent = modelEntity.get<ModelComponent>();
 
 			int i = 0;
 			for (const auto & collider : modelEntity.get<ModelColliderComponent>().colliders) {
-				comp.shape.updateChildTransform(i, toBullet(transform, collider, &skeleton, &modelSkeleton, &modelComponent));
+				comp.shape.updateChildTransform(i, toBullet(transform, collider, skeleton, modelSkeleton, &modelComponent));
 				++i;
 			}
 		}

@@ -6,14 +6,16 @@
 #include <cmath>
 #include <glm/glm.hpp>
 
+#include "opengl/Mesh.hpp"
+
 #include "data/ModelComponent.hpp"
-#include "data/OpenGLModelComponent.hpp"
+#include "data/SystemSpecificModelComponent.hpp"
 #include "data/TransformComponent.hpp"
 
 namespace kengine {
 	namespace shaderHelper {
 		inline glm::vec3 toVec(const putils::Point3f & p);
-		void drawModel(const OpenGLModelComponent & openGL);
+		void drawModel(const SystemSpecificModelComponent<putils::gl::Mesh> & openGL);
 
 		namespace shapes {
 			void drawSphere();

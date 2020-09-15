@@ -61,7 +61,7 @@ namespace kengine::Shaders {
 		_tex = _textureID;
 	}
 
-	static void loadSkyBox(Entity & e, const SkyBoxComponent & comp) {
+	static SkyBoxOpenGLComponent & loadSkyBox(Entity & e, const SkyBoxComponent & comp) {
 		auto & skyBox = e.attach<SkyBoxOpenGLComponent>();
 		skyBox.textureID.generate();
 		glBindTexture(GL_TEXTURE_CUBE_MAP, skyBox.textureID);
@@ -83,6 +83,8 @@ namespace kengine::Shaders {
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+		return skyBox;
 	}
 
 	static void drawSkyBox() {
@@ -173,9 +175,11 @@ namespace kengine::Shaders {
 
 			_color = comp.color;
 
-			if (!e.has<SkyBoxOpenGLComponent>())
-				loadSkyBox(e, comp);
-			glBindTexture(GL_TEXTURE_CUBE_MAP, e.get<SkyBoxOpenGLComponent>().textureID);
+			auto openGL = e.tryGet<SkyBoxOpenGLComponent>();
+			if (!openGL)
+				openGL = &loadSkyBox(e, comp);
+
+			glBindTexture(GL_TEXTURE_CUBE_MAP, openGL->textureID);
 			drawSkyBox();
 		}
 

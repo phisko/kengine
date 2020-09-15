@@ -64,10 +64,10 @@ namespace kengine::Shaders {
 			const putils::Point3f pos = { params.camPos.x, params.camPos.y, params.camPos.z };
 
 			if (light.castShadows) {
-				if (e.has<CSMComponent>()) {
-					const auto & depthMap = e.get<CSMComponent>();
-					shaderHelper::BindFramebuffer b(depthMap.fbo);
-					for (const auto & texture : depthMap.textures) {
+				const auto depthMap = e.tryGet<CSMComponent>();
+				if (depthMap) {
+					shaderHelper::BindFramebuffer b(depthMap->fbo);
+					for (const auto & texture : depthMap->textures) {
 						glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture, 0);
 						glClear(GL_DEPTH_BUFFER_BIT);
 					}

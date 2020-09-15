@@ -17,9 +17,12 @@ namespace kengine {
 					const auto id = getEntity(window, coords);
 					if (id == Entity::INVALID_ID)
 						continue;
-					auto & e = em.getEntity(id);
-					if (e.has<OnClickComponent>())
-						e.get<OnClickComponent>().onClick();
+
+					const auto e = em.getEntity(id);
+
+					const auto onClick = e.tryGet<OnClickComponent>();
+					if (onClick)
+						onClick->onClick();
 				}
 			};
 			e += input;

@@ -45,8 +45,9 @@ namespace kengine::Shaders {
 			setLight(light, centre);
 
 			if (light.castShadows) {
-				if (e.has<DepthMapComponent>()) {
-					shaderHelper::BindFramebuffer b(e.get<DepthMapComponent>().fbo);
+				const auto depthMap = e.tryGet<DepthMapComponent>();
+				if (depthMap) {
+					shaderHelper::BindFramebuffer b(depthMap->fbo);
 					glClear(GL_DEPTH_BUFFER_BIT);
 				}
 

@@ -25,7 +25,7 @@ namespace kengine {
 
 	struct AssImpTexturesModelComponent {
 		struct MeshTextures {
-			std::vector<Entity::ID> diffuse; // id of entities with TextureModelComponent
+			std::vector<Entity::ID> diffuse; // id of entities with SystemSpecificTextureComponent
 			std::vector<Entity::ID> specular;
 
 			putils::NormalizedColor diffuseColor;
