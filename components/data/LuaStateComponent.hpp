@@ -1,6 +1,6 @@
 #pragma once
 
-#include "sol.hpp"
+#include "lua/sol.hpp"
 
 namespace kengine {
 	struct LuaStateComponent {

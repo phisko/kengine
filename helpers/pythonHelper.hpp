@@ -2,7 +2,7 @@
 
 #include "ScriptLanguageHelper.hpp"
 #include "data/PythonStateComponent.hpp"
-#include "python_helper.hpp"
+#include "python/python_helper.hpp"
 
 namespace kengine::pythonHelper {
 	template<typename T>

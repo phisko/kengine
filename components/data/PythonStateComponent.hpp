@@ -1,6 +1,6 @@
 #pragma once
 
-#include "python_helper.hpp"
+#include "python/python_helper.hpp"
 #include "Entity.hpp"
 
 namespace kengine {
