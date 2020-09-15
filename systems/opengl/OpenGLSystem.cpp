@@ -514,9 +514,12 @@ namespace kengine {
 		}
 	}
 
+#pragma region createObject
+#pragma region declarations
+	static void registerVertexAttribute(size_t vertexSize, size_t location, size_t offset, putils::meta::type_index type);
+#pragma endregion
 	static void createObject(Entity & e, const ModelDataComponent & modelData) {
 		auto & openglModel = e.attach<SystemSpecificModelComponent<putils::gl::Mesh>>();
-		openglModel.registerVertexAttributes = modelData.registerVertexAttributes;
 
 		for (const auto & meshData : modelData.meshes) {
 			putils::gl::Mesh openglMesh;
@@ -531,7 +534,9 @@ namespace kengine {
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, openglMesh.indexBuffer);
 			glBufferData(GL_ELEMENT_ARRAY_BUFFER, meshData.indices.nbElements * meshData.indices.elementSize, meshData.indices.data, GL_STATIC_DRAW);
 
-			modelData.registerVertexAttributes();
+			size_t location = 0;
+			for (const auto & attribute : modelData.vertexAttributes)
+				registerVertexAttribute(modelData.vertexSize, location++, attribute.offset, attribute.type);
 
 			openglMesh.nbIndices = meshData.indices.nbElements;
 
@@ -554,6 +559,46 @@ namespace kengine {
 			openglModel.meshes.push_back(std::move(openglMesh));
 		}
 	}
+
+	static void registerVertexAttribute(size_t vertexSize, size_t location, size_t offset, putils::meta::type_index type) {
+		struct VertexType {
+			GLenum type;
+			size_t length;
+		};
+
+#define VERTEX_TYPE(realtype, glenum, length) \
+			{ putils::meta::type<realtype[length]>::index, { glenum, length }}
+
+#define VERTEX_TYPE_FAMILY(realtype, glenum) \
+			{ putils::meta::type<realtype>::index, { glenum, 1 } }, \
+			VERTEX_TYPE(realtype, glenum, 1), \
+			VERTEX_TYPE(realtype, glenum, 2), \
+			VERTEX_TYPE(realtype, glenum, 3), \
+			VERTEX_TYPE(realtype, glenum, 4)
+
+		static const std::unordered_map<putils::meta::type_index, VertexType> types = {
+			VERTEX_TYPE_FAMILY(char, GL_BYTE),
+			VERTEX_TYPE_FAMILY(unsigned char, GL_UNSIGNED_BYTE),
+			VERTEX_TYPE_FAMILY(short, GL_SHORT),
+			VERTEX_TYPE_FAMILY(unsigned short, GL_UNSIGNED_SHORT),
+			VERTEX_TYPE_FAMILY(float, GL_FLOAT),
+			VERTEX_TYPE_FAMILY(int, GL_INT),
+			VERTEX_TYPE_FAMILY(unsigned int, GL_UNSIGNED_INT)
+		};
+
+		const auto it = types.find(type);
+		if (it == types.end()) {
+			kengine_assert_failed(*g_em, "Unknown vertex attribute type");
+			return;
+		}
+
+		glEnableVertexAttribArray((GLuint)location);
+		if (it->second.type == GL_FLOAT)
+			glVertexAttribPointer((GLuint)location, (GLint)it->second.length, it->second.type, GL_FALSE, (GLsizei)vertexSize, (void *)offset);
+		else
+			glVertexAttribIPointer((GLuint)location, (GLint)it->second.length, it->second.type, (GLsizei)vertexSize, (void *)offset);
+	}
+#pragma endregion createObject
 
 	static void loadTexture(Entity & e, const TextureDataComponent & textureData) {
 		auto & textureModel = e.attach<SystemSpecificTextureComponent<putils::gl::Texture>>();
@@ -854,10 +899,13 @@ namespace kengine {
 		for (const auto & [e, shader] : g_em->getEntities<PostProcessShaderComponent>())
 			initShader(*shader.shader);
 
-		for (const auto & [e, modelInfo] : g_em->getEntities<SystemSpecificModelComponent<putils::gl::Mesh>>())
+		for (const auto & [e, modelInfo, modelData] : g_em->getEntities<SystemSpecificModelComponent<putils::gl::Mesh>, ModelDataComponent>())
 			for (const auto & meshInfo : modelInfo.meshes) {
 				glBindBuffer(GL_ARRAY_BUFFER, meshInfo.vertexBuffer);
-				modelInfo.registerVertexAttributes();
+
+				size_t location = 0;
+				for (const auto & attrib : modelData.vertexAttributes)
+					registerVertexAttribute(modelData.vertexSize, location++, attrib.offset, attrib.type);
 			}
 	}
 #pragma endregion OpenGLSystem

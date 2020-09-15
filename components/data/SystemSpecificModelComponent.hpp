@@ -7,7 +7,5 @@ namespace kengine {
 	template<typename Mesh>
 	struct SystemSpecificModelComponent {
 		std::vector<Mesh> meshes;
-
-		void (*registerVertexAttributes)() = nullptr;
 	};
 }

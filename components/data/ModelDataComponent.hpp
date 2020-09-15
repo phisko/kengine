@@ -15,14 +15,14 @@ namespace detail {
 namespace kengine {
 	struct ModelDataComponent {
 		struct Mesh {
-			struct DataInfo {
+			struct Buffer {
 				size_t nbElements;
 				size_t elementSize;
 				const void * data;
 			};
 
-			DataInfo vertices;
-			DataInfo indices;
+			Buffer vertices;
+			Buffer indices;
 			putils::meta::type_index indexType; // unsigned int, unsigned short...
 		};
 
@@ -36,54 +36,38 @@ namespace kengine {
 		using FreeFunc = putils::function<void(), KENGINE_MODEL_LOADER_FUNCTION_SIZE>;
 		FreeFunc free = nullptr;
 
-		using RegisterVertexAttributesFunc = void();
-		RegisterVertexAttributesFunc * registerVertexAttributes = nullptr;
+		struct VertexAttribute {
+			const char * name;
+			size_t offset;
+			putils::meta::type_index type;
+		};
 
-		using VertexSizeFunc = size_t();
-		VertexSizeFunc * getVertexSize = nullptr;
-
-		using AttributeOffsetFunc = std::optional<std::ptrdiff_t>(const char * attributeName);
-		AttributeOffsetFunc * getVertexAttributeOffset = nullptr;
+		std::vector<VertexAttribute> vertexAttributes;
+		size_t vertexSize;
 
 		template<typename VertexType>
 		void init() {
 			static constexpr bool isPolyVoxType = ::detail::has_nested_type_DataType<VertexType>{};
 
-			if constexpr (isPolyVoxType)
-				registerVertexAttributes = putils::gl::setPolyvoxVertexType<VertexType>;
-			else
-				registerVertexAttributes = putils::gl::setVertexType<VertexType>;
+			if constexpr (isPolyVoxType) {
+				vertexAttributes.push_back({ "position", offsetof(VertexType, position), putils::meta::type<float[3]>::index });
+				vertexAttributes.push_back({ "normal", offsetof(VertexType, normal), putils::meta::type<float[3]>::index });
 
-			getVertexSize = [] { return sizeof(VertexType); };
+				using Data = typename VertexType::DataType;
+				const auto dataOffset = offsetof(VertexType, data);
+				putils::reflection::for_each_attribute<Data>([&](const char * name, auto member) {
+					using Member = putils::MemberType<putils_typeof(member)>;
+					vertexAttributes.push_back({ name, dataOffset + (size_t)putils::member_offset(member), putils::meta::type<Member>::index });
+				});
+			}
+			else {
+				putils::reflection::for_each_attribute<VertexType>([&](const char * name, auto member) {
+					using Member = putils::MemberType<putils_typeof(member)>;
+					vertexAttributes.push_back({ name, (size_t)putils::member_offset(member), putils::meta::type<Member>::index });
+				});
+			}
 
-			getVertexAttributeOffset = [](const char * attributeName) {
-				const auto * vertex = (const VertexType *)nullptr;
-				const void * attribute = (const char *)nullptr + sizeof(VertexType);
-
-				if constexpr (isPolyVoxType) {
-					if (strcmp("position", attributeName) == 0)
-						attribute = &vertex->position;
-					else if (strcmp("normal", attributeName) == 0)
-						attribute = &vertex->normal;
-					else
-						putils::reflection::for_each_attribute(vertex->data, [&](const auto name, auto && member) {
-							if (strcmp(name, attributeName) != 0)
-								return;
-							attribute = &member;
-						});
-				}
-				else
-					putils::reflection::for_each_attribute(*vertex, [&](const auto name, auto && member) {
-						if (strcmp(name, attributeName) != 0)
-							return;
-						attribute = &member;
-					});
-
-				std::optional<std::ptrdiff_t> ret = (const char *)attribute - (const char *)vertex;
-				if (*ret >= sizeof(VertexType))
-					return decltype(ret)(std::nullopt);
-				return ret;
-			};
+			vertexSize = sizeof(VertexType);
 		}
 
 		ModelDataComponent() = default;
