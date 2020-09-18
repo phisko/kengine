@@ -131,9 +131,7 @@ void kengine::Entity::attach(T && comp) {
 template<typename T>
 void kengine::Entity::detach() {
 	assert("No such component" && has<T>());
-	auto & comp = get<T>();
-	comp.~T();
-	new(&comp) T;
+	get<T>() = T{};
 	static const auto component = getId<T>();
 	componentMask.set(component, false);
 	manager->removeComponent(id, component);
