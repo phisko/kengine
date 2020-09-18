@@ -5,6 +5,8 @@
 #endif
 
 #include "vector.hpp"
+#include "Point.hpp"
+#include "Entity.hpp"
 
 namespace kengine {
 	struct InputBufferComponent {
