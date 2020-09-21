@@ -5,8 +5,8 @@
 #endif
 
 #include "Point.hpp"
-#include "opengl/Program.hpp"
 #include "function.hpp"
+#include "reflection.hpp"
 
 namespace detail {
 	putils_nested_type_detector(DataType);
