@@ -2,6 +2,7 @@
 
 #include <GLFW/glfw3.h>
 #include "RAII.hpp"
+#include "BaseFunction.hpp"
 
 namespace kengine {
 	struct GLFWWindowComponent {
@@ -11,6 +12,11 @@ namespace kengine {
 		}
 
 		putils::RAII<GLFWwindow *, freeWindow> window{ nullptr };
+	};
+
+	struct GLFWWindowInitComponent {
+		std::function<void()> setHints = nullptr;
+		std::function<void()> onWindowCreated = nullptr;
 	};
 }
 

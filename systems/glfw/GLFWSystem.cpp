@@ -104,7 +104,7 @@ namespace kengine {
 
 #pragma region execute
 #pragma region declarations
-	static void init(Entity & e, WindowComponent & window);
+	static void init(Entity & e, WindowComponent & window, const GLFWWindowInitComponent & initGlfw);
 #pragma endregion
 	static void execute(float deltaTime) {
 		for (const auto & [e, window, glfw] : g_em->getEntities<WindowComponent, GLFWWindowComponent>())
@@ -115,20 +115,18 @@ namespace kengine {
 					g_em->removeEntity(e.id);
 			}
 
-		for (auto & [e, window, noGLFW] : g_em->getEntities<WindowComponent, no<GLFWWindowComponent>>())
-			init(e, window);
+		for (auto & [e, window, initGlfw, noGLFW] : g_em->getEntities<WindowComponent, GLFWWindowInitComponent, no<GLFWWindowComponent>>()) {
+			init(e, window, initGlfw);
+			e.detach<GLFWWindowInitComponent>();
+		}
 	}
 
-	static void init(Entity & e, WindowComponent & window) {
+	static void init(Entity & e, WindowComponent & window, const GLFWWindowInitComponent & initGlfw) {
 		auto & glfwComp = e.attach<GLFWWindowComponent>();
 
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
-#ifndef KENGINE_NDEBUG
-		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
-#endif
+		if (initGlfw.setHints)
+			initGlfw.setHints();
+
 		// TODO: depend on g_windowComponent->fullscreen
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
@@ -152,13 +150,22 @@ namespace kengine {
 		glfwSetKeyCallback(glfwComp.window.get(), Input::onKey);
 
 		glfwSetWindowUserPointer(glfwComp.window.get(), (void *)e.id);
+
+		if (initGlfw.onWindowCreated)
+			initGlfw.onWindowCreated();
 	}
 #pragma endregion execute
 
 	static void onEntityCreated(Entity & e) {
 		const auto window = e.tryGet<WindowComponent>();
-		if (window)
-			init(e, *window);
+		if (!window)
+			return;
+
+		const auto initGlfw = e.tryGet<GLFWWindowInitComponent>();
+		if (!initGlfw)
+			return;
+
+		init(e, *window, *initGlfw);
 	}
 
 	static void terminate() {

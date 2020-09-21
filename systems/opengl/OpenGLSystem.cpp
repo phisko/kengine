@@ -73,7 +73,6 @@ namespace kengine {
 	static size_t g_gBufferTextureCount = 0;
 	static functions::GBufferAttributeIterator g_gBufferIterator = nullptr;
 
-	static bool g_init = false;
 	struct {
 		Entity::ID id = Entity::INVALID_ID;
 		GLFWWindowComponent * glfw = nullptr;
@@ -155,6 +154,7 @@ namespace kengine {
 				if (!window.assignedSystem.empty())
 					continue;
 				g_window.id = e.id;
+				g_window.comp = &window;
 				break;
 			}
 
@@ -163,47 +163,50 @@ namespace kengine {
 					g_window.comp = &e.attach<WindowComponent>();
 					g_window.comp->name = "Kengine";
 					g_window.comp->size = { 1280, 720 };
-					g_window.comp->assignedSystem = "OpenGL";
 					g_window.id = e.id;
 				};
 			}
-			else {
-				auto e = g_em->getEntity(g_window.id);
-				g_window.comp = &e.get<WindowComponent>();
-				g_window.comp->assignedSystem = "OpenGL";
+		}
+
+		g_window.comp->assignedSystem = "OpenGL";
+
+		auto e = g_em->getEntity(g_window.id);
+		e += GLFWWindowInitComponent{
+			.setHints = [] {
+				glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+				glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+				glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+				glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+		#ifndef KENGINE_NDEBUG
+				glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+		#endif
+			},
+			.onWindowCreated = [] {
+				g_window.glfw = &g_em->getEntity(g_window.id).get<GLFWWindowComponent>();
+				glewExperimental = true;
+				const bool ret = glewInit();
+				assert(ret == GLEW_OK);
+
+				initImGui();
+
+		#ifndef KENGINE_NDEBUG
+				glEnable(GL_DEBUG_OUTPUT);
+				glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+				glDebugMessageCallback([](GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar * message, const void * userParam) {
+					if (severity != GL_DEBUG_SEVERITY_NOTIFICATION)
+						std::cerr <<
+						putils::termcolor::red <<
+						"G: severity = 0x" << std::ios::hex << severity << std::ios::dec <<
+						", message: " << message << '\n' <<
+						putils::termcolor::reset;
+				}, nullptr);
+		#endif
+
+		#ifndef KENGINE_OPENGL_NO_DEFAULT_SHADERS
+				addShaders();
+		#endif
 			}
-		}
-
-		if (g_window.glfw == nullptr) {
-			g_window.glfw = g_em->getEntity(g_window.id).tryGet<GLFWWindowComponent>();
-			if (g_window.glfw == nullptr)
-				return;
-		}
-
-		g_init = true;
-
-		glewExperimental = true;
-		const bool ret = glewInit();
-		assert(ret == GLEW_OK);
-
-		initImGui();
-
-#ifndef KENGINE_NDEBUG
-		glEnable(GL_DEBUG_OUTPUT);
-		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-		glDebugMessageCallback([](GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar * message, const void * userParam) {
-			if (severity != GL_DEBUG_SEVERITY_NOTIFICATION)
-				std::cerr <<
-				putils::termcolor::red <<
-				"G: severity = 0x" << std::ios::hex << severity << std::ios::dec <<
-				", message: " << message << '\n' <<
-				putils::termcolor::reset;
-		}, nullptr);
-#endif
-
-#ifndef KENGINE_OPENGL_NO_DEFAULT_SHADERS
-		addShaders();
-#endif
+		};
 	}
 
 	static void initImGui() {
@@ -334,7 +337,7 @@ namespace kengine {
 	static void doOpenGL();
 #pragma endregion
 	static void execute(float deltaTime) {
-		if (g_window.id == Entity::INVALID_ID)
+		if (g_window.id == Entity::INVALID_ID || g_window.glfw == nullptr)
 			return;
 
 		for (auto &[e, modelData, noOpenGL] : g_em->getEntities<ModelDataComponent, no<SystemSpecificModelComponent<putils::gl::Mesh>>>())
