@@ -15,6 +15,7 @@
 #include "Common.hpp"
 #include "RecastNavMeshComponent.hpp"
 
+#include "lengthof.hpp"
 #include "with.hpp"
 
 namespace Flags {
