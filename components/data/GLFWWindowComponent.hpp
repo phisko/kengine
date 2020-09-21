@@ -1,10 +1,16 @@
 #pragma once
 
-struct GLFWwindow;
+#include <GLFW/glfw3.h>
+#include "RAII.hpp"
 
 namespace kengine {
 	struct GLFWWindowComponent {
-		GLFWwindow * window;
+		static inline void freeWindow(GLFWwindow * (&window)) {
+			if (window)
+				glfwDestroyWindow(window);
+		}
+
+		putils::RAII<GLFWwindow *, freeWindow> window{ nullptr };
 	};
 }
 
