@@ -85,13 +85,20 @@ namespace kengine {
 #pragma endregion
 	EntityCreator * GLFWSystem(EntityManager & em) {
 		g_em = &em;
+		
+		for (const auto & [e, buffer] : em.getEntities<InputBufferComponent>()) {
+			Input::g_buffer = &buffer;
+			break;
+		}
+
 		glfwInit();
+		execute(0.f); // init already existing windows
 
 		return [](Entity & e) {
-			e += functions::OnTerminate{ terminate };
-			e += functions::OnMouseCaptured{ onMouseCaptured };
 			e += functions::Execute{ execute };
 			e += functions::OnEntityCreated{ onEntityCreated };
+			e += functions::OnTerminate{ terminate };
+			e += functions::OnMouseCaptured{ onMouseCaptured };
 		};
 	}
 
