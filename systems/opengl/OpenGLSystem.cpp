@@ -66,10 +66,6 @@
 #endif
 
 namespace kengine {
-	namespace Input {
-		static InputBufferComponent * g_buffer;
-	}
-
 	static EntityManager * g_em;
 	static putils::gl::Program::Parameters g_params;
 	static float g_dpiScale = 1.f;
@@ -98,11 +94,6 @@ namespace kengine {
 #pragma endregion
 	EntityCreator * OpenGLSystem(EntityManager & em) {
 		g_em = &em;
-
-		for (const auto & [e, buffer] : em.getEntities<InputBufferComponent>()) {
-			Input::g_buffer = &buffer;
-			break;
-		}
 
 		em += [](Entity & e) {
 			e += AdjustableComponent{
@@ -160,7 +151,7 @@ namespace kengine {
 #pragma endregion
 	static void init() noexcept {
 		if (g_window.comp == nullptr) {
-			for (const auto & [e, window, glfw] : g_em->getEntities<WindowComponent, GLFWWindowComponent>()) {
+			for (const auto & [e, window] : g_em->getEntities<WindowComponent>()) {
 				if (!window.assignedSystem.empty())
 					continue;
 				g_window.id = e.id;
