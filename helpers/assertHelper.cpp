@@ -48,11 +48,10 @@ namespace kengine {
 				Entity::ID id = e.id;
 				e += functions::Execute{[&em, id, &info](float deltaTime) {
 					bool open = true;
-					ImGui::SetNextWindowPosCenter(ImGuiCond_Appearing);
 					ImGui::SetNextWindowSize({ 300, 400 }, ImGuiCond_Appearing);
 					if (ImGui::Begin(putils::string<64>("Assertion failed##%d", id), &open)) {
 
-						ImGui::BeginChild("##Child", { 0, -ImGui::GetItemsLineHeightWithSpacing() });
+						ImGui::BeginChild("##Child", { 0, -ImGui::GetTextLineHeightWithSpacing() });
 						{
 							ImGui::Text("%s l.%d", info.file, info.line);
 							ImGui::Separator();
