@@ -3,37 +3,45 @@
 #include "data/LuaComponent.hpp"
 #include "functions/Execute.hpp"
 
-namespace kengine {
-#pragma region declarations
-	static void execute(EntityManager & em, sol::state & state, float deltaTime);
-#pragma endregion
-	EntityCreatorFunctor<64> LuaSystem(EntityManager & em) {
-		return [&](Entity & e) {
-			auto tmp = new sol::state;
-			e += LuaStateComponent{ tmp };
+namespace kengine::lua {
+	struct impl {
+		static inline EntityManager * em;
+		static inline sol::state * state;
 
-			auto & state = *tmp;
-			state.open_libraries();
-			scriptLanguageHelper::init(em,
+		static void init(Entity & e) {
+			e += functions::Execute{ execute };
+
+			state = new sol::state;
+			e += LuaStateComponent{ state };
+
+			state->open_libraries();
+			scriptLanguageHelper::init(*em,
 				[&](auto && ... args) {
-					luaHelper::detail::registerFunctionWithState(state, FWD(args)...);
+					luaHelper::detail::registerFunctionWithState(*state, FWD(args)...);
 				},
 				[&](auto type) {
 					using T = putils_wrapped_type(type);
-					luaHelper::detail::registerTypeWithState<T>(em, state);
+					luaHelper::detail::registerTypeWithState<T>(*em, *state);
 				}
 			);
-
-			e += functions::Execute{ [&](float deltaTime) { execute(em, state, deltaTime); } };
-		};
-	}
-
-	static void execute(EntityManager & em, sol::state & state, float deltaTime) {
-		state["deltaTime"] = deltaTime;
-		for (auto & [e, comp] : em.getEntities<LuaComponent>()) {
-			state["self"] = &e;
-			for (const auto & s : comp.scripts)
-				state.script_file(s.c_str());
 		}
+
+		static void execute(float deltaTime) {
+			(*state)["deltaTime"] = deltaTime;
+			for (auto & [e, comp] : em->getEntities<LuaComponent>()) {
+				(*state)["self"] = &e;
+				for (const auto & s : comp.scripts)
+					state->script_file(s.c_str());
+			}
+		}
+	};
+}
+
+namespace kengine {
+	EntityCreatorFunctor<64> LuaSystem(EntityManager & em) {
+		lua::impl::em = &em;
+		return [&](Entity & e) {
+			lua::impl::init(e);
+		};
 	}
 }

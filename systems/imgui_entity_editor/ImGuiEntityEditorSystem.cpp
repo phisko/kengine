@@ -12,51 +12,66 @@
 #include "helpers/imGuiHelper.hpp"
 #include "imgui.h"
 
-namespace kengine {
-	EntityCreatorFunctor<64> ImGuiEntityEditorSystem(EntityManager & em) {
-		return [&](Entity & e) {
+namespace kengine::imgui_entity_editor {
+	struct impl {
+		static inline EntityManager * em;
+		static inline bool * enabled;
+
+		static void init(Entity & e) {
 			e += NameComponent{ "Entity editor" };
 			auto & tool = e.attach<ImGuiToolComponent>();
 			tool.enabled = true;
+			enabled = &tool.enabled;
 
-			e += functions::Execute{[&](float deltaTime) {
-				if (!tool.enabled)
-					return;
+			e += functions::Execute{ execute };
+		}
 
-				float scale = 1.f;
-				for (const auto & [e, getScale] : em.getEntities<functions::GetImGuiScale>())
-					scale = getScale();
+		static void execute(float deltaTime) {
+			if (!*enabled)
+				return;
 
-				for (auto & [selected, _] : em.getEntities<SelectedComponent>()) {
-					bool open = true;
+			float scale = 1.f;
+			for (const auto & [e, getScale] : em->getEntities<functions::GetImGuiScale>())
+				scale = getScale();
 
-					ImGui::SetNextWindowSize({ 200.f * scale, 200.f * scale}, ImGuiCond_FirstUseEver);
+			for (auto & [selected, _] : em->getEntities<SelectedComponent>()) {
+				bool open = true;
 
-					const auto beginWindow = [&selected, &open] {
-						const auto name = selected.tryGet<NameComponent>();
-						if (name)
-							return ImGui::Begin(putils::string<64>("%s##[%d]", name->name.c_str(), selected.id), &open, ImGuiWindowFlags_NoSavedSettings);
-						else
-							return ImGui::Begin(putils::string<64>("[%d] Entity editor", selected.id), nullptr, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoTitleBar);
-					};
+				ImGui::SetNextWindowSize({ 200.f * scale, 200.f * scale }, ImGuiCond_FirstUseEver);
 
-					if (beginWindow()) {
-						if (!selected.has<NameComponent>()) { // no title bar
-							if (ImGui::Button("x"))
-								selected.detach<SelectedComponent>();
-							ImGui::Separator();
-						}
+				const auto beginWindow = [&selected, &open] {
+					const auto name = selected.tryGet<NameComponent>();
+					if (name)
+						return ImGui::Begin(putils::string<64>("%s##[%d]", name->name.c_str(), selected.id), &open, ImGuiWindowFlags_NoSavedSettings);
+					else
+						return ImGui::Begin(putils::string<64>("[%d] Entity editor", selected.id), nullptr, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoTitleBar);
+				};
 
-						ImGui::BeginChild("##child");
-						imguiHelper::editEntity(em, selected);
-						ImGui::EndChild();
+				if (beginWindow()) {
+					if (!selected.has<NameComponent>()) { // no title bar
+						if (ImGui::Button("x"))
+							selected.detach<SelectedComponent>();
+						ImGui::Separator();
 					}
-					ImGui::End();
 
-					if (!open)
-						selected.detach<SelectedComponent>();
+					ImGui::BeginChild("##child");
+					imguiHelper::editEntity(*em, selected);
+					ImGui::EndChild();
 				}
-			}};
+				ImGui::End();
+
+				if (!open)
+					selected.detach<SelectedComponent>();
+			}
+		}
+	};
+}
+
+namespace kengine {
+	EntityCreatorFunctor<64> ImGuiEntityEditorSystem(EntityManager & em) {
+		imgui_entity_editor::impl::em = &em;
+		return [&](Entity & e) {
+			imgui_entity_editor::impl::init(e);
 		};
 	}
 }

@@ -11,21 +11,15 @@
 #include "functions/Execute.hpp"
 #include "functions/OnEntityRemoved.hpp"
 
-namespace kengine {
-	namespace recast {
-		Adjustables g_adjustables;
-		EntityManager * g_em;
-	}
-	using namespace recast;
+namespace kengine::recast {
+	Adjustables g_adjustables;
+	EntityManager * g_em;
 
-#pragma region declarations
-	static void onEntityRemoved(Entity & e);
-	static void execute(float deltaTime);
-#pragma endregion
-	EntityCreator * RecastSystem(EntityManager & em) {
-		g_em = &em;
+	void buildNavMeshes();
+	void doPathfinding(float deltaTime);
 
-		return [](Entity & e) {
+	struct impl {
+		static void init(Entity & e) {
 			e += functions::OnEntityRemoved{ onEntityRemoved };
 			e += functions::Execute{ execute };
 			e += makeGBufferShaderComponent<RecastDebugShader>(*g_em);
@@ -35,27 +29,30 @@ namespace kengine {
 					{ "Path optimization range", &g_adjustables.pathOptimizationRange }
 				}
 			};
-		};
-	}
-
-	static void onEntityRemoved(Entity & e) {
-		const auto agent = e.tryGet<RecastAgentComponent>();
-		if (agent) {
-			auto environment = g_em->getEntity(agent->crowd);
-			environment.get<RecastCrowdComponent>().crowd->removeAgent(agent->index);
 		}
 
-		// It doesn't cost us anything to have floating RecastAgentComponents, so we don't remove them when the RecastCrowdComponent is removed
-	}
+		static void onEntityRemoved(Entity & e) {
+			const auto agent = e.tryGet<RecastAgentComponent>();
+			if (agent) {
+				auto environment = g_em->getEntity(agent->crowd);
+				environment.get<RecastCrowdComponent>().crowd->removeAgent(agent->index);
+			}
 
-#pragma region declarations
-	namespace recast {
-		void buildNavMeshes();
-		void doPathfinding(float deltaTime);
-	}
-#pragma endregion
-	static void execute(float deltaTime) {
-		buildNavMeshes();
-		doPathfinding(deltaTime);
+			// It doesn't cost us anything to have floating RecastAgentComponents, so we don't remove them when the RecastCrowdComponent is removed
+		}
+
+		static void execute(float deltaTime) {
+			buildNavMeshes();
+			doPathfinding(deltaTime);
+		}
+	};
+}
+
+namespace kengine {
+	EntityCreator * RecastSystem(EntityManager & em) {
+		recast::g_em = &em;
+		return [](Entity & e) {
+			recast::impl::init(e);
+		};
 	}
 }

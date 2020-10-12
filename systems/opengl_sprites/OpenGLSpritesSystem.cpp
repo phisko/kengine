@@ -13,54 +13,58 @@
 
 #include "stb_image.h"
 
-namespace kengine {
-	static EntityManager * g_em;
+namespace kengine::opengl_sprites {
+	struct impl {
+		static inline EntityManager * em;
 
-#pragma region declarations
-	static void onEntityCreated(Entity & e);
-#pragma endregion
-	EntityCreator * OpenGLSpritesSystem(EntityManager & em) {
-		g_em = &em;
-
-		return [](Entity & e) {
+		static void init(Entity & e) {
 			e += functions::OnEntityCreated{ onEntityCreated };
-			e += makeGBufferShaderComponent<SpritesShader>(*g_em);
-		};
-	}
+			e += makeGBufferShaderComponent<SpritesShader>(*em);
+		}
 
-	void onEntityCreated(Entity & e) {
-		if (!e.has<GraphicsComponent>())
-			return;
-
-		if (!e.has<SpriteComponent2D>() && !e.has<SpriteComponent3D>())
-			return;
-
-		if (e.has<InstanceComponent>() && e.get<InstanceComponent>().model != Entity::INVALID_ID)
-			return;
-
-		const auto & file = e.get<GraphicsComponent>().appearance;
-
-		for (const auto &[model, comp] : g_em->getEntities<ModelComponent>())
-			if (comp.file == file) {
-				e += InstanceComponent{ model.id };
+		static void onEntityCreated(Entity & e) {
+			if (!e.has<GraphicsComponent>())
 				return;
-			}
 
-		int width, height, components;
-		const auto data = stbi_load(file.c_str(), &width, &height, &components, 0);
-		if (data == nullptr)
-			return; // Not supported image type
+			if (!e.has<SpriteComponent2D>() && !e.has<SpriteComponent3D>())
+				return;
 
-		*g_em += [&](Entity & model) {
-			e += InstanceComponent{ model.id };
+			if (e.has<InstanceComponent>() && e.get<InstanceComponent>().model != Entity::INVALID_ID)
+				return;
 
-			TextureDataComponent textureData;
-			textureData.data = data;
-			textureData.width = width;
-			textureData.height = height;
-			textureData.components = components;
-			textureData.free = stbi_image_free;
-			model += std::move(textureData);
+			const auto & file = e.get<GraphicsComponent>().appearance;
+
+			for (const auto & [model, comp] : em->getEntities<ModelComponent>())
+				if (comp.file == file) {
+					e += InstanceComponent{ model.id };
+					return;
+				}
+
+			int width, height, components;
+			const auto data = stbi_load(file.c_str(), &width, &height, &components, 0);
+			if (data == nullptr)
+				return; // Not supported image type
+
+			*em += [&](Entity & model) {
+				e += InstanceComponent{ model.id };
+
+				TextureDataComponent textureData;
+				textureData.data = data;
+				textureData.width = width;
+				textureData.height = height;
+				textureData.components = components;
+				textureData.free = stbi_image_free;
+				model += std::move(textureData);
+			};
+		}
+	};
+}
+
+namespace kengine {
+	EntityCreator * OpenGLSpritesSystem(EntityManager & em) {
+		opengl_sprites::impl::em = &em;
+		return [](Entity & e) {
+			opengl_sprites::impl::init(e);
 		};
 	}
 }

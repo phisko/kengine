@@ -4,40 +4,46 @@
 #include "data/InputBufferComponent.hpp"
 #include "functions/Execute.hpp"
 
-namespace kengine {
-	static InputBufferComponent * g_buffer;
+namespace kengine::input {
+	struct impl {
+		static inline InputBufferComponent * buffer;
+		static inline EntityManager * em;
 
-#pragma region declarations
-	static void execute(EntityManager & em);
-#pragma endregion
+		static void init(Entity & e) {
+			buffer = &e.attach<InputBufferComponent>();
+			e += functions::Execute{ execute };
+		}
+
+		static void execute(float deltaTime) {
+			for (const auto & [e, comp] : em->getEntities<InputComponent>()) {
+				for (const auto & e : buffer->keys)
+					if (comp.onKey != nullptr)
+						comp.onKey(e.window, e.key, e.pressed);
+
+				if (comp.onMouseButton != nullptr)
+					for (const auto & e : buffer->clicks)
+						comp.onMouseButton(e.window, e.button, e.pos, e.pressed);
+
+				if (comp.onMouseMove != nullptr)
+					for (const auto & e : buffer->moves)
+						comp.onMouseMove(e.window, e.pos, e.rel);
+
+				if (comp.onScroll != nullptr)
+					for (const auto & e : buffer->scrolls)
+						comp.onScroll(e.window, e.xoffset, e.yoffset, e.pos);
+			}
+			buffer->keys.clear();
+			buffer->clicks.clear();
+			buffer->moves.clear();
+			buffer->scrolls.clear();
+		}
+	};
+}
+
+namespace kengine {
 	EntityCreatorFunctor<64> InputSystem(EntityManager & em) {
 		return [&](Entity & e) {
-			e += functions::Execute{ [&](float deltaTime) { execute(em); } };
-			g_buffer = &e.attach<InputBufferComponent>();
+			input::impl::init(e);
 		};
-	}
-
-	static void execute(EntityManager & em) {
-		for (const auto &[e, comp] : em.getEntities<InputComponent>()) {
-			for (const auto & e : g_buffer->keys)
-				if (comp.onKey != nullptr)
-					comp.onKey(e.window, e.key, e.pressed);
-
-			if (comp.onMouseButton != nullptr)
-				for (const auto & e : g_buffer->clicks)
-					comp.onMouseButton(e.window, e.button, e.pos, e.pressed);
-
-			if (comp.onMouseMove != nullptr)
-				for (const auto & e : g_buffer->moves)
-					comp.onMouseMove(e.window, e.pos, e.rel);
-
-			if (comp.onScroll != nullptr)
-				for (const auto & e : g_buffer->scrolls)
-					comp.onScroll(e.window, e.xoffset, e.yoffset, e.pos);
-		}
-		g_buffer->keys.clear();
-		g_buffer->clicks.clear();
-		g_buffer->moves.clear();
-		g_buffer->scrolls.clear();
 	}
 }
