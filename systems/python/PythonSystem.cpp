@@ -14,6 +14,7 @@ namespace kengine::python {
 			e += PythonStateComponent{ std::move(tmp) };
 
 			py::globals()["kengine"] = state.module;
+			module = &state.module;
 			scriptLanguageHelper::init(*em,
 				[&](auto && ... args) {
 					pythonHelper::detail::registerFunctionWithState(state, FWD(args)...);

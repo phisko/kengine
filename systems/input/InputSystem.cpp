@@ -42,6 +42,7 @@ namespace kengine::input {
 
 namespace kengine {
 	EntityCreatorFunctor<64> InputSystem(EntityManager & em) {
+		input::impl::em = &em;
 		return [&](Entity & e) {
 			input::impl::init(e);
 		};
