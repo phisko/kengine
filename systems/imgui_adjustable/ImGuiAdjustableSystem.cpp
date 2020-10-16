@@ -322,7 +322,7 @@ namespace kengine::imgui_adjustable {
 			std::ofstream f(KENGINE_ADJUSTABLE_SAVE_FILE, std::ofstream::trunc);
 			assert(f);
 
-			const auto entities = sortHelper::getSortedEntities<0, AdjustableComponent>(*em, [](const auto & a, const auto & b) {
+			const auto entities = sortHelper::getSortedEntities<AdjustableComponent>(*em, [](const auto & a, const auto & b) {
 				return strcmp(std::get<1>(a)->section.c_str(), std::get<1>(b)->section.c_str()) < 0;
 				});
 
