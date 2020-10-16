@@ -2,13 +2,19 @@
 
 #include "EntityManager.hpp"
 #include "data/NameComponent.hpp"
+#include "fwd.hpp"
 
 namespace kengine::sortHelper {
 	// Returns a container of tuple<Entity, Comps *...>
 	// Pred: bool(tuple<Entity, Comps*...> lhs, tuple<Entity, Comps*...> rhs) = lhs < rhs 
+	template<typename ... Comps, typename Pred>
+	auto getSortedEntities(EntityManager & em, Pred && pred);
+	// Returns a stack-allocated putils::vector instead of std::vector
 	template<size_t MaxCount, typename ... Comps, typename Pred>
 	auto getSortedEntities(EntityManager & em, Pred && pred);
 
+	template<typename ... Comps>
+	auto getNameSortedEntities(EntityManager & em);
 	template<size_t MaxCount, typename ... Comps>
 	auto getNameSortedEntities(EntityManager & em);
 }
@@ -54,6 +60,11 @@ namespace kengine::sortHelper {
 		return ret;
 	}
 
+	template<typename ... Comps, typename Pred>
+	auto getSortedEntities(EntityManager & em, Pred && pred) {
+		return getSortedEntities<0, Comps...>(em, FWD(pred));
+	}
+
 	template<size_t MaxCount, typename ... Comps>
 	auto getNameSortedEntities(EntityManager & em) {
 		return getSortedEntities<MaxCount, NameComponent, Comps...>(em,
@@ -61,5 +72,10 @@ namespace kengine::sortHelper {
 				return strcmp(std::get<1>(lhs)->name, std::get<1>(rhs)->name) < 0;
 			}
 		);
+	}
+
+	template<typename ... Comps>
+	auto getNameSortedEntities(EntityManager & em) {
+		return getNameSortedEntities<0, Comps...>(em);
 	}
 }
