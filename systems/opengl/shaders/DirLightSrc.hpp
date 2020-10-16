@@ -2,7 +2,7 @@
 
 #include "opengl/Uniform.hpp"
 
-namespace kengine::Shaders::src {
+namespace kengine::opengl::shaders::src {
 	namespace DirLight {
 		namespace Frag {
 			extern const char * glsl;
@@ -29,7 +29,7 @@ namespace kengine::Shaders::src {
 	}
 }
 
-#define refltype kengine::Shaders::src::DirLight::Frag::Uniforms
+#define refltype kengine::opengl::shaders::src::DirLight::Frag::Uniforms
 putils_reflection_info{
 	putils_reflection_attributes(
 		putils_reflection_attribute_private(_viewPos),
@@ -44,7 +44,7 @@ putils_reflection_info{
 };
 #undef refltype
 
-#define refltype kengine::Shaders::src::DirLight::GetDirection::Uniforms
+#define refltype kengine::opengl::shaders::src::DirLight::GetDirection::Uniforms
 putils_reflection_info{
 	putils_reflection_attributes(
 		putils_reflection_attribute_private(_direction)

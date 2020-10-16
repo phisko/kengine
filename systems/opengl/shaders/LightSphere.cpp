@@ -14,7 +14,7 @@ static auto SPHERE_SIZE = .25f;
 static auto SUN_DIST = 500.f;
 static auto SUN_SIZE = 100.f;
 
-namespace kengine::Shaders {
+namespace kengine::opengl::shaders {
 	static glm::vec3 toVec(const putils::Point3f & p) { return { p.x, p.y, p.z }; }
 
 	LightSphere::LightSphere(EntityManager & em, Entity & parent) 

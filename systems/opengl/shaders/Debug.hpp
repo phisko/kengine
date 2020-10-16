@@ -6,7 +6,7 @@ namespace kengine {
 	class EntityManager;
 }
 
-namespace kengine::Shaders {
+namespace kengine::opengl::shaders {
 	class Debug : public putils::gl::Program {
 	public:
 		Debug(EntityManager & em);
@@ -30,7 +30,7 @@ namespace kengine::Shaders {
 	};
 }
 
-#define refltype kengine::Shaders::Debug
+#define refltype kengine::opengl::shaders::Debug
 putils_reflection_info{
 	putils_reflection_attributes(
 		putils_reflection_attribute_private(_model),

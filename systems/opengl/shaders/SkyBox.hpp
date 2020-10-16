@@ -6,7 +6,7 @@ namespace kengine {
 	class EntityManager;
 }
 
-namespace kengine::Shaders {
+namespace kengine::opengl::shaders {
 	class SkyBox : public putils::gl::Program {
 	public:
 		SkyBox(EntityManager & em);
@@ -31,7 +31,7 @@ namespace kengine::Shaders {
 	};
 }
 
-#define refltype kengine::Shaders::SkyBox
+#define refltype kengine::opengl::shaders::SkyBox
 putils_reflection_info{
 	putils_reflection_attributes(
 		putils_reflection_attribute_private(_view),

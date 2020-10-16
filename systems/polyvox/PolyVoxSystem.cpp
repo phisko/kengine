@@ -28,7 +28,8 @@ namespace kengine::polyvox {
 
 		static void init(Entity & e) {
 			e += functions::Execute { execute };
-			e += makeGBufferShaderComponent<PolyVoxShader>(*em);
+			e += opengl::ShaderComponent{ std::make_unique<PolyVoxShader>(*em) };
+			e += opengl::GBufferShaderComponent{};
 		}
 
 		static void execute(float deltaTime) {

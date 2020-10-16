@@ -9,7 +9,7 @@ namespace kengine {
 }
 
 namespace kengine {
-	class AssImpShadowCube : public Shaders::ShadowCubeShader
+	class AssImpShadowCube : public opengl::shaders::ShadowCubeShader
 	{
 	public:
 		AssImpShadowCube(EntityManager & em)
@@ -35,7 +35,7 @@ putils_reflection_info {
 	);
 
 	putils_reflection_parents(
-		putils_reflection_type(kengine::Shaders::ShadowCubeShader)
+		putils_reflection_type(kengine::opengl::shaders::ShadowCubeShader)
 	);
 };
 #undef refltype

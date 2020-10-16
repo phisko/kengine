@@ -60,7 +60,7 @@ void main() {
 )";
 #pragma endregion GLSL
 
-namespace kengine::Shaders {
+namespace kengine::opengl::shaders {
 	Highlight::Highlight(EntityManager & em)
 		: Program(true, putils_nameof(Highlight)),
 		_em(em)

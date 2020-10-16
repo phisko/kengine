@@ -17,7 +17,7 @@ namespace kengine {
 	static bool DEBUG_CSM = false;
 }
 
-namespace kengine::Shaders {
+namespace kengine::opengl::shaders {
 	DirLight::DirLight(EntityManager & em, Entity & parent)
 		: Program(true, putils_nameof(DirLight)),
 		_em(em)
@@ -73,7 +73,7 @@ namespace kengine::Shaders {
 					}
 				}
 
-				for (const auto & [shadowMapEntity, shader, comp] : _em.getEntities<LightingShaderComponent, ShadowMapShaderComponent>()) {
+				for (const auto & [shadowMapEntity, shader, shadowMapShader] : _em.getEntities<ShaderComponent, ShadowMapShaderComponent>()) {
 					auto & shadowMap = static_cast<ShadowMapShader &>(*shader.shader);
 					shadowMap.run(e, light, params);
 				}

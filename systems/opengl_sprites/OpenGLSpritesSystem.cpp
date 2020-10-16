@@ -19,7 +19,8 @@ namespace kengine::opengl_sprites {
 
 		static void init(Entity & e) {
 			e += functions::OnEntityCreated{ onEntityCreated };
-			e += makeGBufferShaderComponent<SpritesShader>(*em);
+			e += opengl::ShaderComponent{ std::make_unique<SpritesShader>(*em) };
+			e += opengl::GBufferShaderComponent{};
 		}
 
 		static void onEntityCreated(Entity & e) {

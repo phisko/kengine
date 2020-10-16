@@ -11,7 +11,7 @@
 #include "helpers/matrixHelper.hpp"
 #include "shaderHelper.hpp"
 
-namespace kengine::Shaders {
+namespace kengine::opengl::shaders {
 	void ShadowCube::init(size_t firstTextureID) {
 		initWithShaders<ShadowCube>(putils::make_vector(
 			ShaderDescription{ src::ProjViewModel::Vert::glsl, GL_VERTEX_SHADER },

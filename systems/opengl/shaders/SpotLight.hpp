@@ -10,7 +10,7 @@ namespace kengine {
 	struct SpotLightComponent;
 }
 
-namespace kengine::Shaders {
+namespace kengine::opengl::shaders {
 	class ShadowMap;
 
 	class SpotLight : public putils::gl::Program,
@@ -35,12 +35,12 @@ namespace kengine::Shaders {
 	};
 }
 
-#define refltype kengine::Shaders::SpotLight
+#define refltype kengine::opengl::shaders::SpotLight
 putils_reflection_info {
 	putils_reflection_parents(
-		putils_reflection_type(kengine::Shaders::src::ProjViewModel::Vert::Uniforms),
-		putils_reflection_type(kengine::Shaders::src::ShadowMap::Frag::Uniforms),
-		putils_reflection_type(kengine::Shaders::src::SpotLight::Frag::Uniforms)
+		putils_reflection_type(kengine::opengl::shaders::src::ProjViewModel::Vert::Uniforms),
+		putils_reflection_type(kengine::opengl::shaders::src::ShadowMap::Frag::Uniforms),
+		putils_reflection_type(kengine::opengl::shaders::src::SpotLight::Frag::Uniforms)
 	);
 };
 #undef refltype

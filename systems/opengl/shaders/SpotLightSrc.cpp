@@ -1,4 +1,4 @@
-namespace kengine::Shaders::src {
+namespace kengine::opengl::shaders::src {
 	namespace SpotLight {
 		namespace Frag {
 			const char * glsl = R"(

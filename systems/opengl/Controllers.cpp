@@ -24,8 +24,8 @@ namespace kengine::opengl {
 				if (ImGui::Begin("Shaders", &tool.enabled)) {
 					static const auto displayShaders = [](const char * groupName, auto && shaders) {
 						if (ImGui::CollapsingHeader(groupName))
-							for (auto & [e, comp] : shaders) {
-								ImGui::MenuItem(comp.shader->getName().c_str(), nullptr, &comp.enabled);
+							for (auto & [e, shader, tag] : shaders) {
+								ImGui::MenuItem(shader.shader->getName().c_str(), nullptr, &shader.enabled);
 
 								const auto prof = e.tryGet<ShaderProfileComponent>();
 								if (prof) {
@@ -35,10 +35,10 @@ namespace kengine::opengl {
 							}
 					};
 
-					displayShaders("GBuffer", em.getEntities<GBufferShaderComponent>());
-					displayShaders("Lighting", em.getEntities<LightingShaderComponent>());
-					displayShaders("Post lighting", em.getEntities<PostLightingShaderComponent>());
-					displayShaders("Post process", em.getEntities<PostProcessShaderComponent>());
+					displayShaders("GBuffer", em.getEntities<ShaderComponent, GBufferShaderComponent>());
+					displayShaders("Lighting", em.getEntities<ShaderComponent, LightingShaderComponent>());
+					displayShaders("Post lighting", em.getEntities<ShaderComponent, PostLightingShaderComponent>());
+					displayShaders("Post process", em.getEntities<ShaderComponent, PostProcessShaderComponent>());
 				}
 				ImGui::End();
 			}};

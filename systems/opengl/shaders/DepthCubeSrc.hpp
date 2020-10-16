@@ -2,7 +2,7 @@
 
 #include "opengl/Uniform.hpp"
 
-namespace kengine::Shaders::src {
+namespace kengine::opengl::shaders::src {
 	namespace DepthCube {
 		namespace Geom {
 			extern const char * glsl;
@@ -23,7 +23,7 @@ namespace kengine::Shaders::src {
 	}
 }
 
-#define refltype kengine::Shaders::src::DepthCube::Geom::Uniforms
+#define refltype kengine::opengl::shaders::src::DepthCube::Geom::Uniforms
 putils_reflection_info{
 	putils_reflection_attributes(
 		putils_reflection_attribute_private(_shadowMatrices)
@@ -31,7 +31,7 @@ putils_reflection_info{
 };
 #undef refltype
 
-#define refltype kengine::Shaders::src::DepthCube::Frag::Uniforms
+#define refltype kengine::opengl::shaders::src::DepthCube::Frag::Uniforms
 putils_reflection_info{
 	putils_reflection_attributes(
 		putils_reflection_attribute_private(_lightPos), 

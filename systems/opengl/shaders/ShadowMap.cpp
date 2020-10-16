@@ -16,7 +16,7 @@ namespace kengine {
 	float SHADOW_MAP_FAR_PLANE = 1000.f;
 }
 
-namespace kengine::Shaders {
+namespace kengine::opengl::shaders {
 	ShadowMap::ShadowMap(EntityManager & em, Entity & parent)
 		: ShadowMapShader(false, putils_nameof(ShadowMap)), _em(em)
 	{

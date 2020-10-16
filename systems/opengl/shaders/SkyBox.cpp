@@ -45,7 +45,7 @@ void main() {
 )";
 #pragma endregion GLSL
 
-namespace kengine::Shaders {
+namespace kengine::opengl::shaders {
 	SkyBox::SkyBox(EntityManager & em)
 		: Program(true, putils_nameof(SkyBox)),
 		_em(em)

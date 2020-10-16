@@ -22,7 +22,9 @@ namespace kengine::recast {
 		static void init(Entity & e) {
 			e += functions::OnEntityRemoved{ onEntityRemoved };
 			e += functions::Execute{ execute };
-			e += makeGBufferShaderComponent<RecastDebugShader>(*g_em);
+
+			e += opengl::ShaderComponent{ std::make_unique<RecastDebugShader>(*g_em) };
+			e += opengl::GBufferShaderComponent{};
 
 			e += AdjustableComponent{
 				"Recast", {

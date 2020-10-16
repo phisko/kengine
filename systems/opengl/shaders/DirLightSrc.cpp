@@ -1,4 +1,4 @@
-namespace kengine::Shaders::src {
+namespace kengine::opengl::shaders::src {
     namespace DirLight {
 		namespace Frag {
 			const char * glsl = R"(

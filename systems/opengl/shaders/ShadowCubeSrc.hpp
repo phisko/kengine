@@ -2,7 +2,7 @@
 
 #include "opengl/Uniform.hpp"
 
-namespace kengine::Shaders::src {
+namespace kengine::opengl::shaders::src {
 	namespace ShadowCube {
 		namespace Frag {
 			extern const char * glsl;
@@ -18,7 +18,7 @@ namespace kengine::Shaders::src {
 	}
 }
 
-#define refltype kengine::Shaders::src::ShadowCube::Frag::Uniforms
+#define refltype kengine::opengl::shaders::src::ShadowCube::Frag::Uniforms
 putils_reflection_info{
 	putils_reflection_attributes(
 		putils_reflection_attribute_private(_shadowMap), 

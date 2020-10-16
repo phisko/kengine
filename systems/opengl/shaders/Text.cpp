@@ -76,7 +76,7 @@ void main() {
 )";
 #pragma endregion GLSL
 
-namespace kengine::Shaders {
+namespace kengine::opengl::shaders {
 	struct Font {
 		struct Character {
 			GLuint textureID;
@@ -142,7 +142,7 @@ namespace kengine::Shaders {
 		initWithShaders<Text>(putils::make_vector(
 			ShaderDescription{ vert, GL_VERTEX_SHADER },
 			ShaderDescription{ frag, GL_FRAGMENT_SHADER },
-			ShaderDescription{ Shaders::src::ApplyTransparency::Frag::glsl, GL_FRAGMENT_SHADER }
+			ShaderDescription{ opengl::shaders::src::ApplyTransparency::Frag::glsl, GL_FRAGMENT_SHADER }
 		));
 
 		_textureID = firstTextureID;

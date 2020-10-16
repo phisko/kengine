@@ -12,7 +12,7 @@
 
 #include "ShadowMapShader.hpp"
 
-namespace kengine::Shaders {
+namespace kengine::opengl::shaders {
 	void SpotLight::init(size_t firstTextureID) {
 		initWithShaders<SpotLight>(putils::make_vector(
 			ShaderDescription{ src::ProjViewModel::Vert::glsl, GL_VERTEX_SHADER },
@@ -51,7 +51,7 @@ namespace kengine::Shaders {
 					glClear(GL_DEPTH_BUFFER_BIT);
 				}
 
-				for (const auto & [shadowMapEntity, shader, comp] : _em.getEntities<LightingShaderComponent, ShadowMapShaderComponent>()) {
+				for (const auto & [shadowMapEntity, shader, shadowMapShader] : _em.getEntities<ShaderComponent, ShadowMapShaderComponent>()) {
 					auto & shadowMap = static_cast<ShadowMapShader &>(*shader.shader);
 					shadowMap.run(e, light, centre, params);
 				}

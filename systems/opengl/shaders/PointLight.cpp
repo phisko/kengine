@@ -11,7 +11,7 @@
 #include "helpers/lightHelper.hpp"
 #include "shaderHelper.hpp"
 
-namespace kengine::Shaders {
+namespace kengine::opengl::shaders {
 	void PointLight::init(size_t firstTextureID) {
 		initWithShaders<PointLight>(putils::make_vector(
 			ShaderDescription{ src::ProjViewModel::Vert::glsl, GL_VERTEX_SHADER },
@@ -51,7 +51,7 @@ namespace kengine::Shaders {
 					glClear(GL_DEPTH_BUFFER_BIT);
 				}
 
-				for (const auto & [shadowCubeEntity, shader, comp] : _em.getEntities<LightingShaderComponent, ShadowCubeShaderComponent>()) {
+				for (const auto & [shadowCubeEntity, shader, shadowCubeShader] : _em.getEntities<ShaderComponent, ShadowCubeShaderComponent>()) {
 					auto & shadowCube = static_cast<ShadowCubeShader &>(*shader.shader);
 					shadowCube.run(e, light, centre, radius, params);
 				}

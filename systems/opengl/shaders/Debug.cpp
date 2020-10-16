@@ -62,7 +62,7 @@ void main() {
 )";
 #pragma endregion GLSL
 
-namespace kengine::Shaders {
+namespace kengine::opengl::shaders {
 	Debug::Debug(EntityManager & em)
 		: Program(false, putils_nameof(Debug)),
 		_em(em)

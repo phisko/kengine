@@ -2,7 +2,7 @@
 
 #include "opengl/Uniform.hpp"
 
-namespace kengine::Shaders::src {
+namespace kengine::opengl::shaders::src {
 	namespace ProjViewModel {
 		namespace Vert {
 			extern const char * glsl;
@@ -16,7 +16,7 @@ namespace kengine::Shaders::src {
 	}
 }
 
-#define refltype kengine::Shaders::src::ProjViewModel::Vert::Uniforms
+#define refltype kengine::opengl::shaders::src::ProjViewModel::Vert::Uniforms
 putils_reflection_info{
 	putils_reflection_attributes(
 		putils_reflection_attribute_private(_proj), 

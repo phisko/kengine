@@ -9,7 +9,7 @@
 #include "shaderHelper.hpp"
 #include "helpers/lightHelper.hpp"
 
-namespace kengine::Shaders {
+namespace kengine::opengl::shaders {
 	template<typename T, typename Func>
 	void ShadowMapShader::runImpl(T & depthMap, Func && draw, const Parameters & params) {
 		glViewport(0, 0, depthMap.size, depthMap.size);

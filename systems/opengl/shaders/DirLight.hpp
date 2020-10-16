@@ -10,7 +10,7 @@ namespace kengine {
 	struct DirLightComponent;
 }
 
-namespace kengine::Shaders {
+namespace kengine::opengl::shaders {
 	class DirLight : public putils::gl::Program,
 		public src::CSM::Frag::Uniforms,
 		public src::DirLight::Frag::Uniforms
@@ -30,11 +30,11 @@ namespace kengine::Shaders {
 	};
 }
 
-#define refltype kengine::Shaders::DirLight
+#define refltype kengine::opengl::shaders::DirLight
 putils_reflection_info{
 	putils_reflection_parents(
-		putils_reflection_type(kengine::Shaders::src::CSM::Frag::Uniforms),
-		putils_reflection_type(kengine::Shaders::src::DirLight::Frag::Uniforms)
+		putils_reflection_type(kengine::opengl::shaders::src::CSM::Frag::Uniforms),
+		putils_reflection_type(kengine::opengl::shaders::src::DirLight::Frag::Uniforms)
 	);
 };
 #undef refltype

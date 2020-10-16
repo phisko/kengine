@@ -10,7 +10,7 @@ namespace kengine {
 	struct PointLightComponent;
 }
 
-namespace kengine::Shaders {
+namespace kengine::opengl::shaders {
 	class ShadowCube;
 
 	class PointLight : public putils::gl::Program,
@@ -34,12 +34,12 @@ namespace kengine::Shaders {
 	};
 }
 
-#define refltype kengine::Shaders::PointLight
+#define refltype kengine::opengl::shaders::PointLight
 putils_reflection_info {
 	putils_reflection_parents(
-		putils_reflection_type(kengine::Shaders::src::ProjViewModel::Vert::Uniforms),
-		putils_reflection_type(kengine::Shaders::src::ShadowCube::Frag::Uniforms),
-		putils_reflection_type(kengine::Shaders::src::PointLight::Frag::Uniforms)
+		putils_reflection_type(kengine::opengl::shaders::src::ProjViewModel::Vert::Uniforms),
+		putils_reflection_type(kengine::opengl::shaders::src::ShadowCube::Frag::Uniforms),
+		putils_reflection_type(kengine::opengl::shaders::src::PointLight::Frag::Uniforms)
 	);
 };
 #undef refltype

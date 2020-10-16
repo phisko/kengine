@@ -6,7 +6,7 @@ namespace kengine {
 	class EntityManager;
 }
 
-namespace kengine::Shaders {
+namespace kengine::opengl::shaders {
 	class Text : public putils::gl::Program {
 	public:
 		Text(EntityManager & em);
@@ -31,7 +31,7 @@ namespace kengine::Shaders {
 	};
 }
 
-#define refltype kengine::Shaders::Text
+#define refltype kengine::opengl::shaders::Text
 putils_reflection_info{
 	putils_reflection_attributes(
 		putils_reflection_attribute_private(_model),

@@ -12,7 +12,7 @@ namespace kengine {
 	struct PointLightComponent;
 }
 
-namespace kengine::Shaders {
+namespace kengine::opengl::shaders {
 	class ShadowMapShader : public putils::gl::Program {
 	public:
 		ShadowMapShader(bool usesGBuffer = false, const char * name = "") : Program(usesGBuffer, name) {}
@@ -30,8 +30,8 @@ namespace kengine::Shaders {
 	};
 
 	class ShadowCubeShader : public putils::gl::Program,
-		public Shaders::src::DepthCube::Geom::Uniforms,
-		public Shaders::src::DepthCube::Frag::Uniforms
+		public src::DepthCube::Geom::Uniforms,
+		public src::DepthCube::Frag::Uniforms
 	{
 	public:
 		ShadowCubeShader(bool usesGBuffer = false, const char * name = "") : Program(usesGBuffer, name) {}
@@ -52,7 +52,7 @@ namespace kengine::Shaders {
 	};
 }
 
-#define refltype kengine::Shaders::ShadowCubeShader
+#define refltype kengine::opengl::shaders::ShadowCubeShader
 putils_reflection_info{
 	putils_reflection_attributes(
 		putils_reflection_attribute_private(_proj),
@@ -61,8 +61,8 @@ putils_reflection_info{
 	);
 
 	putils_reflection_parents(
-		putils_reflection_type(kengine::Shaders::src::DepthCube::Geom::Uniforms),
-		putils_reflection_type(kengine::Shaders::src::DepthCube::Frag::Uniforms)
+		putils_reflection_type(kengine::opengl::shaders::src::DepthCube::Geom::Uniforms),
+		putils_reflection_type(kengine::opengl::shaders::src::DepthCube::Frag::Uniforms)
 	);
 };
 #undef refltype

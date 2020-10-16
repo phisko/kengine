@@ -3,7 +3,7 @@
 #include "opengl/Uniform.hpp"
 #include "data/LightComponent.hpp"
 
-namespace kengine::Shaders::src {
+namespace kengine::opengl::shaders::src {
 	namespace ShadowMap {
 		namespace Frag {
 			extern const char * glsl;
@@ -36,7 +36,7 @@ namespace kengine::Shaders::src {
 	}
 }
 
-#define refltype kengine::Shaders::src::ShadowMap::Frag::Uniforms
+#define refltype kengine::opengl::shaders::src::ShadowMap::Frag::Uniforms
 putils_reflection_info{
 	putils_reflection_attributes(
 		putils_reflection_attribute_private(_shadowMap),
@@ -47,7 +47,7 @@ putils_reflection_info{
 };
 #undef refltype
 
-#define refltype kengine::Shaders::src::CSM::Frag::Uniforms
+#define refltype kengine::opengl::shaders::src::CSM::Frag::Uniforms
 putils_reflection_info{
 	putils_reflection_attributes(
 		putils_reflection_attribute_private(_shadowMap), 

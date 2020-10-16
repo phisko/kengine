@@ -12,7 +12,7 @@
 #include "ShadowMap.hpp"
 #include "QuadSrc.hpp"
 
-namespace kengine::Shaders {
+namespace kengine::opengl::shaders {
 	GodRaysSpotLight::GodRaysSpotLight(EntityManager & em)
 		: Program(true, putils_nameof(GodRaysSpotLight)),
 		_em(em)

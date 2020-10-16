@@ -111,7 +111,7 @@ namespace kengine {
 		initWithShaders<RecastDebugShader>(putils::make_vector(
 			ShaderDescription{ vert, GL_VERTEX_SHADER },
 			ShaderDescription{ frag, GL_FRAGMENT_SHADER },
-			ShaderDescription{ Shaders::src::ApplyTransparency::Frag::glsl, GL_FRAGMENT_SHADER }
+			ShaderDescription{ opengl::shaders::src::ApplyTransparency::Frag::glsl, GL_FRAGMENT_SHADER }
 		));
 
 		glGenVertexArrays(1, &_vao);

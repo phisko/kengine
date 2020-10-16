@@ -193,36 +193,69 @@ namespace kengine::opengl {
 
 		static void addShaders() {
 			{ // GBuffer
-				*em += [=](Entity & e) { e += makeGBufferShaderComponent<Shaders::Debug>(*em); };
-				*em += [=](Entity & e) { e += makeGBufferShaderComponent<Shaders::Text>(*em); };
+				*em += [=](Entity & e) {
+					e += ShaderComponent{ std::make_unique<shaders::Debug>(*em) };
+					e += GBufferShaderComponent{};
+				};
+				*em += [=](Entity & e) {
+					e += ShaderComponent{ std::make_unique<shaders::Text>(*em) };
+					e += GBufferShaderComponent{};
+				};
 			}
 
 			{ // Lighting
 				*em += [&](Entity & e) {
-					e += makeLightingShaderComponent<Shaders::ShadowMap>(*em, e);
+					e += ShaderComponent{ std::make_unique<shaders::ShadowMap>(*em, e) };
 					e += ShadowMapShaderComponent{};
 				};
 
 				*em += [&](Entity & e) {
-					e += makeLightingShaderComponent<Shaders::ShadowCube>(*em);
+					e += ShaderComponent{ std::make_unique<shaders::ShadowCube>(*em) };
 					e += ShadowCubeShaderComponent{};
 				};
 
-				*em += [=](Entity & e) { e += makeLightingShaderComponent<Shaders::SpotLight>(*em); };
-				*em += [=](Entity & e) { e += makeLightingShaderComponent<Shaders::DirLight>(*em, e); };
-				*em += [=](Entity & e) { e += makeLightingShaderComponent<Shaders::PointLight>(*em); };
+				*em += [=](Entity & e) {
+					e += ShaderComponent{ std::make_unique<shaders::SpotLight>(*em) };
+					e += LightingShaderComponent{};
+				};
+				*em += [=](Entity & e) {
+					e += ShaderComponent{ std::make_unique<shaders::DirLight>(*em, e) };
+					e += LightingShaderComponent{};
+				};
+				*em += [=](Entity & e) {
+					e += ShaderComponent{ std::make_unique<shaders::PointLight>(*em) };
+					e += LightingShaderComponent{};
+				};
 			}
 
 			{ // Post lighting
-				*em += [=](Entity & e) { e += makePostLightingShaderComponent<Shaders::GodRaysDirLight>(*em); };
-				*em += [=](Entity & e) { e += makePostLightingShaderComponent<Shaders::GodRaysPointLight>(*em); };
-				*em += [=](Entity & e) { e += makePostLightingShaderComponent<Shaders::GodRaysSpotLight>(*em); };
+				*em += [=](Entity & e) {
+					e += ShaderComponent{ std::make_unique<shaders::GodRaysDirLight>(*em) };
+					e += PostLightingShaderComponent{};
+				};
+				*em += [=](Entity & e) {
+					e += ShaderComponent{ std::make_unique<shaders::GodRaysPointLight>(*em) };
+					e += PostLightingShaderComponent{};
+				};
+				*em += [=](Entity & e) {
+					e += ShaderComponent{ std::make_unique<shaders::GodRaysSpotLight>(*em) };
+					e += PostLightingShaderComponent{};
+				};
 			}
 
 			{ // Post process
-				*em += [=](Entity & e) { e += makePostProcessShaderComponent<Shaders::LightSphere>(*em, e); };
-				*em += [=](Entity & e) { e += makePostProcessShaderComponent<Shaders::Highlight>(*em); };
-				*em += [=](Entity & e) { e += makePostProcessShaderComponent<Shaders::SkyBox>(*em); };
+				*em += [=](Entity & e) {
+					e += ShaderComponent{ std::make_unique<shaders::LightSphere>(*em, e) };
+					e += PostProcessShaderComponent{};
+				};
+				*em += [=](Entity & e) {
+					e += ShaderComponent{ std::make_unique<shaders::Highlight>(*em) };
+					e += PostProcessShaderComponent{};
+				};
+				*em += [=](Entity & e) {
+					e += ShaderComponent{ std::make_unique<shaders::SkyBox>(*em) };
+					e += PostProcessShaderComponent{};
+				};
 			}
 		}
 
@@ -230,21 +263,9 @@ namespace kengine::opengl {
 			if (gBufferIterator == nullptr)
 				return;
 
-			const auto gbuffer = e.tryGet<GBufferShaderComponent>();
-			if (gbuffer)
-				initShader(*gbuffer->shader);
-
-			const auto lighting = e.tryGet<LightingShaderComponent>();
-			if (lighting)
-				initShader(*lighting->shader);
-
-			const auto postLighting = e.tryGet<PostLightingShaderComponent>();
-			if (postLighting)
-				initShader(*postLighting->shader);
-
-			const auto postProcess = e.tryGet<PostProcessShaderComponent>();
-			if (postProcess)
-				initShader(*postProcess->shader);
+			const auto shader = e.tryGet<ShaderComponent>();
+			if (shader)
+				initShader(*shader->shader);
 		}
 
 		static void initShader(putils::gl::Program & p) {
@@ -529,9 +550,9 @@ namespace kengine::opengl {
 			return &fb;
 		}
 
-		template<typename Shaders>
-		static void runShaders(Shaders && shaders) {
-			for (auto & [e, comp] : shaders) {
+		template<typename Tag>
+		static void runShaders() {
+			for (auto & [e, comp, tag] : em->getEntities<ShaderComponent, Tag>()) {
 				if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 					continue;
 				if (!comp.enabled)
@@ -570,7 +591,7 @@ namespace kengine::opengl {
 			{
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 				shaderHelper::Enable depth(GL_DEPTH_TEST);
-				runShaders(em.getEntities<GBufferShaderComponent>());
+				runShaders<GBufferShaderComponent>();
 			}
 			gbuffer->bindForReading();
 		}
@@ -581,9 +602,9 @@ namespace kengine::opengl {
 
 			glBlitFramebuffer(0, 0, (GLint)params.viewport.size.x, (GLint)params.viewport.size.y, 0, 0, (GLint)params.viewport.size.x, (GLint)params.viewport.size.y, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
-			runShaders(em.getEntities<LightingShaderComponent>());
-			runShaders(em.getEntities<PostLightingShaderComponent>());
-			runShaders(em.getEntities<PostProcessShaderComponent>());
+			runShaders<LightingShaderComponent>();
+			runShaders<PostLightingShaderComponent>();
+			runShaders<PostProcessShaderComponent>();
 		}
 
 		static void blitTextureToViewport(const CameraFramebufferComponent & fb, const ViewportComponent & viewport) {
@@ -679,13 +700,13 @@ namespace kengine::opengl {
 			gBufferTextureCount = nbAttributes;
 			gBufferIterator = iterator;
 
-			for (const auto & [e, shader] : em->getEntities<GBufferShaderComponent>())
+			for (const auto & [e, shader, gbuffer] : em->getEntities<ShaderComponent, GBufferShaderComponent>())
 				initShader(*shader.shader);
-			for (const auto & [e, shader] : em->getEntities<LightingShaderComponent>())
+			for (const auto & [e, shader, lighting] : em->getEntities<ShaderComponent, LightingShaderComponent>())
 				initShader(*shader.shader);
-			for (const auto & [e, shader] : em->getEntities<PostLightingShaderComponent>())
+			for (const auto & [e, shader, postLighting] : em->getEntities<ShaderComponent, PostLightingShaderComponent>())
 				initShader(*shader.shader);
-			for (const auto & [e, shader] : em->getEntities<PostProcessShaderComponent>())
+			for (const auto & [e, shader, postProcess] : em->getEntities<ShaderComponent, PostProcessShaderComponent>())
 				initShader(*shader.shader);
 
 			for (const auto & [e, modelInfo, modelData] : em->getEntities<SystemSpecificModelComponent<putils::gl::Mesh>, ModelDataComponent>())

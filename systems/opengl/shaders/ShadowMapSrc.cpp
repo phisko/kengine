@@ -1,7 +1,7 @@
 #include "macro_as_string.hpp"
 #include "data/LightComponent.hpp"
 
-namespace kengine::Shaders::src {
+namespace kengine::opengl::shaders::src {
 	namespace ShadowMap {
 		namespace Frag {
 			const char * glsl = R"(

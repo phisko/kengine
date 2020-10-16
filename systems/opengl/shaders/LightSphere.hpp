@@ -11,7 +11,7 @@ namespace kengine {
 	struct LightComponent;
 }
 
-namespace kengine::Shaders {
+namespace kengine::opengl::shaders {
 	class LightSphere : public putils::gl::Program,
 		public src::ProjViewModel::Vert::Uniforms
 	{
@@ -32,10 +32,10 @@ namespace kengine::Shaders {
 	};
 }
 
-#define refltype kengine::Shaders::LightSphere
+#define refltype kengine::opengl::shaders::LightSphere
 putils_reflection_info{
 	putils_reflection_parents(
-		putils_reflection_type(kengine::Shaders::src::ProjViewModel::Vert::Uniforms)
+		putils_reflection_type(kengine::opengl::shaders::src::ProjViewModel::Vert::Uniforms)
 	);
 
 	putils_reflection_attributes(

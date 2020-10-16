@@ -2,7 +2,7 @@
 
 #include "opengl/Uniform.hpp"
 
-namespace kengine::Shaders::src {
+namespace kengine::opengl::shaders::src {
 	namespace PointLight {
 		namespace Frag {
 			extern const char * glsl;
@@ -30,7 +30,7 @@ namespace kengine::Shaders::src {
 	}
 }
 
-#define refltype kengine::Shaders::src::PointLight::Frag::Uniforms
+#define refltype kengine::opengl::shaders::src::PointLight::Frag::Uniforms
 putils_reflection_info{
 	putils_reflection_attributes(
 		putils_reflection_attribute_private(_viewPos), 
@@ -46,7 +46,7 @@ putils_reflection_info{
 };
 #undef refltype
 
-#define refltype kengine::Shaders::src::PointLight::GetDirection::Uniforms
+#define refltype kengine::opengl::shaders::src::PointLight::GetDirection::Uniforms
 putils_reflection_info{
 	putils_reflection_attributes(
 		putils_reflection_attribute_private(_position)

@@ -6,7 +6,7 @@ namespace kengine {
 	class EntityManager;
 }
 
-namespace kengine::Shaders {
+namespace kengine::opengl::shaders {
 	class Highlight : public putils::gl::Program {
 	public:
 		Highlight(EntityManager & em);
@@ -29,7 +29,7 @@ namespace kengine::Shaders {
 	};
 }
 
-#define refltype kengine::Shaders::Highlight
+#define refltype kengine::opengl::shaders::Highlight
 putils_reflection_info{
 	putils_reflection_attributes(
 		putils_reflection_attribute_private(_viewPos),

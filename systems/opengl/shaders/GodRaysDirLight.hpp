@@ -12,7 +12,7 @@ namespace kengine {
 	struct DirLightComponent;
 }
 
-namespace kengine::Shaders {
+namespace kengine::opengl::shaders {
 	class GodRaysDirLight : public putils::gl::Program,
 		public src::GodRays::Frag::Uniforms,
 		public src::CSM::Frag::Uniforms,
@@ -25,7 +25,7 @@ namespace kengine::Shaders {
 		void run(const Parameters & params) override;
 		
 	private:
-		void drawLight(const DirLightComponent & light, const CSMComponent & depthMap, const Parameters & params);
+		void drawLight(const DirLightComponent & light, const opengl::CSMComponent & depthMap, const Parameters & params);
 
 	private:
 		EntityManager & _em;
@@ -33,12 +33,12 @@ namespace kengine::Shaders {
 	};
 }
 
-#define refltype kengine::Shaders::GodRaysDirLight
+#define refltype kengine::opengl::shaders::GodRaysDirLight
 putils_reflection_info{
 	putils_reflection_parents(
-		putils_reflection_type(kengine::Shaders::src::GodRays::Frag::Uniforms),
-		putils_reflection_type(kengine::Shaders::src::CSM::Frag::Uniforms),
-		putils_reflection_type(kengine::Shaders::src::DirLight::GetDirection::Uniforms)
+		putils_reflection_type(kengine::opengl::shaders::src::GodRays::Frag::Uniforms),
+		putils_reflection_type(kengine::opengl::shaders::src::CSM::Frag::Uniforms),
+		putils_reflection_type(kengine::opengl::shaders::src::DirLight::GetDirection::Uniforms)
 	);
 };
 #undef refltype

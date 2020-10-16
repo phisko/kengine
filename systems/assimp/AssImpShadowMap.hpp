@@ -5,7 +5,7 @@
 namespace kengine {
 	class EntityManager;
 
-	class AssImpShadowMap : public Shaders::ShadowMapShader {
+	class AssImpShadowMap : public opengl::shaders::ShadowMapShader {
 	public:
 		AssImpShadowMap(EntityManager & em)
 			: ShadowMapShader(false, putils_nameof(AssImpShadowMap)),

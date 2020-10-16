@@ -8,10 +8,13 @@
 namespace kengine {
 	class EntityManager;
 	struct SpotLightComponent;
-	struct DepthMapComponent;
+
+	namespace opengl {
+		struct DepthMapComponent;
+	}
 }
 
-namespace kengine::Shaders {
+namespace kengine::opengl::shaders {
 	class GodRaysSpotLight : public putils::gl::Program,
 		public src::GodRays::Frag::Uniforms,
 		public src::ShadowMap::Frag::Uniforms,
@@ -32,12 +35,12 @@ namespace kengine::Shaders {
 	};
 }
 
-#define refltype kengine::Shaders::GodRaysSpotLight
+#define refltype kengine::opengl::shaders::GodRaysSpotLight
 putils_reflection_info {
 	putils_reflection_parents(
-		putils_reflection_type(kengine::Shaders::src::GodRays::Frag::Uniforms),
-		putils_reflection_type(kengine::Shaders::src::ShadowMap::Frag::Uniforms),
-		putils_reflection_type(kengine::Shaders::src::PointLight::GetDirection::Uniforms)
+		putils_reflection_type(kengine::opengl::shaders::src::GodRays::Frag::Uniforms),
+		putils_reflection_type(kengine::opengl::shaders::src::ShadowMap::Frag::Uniforms),
+		putils_reflection_type(kengine::opengl::shaders::src::PointLight::GetDirection::Uniforms)
 	);
 };
 #undef refltype

@@ -103,17 +103,18 @@ namespace kengine::assimp {
 			e += functions::OnEntityCreated{ onEntityCreated };
 
 			*em += [&](Entity & e) {
-				e += makeGBufferShaderComponent<AssImpShader>(*em);
+				e += opengl::ShaderComponent{ std::make_unique<AssImpShader>(*em) };
+				e += opengl::GBufferShaderComponent{};
 			};
 
 			*em += [&](Entity & e) {
-				e += makeLightingShaderComponent<AssImpShadowMap>(*em);
-				e += ShadowMapShaderComponent{};
+				e += opengl::ShaderComponent{ std::make_unique<AssImpShadowMap>(*em) };
+				e += opengl::ShadowMapShaderComponent{};
 			};
 
 			*em += [&](Entity & e) {
-				e += makeLightingShaderComponent<AssImpShadowCube>(*em);
-				e += ShadowCubeShaderComponent{};
+				e += opengl::ShaderComponent{ std::make_unique<AssImpShadowCube>(*em) };
+				e += opengl::ShadowCubeShaderComponent{};
 			};
 		}
 
