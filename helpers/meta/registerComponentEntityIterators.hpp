@@ -11,14 +11,14 @@ namespace kengine {
 
 		type += meta::ForEachEntity{
 			[&](auto && func) {
-				for (auto & [e, comp] : em.getEntities<Comp>())
+				for (auto [e, comp] : em.getEntities<Comp>())
 					func(e);
 			}
 		};
 
 		type += meta::ForEachEntityWithout{
 			[&](auto && func) {
-				for (auto & [e, notComp] : em.getEntities<no<Comp>>())
+				for (auto [e, notComp] : em.getEntities<no<Comp>>())
 					func(e);
 			}
 		};
