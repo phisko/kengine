@@ -57,7 +57,7 @@ namespace kengine::opengl::shaders {
 		_viewPos = params.camPos;
 		_screenSize = putils::Point2f(params.viewport.size);
 
-		for (auto &[e, light] : _em.getEntities<DirLightComponent>()) {
+		for (auto [e, light] : _em.getEntities<DirLightComponent>()) {
 			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 

@@ -21,14 +21,14 @@ namespace kengine::sortHelper {
 
 namespace kengine::sortHelper {
 	namespace detail {
+		template<typename PointerTuple, typename RefTuple>
+		void setImpl(PointerTuple & p, const RefTuple & r, std::index_sequence<>) {}
+
 		template<typename PointerTuple, typename RefTuple, size_t I, size_t ...Is>
 		void setImpl(PointerTuple & p, const RefTuple & r, std::index_sequence<I, Is...>) {
 			std::get<I + 1>(p) = &std::get<I + 1>(r);
 			setImpl(p, r, std::index_sequence<Is...>());
 		}
-
-		template<typename PointerTuple, typename RefTuple>
-		void setImpl(PointerTuple & p, const RefTuple & r, std::index_sequence<>) {}
 
 		template<typename PointerTuple, typename RefTuple, size_t ...Is>
 		void set(PointerTuple & p, const RefTuple & r, std::index_sequence<Is...> is) {

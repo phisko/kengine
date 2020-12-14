@@ -34,7 +34,7 @@ namespace kengine::recast {
 	}
 
 	static void removeOldAgents() {
-		for (auto & [e, agent, noPathfinding] : g_em->getEntities<RecastAgentComponent, no<PathfindingComponent>>()) {
+		for (auto [e, agent, noPathfinding] : g_em->getEntities<RecastAgentComponent, no<PathfindingComponent>>()) {
 			auto environment = g_em->getEntity(agent.crowd);
 			auto & crowd = environment.get<RecastCrowdComponent>();
 			crowd.crowd->removeAgent(agent.index);
@@ -61,7 +61,7 @@ namespace kengine::recast {
 	static void attachAgentComponent(Entity & e, const ObjectInfo & objectInfo, const RecastCrowdComponent & crowd, Entity::ID crowdId);
 #pragma endregion
 	static void createNewAgents() {
-		for (auto & [e, pathfinding, transform, noRecast] : g_em->getEntities<PathfindingComponent, TransformComponent, no<RecastAgentComponent>>()) {
+		for (auto [e, pathfinding, transform, noRecast] : g_em->getEntities<PathfindingComponent, TransformComponent, no<RecastAgentComponent>>()) {
 			if (pathfinding.environment == Entity::INVALID_ID)
 				continue;
 
@@ -144,7 +144,7 @@ namespace kengine::recast {
 #pragma endregion createNewAgents
 
 	static void moveChangedAgents() {
-		for (auto & [e, pathfinding, agent] : g_em->getEntities<PathfindingComponent, RecastAgentComponent>()) {
+		for (auto [e, pathfinding, agent] : g_em->getEntities<PathfindingComponent, RecastAgentComponent>()) {
 			if (pathfinding.environment == agent.crowd)
 				continue;
 

@@ -27,7 +27,7 @@
 #include "MagicaVoxel.hpp"
 
 namespace kengine::magica_voxel {
-	static auto buildMesh(PolyVox::RawVolume<PolyVoxComponent::VertexData> & volume) {
+	static auto buildMesh(PolyVox::RawVolume<PolyVoxComponent::VertexData> && volume) {
 		const auto encodedMesh = PolyVox::extractCubicMesh(&volume, volume.getEnclosingRegion());
 		const auto mesh = PolyVox::decodeMesh(encodedMesh);
 		return mesh;
@@ -95,7 +95,7 @@ namespace kengine::magica_voxel {
 #ifndef KENGINE_NDEBUG
 			std::cout << putils::termcolor::green << "[MagicaVoxel] Loading " << putils::termcolor::cyan << f << putils::termcolor::green << "..." << putils::termcolor::reset;
 #endif
-			const auto meshInfo = loadVoxModel(f);
+			auto meshInfo = loadVoxModel(f);
 			auto & mesh = e.attach<MagicaVoxelModelComponent>().mesh;
 			mesh = std::move(meshInfo.mesh);
 
@@ -159,7 +159,7 @@ namespace kengine::magica_voxel {
 
 		static ModelDataComponent::FreeFunc release(Entity::ID id, EntityManager & em) {
 			return [&em, id] {
-				auto & e = em.getEntity(id);
+				auto e = em.getEntity(id);
 				const auto model = e.tryGet<MagicaVoxelModelComponent>();
 				if (model) {
 					model->mesh.clear();
@@ -231,7 +231,7 @@ namespace kengine::magica_voxel {
 				volume.setVoxel(voxel.x, voxel.z, voxel.y, voxelValue);
 			}
 
-			return { buildMesh(volume), size };
+			return { buildMesh(std::move(volume)), size };
 		}
 
 		static bool idMatches(const char * s1, const char * s2) {

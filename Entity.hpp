@@ -103,36 +103,3 @@ putils_reflection_info{
 	);
 };
 #undef refltype
-
-#include "EntityManager.hpp"
-
-template<typename T>
-T & kengine::Entity::attach() {
-	if (!has<T>()) {
-		static const auto component = getId<T>();
-		componentMask.set(component, true);
-		manager->addComponent(id, component);
-	}
-	return get<T>();
-}
-
-template<typename T>
-void kengine::Entity::attach(T && comp) {
-	using Comp = std::decay_t<T>;
-
-	Component<Comp>::get(id) = FWD(comp);
-	if (!has<Comp>()) {
-		static const auto component = getId<Comp>();
-		componentMask.set(component, true);
-		manager->addComponent(id, component);
-	}
-}
-
-template<typename T>
-void kengine::Entity::detach() {
-	assert("No such component" && has<T>());
-	get<T>() = T{};
-	static const auto component = getId<T>();
-	componentMask.set(component, false);
-	manager->removeComponent(id, component);
-}

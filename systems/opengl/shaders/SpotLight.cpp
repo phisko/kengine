@@ -37,7 +37,7 @@ namespace kengine::opengl::shaders {
 
 		glActiveTexture((GLenum)(GL_TEXTURE0 + _shadowMapTextureID));
 
-		for (auto &[e, light, transform] : _em.getEntities<SpotLightComponent, TransformComponent>()) {
+		for (auto [e, light, transform] : _em.getEntities<SpotLightComponent, TransformComponent>()) {
 			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 

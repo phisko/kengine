@@ -77,14 +77,14 @@ namespace kengine {
 			}
 
 			template<typename E>
-			Value(const char * name, E * enumType) : name(name), i((int *)enumType), adjustableType(Enum) {
+			Value(const char * name, E * enumType) : name(name), storage(IntStorage{ (int *)enumType }) {
 				static_assert(std::is_enum_v<E> && std::is_same_v<std::underlying_type_t<E>, int>);
 				getEnumNames = getEnumNamesImpl<E>;
 				enumCount = putils::magic_enum::enum_count<E>();
 			}
 
 			template<typename E>
-			Value(const char * name, E enumType) : name(name), i(enumType), adjustableType(Enum) {
+			Value(const char * name, E enumType) : name(name), storage(IntStorage{ (int)enumType }) {
 				static_assert(std::is_enum_v<E> && std::is_same_v<std::underlying_type_t<E>, int>);
 				getEnumNames = getEnumNamesImpl<E>();
 				enumCount = putils::magic_enum::enum_count<E>();

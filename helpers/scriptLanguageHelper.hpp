@@ -25,8 +25,8 @@ namespace kengine::scriptLanguageHelper {
 		);
 
 		registerFunction("removeEntity",
-			function<void(Entity &)>(
-				[&](Entity & go) { em.removeEntity(go); }
+			function<void(Entity)>(
+				[&](Entity go) { em.removeEntity(go); }
 			)
 		);
 		registerFunction("removeEntityById",
@@ -41,11 +41,11 @@ namespace kengine::scriptLanguageHelper {
 			)
 		);
 
-		using ForEachEntityFunc = function<void(Entity &)>;
+		using ForEachEntityFunc = function<void(Entity)>;
 		registerFunction("forEachEntity",
 			function<void(const ForEachEntityFunc &)>(
 				[&](const ForEachEntityFunc & f) {
-					for (auto & e : em.getEntities())
+					for (auto e : em.getEntities())
 						f(e);
 				}
 			)
@@ -66,40 +66,40 @@ namespace kengine::scriptLanguageHelper {
 
 		const auto className = putils::reflection::get_class_name<T>();
 		registerEntityMember(putils::string<128>("get%s", className),
-			function<T & (Entity &)>(
-				[](Entity & self) { return std::ref(self.get<T>()); }
+			function<T & (Entity)>(
+				[](Entity self) { return std::ref(self.get<T>()); }
 			)
 		);
 
 		registerEntityMember(putils::string<128>("tryGet%s", className),
-			function<const T * (Entity &)>(
-				[](Entity & self) { return self.tryGet<T>(); }
+			function<const T * (Entity)>(
+				[](Entity self) { return self.tryGet<T>(); }
 			)
 		);
 
 		registerEntityMember(putils::string<128>("has%s", className),
-			function<bool(Entity &)>(
-				[](Entity & self) { return self.has<T>(); }
+			function<bool(Entity)>(
+				[](Entity self) { return self.has<T>(); }
 			)
 		);
 
 		registerEntityMember(putils::string<128>("attach%s", className),
-			function<T & (Entity &)>(
-				[](Entity & self) { return std::ref(self.attach<T>()); }
+			function<T & (Entity)>(
+				[](Entity self) { return std::ref(self.attach<T>()); }
 			)
 		);
 
 		registerEntityMember(putils::string<128>("detach%s", className),
-			function<void(Entity &)>(
-				[](Entity & self) { self.detach<T>(); }
+			function<void(Entity)>(
+				[](Entity self) { self.detach<T>(); }
 			)
 		);
 
-		using ForEachEntityFunc = function<void(Entity &, T &)>;
+		using ForEachEntityFunc = function<void(Entity, T &)>;
 		registerFunction(putils::string<128>("forEachEntityWith%s", className),
 			function<void(const ForEachEntityFunc &)>(
 				[&](const ForEachEntityFunc & f) {
-					for (auto & [e, t] : em.getEntities<T>())
+					for (auto [e, t] : em.getEntities<T>())
 						f(e, t);
 				}
 			)

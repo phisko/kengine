@@ -65,7 +65,7 @@ namespace kengine::imgui_tool {
 				bool mustSave = false;
 				if (ImGui::BeginMenu("Tools")) {
 					if (ImGui::MenuItem("Disable all"))
-						for (auto & [e, tool] : em->getEntities<ImGuiToolComponent>())
+						for (auto [e, tool] : em->getEntities<ImGuiToolComponent>())
 							tool.enabled = false;
 
 					const auto sorted = sortHelper::getNameSortedEntities<KENGINE_IMGUI_MAX_TOOLS, ImGuiToolComponent>(*em);

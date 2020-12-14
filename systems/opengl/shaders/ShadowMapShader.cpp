@@ -4,7 +4,7 @@
 #include "ShadowMapShader.hpp"
 #include "data/LightComponent.hpp"
 #include "data/ShaderComponent.hpp"
-#include "Entity.hpp"
+#include "EntityManager.hpp"
 
 #include "shaderHelper.hpp"
 #include "helpers/lightHelper.hpp"

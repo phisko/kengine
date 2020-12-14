@@ -137,7 +137,7 @@ namespace kengine::glfw {
 						em->removeEntity(e.id);
 				}
 
-			for (auto & [e, window, initGlfw, noGLFW] : em->getEntities<WindowComponent, GLFWWindowInitComponent, no<GLFWWindowComponent>>()) {
+			for (auto [e, window, initGlfw, noGLFW] : em->getEntities<WindowComponent, GLFWWindowInitComponent, no<GLFWWindowComponent>>()) {
 				createWindow(e, window, initGlfw);
 				e.detach<GLFWWindowInitComponent>();
 			}

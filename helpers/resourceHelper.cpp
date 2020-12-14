@@ -1,4 +1,5 @@
 #include <filesystem>
+#include "EntityManager.hpp"
 #include "resourceHelper.hpp"
 #include "assertHelper.hpp"
 
@@ -22,7 +23,7 @@ namespace kengine::resourceHelper {
 		const auto directory = path.parent_path();
 		const auto filename = path.filename();
 
-		for (const auto & [e, model] : em.getEntities<ModelComponent>())
+		for (const auto [e, model] : em.getEntities<ModelComponent>())
 			if (model.file == file)
 				return e.id;
 
@@ -50,7 +51,7 @@ namespace kengine::resourceHelper {
 			const void * data = nullptr;
 		};
 
-		for (const auto & [e, loaded] : em.getEntities<LoadedFromMemory>())
+		for (const auto [e, loaded] : em.getEntities<LoadedFromMemory>())
 			if (loaded.data == data)
 				return e.id;
 

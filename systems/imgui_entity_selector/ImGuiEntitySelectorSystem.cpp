@@ -41,7 +41,7 @@ namespace kengine::imgui_entity_selector {
 				ImGui::Separator();
 
 				ImGui::BeginChild("child");
-				for (auto & e : em->getEntities())
+				for (auto e : em->getEntities())
 					if (matches(e, nameSearch, *em)) {
 						if (e.has<SelectedComponent>())
 							e.detach<SelectedComponent>();

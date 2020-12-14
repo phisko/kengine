@@ -28,7 +28,7 @@ namespace kengine::lua {
 
 		static void execute(float deltaTime) {
 			(*state)["deltaTime"] = deltaTime;
-			for (auto & [e, comp] : em->getEntities<LuaComponent>()) {
+			for (auto [e, comp] : em->getEntities<LuaComponent>()) {
 				(*state)["self"] = &e;
 				for (const auto & s : comp.scripts)
 					state->script_file(s.c_str());

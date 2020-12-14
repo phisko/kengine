@@ -206,21 +206,21 @@ namespace kengine::bullet {
 		}
 
 		static void execute(float deltaTime) {
-			for (auto & [e, instance, transform, physics, comp] : em->getEntities<InstanceComponent, TransformComponent, PhysicsComponent, BulletPhysicsComponent>()) {
+			for (auto [e, instance, transform, physics, comp] : em->getEntities<InstanceComponent, TransformComponent, PhysicsComponent, BulletPhysicsComponent>()) {
 				const auto model = em->getEntity(instance.model);
 				if (!model.has<ModelColliderComponent>())
 					continue;
 				updateBulletComponent(e, comp, transform, physics, model);
 			}
 
-			for (auto & [e, instance, transform, physics, noComp] : em->getEntities<InstanceComponent, TransformComponent, PhysicsComponent, no<BulletPhysicsComponent>>()) {
+			for (auto [e, instance, transform, physics, noComp] : em->getEntities<InstanceComponent, TransformComponent, PhysicsComponent, no<BulletPhysicsComponent>>()) {
 				const auto model = em->getEntity(instance.model);
 				if (!model.has<ModelColliderComponent>())
 					continue;
 				addBulletComponent(e, transform, physics, model);
 			}
 
-			for (auto & [e, bullet, noPhys] : em->getEntities<BulletPhysicsComponent, no<PhysicsComponent>>())
+			for (auto [e, bullet, noPhys] : em->getEntities<BulletPhysicsComponent, no<PhysicsComponent>>())
 				e.detach<BulletPhysicsComponent>();
 
 			dynamicsWorld.setGravity({ 0.f, -adjustables.gravity, 0.f });

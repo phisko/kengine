@@ -11,8 +11,10 @@
 
 #include "functions/Execute.hpp"
 
+#include "meta/type.hpp"
+
 namespace kengine::polyvox {
-	static auto buildMesh(PolyVox::RawVolume<PolyVoxComponent::VertexData> & volume) {
+	static auto buildMesh(PolyVox::RawVolume<PolyVoxComponent::VertexData> && volume) {
 		const auto encodedMesh = PolyVox::extractCubicMesh(&volume, volume.getEnclosingRegion());
 		const auto mesh = PolyVox::decodeMesh(encodedMesh);
 		return mesh;
@@ -33,7 +35,7 @@ namespace kengine::polyvox {
 		}
 
 		static void execute(float deltaTime) {
-			for (auto & [e, poly] : em->getEntities<PolyVoxComponent>()) {
+			for (auto [e, poly] : em->getEntities<PolyVoxComponent>()) {
 				if (!poly.changed)
 					continue;
 				poly.changed = false;
@@ -41,7 +43,7 @@ namespace kengine::polyvox {
 				ModelDataComponent modelData;
 
 				auto & mesh = e.attach<PolyVoxMeshContainerComponent>().mesh;
-				mesh = buildMesh(poly.volume);
+				mesh = buildMesh(std::move(poly.volume));
 
 				const auto & centre = poly.volume.getEnclosingRegion().getCentre();
 				auto & model = e.attach<ModelComponent>();
@@ -62,7 +64,7 @@ namespace kengine::polyvox {
 
 		static ModelDataComponent::FreeFunc FreePolyVoxMeshData(Entity::ID id) {
 			return [id] {
-				auto & e = em->getEntity(id);
+				auto e = em->getEntity(id);
 				auto & mesh = e.attach<PolyVoxMeshContainerComponent>().mesh; // previous `attach` hasn't been processed yet, so `get` would assert
 				mesh.clear();
 				e.detach<PolyVoxMeshContainerComponent>();

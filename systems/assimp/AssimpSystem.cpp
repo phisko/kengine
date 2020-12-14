@@ -546,7 +546,7 @@ namespace kengine::assimp {
 		};
 
 		static void execute(float deltaTime) {
-			for (auto & [e, instance, skeleton, anim, transform] : em->getEntities<InstanceComponent, SkeletonComponent, AnimationComponent, TransformComponent>())
+			for (auto [e, instance, skeleton, anim, transform] : em->getEntities<InstanceComponent, SkeletonComponent, AnimationComponent, TransformComponent>())
 			{// em->runTask([&] {
 				const auto & modelEntity = em->getEntity(instance.model);
 				if (!modelEntity.has<AssImpModelSkeletonComponent>())

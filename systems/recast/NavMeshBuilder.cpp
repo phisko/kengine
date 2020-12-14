@@ -26,11 +26,11 @@ namespace Flags {
 
 namespace kengine::recast {
 #pragma region declarations
-	static void createRecastMesh(const char * file, Entity & model, NavMeshComponent & navMesh, const ModelDataComponent & modelData);
+	static void createRecastMesh(const char * file, Entity model, NavMeshComponent & navMesh, const ModelDataComponent & modelData);
 #pragma endregion
 	void buildNavMeshes() {
 		static const auto buildRecastComponent = [](auto && entities) {
-			for (auto & [e, model, modelData, navMesh, _] : entities) {
+			for (auto [e, model, modelData, navMesh, _] : entities) {
 				g_em->runTask([&, id = e.id]{
 					kengine_assert(*g_em, navMesh.vertsPerPoly <= DT_VERTS_PER_POLYGON);
 					createRecastMesh(model.file, g_em->getEntity(id), navMesh, modelData);
@@ -66,7 +66,7 @@ namespace kengine::recast {
 	static NavMeshQueryPtr createNavMeshQuery(const NavMeshComponent & params, const dtNavMesh & navMesh);
 	static NavMeshComponent::GetPathFunc getPath(const ModelComponent & model, const NavMeshComponent & navMesh, const RecastNavMeshComponent & recast);
 #pragma endregion
-	static void createRecastMesh(const char * file, Entity & e, NavMeshComponent & navMesh, const ModelDataComponent & modelData) {
+	static void createRecastMesh(const char * file, Entity e, NavMeshComponent & navMesh, const ModelDataComponent & modelData) {
 		NavMeshData data;
 
 		const putils::string<4096> binaryFile("%s.nav", file);

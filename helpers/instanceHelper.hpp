@@ -32,7 +32,7 @@ namespace kengine::instanceHelper {
 
 	template<typename Comp>
 	bool modelHas(EntityManager & em, const Entity & instance) {
-		return modelHas<Comp>(em, e.get<InstanceComponent>());
+		return modelHas<Comp>(em, instance.get<InstanceComponent>());
 	}
 
 	template<typename Comp>

@@ -314,7 +314,7 @@ namespace kengine::imgui_adjustable {
 
 		static void load() {
 			loadedFile = putils::parseIniFile(KENGINE_ADJUSTABLE_SAVE_FILE);
-			for (auto & [e, comp] : em->getEntities<AdjustableComponent>())
+			for (auto [e, comp] : em->getEntities<AdjustableComponent>())
 				initAdjustable(comp);
 		}
 

@@ -34,7 +34,7 @@ namespace kengine::imgui_entity_editor {
 			for (const auto & [e, getScale] : em->getEntities<functions::GetImGuiScale>())
 				scale = getScale();
 
-			for (auto & [selected, _] : em->getEntities<SelectedComponent>()) {
+			for (auto [selected, _] : em->getEntities<SelectedComponent>()) {
 				bool open = true;
 
 				ImGui::SetNextWindowSize({ 200.f * scale, 200.f * scale }, ImGuiCond_FirstUseEver);

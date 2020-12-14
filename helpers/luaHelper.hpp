@@ -83,6 +83,6 @@ namespace kengine::luaHelper {
 	template<typename Func>
 	void registerFunction(EntityManager & em, const char * name, Func && func) {
 		for (const auto & [e, comp] : em.getEntities<LuaStateComponent>())
-			detail::registerFunctionWithState(state, name, func);
+			detail::registerFunctionWithState(*comp.state, name, func);
 	}
 }

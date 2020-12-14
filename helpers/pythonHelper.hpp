@@ -33,15 +33,15 @@ namespace kengine::pythonHelper {
 		template<typename Ret, typename ...Args>
 		void registerFunctionWithState(PythonStateComponent::Data & state, const char * name, const scriptLanguageHelper::function<Ret(Args...)> & func) {
 			if constexpr (std::is_reference_v<Ret>)
-				state.module.def(name, func, py::return_value_policy::reference);
+				state.module_.def(name, func, py::return_value_policy::reference);
 			else
-				state.module.def(name, func);
+				state.module_.def(name, func);
 		}
 
 		template<typename T>
 		void registerTypeWithState(EntityManager & em, PythonStateComponent::Data & state) {
 			if constexpr (std::is_same<T, Entity>()) {
-				state.entity = new py::class_<Entity>(state.module, putils::reflection::get_class_name<Entity>(), py::dynamic_attr());
+				state.entity = new py::class_<Entity>(state.module_, putils::reflection::get_class_name<Entity>(), py::dynamic_attr());
 				putils::reflection::for_each_attribute<Entity>([&](auto name, auto member) {
 					state.entity->def_readwrite(name, member);
 				});
@@ -50,7 +50,7 @@ namespace kengine::pythonHelper {
 				});
 			}
 			else
-				putils::python::registerType<T>(state.module);
+				putils::python::registerType<T>(state.module_);
 		}
 
 		template<typename T>

@@ -313,10 +313,10 @@ namespace kengine::opengl {
 			if (window.id == Entity::INVALID_ID || window.glfw == nullptr)
 				return;
 
-			for (auto & [e, modelData, noOpenGL] : em->getEntities<ModelDataComponent, no<SystemSpecificModelComponent<putils::gl::Mesh>>>())
+			for (auto [e, modelData, noOpenGL] : em->getEntities<ModelDataComponent, no<SystemSpecificModelComponent<putils::gl::Mesh>>>())
 				createObject(e, modelData);
 
-			for (auto & [e, textureData, noTextureModel] : em->getEntities<TextureDataComponent, no<SystemSpecificTextureComponent<putils::gl::Texture>>>())
+			for (auto [e, textureData, noTextureModel] : em->getEntities<TextureDataComponent, no<SystemSpecificTextureComponent<putils::gl::Texture>>>())
 				loadTexture(e, textureData);
 
 			doOpenGL();
@@ -475,7 +475,7 @@ namespace kengine::opengl {
 			};
 			putils::vector<ToBlit, KENGINE_MAX_VIEWPORTS> toBlit;
 
-			for (auto & [e, cam, viewport] : em->getEntities<CameraComponent, ViewportComponent>()) {
+			for (auto [e, cam, viewport] : em->getEntities<CameraComponent, ViewportComponent>()) {
 				if (viewport.window == Entity::INVALID_ID)
 					viewport.window = window.id;
 				else if (viewport.window != window.id)
@@ -552,7 +552,7 @@ namespace kengine::opengl {
 
 		template<typename Tag>
 		static void runShaders() {
-			for (auto & [e, comp, tag] : em->getEntities<ShaderComponent, Tag>()) {
+			for (auto [e, comp, tag] : em->getEntities<ShaderComponent, Tag>()) {
 				if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 					continue;
 				if (!comp.enabled)

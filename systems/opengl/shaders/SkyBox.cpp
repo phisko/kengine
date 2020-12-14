@@ -169,7 +169,7 @@ namespace kengine::opengl::shaders {
 
 		glActiveTexture((GLenum)(GL_TEXTURE0 + _textureID));
 
-		for (auto & [e, comp] : _em.getEntities<SkyBoxComponent>()) {
+		for (auto [e, comp] : _em.getEntities<SkyBoxComponent>()) {
 			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
