@@ -1,5 +1,5 @@
 #include "SkyBox.hpp"
-#include "EntityManager.hpp"
+#include "kengine.hpp"
 
 #include "data/SkyBoxComponent.hpp"
 
@@ -46,12 +46,11 @@ void main() {
 #pragma endregion GLSL
 
 namespace kengine::opengl::shaders {
-	SkyBox::SkyBox(EntityManager & em)
-		: Program(true, putils_nameof(SkyBox)),
-		_em(em)
+	SkyBox::SkyBox() noexcept
+		: Program(true, putils_nameof(SkyBox))
 	{}
 
-	void SkyBox::init(size_t firstTextureID) {
+	void SkyBox::init(size_t firstTextureID) noexcept {
 		initWithShaders<SkyBox>(putils::make_vector(
 			ShaderDescription{ vert, GL_VERTEX_SHADER },
 			ShaderDescription{ frag, GL_FRAGMENT_SHADER }
@@ -61,13 +60,13 @@ namespace kengine::opengl::shaders {
 		_tex = _textureID;
 	}
 
-	static SkyBoxOpenGLComponent & loadSkyBox(Entity & e, const SkyBoxComponent & comp) {
+	static SkyBoxOpenGLComponent & loadSkyBox(Entity & e, const SkyBoxComponent & comp) noexcept {
 		auto & skyBox = e.attach<SkyBoxOpenGLComponent>();
 		skyBox.textureID.generate();
 		glBindTexture(GL_TEXTURE_CUBE_MAP, skyBox.textureID);
 
 		unsigned int i = 0;
-		putils::reflection::for_each_attribute(comp, [&i](const char * name, auto && member) {
+		putils::reflection::for_each_attribute(comp, [&i](const char * name, auto && member) noexcept {
 			if constexpr (std::is_same<putils_typeof(member), SkyBoxComponent::string>()) {
 				int width, height, nrChannels;
 				const auto data = stbi_load(member.c_str(), &width, &height, &nrChannels, 0);
@@ -87,7 +86,7 @@ namespace kengine::opengl::shaders {
 		return skyBox;
 	}
 
-	static void drawSkyBox() {
+	static void drawSkyBox() noexcept {
 		static GLuint vao = 0;
 		static GLuint vbo;
 		if (vao == 0) {
@@ -149,7 +148,7 @@ namespace kengine::opengl::shaders {
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}
 
-	void SkyBox::run(const Parameters & params) {
+	void SkyBox::run(const Parameters & params) noexcept {
 		use();
 
 		GLint fbo;
@@ -169,7 +168,7 @@ namespace kengine::opengl::shaders {
 
 		glActiveTexture((GLenum)(GL_TEXTURE0 + _textureID));
 
-		for (auto [e, comp] : _em.getEntities<SkyBoxComponent>()) {
+		for (auto [e, comp] : entities.with<SkyBoxComponent>()) {
 			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 

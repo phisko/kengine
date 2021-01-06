@@ -25,11 +25,11 @@ namespace kengine {
 		struct BaseFunction<Ret(Args...)> {
 			putils::function<Ret(Args...), KENGINE_FUNCTION_MAX_SIZE> func = nullptr;
 
-			bool operator==(nullptr_t) const { return func == nullptr; }
-			bool operator!=(nullptr_t) const { return func != nullptr; }
+			bool operator==(nullptr_t) const noexcept { return func == nullptr; }
+			bool operator!=(nullptr_t) const noexcept { return func != nullptr; }
 
-			Ret operator()(Args... args) const { return func(args...); }
-			Ret call(Args ... args) const { return func(args...); }
+			Ret operator()(Args... args) const noexcept { return func(args...); }
+			Ret call(Args ... args) const noexcept { return func(args...); }
 		};
 	}
 }

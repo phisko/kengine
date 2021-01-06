@@ -2,20 +2,15 @@
 
 #include "opengl/Program.hpp"
 
-namespace kengine {
-	class EntityManager;
-}
-
 namespace kengine::opengl::shaders {
 	class SkyBox : public putils::gl::Program {
 	public:
-		SkyBox(EntityManager & em);
+		SkyBox() noexcept;
 
-		void init(size_t firstTextureID) override;
-		void run(const Parameters & params) override;
+		void init(size_t firstTextureID) noexcept override;
+		void run(const Parameters & params) noexcept override;
 
 	private:
-		EntityManager & _em;
 		size_t _textureID;
 
 #pragma region Uniforms

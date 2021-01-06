@@ -6,7 +6,6 @@
 #include "SpotLightSrc.hpp"
 
 namespace kengine {
-	class EntityManager;
 	struct SpotLightComponent;
 }
 
@@ -19,19 +18,17 @@ namespace kengine::opengl::shaders {
 		public src::SpotLight::Frag::Uniforms
 	{
 	public:
-		SpotLight(EntityManager & em)
-			: Program(true, putils_nameof(SpotLight)),
-			_em(em)
+		SpotLight() noexcept
+			: Program(true, putils_nameof(SpotLight))
 		{}
 
-		void init(size_t firstTextureID) override;
-		void run(const Parameters & params) override;
+		void init(size_t firstTextureID) noexcept override;
+		void run(const Parameters & params) noexcept override;
 
 	private:
-		EntityManager & _em;
 		size_t _shadowMapTextureID = -1;
 
-		void setLight(const SpotLightComponent & light, const putils::Point3f & pos); 
+		void setLight(const SpotLightComponent & light, const putils::Point3f & pos) noexcept; 
 	};
 }
 

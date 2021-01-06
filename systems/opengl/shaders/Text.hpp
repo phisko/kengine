@@ -2,18 +2,14 @@
 
 #include "opengl/Program.hpp"
 
-namespace kengine {
-	class EntityManager;
-}
-
 namespace kengine::opengl::shaders {
 	class Text : public putils::gl::Program {
 	public:
-		Text(EntityManager & em);
-		~Text();
+		Text() noexcept;
+		~Text() noexcept;
 
-		void init(size_t firstTextureID) override;
-		void run(const Parameters & params) override;
+		void init(size_t firstTextureID) noexcept override;
+		void run(const Parameters & params) noexcept override;
 
 	public:
 		putils::gl::Uniform<glm::mat4> _model;
@@ -26,7 +22,6 @@ namespace kengine::opengl::shaders {
 		putils::gl::Uniform<float> _entityID;
 
 	private:
-		EntityManager & _em;
 		size_t _textureID;
 	};
 }

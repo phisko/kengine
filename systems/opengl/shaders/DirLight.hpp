@@ -6,7 +6,6 @@
 #include "DirLightSrc.hpp"
 
 namespace kengine {
-	class EntityManager;
 	struct DirLightComponent;
 }
 
@@ -16,16 +15,15 @@ namespace kengine::opengl::shaders {
 		public src::DirLight::Frag::Uniforms
 	{
 	public:
-		DirLight(EntityManager & em, Entity & parent);
+		DirLight(Entity & parent) noexcept;
 
-		void init(size_t firstTextureID) override;
-		void run(const Parameters & params) override;
-
-	private:
-		void setLight(const DirLightComponent & light); 
+		void init(size_t firstTextureID) noexcept override;
+		void run(const Parameters & params) noexcept override;
 
 	private:
-		EntityManager & _em;
+		void setLight(const DirLightComponent & light) noexcept; 
+
+	private:
 		size_t _shadowMapTextureID;
 	};
 }

@@ -1,7 +1,10 @@
 #pragma once
 
+#ifndef PUTILS_GLM
+static_assert(false, "RecastSystem requires GLM");
+#else
+
 #include <glm/glm.hpp>
-#include "EntityManager.hpp"
 #include "Point.hpp"
 
 namespace kengine::recast {
@@ -10,5 +13,6 @@ namespace kengine::recast {
 	};
 
 	extern Adjustables g_adjustables;
-	extern EntityManager * g_em;
 }
+
+#endif

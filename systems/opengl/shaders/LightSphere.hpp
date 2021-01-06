@@ -6,7 +6,6 @@
 #include "ProjViewModelSrc.hpp"
 
 namespace kengine {
-	class EntityManager;
 	class Entity;
 	struct LightComponent;
 }
@@ -16,19 +15,16 @@ namespace kengine::opengl::shaders {
 		public src::ProjViewModel::Vert::Uniforms
 	{
 	public:
-		LightSphere(EntityManager & em, Entity & parent);
+		LightSphere(Entity & parent) noexcept;
 
-		void init(size_t firstTextureID) override;
-		void run(const Parameters & params) override;
+		void init(size_t firstTextureID) noexcept override;
+		void run(const Parameters & params) noexcept override;
 
 	private:
-		void drawLight(const LightComponent & light, const glm::vec3 & pos, float size);
+		void drawLight(const LightComponent & light, const glm::vec3 & pos, float size) noexcept;
 
 	public:
 		putils::gl::Uniform<putils::NormalizedColor> _color;
-
-	private:
-		EntityManager & _em;
 	};
 }
 

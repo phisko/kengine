@@ -1,5 +1,5 @@
 #include "OnClickSystem.hpp"
-#include "EntityManager.hpp"
+#include "kengine.hpp"
 
 #include "data/OnClickComponent.hpp"
 #include "data/InputComponent.hpp"
@@ -7,24 +7,22 @@
 
 namespace kengine::onclick {
 	struct impl {
-		static inline EntityManager * em;
-
-		static void init(Entity & e) {
+		static void init(Entity & e) noexcept {
 			InputComponent input;
 			input.onMouseButton = onMouseButton;
 			e += input;
 		}
 
-		static void onMouseButton(Entity::ID window, int button, const putils::Point2f & coords, bool pressed) {
+		static void onMouseButton(EntityID window, int button, const putils::Point2f & coords, bool pressed) noexcept {
 			if (!pressed)
 				return;
 
-			for (const auto & [e, getEntity] : em->getEntities<functions::GetEntityInPixel>()) {
+			for (const auto & [e, getEntity] : entities.with<functions::GetEntityInPixel>()) {
 				const auto id = getEntity(window, coords);
-				if (id == Entity::INVALID_ID)
+				if (id == INVALID_ID)
 					continue;
 
-				const auto e = em->getEntity(id);
+				const auto e = entities.get(id);
 
 				const auto onClick = e.tryGet<OnClickComponent>();
 				if (onClick)
@@ -35,9 +33,8 @@ namespace kengine::onclick {
 }
 
 namespace kengine {
-	EntityCreatorFunctor<64> OnClickSystem(EntityManager & em) {
-		onclick::impl::em = &em;
-		return [&](Entity & e) {
+	EntityCreator * OnClickSystem() noexcept {
+		return [](Entity & e) noexcept {
 			onclick::impl::init(e);
 		};
 	}

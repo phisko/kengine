@@ -2,7 +2,7 @@
 
 #include <utility>
 #include "BaseFunction.hpp"
-#include "EntityManager.hpp"
+#include "kengine.hpp"
 
 #ifndef KENGINE_GBUFFER_ATTRIBUTE_ITERATOR_MAX_SIZE
 # define KENGINE_GBUFFER_ATTRIBUTE_ITERATOR_MAX_SIZE 64
@@ -19,8 +19,8 @@ namespace kengine::functions {
 
 namespace kengine {
 	template<typename Textures>
-	void initGBuffer(EntityManager & em) {
-		for (const auto & [e, initGBuffer] : em.getEntities<functions::InitGBuffer>()) {
+	void initGBuffer() {
+		for (const auto & [e, initGBuffer] : entities.with<functions::InitGBuffer>()) {
 			initGBuffer(std::tuple_size_v<putils_typeof(putils::reflection::get_attributes<Textures>())>,
 				[](auto func) {
 					putils::reflection::for_each_attribute<Textures>([&](auto name, auto member) {

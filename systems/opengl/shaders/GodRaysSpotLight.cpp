@@ -1,5 +1,5 @@
 #include "GodRaysSpotLight.hpp"
-#include "EntityManager.hpp"
+#include "kengine.hpp"
 
 #include "data/LightComponent.hpp"
 #include "data/TransformComponent.hpp"
@@ -13,13 +13,12 @@
 #include "QuadSrc.hpp"
 
 namespace kengine::opengl::shaders {
-	GodRaysSpotLight::GodRaysSpotLight(EntityManager & em)
-		: Program(true, putils_nameof(GodRaysSpotLight)),
-		_em(em)
+	GodRaysSpotLight::GodRaysSpotLight() noexcept
+		: Program(true, putils_nameof(GodRaysSpotLight))
 	{
 	}
 
-	void GodRaysSpotLight::init(size_t firstTextureID) {
+	void GodRaysSpotLight::init(size_t firstTextureID) noexcept {
 		initWithShaders<GodRaysSpotLight>(putils::make_vector(
 			ShaderDescription{ src::Quad::Vert::glsl, GL_VERTEX_SHADER },
 			ShaderDescription{ src::GodRays::Frag::glsl, GL_FRAGMENT_SHADER },
@@ -31,7 +30,7 @@ namespace kengine::opengl::shaders {
 		_shadowMap = _shadowMapTextureID;
 	}
 
-	void GodRaysSpotLight::run(const Parameters & params) {
+	void GodRaysSpotLight::run(const Parameters & params) noexcept {
 		use();
 
 		shaderHelper::Enable _(GL_BLEND);
@@ -45,7 +44,7 @@ namespace kengine::opengl::shaders {
 		_viewPos = params.camPos;
 		_screenSize = putils::Point2f(params.viewport.size);
 
-		for (const auto &[e, light, depthMap, transform, comp] : _em.getEntities<SpotLightComponent, DepthMapComponent, TransformComponent, GodRaysComponent>()) {
+		for (const auto &[e, light, depthMap, transform, comp] : entities.with<SpotLightComponent, DepthMapComponent, TransformComponent, GodRaysComponent>()) {
 			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
@@ -57,7 +56,7 @@ namespace kengine::opengl::shaders {
 		}
 	}
 
-	void GodRaysSpotLight::drawLight(const SpotLightComponent & light, const putils::Point3f & pos, const DepthMapComponent & depthMap, const Parameters & params) {
+	void GodRaysSpotLight::drawLight(const SpotLightComponent & light, const putils::Point3f & pos, const DepthMapComponent & depthMap, const Parameters & params) noexcept {
 		_color = light.color;
 		_position = pos;
 

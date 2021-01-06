@@ -6,7 +6,7 @@
 
 namespace kengine {
 	struct PathfindingComponent {
-		Entity::ID environment = Entity::INVALID_ID; // Entity in which we are navigating. Should have a model with a NavMeshComponent
+		EntityID environment = INVALID_ID; // Entity in which we are navigating. Should have a model with a NavMeshComponent
 		putils::Point3f destination;
 		float searchDistance = 2.f;
 		float maxSpeed = 1.f;

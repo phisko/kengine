@@ -1,6 +1,6 @@
 #include "DirLight.hpp"
 
-#include "EntityManager.hpp"
+#include "kengine.hpp"
 #include "helpers/lightHelper.hpp"
 
 #include "data/LightComponent.hpp"
@@ -18,9 +18,8 @@ namespace kengine {
 }
 
 namespace kengine::opengl::shaders {
-	DirLight::DirLight(EntityManager & em, Entity & parent)
-		: Program(true, putils_nameof(DirLight)),
-		_em(em)
+	DirLight::DirLight(Entity & parent) noexcept
+		: Program(true, putils_nameof(DirLight))
 	{
 #ifndef KENGINE_NDEBUG
 		parent += AdjustableComponent{
@@ -31,7 +30,7 @@ namespace kengine::opengl::shaders {
 #endif
 	}
 
-	void DirLight::init(size_t firstTextureID) {
+	void DirLight::init(size_t firstTextureID) noexcept {
 		initWithShaders<DirLight>(putils::make_vector(
 			ShaderDescription{ src::Quad::Vert::glsl, GL_VERTEX_SHADER },
 			ShaderDescription{ src::CSM::Frag::glsl, GL_FRAGMENT_SHADER },
@@ -43,7 +42,7 @@ namespace kengine::opengl::shaders {
 			_shadowMap[i] = _shadowMapTextureID + i;
 	}
 
-	void DirLight::run(const Parameters & params) {
+	void DirLight::run(const Parameters & params) noexcept {
 		shaderHelper::Enable __b(GL_BLEND);
 		glBlendEquation(GL_FUNC_ADD);
 		glBlendFunc(GL_ONE, GL_ONE);
@@ -57,7 +56,7 @@ namespace kengine::opengl::shaders {
 		_viewPos = params.camPos;
 		_screenSize = putils::Point2f(params.viewport.size);
 
-		for (auto [e, light] : _em.getEntities<DirLightComponent>()) {
+		for (auto [e, light] : entities.with<DirLightComponent>()) {
 			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
@@ -73,7 +72,7 @@ namespace kengine::opengl::shaders {
 					}
 				}
 
-				for (const auto & [shadowMapEntity, shader, shadowMapShader] : _em.getEntities<ShaderComponent, ShadowMapShaderComponent>()) {
+				for (const auto & [shadowMapEntity, shader, shadowMapShader] : entities.with<ShaderComponent, ShadowMapShaderComponent>()) {
 					auto & shadowMap = static_cast<ShadowMapShader &>(*shader.shader);
 					shadowMap.run(e, light, params);
 				}
@@ -93,7 +92,7 @@ namespace kengine::opengl::shaders {
 		}
 	}
 
-	void DirLight::setLight(const DirLightComponent & light) {
+	void DirLight::setLight(const DirLightComponent & light) noexcept {
 		_color = light.color;
 		_direction = light.direction;
 

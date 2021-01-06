@@ -1,5 +1,5 @@
 #include "ShadowMap.hpp"
-#include "EntityManager.hpp"
+#include "kengine.hpp"
 
 #include "data/InstanceComponent.hpp"
 #include "data/AdjustableComponent.hpp"
@@ -17,8 +17,8 @@ namespace kengine {
 }
 
 namespace kengine::opengl::shaders {
-	ShadowMap::ShadowMap(EntityManager & em, Entity & parent)
-		: ShadowMapShader(false, putils_nameof(ShadowMap)), _em(em)
+	ShadowMap::ShadowMap(Entity & parent) noexcept
+		: ShadowMapShader(false, putils_nameof(ShadowMap))
 	{
 		parent += AdjustableComponent{
 			"Render/Lights", {
@@ -28,7 +28,7 @@ namespace kengine::opengl::shaders {
 		};
 	}
 
-	void ShadowMap::init(size_t firstTextureID) {
+	void ShadowMap::init(size_t firstTextureID) noexcept {
 		initWithShaders<ShadowMap>(putils::make_vector(
 			ShaderDescription{ src::ProjViewModel::Vert::glsl, GL_VERTEX_SHADER }
 		));
@@ -36,16 +36,16 @@ namespace kengine::opengl::shaders {
 		_proj = glm::mat4(1.f);
 	}
 
-	void ShadowMap::drawToTexture(GLuint texture, const glm::mat4 & lightSpaceMatrix, const Parameters & params) {
+	void ShadowMap::drawToTexture(GLuint texture, const glm::mat4 & lightSpaceMatrix, const Parameters & params) noexcept {
 		_view = lightSpaceMatrix;
 
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture, 0);
 
-		for (const auto & [e, instance, transform, shadow, noNoShadow] : _em.getEntities<InstanceComponent, TransformComponent, DefaultShadowComponent, no<NoShadowComponent>>()) {
+		for (const auto & [e, instance, transform, shadow, noNoShadow] : entities.with<InstanceComponent, TransformComponent, DefaultShadowComponent, no<NoShadowComponent>>()) {
 			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
-			const auto & model = _em.getEntity(instance.model);
+			const auto & model = entities.get(instance.model);
 			const auto openGL = model.tryGet<SystemSpecificModelComponent<putils::gl::Mesh>>();
 			if (!openGL)
 				continue;

@@ -1,6 +1,6 @@
 #include "PolyVoxShader.hpp"
 
-#include "EntityManager.hpp"
+#include "kengine.hpp"
 
 #include "data/InstanceComponent.hpp"
 #include "data/TransformComponent.hpp"
@@ -71,14 +71,13 @@ void main() {
 #pragma endregion GLSL
 
 namespace kengine {
-	static glm::vec3 toVec(const putils::Point3f & p) { return { p.x, p.y, p.z }; }
+	static glm::vec3 toVec(const putils::Point3f & p) noexcept { return { p.x, p.y, p.z }; }
 
-	PolyVoxShader::PolyVoxShader(EntityManager & em)
-		: Program(false, putils_nameof(PolyVoxShader)),
-		_em(em)
+	PolyVoxShader::PolyVoxShader() noexcept
+		: Program(false, putils_nameof(PolyVoxShader))
 	{}
 
-	void PolyVoxShader::init(size_t firstTextureID) {
+	void PolyVoxShader::init(size_t firstTextureID) noexcept {
 		initWithShaders<PolyVoxShader>(putils::make_vector(
 			ShaderDescription{ vert, GL_VERTEX_SHADER },
 			ShaderDescription{ frag, GL_FRAGMENT_SHADER },
@@ -86,18 +85,18 @@ namespace kengine {
 		));
 	}
 
-	void PolyVoxShader::run(const Parameters & params) {
+	void PolyVoxShader::run(const Parameters & params) noexcept {
 		use();
 
 		_view = params.view;
 		_proj = params.proj;
 		_viewPos = params.camPos;
 
-		for (const auto &[e, poly, graphics, instance, transform] : _em.getEntities<PolyVoxObjectComponent, GraphicsComponent, InstanceComponent, TransformComponent>()) {
+		for (const auto &[e, poly, graphics, instance, transform] : entities.with<PolyVoxObjectComponent, GraphicsComponent, InstanceComponent, TransformComponent>()) {
 			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
-			const auto model = _em.getEntity(instance.model);
+			const auto model = entities.get(instance.model);
 			const auto openGL = model.tryGet<SystemSpecificModelComponent<putils::gl::Mesh>>();
 			if (!openGL)
 				continue;

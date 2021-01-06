@@ -7,7 +7,7 @@
 #include <glm/gtx/euler_angles.hpp>
 
 #include "BulletSystem.hpp"
-#include "EntityManager.hpp"
+#include "kengine.hpp"
 
 #include "data/AdjustableComponent.hpp"
 #include "data/DebugGraphicsComponent.hpp"
@@ -35,7 +35,7 @@
 #include "BulletCollision/CollisionDispatch/btGhostObject.h"
 
 namespace putils {
-	inline bool operator<(const Point3f & lhs, const Point3f & rhs) {
+	inline bool operator<(const Point3f & lhs, const Point3f & rhs) noexcept {
 		if (lhs.x < rhs.x) return true;
 		if (lhs.x > rhs.x) return false;
 		if (lhs.y < rhs.y) return true;
@@ -47,103 +47,7 @@ namespace putils {
 }
 
 namespace kengine::bullet {
-	struct helpers {
-		static glm::vec3 toVec(const putils::Point3f & p) { return { p.x, p.y, p.z }; }
-		static putils::Point3f toPutils(const btVector3 & vec) { return { vec.getX(), vec.getY(), vec.getZ() }; }
-		static btVector3 toBullet(const putils::Point3f & p) { return { p.x, p.y, p.z }; }
-
-		static btTransform toBullet(const TransformComponent & transform) {
-			glm::mat4 mat(1.f);
-
-			mat = glm::translate(mat, toVec(transform.boundingBox.position));
-			mat = glm::rotate(mat, transform.yaw, { 0.f, 1.f, 0.f });
-			mat = glm::rotate(mat, transform.pitch, { 1.f, 0.f, 0.f });
-			mat = glm::rotate(mat, transform.roll, { 0.f, 0.f, 1.f });
-
-			btTransform ret;
-			ret.setFromOpenGLMatrix(glm::value_ptr(mat));
-
-			return ret;
-		}
-
-		static btTransform toBullet(const TransformComponent & parent, const ModelColliderComponent::Collider & collider, const SkeletonComponent * skeleton, const ModelSkeletonComponent * modelSkeleton, const ModelComponent * model) {
-			glm::mat4 parentMat(1.f);
-			parentMat = glm::scale(parentMat, { -1.f, 1.f, -1.f });
-
-			if (!collider.boneName.empty()) {
-				// Apply model scale to bone transformation
-				assert(skeleton != nullptr && modelSkeleton != nullptr && model != nullptr);
-
-				const auto worldSpaceBone = skeletonHelper::getBoneMatrix(collider.boneName.c_str(), *skeleton, *modelSkeleton);
-				const auto pos = matrixHelper::getPosition(worldSpaceBone);
-				parentMat = glm::translate(parentMat, toVec(pos * model->boundingBox.size * parent.boundingBox.size));
-				parentMat = glm::translate(parentMat, -toVec(pos));
-				parentMat *= worldSpaceBone;
-			}
-
-			glm::mat4 colliderMat(1.f);
-			colliderMat = glm::translate(colliderMat, toVec(collider.boundingBox.position * parent.boundingBox.size));
-			colliderMat = glm::rotate(colliderMat, collider.yaw, { 0.f, 1.f, 0.f });
-			colliderMat = glm::rotate(colliderMat, collider.pitch, { 1.f, 0.f, 0.f });
-			colliderMat = glm::rotate(colliderMat, collider.roll, { 0.f, 0.f, 1.f });
-
-			const auto mat = parentMat * colliderMat;
-			btTransform ret;
-			ret.setFromOpenGLMatrix(glm::value_ptr(mat));
-
-			return ret;
-		}
-	};
-
-#pragma region Debug Drawer
-#ifndef KENGINE_NDEBUG
-	class Drawer : public btIDebugDraw {
-	public:
-		Drawer(EntityManager & em) : _em(em) {
-			em += [this](Entity & e) {
-				e += TransformComponent{};
-				e += DebugGraphicsComponent{};
-				_debugEntity = e.id;
-			};
-		}
-
-		void cleanup() {
-			auto & comp = getDebugComponent();
-			comp.elements.clear();
-		}
-
-	private:
-		DebugGraphicsComponent & getDebugComponent() { return _em.getEntity(_debugEntity).get<DebugGraphicsComponent>(); }
-
-		void drawLine(const btVector3 & from, const btVector3 & to, const btVector3 & color) override {
-			auto & comp = getDebugComponent();
-			const auto a = helpers::toPutils(from);
-			const auto b = helpers::toPutils(to);
-			const auto putilsColor = putils::NormalizedColor{ color[0], color[1], color[2], 1.f };
-			comp.elements.emplace_back(DebugGraphicsComponent::Line{ a }, b, putilsColor, DebugGraphicsComponent::ReferenceSpace::World);
-		}
-
-		void drawContactPoint(const btVector3 & PointOnB, const btVector3 & normalOnB, btScalar distance, int lifeTime, const btVector3 & color) override {}
-
-		void draw3dText(const btVector3 & location, const char * textString) override {}
-
-		void reportErrorWarning(const char * warningString) override { std::cerr << putils::termcolor::red << "[Bullet] " << warningString << putils::termcolor::reset; }
-
-		void setDebugMode(int debugMode) override {}
-		int getDebugMode() const override { return DBG_DrawWireframe; }
-
-	private:
-		EntityManager & _em;
-		Entity::ID _debugEntity;
-	};
-
-	static Drawer * drawer = nullptr;
-#endif
-#pragma endregion Debug Drawer
-
 	struct impl {
-		static inline EntityManager * em;
-
 		static inline struct {
 			bool enableDebug = false;
 			float gravity = 1.f;
@@ -183,11 +87,11 @@ namespace kengine::bullet {
 			}
 
 			BulletPhysicsComponent() noexcept = default;
-			BulletPhysicsComponent(BulletPhysicsComponent &&) = default;
-			BulletPhysicsComponent & operator=(BulletPhysicsComponent &&) = default;
+			BulletPhysicsComponent(BulletPhysicsComponent &&) noexcept = default;
+			BulletPhysicsComponent & operator=(BulletPhysicsComponent &&) noexcept = default;
 		};
 
-		static void init(Entity & e) {
+		static void init(Entity & e) noexcept {
 			e += functions::Execute{ execute };
 			e += functions::QueryPosition{ queryPosition };
 
@@ -201,26 +105,26 @@ namespace kengine::bullet {
 			};
 
 #ifndef KENGINE_NDEBUG
-			bullet::drawer = new bullet::Drawer(*em);
+			drawer = new Drawer();
 #endif
 		}
 
-		static void execute(float deltaTime) {
-			for (auto [e, instance, transform, physics, comp] : em->getEntities<InstanceComponent, TransformComponent, PhysicsComponent, BulletPhysicsComponent>()) {
-				const auto model = em->getEntity(instance.model);
+		static void execute(float deltaTime) noexcept {
+			for (auto [e, instance, transform, physics, comp] : entities.with<InstanceComponent, TransformComponent, PhysicsComponent, BulletPhysicsComponent>()) {
+				const auto model = entities.get(instance.model);
 				if (!model.has<ModelColliderComponent>())
 					continue;
 				updateBulletComponent(e, comp, transform, physics, model);
 			}
 
-			for (auto [e, instance, transform, physics, noComp] : em->getEntities<InstanceComponent, TransformComponent, PhysicsComponent, no<BulletPhysicsComponent>>()) {
-				const auto model = em->getEntity(instance.model);
+			for (auto [e, instance, transform, physics, noComp] : entities.with<InstanceComponent, TransformComponent, PhysicsComponent, no<BulletPhysicsComponent>>()) {
+				const auto model = entities.get(instance.model);
 				if (!model.has<ModelColliderComponent>())
 					continue;
 				addBulletComponent(e, transform, physics, model);
 			}
 
-			for (auto [e, bullet, noPhys] : em->getEntities<BulletPhysicsComponent, no<PhysicsComponent>>())
+			for (auto [e, bullet, noPhys] : entities.with<BulletPhysicsComponent, no<PhysicsComponent>>())
 				e.detach<BulletPhysicsComponent>();
 
 			dynamicsWorld.setGravity({ 0.f, -adjustables.gravity, 0.f });
@@ -236,7 +140,7 @@ namespace kengine::bullet {
 
 		using CollisionShapeMap = std::map<putils::Point3f, std::unique_ptr<btCollisionShape>>;
 		template<typename Func>
-		static btCollisionShape * getCollisionShape(CollisionShapeMap & shapes, const putils::Vector3f & size, Func && creator) {
+		static btCollisionShape * getCollisionShape(CollisionShapeMap & shapes, const putils::Vector3f & size, Func && creator) noexcept {
 			const auto it = shapes.find(size);
 			if (it != shapes.end())
 				return it->second.get();
@@ -246,7 +150,7 @@ namespace kengine::bullet {
 			return ret;
 		}
 
-		static void addBulletComponent(Entity & e, TransformComponent & transform, PhysicsComponent & physics, const Entity & modelEntity) {
+		static void addBulletComponent(Entity & e, TransformComponent & transform, PhysicsComponent & physics, const Entity & modelEntity) noexcept {
 			auto & comp = e.attach<BulletPhysicsComponent>();
 			comp.active = true;
 			comp.motionState.transform = &transform;
@@ -309,7 +213,7 @@ namespace kengine::bullet {
 			dynamicsWorld.addRigidBody(&comp.body);
 		}
 
-		static void updateBulletComponent(Entity & e, BulletPhysicsComponent & comp, const TransformComponent & transform, PhysicsComponent & physics, const Entity & modelEntity, bool first = false) {
+		static void updateBulletComponent(Entity & e, BulletPhysicsComponent & comp, const TransformComponent & transform, PhysicsComponent & physics, const Entity & modelEntity, bool first = false) noexcept {
 			const bool kinematic = e.has<KinematicComponent>();
 
 			if (physics.changed || first) {
@@ -359,11 +263,11 @@ namespace kengine::bullet {
 			}
 		}
 
-		static void detectCollisions() {
+		static void detectCollisions() noexcept {
 			const auto numManifolds = dispatcher.getNumManifolds();
 			if (numManifolds <= 0)
 				return;
-			for (const auto & [_, onCollision] : em->getEntities<functions::OnCollision>())
+			for (const auto & [_, onCollision] : entities.with<functions::OnCollision>())
 				for (int i = 0; i < numManifolds; ++i) {
 					const auto contactManifold = dispatcher.getManifoldByIndexInternal(i);
 					const auto objectA = (btCollisionObject *)(contactManifold->getBody0());
@@ -371,13 +275,13 @@ namespace kengine::bullet {
 
 					const auto id1 = objectA->getUserIndex();
 					const auto id2 = objectB->getUserIndex();
-					auto e1 = em->getEntity(id1);
-					auto e2 = em->getEntity(id2);
+					auto e1 = entities.get(id1);
+					auto e2 = entities.get(id2);
 					onCollision(e1, e2);
 				}
 		}
 
-		static void queryPosition(const putils::Point3f & pos, float radius, const EntityIteratorFunc & func) {
+		static void queryPosition(const putils::Point3f & pos, float radius, const EntityIteratorFunc & func) noexcept {
 			btSphereShape sphere(radius);
 			btPairCachingGhostObject ghost;
 			btTransform transform;
@@ -388,12 +292,12 @@ namespace kengine::bullet {
 			ghost.activate(true);
 
 			struct Callback : btCollisionWorld::ContactResultCallback {
-				Callback(btPairCachingGhostObject & ghost, const EntityIteratorFunc & func) : ghost(ghost), func(func) {}
+				Callback(btPairCachingGhostObject & ghost, const EntityIteratorFunc & func) noexcept : ghost(ghost), func(func) {}
 
 				btScalar addSingleResult(btManifoldPoint & cp, const btCollisionObjectWrapper * colObj0Wrap, int partId0, int index0, const btCollisionObjectWrapper * colObj1Wrap, int partId1, int index1) final {
 					assert(colObj1Wrap->m_collisionObject == &ghost);
 					const auto id = colObj0Wrap->m_collisionObject->getUserIndex();
-					func(em->getEntity(id));
+					func(entities.get(id));
 					return 1.f;
 				}
 
@@ -405,15 +309,103 @@ namespace kengine::bullet {
 			dynamicsWorld.contactTest(&ghost, callback);
 		}
 
+		struct helpers {
+			static glm::vec3 toVec(const putils::Point3f & p) noexcept { return { p.x, p.y, p.z }; }
+			static putils::Point3f toPutils(const btVector3 & vec) noexcept { return { vec.getX(), vec.getY(), vec.getZ() }; }
+			static btVector3 toBullet(const putils::Point3f & p) noexcept { return { p.x, p.y, p.z }; }
+
+			static btTransform toBullet(const TransformComponent & transform) noexcept {
+				glm::mat4 mat(1.f);
+
+				mat = glm::translate(mat, toVec(transform.boundingBox.position));
+				mat = glm::rotate(mat, transform.yaw, { 0.f, 1.f, 0.f });
+				mat = glm::rotate(mat, transform.pitch, { 1.f, 0.f, 0.f });
+				mat = glm::rotate(mat, transform.roll, { 0.f, 0.f, 1.f });
+
+				btTransform ret;
+				ret.setFromOpenGLMatrix(glm::value_ptr(mat));
+
+				return ret;
+			}
+
+			static btTransform toBullet(const TransformComponent & parent, const ModelColliderComponent::Collider & collider, const SkeletonComponent * skeleton, const ModelSkeletonComponent * modelSkeleton, const ModelComponent * model) noexcept {
+				glm::mat4 parentMat(1.f);
+				parentMat = glm::scale(parentMat, { -1.f, 1.f, -1.f });
+
+				if (!collider.boneName.empty()) {
+					// Apply model scale to bone transformation
+					assert(skeleton != nullptr && modelSkeleton != nullptr && model != nullptr);
+
+					const auto worldSpaceBone = skeletonHelper::getBoneMatrix(collider.boneName.c_str(), *skeleton, *modelSkeleton);
+					const auto pos = matrixHelper::getPosition(worldSpaceBone);
+					parentMat = glm::translate(parentMat, toVec(pos * model->boundingBox.size * parent.boundingBox.size));
+					parentMat = glm::translate(parentMat, -toVec(pos));
+					parentMat *= worldSpaceBone;
+				}
+
+				glm::mat4 colliderMat(1.f);
+				colliderMat = glm::translate(colliderMat, toVec(collider.boundingBox.position * parent.boundingBox.size));
+				colliderMat = glm::rotate(colliderMat, collider.yaw, { 0.f, 1.f, 0.f });
+				colliderMat = glm::rotate(colliderMat, collider.pitch, { 1.f, 0.f, 0.f });
+				colliderMat = glm::rotate(colliderMat, collider.roll, { 0.f, 0.f, 1.f });
+
+				const auto mat = parentMat * colliderMat;
+				btTransform ret;
+				ret.setFromOpenGLMatrix(glm::value_ptr(mat));
+
+				return ret;
+			}
+		};
+
+#ifndef KENGINE_NDEBUG
+		struct Drawer : public btIDebugDraw {
+		public:
+			Drawer() noexcept {
+				entities += [this](Entity & e) noexcept {
+					e += TransformComponent{};
+					e += DebugGraphicsComponent{};
+					_debugEntity = e.id;
+				};
+			}
+
+			void cleanup() noexcept {
+				auto & comp = getDebugComponent();
+				comp.elements.clear();
+			}
+
+		private:
+			DebugGraphicsComponent & getDebugComponent() noexcept { return entities.get(_debugEntity).get<DebugGraphicsComponent>(); }
+
+			void drawLine(const btVector3 & from, const btVector3 & to, const btVector3 & color) noexcept override {
+				auto & comp = getDebugComponent();
+				const auto a = helpers::toPutils(from);
+				const auto b = helpers::toPutils(to);
+				const auto putilsColor = putils::NormalizedColor{ color[0], color[1], color[2], 1.f };
+				comp.elements.emplace_back(DebugGraphicsComponent::Line{ a }, b, putilsColor, DebugGraphicsComponent::ReferenceSpace::World);
+			}
+
+			void drawContactPoint(const btVector3 & PointOnB, const btVector3 & normalOnB, btScalar distance, int lifeTime, const btVector3 & color) override {}
+
+			void draw3dText(const btVector3 & location, const char * textString) override {}
+
+			void reportErrorWarning(const char * warningString) override { std::cerr << putils::termcolor::red << "[Bullet] " << warningString << putils::termcolor::reset; }
+
+			void setDebugMode(int debugMode) override {}
+			int getDebugMode() const override { return DBG_DrawWireframe; }
+
+		private:
+			EntityID _debugEntity;
+		};
+
+		static inline Drawer * drawer = nullptr;
+#endif
 	};
 }
 
 namespace kengine {
-	EntityCreator * BulletSystem(EntityManager & em) {
-		bullet::impl::em = &em;
-		return [](Entity & e) {
+	EntityCreator * BulletSystem() noexcept {
+		return [](Entity & e) noexcept {
 			bullet::impl::init(e);
 		};
 	}
-
 }

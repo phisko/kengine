@@ -1,5 +1,5 @@
 #include "ImGuiAdjustableSystem.hpp"
-#include "EntityManager.hpp"
+#include "kengine.hpp"
 
 #include <fstream>
 
@@ -43,13 +43,11 @@
 
 namespace kengine::imgui_adjustable {
 	struct impl {
-		static inline EntityManager * em;
-
 		using string = AdjustableComponent::string;
 		static inline putils::IniFile loadedFile;
 		using Sections = putils::vector<string, KENGINE_MAX_ADJUSTABLES_SECTIONS>;
 
-		static void init(Entity & e) {
+		static void init(Entity & e) noexcept {
 			load();
 			e += functions::OnTerminate{ save };
 			e += functions::OnEntityCreated{ onEntityCreated };
@@ -58,14 +56,14 @@ namespace kengine::imgui_adjustable {
 			auto & tool = e.attach<ImGuiToolComponent>();
 			tool.enabled = true;
 
-			e += functions::Execute{ [&](float deltaTime) {
+			e += functions::Execute{ [&](float deltaTime) noexcept {
 				if (!tool.enabled)
 					return;
 				drawImGui(tool.enabled);
 			} };
 		}
 
-		static void drawImGui(bool & enabled) {
+		static void drawImGui(bool & enabled) noexcept {
 			if (ImGui::Begin("Adjustables", &enabled)) {
 				static char nameSearch[1024] = "";
 
@@ -114,10 +112,10 @@ namespace kengine::imgui_adjustable {
 			ImGui::End();
 		}
 
-		static putils::vector<AdjustableComponent *, KENGINE_MAX_ADJUSTABLES> getFilteredComps(const char * nameSearch) {
+		static putils::vector<AdjustableComponent *, KENGINE_MAX_ADJUSTABLES> getFilteredComps(const char * nameSearch) noexcept {
 			putils::vector<AdjustableComponent *, KENGINE_MAX_ADJUSTABLES> comps;
 
-			for (const auto & [e, comp] : em->getEntities<AdjustableComponent>()) {
+			for (const auto & [e, comp] : entities.with<AdjustableComponent>()) {
 				if (comp.section.find(nameSearch) != std::string::npos) {
 					comps.emplace_back(&comp);
 					continue;
@@ -130,14 +128,14 @@ namespace kengine::imgui_adjustable {
 					}
 			}
 
-			std::sort(comps.begin(), comps.end(), [](const auto lhs, const auto rhs) {
+			std::sort(comps.begin(), comps.end(), [](const auto lhs, const auto rhs) noexcept {
 				return strcmp(lhs->section.c_str(), rhs->section.c_str()) < 0;
 				});
 
 			return comps;
 		}
 
-		static Sections split(const string & s, char delim) {
+		static Sections split(const string & s, char delim) noexcept {
 			Sections ret;
 
 			size_t previous = 0;
@@ -151,7 +149,7 @@ namespace kengine::imgui_adjustable {
 			return ret;
 		}
 
-		static string reconstitutePath(const Sections & subSections) {
+		static string reconstitutePath(const Sections & subSections) noexcept {
 			string ret;
 
 			bool first = true;
@@ -165,7 +163,7 @@ namespace kengine::imgui_adjustable {
 			return ret;
 		}
 
-		static size_t updateImGuiTree(bool & hidden, const Sections & subs, const Sections & previousSubsections) {
+		static size_t updateImGuiTree(bool & hidden, const Sections & subs, const Sections & previousSubsections) noexcept {
 			auto current = previousSubsections.size() - 1;
 
 			if (!previousSubsections.empty()) {
@@ -205,13 +203,13 @@ namespace kengine::imgui_adjustable {
 			return current;
 		}
 
-		static void draw(const char * name, AdjustableComponent::Value & value) {
+		static void draw(const char * name, AdjustableComponent::Value & value) noexcept {
 			ImGui::Columns(2);
 			ImGui::Text(name);
 			ImGui::NextColumn();
 
 			std::visit(putils::overloaded{
-				[&](AdjustableComponent::Value::IntStorage & s) {
+				[&](AdjustableComponent::Value::IntStorage & s) noexcept {
 					if (value.getEnumNames != nullptr)
 						ImGui::Combo((string("##") + value.name).c_str(), s.ptr != nullptr ? s.ptr : &s.value, value.getEnumNames(), (int)value.enumCount);
 					else {
@@ -225,7 +223,7 @@ namespace kengine::imgui_adjustable {
 						ImGui::PopItemWidth();
 					}
 				},
-				[&](AdjustableComponent::Value::FloatStorage & s) {
+				[&](AdjustableComponent::Value::FloatStorage & s) noexcept {
 					ImGui::PushItemWidth(-1.f);
 					auto val = s.ptr != nullptr ? *s.ptr : s.value;
 					if (ImGui::InputFloat((string("##") + value.name).c_str(), &val, 0.f, 0.f, "%.6f", ImGuiInputTextFlags_EnterReturnsTrue)) {
@@ -235,12 +233,12 @@ namespace kengine::imgui_adjustable {
 					}
 					ImGui::PopItemWidth();
 				},
-				[&](AdjustableComponent::Value::BoolStorage & s) {
+				[&](AdjustableComponent::Value::BoolStorage & s) noexcept {
 					ImGui::Checkbox((string("##") + value.name).c_str(), s.ptr != nullptr ? s.ptr : &s.value);
 					if (s.ptr != nullptr)
 						s.value = *s.ptr;
 				},
-				[&](AdjustableComponent::Value::ColorStorage & s) {
+				[&](AdjustableComponent::Value::ColorStorage & s) noexcept {
 					const auto color = s.ptr != nullptr ? s.ptr->attributes : s.value.attributes;
 					if (ImGui::ColorButton((string("##") + value.name).c_str(), ImVec4(color[0], color[1], color[2], color[3])))
 						ImGui::OpenPopup("color picker popup");
@@ -253,7 +251,7 @@ namespace kengine::imgui_adjustable {
 					if (s.ptr != nullptr)
 						s.value = *s.ptr;
 				},
-				[&](auto && t) {
+				[&](auto && t) noexcept {
 					static_assert(putils::always_false<decltype(t)>(), "Non exhaustive visitor");
 				}
 				}, value.storage);
@@ -261,7 +259,7 @@ namespace kengine::imgui_adjustable {
 			ImGui::Columns();
 		}
 
-		static void onEntityCreated(Entity & e) {
+		static void onEntityCreated(Entity & e) noexcept {
 			const auto adjustable = e.tryGet<AdjustableComponent>();
 			if (!adjustable)
 				return;
@@ -269,7 +267,7 @@ namespace kengine::imgui_adjustable {
 			initAdjustable(*adjustable);
 		}
 
-		static void initAdjustable(AdjustableComponent & comp) {
+		static void initAdjustable(AdjustableComponent & comp) noexcept {
 			const auto it = loadedFile.sections.find(comp.section.c_str());
 			if (it == loadedFile.sections.end())
 				return;
@@ -281,92 +279,89 @@ namespace kengine::imgui_adjustable {
 			}
 		}
 
-		static void setValue(AdjustableComponent::Value & value, const char * s) {
+		static void setValue(AdjustableComponent::Value & value, const char * s) noexcept {
 			const auto assignPtr = [](auto & storage) {
 				if (storage.ptr != nullptr)
 					*storage.ptr = storage.value;
 			};
 
 			std::visit(putils::overloaded{
-				[&](AdjustableComponent::Value::IntStorage & storage) {
+				[&](AdjustableComponent::Value::IntStorage & storage) noexcept {
 					storage.value = putils::parse<int>(s);
 					assignPtr(storage);
 				},
-				[&](AdjustableComponent::Value::FloatStorage & storage) {
+				[&](AdjustableComponent::Value::FloatStorage & storage) noexcept {
 					storage.value = putils::parse<float>(s);
 					assignPtr(storage);
 				},
-				[&](AdjustableComponent::Value::BoolStorage & storage) {
+				[&](AdjustableComponent::Value::BoolStorage & storage) noexcept {
 					storage.value = putils::parse<bool>(s);
 					assignPtr(storage);
 				},
-				[&](AdjustableComponent::Value::ColorStorage & storage) {
+				[&](AdjustableComponent::Value::ColorStorage & storage) noexcept {
 					putils::Color tmp;
 					tmp.rgba = putils::parse<unsigned int>(s);
 					storage.value = putils::toNormalizedColor(tmp);
 					assignPtr(storage);
 				},
-				[&](auto && t) {
+				[&](auto && t) noexcept {
 					static_assert(putils::always_false<decltype(t)>(), "Non exhaustive visitor");
 				}
 				}, value.storage);
 		}
 
-		static void load() {
+		static void load() noexcept {
 			loadedFile = putils::parseIniFile(KENGINE_ADJUSTABLE_SAVE_FILE);
-			for (auto [e, comp] : em->getEntities<AdjustableComponent>())
+			for (auto [e, comp] : entities.with<AdjustableComponent>())
 				initAdjustable(comp);
 		}
 
-		static void save() {
+		static void save() noexcept {
 			std::ofstream f(KENGINE_ADJUSTABLE_SAVE_FILE, std::ofstream::trunc);
 			assert(f);
 
-			const auto entities = sortHelper::getSortedEntities<AdjustableComponent>(*em, [](const auto & a, const auto & b) {
+			const auto entities = sortHelper::getSortedEntities<AdjustableComponent>([](const auto & a, const auto & b) noexcept {
 				return strcmp(std::get<1>(a)->section.c_str(), std::get<1>(b)->section.c_str()) < 0;
-				});
+			});
 
 			for (const auto & [e, comp] : entities) {
 				f << '[' << comp->section << ']' << std::endl;
 
 				auto values = comp->values;
-				std::sort(values.begin(), values.end(), [](const auto & lhs, const auto & rhs) {
+				std::sort(values.begin(), values.end(), [](const auto & lhs, const auto & rhs) noexcept {
 					return strcmp(lhs.name.c_str(), rhs.name.c_str()) < 0;
-					});
+				});
 
 				for (const auto & value : values) {
 					f << value.name << '=';
 					std::visit(putils::overloaded{
-						[&](const AdjustableComponent::Value::IntStorage & s) {
+						[&](const AdjustableComponent::Value::IntStorage & s) noexcept {
 							f << s.value;
 						},
-						[&](const AdjustableComponent::Value::FloatStorage & s) {
+						[&](const AdjustableComponent::Value::FloatStorage & s) noexcept {
 							f << s.value;
 						},
-						[&](const AdjustableComponent::Value::BoolStorage & s) {
+						[&](const AdjustableComponent::Value::BoolStorage & s) noexcept {
 							f << std::boolalpha << s.value << std::noboolalpha;
 						},
-						[&](const AdjustableComponent::Value::ColorStorage & s) {
+						[&](const AdjustableComponent::Value::ColorStorage & s) noexcept {
 							f << putils::toRGBA(s.value);
 						},
-						[&](auto && t) {
+						[&](auto && t) noexcept {
 							static_assert(putils::always_false<decltype(t)>(), "Non exhaustive visitor");
 						}
-						}, value.storage);
+					}, value.storage);
 					f << std::endl;
 				}
 				f << std::endl;
 			}
 		}
-
-
 	};
 }
 
 namespace kengine {
-	EntityCreatorFunctor<64> ImGuiAdjustableSystem(EntityManager & em) {
-		imgui_adjustable::impl::em = &em;
-		return [&](Entity & e) {
+	EntityCreator * ImGuiAdjustableSystem() noexcept {
+		return [](Entity & e) noexcept {
 			imgui_adjustable::impl::init(e);
 		};
 	}

@@ -1,5 +1,5 @@
 #include "ImGuiPromptSystem.hpp"
-#include "EntityManager.hpp"
+#include "kengine.hpp"
 
 #include "data/NameComponent.hpp"
 #include "data/ImGuiToolComponent.hpp"
@@ -23,7 +23,6 @@ enum class Language {
 
 namespace kengine::imgui_prompt {
 	struct impl {
-		static inline EntityManager * em;
 		static inline bool * enabled;
 
 		static inline Language selectedLanguage = Language::Lua;
@@ -40,24 +39,24 @@ namespace kengine::imgui_prompt {
 			std::list<Line> lines;
 
 			template<typename S>
-			void addLine(S && s, bool separator = false, const putils::NormalizedColor & color = {}) {
+			void addLine(S && s, bool separator = false, const putils::NormalizedColor & color = {}) noexcept {
 				lines.push_back({ FWD(s), separator, color });
 			}
 
 			template<typename S>
-			void addError(S && s, bool separator = false) {
+			void addError(S && s, bool separator = false) noexcept {
 				addLine(FWD(s), separator, { 1.f, 0.f, 0.f });
 			}
 		} history;
 
-		static void init(Entity & e) {
+		static void init(Entity & e) noexcept {
 			auto & tool = e.attach<ImGuiToolComponent>();
 			enabled = &tool.enabled;
 			e += NameComponent{ "Prompt" };
 			e += functions::Execute{ draw };
 		}
 
-		static void draw(float deltaTime) {
+		static void draw(float deltaTime) noexcept {
 			if (!*enabled)
 				return;
 
@@ -78,7 +77,7 @@ namespace kengine::imgui_prompt {
 		}
 
 		static inline bool shouldScrollDown = false;
-		static void drawHistory() {
+		static void drawHistory() noexcept {
 			int tmp = maxLines;
 			if (ImGui::InputInt("Max history", &tmp, 0, 0, ImGuiInputTextFlags_EnterReturnsTrue))
 				maxLines = tmp;
@@ -105,7 +104,7 @@ namespace kengine::imgui_prompt {
 			ImGui::EndChild();
 		}
 
-		static bool drawPrompt() {
+		static bool drawPrompt() noexcept {
 			static bool first = true;
 			if (putils::reflection::imguiEnumCombo("##Language", selectedLanguage) || first) {
 				history.addLine(
@@ -128,7 +127,7 @@ namespace kengine::imgui_prompt {
 			return ret;
 		}
 
-		static void eval() {
+		static void eval() noexcept {
 			switch (selectedLanguage) {
 			case Language::Lua:
 				evalLua();
@@ -142,7 +141,7 @@ namespace kengine::imgui_prompt {
 		}
 
 		static inline bool active = false;
-		static void evalLua() {
+		static void evalLua() noexcept {
 #ifndef KENGINE_LUA
 			addLineToHistory(
 				"Please compile with KENGINE_LUA",
@@ -152,7 +151,7 @@ namespace kengine::imgui_prompt {
 #else
 			static bool first = true;
 
-			for (const auto & [e, state] : em->getEntities<kengine::LuaStateComponent>()) {
+			for (const auto & [e, state] : entities.with<kengine::LuaStateComponent>()) {
 				if (first) {
 					setupOutputRedirect(*state.state);
 					first = false;
@@ -170,7 +169,7 @@ namespace kengine::imgui_prompt {
 #endif
 		}
 
-		static void setupOutputRedirect(sol::state & state) {
+		static void setupOutputRedirect(sol::state & state) noexcept {
 			static const luaL_Reg printlib[] = {
 				{ "print", [](lua_State * L) { return addToHistoryOrPrint(L, {}); } },
 				{ "error", [](lua_State * L) { return addToHistoryOrPrint(L, { 1.f, 0.f, 0.f }); } },
@@ -182,7 +181,7 @@ namespace kengine::imgui_prompt {
 			lua_pop(state, 1);
 		}
 
-		static int addToHistoryOrPrint(lua_State * L, const putils::NormalizedColor & color) {
+		static int addToHistoryOrPrint(lua_State * L, const putils::NormalizedColor & color) noexcept {
 			std::string line;
 
 			// Stolen from luaB_print
@@ -241,7 +240,6 @@ namespace kengine::imgui_prompt {
 			}
 		};
 #endif
-#pragma endregion PythonRedirectHelper
 		static void evalPython() {
 #ifndef KENGINE_PYTHON
 			addLineToHistory(
@@ -271,9 +269,8 @@ namespace kengine::imgui_prompt {
 }
 
 namespace kengine {
-	EntityCreator * ImGuiPromptSystem(EntityManager & em) {
-		imgui_prompt::impl::em = &em;
-		return [](Entity & e) {
+	EntityCreator * ImGuiPromptSystem() noexcept {
+		return [](Entity & e) noexcept {
 			imgui_prompt::impl::init(e);
 		};
 	}

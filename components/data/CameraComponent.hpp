@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Point.hpp"
+#include "Rect.hpp"
 
 namespace kengine {
     struct CameraComponent {

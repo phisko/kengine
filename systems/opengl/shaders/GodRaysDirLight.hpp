@@ -8,7 +8,6 @@
 #include "DirLightSrc.hpp"
 
 namespace kengine {
-	class EntityManager;
 	struct DirLightComponent;
 }
 
@@ -19,16 +18,15 @@ namespace kengine::opengl::shaders {
 		public src::DirLight::GetDirection::Uniforms
 	{
 	public:
-		GodRaysDirLight(EntityManager & em);
+		GodRaysDirLight() noexcept;
 
-		void init(size_t firstTextureID) override;
-		void run(const Parameters & params) override;
+		void init(size_t firstTextureID) noexcept override;
+		void run(const Parameters & params) noexcept override;
 		
 	private:
-		void drawLight(const DirLightComponent & light, const opengl::CSMComponent & depthMap, const Parameters & params);
+		void drawLight(const DirLightComponent & light, const opengl::CSMComponent & depthMap, const Parameters & params) noexcept;
 
 	private:
-		EntityManager & _em;
 		GLuint _shadowMapTextureID;
 	};
 }

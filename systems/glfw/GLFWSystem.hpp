@@ -3,6 +3,5 @@
 #include "EntityCreator.hpp"
 
 namespace kengine {
-	class EntityManager;
-	EntityCreator * GLFWSystem(EntityManager & em);
+	EntityCreator * GLFWSystem() noexcept;
 }

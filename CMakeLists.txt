@@ -38,12 +38,14 @@ add_subdirectory(putils)
 
 # Add C++ macros
 
-file(GLOB src_files
-    *.cpp *.hpp
-    components/data/*.cpp components/data/*.hpp
-    components/functions/*.cpp components/functions/*.hpp
-    components/meta/*.cpp components/meta/*.hpp
-    helpers/*.cpp helpers/*.hpp)
+putils_src_files(src_files
+	.
+	impl
+	components/data
+	components/functions
+	components/meta
+	helpers
+)
 
 add_library(kengine STATIC ${src_files})
 target_link_libraries(kengine PUBLIC putils)

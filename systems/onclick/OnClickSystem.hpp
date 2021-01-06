@@ -3,7 +3,5 @@
 #include "EntityCreator.hpp"
 
 namespace kengine {
-	class EntityManager;
-
-	EntityCreatorFunctor<64> OnClickSystem(EntityManager & em);
+	EntityCreator * OnClickSystem() noexcept;
 }

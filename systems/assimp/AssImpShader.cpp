@@ -13,7 +13,7 @@
 static_assert(KENGINE_ASSIMP_BONE_INFO_PER_VERTEX == 4, "This shader assumes only 4 bones per vertex");
 
 namespace kengine {
-	void AssImpShader::init(size_t firstTextureID) {
+	void AssImpShader::init(size_t firstTextureID) noexcept {
 		initWithShaders<AssImpShader>(putils::make_vector(
 			ShaderDescription{ src::TexturedShader::vert, GL_VERTEX_SHADER },
 			ShaderDescription{ src::TexturedShader::frag, GL_FRAGMENT_SHADER },
@@ -26,13 +26,13 @@ namespace kengine {
 		_texture_specular = _specularTextureID;
 	}
 
-	void AssImpShader::run(const Parameters & params) {
+	void AssImpShader::run(const Parameters & params) noexcept {
 		use();
 
 		_view = params.view;
 		_proj = params.proj;
 
-		for (const auto &[e, assimp, instance, graphics, transform, skeleton] : _em.getEntities<AssImpObjectComponent, InstanceComponent, GraphicsComponent, TransformComponent, SkeletonComponent>()) {
+		for (const auto &[e, assimp, instance, graphics, transform, skeleton] : entities.with<AssImpObjectComponent, InstanceComponent, GraphicsComponent, TransformComponent, SkeletonComponent>()) {
 			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
@@ -48,7 +48,7 @@ namespace kengine {
 			uniforms.specularColor = _specularColor;
 			uniforms.diffuseColor = _diffuseColor;
 
-			AssImpHelper::drawModel(_em, instance, transform, skeleton, true, uniforms);
+			AssImpHelper::drawModel(instance, transform, skeleton, true, uniforms);
 		}
 	}
 }

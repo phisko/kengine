@@ -14,14 +14,14 @@ namespace kengine {
 		using EventVector = putils::vector<T, KENGINE_INPUT_MAX_BUFFERED_EVENTS>;
 
 		struct KeyEvent {
-			Entity::ID window;
+			EntityID window;
 			int key;
 			bool pressed;
 		};
 		EventVector<KeyEvent> keys;
 
 		struct ClickEvent {
-			Entity::ID window;
+			EntityID window;
 			putils::Point2f pos;
 			int button;
 			bool pressed;
@@ -29,14 +29,14 @@ namespace kengine {
 		EventVector<ClickEvent> clicks;
 
 		struct MouseMoveEvent {
-			Entity::ID window;
+			EntityID window;
 			putils::Point2f pos;
 			putils::Point2f rel;
 		};
 		EventVector<MouseMoveEvent> moves;
 
 		struct MouseScrollEvent {
-			Entity::ID window;
+			EntityID window;
 			float xoffset;
 			float yoffset;
 			putils::Point2f pos;

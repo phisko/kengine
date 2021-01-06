@@ -5,7 +5,7 @@
 
 namespace kengine {
 	struct InstanceComponent {
-		Entity::ID model = Entity::INVALID_ID;
+		EntityID model = INVALID_ID;
 	};
 }
 

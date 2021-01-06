@@ -1,5 +1,5 @@
 #include "GodRaysPointLight.hpp"
-#include "EntityManager.hpp"
+#include "kengine.hpp"
 
 #include "data/LightComponent.hpp"
 #include "data/TransformComponent.hpp"
@@ -13,13 +13,12 @@
 #include "QuadSrc.hpp"
 
 namespace kengine::opengl::shaders {
-	GodRaysPointLight::GodRaysPointLight(EntityManager & em)
-		: Program(true, putils_nameof(GodRaysPointLight)),
-		_em(em)
+	GodRaysPointLight::GodRaysPointLight() noexcept
+		: Program(true, putils_nameof(GodRaysPointLight))
 	{
 	}
 
-	void GodRaysPointLight::init(size_t firstTextureID) {
+	void GodRaysPointLight::init(size_t firstTextureID) noexcept {
 		initWithShaders<GodRaysPointLight>(putils::make_vector(
 			ShaderDescription{ src::Quad::Vert::glsl, GL_VERTEX_SHADER },
 			ShaderDescription{ src::GodRays::Frag::glsl, GL_FRAGMENT_SHADER },
@@ -31,7 +30,7 @@ namespace kengine::opengl::shaders {
 		_shadowMap = _shadowMapTextureID;
 	}
 
-	void GodRaysPointLight::run(const Parameters & params) {
+	void GodRaysPointLight::run(const Parameters & params) noexcept {
 		use();
 
 		shaderHelper::Enable _(GL_BLEND);
@@ -46,7 +45,7 @@ namespace kengine::opengl::shaders {
 		assert(src::ShadowCube::Frag::Uniforms::_viewPos.location == src::GodRays::Frag::Uniforms::_viewPos.location);
 		_screenSize = putils::Point2f(params.viewport.size);
 
-		for (const auto &[e, light, depthMap, transform, comp] : _em.getEntities<PointLightComponent, DepthCubeComponent, TransformComponent, GodRaysComponent>()) {
+		for (const auto &[e, light, depthMap, transform, comp] : entities.with<PointLightComponent, DepthCubeComponent, TransformComponent, GodRaysComponent>()) {
 			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
@@ -58,7 +57,7 @@ namespace kengine::opengl::shaders {
 		}
 	}
 
-	void GodRaysPointLight::drawLight(const glm::vec3 & camPos, const PointLightComponent & light, const putils::Point3f & pos, const DepthCubeComponent & depthMap, size_t screenWidth, size_t screenHeight) {
+	void GodRaysPointLight::drawLight(const glm::vec3 & camPos, const PointLightComponent & light, const putils::Point3f & pos, const DepthCubeComponent & depthMap, size_t screenWidth, size_t screenHeight) noexcept {
 		_color = light.color;
 		src::ShadowCube::Frag::Uniforms::_position = pos;
 		assert(src::ShadowCube::Frag::Uniforms::_position.location == src::PointLight::GetDirection::Uniforms::_position.location);

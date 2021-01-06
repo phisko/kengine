@@ -3,14 +3,12 @@
 #include "opengl/Program.hpp"
 
 namespace kengine {
-	class EntityManager;
-
 	class SpritesShader : public putils::gl::Program {
 	public:
-		SpritesShader(EntityManager & em);
+		SpritesShader() noexcept;
 
-		void init(size_t firstTextureID) override;
-		void run(const Parameters & params) override;
+		void init(size_t firstTextureID) noexcept override;
+		void run(const Parameters & params) noexcept override;
 
 #pragma region Uniforms
 	public:
@@ -25,7 +23,6 @@ namespace kengine {
 #pragma endregion Uniforms
 
 	private:
-		EntityManager & _em;
 		size_t _textureID;
 	};
 }

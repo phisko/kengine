@@ -5,6 +5,6 @@
 namespace kengine {
 	struct RecastAgentComponent {
 		int index = 0;
-		Entity::ID crowd = Entity::INVALID_ID;
+		EntityID crowd = INVALID_ID;
 	};
 }

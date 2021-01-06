@@ -1,5 +1,5 @@
 #include "ImGuiHelper.hpp"
-#include "EntityManager.hpp"
+#include "kengine.hpp"
 
 #include "helpers/typeHelper.hpp"
 #include "helpers/sortHelper.hpp"
@@ -11,10 +11,10 @@
 #include "imgui.h"
 
 namespace kengine::imguiHelper {
-	void displayEntity(EntityManager & em, const Entity & e) {
+	void displayEntity(const Entity & e) noexcept {
 		const auto types = sortHelper::getNameSortedEntities<KENGINE_COMPONENT_COUNT,
 			meta::Has, meta::DisplayImGui
-		>(em);
+		>();
 
 		for (const auto & [_, name, has, display] : types)
 			if (has->call(e))
@@ -24,11 +24,11 @@ namespace kengine::imguiHelper {
 				}
 	}
 
-	void editEntity(EntityManager & em, Entity & e) {
+	void editEntity(Entity & e) noexcept {
 		if (ImGui::BeginPopupContextWindow()) {
 			const auto types = sortHelper::getNameSortedEntities<KENGINE_COMPONENT_COUNT,
 				meta::Has, meta::AttachTo
-			>(em);
+			>();
 
 			for (const auto & [_, name, has, add] : types)
 				if (!has->call(e))
@@ -40,7 +40,7 @@ namespace kengine::imguiHelper {
 
 		const auto types = sortHelper::getNameSortedEntities<KENGINE_COMPONENT_COUNT,
 			meta::Has, meta::EditImGui
-		>(em);
+		>();
 
 		for (const auto & [_, name, has, edit] : types) {
 			if (!has->call(e))

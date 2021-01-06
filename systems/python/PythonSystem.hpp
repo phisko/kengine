@@ -3,6 +3,5 @@
 #include "EntityCreator.hpp"
 
 namespace kengine {
-	class EntityManager;
-	EntityCreatorFunctor<64> PythonSystem(EntityManager & em);
+	EntityCreator * PythonSystem() noexcept;
 }

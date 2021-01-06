@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Entity.hpp"
-#include "EntityManager.hpp"
+#include "kengine.hpp"
 
 #include "data/CameraComponent.hpp"
 #include "functions/AppearsInViewport.hpp"
+#include "Rect.hpp"
 
 namespace kengine {
 	struct OnScreenComponent;
@@ -12,14 +12,14 @@ namespace kengine {
 
 namespace kengine::cameraHelper {
 	struct ViewportInfo {
-		Entity::ID camera = Entity::INVALID_ID;
+		EntityID camera = INVALID_ID;
 		putils::Point2f pixel = { -1.f, -1.f };
 		putils::Point2f viewportPercent = { -1.f, -1.f }; // [0,1]
 	};
-	ViewportInfo getViewportForPixel(EntityManager & em, Entity::ID windowID, const putils::Point2ui & pixel); 
+	ViewportInfo getViewportForPixel(EntityID windowID, const putils::Point2ui & pixel) noexcept; 
 
-	inline bool entityAppearsInViewport(const Entity & e, Entity::ID viewport);
-	putils::Rect3f convertToScreenPercentage(const putils::Rect3f & rect, const putils::Point2f & screenSize, const OnScreenComponent & comp);
+	bool entityAppearsInViewport(const Entity & e, EntityID viewport) noexcept;
+	putils::Rect3f convertToScreenPercentage(const putils::Rect3f & rect, const putils::Point2f & screenSize, const OnScreenComponent & comp) noexcept;
 
 	struct Facings {
 		putils::Vector3f front;
@@ -27,12 +27,5 @@ namespace kengine::cameraHelper {
 		putils::Vector3f up;
 	};
 
-	Facings getFacings(const CameraComponent & camera);
-
-	// Impl
-
-	inline bool entityAppearsInViewport(const Entity & e, Entity::ID viewport) {
-		const auto appearsInViewport = e.tryGet<functions::AppearsInViewport>();
-		return !appearsInViewport || appearsInViewport->call(viewport);
-	}
+	Facings getFacings(const CameraComponent & camera) noexcept;
 }

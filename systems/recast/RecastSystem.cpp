@@ -11,50 +11,48 @@
 #include "functions/Execute.hpp"
 #include "functions/OnEntityRemoved.hpp"
 
-namespace kengine::recast {
-	Adjustables g_adjustables;
-	EntityManager * g_em;
+namespace kengine {
+	namespace recast {
+		Adjustables g_adjustables;
 
-	void buildNavMeshes();
-	void doPathfinding(float deltaTime);
+		void buildNavMeshes() noexcept;
+		void doPathfinding(float deltaTime) noexcept;
+	}
 
-	struct impl {
-		static void init(Entity & e) {
-			e += functions::OnEntityRemoved{ onEntityRemoved };
-			e += functions::Execute{ execute };
+	EntityCreator * RecastSystem() noexcept {
+		struct impl {
+			static void init(Entity & e) noexcept {
+				e += functions::OnEntityRemoved{ onEntityRemoved };
+				e += functions::Execute{ execute };
 
-			e += opengl::ShaderComponent{ std::make_unique<RecastDebugShader>(*g_em) };
-			e += opengl::GBufferShaderComponent{};
+				e += opengl::ShaderComponent{ std::make_unique<RecastDebugShader>() };
+				e += opengl::GBufferShaderComponent{};
 
-			e += AdjustableComponent{
-				"Recast", {
-					{ "Path optimization range", &g_adjustables.pathOptimizationRange }
-				}
-			};
-		}
-
-		static void onEntityRemoved(Entity & e) {
-			const auto agent = e.tryGet<RecastAgentComponent>();
-			if (agent) {
-				auto environment = g_em->getEntity(agent->crowd);
-				environment.get<RecastCrowdComponent>().crowd->removeAgent(agent->index);
+				e += AdjustableComponent{
+					"Recast", {
+						{ "Path optimization range", &recast::g_adjustables.pathOptimizationRange }
+					}
+				};
 			}
 
-			// It doesn't cost us anything to have floating RecastAgentComponents, so we don't remove them when the RecastCrowdComponent is removed
-		}
+			static void onEntityRemoved(Entity & e) noexcept {
+				const auto agent = e.tryGet<RecastAgentComponent>();
+				if (agent) {
+					auto environment = entities.get(agent->crowd);
+					environment.get<RecastCrowdComponent>().crowd->removeAgent(agent->index);
+				}
 
-		static void execute(float deltaTime) {
-			buildNavMeshes();
-			doPathfinding(deltaTime);
-		}
-	};
-}
+				// It doesn't cost us anything to have floating RecastAgentComponents, so we don't remove them when the RecastCrowdComponent is removed
+			}
 
-namespace kengine {
-	EntityCreator * RecastSystem(EntityManager & em) {
-		recast::g_em = &em;
-		return [](Entity & e) {
-			recast::impl::init(e);
+			static void execute(float deltaTime) noexcept {
+				recast::buildNavMeshes();
+				recast::doPathfinding(deltaTime);
+			}
+		};
+
+		return [](Entity & e) noexcept {
+			impl::init(e);
 		};
 	}
 }

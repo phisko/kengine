@@ -1,6 +1,6 @@
 #include "SpritesShader.hpp"
 
-#include "EntityManager.hpp"
+#include "kengine.hpp"
 
 #include "data/SystemSpecificTextureComponent.hpp"
 #include "data/TransformComponent.hpp"
@@ -73,12 +73,11 @@ void main() {
 #pragma endregion GLSL
 
 namespace kengine {
-	SpritesShader::SpritesShader(EntityManager & em)
-		: Program(false, putils_nameof(SpritesShader)),
-		_em(em)
+	SpritesShader::SpritesShader() noexcept
+		: Program(false, putils_nameof(SpritesShader))
 	{}
 
-	void SpritesShader::init(size_t firstTextureID) {
+	void SpritesShader::init(size_t firstTextureID) noexcept {
 		initWithShaders<SpritesShader>(putils::make_vector(
 			ShaderDescription{ vert, GL_VERTEX_SHADER },
 			ShaderDescription{ frag, GL_FRAGMENT_SHADER },
@@ -96,9 +95,9 @@ namespace kengine {
 	};
 
 #pragma region declarations
-	static void drawObject(EntityManager & em, const putils::gl::Program::Parameters & params, const GraphicsComponent & graphics, const InstanceComponent & instance, const TransformComponent & transform, Uniforms uniforms, const SpriteComponent2D * comp = nullptr);
+	static void drawObject(const putils::gl::Program::Parameters & params, const GraphicsComponent & graphics, const InstanceComponent & instance, const TransformComponent & transform, Uniforms uniforms, const SpriteComponent2D * comp = nullptr) noexcept;
 #pragma endregion
-	void SpritesShader::run(const Parameters & params) {
+	void SpritesShader::run(const Parameters & params) noexcept {
 		const Uniforms uniforms{ _textureID, _color, _model };
 
 		use();
@@ -108,29 +107,29 @@ namespace kengine {
 
 		_view = glm::mat4(1.f);
 		_proj = glm::mat4(1.f);
-		for (const auto &[e, instance, graphics, transform, sprite] : _em.getEntities<InstanceComponent, GraphicsComponent, TransformComponent, SpriteComponent2D>()) {
+		for (const auto &[e, instance, graphics, transform, sprite] : entities.with<InstanceComponent, GraphicsComponent, TransformComponent, SpriteComponent2D>()) {
 			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			_entityID = (float)e.id;
-			drawObject(_em, params, graphics, instance, transform, uniforms, &sprite);
+			drawObject(params, graphics, instance, transform, uniforms, &sprite);
 		}
 
 		_view = params.view;
 		_proj = params.proj;
-		for (const auto &[e, instance, graphics, transform, sprite] : _em.getEntities<InstanceComponent, GraphicsComponent, TransformComponent, SpriteComponent3D>()) {
+		for (const auto &[e, instance, graphics, transform, sprite] : entities.with<InstanceComponent, GraphicsComponent, TransformComponent, SpriteComponent3D>()) {
 			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			_entityID = (float)e.id;
-			drawObject(_em, params, graphics, instance, transform, uniforms);
+			drawObject(params, graphics, instance, transform, uniforms);
 		}
 	}
 
-	static void drawObject(EntityManager & em, const putils::gl::Program::Parameters & params, const GraphicsComponent & graphics, const InstanceComponent & instance, const TransformComponent & transform, Uniforms uniforms, const SpriteComponent2D * comp) {
+	static void drawObject(const putils::gl::Program::Parameters & params, const GraphicsComponent & graphics, const InstanceComponent & instance, const TransformComponent & transform, Uniforms uniforms, const SpriteComponent2D * comp) noexcept {
 		uniforms.color = graphics.color;
 
-		const auto modelEntity = em.getEntity(instance.model);
+		const auto modelEntity = entities.get(instance.model);
 		const auto texture = modelEntity.tryGet<SystemSpecificTextureComponent<putils::gl::Texture>>();
 		if (!texture)
 			return;

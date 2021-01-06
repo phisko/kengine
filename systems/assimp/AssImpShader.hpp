@@ -3,17 +3,14 @@
 #include "opengl/Program.hpp"
 
 namespace kengine {
-	class EntityManager;
-
 	class AssImpShader : public putils::gl::Program {
 	public:
-		AssImpShader(EntityManager & em)
-			: Program(false, putils_nameof(AssImpShader)),
-			_em(em)
+		AssImpShader() noexcept
+			: Program(false, putils_nameof(AssImpShader))
 		{}
 
-		void init(size_t firstTextureID) override;
-		void run(const Parameters & params) override;
+		void init(size_t firstTextureID) noexcept override;
+		void run(const Parameters & params) noexcept override;
 
 #pragma region Uniforms
 	public:
@@ -34,7 +31,6 @@ namespace kengine {
 #pragma endregion Uniforms
 
 	private:
-		EntityManager & _em;
 		size_t _diffuseTextureID;
 		size_t _specularTextureID;
 	};

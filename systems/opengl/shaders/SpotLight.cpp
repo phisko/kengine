@@ -1,6 +1,6 @@
 #include "SpotLight.hpp"
 
-#include "EntityManager.hpp"
+#include "kengine.hpp"
 
 #include "data/TransformComponent.hpp"
 #include "data/LightComponent.hpp"
@@ -13,7 +13,7 @@
 #include "ShadowMapShader.hpp"
 
 namespace kengine::opengl::shaders {
-	void SpotLight::init(size_t firstTextureID) {
+	void SpotLight::init(size_t firstTextureID) noexcept {
 		initWithShaders<SpotLight>(putils::make_vector(
 			ShaderDescription{ src::ProjViewModel::Vert::glsl, GL_VERTEX_SHADER },
 			ShaderDescription{ src::ShadowMap::Frag::glsl, GL_FRAGMENT_SHADER },
@@ -24,7 +24,7 @@ namespace kengine::opengl::shaders {
 		_shadowMap = _shadowMapTextureID;
 	}
 
-	void SpotLight::run(const Parameters & params) {
+	void SpotLight::run(const Parameters & params) noexcept {
 		shaderHelper::Enable __c(GL_CULL_FACE);
 		shaderHelper::Enable __b(GL_BLEND);
 		glBlendEquation(GL_FUNC_ADD);
@@ -37,7 +37,7 @@ namespace kengine::opengl::shaders {
 
 		glActiveTexture((GLenum)(GL_TEXTURE0 + _shadowMapTextureID));
 
-		for (auto [e, light, transform] : _em.getEntities<SpotLightComponent, TransformComponent>()) {
+		for (auto [e, light, transform] : entities.with<SpotLightComponent, TransformComponent>()) {
 			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
@@ -51,7 +51,7 @@ namespace kengine::opengl::shaders {
 					glClear(GL_DEPTH_BUFFER_BIT);
 				}
 
-				for (const auto & [shadowMapEntity, shader, shadowMapShader] : _em.getEntities<ShaderComponent, ShadowMapShaderComponent>()) {
+				for (const auto & [shadowMapEntity, shader, shadowMapShader] : entities.with<ShaderComponent, ShadowMapShaderComponent>()) {
 					auto & shadowMap = static_cast<ShadowMapShader &>(*shader.shader);
 					shadowMap.run(e, light, centre, params);
 				}
@@ -67,7 +67,7 @@ namespace kengine::opengl::shaders {
 			_model = model;
 
 			const auto centreToCam = putils::Point3f{ params.camPos.x, params.camPos.y, params.camPos.z } - centre;
-			if (centreToCam.getLengthSquared() < radius * radius)
+			if (putils::getLengthSquared(centreToCam) < radius * radius)
 				glCullFace(GL_BACK);
 			else
 				glCullFace(GL_FRONT);
@@ -81,7 +81,7 @@ namespace kengine::opengl::shaders {
 		glCullFace(GL_BACK);
 	}
 
-	void SpotLight::setLight(const SpotLightComponent & light, const putils::Point3f & pos) {
+	void SpotLight::setLight(const SpotLightComponent & light, const putils::Point3f & pos) noexcept {
 		_color = light.color;
 		_position = pos;
 		_direction = light.direction;

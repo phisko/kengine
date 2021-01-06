@@ -1,12 +1,12 @@
 #pragma once
 
 #include "BaseFunction.hpp"
-#include "Entity.hpp"
+#include "impl/ID.hpp"
 #include "Point.hpp"
 
 namespace kengine::functions {
     struct GetEntityInPixel : BaseFunction<
-        Entity::ID(Entity::ID window, const putils::Point2ui & pixel)
+        EntityID(EntityID window, const putils::Point2ui & pixel)
     > {};
 }
 

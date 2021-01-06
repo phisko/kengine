@@ -5,7 +5,7 @@
 namespace kengine {
 	template<typename T, void (*FreeFunc)(T *)>
 	struct Deleter {
-		void operator()(T * ptr) { FreeFunc(ptr); }
+		void operator()(T * ptr) noexcept { FreeFunc(ptr); }
 	};
 
 	template<typename T, void(*FreeFunc)(T *)>

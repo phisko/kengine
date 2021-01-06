@@ -1,5 +1,5 @@
 #include "KinematicSystem.hpp"
-#include "EntityManager.hpp"
+#include "kengine.hpp"
 
 #include "data/KinematicComponent.hpp"
 #include "data/PhysicsComponent.hpp"
@@ -11,17 +11,15 @@
 
 namespace kengine::kinematic {
 	struct impl {
-		static inline EntityManager * em;
-
-		static void init(Entity & e) {
+		static void init(Entity & e) noexcept {
 			e += functions::Execute{ execute };
 		}
 
-		static void execute(float deltaTime) {
-			for (const auto & [e, transform, physics, kinematic] : em->getEntities<TransformComponent, PhysicsComponent, KinematicComponent>()) {
+		static void execute(float deltaTime) noexcept {
+			for (const auto & [e, transform, physics, kinematic] : entities.with<TransformComponent, PhysicsComponent, KinematicComponent>()) {
 				transform.boundingBox.position += physics.movement * deltaTime;
 
-				const auto applyRotation = [deltaTime](float & transformMember, float physicsMember) {
+				const auto applyRotation = [deltaTime](float & transformMember, float physicsMember) noexcept {
 					transformMember += physicsMember * deltaTime;
 					transformMember = putils::constrainAngle(transformMember);
 				};
@@ -35,9 +33,8 @@ namespace kengine::kinematic {
 }
 
 namespace kengine {
-	EntityCreatorFunctor<64> KinematicSystem(EntityManager & em) {
-		kinematic::impl::em = &em;
-		return [&](Entity & e) {
+	EntityCreator * KinematicSystem() noexcept {
+		return [](Entity & e) noexcept {
 			kinematic::impl::init(e);
 		};
 	}

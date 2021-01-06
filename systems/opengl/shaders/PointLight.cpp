@@ -1,7 +1,7 @@
 #include "PointLight.hpp"
 
 #include "ShadowCube.hpp"
-#include "EntityManager.hpp"
+#include "kengine.hpp"
 
 #include "data/TransformComponent.hpp"
 #include "data/LightComponent.hpp"
@@ -12,7 +12,7 @@
 #include "shaderHelper.hpp"
 
 namespace kengine::opengl::shaders {
-	void PointLight::init(size_t firstTextureID) {
+	void PointLight::init(size_t firstTextureID) noexcept {
 		initWithShaders<PointLight>(putils::make_vector(
 			ShaderDescription{ src::ProjViewModel::Vert::glsl, GL_VERTEX_SHADER },
 			ShaderDescription{ src::PointLight::Frag::glsl, GL_FRAGMENT_SHADER },
@@ -24,7 +24,7 @@ namespace kengine::opengl::shaders {
 		_shadowMap = _shadowMapTextureID;
 	}
 
-	void PointLight::run(const Parameters & params) {
+	void PointLight::run(const Parameters & params) noexcept {
 		shaderHelper::Enable __c(GL_CULL_FACE);
 		shaderHelper::Enable __b(GL_BLEND);
 		glBlendEquation(GL_FUNC_ADD);
@@ -37,7 +37,7 @@ namespace kengine::opengl::shaders {
 
 		glActiveTexture((GLenum)(GL_TEXTURE0 + _shadowMapTextureID));
 
-		for (auto [e, light, transform] : _em.getEntities<PointLightComponent, TransformComponent>()) {
+		for (auto [e, light, transform] : entities.with<PointLightComponent, TransformComponent>()) {
 			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
@@ -51,7 +51,7 @@ namespace kengine::opengl::shaders {
 					glClear(GL_DEPTH_BUFFER_BIT);
 				}
 
-				for (const auto & [shadowCubeEntity, shader, shadowCubeShader] : _em.getEntities<ShaderComponent, ShadowCubeShaderComponent>()) {
+				for (const auto & [shadowCubeEntity, shader, shadowCubeShader] : entities.with<ShaderComponent, ShadowCubeShaderComponent>()) {
 					auto & shadowCube = static_cast<ShadowCubeShader &>(*shader.shader);
 					shadowCube.run(e, light, centre, radius, params);
 				}
@@ -68,7 +68,7 @@ namespace kengine::opengl::shaders {
 			_model = model;
 
 			const auto centreToCam = putils::Point3f{ params.camPos.x, params.camPos.y, params.camPos.z } - centre;
-			if (centre.getLengthSquared() < radius * radius)
+			if (putils::getLengthSquared(centre) < radius * radius)
 				glCullFace(GL_BACK);
 			else
 				glCullFace(GL_FRONT);
@@ -83,7 +83,7 @@ namespace kengine::opengl::shaders {
 		glCullFace(GL_BACK);
 	}
 
-	void PointLight::setLight(const PointLightComponent & light, const putils::Point3f & pos, float radius) {
+	void PointLight::setLight(const PointLightComponent & light, const putils::Point3f & pos, float radius) noexcept {
 		_color = light.color;
 		src::ShadowCube::Frag::Uniforms::_position = pos;
 		assert(src::ShadowCube::Frag::Uniforms::_position.location == src::PointLight::Frag::Uniforms::_position.location);

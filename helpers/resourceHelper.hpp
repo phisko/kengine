@@ -3,6 +3,6 @@
 #include "Entity.hpp"
 
 namespace kengine::resourceHelper {
-	Entity::ID loadTexture(EntityManager & em, const char * file);
-	Entity::ID loadTexture(EntityManager & em, void * data, size_t width, size_t height);
+	EntityID loadTexture(const char * file) noexcept;
+	EntityID loadTexture(void * data, size_t width, size_t height) noexcept;
 }

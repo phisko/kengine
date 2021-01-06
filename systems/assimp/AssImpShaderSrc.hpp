@@ -2,10 +2,8 @@
 
 #include "macro_as_string.hpp"
 
-namespace kengine {
-	namespace src {
-		namespace TexturedShader {
-			static const char * vert = R"(
+namespace kengine::src::TexturedShader {
+	static const char * vert = R"(
 #version 330
 
 layout (location = 0) in vec3 position;
@@ -39,7 +37,7 @@ void main() {
 }
 	)";
 
-			static const char * frag = R"(
+	static const char * frag = R"(
 #version 330
 
 in vec4 WorldPosition;
@@ -87,8 +85,6 @@ void main() {
 	gspecular = vec4(totalSpecular.xyz, 0.0);
 }
 	)";
-		}
-	}
 }
 
 

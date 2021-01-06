@@ -4,7 +4,7 @@
 #include "OpenGLSystem.hpp"
 #include "Controllers.hpp"
 
-#include "EntityManager.hpp"
+#include "kengine.hpp"
 
 #include "opengl/Program.hpp"
 #include "opengl/RAII.hpp"
@@ -20,9 +20,7 @@
 #include "data/ModelComponent.hpp"
 #include "data/SystemSpecificModelComponent.hpp"
 #include "data/ImGuiContextComponent.hpp"
-#include "data/InputBufferComponent.hpp"
 #include "data/AdjustableComponent.hpp"
-#include "data/InputComponent.hpp"
 #include "data/CameraComponent.hpp"
 #include "data/ViewportComponent.hpp"
 #include "data/WindowComponent.hpp"
@@ -67,7 +65,6 @@
 
 namespace kengine::opengl {
 	struct impl {
-		static inline EntityManager * em;
 		static inline putils::gl::Program::Parameters params;
 
 		static inline struct {
@@ -78,12 +75,12 @@ namespace kengine::opengl {
 		static inline functions::GBufferAttributeIterator gBufferIterator = nullptr;
 
 		static inline struct {
-			Entity::ID id = Entity::INVALID_ID;
+			EntityID id = INVALID_ID;
 			GLFWWindowComponent * glfw = nullptr;
 			WindowComponent * comp = nullptr;
 		} window;
 
-		static void init(Entity & e) {
+		static void init(Entity & e) noexcept {
 			e += functions::Execute{ execute };
 			e += functions::OnEntityCreated{ onEntityCreated };
 			e += functions::OnEntityRemoved{ onEntityRemoved };
@@ -102,8 +99,8 @@ namespace kengine::opengl {
 			e += functions::InitGBuffer{ initGBuffer };
 
 #if !defined(KENGINE_NDEBUG) && !defined(KENGINE_OPENGL_NO_DEBUG_TOOLS)
-			*em += opengl::ShaderController(*em);
-			*em += opengl::GBufferDebugger(*em, gBufferIterator);
+			entities += opengl::ShaderController();
+			entities += opengl::GBufferDebugger(gBufferIterator);
 #endif
 
 			params.nearPlane = 1.f;
@@ -114,7 +111,7 @@ namespace kengine::opengl {
 
 		static void init() noexcept {
 			if (window.comp == nullptr) {
-				for (const auto & [e, w] : em->getEntities<WindowComponent>()) {
+				for (const auto & [e, w] : entities.with<WindowComponent>()) {
 					if (!w.assignedSystem.empty())
 						continue;
 					window.id = e.id;
@@ -122,8 +119,8 @@ namespace kengine::opengl {
 					break;
 				}
 
-				if (window.id == Entity::INVALID_ID) {
-					*em += [](Entity & e) {
+				if (window.id == INVALID_ID) {
+					entities += [](Entity & e) {
 						window.comp = &e.attach<WindowComponent>();
 						window.comp->name = "Kengine";
 						window.comp->size = { 1280, 720 };
@@ -134,9 +131,9 @@ namespace kengine::opengl {
 
 			window.comp->assignedSystem = "OpenGL";
 
-			auto e = em->getEntity(window.id);
+			auto e = entities.get(window.id);
 			e += GLFWWindowInitComponent{
-				.setHints = [] {
+				.setHints = []() noexcept {
 					glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 					glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 					glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -145,8 +142,8 @@ namespace kengine::opengl {
 					glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 			#endif
 				},
-				.onWindowCreated = [] {
-					window.glfw = &em->getEntity(window.id).get<GLFWWindowComponent>();
+				.onWindowCreated = []() noexcept {
+					window.glfw = &entities.get(window.id).get<GLFWWindowComponent>();
 					glewExperimental = true;
 					const bool ret = glewInit();
 					assert(ret == GLEW_OK);
@@ -173,8 +170,8 @@ namespace kengine::opengl {
 			};
 		}
 
-		static void initImGui() {
-			em->getEntity(window.id) += ImGuiContextComponent{
+		static void initImGui() noexcept {
+			entities.get(window.id) += ImGuiContextComponent{
 				ImGui::CreateContext()
 			};
 
@@ -191,75 +188,75 @@ namespace kengine::opengl {
 			ImGui::NewFrame();
 		}
 
-		static void addShaders() {
+		static void addShaders() noexcept {
 			{ // GBuffer
-				*em += [=](Entity & e) {
-					e += ShaderComponent{ std::make_unique<shaders::Debug>(*em) };
+				entities += [=](Entity & e) noexcept {
+					e += ShaderComponent{ std::make_unique<shaders::Debug>() };
 					e += GBufferShaderComponent{};
 				};
-				*em += [=](Entity & e) {
-					e += ShaderComponent{ std::make_unique<shaders::Text>(*em) };
+				entities += [=](Entity & e) noexcept {
+					e += ShaderComponent{ std::make_unique<shaders::Text>() };
 					e += GBufferShaderComponent{};
 				};
 			}
 
 			{ // Lighting
-				*em += [&](Entity & e) {
-					e += ShaderComponent{ std::make_unique<shaders::ShadowMap>(*em, e) };
+				entities += [&](Entity & e) noexcept {
+					e += ShaderComponent{ std::make_unique<shaders::ShadowMap>(e) };
 					e += ShadowMapShaderComponent{};
 				};
 
-				*em += [&](Entity & e) {
-					e += ShaderComponent{ std::make_unique<shaders::ShadowCube>(*em) };
+				entities += [&](Entity & e) noexcept {
+					e += ShaderComponent{ std::make_unique<shaders::ShadowCube>() };
 					e += ShadowCubeShaderComponent{};
 				};
 
-				*em += [=](Entity & e) {
-					e += ShaderComponent{ std::make_unique<shaders::SpotLight>(*em) };
+				entities += [=](Entity & e) noexcept {
+					e += ShaderComponent{ std::make_unique<shaders::SpotLight>() };
 					e += LightingShaderComponent{};
 				};
-				*em += [=](Entity & e) {
-					e += ShaderComponent{ std::make_unique<shaders::DirLight>(*em, e) };
+				entities += [=](Entity & e) noexcept {
+					e += ShaderComponent{ std::make_unique<shaders::DirLight>(e) };
 					e += LightingShaderComponent{};
 				};
-				*em += [=](Entity & e) {
-					e += ShaderComponent{ std::make_unique<shaders::PointLight>(*em) };
+				entities += [=](Entity & e) noexcept {
+					e += ShaderComponent{ std::make_unique<shaders::PointLight>() };
 					e += LightingShaderComponent{};
 				};
 			}
 
 			{ // Post lighting
-				*em += [=](Entity & e) {
-					e += ShaderComponent{ std::make_unique<shaders::GodRaysDirLight>(*em) };
+				entities += [=](Entity & e) noexcept {
+					e += ShaderComponent{ std::make_unique<shaders::GodRaysDirLight>() };
 					e += PostLightingShaderComponent{};
 				};
-				*em += [=](Entity & e) {
-					e += ShaderComponent{ std::make_unique<shaders::GodRaysPointLight>(*em) };
+				entities += [=](Entity & e) noexcept {
+					e += ShaderComponent{ std::make_unique<shaders::GodRaysPointLight>() };
 					e += PostLightingShaderComponent{};
 				};
-				*em += [=](Entity & e) {
-					e += ShaderComponent{ std::make_unique<shaders::GodRaysSpotLight>(*em) };
+				entities += [=](Entity & e) noexcept {
+					e += ShaderComponent{ std::make_unique<shaders::GodRaysSpotLight>() };
 					e += PostLightingShaderComponent{};
 				};
 			}
 
 			{ // Post process
-				*em += [=](Entity & e) {
-					e += ShaderComponent{ std::make_unique<shaders::LightSphere>(*em, e) };
+				entities += [=](Entity & e) noexcept {
+					e += ShaderComponent{ std::make_unique<shaders::LightSphere>(e) };
 					e += PostProcessShaderComponent{};
 				};
-				*em += [=](Entity & e) {
-					e += ShaderComponent{ std::make_unique<shaders::Highlight>(*em) };
+				entities += [=](Entity & e) noexcept {
+					e += ShaderComponent{ std::make_unique<shaders::Highlight>() };
 					e += PostProcessShaderComponent{};
 				};
-				*em += [=](Entity & e) {
-					e += ShaderComponent{ std::make_unique<shaders::SkyBox>(*em) };
+				entities += [=](Entity & e) noexcept {
+					e += ShaderComponent{ std::make_unique<shaders::SkyBox>() };
 					e += PostProcessShaderComponent{};
 				};
 			}
 		}
 
-		static void onEntityCreated(Entity & e) {
+		static void onEntityCreated(Entity & e) noexcept {
 			if (gBufferIterator == nullptr)
 				return;
 
@@ -268,17 +265,17 @@ namespace kengine::opengl {
 				initShader(*shader->shader);
 		}
 
-		static void initShader(putils::gl::Program & p) {
+		static void initShader(putils::gl::Program & p) noexcept {
 			p.init(gBufferTextureCount);
 
 			assert(gBufferIterator != nullptr);
 			int texture = 0;
-			gBufferIterator([&](const char * name) {
+			gBufferIterator([&](const char * name) noexcept {
 				p.addGBufferTexture(name, texture++);
 				});
 		}
 
-		static void onEntityRemoved(Entity & e) {
+		static void onEntityRemoved(Entity & e) noexcept {
 			const auto viewport = e.tryGet<ViewportComponent>();
 			if (viewport) {
 				if (viewport->window == window.id) {
@@ -289,14 +286,14 @@ namespace kengine::opengl {
 
 			if (e.id != window.id)
 				return;
-			window.id = Entity::INVALID_ID;
+			window.id = INVALID_ID;
 			window.glfw = nullptr;
 			window.comp = nullptr;
 			terminate();
 		}
 
-		static void onMouseCaptured(Entity::ID w, bool captured) {
-			if (w != Entity::INVALID_ID && w != window.id)
+		static void onMouseCaptured(EntityID w, bool captured) noexcept {
+			if (w != INVALID_ID && w != window.id)
 				return;
 
 			if (captured) {
@@ -309,14 +306,14 @@ namespace kengine::opengl {
 			}
 		}
 
-		static void execute(float deltaTime) {
-			if (window.id == Entity::INVALID_ID || window.glfw == nullptr)
+		static void execute(float deltaTime) noexcept {
+			if (window.id == INVALID_ID || window.glfw == nullptr)
 				return;
 
-			for (auto [e, modelData, noOpenGL] : em->getEntities<ModelDataComponent, no<SystemSpecificModelComponent<putils::gl::Mesh>>>())
+			for (auto [e, modelData, noOpenGL] : entities.with<ModelDataComponent, no<SystemSpecificModelComponent<putils::gl::Mesh>>>())
 				createObject(e, modelData);
 
-			for (auto [e, textureData, noTextureModel] : em->getEntities<TextureDataComponent, no<SystemSpecificTextureComponent<putils::gl::Texture>>>())
+			for (auto [e, textureData, noTextureModel] : entities.with<TextureDataComponent, no<SystemSpecificTextureComponent<putils::gl::Texture>>>())
 				loadTexture(e, textureData);
 
 			doOpenGL();
@@ -345,7 +342,7 @@ namespace kengine::opengl {
 			ImGui::NewFrame();
 		}
 
-		static void createObject(Entity & e, const ModelDataComponent & modelData) {
+		static void createObject(Entity & e, const ModelDataComponent & modelData) noexcept {
 			auto & openglModel = e.attach<SystemSpecificModelComponent<putils::gl::Mesh>>();
 
 			for (const auto & meshData : modelData.meshes) {
@@ -379,7 +376,7 @@ namespace kengine::opengl {
 				};
 				const auto it = types.find(meshData.indexType);
 				if (it == types.end())
-					kengine_assert_failed(*em, "Unknown index type");
+					kengine_assert_failed("Unknown index type");
 				else
 					openglMesh.indexType = it->second;
 
@@ -387,7 +384,7 @@ namespace kengine::opengl {
 			}
 		}
 
-		static void registerVertexAttribute(size_t vertexSize, size_t location, size_t offset, putils::meta::type_index type) {
+		static void registerVertexAttribute(size_t vertexSize, size_t location, size_t offset, putils::meta::type_index type) noexcept {
 			struct VertexType {
 				GLenum type;
 				size_t length;
@@ -415,7 +412,7 @@ namespace kengine::opengl {
 
 			const auto it = types.find(type);
 			if (it == types.end()) {
-				kengine_assert_failed(*em, "Unknown vertex attribute type");
+				kengine_assert_failed("Unknown vertex attribute type");
 				return;
 			}
 
@@ -426,7 +423,7 @@ namespace kengine::opengl {
 				glVertexAttribIPointer((GLuint)location, (GLint)it->second.length, it->second.type, (GLsizei)vertexSize, (void *)offset);
 		}
 
-		static void loadTexture(Entity & e, const TextureDataComponent & textureData) {
+		static void loadTexture(Entity & e, const TextureDataComponent & textureData) noexcept {
 			auto & textureModel = e.attach<SystemSpecificTextureComponent<putils::gl::Texture>>();
 
 			glGenTextures(1, &textureModel.texture.get());
@@ -465,7 +462,7 @@ namespace kengine::opengl {
 			putils::Point2i resolution;
 		};
 
-		static void doOpenGL() {
+		static void doOpenGL() noexcept {
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -475,15 +472,15 @@ namespace kengine::opengl {
 			};
 			putils::vector<ToBlit, KENGINE_MAX_VIEWPORTS> toBlit;
 
-			for (auto [e, cam, viewport] : em->getEntities<CameraComponent, ViewportComponent>()) {
-				if (viewport.window == Entity::INVALID_ID)
+			for (auto [e, cam, viewport] : entities.with<CameraComponent, ViewportComponent>()) {
+				if (viewport.window == INVALID_ID)
 					viewport.window = window.id;
 				else if (viewport.window != window.id)
 					continue;
 
 				params.viewportID = e.id;
 				setupParams(cam, viewport);
-				fillGBuffer(*em, e, viewport);
+				fillGBuffer(e, viewport);
 
 				auto fb = e.tryGet<CameraFramebufferComponent>();
 				if (!fb || fb->resolution != viewport.resolution) {
@@ -492,12 +489,12 @@ namespace kengine::opengl {
 						continue;
 				}
 
-				renderToTexture(*em, *fb);
+				renderToTexture(*fb);
 				if (viewport.boundingBox.size.x > 0 && viewport.boundingBox.size.y > 0)
 					toBlit.push_back(ToBlit{ fb, &viewport });
 			}
 
-			std::sort(toBlit.begin(), toBlit.end(), [](const ToBlit & lhs, const ToBlit & rhs) {
+			std::sort(toBlit.begin(), toBlit.end(), [](const ToBlit & lhs, const ToBlit & rhs) noexcept {
 				return lhs.viewport->zOrder < rhs.viewport->zOrder;
 				});
 
@@ -505,7 +502,7 @@ namespace kengine::opengl {
 				blitTextureToViewport(*blit.fb, *blit.viewport);
 		}
 
-		static void setupParams(const CameraComponent & cam, const ViewportComponent & viewport) {
+		static void setupParams(const CameraComponent & cam, const ViewportComponent & viewport) noexcept {
 			params.viewport.size = viewport.resolution;
 			putils::gl::setViewPort(params.viewport);
 
@@ -516,7 +513,7 @@ namespace kengine::opengl {
 			params.view = matrixHelper::getViewMatrix(cam, viewport);
 		}
 
-		static CameraFramebufferComponent * initFramebuffer(Entity & e) {
+		static CameraFramebufferComponent * initFramebuffer(Entity & e) noexcept {
 			auto & viewport = e.get<ViewportComponent>();
 			if (viewport.resolution.x == 0 || viewport.resolution.y == 0)
 				return nullptr;
@@ -551,8 +548,8 @@ namespace kengine::opengl {
 		}
 
 		template<typename Tag>
-		static void runShaders() {
-			for (auto [e, comp, tag] : em->getEntities<ShaderComponent, Tag>()) {
+		static void runShaders() noexcept {
+			for (auto [e, comp, tag] : entities.with<ShaderComponent, Tag>()) {
 				if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 					continue;
 				if (!comp.enabled)
@@ -560,12 +557,12 @@ namespace kengine::opengl {
 
 #ifndef KENGINE_NDEBUG
 				struct ShaderProfiler {
-					ShaderProfiler(Entity & e) {
+					ShaderProfiler(Entity & e) noexcept {
 						_comp = &e.attach<opengl::ShaderProfileComponent>();
 						_timer.restart();
 					}
 
-					~ShaderProfiler() {
+					~ShaderProfiler() noexcept {
 						_comp->executionTime = _timer.getTimeSinceStart().count();
 					}
 
@@ -578,7 +575,7 @@ namespace kengine::opengl {
 			}
 		}
 
-		static void fillGBuffer(EntityManager & em, Entity & e, const ViewportComponent & viewport) noexcept {
+		static void fillGBuffer(Entity & e, const ViewportComponent & viewport) noexcept {
 			auto gbuffer = e.tryGet<GBufferComponent>();
 			if (!gbuffer) {
 				gbuffer = &e.attach<GBufferComponent>();
@@ -596,7 +593,7 @@ namespace kengine::opengl {
 			gbuffer->bindForReading();
 		}
 
-		static void renderToTexture(EntityManager & em, const CameraFramebufferComponent & fb) noexcept {
+		static void renderToTexture(const CameraFramebufferComponent & fb) noexcept {
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fb.fbo);
 			glClear(GL_COLOR_BUFFER_BIT);
 
@@ -607,11 +604,11 @@ namespace kengine::opengl {
 			runShaders<PostProcessShaderComponent>();
 		}
 
-		static void blitTextureToViewport(const CameraFramebufferComponent & fb, const ViewportComponent & viewport) {
+		static void blitTextureToViewport(const CameraFramebufferComponent & fb, const ViewportComponent & viewport) noexcept {
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, fb.fbo);
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
-			const auto box = cameraHelper::convertToScreenPercentage(viewport.boundingBox, window.comp->size, viewport);
+			const auto box = cameraHelper::convertToScreenPercentage({ viewport.boundingBox.position, viewport.boundingBox.size }, window.comp->size, viewport);
 
 			const auto destSizeX = (GLint)(box.size.x * window.comp->size.x);
 			const auto destSizeY = (GLint)(box.size.y * window.comp->size.y);
@@ -633,28 +630,29 @@ namespace kengine::opengl {
 			GBufferComponent * gBuffer = nullptr;
 			size_t indexForPixel = 0;
 		};
-		static Entity::ID getEntityInPixel(Entity::ID window, const putils::Point2ui & pixel) {
+
+		static EntityID getEntityInPixel(EntityID window, const putils::Point2ui & pixel) noexcept {
 			static constexpr auto GBUFFER_ENTITY_LOCATION = offsetof(GBufferTextures, entityID) / sizeof(GBufferTextures::entityID);
 
 			const auto info = getGBufferInfo(window, pixel);
 			if (info.gBuffer == nullptr)
-				return Entity::INVALID_ID;
+				return INVALID_ID;
 
-			Entity::ID ret;
+			EntityID ret;
 			{ // Release texture asap
 				const auto texture = info.gBuffer->getTexture(GBUFFER_ENTITY_LOCATION);
 				const auto & size = info.gBuffer->getSize();
 				for (size_t i = 0; i < size.x * size.y; ++i)
 					if (texture.data[i] != 0.f)
 						break;
-				ret = (Entity::ID)texture.data[info.indexForPixel];
+				ret = (EntityID)texture.data[info.indexForPixel];
 			}
 			if (ret == 0)
-				ret = Entity::INVALID_ID;
+				ret = INVALID_ID;
 			return ret;
 		}
 
-		static putils::Point3f getPositionInPixel(Entity::ID window, const putils::Point2ui & pixel) {
+		static putils::Point3f getPositionInPixel(EntityID window, const putils::Point2ui & pixel) noexcept {
 			static constexpr auto GBUFFER_POSITION_LOCATION = offsetof(GBufferTextures, position) / sizeof(GBufferTextures::position);
 
 			const auto info = getGBufferInfo(window, pixel);
@@ -668,19 +666,19 @@ namespace kengine::opengl {
 			return texture.data + info.indexForPixel;
 		}
 
-		static GBufferInfo getGBufferInfo(Entity::ID w, const putils::Point2ui & pixel) {
+		static GBufferInfo getGBufferInfo(EntityID w, const putils::Point2ui & pixel) noexcept {
 			static constexpr auto GBUFFER_TEXTURE_COMPONENTS = 4;
 
 			GBufferInfo ret;
 
-			if (w != Entity::INVALID_ID && w != window.id)
+			if (w != INVALID_ID && w != window.id)
 				return ret;
 
-			const auto viewportInfo = cameraHelper::getViewportForPixel(*em, window.id, pixel);
-			if (viewportInfo.camera == Entity::INVALID_ID)
+			const auto viewportInfo = cameraHelper::getViewportForPixel(window.id, pixel);
+			if (viewportInfo.camera == INVALID_ID)
 				return ret;
 
-			auto camera = em->getEntity(viewportInfo.camera);
+			auto camera = entities.get(viewportInfo.camera);
 			const auto gBuffer = camera.tryGet<GBufferComponent>();
 			if (!gBuffer)
 				return ret;
@@ -696,20 +694,20 @@ namespace kengine::opengl {
 			return ret;
 		}
 
-		static void initGBuffer(size_t nbAttributes, const functions::GBufferAttributeIterator & iterator) {
+		static void initGBuffer(size_t nbAttributes, const functions::GBufferAttributeIterator & iterator) noexcept {
 			gBufferTextureCount = nbAttributes;
 			gBufferIterator = iterator;
 
-			for (const auto & [e, shader, gbuffer] : em->getEntities<ShaderComponent, GBufferShaderComponent>())
+			for (const auto & [e, shader, gbuffer] : entities.with<ShaderComponent, GBufferShaderComponent>())
 				initShader(*shader.shader);
-			for (const auto & [e, shader, lighting] : em->getEntities<ShaderComponent, LightingShaderComponent>())
+			for (const auto & [e, shader, lighting] : entities.with<ShaderComponent, LightingShaderComponent>())
 				initShader(*shader.shader);
-			for (const auto & [e, shader, postLighting] : em->getEntities<ShaderComponent, PostLightingShaderComponent>())
+			for (const auto & [e, shader, postLighting] : entities.with<ShaderComponent, PostLightingShaderComponent>())
 				initShader(*shader.shader);
-			for (const auto & [e, shader, postProcess] : em->getEntities<ShaderComponent, PostProcessShaderComponent>())
+			for (const auto & [e, shader, postProcess] : entities.with<ShaderComponent, PostProcessShaderComponent>())
 				initShader(*shader.shader);
 
-			for (const auto & [e, modelInfo, modelData] : em->getEntities<SystemSpecificModelComponent<putils::gl::Mesh>, ModelDataComponent>())
+			for (const auto & [e, modelInfo, modelData] : entities.with<SystemSpecificModelComponent<putils::gl::Mesh>, ModelDataComponent>())
 				for (const auto & meshInfo : modelInfo.meshes) {
 					glBindBuffer(GL_ARRAY_BUFFER, meshInfo.vertexBuffer);
 
@@ -719,7 +717,7 @@ namespace kengine::opengl {
 				}
 		}
 
-		static void terminate() {
+		static void terminate() noexcept {
 			ImGui_ImplOpenGL3_Shutdown();
 			ImGui_ImplGlfw_Shutdown();
 			ImGui::DestroyContext();
@@ -728,14 +726,13 @@ namespace kengine::opengl {
 }
 
 namespace kengine {
-	EntityCreator * OpenGLSystem(EntityManager & em) {
-		opengl::impl::em = &em;
-		em += [](Entity & e) {
+	EntityCreator * OpenGLSystem() noexcept {
+		entities += [](Entity & e) noexcept {
 			opengl::impl::init(e);
 		};
 
 #ifndef KENGINE_NO_DEFAULT_GBUFFER
-		kengine::initGBuffer<GBufferTextures>(em);
+		kengine::initGBuffer<GBufferTextures>();
 #endif
 
 		return [](Entity & e) {

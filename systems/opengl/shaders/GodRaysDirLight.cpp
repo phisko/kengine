@@ -1,5 +1,5 @@
 #include "GodRaysDirLight.hpp"
-#include "EntityManager.hpp"
+#include "kengine.hpp"
 
 #include "data/LightComponent.hpp"
 #include "data/ShaderComponent.hpp"
@@ -13,13 +13,12 @@
 #include "ShadowMap.hpp"
 
 namespace kengine::opengl::shaders {
-	GodRaysDirLight::GodRaysDirLight(EntityManager & em)
-		: Program(true, putils_nameof(GodRaysDirLight)),
-		_em(em)
+	GodRaysDirLight::GodRaysDirLight() noexcept
+		: Program(true, putils_nameof(GodRaysDirLight))
 	{
 	}
 
-	void GodRaysDirLight::init(size_t firstTextureID) {
+	void GodRaysDirLight::init(size_t firstTextureID) noexcept {
 		initWithShaders<GodRaysDirLight>(putils::make_vector(
 			ShaderDescription{ src::Quad::Vert::glsl, GL_VERTEX_SHADER },
 			ShaderDescription{ src::GodRays::Frag::glsl, GL_FRAGMENT_SHADER },
@@ -32,7 +31,7 @@ namespace kengine::opengl::shaders {
 			_shadowMap[i] = _shadowMapTextureID + i;
 	}
 
-	void GodRaysDirLight::run(const Parameters & params) {
+	void GodRaysDirLight::run(const Parameters & params) noexcept {
 		use();
 
 		shaderHelper::Enable _(GL_BLEND);
@@ -45,7 +44,7 @@ namespace kengine::opengl::shaders {
 		_viewPos = params.camPos;
 		_screenSize = putils::Point2f(params.viewport.size);
 
-		for (const auto &[e, light, depthMap, comp] : _em.getEntities<DirLightComponent, CSMComponent, GodRaysComponent>()) {
+		for (const auto &[e, light, depthMap, comp] : entities.with<DirLightComponent, CSMComponent, GodRaysComponent>()) {
 			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
@@ -58,7 +57,7 @@ namespace kengine::opengl::shaders {
 		}
 	}
 
-	void GodRaysDirLight::drawLight(const DirLightComponent & light, const CSMComponent & depthMap, const Parameters & params) {
+	void GodRaysDirLight::drawLight(const DirLightComponent & light, const CSMComponent & depthMap, const Parameters & params) noexcept {
 		_color = light.color;
 		_direction = light.direction;
 

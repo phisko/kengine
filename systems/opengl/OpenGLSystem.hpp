@@ -22,9 +22,7 @@ namespace kengine {
 		float entityID[4]; // id, ignore, ignore, ignore
 	};
 
-	class EntityManager;
-
-	EntityCreator * OpenGLSystem(EntityManager & em);
+	EntityCreator * OpenGLSystem() noexcept;
 }
 
 #define refltype kengine::GBufferTextures

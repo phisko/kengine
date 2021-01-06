@@ -5,7 +5,7 @@
 
 namespace kengine::functions {
 	struct AppearsInViewport : BaseFunction<
-		bool(Entity::ID)
+		bool(EntityID)
 	> {};
 }
 

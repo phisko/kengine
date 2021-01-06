@@ -5,7 +5,7 @@
 #include "opengl/Mesh.hpp"
 
 namespace kengine::shaderHelper {
-	void drawModel(const SystemSpecificModelComponent<putils::gl::Mesh> & openGL) {
+	void drawModel(const SystemSpecificModelComponent<putils::gl::Mesh> & openGL) noexcept {
 		for (const auto & mesh : openGL.meshes)
 			putils::gl::draw(mesh);
 	}
@@ -14,23 +14,23 @@ namespace kengine::shaderHelper {
 		namespace sphere {
 #define X .525731112119133606f
 #define Z .850650808352039932f
-			static GLfloat vdata[12][3] = {
+			static constexpr GLfloat vdata[12][3] = {
 				{-X, 0.f, Z}, {X, 0.f, Z}, {-X, 0.f, -Z}, {X, 0.f, -Z},
 				{0.f, Z, X}, {0.f, Z, -X}, {0.f, -Z, X}, {0.f, -Z, -X},
 				{Z, X, 0.f}, {-Z, X, 0.f}, {Z, -X, 0.f}, {-Z, -X, 0.f}
 			};
-			static GLuint tindices[20][3] = {
+			static constexpr GLuint tindices[20][3] = {
 				{0,4,1}, {0,9,4}, {9,5,4}, {4,5,8}, {4,8,1},
 				{8,10,1}, {8,3,10}, {5,3,8}, {5,2,3}, {2,7,3},
 				{7,10,3}, {7,6,10}, {7,11,6}, {11,0,6}, {0,1,6},
 				{6,1,10}, {9,0,11}, {9,11,2}, {9,2,5}, {7,2,11} };
 
-			void normalize(GLfloat *a) {
+			static void normalize(GLfloat *a) noexcept {
 				GLfloat d = sqrt(a[0] * a[0] + a[1] * a[1] + a[2] * a[2]);
 				a[0] /= d; a[1] /= d; a[2] /= d;
 			}
 
-			void drawtri(std::vector<float> & ret, GLfloat *a, GLfloat *b, GLfloat *c, int div, float r) {
+			static void drawtri(std::vector<float> & ret, const GLfloat *a, const GLfloat *b, const GLfloat *c, int div, float r) noexcept {
 				if (div <= 0) {
 					ret.push_back(a[0] * r); ret.push_back(a[1] * r); ret.push_back(a[2] * r);
 					ret.push_back(b[0] * r); ret.push_back(b[1] * r); ret.push_back(b[2] * r);
@@ -52,7 +52,7 @@ namespace kengine::shaderHelper {
 			}
 		}
 
-		void drawSphere() {
+		void drawSphere() noexcept {
 			static constexpr auto ndiv = 5;
 			static const auto radius = .5f;
 
@@ -84,7 +84,7 @@ namespace kengine::shaderHelper {
 			glBindVertexArray(0);
 		}
 
-		void drawQuad() {
+		void drawQuad() noexcept {
 			static GLuint vao = 0;
 			static GLuint vbo;
 
@@ -111,7 +111,7 @@ namespace kengine::shaderHelper {
 			glBindVertexArray(0);
 		}
 
-		void drawTexturedQuad() {
+		void drawTexturedQuad() noexcept {
 			static GLuint vao = 0;
 			static GLuint vbo;
 
@@ -141,7 +141,7 @@ namespace kengine::shaderHelper {
 		}
 
 		namespace cone {
-			glm::vec3 perp(const glm::vec3 &v) {
+			glm::vec3 perp(const glm::vec3 &v) noexcept {
 				auto min = fabs(v.x);
 				glm::vec3 cardinalAxis(1.f, 0.f, 0.f);
 
@@ -158,7 +158,7 @@ namespace kengine::shaderHelper {
 			}
 		}
 
-		void drawCone(const glm::vec3 & dir, float radius) {
+		void drawCone(const glm::vec3 & dir, float radius) noexcept {
 			static constexpr auto radialSlices = 5;
 			static const glm::vec3 pointPos{ 0.f, 0.f, 0.f };
 			static const auto height = 1.f;
@@ -193,10 +193,10 @@ namespace kengine::shaderHelper {
 			glEnd();
 		}
 
-		void drawCube() {
+		void drawCube() noexcept {
 			static GLuint vao = -1;
 			if (vao == -1) {
-				static float vertices[] = {
+				static constexpr float vertices[] = {
 					// positions          
 					-.5f,  .5f, -.5f,
 					-.5f, -.5f, -.5f,
@@ -255,7 +255,7 @@ namespace kengine::shaderHelper {
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 
-		void drawLine(const glm::vec3 & from, const glm::vec3 & to) {
+		void drawLine(const glm::vec3 & from, const glm::vec3 & to) noexcept {
 			static GLuint vao = -1;
 			static GLuint vbo;
 

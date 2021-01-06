@@ -1,11 +1,11 @@
 #pragma once
 
 #include "reflection.hpp"
-#include "Point.hpp"
+#include "Rect.hpp"
 
 namespace kengine {
     struct TransformComponent {
-        putils::Rect3f boundingBox{ {}, { 1.f, 1.f, 1.f } };
+        putils::Rect3f boundingBox{ { 0.f, 0.f, 0.f }, { 1.f, 1.f, 1.f } };
         float yaw = 0; // Radians
         float pitch = 0; // Radians
 		float roll = 0; // Radians

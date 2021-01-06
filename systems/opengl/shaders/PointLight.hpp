@@ -6,7 +6,6 @@
 #include "PointLightSrc.hpp"
 
 namespace kengine {
-	class EntityManager;
 	struct PointLightComponent;
 }
 
@@ -19,18 +18,17 @@ namespace kengine::opengl::shaders {
 		public src::PointLight::Frag::Uniforms
 	{
 	public:
-		PointLight(EntityManager & em)
-			: Program(true, putils_nameof(PointLight)), _em(em)
+		PointLight() noexcept
+			: Program(true, putils_nameof(PointLight))
 		{}
 
-		void init(size_t firstTextureID) override;
-		void run(const Parameters & params) override;
+		void init(size_t firstTextureID) noexcept override;
+		void run(const Parameters & params) noexcept override;
 
 	private:
-		EntityManager & _em;
 		size_t _shadowMapTextureID;
 
-		void setLight(const PointLightComponent & light, const putils::Point3f & pos, float radius); 
+		void setLight(const PointLightComponent & light, const putils::Point3f & pos, float radius) noexcept; 
 	};
 }
 

@@ -6,22 +6,17 @@
 #include "opengl/Program.hpp"
 
 namespace kengine {
-	class EntityManager;
-
 	class RecastDebugShader : public duDebugDraw, public putils::gl::Program {
 	public:
-#pragma region ctor / dtor
-		RecastDebugShader(EntityManager & em);
-		~RecastDebugShader() = default;
-#pragma endregion ctor / dtor
+		RecastDebugShader() noexcept;
+		~RecastDebugShader() noexcept = default;
 
-#pragma region Program
+		// Program
 	public:
-		void init(size_t firstTexture) final;
-		void run(const Parameters & params) final;
-#pragma endregion Program
+		void init(size_t firstTexture) noexcept final;
+		void run(const Parameters & params) noexcept final;
 
-#pragma region duDebugDraw
+		// duDebugDraw
 	public:
 		void depthMask(bool state) final {}
 		void texture(bool state) final {}
@@ -35,7 +30,6 @@ namespace kengine {
 		void vertex(const float x, const float y, const float z, unsigned int color, const float u, const float v) final;
 
 		void end() final;
-#pragma endregion duDebugDraw
 
 #pragma region Uniforms
 	public:
@@ -47,10 +41,7 @@ namespace kengine {
 		putils::gl::Uniform<putils::NormalizedColor> _color;
 #pragma endregion Uniforms
 
-#pragma region Attributes
 	private:
-		EntityManager & _em;
-
 		struct Vertex {
 			float pos[3];
 			float color[4];
@@ -61,7 +52,6 @@ namespace kengine {
 		GLenum _currentVertexType;
 		GLuint _vao;
 		GLuint _vbo;
-#pragma endregion Attributes
 	};
 }
 

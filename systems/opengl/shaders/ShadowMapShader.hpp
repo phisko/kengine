@@ -15,18 +15,18 @@ namespace kengine {
 namespace kengine::opengl::shaders {
 	class ShadowMapShader : public putils::gl::Program {
 	public:
-		ShadowMapShader(bool usesGBuffer = false, const char * name = "") : Program(usesGBuffer, name) {}
-		virtual ~ShadowMapShader() {}
+		ShadowMapShader(bool usesGBuffer = false, const char * name = "") noexcept : Program(usesGBuffer, name) {}
+		virtual ~ShadowMapShader() noexcept {}
 
-		virtual void drawToTexture(GLuint texture, const glm::mat4 & lightSpaceMatrix, const Parameters & params) {}
-		void run(const Parameters & params) override {}
+		virtual void drawToTexture(GLuint texture, const glm::mat4 & lightSpaceMatrix, const Parameters & params) noexcept {}
+		void run(const Parameters & params) noexcept override {}
 
-		virtual void run(Entity & e, DirLightComponent & light, const Parameters & params);
-		virtual void run(Entity & e, SpotLightComponent & light, const putils::Point3f & pos, const Parameters & params);
+		virtual void run(Entity & e, DirLightComponent & light, const Parameters & params) noexcept;
+		virtual void run(Entity & e, SpotLightComponent & light, const putils::Point3f & pos, const Parameters & params) noexcept;
 
 	private:
 		template<typename T, typename Func>
-		void runImpl(T & depthMap, Func && draw, const Parameters & params);
+		void runImpl(T & depthMap, Func && draw, const Parameters & params) noexcept;
 	};
 
 	class ShadowCubeShader : public putils::gl::Program,
@@ -34,13 +34,13 @@ namespace kengine::opengl::shaders {
 		public src::DepthCube::Frag::Uniforms
 	{
 	public:
-		ShadowCubeShader(bool usesGBuffer = false, const char * name = "") : Program(usesGBuffer, name) {}
-		virtual ~ShadowCubeShader() {}
+		ShadowCubeShader(bool usesGBuffer = false, const char * name = "") noexcept : Program(usesGBuffer, name) {}
+		virtual ~ShadowCubeShader() noexcept {}
 
-		void run(const Parameters & params) override {}
-		virtual void run(Entity & e, PointLightComponent & light, const putils::Point3f & pos, float radius, const Parameters & params);
+		void run(const Parameters & params) noexcept override {}
+		virtual void run(Entity & e, PointLightComponent & light, const putils::Point3f & pos, float radius, const Parameters & params) noexcept;
 
-		virtual void drawObjects(const Parameters & params) {}
+		virtual void drawObjects(const Parameters & params) noexcept {}
 
 #pragma region Uniforms
 	protected:

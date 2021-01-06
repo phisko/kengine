@@ -1,61 +1,24 @@
 #pragma once
 
-#include "EntityManager.hpp"
+#include "kengine.hpp"
 #include "data/InstanceComponent.hpp"
 #include "assertHelper.hpp"
 
 namespace kengine::instanceHelper {
 	template<typename Comp>
-	bool modelHas(EntityManager & em, const Entity & instance);
+	bool modelHas(const Entity & instance) noexcept;
 	template<typename Comp>
-	bool modelHas(EntityManager & em, const InstanceComponent & instance);
+	bool modelHas(const InstanceComponent & instance) noexcept;
 
 	template<typename Comp>
-	const Comp & getModel(EntityManager & em, const Entity & instance);
+	const Comp & getModel(const Entity & instance) noexcept;
 	template<typename Comp>
-	const Comp & getModel(EntityManager & em, const InstanceComponent & instance);
+	const Comp & getModel(const InstanceComponent & instance) noexcept;
 
 	template<typename Comp>
-	const Comp & tryGetModel(EntityManager & em, const Entity & instance);
+	const Comp & tryGetModel(const Entity & instance) noexcept;
 	template<typename Comp>
-	const Comp & tryGetModel(EntityManager & em, const InstanceComponent & instance);
+	const Comp & tryGetModel(const InstanceComponent & instance) noexcept;
 }
 
-// impl
-namespace kengine::instanceHelper {
-	template<typename Comp>
-	bool modelHas(EntityManager & em, const InstanceComponent & instance) {
-		kengine_assert(em, instance.model != Entity::INVALID_ID);
-		const auto model = em.getEntity(instance.model);
-		return model.has<Comp>();
-	}
-
-	template<typename Comp>
-	bool modelHas(EntityManager & em, const Entity & instance) {
-		return modelHas<Comp>(em, instance.get<InstanceComponent>());
-	}
-
-	template<typename Comp>
-	const Comp & getModel(EntityManager & em, const InstanceComponent & instance) {
-		kengine_assert(em, instance.model != Entity::INVALID_ID);
-		const auto model = em.getEntity(instance.model);
-		return model.get<Comp>();
-	}
-
-	template<typename Comp>
-	const Comp & getModel(EntityManager & em, const Entity & e) {
-		return getModel<Comp>(em, e.get<InstanceComponent>());
-	}
-
-	template<typename Comp>
-	const Comp * tryGetModel(EntityManager & em, const InstanceComponent & instance) {
-		kengine_assert(em, instance.model != Entity::INVALID_ID);
-		const auto model = em.getEntity(instance.model);
-		return model.tryGet<Comp>();
-	}
-
-	template<typename Comp>
-	const Comp * tryGetModel(EntityManager & em, const Entity & e) {
-		return tryGetModel<Comp>(em, e.get<InstanceComponent>());
-	}
-}
+#include "instanceHelper.inl"

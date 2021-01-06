@@ -1,5 +1,5 @@
 #include "LightSphere.hpp"
-#include "EntityManager.hpp"
+#include "kengine.hpp"
 
 #include "data/LightComponent.hpp"
 #include "data/TransformComponent.hpp"
@@ -15,11 +15,11 @@ static auto SUN_DIST = 500.f;
 static auto SUN_SIZE = 100.f;
 
 namespace kengine::opengl::shaders {
-	static glm::vec3 toVec(const putils::Point3f & p) { return { p.x, p.y, p.z }; }
+	static glm::vec3 toVec(const putils::Point3f & p) noexcept { return { p.x, p.y, p.z }; }
 
-	LightSphere::LightSphere(EntityManager & em, Entity & parent) 
-		: Program(false, putils_nameof(LightSphere)),
-		_em(em) {
+	LightSphere::LightSphere(Entity & parent) noexcept 
+		: Program(false, putils_nameof(LightSphere))
+	{
 		parent += AdjustableComponent{
 			"Render/Lights", {
 				{ "Sphere size", &SPHERE_SIZE },
@@ -29,14 +29,14 @@ namespace kengine::opengl::shaders {
 		};
 	}
 
-	void LightSphere::init(size_t firstTextureID) {
+	void LightSphere::init(size_t firstTextureID) noexcept {
 		initWithShaders<LightSphere>(putils::make_vector(
 			ShaderDescription{ src::ProjViewModel::Vert::glsl, GL_VERTEX_SHADER },
 			ShaderDescription{ src::Color::Frag::glsl, GL_FRAGMENT_SHADER }
 		));
 	}
 
-	void LightSphere::run(const Parameters & params) {
+	void LightSphere::run(const Parameters & params) noexcept {
 		shaderHelper::Enable __e(GL_DEPTH_TEST);
 		shaderHelper::Enable __c(GL_CULL_FACE);
 
@@ -44,14 +44,14 @@ namespace kengine::opengl::shaders {
 		_proj = params.proj;
 		_view = params.view;
 
-		for (const auto & [e, light] : _em.getEntities<DirLightComponent>()) {
+		for (const auto & [e, light] : entities.with<DirLightComponent>()) {
 			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			drawLight(light, params.camPos - toVec(light.direction) * SUN_DIST, SUN_SIZE);
 		}
 
-		for (const auto & [e, light, transform] : _em.getEntities<PointLightComponent, TransformComponent>()) {
+		for (const auto & [e, light, transform] : entities.with<PointLightComponent, TransformComponent>()) {
 			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
@@ -59,7 +59,7 @@ namespace kengine::opengl::shaders {
 			drawLight(light, toVec(pos), SPHERE_SIZE);
 		}
 
-		for (const auto & [e, light, transform] : _em.getEntities<SpotLightComponent, TransformComponent>()) {
+		for (const auto & [e, light, transform] : entities.with<SpotLightComponent, TransformComponent>()) {
 			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
@@ -70,7 +70,7 @@ namespace kengine::opengl::shaders {
 		}
 	}
 
-	void LightSphere::drawLight(const LightComponent & light, const glm::vec3 & pos, float size) {
+	void LightSphere::drawLight(const LightComponent & light, const glm::vec3 & pos, float size) noexcept {
 		glm::mat4 model(1.f);
 		model = glm::translate(model, pos);
 		model = glm::scale(model, glm::vec3(size));

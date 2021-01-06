@@ -1,5 +1,5 @@
 #include "Highlight.hpp"
-#include "EntityManager.hpp"
+#include "kengine.hpp"
 
 #include "data/HighlightComponent.hpp"
 
@@ -61,20 +61,19 @@ void main() {
 #pragma endregion GLSL
 
 namespace kengine::opengl::shaders {
-	Highlight::Highlight(EntityManager & em)
-		: Program(true, putils_nameof(Highlight)),
-		_em(em)
+	Highlight::Highlight() noexcept
+		: Program(true, putils_nameof(Highlight))
 	{
 	}
 
-	void Highlight::init(size_t firstTextureID) {
+	void Highlight::init(size_t firstTextureID) noexcept {
 		initWithShaders<Highlight>(putils::make_vector(
 			ShaderDescription{ src::Quad::Vert::glsl, GL_VERTEX_SHADER },
 			ShaderDescription{ frag, GL_FRAGMENT_SHADER }
 		));
 	}
 
-	void Highlight::run(const Parameters & params) {
+	void Highlight::run(const Parameters & params) noexcept {
 		use();
 
 		shaderHelper::Enable _(GL_BLEND);
@@ -84,7 +83,7 @@ namespace kengine::opengl::shaders {
 		_viewPos = params.camPos;
 		_screenSize = putils::Point2f(params.viewport.size);
 
-		for (const auto & [e, highlight] : _em.getEntities<HighlightComponent>()) {
+		for (const auto & [e, highlight] : entities.with<HighlightComponent>()) {
 			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 

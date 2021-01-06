@@ -3,20 +3,14 @@
 #include "systems/opengl/shaders/ShadowMapShader.hpp"
 
 namespace kengine {
-	class EntityManager;
-
 	class AssImpShadowMap : public opengl::shaders::ShadowMapShader {
 	public:
-		AssImpShadowMap(EntityManager & em)
-			: ShadowMapShader(false, putils_nameof(AssImpShadowMap)),
-			_em(em)
+		AssImpShadowMap() noexcept
+			: ShadowMapShader(false, putils_nameof(AssImpShadowMap))
 		{}
 
-		void init(size_t firstTextureID) override;
-		void drawToTexture(GLuint texture, const glm::mat4 & lightSpaceMatrix, const Parameters & params) override;
-
-	private:
-		EntityManager & _em;
+		void init(size_t firstTextureID) noexcept override;
+		void drawToTexture(GLuint texture, const glm::mat4 & lightSpaceMatrix, const Parameters & params) noexcept override;
 
 #pragma region Uniforms
 	public:

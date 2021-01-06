@@ -3,14 +3,12 @@
 #include "opengl/Program.hpp"
 
 namespace kengine {
-	class EntityManager;
-
 	class PolyVoxShader : public putils::gl::Program {
 	public:
-		PolyVoxShader(EntityManager & em);
+		PolyVoxShader() noexcept;
 
-		void init(size_t firstTextureID) override;
-		void run(const Parameters & params) override;
+		void init(size_t firstTextureID) noexcept override;
+		void run(const Parameters & params) noexcept override;
 
 #pragma region Uniforms
 	public:
@@ -22,9 +20,6 @@ namespace kengine {
 		putils::gl::Uniform<float> _entityID;
 		putils::gl::Uniform<putils::NormalizedColor> _color;
 #pragma endregion Uniforms
-
-	private:
-		EntityManager & _em;
 	};
 }
 

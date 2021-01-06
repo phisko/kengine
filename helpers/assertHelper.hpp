@@ -19,29 +19,27 @@
 # else
 #  define kengine_debub_break (void)0
 # endif
-# define kengine_assert_failed(em, message) \
+# define kengine_assert_failed(message) \
 	do {\
-		kengine::assertHelper::assertFailed(em, __FILE__, __LINE__, message); \
+		kengine::assertHelper::assertFailed(__FILE__, __LINE__, message); \
 		if (kengine::assertHelper::isDebuggerPresent()) \
 			kengine_debug_break; \
 	} while(false)
-# define kengine_assert_with_message(em, x, message) \
+# define kengine_assert_with_message(x, message) \
 	do {\
 		if (!!(x)) \
 			(void)0; \
 		else \
-			kengine_assert_failed(em, message); \
+			kengine_assert_failed(message); \
 		kengine_assume(!!(x)); \
 	} while (false)
-# define kengine_assert(em, x) \
-	kengine_assert_with_message(em, x, #x)
+# define kengine_assert(x) \
+	kengine_assert_with_message(x, #x)
 
 namespace kengine {
-	class EntityManager;
-
 	namespace assertHelper {
-		void assertFailed(EntityManager & em, const char * file, int line, const std::string & expr);
-		bool isDebuggerPresent();
+		void assertFailed(const char * file, int line, const std::string & expr) noexcept;
+		bool isDebuggerPresent() noexcept;
 	}
 }
 #endif

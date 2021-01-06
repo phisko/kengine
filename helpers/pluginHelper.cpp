@@ -1,14 +1,14 @@
 #include "PluginHelper.hpp"
-#include "EntityManager.hpp"
+#include "kengine.hpp"
 
 #include "data/ImGuiContextComponent.hpp"
 #include "imgui.h"
 
 namespace kengine::pluginHelper {
-    void initPlugin(EntityManager & em) {
-        detail::components = &em._getComponentMap();
+    void initPlugin(void * state) noexcept {
+        kengine::initPlugin(state);
 
-        for (const auto & [e, context] : em.getEntities<kengine::ImGuiContextComponent>())
+        for (const auto & [e, context] : entities.with<kengine::ImGuiContextComponent>())
             ImGui::SetCurrentContext(context.context);
     }
 }

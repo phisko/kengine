@@ -8,22 +8,14 @@
 
 #include "data/ShaderComponent.hpp"
 
-namespace kengine {
-	class EntityManager;
-	struct PointLightComponent;
-}
-
 namespace kengine::opengl::shaders {
 	class ShadowCube : public ShadowCubeShader
 	{
 	public:
-		ShadowCube(EntityManager & em) : ShadowCubeShader(false, putils_nameof(ShadowCube)), _em(em) {}
+		ShadowCube() noexcept : ShadowCubeShader(false, putils_nameof(ShadowCube)) {}
 
-		void init(size_t firstTextureID) override;
-		void drawObjects(const Parameters & params) override;
-
-	private:
-		EntityManager & _em;
+		void init(size_t firstTextureID) noexcept override;
+		void drawObjects(const Parameters & params) noexcept override;
 	};
 }
 

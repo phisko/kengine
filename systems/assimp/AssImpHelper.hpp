@@ -19,14 +19,12 @@
 #include "data/SkeletonComponent.hpp"
 
 namespace kengine {
-	class EntityManager;
-
 	struct AssImpObjectComponent {};
 
 	struct AssImpTexturesModelComponent {
 		struct MeshTextures {
-			std::vector<Entity::ID> diffuse; // id of entities with SystemSpecificTextureComponent
-			std::vector<Entity::ID> specular;
+			std::vector<EntityID> diffuse; // id of entities with SystemSpecificTextureComponent
+			std::vector<EntityID> specular;
 
 			putils::NormalizedColor diffuseColor;
 			putils::NormalizedColor specularColor;
@@ -48,6 +46,6 @@ namespace kengine {
 			putils::gl::Uniform<putils::NormalizedColor> specularColor;
 		};
 
-		void drawModel(EntityManager & em, const InstanceComponent & instance, const TransformComponent & transform, const SkeletonComponent & skeleton, bool useTextures, const Uniforms & uniforms);
+		void drawModel(const InstanceComponent & instance, const TransformComponent & transform, const SkeletonComponent & skeleton, bool useTextures, const Uniforms & uniforms) noexcept;
 	}
 }

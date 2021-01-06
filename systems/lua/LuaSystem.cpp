@@ -5,30 +5,29 @@
 
 namespace kengine::lua {
 	struct impl {
-		static inline EntityManager * em;
 		static inline sol::state * state;
 
-		static void init(Entity & e) {
+		static void init(Entity & e) noexcept {
 			e += functions::Execute{ execute };
 
 			state = new sol::state;
 			e += LuaStateComponent{ state };
 
 			state->open_libraries();
-			scriptLanguageHelper::init(*em,
-				[&](auto && ... args) {
-					luaHelper::detail::registerFunctionWithState(*state, FWD(args)...);
+			scriptLanguageHelper::init(
+				[&](auto && ... args) noexcept {
+					luaHelper::impl::registerFunctionWithState(*state, FWD(args)...);
 				},
-				[&](auto type) {
+				[&](auto type) noexcept {
 					using T = putils_wrapped_type(type);
-					luaHelper::detail::registerTypeWithState<T>(*em, *state);
+					luaHelper::impl::registerTypeWithState<T>(*state);
 				}
 			);
 		}
 
-		static void execute(float deltaTime) {
+		static void execute(float deltaTime) noexcept {
 			(*state)["deltaTime"] = deltaTime;
-			for (auto [e, comp] : em->getEntities<LuaComponent>()) {
+			for (auto [e, comp] : entities.with<LuaComponent>()) {
 				(*state)["self"] = &e;
 				for (const auto & s : comp.scripts)
 					state->script_file(s.c_str());
@@ -38,9 +37,8 @@ namespace kengine::lua {
 }
 
 namespace kengine {
-	EntityCreatorFunctor<64> LuaSystem(EntityManager & em) {
-		lua::impl::em = &em;
-		return [&](Entity & e) {
+	EntityCreator * LuaSystem() noexcept {
+		return [](Entity & e) noexcept {
 			lua::impl::init(e);
 		};
 	}

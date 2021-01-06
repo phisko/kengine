@@ -8,6 +8,6 @@ namespace kengine::opengl {
 		float executionTime;
 	};
 
-	EntityCreatorFunctor<64> ShaderController(EntityManager & em);
-	EntityCreatorFunctor<64> GBufferDebugger(EntityManager & em, const functions::GBufferAttributeIterator & iterator);
+	EntityCreator * ShaderController() noexcept;
+	EntityCreatorFunctor<64> GBufferDebugger(const functions::GBufferAttributeIterator & iterator) noexcept;
 }

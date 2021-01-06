@@ -3,7 +3,5 @@
 #include "EntityCreator.hpp"
 
 namespace kengine {
-	class EntityManager;
-
-	EntityCreator * CollisionSystem(EntityManager & em);
+	EntityCreator * CollisionSystem() noexcept;
 }

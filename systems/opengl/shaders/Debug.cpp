@@ -1,5 +1,5 @@
 #include "Debug.hpp"
-#include "EntityManager.hpp"
+#include "kengine.hpp"
 
 #include "data/DebugGraphicsComponent.hpp"
 #include "data/TransformComponent.hpp"
@@ -63,13 +63,12 @@ void main() {
 #pragma endregion GLSL
 
 namespace kengine::opengl::shaders {
-	Debug::Debug(EntityManager & em)
-		: Program(false, putils_nameof(Debug)),
-		_em(em)
+	Debug::Debug() noexcept
+		: Program(false, putils_nameof(Debug))
 	{
 	}
 
-	void Debug::init(size_t firstTextureID) {
+	void Debug::init(size_t firstTextureID) noexcept {
 		initWithShaders<Debug>(putils::make_vector(
 			ShaderDescription{ vert, GL_VERTEX_SHADER },
 			ShaderDescription{ frag, GL_FRAGMENT_SHADER },
@@ -77,14 +76,14 @@ namespace kengine::opengl::shaders {
 		));
 	}
 
-	void Debug::run(const Parameters & params) {
+	void Debug::run(const Parameters & params) noexcept {
 		use();
 
 		_view = params.view;
 		_proj = params.proj;
 		_viewPos = params.camPos;
 
-		const auto commonMatrixTransform = [](glm::mat4 & model, const kengine::TransformComponent & transform, DebugGraphicsComponent::ReferenceSpace referenceSpace) {
+		const auto commonMatrixTransform = [](glm::mat4 & model, const kengine::TransformComponent & transform, DebugGraphicsComponent::ReferenceSpace referenceSpace) noexcept {
 			if (referenceSpace == DebugGraphicsComponent::ReferenceSpace::World)
 				return;
 			model = glm::translate(model, shaderHelper::toVec(transform.boundingBox.position));
@@ -93,7 +92,7 @@ namespace kengine::opengl::shaders {
 			model = glm::rotate(model, transform.roll, { 0.f, 0.f, 1.f });
 		};
 
-		for (const auto &[e, debug, transform] : _em.getEntities<DebugGraphicsComponent, TransformComponent>()) {
+		for (const auto &[e, debug, transform] : entities.with<DebugGraphicsComponent, TransformComponent>()) {
 			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
@@ -103,29 +102,29 @@ namespace kengine::opengl::shaders {
 
 				glm::mat4 model{ 1.f };
 				std::visit(putils::overloaded{
-					[&](const DebugGraphicsComponent::Line & line) {
+					[&](const DebugGraphicsComponent::Line & line) noexcept {
 						commonMatrixTransform(model, transform, element.referenceSpace);
 						_model = model;
 						shaderHelper::shapes::drawLine(shaderHelper::toVec(element.pos), shaderHelper::toVec(line.end));
 					},
-					[&](const DebugGraphicsComponent::Sphere & sphere) {
+					[&](const DebugGraphicsComponent::Sphere & sphere) noexcept {
 						model = glm::translate(model, shaderHelper::toVec(element.pos));
 						commonMatrixTransform(model, transform, element.referenceSpace);
 						model = glm::scale(model, shaderHelper::toVec(transform.boundingBox.size * sphere.radius));
 						_model = model;
 						shaderHelper::shapes::drawSphere();
 					},
-					[&](const DebugGraphicsComponent::Box & box) {
+					[&](const DebugGraphicsComponent::Box & box) noexcept {
 						model = glm::translate(model, shaderHelper::toVec(element.pos));
 						commonMatrixTransform(model, transform, element.referenceSpace);
 						model = glm::scale(model, shaderHelper::toVec(transform.boundingBox.size * box.size));
 						_model = model;
 						shaderHelper::shapes::drawCube();
 					},
-					[&](const DebugGraphicsComponent::Text & text) {
+					[&](const DebugGraphicsComponent::Text & text) noexcept {
 						// TODO
 					},
-					[&](auto && v) {
+					[&](auto && v) noexcept {
 						static_assert(putils::always_false<decltype(v)>(), "Non exhaustive visitor");
 					}
 				}, element.data);

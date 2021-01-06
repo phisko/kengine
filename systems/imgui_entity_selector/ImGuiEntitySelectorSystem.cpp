@@ -18,10 +18,9 @@
 
 namespace kengine::imgui_entity_selector {
 	struct impl {
-		static inline EntityManager * em;
 		static inline bool * enabled;
 
-		static void init(Entity & e) {
+		static void init(Entity & e) noexcept {
 			e += NameComponent{ "Entity selector" };
 			auto & tool = e.attach<ImGuiToolComponent>();
 			tool.enabled = true;
@@ -30,7 +29,7 @@ namespace kengine::imgui_entity_selector {
 			e += functions::Execute{ execute };
 		}
 
-		static void execute(float deltaTime) {
+		static void execute(float deltaTime) noexcept {
 			if (!*enabled)
 				return;
 
@@ -41,8 +40,8 @@ namespace kengine::imgui_entity_selector {
 				ImGui::Separator();
 
 				ImGui::BeginChild("child");
-				for (auto e : em->getEntities())
-					if (matches(e, nameSearch, *em)) {
+				for (auto e : entities)
+					if (matches(e, nameSearch)) {
 						if (e.has<SelectedComponent>())
 							e.detach<SelectedComponent>();
 						else
@@ -53,7 +52,7 @@ namespace kengine::imgui_entity_selector {
 			ImGui::End();
 		}
 
-		static bool matches(const Entity & e, const char * str, EntityManager & em) {
+		static bool matches(const Entity & e, const char * str) noexcept {
 			putils::string<1024> displayText("[%d]", e.id);;
 			const auto name = e.tryGet<NameComponent>();
 			if (name) {
@@ -66,14 +65,14 @@ namespace kengine::imgui_entity_selector {
 				displayText += " -- ";
 
 				bool matches = false;
-				if (str[0] >= '0' && str[0] <= '9' && putils::parse<Entity::ID>(str) == e.id) {
+				if (str[0] >= '0' && str[0] <= '9' && putils::parse<EntityID>(str) == e.id) {
 					matches = true;
 					displayText += "ID";
 				}
 				else {
 					const auto types = sortHelper::getNameSortedEntities<KENGINE_COMPONENT_COUNT,
 						meta::Has, meta::MatchString
-					>(em);
+					>();
 
 					for (const auto & [_, type, has, matchFunc] : types) {
 						if (!has->call(e) || !matchFunc->call(e, str))
@@ -98,13 +97,13 @@ namespace kengine::imgui_entity_selector {
 				if (ImGui::MenuItem("Select"))
 					ret = true;
 				if (ImGui::MenuItem("Remove")) {
-					em.removeEntity(e);
+					entities.remove(e);
 					return false;
 				}
 				ImGui::EndPopup();
 			}
 			if (openTreeNode) {
-				imguiHelper::displayEntity(em, e);
+				imguiHelper::displayEntity(e);
 				ImGui::TreePop();
 			}
 
@@ -114,9 +113,8 @@ namespace kengine::imgui_entity_selector {
 }
 
 namespace kengine {
-	EntityCreatorFunctor<64> ImGuiEntitySelectorSystem(EntityManager & em) {
-		imgui_entity_selector::impl::em = &em;
-		return [&](Entity & e) {
+	EntityCreator * ImGuiEntitySelectorSystem() noexcept {
+		return [](Entity & e) noexcept {
 			imgui_entity_selector::impl::init(e);
 		};
 	}

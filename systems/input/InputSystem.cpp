@@ -1,5 +1,5 @@
 #include "InputSystem.hpp"
-#include "EntityManager.hpp"
+#include "kengine.hpp"
 #include "data/InputComponent.hpp"
 #include "data/InputBufferComponent.hpp"
 #include "functions/Execute.hpp"
@@ -7,15 +7,14 @@
 namespace kengine::input {
 	struct impl {
 		static inline InputBufferComponent * buffer;
-		static inline EntityManager * em;
 
-		static void init(Entity & e) {
+		static void init(Entity & e) noexcept {
 			buffer = &e.attach<InputBufferComponent>();
 			e += functions::Execute{ execute };
 		}
 
-		static void execute(float deltaTime) {
-			for (const auto & [e, comp] : em->getEntities<InputComponent>()) {
+		static void execute(float deltaTime) noexcept {
+			for (const auto & [e, comp] : entities.with<InputComponent>()) {
 				for (const auto & e : buffer->keys)
 					if (comp.onKey != nullptr)
 						comp.onKey(e.window, e.key, e.pressed);
@@ -41,9 +40,8 @@ namespace kengine::input {
 }
 
 namespace kengine {
-	EntityCreatorFunctor<64> InputSystem(EntityManager & em) {
-		input::impl::em = &em;
-		return [&](Entity & e) {
+	EntityCreator * InputSystem() noexcept {
+		return [](Entity & e) noexcept {
 			input::impl::init(e);
 		};
 	}

@@ -12,7 +12,7 @@
 #include "shaderHelper.hpp"
 
 namespace kengine::opengl::shaders {
-	void ShadowCube::init(size_t firstTextureID) {
+	void ShadowCube::init(size_t firstTextureID) noexcept {
 		initWithShaders<ShadowCube>(putils::make_vector(
 			ShaderDescription{ src::ProjViewModel::Vert::glsl, GL_VERTEX_SHADER },
 			ShaderDescription{ src::DepthCube::Geom::glsl, GL_GEOMETRY_SHADER },
@@ -23,12 +23,12 @@ namespace kengine::opengl::shaders {
 		_view = glm::mat4(1.f);
 	}
 
-	void ShadowCube::drawObjects(const Parameters & params) {
-		for (const auto &[e, instance, transform, shadow, noNoShadow] : _em.getEntities<InstanceComponent, TransformComponent, DefaultShadowComponent, no<NoShadowComponent>>()) {
+	void ShadowCube::drawObjects(const Parameters & params) noexcept {
+		for (const auto &[e, instance, transform, shadow, noNoShadow] : entities.with<InstanceComponent, TransformComponent, DefaultShadowComponent, no<NoShadowComponent>>()) {
 			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
-			const auto & model = _em.getEntity(instance.model);
+			const auto & model = entities.get(instance.model);
 			const auto openGL = model.tryGet<SystemSpecificModelComponent<putils::gl::Mesh>>();
 			if (!openGL)
 				continue;

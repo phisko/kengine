@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Point.hpp"
+#include "Rect.hpp"
 
 #ifndef KENGINE_BONE_NAME_MAX_LENGTH
 # define KENGINE_BONE_NAME_MAX_LENGTH 64

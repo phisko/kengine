@@ -6,7 +6,6 @@
 #include "PointLightSrc.hpp"
 
 namespace kengine {
-	class EntityManager;
 	struct SpotLightComponent;
 
 	namespace opengl {
@@ -21,16 +20,15 @@ namespace kengine::opengl::shaders {
 		public src::PointLight::GetDirection::Uniforms
 	{
 	public:
-		GodRaysSpotLight(EntityManager & em);
+		GodRaysSpotLight() noexcept;
 
-		void init(size_t firstTextureID) override;
-		void run(const Parameters & params) override;
+		void init(size_t firstTextureID) noexcept override;
+		void run(const Parameters & params) noexcept override;
 		
 	private:
-		void drawLight(const SpotLightComponent & light, const putils::Point3f & pos, const DepthMapComponent & depthMap, const Parameters & params);
+		void drawLight(const SpotLightComponent & light, const putils::Point3f & pos, const DepthMapComponent & depthMap, const Parameters & params) noexcept;
 
 	private:
-		EntityManager & _em;
 		GLuint _shadowMapTextureID;
 	};
 }

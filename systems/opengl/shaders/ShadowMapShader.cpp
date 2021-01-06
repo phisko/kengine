@@ -4,14 +4,14 @@
 #include "ShadowMapShader.hpp"
 #include "data/LightComponent.hpp"
 #include "data/ShaderComponent.hpp"
-#include "EntityManager.hpp"
+#include "kengine.hpp"
 
 #include "shaderHelper.hpp"
 #include "helpers/lightHelper.hpp"
 
 namespace kengine::opengl::shaders {
 	template<typename T, typename Func>
-	void ShadowMapShader::runImpl(T & depthMap, Func && draw, const Parameters & params) {
+	void ShadowMapShader::runImpl(T & depthMap, Func && draw, const Parameters & params) noexcept {
 		glViewport(0, 0, depthMap.size, depthMap.size);
 		glCullFace(GL_FRONT);
 
@@ -26,7 +26,7 @@ namespace kengine::opengl::shaders {
 		putils::gl::setViewPort(params.viewport);
 	}
 
-	static void initTexture(GLuint texture, size_t size) {
+	static void initTexture(GLuint texture, size_t size) noexcept {
 		glBindTexture(GL_TEXTURE_2D, texture);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, (GLsizei)size, (GLsizei)size, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -37,7 +37,7 @@ namespace kengine::opengl::shaders {
 		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 	}
 
-	static void createCSM(CSMComponent & depthMap) {
+	static void createCSM(CSMComponent & depthMap) noexcept {
 		depthMap.fbo.generate();
 		for (auto & t : depthMap.textures)
 			t.generate();
@@ -53,8 +53,7 @@ namespace kengine::opengl::shaders {
 		assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
 	}
 
-
-	void ShadowMapShader::run(Entity & e, DirLightComponent & light, const Parameters & params) {
+	void ShadowMapShader::run(Entity & e, DirLightComponent & light, const Parameters & params) noexcept {
 		auto depthMap = e.tryGet<CSMComponent>();
 		if (!depthMap)
 			depthMap = &e.attach<CSMComponent>();
@@ -64,7 +63,7 @@ namespace kengine::opengl::shaders {
 			createCSM(*depthMap);
 		}
 
-		runImpl(*depthMap, [&] {
+		runImpl(*depthMap, [&]() noexcept {
 			for (size_t i = 0; i < light.cascadeEnds.size(); ++i) {
 				const float cascadeStart = (i == 0 ? params.nearPlane : lightHelper::getCSMCascadeEnd(light, i - 1));
 				const float cascadeEnd = lightHelper::getCSMCascadeEnd(light, i);
@@ -75,7 +74,7 @@ namespace kengine::opengl::shaders {
 		}, params);
 	}
 
-	static void createShadowMap(DepthMapComponent & depthMap) {
+	static void createShadowMap(DepthMapComponent & depthMap) noexcept {
 		depthMap.fbo.generate();
 		depthMap.texture.generate();
 
@@ -89,7 +88,7 @@ namespace kengine::opengl::shaders {
 		assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
 	}
 
-	void ShadowMapShader::run(Entity & e, SpotLightComponent & light, const putils::Point3f & pos, const Parameters & params) {
+	void ShadowMapShader::run(Entity & e, SpotLightComponent & light, const putils::Point3f & pos, const Parameters & params) noexcept {
 		auto depthMap = e.tryGet<DepthMapComponent>();
 		if (!depthMap)
 			depthMap = &e.attach<DepthMapComponent>();
@@ -99,12 +98,12 @@ namespace kengine::opengl::shaders {
 			createShadowMap(*depthMap);
 		}
 
-		runImpl(*depthMap, [&] {
+		runImpl(*depthMap, [&]() noexcept {
 			drawToTexture(depthMap->texture, lightHelper::getLightSpaceMatrix(light, shaderHelper::toVec(pos), params), params);
 		}, params);
 	}
 
-	void ShadowCubeShader::run(Entity & e, PointLightComponent & light, const putils::Point3f & pos, float radius, const Parameters & params) {
+	void ShadowCubeShader::run(Entity & e, PointLightComponent & light, const putils::Point3f & pos, float radius, const Parameters & params) noexcept {
 		auto depthCube = e.tryGet<DepthCubeComponent>();
 		if (!depthCube)
 			depthCube = &e.attach<DepthCubeComponent>();

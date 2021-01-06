@@ -1,14 +1,13 @@
 #include "ImGuiHelper.hpp"
-#include "EntityManager.hpp"
+#include "kengine.hpp"
 #include "data/LuaStateComponent.hpp"
 
 extern lua_State * lState;
 extern void LoadImguiBindings();
 
 namespace kengine::imguiLuaHelper {
-	void initBindings(EntityManager & em) {
-
-		for (const auto & [e, state] : em.getEntities<LuaStateComponent>()) {
+	void initBindings() noexcept {
+		for (const auto & [e, state] : entities.with<LuaStateComponent>()) {
 			lState = *state.state;
 			LoadImguiBindings();
 		}

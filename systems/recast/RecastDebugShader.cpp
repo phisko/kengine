@@ -1,7 +1,7 @@
 #ifndef KENGINE_NDEBUG
 
 #include "RecastDebugShader.hpp"
-#include "EntityManager.hpp"
+#include "kengine.hpp"
 
 #include <RecastDebugDraw.h>
 #include <DetourDebugDraw.h>
@@ -79,23 +79,22 @@ namespace kengine {
 		std::string fileName;
 	} g_adjustables;
 
-	RecastDebugShader::RecastDebugShader(EntityManager & em)
-		: Program(false, putils_nameof(RecastDebugShader)),
-		_em(em)
+	RecastDebugShader::RecastDebugShader() noexcept
+		: Program(false, putils_nameof(RecastDebugShader))
 	{
-		em += [&](Entity & e) {
+		entities += [](Entity & e) noexcept {
 			e += AdjustableComponent{
 				"Navmesh", {
 					{ "Debug", &g_adjustables.enabled }
 				}
 			};
 
-			e += functions::Execute{[&](float deltaTime) {
+			e += functions::Execute{[&](float deltaTime) noexcept {
 				if (!g_adjustables.enabled)
 					return;
 				if (ImGui::Begin("RecastShader")) {
 					if (ImGui::BeginCombo("File", g_adjustables.fileName.c_str())) {
-						for (const auto & [e, model, recast] : em.getEntities<ModelComponent, RecastNavMeshComponent>())
+						for (const auto & [e, model, recast] : entities.with<ModelComponent, RecastNavMeshComponent>())
 							if (ImGui::Selectable(model.file))
 								g_adjustables.fileName = model.file;
 						ImGui::EndCombo();
@@ -107,7 +106,7 @@ namespace kengine {
 	}
 
 #pragma region Program
-	void RecastDebugShader::init(size_t firstTexture) {
+	void RecastDebugShader::init(size_t firstTexture) noexcept {
 		initWithShaders<RecastDebugShader>(putils::make_vector(
 			ShaderDescription{ vert, GL_VERTEX_SHADER },
 			ShaderDescription{ frag, GL_FRAGMENT_SHADER },
@@ -121,7 +120,7 @@ namespace kengine {
 		putils::gl::setVertexType<Vertex>();
 	}
 
-	void RecastDebugShader::run(const Parameters & params) {
+	void RecastDebugShader::run(const Parameters & params) noexcept {
 		if (!g_adjustables.enabled)
 			return;
 
@@ -131,14 +130,14 @@ namespace kengine {
 		_proj = params.proj;
 		_viewPos = params.camPos;
 
-		for (const auto & [e, graphics, instance, transform] : _em.getEntities<GraphicsComponent, InstanceComponent, TransformComponent>()) {
+		for (const auto & [e, graphics, instance, transform] : entities.with<GraphicsComponent, InstanceComponent, TransformComponent>()) {
 			if (graphics.appearance != g_adjustables.fileName)
 				continue;
 
 			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
-			const auto model = _em.getEntity(instance.model);
+			const auto model = entities.get(instance.model);
 			_model = matrixHelper::getModelMatrix(model.get<ModelComponent>(), transform);
 
 			const auto & comp = model.get<RecastNavMeshComponent>();
@@ -163,7 +162,7 @@ namespace kengine {
 			_currentVertexType = GL_TRIANGLES;
 			break;
 		default:
-			kengine_assert_failed(_em, "Unknown primitive type");
+			kengine_assert_failed("Unknown primitive type");
 		}
 	}
 

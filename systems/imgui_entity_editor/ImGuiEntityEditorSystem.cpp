@@ -1,5 +1,5 @@
 #include "ImGuiEntityEditorSystem.hpp"
-#include "EntityManager.hpp"
+#include "kengine.hpp"
 
 #include "data/ImGuiToolComponent.hpp"
 #include "data/SelectedComponent.hpp"
@@ -14,10 +14,9 @@
 
 namespace kengine::imgui_entity_editor {
 	struct impl {
-		static inline EntityManager * em;
 		static inline bool * enabled;
 
-		static void init(Entity & e) {
+		static void init(Entity & e) noexcept {
 			e += NameComponent{ "Entity editor" };
 			auto & tool = e.attach<ImGuiToolComponent>();
 			tool.enabled = true;
@@ -26,15 +25,15 @@ namespace kengine::imgui_entity_editor {
 			e += functions::Execute{ execute };
 		}
 
-		static void execute(float deltaTime) {
+		static void execute(float deltaTime) noexcept {
 			if (!*enabled)
 				return;
 
 			float scale = 1.f;
-			for (const auto & [e, getScale] : em->getEntities<functions::GetImGuiScale>())
+			for (const auto & [e, getScale] : entities.with<functions::GetImGuiScale>())
 				scale = getScale();
 
-			for (auto [selected, _] : em->getEntities<SelectedComponent>()) {
+			for (auto [selected, _] : entities.with<SelectedComponent>()) {
 				bool open = true;
 
 				ImGui::SetNextWindowSize({ 200.f * scale, 200.f * scale }, ImGuiCond_FirstUseEver);
@@ -55,7 +54,7 @@ namespace kengine::imgui_entity_editor {
 					}
 
 					ImGui::BeginChild("##child");
-					imguiHelper::editEntity(*em, selected);
+					imguiHelper::editEntity(selected);
 					ImGui::EndChild();
 				}
 				ImGui::End();
@@ -68,9 +67,8 @@ namespace kengine::imgui_entity_editor {
 }
 
 namespace kengine {
-	EntityCreatorFunctor<64> ImGuiEntityEditorSystem(EntityManager & em) {
-		imgui_entity_editor::impl::em = &em;
-		return [&](Entity & e) {
+	EntityCreator * ImGuiEntityEditorSystem() noexcept {
+		return [](Entity & e) noexcept {
 			imgui_entity_editor::impl::init(e);
 		};
 	}

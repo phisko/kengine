@@ -2,20 +2,13 @@
 
 #include "opengl/Program.hpp"
 
-namespace kengine {
-	class EntityManager;
-}
-
 namespace kengine::opengl::shaders {
 	class Debug : public putils::gl::Program {
 	public:
-		Debug(EntityManager & em);
+		Debug() noexcept;
 
-		void init(size_t firstTextureID) override;
-		void run(const Parameters & params) override;
-
-	private:
-		EntityManager & _em;
+		void init(size_t firstTextureID) noexcept override;
+		void run(const Parameters & params) noexcept override;
 
 #pragma region Uniforms
 	public:

@@ -1,11 +1,8 @@
 #pragma once
 
-namespace kengine {
-	class EntityManager;
-	class Entity;
+#include "kengine.hpp"
 
-	namespace imguiHelper {
-		void displayEntity(EntityManager & em, const Entity & e);
-		void editEntity(EntityManager & em, Entity & e);
-	}
+namespace kengine::imguiHelper {
+	void displayEntity(const Entity & e) noexcept;
+	void editEntity(Entity & e) noexcept;
 }
