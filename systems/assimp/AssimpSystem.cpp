@@ -544,8 +544,11 @@ namespace kengine::assimp {
 		};
 
 		static void execute(float deltaTime) noexcept {
+			std::atomic<size_t> jobsLeft = 0;
+
 			for (auto [e, instance, skeleton, anim, transform] : entities.with<InstanceComponent, SkeletonComponent, AnimationComponent, TransformComponent>())
 			{
+				++jobsLeft;
 				threadPool().runTask([&, id = e.id]() noexcept {
 					auto e = entities.get(id);
 
@@ -594,10 +597,11 @@ namespace kengine::assimp {
 						}
 						lastFrame = {};
 					}
+					--jobsLeft;
 				});
 			}
 
-			threadPool().completeTasks();
+			while (jobsLeft > 0);
 		}
 
 		static void updateBoneMats(const aiNode * node, const aiAnimation * anim, float time, const AssImpModelSkeletonComponent & assimpSkeleton, SkeletonComponent & comp, const glm::mat4 & parentTransform, const AnimationComponent & animComponent, TransformComponent & transform, LastFrameMovementComponent & lastFrame, const glm::mat4 & modelMatrix, bool firstNodeAnim) noexcept {

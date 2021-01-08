@@ -141,7 +141,10 @@ namespace kengine::recast {
 			}
 
 			static void updateCrowds(float deltaTime) noexcept {
+				std::atomic<size_t> jobsLeft = 0;
+
 				for (const auto & [environment, crowd, environmentTransform] : entities.with<RecastCrowdComponent, TransformComponent>()) {
+					++jobsLeft;
 					threadPool().runTask([&, environment]() noexcept {
 						const auto & navMesh = instanceHelper::getModel<RecastNavMeshComponent>(environment);
 						const auto environmentInfo = getEnvironmentInfo(environment);
@@ -164,9 +167,11 @@ namespace kengine::recast {
 							auto e = entities.get((EntityID)agent->params.userData);
 							readFromAgent(e.get<TransformComponent>(), e.get<PhysicsComponent>(), *agent, environmentInfo);
 						}
+						--jobsLeft;
 					});
 				}
-				threadPool().completeTasks();
+
+				while (jobsLeft > 0);
 			}
 
 			static void readFromAgent(TransformComponent & transform, PhysicsComponent & physics, const dtCrowdAgent & agent, const EnvironmentInfo & environmentInfo) noexcept {

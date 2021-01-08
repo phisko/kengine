@@ -30,20 +30,24 @@ namespace kengine::recast {
 	void buildNavMeshes() noexcept {
 		struct impl {
 			static void buildNavMeshes() noexcept {
-				static const auto buildRecastComponent = [](auto && entities) noexcept {
+				std::atomic<size_t> jobsLeft = 0;
+
+				static const auto buildRecastComponent = [&](auto && entities) noexcept {
 					for (auto [e, model, modelData, navMesh, _] : entities) {
+						++jobsLeft;
 						threadPool().runTask([&, id = e.id]() noexcept {
 							kengine_assert(navMesh.vertsPerPoly <= DT_VERTS_PER_POLYGON);
 							createRecastMesh(model.file, kengine::entities.get(id), navMesh, modelData);
 							if constexpr (std::is_same<RebuildNavMeshComponent, putils_typeof(_)>())
 								e.detach<RebuildNavMeshComponent>();
+							--jobsLeft;
 						});
 					}
 				};
 
 				buildRecastComponent(kengine::entities.with<ModelComponent, ModelDataComponent, NavMeshComponent, no<RecastNavMeshComponent>>());
 				buildRecastComponent(kengine::entities.with<ModelComponent, ModelDataComponent, NavMeshComponent, RebuildNavMeshComponent>());
-				threadPool().completeTasks();
+				while (jobsLeft > 0);
 			}
 
 			using HeightfieldPtr = UniquePtr<rcHeightfield, rcFreeHeightField>;
