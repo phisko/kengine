@@ -25,9 +25,9 @@ namespace kengine::glfw {
 			const auto id = (EntityID)glfwGetWindowUserPointer(window);
 
 			if (action == GLFW_PRESS)
-				g_buffer->keys.try_push_back(InputBufferComponent::KeyEvent{ id, key, true });
+				g_buffer->keys.push_back(InputBufferComponent::KeyEvent{ id, key, true });
 			else if (action == GLFW_RELEASE)
-				g_buffer->keys.try_push_back(InputBufferComponent::KeyEvent{ id, key, false });
+				g_buffer->keys.push_back(InputBufferComponent::KeyEvent{ id, key, false });
 		}
 
 		static putils::Point2f lastPos{ FLT_MAX, FLT_MAX };
@@ -39,9 +39,9 @@ namespace kengine::glfw {
 			const auto id = (EntityID)glfwGetWindowUserPointer(window);
 
 			if (action == GLFW_PRESS)
-				g_buffer->clicks.try_push_back(InputBufferComponent::ClickEvent{ id, lastPos, button, true });
+				g_buffer->clicks.push_back(InputBufferComponent::ClickEvent{ id, lastPos, button, true });
 			else if (action == GLFW_RELEASE)
-				g_buffer->clicks.try_push_back(InputBufferComponent::ClickEvent{ id, lastPos, button, false });
+				g_buffer->clicks.push_back(InputBufferComponent::ClickEvent{ id, lastPos, button, false });
 		}
 
 		static void onMouseMove(GLFWwindow * window, double xpos, double ypos) noexcept {
@@ -61,7 +61,7 @@ namespace kengine::glfw {
 			info.rel = { (float)xpos - lastPos.x, (float)ypos - lastPos.y };
 			lastPos = info.pos;
 
-			g_buffer->moves.try_push_back(info);
+			g_buffer->moves.push_back(info);
 		}
 
 		static void onScroll(GLFWwindow * window, double xoffset, double yoffset) noexcept {
@@ -69,7 +69,7 @@ namespace kengine::glfw {
 				return;
 
 			const auto id = (EntityID)glfwGetWindowUserPointer(window);
-			g_buffer->scrolls.try_push_back(InputBufferComponent::MouseScrollEvent{ id, (float)xoffset, (float)yoffset, lastPos });
+			g_buffer->scrolls.push_back(InputBufferComponent::MouseScrollEvent{ id, (float)xoffset, (float)yoffset, lastPos });
 		}
 	}
 

@@ -23,26 +23,13 @@ namespace kengine::impl {
 		else {
 			static auto & meta = metadata();
 			ReadLock r(meta._mutex);
+			const auto it = meta._map.find(entity);
+			if (it != meta._map.end())
+				return it->second;
+			r.unlock();
 
-			if (entity >= meta.chunks.size() * KENGINE_COMPONENT_CHUNK_SIZE) {
-				r.unlock(); { // Unlock read so we can get write
-					WriteLock l(meta._mutex);
-					while (entity >= meta.chunks.size() * KENGINE_COMPONENT_CHUNK_SIZE)
-						meta.chunks.emplace_back();
-					// Only populate the chunk we need
-					meta.chunks.back().resize(KENGINE_COMPONENT_CHUNK_SIZE);
-				} r.lock(); // Re-lock read
-			}
-
-			auto & currentChunk = meta.chunks[entity / KENGINE_COMPONENT_CHUNK_SIZE];
-			if (currentChunk.empty()) {
-				r.unlock(); {
-					WriteLock l(meta._mutex);
-					currentChunk.resize(KENGINE_COMPONENT_CHUNK_SIZE);
-				} r.lock();
-			}
-
-			return currentChunk[entity % KENGINE_COMPONENT_CHUNK_SIZE];
+			WriteLock l(meta._mutex);
+			return meta._map[entity];
 		}
 	}
 

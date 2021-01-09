@@ -36,7 +36,7 @@ namespace kengine {
 		};
 
 		static constexpr char vectorName[] = "ModelColliderComponentVector";
-		using vector = putils::vector<Collider, KENGINE_MAX_MODEL_COLLIDERS, vectorName>;
+		using vector = std::vector<Collider>;
 		vector colliders;
 	};
 }

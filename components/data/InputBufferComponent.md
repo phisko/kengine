@@ -10,15 +10,6 @@
 
 ## Members
 
-### EventVector type
-
-```cpp
-template<typename T>
-using EventVector = putils::vector<T, KENGINE_INPUT_MAX_BUFFERED_EVENTS>;
-```
-
-This template container is used for all event buffers. The maximum number of events of each type defaults to 128 and can be modified by defining the `KENGINE_INPUT_MAX_BUFFERED_EVENTS` macro.
-
 ### keys
 
 ```cpp
@@ -27,7 +18,7 @@ struct KeyEvent {
     int key;
     bool pressed;
 };
-EventVector<KeyEvent> keys;
+std::vector<KeyEvent> keys;
 ```
 
 Key events for the current frame.
@@ -41,7 +32,7 @@ struct ClickEvent {
     int button;
     bool pressed;
 };
-EventVector<ClickEvent> clicks;
+std::vector<ClickEvent> clicks;
 ```
 
 Click events for the current frame.
@@ -54,7 +45,7 @@ struct MouseMoveEvent {
     putils::Point2f pos;
     putils::Point2f rel;
 };
-EventVector<MouseMoveEvent> moves;
+std::vector<MouseMoveEvent> moves;
 ```
 
 Mouse move events for the current frame.
@@ -68,7 +59,7 @@ struct MouseScrollEvent {
     float yoffset;
     putils::Point2f pos;
 };
-EventVector<MouseScrollEvent> scrolls;
+std::vector<MouseScrollEvent> scrolls;
 ```
 
 Mouse scroll events for the current frame.

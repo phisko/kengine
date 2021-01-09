@@ -4,21 +4,18 @@
 # define KENGINE_INPUT_MAX_BUFFERED_EVENTS 128
 #endif
 
-#include "vector.hpp"
+#include <vector>
 #include "Point.hpp"
 #include "Entity.hpp"
 
 namespace kengine {
 	struct InputBufferComponent {
-		template<typename T>
-		using EventVector = putils::vector<T, KENGINE_INPUT_MAX_BUFFERED_EVENTS>;
-
 		struct KeyEvent {
 			EntityID window;
 			int key;
 			bool pressed;
 		};
-		EventVector<KeyEvent> keys;
+		std::vector<KeyEvent> keys;
 
 		struct ClickEvent {
 			EntityID window;
@@ -26,14 +23,14 @@ namespace kengine {
 			int button;
 			bool pressed;
 		};
-		EventVector<ClickEvent> clicks;
+		std::vector<ClickEvent> clicks;
 
 		struct MouseMoveEvent {
 			EntityID window;
 			putils::Point2f pos;
 			putils::Point2f rel;
 		};
-		EventVector<MouseMoveEvent> moves;
+		std::vector<MouseMoveEvent> moves;
 
 		struct MouseScrollEvent {
 			EntityID window;
@@ -41,7 +38,7 @@ namespace kengine {
 			float yoffset;
 			putils::Point2f pos;
 		};
-		EventVector<MouseScrollEvent> scrolls;
+		std::vector<MouseScrollEvent> scrolls;
 	};
 }
 

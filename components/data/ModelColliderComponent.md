@@ -36,7 +36,5 @@ The maximum length of a bone name (stored as a [putils::string](https://github.c
 ### colliders
 
 ```cpp
-putils::vector<Collider, KENGINE_MAX_MODEL_COLLIDERS, vectorName> colliders;
+std::vector<Collider> colliders;
 ```
-
-The maximum number of colliders defaults to 64 and can be adjusted by defining the `KENGINE_MAX_MODEL_COLLIDERS` macro.
