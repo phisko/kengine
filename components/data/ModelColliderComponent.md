@@ -5,7 +5,7 @@
 ## Specs
 
 * [Reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
-* Serializable (POD)
+* Not serializable (holds dynamic pointers)
 * Processed by physics systems (such as the [BulletSystem](../../systems/bullet/BulletSystem.md))
 
 ## Members

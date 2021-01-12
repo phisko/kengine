@@ -5,6 +5,7 @@
 #include "data/TransformComponent.hpp"
 #include "data/LightComponent.hpp"
 #include "data/ShaderComponent.hpp"
+#include "data/OpenGLResourceComponent.hpp"
 
 #include "helpers/cameraHelper.hpp"
 #include "helpers/lightHelper.hpp"
@@ -51,7 +52,7 @@ namespace kengine::opengl::shaders {
 					glClear(GL_DEPTH_BUFFER_BIT);
 				}
 
-				for (const auto & [shadowMapEntity, shader, shadowMapShader] : entities.with<ShaderComponent, ShadowMapShaderComponent>()) {
+				for (const auto & [shadowMapEntity, shader, shadowMapShader] : entities.with<SystemSpecificShaderComponent<putils::gl::Program>, ShadowMapShaderComponent>()) {
 					auto & shadowMap = static_cast<ShadowMapShader &>(*shader.shader);
 					shadowMap.run(e, light, centre, params);
 				}

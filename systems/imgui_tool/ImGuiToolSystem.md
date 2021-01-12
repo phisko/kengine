@@ -7,12 +7,10 @@ Clicking an item in "Tools" dropdown will toggle the `ImGuiToolComponent`'s `ena
 ## Example
 
 ```cpp
-EntityManager em;
-
 // ... add graphics system handling ImGui
-em += ImGuiToolSystem(em); // Add the tool system
+entities += ImGuiToolSystem(); // Add the tool system
 
-em += [](Entity & e) {
+entities += [](Entity & e) {
     auto & tool = e.attach<ImGuiToolComponent>();
     tool.name = "My tool";
     tool.enabled = true;

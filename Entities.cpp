@@ -8,6 +8,10 @@ namespace kengine {
 		return { id, impl::state->_entities[id].mask };
 	}
 
+	Entity Entities::operator[](EntityID id) noexcept {
+		return get(id);
+	}
+
 	void Entities::remove(Entity e) noexcept {
 		remove(e.id);
 	}
@@ -20,9 +24,9 @@ namespace kengine {
 
 		{
 			impl::ReadLock l(impl::state->_componentsMutex);
-			for (const auto & [_, comp] : impl::state->_components)
-				if (e.componentMask[comp->id])
-					comp->reset(id);
+			for (size_t i = 0; i < impl::state->_components.size(); ++i)
+				if (e.componentMask[i])
+					impl::state->_components[i]->reset(id);
 		}
 
 		impl::ComponentMask mask;

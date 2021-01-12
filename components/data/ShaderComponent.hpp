@@ -2,43 +2,18 @@
 
 #include <memory>
 
-#include "putils/opengl/Program.hpp"
-#include "putils/opengl/RAII.hpp"
-#include "data/LightComponent.hpp"
-
 namespace kengine {
-	class Entity;
+	template<typename T>
+	struct SystemSpecificShaderComponent {
+		std::unique_ptr<T> shader;
+		bool enabled = true;
+	};
 
-	namespace opengl {
-		struct ShaderComponent {
-			std::unique_ptr<putils::gl::Program> shader;
-			bool enabled = true;
-		};
+	struct GBufferShaderComponent {};
+	struct LightingShaderComponent {};
+	struct PostLightingShaderComponent {};
+	struct PostProcessShaderComponent {};
 
-		struct GBufferShaderComponent {};
-		struct LightingShaderComponent {};
-		struct PostLightingShaderComponent {};
-		struct PostProcessShaderComponent {};
-
-		struct DepthMapComponent {
-			putils::gl::FrameBuffer fbo;
-			putils::gl::Texture texture;
-			int size = -1;
-		};
-
-		struct CSMComponent {
-			putils::gl::FrameBuffer fbo;
-			putils::gl::Texture textures[KENGINE_MAX_CSM_COUNT];
-			int size = -1;
-		};
-
-		struct DepthCubeComponent {
-			putils::gl::FrameBuffer fbo;
-			putils::gl::Texture texture;
-			int size = -1;
-		};
-
-		struct ShadowMapShaderComponent {};
-		struct ShadowCubeShaderComponent {};
-	}
+	struct ShadowMapShaderComponent {};
+	struct ShadowCubeShaderComponent {};
 }

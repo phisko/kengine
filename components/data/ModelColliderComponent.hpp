@@ -35,9 +35,7 @@ namespace kengine {
 			float roll = 0.f;
 		};
 
-		static constexpr char vectorName[] = "ModelColliderComponentVector";
-		using vector = std::vector<Collider>;
-		vector colliders;
+		std::vector<Collider> colliders;
 	};
 }
 

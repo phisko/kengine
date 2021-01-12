@@ -1,23 +1,8 @@
-# [registerComponentAttributeIterators](registerComponentAttributeIterators.hpp)
-
-Helper functions to register sample implementations of the [ForEachAttribute](../components/meta/ForEachAttribute.md) `meta Component`.
-
-## Members
-
-### registerComponentAttributeIterators
-
-```cpp
-template<typename Comp>
-void registerComponentAttributeIterator(EntityManager & em);
-```
-
-Implements the `ForEachAttribute` `meta Component` for `Comp`.
-
-### registerComponentAttributeIterators
+# [registerComponentAttributeIterator](registerComponentAttributeIterator.hpp)
 
 ```cpp
 template<typename ... Comps>
-void registerComponentAttributeIterators(EntityManager & em);
+void registerComponentAttributeIterator() noexcept;
 ```
 
-Calls `registerComponentAttributeIterator<T>` for each `T` in `Comps`.
+Registers sample implementations of the [ForEachAttribute](../components/meta/ForEachAttribute.md) `meta Component` for `Comps`.

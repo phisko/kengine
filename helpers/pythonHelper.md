@@ -9,17 +9,27 @@ These are defined in the `kengine::pythonHelper` namespace.
 ### registerType
 
 ```cpp
-template<typename T>
-void registerType(EntityManager & em);
+template<typename ... Types>
+void registerTypes() noexcept;
 ```
 
-Registers a [reflectible](../putils/reflection.md) type with the Python state.
+Registers [reflectible](../putils/reflection.md) types with the Python state.
+
+### registerComponents
+
+```cpp
+template<typename ... Comps>
+void registerComponents() noexcept;
+```
+
+Registers [reflectible](../putils/reflection.md) types with the Python state as `Components` (adding `Entity` member functions).
+
 
 ### registerFunction
 
 ```cpp
 template<typename F>
-void registerFunction(EntityManager & em, const char * name, F && func);
+void registerFunction(const char * name, F && func) noexcept;
 ```
 
 Register a new function with the Python state.

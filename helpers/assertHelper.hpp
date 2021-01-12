@@ -7,9 +7,9 @@
 #endif
 
 #ifdef KENGINE_NDEBUG
-# define kengine_assert(em, x) (void)0
-# define kengine_assert_with_message(em, x, message) (void)0
-# define kengine_assert_failed(em, x) (void)0
+# define kengine_assert(x) (void)0
+# define kengine_assert_with_message(x, message) (void)0
+# define kengine_assert_failed(x) (void)0
 # define kengine_debug_break (void)0
 #else
 # include <string>

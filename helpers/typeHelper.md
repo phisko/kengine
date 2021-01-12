@@ -8,7 +8,7 @@ Helper functions for manipulating "type Entities", i.e. `Entities` that hold inf
 
 ```cpp
 template<typename T>
-Entity getTypeEntity(EntityManager & em);
+Entity getTypeEntity() noexcept;
 ```
 
 Returns the "type Entity" for `T`.

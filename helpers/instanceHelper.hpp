@@ -16,9 +16,9 @@ namespace kengine::instanceHelper {
 	const Comp & getModel(const InstanceComponent & instance) noexcept;
 
 	template<typename Comp>
-	const Comp & tryGetModel(const Entity & instance) noexcept;
+	const Comp * tryGetModel(const Entity & instance) noexcept;
 	template<typename Comp>
-	const Comp & tryGetModel(const InstanceComponent & instance) noexcept;
+	const Comp * tryGetModel(const InstanceComponent & instance) noexcept;
 }
 
 #include "instanceHelper.inl"

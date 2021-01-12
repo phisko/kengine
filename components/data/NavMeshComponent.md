@@ -4,4 +4,4 @@
 
 # RebuildNavMeshComponent
 
-`Component` that indicates that the navmesh for the `Entity` should be rebuilt. This `Component` is automatically removed once the navmesh has been built.
+Tag `Component` that indicates that the navmesh for the `Entity` should be rebuilt. This `Component` is automatically removed once the navmesh has been built.

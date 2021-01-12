@@ -3,7 +3,7 @@
 
 #include "ShadowMapShader.hpp"
 #include "data/LightComponent.hpp"
-#include "data/ShaderComponent.hpp"
+#include "data/OpenGLResourceComponent.hpp"
 #include "kengine.hpp"
 
 #include "shaderHelper.hpp"

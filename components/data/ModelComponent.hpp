@@ -16,7 +16,6 @@ namespace kengine {
 		float yaw = 0.f;
 		float pitch = 0.f;
 		float roll = 0.f;
-		bool mirrored = false;
 	};
 }
 
@@ -30,9 +29,7 @@ putils_reflection_info {
 
 		putils_reflection_attribute(yaw),
 		putils_reflection_attribute(pitch),
-		putils_reflection_attribute(roll),
-
-		putils_reflection_attribute(mirrored)
+		putils_reflection_attribute(roll)
 	);
 };
 #undef refltype

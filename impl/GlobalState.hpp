@@ -43,7 +43,7 @@ namespace kengine::impl {
 		bool _toReuseSorted = true;
 		mutable Mutex _toReuseMutex;
 
-		std::unordered_map<putils::meta::type_index, std::unique_ptr<ComponentMetadata>> _components;
+		std::vector<std::unique_ptr<ComponentMetadata>> _components;
 		Mutex _componentsMutex;
 	};
 

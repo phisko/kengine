@@ -8,7 +8,7 @@ Helper functions to quickly register all currently implemented type utilities (`
 
 ```cpp
 template<typename ... Types>
-void registerTypes(EntityManager & em);
+void registerTypes() noexcept;
 ```
 
 Registers a set of non-component types. For each `T` in `Types`:
@@ -21,7 +21,7 @@ Registers a set of non-component types. For each `T` in `Types`:
 
 ```cpp
 template<typename ... Comps>
-void registerComponents(EntityManager & em);
+void registerComponents() noexcept;
 ```
 
 Registers a set of component types:
@@ -39,7 +39,7 @@ Registers a set of component types:
 
 ```cpp
 template<typename F>
-void registerFunction(EntityManager & em, const char * name, F && func);
+void registerFunction(const char * name, F && func) noexcept;
 ```
 
 Registers a function with all scripting languages (Lua and Python).

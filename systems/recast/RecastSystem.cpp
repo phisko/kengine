@@ -25,8 +25,8 @@ namespace kengine {
 				e += functions::OnEntityRemoved{ onEntityRemoved };
 				e += functions::Execute{ execute };
 
-				e += opengl::ShaderComponent{ std::make_unique<RecastDebugShader>() };
-				e += opengl::GBufferShaderComponent{};
+				e += SystemSpecificShaderComponent<putils::gl::Program>{ std::make_unique<RecastDebugShader>() };
+				e += GBufferShaderComponent{};
 
 				e += AdjustableComponent{
 					"Recast", {

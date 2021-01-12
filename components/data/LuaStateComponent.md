@@ -12,4 +12,4 @@
 
 An `Entity` with a `LuaStateComponent` is created by the [LuaSystem](../../systems/lua/LuaSystem.md) during initialization. It is then accessible by users to perform any desired operations with lua (executing scripts, evaluating lua state variables/expressions, or even registering new types and functions).
 
-Note that the `LuaSystem` already provides a set of helper functions to easily register new types and functions. These helper functions should be preferred over direct manipulation of the `LuaStateComponent`.
+Note that the [luaHelper](../../helpers/luaHelper.md) already provides functions to easily register new types and functions.

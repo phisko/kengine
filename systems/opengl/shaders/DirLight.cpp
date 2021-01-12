@@ -72,7 +72,7 @@ namespace kengine::opengl::shaders {
 					}
 				}
 
-				for (const auto & [shadowMapEntity, shader, shadowMapShader] : entities.with<ShaderComponent, ShadowMapShaderComponent>()) {
+				for (const auto & [shadowMapEntity, shader, shadowMapShader] : entities.with<SystemSpecificShaderComponent<putils::gl::Program>, ShadowMapShaderComponent>()) {
 					auto & shadowMap = static_cast<ShadowMapShader &>(*shader.shader);
 					shadowMap.run(e, light, params);
 				}

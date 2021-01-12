@@ -5,7 +5,7 @@
 
 #include "data/TransformComponent.hpp"
 #include "data/LightComponent.hpp"
-#include "data/ShaderComponent.hpp"
+#include "data/OpenGLResourceComponent.hpp"
 
 #include "helpers/cameraHelper.hpp"
 #include "helpers/lightHelper.hpp"
@@ -51,7 +51,7 @@ namespace kengine::opengl::shaders {
 					glClear(GL_DEPTH_BUFFER_BIT);
 				}
 
-				for (const auto & [shadowCubeEntity, shader, shadowCubeShader] : entities.with<ShaderComponent, ShadowCubeShaderComponent>()) {
+				for (const auto & [shadowCubeEntity, shader, shadowCubeShader] : entities.with<SystemSpecificShaderComponent<putils::gl::Program>, ShadowCubeShaderComponent>()) {
 					auto & shadowCube = static_cast<ShadowCubeShader &>(*shader.shader);
 					shadowCube.run(e, light, centre, radius, params);
 				}

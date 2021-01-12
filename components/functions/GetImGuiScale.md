@@ -5,7 +5,7 @@
 ## Prototype
 
 ```cpp
-float()
+float ();
 ```
 
 ### Return value

@@ -18,8 +18,8 @@ namespace kengine {
 		struct impl {
 			static void init(Entity & e) noexcept {
 				e += functions::OnEntityCreated{ onEntityCreated };
-				e += opengl::ShaderComponent{ std::make_unique<SpritesShader>() };
-				e += opengl::GBufferShaderComponent{};
+				e += SystemSpecificShaderComponent<putils::gl::Program>{ std::make_unique<SpritesShader>() };
+				e += GBufferShaderComponent{};
 			}
 
 			static void onEntityCreated(Entity & e) noexcept {

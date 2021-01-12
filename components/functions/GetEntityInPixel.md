@@ -28,12 +28,10 @@ Here is a small example that creates an input handler which, when the user click
 This piece of code is very similar to the behavior of the [OnClickSystem](../../systems/onclick/OnClickSystem.md).
 
 ```cpp
-EntityManager em;
-
-em += [](Entity & e) {
+entities += [](Entity & e) {
     InputComponent input;
-    input.onMouseButton = [&](Entity::ID window, int button, const putils::Point2f & pixel, bool pressed) {
-        for (const auto & [e, getEntity] : em.getEntities<functions::GetEntityInPixel>()) {
+    input.onMouseButton = [](Entity::ID window, int button, const putils::Point2f & pixel, bool pressed) {
+        for (const auto & [e, getEntity] : entities.with<functions::GetEntityInPixel>()) {
             const auto id = getEntity(window, pixel);
             std::cout << id << '\n';
         }

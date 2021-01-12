@@ -2,7 +2,7 @@
 
 #include "opengl/Program.hpp"
 #include "opengl/Uniform.hpp"
-#include "data/ShaderComponent.hpp"
+#include "data/OpenGLResourceComponent.hpp"
 #include "GodRaysSrc.hpp"
 #include "ShadowMapSrc.hpp"
 #include "DirLightSrc.hpp"

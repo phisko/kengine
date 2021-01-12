@@ -12,4 +12,4 @@
 
 An `Entity` with a `PythonStateComponent` is created by the [PythonSystem](../../systems/python/PythonSystem.md) during initialization. It is then accessible by users to perform any desired operations with python (executing scripts, evaluating python state variables/expressions, or even registering new types and functions).
 
-Note that the `PythonSystem` already provides a set of helper functions to easily register new types and functions. These helper functions should be preferred over direct manipulation of the `PyStateComponent`.
+Note that the [pythonHelper](../../helpers/pythonHelper.md) already provides functions to easily register new types and functions.

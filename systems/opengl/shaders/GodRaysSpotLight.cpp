@@ -4,6 +4,7 @@
 #include "data/LightComponent.hpp"
 #include "data/TransformComponent.hpp"
 #include "data/GodRaysComponent.hpp"
+#include "data/OpenGLResourceComponent.hpp"
 
 #include "helpers/cameraHelper.hpp"
 #include "helpers/lightHelper.hpp"

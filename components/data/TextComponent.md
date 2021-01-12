@@ -1,6 +1,12 @@
 # [TextComponent](TextComponent.hpp)
 
-`Component` that lets an `Entity` be used to render 2D or 3D text.
+```cpp
+struct TextComponent;
+struct TextComponent2D : TextComponent, OnScreenComponent;
+struct TextComponent3D : TextComponent;
+```
+
+`Components` that lets an `Entity` be used to render 2D or 3D text.
 
 ## Specs
 

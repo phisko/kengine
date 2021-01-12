@@ -46,16 +46,19 @@ namespace kengine::impl {
 
 			{
 				ReadLock l(state->_componentsMutex);
-				const auto it = state->_components.find(typeIndex);
+				const auto it = std::find_if(state->_components.begin(), state->_components.end(),
+					[typeIndex](const std::unique_ptr<ComponentMetadata> & meta) noexcept { return meta->type == typeIndex; }
+				);
 				if (it != state->_components.end())
-					return static_cast<Metadata<Comp> *>(it->second.get());
+					return static_cast<Metadata<Comp> *>(it->get());
 			}
 
 			auto tmp = std::make_unique<Metadata<Comp>>();
+			tmp->type = typeIndex;
 			auto ptr = static_cast<Metadata<Comp> *>(tmp.get());
 			{
 				WriteLock l(state->_componentsMutex);
-				state->_components[typeIndex] = std::move(tmp);
+				state->_components.push_back(std::move(tmp));
 				ptr->id = state->_components.size() - 1;
 			}
 

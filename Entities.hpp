@@ -14,6 +14,7 @@ namespace kengine {
 		void remove(EntityID id) noexcept;
 
 		Entity get(EntityID id) noexcept;
+		Entity operator[](EntityID id) noexcept;
 
 		void setActive(Entity e, bool active) noexcept;
 		void setActive(EntityID id, bool active) noexcept;

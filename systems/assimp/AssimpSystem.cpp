@@ -31,6 +31,8 @@
 #include "helpers/resourceHelper.hpp"
 #include "AssImpHelper.hpp"
 
+#include "opengl/Program.hpp"
+
 #include "file_extension.hpp"
 #include "imgui.h"
 
@@ -101,18 +103,18 @@ namespace kengine::assimp {
 			e += functions::OnEntityCreated{ onEntityCreated };
 
 			entities += [&](Entity & e) noexcept {
-				e += opengl::ShaderComponent{ std::make_unique<AssImpShader>() };
-				e += opengl::GBufferShaderComponent{};
+				e += SystemSpecificShaderComponent<putils::gl::Program>{ std::make_unique<AssImpShader>() };
+				e += GBufferShaderComponent{};
 			};
 
 			entities += [&](Entity & e) noexcept {
-				e += opengl::ShaderComponent{ std::make_unique<AssImpShadowMap>() };
-				e += opengl::ShadowMapShaderComponent{};
+				e += SystemSpecificShaderComponent<putils::gl::Program>{ std::make_unique<AssImpShadowMap>() };
+				e += ShadowMapShaderComponent{};
 			};
 
 			entities += [&](Entity & e) {
-				e += opengl::ShaderComponent{ std::make_unique<AssImpShadowCube>() };
-				e += opengl::ShadowCubeShaderComponent{};
+				e += SystemSpecificShaderComponent<putils::gl::Program>{ std::make_unique<AssImpShadowCube>() };
+				e += ShadowCubeShaderComponent{};
 			};
 		}
 

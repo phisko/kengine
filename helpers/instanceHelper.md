@@ -8,9 +8,9 @@ Helper functions to manipulate [instance and model Entities](../components/data/
 
 ```cpp
 template<typename Comp>
-bool modelHas(EntityManager & em, const Entity & instance);
+bool modelHas(const Entity & instance);
 template<typename Comp>
-bool modelHas(EntityManager & em, const InstanceComponent & instance);
+bool modelHas(const InstanceComponent & instance);
 ```
 
 Returns whether the `model Entity` for `instance` has a `Comp` component.
@@ -19,9 +19,20 @@ Returns whether the `model Entity` for `instance` has a `Comp` component.
 
 ```cpp
 template<typename Comp>
-const Comp & getModel(EntityManager & em, const Entity & instance);
+const Comp & getModel(const Entity & instance);
 template<typename Comp>
-const Comp & getModel(EntityManager & em, const InstanceComponent & instance);
+const Comp & getModel(const InstanceComponent & instance);
 ```
 
-Returns the `Comp` component of the `model Entity` for instance.
+Returns the `Comp` component of the `model Entity` for `instance`.
+
+### tryGetModel
+
+```cpp
+template<typename Comp>
+const Comp * tryGetModel(const Entity & instance) noexcept;
+template<typename Comp>
+const Comp * tryGetModel(const InstanceComponent & instance) noexcept;
+```
+
+Returns the `Comp` component of the `model Entity` for `instance`, or `nullptr` if there is none.

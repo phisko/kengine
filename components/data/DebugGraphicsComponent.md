@@ -20,24 +20,56 @@ The maximum length of the debug text and font (stored as [putils::strings](https
 
 ## Members
 
-### Constructors
+### Element types
 
-#### Text
 ```cpp
-DebugGraphicsComponent(const char * text, unsigned int textSize, const char * font, const putils::Point3f & startPos, unsigned int color);
+struct Text {
+    std::string text;
+    std::string font;
+    float size = 1.f;
+};
+
+struct Line {
+    putils::Point3f end = {};
+    float thickness = 1.f;
+};
+
+struct Sphere {
+    float radius = .5f;
+};
+
+struct Box {
+    putils::Vector3f size = { 1.f, 1.f, 1.f };
+};
 ```
 
-#### Line
+These are the representations for the various type of debug elements.
+
+### Reference space
+
 ```cpp
-DebugGraphicsComponent(const putils::Point3f & startPos, const putils::Point3f & endPos, float thickness, unsigned int color);
+enum class ReferenceSpace {
+    World,
+    Object
+};
 ```
 
-#### Sphere
+Specifies whether an element's position is specified in world-space or object-space.
+
+### Elements
+
 ```cpp
-DebugGraphicsComponent(const putils::Point3f & center, float radius, unsigned int color);
+struct Element {
+    putils::Point3f pos;
+    putils::NormalizedColor color;
+    std::variant<Text, Line, Sphere, Box> data;
+    ReferenceSpace referenceSpace;
+
+    template<typename T>
+    explicit Element(T && val, const putils::Point3f & pos = { 0.f, 0.f, 0.f }, const putils::NormalizedColor & color = {}, ReferenceSpace referenceSpace = ReferenceSpace::Object);
+};
+
+std::vector<Element> elements;
 ```
 
-#### Box
-```cpp
-DebugGraphicsComponent(const putils::Rect3f & box, unsigned int color);
-```
+Collection of elements to be drawn for this entity.

@@ -7,7 +7,7 @@ Helper functions for [ImGui](https://github.com/ocornut/imgui) + Kengine operati
 ### displayEntity
 
 ```cpp
-void displayEntity(EntityManager & em, const Entity & e);
+void displayEntity(const Entity & e) noexcept;
 ```
 
 Displays an `Entity` as an ImGui tree with read-only attributes.
@@ -15,7 +15,7 @@ Displays an `Entity` as an ImGui tree with read-only attributes.
 ### editEntity
 
 ```cpp
-void editEntity(EntityManager & em, Entity & e);
+void editEntity(Entity & e) noexcept;
 ```
 
 Displays an `Entity` as an ImGui tree with write-enabled attributes.

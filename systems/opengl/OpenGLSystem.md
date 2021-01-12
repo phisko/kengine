@@ -28,7 +28,6 @@ The shadow map resolution defaults to 8192 (this seems like a lot, but I've only
 
 The following `function Components` are implemented:
 
-* [OnMouseCaptured](../../components/data/functions/OnMouseCaptured.md): captures the mouse into the GLFW window
 * [GetImGuiScale](../../components/data/functions/GetImGuiScale.md): returns the user-specified ImGui scale
 * [GetEntityInPixel](../../components/data/functions/GetEntityInPixel.md)
 
@@ -72,7 +71,7 @@ The default shaders provided with this system assume you make use of a type with
 
 ### Shader initialization and vertex type registration
 
-The shader [Programs](../../putils/opengl/Program.md) for the various [ShaderComponents](../../components/data/ShaderComponent.md) are initialized by the `OpenGLSystem`, and the vertex type registration functions provided by the [ModelDataComponents](../../components/data/ModelDataComponent.md) are called.
+The shader [Programs](../../putils/opengl/Program.md) for the various [ShaderComponents](../../components/data/ShaderComponent.md) are initialized by the `OpenGLSystem`, using the vertex type registration information provided by the [ModelDataComponents](../../components/data/ModelDataComponent.md).
 
 ### ImGui
 
@@ -81,7 +80,3 @@ The `OpenGLSystem` initializes an ImGui context which can be retrieved through i
 If building in debug mode, the following debug elements are automatically added (from [Controllers.hpp](Controllers.hpp)):
 * A shader controller, letting you enable/disable individual shaders
 * A texture debugger, letting you draw the individual components of the GBuffer or any texture registered by shaders
-
-### Input
-
-Input is captured and transferred to [InputBufferComponents](../../components/data/InputBufferComponent.md).

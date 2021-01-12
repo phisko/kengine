@@ -8,6 +8,8 @@
 #include "data/ShaderComponent.hpp"
 #include "functions/Execute.hpp"
 
+#include "opengl/Program.hpp"
+
 #include "imgui.h"
 
 namespace kengine::opengl {
@@ -36,6 +38,7 @@ namespace kengine::opengl {
 							}
 					};
 
+					using ShaderComponent = SystemSpecificShaderComponent<putils::gl::Program>;
 					displayShaders("GBuffer", entities.with<ShaderComponent, GBufferShaderComponent>());
 					displayShaders("Lighting", entities.with<ShaderComponent, LightingShaderComponent>());
 					displayShaders("Post lighting", entities.with<ShaderComponent, PostLightingShaderComponent>());

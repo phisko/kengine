@@ -17,9 +17,7 @@ std::vector<std::string>> files;
 
 List of all animation files to be loaded for the model.
 
-### Anim type
-
-Describes an animation.
+### animations
 
 ```cpp
 struct Anim {
@@ -27,11 +25,7 @@ struct Anim {
     float totalTime;
     float ticksPerSecond;
 };
-```
 
-### animations
-
-```cpp
 std::vector<Anim> animations;
 ```
 

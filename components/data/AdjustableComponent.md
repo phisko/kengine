@@ -18,7 +18,7 @@ The maximum length of the adjustable's name (stored as a [putils::string](https:
 static bool globalBool = false;
 static int globalInt = 42;
 
-em += [&](kengine::Entity e) {
+kengine::entities += [&](kengine::Entity e) {
     e += kengine::AdjustableComponent(
         "Globals", // "Category", for these adjustables to be grouped under
         { // vector of adjustables

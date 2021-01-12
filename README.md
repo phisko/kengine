@@ -6,7 +6,9 @@ The Koala engine is a type-safe and self-documenting implementation of an Entity
 
 ## Table of contents
 
-* [Classes](#classes)
+* [Members](#members)
+    + [Classes](#classes)
+    + [API](#api)
 * [Reflection](#reflection)
 * [Components](#components)
     + [Data components](#data-components)
@@ -51,14 +53,77 @@ Alternatively, the entire source code can be found in ZIP form in the latest rel
 
 The engine requires a **C++17** compiler.
 
-## Classes
+## Members
+
+### Classes
 
 * [Entity](Entity.md): can be used to represent anything (generally an in-game entity). Is simply a container of `Components`
-* [EntityManager](EntityManager.md): manages `Entities` and `Components`
+* [Entities](Entities.md): lets users create, remove, access and iterate over entities.
 
 Note that there is no `Component` class. Any type can be used as a `Component`, and dynamically attached/detached to `Entities`.
 
 Similarly, there is no `System` class to hold game logic. `Systems` are simply `Entities` with an `Execute` component. This lets users introspect `Systems` or add behavior to them (such as profiling) just like they would with any other `Entity`.
+
+### [API](kengine.hpp)
+
+#### init
+
+```cpp
+void init(size_t threads = 0) noexcept;
+```
+
+Initializes the engine and creates a [ThreadPool](putils/ThreadPool.md) with the given number of worker threads.
+
+#### entities
+
+```cpp
+Entities entities;
+```
+
+Global [Entities](Entities.md) object that allows for creation, removal, access and iteration over entities.
+
+#### threadPool
+
+```cpp
+putils::ThreadPool & threadPool() noexcept;
+```
+
+Returns the engine's [ThreadPool](putils/ThreadPool.md) to allow for controlled asynchronous tasks.
+
+#### isRunning, stopRunning
+
+```cpp
+bool isRunning() noexcept;
+void stopRunning() noexcept;
+```
+
+Lets code query and control whether the engine should keep running or not.
+
+#### terminate
+
+```cpp
+void terminate() noexcept;
+```
+
+Cleans up the engine. All [OnTerminate](components/functions/OnTerminate.md) function `Components` will be called, the ThreadPool's workers will be joined and the internal state will be deleted.
+
+This function should typically only be called right before exiting `main`.
+
+#### getState
+
+```cpp
+void * getState() noexcept;
+```
+
+Returns a pointer to the engine's internal state. This state is required when initializing a plugin (as it is not shared across DLL boundaries).
+
+#### initPlugin
+
+```cpp
+void initPlugin(void * state) noexcept;
+```
+
+Initializes the current plugin with the provided internal state pointer.
 
 ## Reflection
 
@@ -111,20 +176,18 @@ At their core, meta components are function components: they also inherit from [
 As an example, the [Has](components/meta/Has.md) meta component, attached to the type entity for `T`, takes an `Entity` as parameter and returns whether it has a `T` component.
 
 ```cpp
-EntityManager em;
-
-auto type = getTypeEntity<TransformComponent>(em); // Get the type entity
+auto type = getTypeEntity<TransformComponent>(); // Get the type entity
 type += NameComponent{ "TransformComponent" }; // You'll typically want to provide the type name as information
 type += meta::Has{ // Provide the implementation for `Has`
     [](const Entity & e) { return e.has<TransformComponent>(); }
 };
 
-auto e = em.createEntity([](Entity & e) { // Create an entity with a TransformComponent
+auto e = entities.create([](Entity & e) { // Create an entity with a TransformComponent
     e += TransformComponent{};
 });
 
 // For each entity with a NameComponent and a Has meta component
-for (const auto & [type, name, has] : em.getEntities<NameComponent, meta::Has>())
+for (const auto & [type, name, has] : entities.with<NameComponent, meta::Has>())
     if (has(e)) // if `e` has the component represented by `type`
         std::cout << e.id << " has a " << name.name << '\n';
 ```
@@ -187,7 +250,7 @@ These are pre-built, extensible and pluggable elements that can be used to boots
 * [Execute](components/functions/Execute.md): called each frame
 * [OnEntityCreated](components/functions/OnEntityCreated.md): called for each new `Entity`
 * [OnEntityRemoved](components/functions/OnEntityRemoved.md): called whenever an `Entity` is removed
-* [OnTerminate](components/functions/OnTerminate.md): called during `EntityManager` destruction
+* [OnTerminate](components/functions/OnTerminate.md): called when terminating the engine
 * [GetEntityInPixel](components/functions/GetEntityInPixel.md): returns the `Entity` seen in a given pixel
 * [GetImGuiScale](components/functions/GetImGuiScale.md): returns the scale to apply to ImGui widgets
 * [OnCollision](components/functions/OnCollision.md): called whenever two `Entities` collide
@@ -302,8 +365,7 @@ Below is a commented main function that creates an entity and attaches some comp
 
 #include "go_to_bin_dir.hpp"
 
-#include "EntityManager.hpp"
-#include "Entity.hpp"
+#include "kengine.hpp"
 
 #include "systems/lua/LuaSystem.hpp"
 
@@ -316,20 +378,18 @@ Below is a commented main function that creates an entity and attaches some comp
 
 // Simple system that outputs the transform and lua components of each entity that has them
 //- Forward declaration
-static float execute(kengine::EntityManager & em, float deltaTime);
+static float execute(float deltaTime);
 //-
-auto DebugSystem(kengine::EntityManager & em) {
+auto DebugSystem() {
     return [&](kengine::Entity & e) {
         // Attach an Execute component that will be called each frame
-        e += kengine::functions::Execute{
-             [&](float deltaTime) { execute(em, deltaTime); }
-        };
+        e += kengine::functions::Execute{ execute };
     };
 }
 
 // This could be defined as a lambda in DebugSystem but is moved out here for readability
-static float execute(kengine::EntityManager & em, float deltaTime) {
-    for (const auto & [e, transform, lua] : em.getEntities<kengine::TransformComponent, kengine::LuaComponent>()) {
+static float execute(float deltaTime) {
+    for (const auto & [e, transform, lua] : kengine::entities.with<kengine::TransformComponent, kengine::LuaComponent>()) {
         std::cout << "Entity " << e.id << '\n';
         std::cout << "\tTransform: "
             << transform.boundingBox.position.x << ' '
@@ -348,14 +408,13 @@ int main(int, char **av) {
     // Go to the executable's directory to be next to resources and scripts
     putils::goToBinDir(av[0]);
 
-    // Create an EntityManager
-    kengine::EntityManager em; // Optionally, pass a number of threads as parameter -> kengine::EntityManager em(4);
+    kengine::init(); // Optionally, pass a number of threads as parameter
 
-    em += DebugSystem(em);
-    em += kengine::LuaSystem(em);
+    kengine::entities += DebugSystem();
+    kengine::entities += kengine::LuaSystem();
 
     // Create an Entity and attach Components to it
-    em += [](kengine::Entity e) {
+    kengine::entities += [](kengine::Entity e) {
         e += kengine::TransformComponent({ 42.f, 0.f, 42.f }); // Parameter is a Point3f for position
         e += kengine::LuaComponent({ "scripts/unit.lua" }); // Parameter is a vector of scripts
     };
@@ -364,10 +423,10 @@ int main(int, char **av) {
     kengine::luaHelper::registerTypes<
         kengine::TransformComponent, putils::Point3f, putils::Rect3f,
         kengine::LuaComponent
-    >(em);
+    >();
 
     // Start game
-    kengine::MainLoop::run(em);
+    kengine::MainLoop::run();
 
     return 0;
 }

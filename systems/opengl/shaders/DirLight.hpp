@@ -1,11 +1,12 @@
 #pragma once
 
 #include "opengl/Program.hpp"
-#include "data/ShaderComponent.hpp"
+#include "data/OpenGLResourceComponent.hpp"
 #include "ShadowMapSrc.hpp"
 #include "DirLightSrc.hpp"
 
 namespace kengine {
+	class Entity;
 	struct DirLightComponent;
 }
 

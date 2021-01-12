@@ -41,3 +41,22 @@ bool loop = true;
 ```
 
 Whether the animation should loop or not.
+
+### Mover behaviors
+
+```cpp
+enum class MoverBehavior {
+    UpdateTransformComponent,
+    UpdateBones,
+    None
+};
+
+MoverBehavior positionMoverBehavior = MoverBehavior::UpdateBones;
+MoverBehavior rotationMoverBehavior = MoverBehavior::UpdateBones;
+MoverBehavior scaleMoverBehavior = MoverBehavior::UpdateBones;
+```
+
+Specifies how the animation's movement should be retranscribed:
+* by updating the `Entity`'s actual position through the [TransformComponent](TransformComponent.md)
+* by updating the bone matrices in the [SkeletonComponent](SkeletonComponent.md)
+* not at all

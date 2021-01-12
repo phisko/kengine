@@ -46,7 +46,7 @@ namespace kengine {
 		size_t vertexSize;
 
 		template<typename VertexType>
-		void init() {
+		void init() noexcept {
 			static constexpr bool isPolyVoxType = ::detail::has_nested_type_DataType<VertexType>{};
 
 			if constexpr (isPolyVoxType) {
@@ -55,13 +55,13 @@ namespace kengine {
 
 				using Data = typename VertexType::DataType;
 				const auto dataOffset = offsetof(VertexType, data);
-				putils::reflection::for_each_attribute<Data>([&](const char * name, auto member) {
+				putils::reflection::for_each_attribute<Data>([&](const char * name, auto member) noexcept {
 					using Member = putils::MemberType<putils_typeof(member)>;
 					vertexAttributes.push_back({ name, dataOffset + (size_t)putils::member_offset(member), putils::meta::type<Member>::index });
 				});
 			}
 			else {
-				putils::reflection::for_each_attribute<VertexType>([&](const char * name, auto member) {
+				putils::reflection::for_each_attribute<VertexType>([&](const char * name, auto member) noexcept {
 					using Member = putils::MemberType<putils_typeof(member)>;
 					vertexAttributes.push_back({ name, (size_t)putils::member_offset(member), putils::meta::type<Member>::index });
 				});

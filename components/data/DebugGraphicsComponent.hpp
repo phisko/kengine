@@ -44,7 +44,7 @@ namespace kengine {
 			Element & operator=(Element &&) = default;
 
 			template<typename T, typename = std::enable_if_t<!std::is_same<std::decay_t<T>, Element>()>>
-			explicit Element(T && val, const putils::Point3f & pos = {}, const putils::NormalizedColor & color = {}, ReferenceSpace referenceSpace = ReferenceSpace::Object)
+			explicit Element(T && val, const putils::Point3f & pos = { 0.f, 0.f, 0.f }, const putils::NormalizedColor & color = {}, ReferenceSpace referenceSpace = ReferenceSpace::Object)
 				: data(FWD(val)), pos(pos), color(color), referenceSpace(referenceSpace)
 			{}
 		};

@@ -2,7 +2,7 @@
 
 `Component` providing graphical information about a "model" file (be it a 3D model, a 2D sprite or any other form of renderable element).
 
-`Entities` with this `Component` are sometimes referred to as "model Entities". They hold [flyweight](https://www.wikiwand.com/en/Flyweight_pattern)-style data about all `Entities` using the model.
+`Entities` with this `Component` are sometimes referred to as "model Entities". They hold [flyweight](https://www.wikiwand.com/en/Flyweight_pattern)-style data about all `Entities` [using the model](InstanceComponent.md).
 
 ## Specs
 
@@ -36,10 +36,4 @@ Defines the offset and scale to be applied to the model.
 float pitch = 0.f; // Radians
 float yaw = 0.f; // Radians
 float roll = 0.f; // Radians
-```
-
-### mirrored
-
-```cpp
-bool mirrored = false;
 ```

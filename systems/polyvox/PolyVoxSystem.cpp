@@ -29,8 +29,8 @@ namespace kengine {
 		struct impl {
 			static void init(Entity & e) noexcept {
 				e += functions::Execute{ execute };
-				e += opengl::ShaderComponent{ std::make_unique<PolyVoxShader>() };
-				e += opengl::GBufferShaderComponent{};
+				e += SystemSpecificShaderComponent<putils::gl::Program>{ std::make_unique<PolyVoxShader>() };
+				e += GBufferShaderComponent{};
 			}
 
 			static void execute(float deltaTime) noexcept {

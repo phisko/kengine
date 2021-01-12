@@ -1,6 +1,6 @@
 # [OnTerminate](OnTerminate.hpp)
 
-`Function Component` used as a callback when the `EntityManager` is about to be destroyed.
+`Function Component` used as a callback when the engine is about to shut down.
 
 ## Prototype
 
@@ -10,4 +10,4 @@ void ();
 
 ## Usage
 
-The `EntityManager` automatically calls this `function Component` in its destructor.
+The engine automatically calls this `function Component` when `kengine::terminate` is called.
