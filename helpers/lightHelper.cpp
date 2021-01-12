@@ -25,7 +25,7 @@ namespace kengine::lightHelper {
 		const float tanHalfHFOV = std::tan(params.camFOV * ar / 2.f);
 		const float tanHalfVFOV = std::tan(params.camFOV / 2.f);
 
-		const float cascadeStart = csmIndex == 0 ? params.nearPlane : getCSMCascadeEnd(light, csmIndex - 1);
+		const float cascadeStart = csmIndex == 0 ? SHADOW_MAP_NEAR_PLANE : getCSMCascadeEnd(light, csmIndex - 1);
 		const float cascadeEnd = getCSMCascadeEnd(light, csmIndex);
 
 		const float xn = cascadeStart * tanHalfHFOV;
