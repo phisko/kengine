@@ -28,20 +28,22 @@ namespace kengine::impl {
 		Impl
 		*/
 
-		struct EntityMetadata {
-			bool active = false;
-			ComponentMask mask = 0;
-			bool shouldActivateAfterInit = true;
+		union EntityMetadata {
+			struct {
+				bool active;
+				ComponentMask mask;
+				bool shouldActivateAfterInit;
+			};
+			ID freeListNext;
 		};
 		std::vector<EntityMetadata> _entities;
-		mutable Mutex _entitiesMutex;
+		Mutex _entitiesMutex;
 
 		std::vector<Archetype> _archetypes;
-		mutable Mutex _archetypesMutex;
+		Mutex _archetypesMutex;
 
-		std::vector<ID> _toReuse;
-		bool _toReuseSorted = true;
-		mutable Mutex _toReuseMutex;
+		ID _freeList = INVALID_ID;
+		Mutex _freeListMutex;
 
 		std::vector<std::unique_ptr<ComponentMetadata>> _components;
 		Mutex _componentsMutex;

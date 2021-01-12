@@ -52,9 +52,10 @@ namespace kengine {
 			entityData.shouldActivateAfterInit = true;
 		}
 
-		impl::WriteLock l(impl::state->_toReuseMutex);
-		impl::state->_toReuse.emplace_back(id);
-		impl::state->_toReuseSorted = false;
+		impl::WriteLock l(impl::state->_freeListMutex);
+		impl::ReadLock entities(impl::state->_entitiesMutex);
+		impl::state->_entities[id].freeListNext = impl::state->_freeList;
+		impl::state->_freeList = id;
 	}
 
 	void Entities::setActive(Entity e, bool active) noexcept {

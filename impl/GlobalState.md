@@ -24,34 +24,36 @@ Indicates whether systems should keep running or stop.
 
 ```cpp
 struct EntityMetadata {
-    bool active = false;
-    ComponentMask mask = 0;
-    bool shouldActivateAfterInit = true;
+    struct {
+        bool active = false;
+        ComponentMask mask = 0;
+        bool shouldActivateAfterInit = true;
+    };
+    ID freeListNext;
 };
 std::vector<EntityMetadata> _entities;
-mutable Mutex _entitiesMutex;
+Mutex _entitiesMutex;
 ```
 
-List of all existing [Entities](../Entity.md).
+List of all existing [Entities](../Entity.md). Either holds the `Entity`'s information or the `ID` of the next `Entity` to be reused.
 
 ### _archetypes
 
 ```cpp
 std::vector<Archetype> _archetypes;
-mutable Mutex _archetypesMutex;
+Mutex _archetypesMutex;
 ```
 
 List of all existing [Archetypes](Archetype.md).
 
-### _toReuse
+### _freeList
 
 ```cpp
-std::vector<ID> _toReuse;
-bool _toReuseSorted = true;
-mutable Mutex _toReuseMutex;
+ID _freeList;
+Mutex _freeListMutex;
 ```
 
-List of `Entities` which have been removed and whose `id` may be reused.
+Index of the next `Entity` to be reused.
 
 ### _components
 
