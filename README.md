@@ -125,6 +125,14 @@ void initPlugin(void * state) noexcept;
 
 Initializes the current plugin with the provided internal state pointer.
 
+#### cleanupArchetypes
+
+```cpp
+void cleanupArchetypes() noexcept;
+```
+
+Removes any unused [Archetypes](impl/Archetype.md) to speed up future iteration over `Entities`. This is called at the end of each frame by the [mainLoop](helpers/mainLoop.md) helper.
+
 ## Reflection
 
 Many parts of the engine (such as the scripting systems or the OpenGL system) make use of `putils`' [reflection API](https://github.com/phisko/putils/blob/master/reflection.md). Most of the components in the following samples are thus defined as reflectible.
@@ -219,6 +227,7 @@ These are pre-built, extensible and pluggable elements that can be used to boots
 * [AdjustableComponent](components/data/AdjustableComponent.md): lets users modify variables through a GUI (such as the [ImGuiAdjustableSystem](systems/imgui_adjustable/ImGuiAdjustableSystem.md))
 * [ImGuiComponent](components/data/ImGuiComponent.md): lets `Entities` render debug elements using [ImGui](https://github.com/ocornut/imgui/)
 * [ImGuiToolComponent](components/data/ImGuiToolComponent.md): indicates that an `Entity`'s `ImGuiComponent` is a tool that can be enabled or disabled by the [ImGuiToolSystem](systems/imgui_tool/ImGuiToolSystem.md)
+* [ImGuiScaleComponent](components/data/ImGuiScaleComponent.md): custom scale to be applied to all ImGui elements
 * [DebugGraphicsComponent](components/data/DebugGraphicsComponent.md): lets an `Entity` be used to draw debug information (such as lines, rectangles or spheres)
 
 ##### Graphics
@@ -252,7 +261,6 @@ These are pre-built, extensible and pluggable elements that can be used to boots
 * [OnEntityRemoved](components/functions/OnEntityRemoved.md): called whenever an `Entity` is removed
 * [OnTerminate](components/functions/OnTerminate.md): called when terminating the engine
 * [GetEntityInPixel](components/functions/GetEntityInPixel.md): returns the `Entity` seen in a given pixel
-* [GetImGuiScale](components/functions/GetImGuiScale.md): returns the scale to apply to ImGui widgets
 * [OnCollision](components/functions/OnCollision.md): called whenever two `Entities` collide
 * [OnMouseCaptured](components/functions/OnMouseCaptured.md): indicates whether the mouse should be captured by the window
 * [QueryPosition](components/functions/QueryPosition.md): returns a list of `Entities` found within a certain distance of a position

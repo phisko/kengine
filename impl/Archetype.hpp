@@ -15,7 +15,9 @@ namespace kengine::impl {
 		Archetype(ComponentMask mask, EntityID firstEntity) noexcept;
 		Archetype() noexcept = default;
 		Archetype(Archetype &&) noexcept;
+		Archetype & operator=(Archetype &&) noexcept;
 		Archetype(const Archetype &) noexcept;
+		Archetype & operator=(const Archetype &) noexcept;
 
 		void add(EntityID id) noexcept;
 		void remove(EntityID id) noexcept;

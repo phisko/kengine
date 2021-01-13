@@ -16,6 +16,7 @@ static void run(F && getTimeFactor) noexcept {
 		start = std::chrono::system_clock::now();
 		for (const auto & [e, func] : kengine::entities.with<kengine::functions::Execute>())
 			func(deltaTime);
+		kengine::cleanupArchetypes();
 		end = std::chrono::system_clock::now();
 	}
 }

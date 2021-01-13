@@ -36,27 +36,27 @@ namespace kengine::impl {
 	template<typename ... Comps>
 	TIterator & TIterator::operator++() noexcept {
 		++currentEntity;
+
+		ReadLock archetypesLock(state->_archetypesMutex);
 		auto & archetype = state->_archetypes[currentType];
 
 		{
-			ReadLock l(archetype.mutex);
+			ReadLock lock(archetype.mutex);
 			if (currentEntity < archetype.entities.size())
 			{
-				ReadLock l(state->_entitiesMutex);
+				ReadLock entitiesLock(state->_entitiesMutex);
 				if (state->_entities[archetype.entities[currentEntity]].active)
 					return *this;
 			}
 		}
 
 		currentEntity = 0;
-		{
-			ReadLock l(state->_archetypesMutex);
-			for (++currentType; currentType < state->_archetypes.size(); ++currentType)
-				if (state->_archetypes[currentType].matches<Comps...>())
-					break;
-			if (currentType >= state->_archetypes.size())
-				currentType = (size_t)-1;
-		}
+
+		for (++currentType; currentType < state->_archetypes.size(); ++currentType)
+			if (state->_archetypes[currentType].matches<Comps...>())
+				break;
+		if (currentType >= state->_archetypes.size())
+			currentType = (size_t)-1;
 
 		return *this;
 	}

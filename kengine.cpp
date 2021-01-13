@@ -1,4 +1,5 @@
 #include "kengine.hpp"
+#include "remove_if.hpp"
 
 namespace kengine {
 	Entities entities;
@@ -29,5 +30,13 @@ namespace kengine {
 
 	void stopRunning() noexcept {
 		impl::state->running = false;
+	}
+
+	void cleanupArchetypes() noexcept {
+		impl::WriteLock l(impl::state->_archetypesMutex);
+
+		putils::remove_if(impl::state->_archetypes, [](const impl::Archetype & archetype) noexcept {
+			return archetype.entities.empty();
+		});
 	}
 }

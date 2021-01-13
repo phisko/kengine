@@ -6,19 +6,37 @@ namespace kengine::impl {
 		: mask(mask), entities({ firstEntity })
 	{}
 
-	Archetype::Archetype(Archetype && rhs) noexcept {
-		mask = rhs.mask;
-		sorted = rhs.sorted;
+	Archetype::Archetype(Archetype && rhs) noexcept
+		: mask(rhs.mask), sorted(rhs.sorted)
+	{
 		WriteLock l(rhs.mutex);
 		entities = std::move(rhs.entities);
 	}
 
-	Archetype::Archetype(const Archetype & rhs) noexcept {
+	Archetype & Archetype::operator=(Archetype && rhs) noexcept {
+		mask = rhs.mask;
+		sorted = rhs.sorted;
+		WriteLock l(rhs.mutex);
+		entities = std::move(rhs.entities);
+		return *this;
+	}
+
+	Archetype::Archetype(const Archetype & rhs) noexcept
+		: mask(rhs.mask), sorted(rhs.sorted)
+	{
+		ReadLock l(rhs.mutex);
+		entities = rhs.entities;
+	}
+
+	Archetype & Archetype::operator=(const Archetype & rhs) noexcept
+	{
 		mask = rhs.mask;
 		sorted = rhs.sorted;
 		ReadLock l(rhs.mutex);
 		entities = rhs.entities;
+		return *this;
 	}
+
 
 	void Archetype::add(EntityID id) noexcept {
 		WriteLock l(mutex);

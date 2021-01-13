@@ -18,4 +18,6 @@ namespace kengine {
 
 	void * getState() noexcept;
 	void initPlugin(void * state) noexcept;
+
+	void cleanupArchetypes() noexcept;
 }

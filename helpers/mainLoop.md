@@ -10,7 +10,7 @@ Helper functions to use as an application's main loop.
 void run() noexcept;
 ```
 
-As long as `isRunning()` returns `true`, loops over all `Entities` with an [Execute](../components/functions/Execute.md) `function Component` and calls them with the calculated delta time.
+As long as `isRunning()` returns `true`, loops over all `Entities` with an [Execute](../components/functions/Execute.md) `function Component` and calls them with the calculated delta time. `cleanupArchetypes` is called at the end of each frame.
 
 
 ### timeModulated::run
