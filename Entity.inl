@@ -66,6 +66,7 @@ namespace kengine {
 		auto & comp = get<T>();
 		comp.~T();
 		new (&comp) T;
+
 		static const auto component = impl::Component<T>::id();
 		componentMask.set(component, false);
 		impl::removeComponent(id, component);
