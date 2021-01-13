@@ -26,10 +26,10 @@ The shadow map resolution defaults to 8192 (this seems like a lot, but I've only
 
 ## Function components
 
-The following `function Components` are implemented:
+The following `function Component` is implemented:
 
-* [GetImGuiScale](../../components/data/functions/GetImGuiScale.md): returns the user-specified ImGui scale
 * [GetEntityInPixel](../../components/data/functions/GetEntityInPixel.md)
+* [GetPositionInPixel](../../components/data/functions/GetPositionInPixel.md)
 
 ## Functionality
 

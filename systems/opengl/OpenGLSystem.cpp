@@ -20,6 +20,7 @@
 #include "data/ModelComponent.hpp"
 #include "data/SystemSpecificModelComponent.hpp"
 #include "data/ImGuiContextComponent.hpp"
+#include "data/ImGuiScaleComponent.hpp"
 #include "data/AdjustableComponent.hpp"
 #include "data/CameraComponent.hpp"
 #include "data/ViewportComponent.hpp"
@@ -33,7 +34,6 @@
 #include "functions/OnEntityCreated.hpp"
 #include "functions/OnEntityRemoved.hpp"
 #include "functions/OnMouseCaptured.hpp"
-#include "functions/GetImGuiScale.hpp"
 #include "functions/GetEntityInPixel.hpp"
 #include "functions/GetPositionInPixel.hpp"
 #include "functions/InitGBuffer.hpp"
@@ -42,6 +42,7 @@
 #include "helpers/cameraHelper.hpp"
 #include "helpers/matrixHelper.hpp"
 #include "helpers/assertHelper.hpp"
+#include "helpers/imguiHelper.hpp"
 
 #include "shaders/ShadowMap.hpp"
 #include "shaders/ShadowCube.hpp"
@@ -71,10 +72,6 @@ namespace kengine::opengl {
 	struct impl {
 		static inline putils::gl::Program::Parameters params;
 
-		static inline struct {
-			float dpiScale = 1.f;
-		} adjustables;
-
 		static inline size_t gBufferTextureCount = 0;
 		static inline functions::GBufferAttributeIterator gBufferIterator = nullptr;
 
@@ -90,13 +87,14 @@ namespace kengine::opengl {
 			e += functions::OnEntityRemoved{ onEntityRemoved };
 			e += functions::OnTerminate{ terminate };
 			e += functions::OnMouseCaptured{ onMouseCaptured };
-			e += functions::GetImGuiScale{ [] { return adjustables.dpiScale; } };
 			e += functions::GetEntityInPixel{ getEntityInPixel };
 			e += functions::GetPositionInPixel{ getPositionInPixel };
 
+			auto & scale = e.attach<ImGuiScaleComponent>();
+
 			e += AdjustableComponent{
 				"ImGui", {
-					{ "Scale", &adjustables.dpiScale }
+					{ "Scale", &scale.scale }
 				}
 			};
 
@@ -323,9 +321,10 @@ namespace kengine::opengl {
 			doOpenGL();
 
 			static float lastScale = 1.f;
-			ImGui::GetIO().FontGlobalScale = adjustables.dpiScale;
-			ImGui::GetStyle().ScaleAllSizes(adjustables.dpiScale / lastScale);
-			lastScale = adjustables.dpiScale;
+			const auto scale = imguiHelper::getScale();
+			ImGui::GetIO().FontGlobalScale = scale;
+			ImGui::GetStyle().ScaleAllSizes(scale / lastScale);
+			lastScale = scale;
 
 			ImGui::Render();
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

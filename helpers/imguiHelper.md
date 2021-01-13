@@ -2,6 +2,12 @@
 
 Helper functions for [ImGui](https://github.com/ocornut/imgui) + Kengine operations.
 
+## Usage
+
+`displayEntity` and `editEntity` are implemented in terms of `meta Components`.
+
+For `Components` to appear in the ImGui tree, the [DisplayImGui](../components/meta/DisplayImGui.md)/[EditImGui](../components/meta/DisplayImGui.md) `meta Components` must first have been registered for them, along with the basic [Has](../components/meta/Has.md), [AttachTo](../components/meta/AttachTo.md) and [DetachFrom](../components/meta/DetachFrom.md).
+
 ## Members
 
 ### displayEntity
@@ -20,8 +26,10 @@ void editEntity(Entity & e) noexcept;
 
 Displays an `Entity` as an ImGui tree with write-enabled attributes.
 
-## Usage
+### getScale
 
-`displayEntity` and `editEntity` are implemented in terms of `meta Components`.
+```cpp
+float getScale() noexcept;
+```
 
-For `Components` to appear in the ImGui tree, the [DisplayImGui](../components/meta/DisplayImGui.md)/[EditImGui](../components/meta/DisplayImGui.md) `meta Components` must first have been registered for them, along with the basic [Has](../components/meta/Has.md), [AttachTo](../components/meta/AttachTo.md) and [DetachFrom](../components/meta/DetachFrom.md).
+Returns the desired scale for all ImGui elements, calculated based on all existing [ImGuiScaleComponents](../components/data/ImGuiScaleComponent.md).

@@ -3,11 +3,15 @@
 
 #include "helpers/typeHelper.hpp"
 #include "helpers/sortHelper.hpp"
+
+#include "data/ImGuiScaleComponent.hpp"
+
 #include "meta/Has.hpp"
 #include "meta/AttachTo.hpp"
 #include "meta/DetachFrom.hpp"
 #include "meta/DisplayImGui.hpp"
 #include "meta/EditImGui.hpp"
+
 #include "imgui.h"
 
 namespace kengine::imguiHelper {
@@ -60,5 +64,12 @@ namespace kengine::imguiHelper {
 				ImGui::TreePop();
 			}
 		}
+	}
+
+	float getScale() noexcept {
+		float scale = 1.f;
+		for (const auto & [e, comp] : entities.with<ImGuiScaleComponent>())
+			scale *= comp.scale;
+		return scale;
 	}
 }
