@@ -290,6 +290,7 @@ In all following descriptions, the "parent" `Component` refers to the `Component
 
 #### Debug tools
 * [ImGuiAdjustableSystem](systems/imgui_adjustable/ImGuiAdjustableSystem.md): displays an ImGui window to edit `AdjustableComponents`
+* [ImGuiEngineStats](systems/imgui_engine_stats/ImGuiEngineStatsSystem.md): displays an ImGui window with engine stats
 * [ImGuiEntityEditorSystem](systems/imgui_entity_editor/ImGuiEntityEditorSystem.md): displays ImGui windows to edit `Entities` with a `SelectedComponent`
 * [ImGuiEntitySelectorSystem](systems/imgui_entity_selector/ImGuiEntitySelectorSystem.md): displays an ImGui window that lets users search for and select `Entities`
 * [ImGuiToolSystem](systems/imgui_tool/ImGuiToolSystem.md): manages ImGui [tool windows](components/data/ImGuiToolComponent.md) through ImGui's MainMenuBar
@@ -313,6 +314,7 @@ These systems must be enabled by setting the corresponding CMake variable to `tr
 | BulletSystem              | KENGINE_BULLET                |
 | CollisionSytem            | KENGINE_COLLISION             |
 | ImGuiAdjustableSystem     | KENGINE_IMGUI_ADJUSTABLE      |
+| ImGuiEngineStatsSystem    | KENGINE_IMGUI_ENGINE_STATS    |
 | ImGuiEntityEditorSystem   | KENGINE_IMGUI_ENTITY_EDITOR   |
 | ImGuiEntitySelectorSystem | KENGINE_IMGUI_ENTITY_SELECTOR |
 | ImGuiPromptSystem         | KENGINE_IMGUI_PROMPT          |
