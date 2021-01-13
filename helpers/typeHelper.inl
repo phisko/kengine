@@ -2,17 +2,24 @@
 
 namespace kengine::typeHelper {
     namespace impl {
-        template<typename T>
-        struct TypeEntityTag {};
+        struct TypeEntityTag {
+            putils::meta::type_index type;
+        };
     }
 
     template <typename T>
     Entity getTypeEntity() noexcept {
         static EntityID ret = []() noexcept {
-            for (const auto [e, comp] : entities.with<impl::TypeEntityTag<T>>())
-                return e.id;
-            return entities.create([](Entity &) {}).id;
+            for (const auto [e, comp] : entities.with<impl::TypeEntityTag>())
+                if (comp.type == putils::meta::type<T>::index)
+					return e.id;
+
+            const auto newTypeEntity = entities.create([](Entity & e) {
+                e += impl::TypeEntityTag{ putils::meta::type<T>::index };
+			});
+            return newTypeEntity.id;
         }();
-        return entities.get(ret);
+
+        return entities[ret];
     }
 }
