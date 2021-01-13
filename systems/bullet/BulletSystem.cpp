@@ -79,11 +79,9 @@ namespace kengine::bullet {
 			btCompoundShape shape{ false };
 			btRigidBody body{ { 0.f, nullptr, nullptr } };
 			MotionState motionState;
-			bool active = false;
 
 			~BulletPhysicsComponent() noexcept {
-				if (active)
-					dynamicsWorld.removeRigidBody(&body);
+				dynamicsWorld.removeRigidBody(&body);
 			}
 
 			BulletPhysicsComponent() noexcept = default;
@@ -152,7 +150,6 @@ namespace kengine::bullet {
 
 		static void addBulletComponent(Entity & e, TransformComponent & transform, PhysicsComponent & physics, const Entity & modelEntity) noexcept {
 			auto & comp = e.attach<BulletPhysicsComponent>();
-			comp.active = true;
 			comp.motionState.transform = &transform;
 
 			const auto & modelCollider = modelEntity.get<ModelColliderComponent>();
