@@ -3,5 +3,5 @@
 #include "EntityCreator.hpp"
 
 namespace kengine {
-	EntityCreator * ImGuiEngineStats() noexcept;
+	EntityCreator * ImGuiEngineStatsSystem() noexcept;
 }
