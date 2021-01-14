@@ -20,6 +20,7 @@
 #include "visit.hpp"
 #include "IniFile.hpp"
 #include "static_assert.hpp"
+#include "concat.hpp"
 
 #ifndef KENGINE_DEFAULT_ADJUSTABLE_SAVE_PATH
 # define KENGINE_DEFAULT_ADJUSTABLE_SAVE_PATH "."
@@ -318,7 +319,10 @@ namespace kengine::imgui_adjustable {
 
 		static void save() noexcept {
 			std::ofstream f(KENGINE_ADJUSTABLE_SAVE_FILE, std::ofstream::trunc);
-			assert(f);
+			if (!f) {
+				kengine_assert_failed(putils::concat("Failed to open '", KENGINE_ADJUSTABLE_SAVE_FILE, "' with write permissions"));
+				return;
+			}
 
 			const auto entities = sortHelper::getSortedEntities<AdjustableComponent>([](const auto & a, const auto & b) noexcept {
 				return strcmp(std::get<1>(a)->section.c_str(), std::get<1>(b)->section.c_str()) < 0;

@@ -5,6 +5,7 @@
 #include <GL/GL.h>
 #include "Point.hpp"
 #include "opengl/RAII.hpp"
+#include "helpers/assertHelper.hpp"
 
 namespace kengine {
 	class GBufferComponent {
@@ -46,7 +47,7 @@ namespace kengine {
 
 			glDrawBuffers((GLsizei)attachments.size(), attachments.data());
 
-			assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+			kengine_assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
 
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 		}

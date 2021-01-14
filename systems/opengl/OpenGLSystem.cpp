@@ -59,6 +59,7 @@
 #include "shaders/Text.hpp"
 
 #include "Timer.hpp"
+#include "concat.hpp"
 
 #ifndef KENGINE_MAX_VIEWPORTS
 # define KENGINE_MAX_VIEWPORTS 8
@@ -148,7 +149,7 @@ namespace kengine::opengl {
 					window.glfw = &entities.get(window.id).get<GLFWWindowComponent>();
 					glewExperimental = true;
 					const bool ret = glewInit();
-					assert(ret == GLEW_OK);
+					kengine_assert(ret == GLEW_OK);
 
 					initImGui();
 
@@ -270,11 +271,11 @@ namespace kengine::opengl {
 		static void initShader(putils::gl::Program & p) noexcept {
 			p.init(gBufferTextureCount);
 
-			assert(gBufferIterator != nullptr);
+			kengine_assert(gBufferIterator != nullptr);
 			int texture = 0;
 			gBufferIterator([&](const char * name) noexcept {
 				p.addGBufferTexture(name, texture++);
-				});
+			});
 		}
 
 		static void onEntityRemoved(Entity & e) noexcept {
@@ -445,7 +446,7 @@ namespace kengine::opengl {
 					format = GL_RGBA;
 					break;
 				default:
-					assert(false);
+					kengine_assert_failed(putils::concat("Incompatible number of texture components: ", textureData.components));
 				}
 
 				glBindTexture(GL_TEXTURE_2D, textureModel.texture);
@@ -543,7 +544,7 @@ namespace kengine::opengl {
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, viewport.resolution.x, viewport.resolution.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, fb.depthTexture, 0);
 
-			assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+			kengine_assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
 
 			viewport.renderTexture = (ViewportComponent::RenderTexture)texture;
 

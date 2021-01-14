@@ -58,7 +58,6 @@ namespace kengine::cameraHelper {
 		case OnScreenComponent::CoordinateType::ScreenPercentage:
 			return rect;
 		default:
-			assert(!"Unsupported coordinate type");
 			static_assert(putils::magic_enum::enum_count<OnScreenComponent::CoordinateType>() == 2);
 			return rect;
 		}

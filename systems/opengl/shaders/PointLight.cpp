@@ -9,6 +9,7 @@
 
 #include "helpers/cameraHelper.hpp"
 #include "helpers/lightHelper.hpp"
+#include "helpers/assertHelper.hpp"
 #include "shaderHelper.hpp"
 
 namespace kengine::opengl::shaders {
@@ -32,7 +33,7 @@ namespace kengine::opengl::shaders {
 
 		use();
 		src::ShadowCube::Frag::Uniforms::_viewPos = params.camPos;
-		assert(src::ShadowCube::Frag::Uniforms::_viewPos.location == src::PointLight::Frag::Uniforms::_viewPos.location);
+		kengine_assert(src::ShadowCube::Frag::Uniforms::_viewPos.location == src::PointLight::Frag::Uniforms::_viewPos.location);
 		_screenSize = putils::Point2f(params.viewport.size);
 
 		glActiveTexture((GLenum)(GL_TEXTURE0 + _shadowMapTextureID));
@@ -86,7 +87,7 @@ namespace kengine::opengl::shaders {
 	void PointLight::setLight(const PointLightComponent & light, const putils::Point3f & pos, float radius) noexcept {
 		_color = light.color;
 		src::ShadowCube::Frag::Uniforms::_position = pos;
-		assert(src::ShadowCube::Frag::Uniforms::_position.location == src::PointLight::Frag::Uniforms::_position.location);
+		kengine_assert(src::ShadowCube::Frag::Uniforms::_position.location == src::PointLight::Frag::Uniforms::_position.location);
 
 		_diffuseStrength = light.diffuseStrength;
 		_specularStrength = light.specularStrength;

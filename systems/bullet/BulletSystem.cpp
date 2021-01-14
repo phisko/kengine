@@ -189,7 +189,6 @@ namespace kengine::bullet {
 						break;
 					}
 					default:
-						assert(!"Unknown collider shape");
 						static_assert(putils::magic_enum::enum_count<ModelColliderComponent::Collider::Shape>() == 5);
 						break;
 					}
@@ -292,7 +291,7 @@ namespace kengine::bullet {
 				Callback(btPairCachingGhostObject & ghost, const EntityIteratorFunc & func) noexcept : ghost(ghost), func(func) {}
 
 				btScalar addSingleResult(btManifoldPoint & cp, const btCollisionObjectWrapper * colObj0Wrap, int partId0, int index0, const btCollisionObjectWrapper * colObj1Wrap, int partId1, int index1) final {
-					assert(colObj1Wrap->m_collisionObject == &ghost);
+					kengine_assert(colObj1Wrap->m_collisionObject == &ghost);
 					const auto id = colObj0Wrap->m_collisionObject->getUserIndex();
 					func(entities.get(id));
 					return 1.f;
@@ -331,7 +330,7 @@ namespace kengine::bullet {
 
 				if (!collider.boneName.empty()) {
 					// Apply model scale to bone transformation
-					assert(skeleton != nullptr && modelSkeleton != nullptr && model != nullptr);
+					kengine_assert(skeleton != nullptr && modelSkeleton != nullptr);
 
 					const auto worldSpaceBone = skeletonHelper::getBoneMatrix(collider.boneName.c_str(), *skeleton, *modelSkeleton);
 					const auto pos = matrixHelper::getPosition(worldSpaceBone);

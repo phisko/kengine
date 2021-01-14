@@ -1,6 +1,8 @@
 #ifdef PUTILS_GLM
 
 #include "skeletonHelper.hpp"
+#include "assertHelper.hpp"
+#include "concat.hpp"
 
 namespace kengine::skeletonHelper {
 	BoneIndexes getBoneIndex(const char * bone, const ModelSkeletonComponent & model) noexcept {
@@ -17,7 +19,7 @@ namespace kengine::skeletonHelper {
 			++indexes.meshIndex;
 		}
 
-		assert(false); // Not found
+		kengine_assert_failed(putils::concat("'", bone, "' bone not found"));
 		return indexes;
 	}
 

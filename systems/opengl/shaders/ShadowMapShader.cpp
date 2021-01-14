@@ -7,6 +7,7 @@
 #include "kengine.hpp"
 
 #include "shaderHelper.hpp"
+#include "helpers/assertHelper.hpp"
 #include "helpers/lightHelper.hpp"
 
 namespace kengine::opengl::shaders {
@@ -50,7 +51,7 @@ namespace kengine::opengl::shaders {
 		glDrawBuffer(GL_NONE);
 		glReadBuffer(GL_NONE);
 
-		assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+		kengine_assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
 	}
 
 	void ShadowMapShader::run(Entity & e, DirLightComponent & light, const Parameters & params) noexcept {
@@ -85,7 +86,7 @@ namespace kengine::opengl::shaders {
 		glDrawBuffer(GL_NONE);
 		glReadBuffer(GL_NONE);
 
-		assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+		kengine_assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
 	}
 
 	void ShadowMapShader::run(Entity & e, SpotLightComponent & light, const putils::Point3f & pos, const Parameters & params) noexcept {

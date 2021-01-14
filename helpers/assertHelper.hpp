@@ -9,22 +9,26 @@
 #ifdef KENGINE_NDEBUG
 # define kengine_assert(x) (void)0
 # define kengine_assert_with_message(x, message) (void)0
-# define kengine_assert_failed(x) (void)0
+# define kengine_assert_failed(message) (void)0
 # define kengine_debug_break (void)0
 #else
 # include <string>
 
 # ifdef WIN32
+#  include "windows.h"
+#  include "dbghelp.h"
 #  define kengine_debug_break DebugBreak()
 # else
 #  define kengine_debub_break (void)0
 # endif
+
 # define kengine_assert_failed(message) \
 	do {\
 		kengine::assertHelper::assertFailed(__FILE__, __LINE__, message); \
 		if (kengine::assertHelper::isDebuggerPresent()) \
 			kengine_debug_break; \
 	} while(false)
+
 # define kengine_assert_with_message(x, message) \
 	do {\
 		if (!!(x)) \
@@ -33,6 +37,7 @@
 			kengine_assert_failed(message); \
 		kengine_assume(!!(x)); \
 	} while (false)
+
 # define kengine_assert(x) \
 	kengine_assert_with_message(x, #x)
 

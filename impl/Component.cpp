@@ -1,5 +1,6 @@
 #include "Component.hpp"
 #include "ComponentMask.hpp"
+#include "helpers/assertHelper.hpp"
 
 namespace kengine::impl {
 	static void updateHasComponent(EntityID entity, ComponentID component, bool newHasComponent) noexcept {
@@ -12,7 +13,7 @@ namespace kengine::impl {
 		auto updatedMask = oldMask;
 		updatedMask[component] = newHasComponent;
 
-		assert(oldMask != updatedMask);
+		kengine_assert(oldMask != updatedMask);
 
 		if (oldMask != 0) {
 			ReadLock l(state->_archetypesMutex);

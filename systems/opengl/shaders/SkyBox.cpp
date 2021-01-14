@@ -4,6 +4,7 @@
 #include "data/SkyBoxComponent.hpp"
 
 #include "helpers/cameraHelper.hpp"
+#include "helpers/assertHelper.hpp"
 #include "shaderHelper.hpp"
 
 #include "opengl/RAII.hpp"
@@ -70,7 +71,7 @@ namespace kengine::opengl::shaders {
 			if constexpr (std::is_same<putils_typeof(member), SkyBoxComponent::string>()) {
 				int width, height, nrChannels;
 				const auto data = stbi_load(member.c_str(), &width, &height, &nrChannels, 0);
-				assert(data != nullptr);
+				kengine_assert(data != nullptr);
 				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 				stbi_image_free(data);
 				++i;
@@ -153,7 +154,7 @@ namespace kengine::opengl::shaders {
 
 		GLint fbo;
 		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
-		assert(fbo != 0);
+		kengine_assert(fbo != 0);
 
 		shaderHelper::Enable _(GL_BLEND);
 		glBlendEquation(GL_FUNC_ADD);

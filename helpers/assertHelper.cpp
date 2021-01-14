@@ -1,3 +1,5 @@
+#ifndef KENGINE_NDEBUG
+
 #include <unordered_set>
 
 #include "AssertHelper.hpp"
@@ -9,11 +11,6 @@
 #include "lengthof.hpp"
 #include "string.hpp"
 #include "get_call_stack.hpp"
-
-#ifdef _WIN32
-# include "windows.h"
-# include "dbghelp.h"
-#endif
 
 struct AssertInfo {
 	const char * file;
@@ -112,3 +109,5 @@ namespace kengine::assertHelper {
 #endif
 	}
 }
+
+#endif

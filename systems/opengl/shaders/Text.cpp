@@ -8,6 +8,7 @@
 #include "data/TransformComponent.hpp"
 
 #include "helpers/cameraHelper.hpp"
+#include "helpers/assertHelper.hpp"
 #include "shaderHelper.hpp"
 
 #include "ApplyTransparencySrc.hpp"
@@ -126,7 +127,7 @@ namespace kengine::opengl::shaders {
 		: Program(false, putils_nameof(Text))
 	{
 		if (FT_Init_FreeType(&g_ft))
-			assert(false && !"[FreeType] Could not init FreeType\n");
+			kengine_assert_failed("[FreeType] Could not init FreeType");
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 	}
 
@@ -283,7 +284,6 @@ namespace kengine::opengl::shaders {
 						break;
 					default:
 						static_assert(putils::magic_enum::enum_count<TextComponent::Alignment>() == 3);
-						assert(false && !"Unknown text alignment");
 					}
 				}
 

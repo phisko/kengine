@@ -3,6 +3,7 @@
 #include "GlobalState.hpp"
 #include "kengine.hpp"
 #include "functions/OnTerminate.hpp"
+#include "helpers/assertHelper.hpp"
 
 namespace kengine::impl {
 	GlobalState * state = nullptr;
@@ -40,13 +41,13 @@ namespace kengine::impl {
 			ReadLock l(state->_archetypesMutex);
 			for (const auto & archetype : state->_archetypes) {
 				ReadLock l(archetype.mutex);
-				assert(std::find(archetype.entities.begin(), archetype.entities.end(), id) == archetype.entities.end());
+				kengine_assert(std::find(archetype.entities.begin(), archetype.entities.end(), id) == archetype.entities.end());
 			}
 		}
 
 		{
 			ReadLock l(state->_entitiesMutex);
-			assert(id < state->_entities.size());
+			kengine_assert(id < state->_entities.size());
 		}
 #endif
 
