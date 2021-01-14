@@ -2,7 +2,7 @@
 
 Provides a set of Python scripts to execute for an `Entity`.
 
-In Python, all the usual [script functions](../../helpers/scriptLanguageHelper.md) are stored in a `pk` namespace (e.g. `pk.getEntity(id)`).
+In Python, all the usual [script functions](../../helpers/scriptLanguageHelper.md) are stored in a `kengine` namespace (e.g. `pk.getEntity(id)`).
 
 Scripts can use the `pk.self` global variable to access the `Entity` they are attached to.
 
