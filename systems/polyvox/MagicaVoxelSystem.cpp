@@ -22,6 +22,7 @@
 #include "helpers/assertHelper.hpp"
 
 #include "string.hpp"
+#include "concat.hpp"
 #include "Export.hpp"
 #include "file_extension.hpp"
 #include "MagicaVoxel.hpp"
@@ -133,7 +134,7 @@ namespace kengine {
 			static void unserialize(const char * f, ModelDataComponent::Mesh & meshData, MagicaVoxel::ChunkContent::Size & size) noexcept {
 				std::ifstream file(f, std::ofstream::binary);
 				if (!file) {
-					kengine_assert_failed(std::string("[MagicaVoxel] Failed to load ") + f);
+					kengine_assert_failed(putils::concat("[MagicaVoxel] Failed to load '", f, "'"));
 					return;
 				}
 
@@ -181,7 +182,7 @@ namespace kengine {
 			static MeshInfo loadVoxModel(const char * f) noexcept {
 				std::ifstream stream(f, std::ios::binary);
 				if (!stream) {
-					kengine_assert_failed(std::string("[MagicaVoxel] Failed to load ") + f);
+					kengine_assert_failed(putils::concat("[MagicaVoxel] Failed to load '", f, "'"));
 					return MeshInfo{};
 				}
 
@@ -190,14 +191,14 @@ namespace kengine {
 				MagicaVoxel::ChunkHeader main;
 				readFromStream(main, stream);
 				if (!idMatches(main.id, "MAIN")) {
-					kengine_assert_failed(std::string("[MagicaVoxel] Expected 'MAIN' chunk header in ") + f);
+					kengine_assert_failed(putils::concat("[MagicaVoxel] Expected 'MAIN' chunk header in '", f, "'"));
 					return MeshInfo{};
 				}
 
 				MagicaVoxel::ChunkHeader first;
 				readFromStream(first, stream);
 				if (!idMatches(first.id, "SIZE")) {
-					kengine_assert_failed(std::string("[MagicaVoxel] Expected 'SIZE' chunk header in ") + f);
+					kengine_assert_failed(putils::concat("[MagicaVoxel] Expected 'SIZE' chunk header in '", f, "'"));
 					return MeshInfo{};
 				}
 				kengine_assert(first.childrenBytes == 0);
@@ -211,7 +212,7 @@ namespace kengine {
 				MagicaVoxel::ChunkHeader voxelsHeader;
 				readFromStream(voxelsHeader, stream);
 				if (!idMatches(voxelsHeader.id, "XYZI")) {
-					kengine_assert_failed(std::string("[MagicaVoxel] Expected 'XYZI' chunk header in ") + f);
+					kengine_assert_failed(putils::concat("[MagicaVoxel] Expected 'XYZI' chunk header in '", f, "'"));
 					return MeshInfo{};
 				}
 
@@ -267,7 +268,7 @@ namespace kengine {
 			static void serialize(const char * f, const ModelDataComponent & modelData, const MagicaVoxel::ChunkContent::Size & size) noexcept {
 				std::ofstream file(f, std::ofstream::binary | std::ofstream::trunc);
 				if (!file) {
-					kengine_assert_failed(std::string("[MagicaVoxel] Failed to serialize to ") + f);
+					kengine_assert_failed(putils::concat("[MagicaVoxel] Failed to serialize to '", f, "'"));
 					return;
 				}
 

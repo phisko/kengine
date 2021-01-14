@@ -15,6 +15,8 @@
 
 #include "data/NameComponent.hpp"
 
+#include "concat.hpp"
+
 namespace kengine {
 	namespace impl {
 		template<typename T>
@@ -23,7 +25,7 @@ namespace kengine {
 				func();
 			}
 			catch (const std::exception & e) {
-				kengine_assert_failed(std::string("[") + name + "] Error registering [" + putils::reflection::get_class_name<T>() + "]: " + e.what());
+				kengine_assert_failed(putils::concat("[", name, "] Error registering [", putils::reflection::get_class_name<T>(), "]: ", e.what()));
 			}
 		}
 

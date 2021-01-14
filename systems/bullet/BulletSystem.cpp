@@ -27,6 +27,7 @@
 
 #include "helpers/matrixHelper.hpp"
 #include "helpers/skeletonHelper.hpp"
+#include "helpers/assertHelper.hpp"
 
 #include "termcolor.hpp"
 #include "magic_enum.hpp"

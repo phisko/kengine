@@ -15,6 +15,7 @@
 #endif
 
 #include "stb_image.h"
+#include "concat.hpp"
 
 namespace kengine::resourceHelper {
 	EntityID loadTexture(const char * file) noexcept {
@@ -36,7 +37,7 @@ namespace kengine::resourceHelper {
 
 			auto & textureData = e.attach<TextureDataComponent>();
 			textureData.data = stbi_load(file, &textureData.width, &textureData.height, &textureData.components, 0);
-			kengine_assert_with_message(textureData.data != nullptr, putils::string<1024>("Error loading texture file [%s]", file).c_str());
+			kengine_assert_with_message(textureData.data != nullptr, putils::concat("Error loading texture file '", file, "'"));
 			textureData.free = stbi_image_free;
 		};
 
