@@ -18,6 +18,7 @@
 #include "RecastNavMeshComponent.hpp"
 
 #include "lengthof.hpp"
+#include "on_scope_exit.hpp"
 #include "with.hpp"
 
 namespace Flags {
@@ -36,11 +37,11 @@ namespace kengine::recast {
 					for (auto [e, model, modelData, navMesh, _] : entities) {
 						++jobsLeft;
 						threadPool().runTask([&, id = e.id]() noexcept {
+							const auto cleanup = putils::onScopeExit([&] { --jobsLeft; });
 							kengine_assert(navMesh.vertsPerPoly <= DT_VERTS_PER_POLYGON);
 							createRecastMesh(model.file, kengine::entities.get(id), navMesh, modelData);
 							if constexpr (std::is_same<RebuildNavMeshComponent, putils_typeof(_)>())
 								e.detach<RebuildNavMeshComponent>();
-							--jobsLeft;
 						});
 					}
 				};

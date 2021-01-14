@@ -535,7 +535,6 @@ namespace kengine::assimp {
 				e.detach<AssImpModelComponent>();
 			};
 		}
-#pragma endregion
 
 		struct LastFrameMovementComponent {
 			unsigned int anim = (unsigned int)-1;
@@ -551,7 +550,10 @@ namespace kengine::assimp {
 			for (auto [e, instance, skeleton, anim, transform] : entities.with<InstanceComponent, SkeletonComponent, AnimationComponent, TransformComponent>())
 			{
 				++jobsLeft;
+
 				threadPool().runTask([&, id = e.id]() noexcept {
+					const auto cleanup = putils::onScopeExit([&] { --jobsLeft; });
+
 					auto e = entities.get(id);
 
 					const auto & modelEntity = entities.get(instance.model);
@@ -599,7 +601,6 @@ namespace kengine::assimp {
 						}
 						lastFrame = {};
 					}
-					--jobsLeft;
 				});
 			}
 

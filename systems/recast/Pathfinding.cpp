@@ -16,6 +16,7 @@
 #include "RecastNavMeshComponent.hpp"
 
 #include "lengthof.hpp"
+#include "on_scope_exit.hpp"
 
 namespace kengine::recast {
 	void doPathfinding(float deltaTime) noexcept {
@@ -146,6 +147,7 @@ namespace kengine::recast {
 				for (const auto & [environment, crowd, environmentTransform] : entities.with<RecastCrowdComponent, TransformComponent>()) {
 					++jobsLeft;
 					threadPool().runTask([&, environment]() noexcept {
+						const auto cleanup = putils::onScopeExit([&] { --jobsLeft; });
 						const auto & navMesh = instanceHelper::getModel<RecastNavMeshComponent>(environment);
 						const auto environmentInfo = getEnvironmentInfo(environment);
 
@@ -167,7 +169,6 @@ namespace kengine::recast {
 							auto e = entities.get((EntityID)agent->params.userData);
 							readFromAgent(e.get<TransformComponent>(), e.get<PhysicsComponent>(), *agent, environmentInfo);
 						}
-						--jobsLeft;
 					});
 				}
 
