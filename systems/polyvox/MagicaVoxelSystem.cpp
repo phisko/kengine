@@ -13,6 +13,7 @@
 #include "data/InstanceComponent.hpp"
 #include "data/ModelDataComponent.hpp"
 #include "data/ModelComponent.hpp"
+#include "data/TransformComponent.hpp"
 #include "data/GraphicsComponent.hpp"
 #include "data/PolyVoxComponent.hpp"
 #include "data/DefaultShadowComponent.hpp"
@@ -126,7 +127,7 @@ namespace kengine {
 				modelData.init<MeshType::VertexType>();
 				e += std::move(modelData);
 
-				auto & box = e.get<ModelComponent>().boundingBox;
+				auto & box = e.attach<TransformComponent>().boundingBox;
 				box.position.x += size.x / 2.f * box.size.x;
 				box.position.z += size.y / 2.f * box.size.z;
 			}
@@ -260,7 +261,7 @@ namespace kengine {
 			}
 
 			static void applyOffset(Entity & e, const MagicaVoxel::ChunkContent::Size & size) noexcept {
-				auto & box = e.get<ModelComponent>().boundingBox;
+				auto & box = e.attach<TransformComponent>().boundingBox;
 				box.position.x += size.x / 2.f * box.size.x;
 				box.position.z += size.y / 2.f * box.size.z;
 			}

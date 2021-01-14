@@ -34,6 +34,7 @@
 #include "opengl/Program.hpp"
 
 #include "file_extension.hpp"
+#include "on_scope_exit.hpp"
 #include "imgui.h"
 
 namespace kengine::assimp {
@@ -440,7 +441,7 @@ namespace kengine::assimp {
 
 				auto noTranslateTransform = e.get<TransformComponent>();
 				noTranslateTransform.boundingBox.position = putils::Point3f{};
-				const auto modelMatrix = matrixHelper::getModelMatrix(modelEntity.get<ModelComponent>(), noTranslateTransform);
+				const auto modelMatrix = matrixHelper::getModelMatrix(noTranslateTransform, modelEntity.tryGet<TransformComponent>());
 
 				glm::mat4 parentTransform(1.f);
 				const auto nodeAnim = getRootNodeAnim(modelEntity, getAnimation(modelEntity, anim), parentTransform);
@@ -565,7 +566,7 @@ namespace kengine::assimp {
 					auto noTranslateTransform = transform;
 					noTranslateTransform.boundingBox.position = putils::Point3f{ 0.f, 0.f, 0.f };
 
-					const auto modelMatrix = matrixHelper::getModelMatrix(modelEntity.get<ModelComponent>(), noTranslateTransform);
+					const auto modelMatrix = matrixHelper::getModelMatrix(noTranslateTransform, modelEntity.tryGet<TransformComponent>());
 
 					const auto & modelAnims = modelEntity.get<ModelAnimationComponent>();
 					if (anim.currentAnim >= modelAnims.animations.size())

@@ -6,7 +6,6 @@
 #include "data/TransformComponent.hpp"
 #include "data/PolyVoxComponent.hpp"
 #include "data/GraphicsComponent.hpp"
-#include "data/ModelComponent.hpp"
 #include "data/SystemSpecificModelComponent.hpp"
 
 #include "helpers/cameraHelper.hpp"
@@ -101,7 +100,7 @@ namespace kengine {
 			if (!openGL)
 				continue;
 
-			_model = matrixHelper::getModelMatrix(model.get<ModelComponent>(), transform);
+			_model = matrixHelper::getModelMatrix(transform, model.tryGet<TransformComponent>());
 			_entityID = (float)e.id;
 			_color = graphics.color;
 

@@ -92,7 +92,7 @@ namespace kengine::recast {
 				if (mustSave)
 					saveBinaryFile(binaryFile, data, navMesh);
 
-				navMesh.getPath = getPath(e.get<ModelComponent>(), navMesh, recast);
+				navMesh.getPath = getPath(e.tryGet<TransformComponent>(), navMesh, recast);
 			}
 
 			static NavMeshData loadBinaryFile(const char * binaryFile, const NavMeshComponent & navMesh) noexcept {
@@ -441,11 +441,11 @@ namespace kengine::recast {
 				return navMeshQuery;
 			}
 
-			static NavMeshComponent::GetPathFunc getPath(const ModelComponent & model, const NavMeshComponent & navMesh, const RecastNavMeshComponent & recast) noexcept {
-				return [&](const Entity & environment, const putils::Point3f & startWorldSpace, const putils::Point3f & endWorldSpace) {
+			static NavMeshComponent::GetPathFunc getPath(const TransformComponent * modelTransform, const NavMeshComponent & navMesh, const RecastNavMeshComponent & recast) noexcept {
+				return [&, modelTransform](const Entity & environment, const putils::Point3f & startWorldSpace, const putils::Point3f & endWorldSpace) {
 					static const dtQueryFilter filter;
 
-					const auto modelToWorld = matrixHelper::getModelMatrix(model, environment.get<TransformComponent>());
+					const auto modelToWorld = matrixHelper::getModelMatrix(environment.get<TransformComponent>(), modelTransform);
 					const auto worldToModel = glm::inverse(modelToWorld);
 
 					const auto start = matrixHelper::convertToReferencial(startWorldSpace, worldToModel);

@@ -2,7 +2,6 @@
 
 #include "data/LightComponent.hpp"
 #include "data/DefaultShadowComponent.hpp"
-#include "data/ModelComponent.hpp"
 #include "data/InstanceComponent.hpp"
 #include "data/NoShadowComponent.hpp"
 
@@ -33,7 +32,7 @@ namespace kengine::opengl::shaders {
 			if (!openGL)
 				continue;
 
-			_model = matrixHelper::getModelMatrix(model.get<ModelComponent>(), transform);
+			_model = matrixHelper::getModelMatrix(transform, model.tryGet<TransformComponent>());
 			shaderHelper::drawModel(*openGL);
 		}
 	}

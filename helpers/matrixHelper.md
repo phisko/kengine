@@ -33,10 +33,10 @@ Converts `pos` to the referencial given by `conversionMatrix`.
 ### getModelMatrix
 
 ```cpp
-glm::mat4 getModelMatrix(const ModelComponent & model, const TransformComponent & transform) noexcept;
+glm::mat4 getModelMatrix(const TransformComponent & transform, const TransformComponent * model) noexcept;
 ```
 
-Generates a model matrix for `model`, transformed accordingly to `transform`.
+Generates a model matrix for an `Entity`, applying any transformations it may have inherited from its `model`.
 
 ### getProjMatrix, getViewMatrix
 

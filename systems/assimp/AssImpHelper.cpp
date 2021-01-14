@@ -1,7 +1,6 @@
 #include "AssImpHelper.hpp"
 #include "kengine.hpp"
 
-#include "data/ModelComponent.hpp"
 #include "data/SystemSpecificTextureComponent.hpp"
 #include "data/SystemSpecificModelComponent.hpp"
 #include "helpers/matrixHelper.hpp"
@@ -19,7 +18,7 @@ namespace kengine::AssImpHelper {
 				if (!openGL)
 					return;
 
-				uniforms.model = matrixHelper::getModelMatrix(model.get<ModelComponent>(), transform);
+				uniforms.model = matrixHelper::getModelMatrix(transform, model.tryGet<TransformComponent>());
 
 				const bool noSkeleton = skeleton.meshes.empty();
 				if (noSkeleton)

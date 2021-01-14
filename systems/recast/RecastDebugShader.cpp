@@ -137,8 +137,8 @@ namespace kengine {
 			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
-			const auto model = entities.get(instance.model);
-			_model = matrixHelper::getModelMatrix(model.get<ModelComponent>(), transform);
+			const auto model = entities[instance.model];
+			_model = matrixHelper::getModelMatrix(transform, model.tryGet<TransformComponent>());
 
 			const auto & comp = model.get<RecastNavMeshComponent>();
 			duDebugDrawNavMesh(this, *comp.navMesh, 0);

@@ -5,7 +5,6 @@
 
 #include "matrixHelper.hpp"
 
-#include "data/ModelComponent.hpp"
 #include "data/TransformComponent.hpp"
 #include "data/CameraComponent.hpp"
 #include "data/ViewportComponent.hpp"
@@ -40,11 +39,11 @@ namespace kengine::matrixHelper {
 		return { tmp.x, tmp.y, tmp.z };
 	}
 
-	glm::mat4 getModelMatrix(const ModelComponent & modelInfo, const TransformComponent & transform) noexcept {
+	glm::mat4 getModelMatrix(const TransformComponent & transform, const TransformComponent * modelTransform) noexcept {
 		glm::mat4 model(1.f);
 		const auto & centre = transform.boundingBox.position;
 
-		{ // TransformComponent
+		{ // Object
 			model = glm::translate(model, toVec(centre));
 
 			model = glm::rotate(model,
@@ -63,22 +62,22 @@ namespace kengine::matrixHelper {
 			model = glm::scale(model, toVec(transform.boundingBox.size));
 		}
 
-		{ // GraphicsComponent
+		if (modelTransform != nullptr) { // Model
 			model = glm::rotate(model,
-				modelInfo.yaw,
+				modelTransform->yaw,
 				{ 0.f, 1.f, 0.f }
 			);
 			model = glm::rotate(model,
-				modelInfo.pitch,
+				modelTransform->pitch,
 				{ 1.f, 0.f, 0.f }
 			);
 			model = glm::rotate(model,
-				modelInfo.roll,
+				modelTransform->roll,
 				{ 0.f, 0.f, 1.f }
 			);
 
-			model = glm::translate(model, -toVec(modelInfo.boundingBox.position)); // Re-center
-			model = glm::scale(model, toVec(modelInfo.boundingBox.size));
+			model = glm::translate(model, -toVec(modelTransform->boundingBox.position)); // Re-center
+			model = glm::scale(model, toVec(modelTransform->boundingBox.size));
 		}
 
 		return model;

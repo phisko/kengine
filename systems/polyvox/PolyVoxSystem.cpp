@@ -7,7 +7,7 @@
 #include "data/ShaderComponent.hpp"
 #include "data/ModelDataComponent.hpp"
 #include "data/PolyVoxComponent.hpp"
-#include "data/ModelComponent.hpp"
+#include "data/TransformComponent.hpp"
 
 #include "functions/Execute.hpp"
 
@@ -45,7 +45,7 @@ namespace kengine {
 					mesh = buildMesh(std::move(poly.volume));
 
 					const auto & centre = poly.volume.getEnclosingRegion().getCentre();
-					auto & model = e.attach<ModelComponent>();
+					auto & model = e.attach<TransformComponent>();
 					model.boundingBox.position = { (float)centre.getX(), (float)centre.getY(), (float)centre.getZ() };
 
 					ModelDataComponent::Mesh meshData;

@@ -61,11 +61,13 @@ namespace kengine::recast {
 			static EnvironmentInfo getEnvironmentInfo(const Entity & environment) noexcept {
 				EnvironmentInfo ret;
 
-				const auto & model = instanceHelper::getModel<ModelComponent>(environment);
+				const auto modelTransform = instanceHelper::tryGetModel<TransformComponent>(environment);
 				const auto & environmentTransform = environment.get<TransformComponent>();
 
-				ret.environmentScale = model.boundingBox.size * environmentTransform.boundingBox.size;
-				ret.modelToWorld = matrixHelper::getModelMatrix(model, environmentTransform);
+				ret.environmentScale = environmentTransform.boundingBox.size;
+				if (modelTransform)
+					ret.environmentScale *= modelTransform->boundingBox.size;
+				ret.modelToWorld = matrixHelper::getModelMatrix(environmentTransform, modelTransform);
 				ret.worldToModel = glm::inverse(ret.modelToWorld);
 				return ret;
 			}

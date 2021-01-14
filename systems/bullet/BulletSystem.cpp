@@ -157,7 +157,7 @@ namespace kengine::bullet {
 
 			const auto skeleton = e.tryGet<SkeletonComponent>();
 			const auto modelSkeleton = modelEntity.tryGet<ModelSkeletonComponent>();
-			const auto modelComponent = modelEntity.tryGet<ModelComponent>();
+			const auto modelTransform = modelEntity.tryGet<TransformComponent>();
 
 			for (const auto & collider : modelCollider.colliders) {
 				const auto size = collider.boundingBox.size * transform.boundingBox.size;
@@ -194,7 +194,7 @@ namespace kengine::bullet {
 						break;
 					}
 				}
-				comp.shape.addChildShape(helpers::toBullet(transform, collider, skeleton, modelSkeleton, modelComponent), shape);
+				comp.shape.addChildShape(helpers::toBullet(transform, collider, skeleton, modelSkeleton, modelTransform), shape);
 			}
 
 			btVector3 localInertia{ 0.f, 0.f, 0.f }; {
@@ -250,11 +250,11 @@ namespace kengine::bullet {
 			const auto skeleton = e.tryGet<SkeletonComponent>();
 			const auto modelSkeleton = modelEntity.tryGet<ModelSkeletonComponent>();
 			if (skeleton && modelSkeleton) {
-				const auto & modelComponent = modelEntity.get<ModelComponent>();
+				const auto modelTransform = modelEntity.tryGet<TransformComponent>();
 
 				int i = 0;
 				for (const auto & collider : modelEntity.get<ModelColliderComponent>().colliders) {
-					comp.shape.updateChildTransform(i, helpers::toBullet(transform, collider, skeleton, modelSkeleton, &modelComponent));
+					comp.shape.updateChildTransform(i, helpers::toBullet(transform, collider, skeleton, modelSkeleton, modelTransform));
 					++i;
 				}
 			}
@@ -325,7 +325,7 @@ namespace kengine::bullet {
 				return ret;
 			}
 
-			static btTransform toBullet(const TransformComponent & parent, const ModelColliderComponent::Collider & collider, const SkeletonComponent * skeleton, const ModelSkeletonComponent * modelSkeleton, const ModelComponent * model) noexcept {
+			static btTransform toBullet(const TransformComponent & parent, const ModelColliderComponent::Collider & collider, const SkeletonComponent * skeleton, const ModelSkeletonComponent * modelSkeleton, const TransformComponent * modelTransform) noexcept {
 				glm::mat4 parentMat(1.f);
 				parentMat = glm::scale(parentMat, { -1.f, 1.f, -1.f });
 
@@ -335,7 +335,10 @@ namespace kengine::bullet {
 
 					const auto worldSpaceBone = skeletonHelper::getBoneMatrix(collider.boneName.c_str(), *skeleton, *modelSkeleton);
 					const auto pos = matrixHelper::getPosition(worldSpaceBone);
-					parentMat = glm::translate(parentMat, toVec(pos * model->boundingBox.size * parent.boundingBox.size));
+					auto parentScale = pos * parent.boundingBox.size;
+					if (modelTransform != nullptr)
+						parentScale *= modelTransform->boundingBox.size;
+					parentMat = glm::translate(parentMat, toVec(parentScale));
 					parentMat = glm::translate(parentMat, -toVec(pos));
 					parentMat *= worldSpaceBone;
 				}
