@@ -1,6 +1,5 @@
 #pragma once
 
-#include <assert.h>
 #include "impl/ID.hpp"
 #include "impl/ComponentMask.hpp"
 #include "reflection.hpp"

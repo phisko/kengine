@@ -1,16 +1,17 @@
 #include "Entity.hpp"
 #include "impl/Component.hpp"
+#include "helpers/assertHelper.hpp"
 
 namespace kengine {
 	template<typename T>
 	T & Entity::get() noexcept {
-		assert("No such component" && has<T>());
+		kengine_assert_with_message(has<T>(), "No such component");
 		return impl::Component<T>::get(id);
 	}
 
 	template<typename T>
 	const T & Entity::get() const noexcept {
-		assert("No such component" && has<T>());
+		kengine_assert_with_message(has<T>(), "No such component");
 		return impl::Component<T>::get(id);
 	}
 
