@@ -14,7 +14,7 @@
 #include "imgui.h"
 #include "with.hpp"
 
-namespace kengine::glfw {
+namespace kengine {
 	namespace Input {
 		static InputBufferComponent * g_buffer;
 
@@ -73,114 +73,110 @@ namespace kengine::glfw {
 		}
 	}
 
-	struct impl {
-		static void init(Entity & e) noexcept {
-			e += functions::Execute{ glfw::impl::execute };
-			e += functions::OnEntityCreated{ glfw::impl::onEntityCreated };
-			e += functions::OnTerminate{ glfw::impl::terminate };
-			e += functions::OnMouseCaptured{ glfw::impl::onMouseCaptured };
-		
-			for (const auto & [e, buffer] : entities.with<InputBufferComponent>()) {
-				Input::g_buffer = &buffer;
-				break;
-			}
+	EntityCreator * GLFWSystem() noexcept {
+		struct impl {
+			static void init(Entity & e) noexcept {
+				e += functions::Execute{ execute };
+				e += functions::OnEntityCreated{ onEntityCreated };
+				e += functions::OnTerminate{ terminate };
+				e += functions::OnMouseCaptured{ onMouseCaptured };
 
-			glfwInit();
-			execute(0.f); // init already existing windows
-		}
-
-		static void terminate() noexcept {
-			glfwTerminate();
-		}
-
-		static void onMouseCaptured(EntityID window, bool captured) noexcept {
-			const auto inputMode = captured ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL;
-
-			if (captured)
-				ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NoMouse;
-			else
-				ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
-
-			if (window == INVALID_ID) {
-				for (const auto & [e, glfw] : entities.with<GLFWWindowComponent>())
-					glfwSetInputMode(glfw.window.get(), GLFW_CURSOR, inputMode);
-				return;
-			}
-
-			const auto glfw = entities.get(window).tryGet<GLFWWindowComponent>();
-			if (glfw == nullptr)
-				return;
-
-			glfwSetInputMode(glfw->window.get(), GLFW_CURSOR, inputMode);
-		}
-
-		static void onEntityCreated(Entity & e) noexcept {
-			const auto window = e.tryGet<WindowComponent>();
-			if (!window)
-				return;
-
-			const auto initGlfw = e.tryGet<GLFWWindowInitComponent>();
-			if (!initGlfw)
-				return;
-
-			createWindow(e, *window, *initGlfw);
-		}
-
-		static void execute(float deltaTime) noexcept {
-			for (const auto & [e, window, glfw] : entities.with<WindowComponent, GLFWWindowComponent>())
-				if (glfwWindowShouldClose(glfw.window.get())) {
-					if (window.shutdownOnClose)
-						stopRunning();
-					else
-						entities.remove(e.id);
+				for (const auto & [e, buffer] : entities.with<InputBufferComponent>()) {
+					Input::g_buffer = &buffer;
+					break;
 				}
 
-			for (auto [e, window, initGlfw, noGLFW] : entities.with<WindowComponent, GLFWWindowInitComponent, no<GLFWWindowComponent>>()) {
-				createWindow(e, window, initGlfw);
-				e.detach<GLFWWindowInitComponent>();
+				glfwInit();
+				execute(0.f); // init already existing windows
 			}
-		}
 
-		static void createWindow(Entity & e, WindowComponent & window, const GLFWWindowInitComponent & initGlfw) noexcept {
-			auto & glfwComp = e.attach<GLFWWindowComponent>();
+			static void terminate() noexcept {
+				glfwTerminate();
+			}
 
-			if (initGlfw.setHints)
-				initGlfw.setHints();
+			static void onMouseCaptured(EntityID window, bool captured) noexcept {
+				const auto inputMode = captured ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL;
 
-			// TODO: depend on g_windowComponent->fullscreen
-			glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+				if (captured)
+					ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NoMouse;
+				else
+					ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
 
-			glfwComp.window = glfwCreateWindow((int)window.size.x, (int)window.size.y, window.name, nullptr, nullptr);
-			// Desired size may not have been available, update to actual size
-			int width, height;
-			glfwGetWindowSize(glfwComp.window.get(), &width, &height);
-			window.size = { (unsigned int)width, (unsigned int)height };
-			glfwSetWindowAspectRatio(glfwComp.window.get(), window.size.x, window.size.y);
+				if (window == INVALID_ID) {
+					for (const auto & [e, glfw] : entities.with<GLFWWindowComponent>())
+						glfwSetInputMode(glfw.window.get(), GLFW_CURSOR, inputMode);
+					return;
+				}
 
-			glfwMakeContextCurrent(glfwComp.window.get());
-			glfwSetWindowSizeCallback(glfwComp.window.get(), [](auto window, int width, int height) noexcept {
-				const auto id = (EntityID)glfwGetWindowUserPointer(window);
-				auto & comp = entities.get(id).get<WindowComponent>();
-				comp.size = { (unsigned int)width, (unsigned int)height };
-			});
+				const auto glfw = entities.get(window).tryGet<GLFWWindowComponent>();
+				if (glfw == nullptr)
+					return;
 
-			glfwSetMouseButtonCallback(glfwComp.window.get(), Input::onClick);
-			glfwSetCursorPosCallback(glfwComp.window.get(), Input::onMouseMove);
-			glfwSetScrollCallback(glfwComp.window.get(), Input::onScroll);
-			glfwSetKeyCallback(glfwComp.window.get(), Input::onKey);
+				glfwSetInputMode(glfw->window.get(), GLFW_CURSOR, inputMode);
+			}
 
-			glfwSetWindowUserPointer(glfwComp.window.get(), (void *)e.id);
+			static void onEntityCreated(Entity & e) noexcept {
+				const auto window = e.tryGet<WindowComponent>();
+				if (!window)
+					return;
 
-			if (initGlfw.onWindowCreated)
-				initGlfw.onWindowCreated();
-		}
-	};
-}
+				const auto initGlfw = e.tryGet<GLFWWindowInitComponent>();
+				if (!initGlfw)
+					return;
 
-namespace kengine {
-	EntityCreator * GLFWSystem() noexcept {
-		return [](Entity & e) noexcept {
-			glfw::impl::init(e);
+				createWindow(e, *window, *initGlfw);
+			}
+
+			static void execute(float deltaTime) noexcept {
+				for (const auto & [e, window, glfw] : entities.with<WindowComponent, GLFWWindowComponent>())
+					if (glfwWindowShouldClose(glfw.window.get())) {
+						if (window.shutdownOnClose)
+							stopRunning();
+						else
+							entities.remove(e.id);
+					}
+
+				for (auto [e, window, initGlfw, noGLFW] : entities.with<WindowComponent, GLFWWindowInitComponent, no<GLFWWindowComponent>>()) {
+					createWindow(e, window, initGlfw);
+					e.detach<GLFWWindowInitComponent>();
+				}
+			}
+
+			static void createWindow(Entity & e, WindowComponent & window, const GLFWWindowInitComponent & initGlfw) noexcept {
+				auto & glfwComp = e.attach<GLFWWindowComponent>();
+
+				if (initGlfw.setHints)
+					initGlfw.setHints();
+
+				// TODO: depend on g_windowComponent->fullscreen
+				glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+
+				glfwComp.window = glfwCreateWindow((int)window.size.x, (int)window.size.y, window.name, nullptr, nullptr);
+				// Desired size may not have been available, update to actual size
+				int width, height;
+				glfwGetWindowSize(glfwComp.window.get(), &width, &height);
+				window.size = { (unsigned int)width, (unsigned int)height };
+				glfwSetWindowAspectRatio(glfwComp.window.get(), window.size.x, window.size.y);
+
+				glfwMakeContextCurrent(glfwComp.window.get());
+				glfwSetWindowSizeCallback(glfwComp.window.get(), [](auto window, int width, int height) noexcept {
+					const auto id = (EntityID)glfwGetWindowUserPointer(window);
+					auto & comp = entities.get(id).get<WindowComponent>();
+					comp.size = { (unsigned int)width, (unsigned int)height };
+					});
+
+				glfwSetMouseButtonCallback(glfwComp.window.get(), Input::onClick);
+				glfwSetCursorPosCallback(glfwComp.window.get(), Input::onMouseMove);
+				glfwSetScrollCallback(glfwComp.window.get(), Input::onScroll);
+				glfwSetKeyCallback(glfwComp.window.get(), Input::onKey);
+
+				glfwSetWindowUserPointer(glfwComp.window.get(), (void *)e.id);
+
+				if (initGlfw.onWindowCreated)
+					initGlfw.onWindowCreated();
+			}
 		};
+
+		return impl::init;
 	}
 }
