@@ -2,7 +2,6 @@
 
 #include "GlobalState.hpp"
 #include "kengine.hpp"
-#include "functions/OnTerminate.hpp"
 #include "helpers/assertHelper.hpp"
 
 namespace kengine::impl {
@@ -11,11 +10,6 @@ namespace kengine::impl {
 	GlobalState::GlobalState(size_t threads) noexcept
 		: threadPool(threads)
 	{}
-
-	GlobalState::~GlobalState() noexcept {
-		for (const auto & [e, func] : entities.with<functions::OnTerminate>())
-			func();
-	}
 
 	Entity alloc() noexcept {
 		{

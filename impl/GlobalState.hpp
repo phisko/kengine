@@ -19,7 +19,6 @@ namespace kengine {
 namespace kengine::impl {
 	struct GlobalState {
 		GlobalState(size_t threads) noexcept;
-		~GlobalState() noexcept;
 
 		putils::ThreadPool threadPool;
 		std::atomic<bool> running = true;

@@ -1,5 +1,6 @@
 #include "kengine.hpp"
 #include "remove_if.hpp"
+#include "functions/OnTerminate.hpp"
 
 namespace kengine {
 	Entities entities;
@@ -17,7 +18,8 @@ namespace kengine {
 	}
 
 	void terminate() noexcept {
-		delete impl::state;
+		for (const auto & [e, func] : entities.with<functions::OnTerminate>())
+			func();
 	}
 
 	putils::ThreadPool & threadPool() noexcept {
