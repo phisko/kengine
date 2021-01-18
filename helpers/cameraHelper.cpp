@@ -9,7 +9,7 @@ namespace kengine::cameraHelper {
 	ViewportInfo getViewportForPixel(EntityID windowID, const putils::Point2ui & pixel) noexcept {
 		ViewportInfo ret;
 
-		const auto & window = entities.get(windowID).get<WindowComponent>();
+		const auto & window = entities[windowID].get<WindowComponent>();
 
 		float highestZ = -FLT_MAX;
 		for (const auto & [e, viewport] : entities.with<ViewportComponent>()) {

@@ -38,7 +38,7 @@ namespace kengine {
 			static void onEntityRemoved(Entity & e) noexcept {
 				const auto agent = e.tryGet<RecastAgentComponent>();
 				if (agent) {
-					auto environment = entities.get(agent->crowd);
+					auto environment = entities[agent->crowd];
 					environment.get<RecastCrowdComponent>().crowd->removeAgent(agent->index);
 				}
 

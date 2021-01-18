@@ -97,7 +97,7 @@ namespace kengine::imgui_entity_selector {
 				if (ImGui::MenuItem("Select"))
 					ret = true;
 				if (ImGui::MenuItem("Remove")) {
-					entities.remove(e);
+					entities -= e;
 					return false;
 				}
 				ImGui::EndPopup();

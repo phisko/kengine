@@ -12,7 +12,7 @@ namespace kengine::AssImpHelper {
 	void drawModel(const InstanceComponent & instance, const TransformComponent & transform, const SkeletonComponent & skeleton, bool useTextures, const Uniforms & uniforms) noexcept {
 		struct impl {
 			static void drawModel(const InstanceComponent & instance, const TransformComponent & transform, const SkeletonComponent & skeleton, bool useTextures, const Uniforms & uniforms) noexcept {
-				const auto model = entities.get(instance.model);
+				const auto model = entities[instance.model];
 
 				const auto openGL = model.tryGet<SystemSpecificModelComponent<putils::gl::Mesh>>();
 				if (!openGL)
@@ -73,7 +73,7 @@ namespace kengine::AssImpHelper {
 
 			static void bindTexture(size_t texture, EntityID modelID) noexcept {
 				glActiveTexture((GLenum)(GL_TEXTURE0 + texture));
-				const auto modelEntity = entities.get(modelID);
+				const auto modelEntity = entities[modelID];
 				const auto openGL = modelEntity.tryGet<SystemSpecificTextureComponent<putils::gl::Texture>>();
 				if (openGL)
 					glBindTexture(GL_TEXTURE_2D, openGL->texture);

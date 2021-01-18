@@ -166,7 +166,7 @@ namespace kengine {
 
 			static ModelDataComponent::FreeFunc release(EntityID id) noexcept {
 				return [id] {
-					auto e = entities.get(id);
+					auto e = entities[id];
 					const auto model = e.tryGet<MagicaVoxelModelComponent>();
 					if (model) {
 						model->mesh.clear();

@@ -30,7 +30,7 @@ namespace kengine::recast {
 
 			static void removeOldAgents() noexcept {
 				for (auto [e, agent, noPathfinding] : entities.with<RecastAgentComponent, no<PathfindingComponent>>()) {
-					auto environment = entities.get(agent.crowd);
+					auto environment = entities[agent.crowd];
 					auto & crowd = environment.get<RecastCrowdComponent>();
 					crowd.crowd->removeAgent(agent.index);
 					e.detach<RecastAgentComponent>();
@@ -42,7 +42,7 @@ namespace kengine::recast {
 					if (pathfinding.environment == INVALID_ID)
 						continue;
 
-					auto environment = entities.get(pathfinding.environment);
+					auto environment = entities[pathfinding.environment];
 
 					auto crowd = environment.tryGet<RecastCrowdComponent>();
 					if (!crowd)
@@ -129,11 +129,11 @@ namespace kengine::recast {
 					if (pathfinding.environment == agent.crowd)
 						continue;
 
-					auto oldEnvironment = entities.get(agent.crowd);
+					auto oldEnvironment = entities[agent.crowd];
 					auto & oldCrowd = oldEnvironment.get<RecastCrowdComponent>();
 					oldCrowd.crowd->removeAgent(agent.index);
 
-					auto newEnvironment = entities.get(pathfinding.environment);
+					auto newEnvironment = entities[pathfinding.environment];
 					auto newCrowd = newEnvironment.tryGet<RecastCrowdComponent>();
 					if (!newCrowd)
 						newCrowd = &attachCrowdComponent(newEnvironment);
@@ -159,7 +159,7 @@ namespace kengine::recast {
 						// Overwrite agent with user-updated components
 						for (int i = 0; i < nbAgents; ++i) {
 							const auto agent = activeAgents[i];
-							auto e = entities.get((EntityID)agent->params.userData);
+							auto e = entities[(EntityID)agent->params.userData];
 							writeToAgent(e, e.get<TransformComponent>(), e.get<PathfindingComponent>(), environmentInfo, navMesh, crowd);
 						}
 
@@ -168,7 +168,7 @@ namespace kengine::recast {
 						// Update user components with agent info
 						for (int i = 0; i < nbAgents; ++i) {
 							const auto agent = activeAgents[i];
-							auto e = entities.get((EntityID)agent->params.userData);
+							auto e = entities[(EntityID)agent->params.userData];
 							readFromAgent(e.get<TransformComponent>(), e.get<PhysicsComponent>(), *agent, environmentInfo);
 						}
 					});

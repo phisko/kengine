@@ -381,7 +381,7 @@ namespace kengine::assimp {
 				const auto animEntity = loadAnimFile(f.c_str());
 				assimpAnimFiles.animEntities.push_back(animEntity);
 
-				const auto & assimpAnim = entities.get(animEntity.id).get<AssImpAnimFileComponent>();
+				const auto & assimpAnim = entities[animEntity.id].get<AssImpAnimFileComponent>();
 				addAnims(f.c_str(), assimpAnim.importer->GetScene(), anims);
 			}
 
@@ -437,7 +437,7 @@ namespace kengine::assimp {
 			};
 
 			const auto getExtractorParams = [&assimpAnimFiles, modelID = e.id](const Entity & e, size_t anim) noexcept {
-				const auto modelEntity = entities.get(modelID);
+				const auto modelEntity = entities[modelID];
 
 				auto noTranslateTransform = e.get<TransformComponent>();
 				noTranslateTransform.boundingBox.position = putils::Point3f{};
@@ -482,7 +482,7 @@ namespace kengine::assimp {
 				const auto maxAnimInEntity = i + e.nbAnims;
 				if (anim < maxAnimInEntity) {
 					const auto animIndex = anim - i;
-					return entities.get(e.id).get<AssImpAnimFileComponent>().importer->GetScene()->mAnimations[animIndex];
+					return entities[e.id].get<AssImpAnimFileComponent>().importer->GetScene()->mAnimations[animIndex];
 				}
 				i = maxAnimInEntity;
 			}
@@ -530,7 +530,7 @@ namespace kengine::assimp {
 
 		static ModelDataComponent::FreeFunc release(EntityID id) noexcept {
 			return [id] {
-				auto e = entities.get(id);
+				auto e = entities[id];
 				auto & model = e.get<AssImpModelComponent>(); // previous attach hasn't been processed yet, so `get` would assert
 				model.importer->FreeScene();
 				e.detach<AssImpModelComponent>();
@@ -555,9 +555,9 @@ namespace kengine::assimp {
 				threadPool().runTask([&, id = e.id]() noexcept {
 					const auto cleanup = putils::onScopeExit([&] { --jobsLeft; });
 
-					auto e = entities.get(id);
+					auto e = entities[id];
 
-					const auto & modelEntity = entities.get(instance.model);
+					const auto & modelEntity = entities[instance.model];
 					if (!modelEntity.has<AssImpModelSkeletonComponent>())
 						return;
 

@@ -129,7 +129,7 @@ namespace kengine {
 	static void drawObject(const putils::gl::Program::Parameters & params, const GraphicsComponent & graphics, const InstanceComponent & instance, const TransformComponent & transform, Uniforms uniforms, const SpriteComponent2D * comp) noexcept {
 		uniforms.color = graphics.color;
 
-		const auto modelEntity = entities.get(instance.model);
+		const auto modelEntity = entities[instance.model];
 		const auto texture = modelEntity.tryGet<SystemSpecificTextureComponent<putils::gl::Texture>>();
 		if (!texture)
 			return;

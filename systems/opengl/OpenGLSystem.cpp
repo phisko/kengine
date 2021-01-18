@@ -134,7 +134,7 @@ namespace kengine::opengl {
 
 			window.comp->assignedSystem = "OpenGL";
 
-			auto e = entities.get(window.id);
+			auto e = entities[window.id];
 			e += GLFWWindowInitComponent{
 				.setHints = []() noexcept {
 					glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -146,7 +146,7 @@ namespace kengine::opengl {
 			#endif
 				},
 				.onWindowCreated = []() noexcept {
-					window.glfw = &entities.get(window.id).get<GLFWWindowComponent>();
+					window.glfw = &entities[window.id].get<GLFWWindowComponent>();
 					glewExperimental = true;
 					const bool ret = glewInit();
 					kengine_assert(ret == GLEW_OK);
@@ -174,7 +174,7 @@ namespace kengine::opengl {
 		}
 
 		static void initImGui() noexcept {
-			entities.get(window.id) += ImGuiContextComponent{
+			entities[window.id] += ImGuiContextComponent{
 				ImGui::CreateContext()
 			};
 
@@ -682,7 +682,7 @@ namespace kengine::opengl {
 			if (viewportInfo.camera == INVALID_ID)
 				return ret;
 
-			auto camera = entities.get(viewportInfo.camera);
+			auto camera = entities[viewportInfo.camera];
 			const auto gBuffer = camera.tryGet<GBufferComponent>();
 			if (!gBuffer)
 				return ret;

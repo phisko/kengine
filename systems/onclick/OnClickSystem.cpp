@@ -22,7 +22,7 @@ namespace kengine::onclick {
 				if (id == INVALID_ID)
 					continue;
 
-				const auto e = entities.get(id);
+				const auto e = entities[id];
 
 				const auto onClick = e.tryGet<OnClickComponent>();
 				if (onClick)

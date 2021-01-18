@@ -22,18 +22,18 @@ namespace kengine::scriptLanguageHelper {
 
 		registerFunction("removeEntity",
 			function<void(Entity)>(
-				[](Entity go) { entities.remove(go); }
+				[](Entity go) { entities -= go; }
 			)
 		);
 		registerFunction("removeEntityById",
 			function<void(EntityID id)>(
-				[](EntityID id) { entities.remove(id); }
+				[](EntityID id) { entities -= id; }
 			)
 		);
 
 		registerFunction("getEntity",
 			function<Entity(EntityID id)>(
-				[](EntityID id) { return entities.get(id); }
+				[](EntityID id) { return entities[id]; }
 			)
 		);
 

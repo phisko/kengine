@@ -4,7 +4,7 @@ namespace kengine::instanceHelper {
 	template<typename Comp>
 	bool modelHas(const InstanceComponent & instance) noexcept {
 		kengine_assert(instance.model != INVALID_ID);
-		const auto model = entities.get(instance.model);
+		const auto model = entities[instance.model];
 		return model.has<Comp>();
 	}
 
@@ -16,7 +16,7 @@ namespace kengine::instanceHelper {
 	template<typename Comp>
 	const Comp & getModel(const InstanceComponent & instance) noexcept {
 		kengine_assert(instance.model != INVALID_ID);
-		const auto model = entities.get(instance.model);
+		const auto model = entities[instance.model];
 		return model.get<Comp>();
 	}
 
@@ -28,7 +28,7 @@ namespace kengine::instanceHelper {
 	template<typename Comp>
 	const Comp * tryGetModel(const InstanceComponent & instance) noexcept {
 		kengine_assert(instance.model != INVALID_ID);
-		const auto model = entities.get(instance.model);
+		const auto model = entities[instance.model];
 		return model.tryGet<Comp>();
 	}
 

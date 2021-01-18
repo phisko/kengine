@@ -95,7 +95,7 @@ namespace kengine {
 			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
-			const auto model = entities.get(instance.model);
+			const auto model = entities[instance.model];
 			const auto openGL = model.tryGet<SystemSpecificModelComponent<putils::gl::Mesh>>();
 			if (!openGL)
 				continue;

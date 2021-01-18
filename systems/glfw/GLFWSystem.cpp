@@ -108,7 +108,7 @@ namespace kengine {
 					return;
 				}
 
-				const auto glfw = entities.get(window).tryGet<GLFWWindowComponent>();
+				const auto glfw = entities[window].tryGet<GLFWWindowComponent>();
 				if (glfw == nullptr)
 					return;
 
@@ -133,7 +133,7 @@ namespace kengine {
 						if (window.shutdownOnClose)
 							stopRunning();
 						else
-							entities.remove(e.id);
+							entities -= e.id;
 					}
 
 				for (auto [e, window, initGlfw, noGLFW] : entities.with<WindowComponent, GLFWWindowInitComponent, no<GLFWWindowComponent>>()) {
@@ -161,7 +161,7 @@ namespace kengine {
 				glfwMakeContextCurrent(glfwComp.window.get());
 				glfwSetWindowSizeCallback(glfwComp.window.get(), [](auto window, int width, int height) noexcept {
 					const auto id = (EntityID)glfwGetWindowUserPointer(window);
-					auto & comp = entities.get(id).get<WindowComponent>();
+					auto & comp = entities[id].get<WindowComponent>();
 					comp.size = { (unsigned int)width, (unsigned int)height };
 					});
 

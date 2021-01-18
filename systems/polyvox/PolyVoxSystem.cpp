@@ -63,7 +63,7 @@ namespace kengine {
 
 			static ModelDataComponent::FreeFunc FreePolyVoxMeshData(EntityID id) noexcept {
 				return [id]() noexcept {
-					auto e = entities.get(id);
+					auto e = entities[id];
 					auto & mesh = e.attach<PolyVoxMeshContainerComponent>().mesh; // previous `attach` hasn't been processed yet, so `get` would assert
 					mesh.clear();
 					e.detach<PolyVoxMeshContainerComponent>();

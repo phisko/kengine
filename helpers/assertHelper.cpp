@@ -60,7 +60,7 @@ namespace kengine::assertHelper {
 							ImGui::EndChild();
 
 							if (ImGui::Button("Skip"))
-								entities.remove(id);
+								entities -= id;
 							ImGui::SameLine();
 							if (ImGui::Button("Ignore"))
 								ignore(info.file, info.line);
@@ -71,7 +71,7 @@ namespace kengine::assertHelper {
 						ImGui::End();
 
 						if (!open)
-							entities.remove(id);
+							entities -= id;
 					} };
 				};
 
@@ -85,7 +85,7 @@ namespace kengine::assertHelper {
 						toRemove.push_back(e.id);
 
 				for (const auto id : toRemove)
-					kengine::entities.remove(id);
+					kengine::entities -= id;
 			}
 
 			static bool isIgnored(const char * file, int line) noexcept {

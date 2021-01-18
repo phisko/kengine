@@ -39,7 +39,7 @@ namespace kengine::recast {
 						threadPool().runTask([&, id = e.id]() noexcept {
 							const auto cleanup = putils::onScopeExit([&] { --jobsLeft; });
 							kengine_assert(navMesh.vertsPerPoly <= DT_VERTS_PER_POLYGON);
-							createRecastMesh(model.file, kengine::entities.get(id), navMesh, modelData);
+							createRecastMesh(model.file, kengine::entities[id], navMesh, modelData);
 							if constexpr (std::is_same<RebuildNavMeshComponent, putils_typeof(_)>())
 								e.detach<RebuildNavMeshComponent>();
 						});

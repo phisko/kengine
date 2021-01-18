@@ -110,14 +110,14 @@ namespace kengine::bullet {
 
 		static void execute(float deltaTime) noexcept {
 			for (auto [e, instance, transform, physics, comp] : entities.with<InstanceComponent, TransformComponent, PhysicsComponent, BulletPhysicsComponent>()) {
-				const auto model = entities.get(instance.model);
+				const auto model = entities[instance.model];
 				if (!model.has<ModelColliderComponent>())
 					continue;
 				updateBulletComponent(e, comp, transform, physics, model);
 			}
 
 			for (auto [e, instance, transform, physics, noComp] : entities.with<InstanceComponent, TransformComponent, PhysicsComponent, no<BulletPhysicsComponent>>()) {
-				const auto model = entities.get(instance.model);
+				const auto model = entities[instance.model];
 				if (!model.has<ModelColliderComponent>())
 					continue;
 				addBulletComponent(e, transform, physics, model);
@@ -272,8 +272,8 @@ namespace kengine::bullet {
 
 					const auto id1 = objectA->getUserIndex();
 					const auto id2 = objectB->getUserIndex();
-					auto e1 = entities.get(id1);
-					auto e2 = entities.get(id2);
+					auto e1 = entities[id1];
+					auto e2 = entities[id2];
 					onCollision(e1, e2);
 				}
 		}
@@ -294,7 +294,7 @@ namespace kengine::bullet {
 				btScalar addSingleResult(btManifoldPoint & cp, const btCollisionObjectWrapper * colObj0Wrap, int partId0, int index0, const btCollisionObjectWrapper * colObj1Wrap, int partId1, int index1) final {
 					kengine_assert(colObj1Wrap->m_collisionObject == &ghost);
 					const auto id = colObj0Wrap->m_collisionObject->getUserIndex();
-					func(entities.get(id));
+					func(entities[id]);
 					return 1.f;
 				}
 
@@ -374,7 +374,7 @@ namespace kengine::bullet {
 			}
 
 		private:
-			DebugGraphicsComponent & getDebugComponent() noexcept { return entities.get(_debugEntity).get<DebugGraphicsComponent>(); }
+			DebugGraphicsComponent & getDebugComponent() noexcept { return entities[_debugEntity].get<DebugGraphicsComponent>(); }
 
 			void drawLine(const btVector3 & from, const btVector3 & to, const btVector3 & color) noexcept override {
 				auto & comp = getDebugComponent();
