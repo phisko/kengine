@@ -76,7 +76,7 @@ namespace kengine::matrixHelper {
 				{ 0.f, 0.f, 1.f }
 			);
 
-			model = glm::translate(model, -toVec(modelTransform->boundingBox.position)); // Re-center
+			model = glm::translate(model, toVec(modelTransform->boundingBox.position)); // Re-center
 			model = glm::scale(model, toVec(modelTransform->boundingBox.size));
 		}
 

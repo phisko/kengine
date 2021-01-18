@@ -128,8 +128,8 @@ namespace kengine {
 				e += std::move(modelData);
 
 				auto & box = e.attach<TransformComponent>().boundingBox;
-				box.position.x += size.x / 2.f * box.size.x;
-				box.position.z += size.y / 2.f * box.size.z;
+				box.position.x -= size.x / 2.f * box.size.x;
+				box.position.z -= size.y / 2.f * box.size.z;
 			}
 
 			static void unserialize(const char * f, ModelDataComponent::Mesh & meshData, MagicaVoxel::ChunkContent::Size & size) noexcept {
@@ -262,8 +262,8 @@ namespace kengine {
 
 			static void applyOffset(Entity & e, const MagicaVoxel::ChunkContent::Size & size) noexcept {
 				auto & box = e.attach<TransformComponent>().boundingBox;
-				box.position.x += size.x / 2.f * box.size.x;
-				box.position.z += size.y / 2.f * box.size.z;
+				box.position.x -= size.x / 2.f * box.size.x;
+				box.position.z -= size.y / 2.f * box.size.z;
 			}
 
 			static void serialize(const char * f, const ModelDataComponent & modelData, const MagicaVoxel::ChunkContent::Size & size) noexcept {
