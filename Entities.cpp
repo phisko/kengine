@@ -22,12 +22,14 @@ namespace kengine {
 		for (const auto & [_, func] : with<functions::OnEntityRemoved>())
 			func(e);
 
+		size_t componentCount;
 		{
 			impl::ReadLock l(impl::state->_componentsMutex);
-			for (size_t i = 0; i < impl::state->_components.size(); ++i)
-				if (e.componentMask[i])
-					impl::state->_components[i]->reset(id);
-		}
+			componentCount = impl::state->_components.size();
+		} // Avoid having the lock active while destroying components, as they might need to access new component types which would need to create new metadata
+		for (size_t i = 0; i < componentCount; ++i)
+			if (e.componentMask[i])
+				impl::state->_components[i]->reset(id);
 
 		impl::ComponentMask mask;
 		{
