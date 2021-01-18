@@ -21,6 +21,8 @@ Creates an `Entity` and passes it to `postCreate`, which can be used to attach `
 ```cpp
 void remove(Entity e) noexcept;
 void remove(EntityID id) noexcept;
+void operator-=(Entity e) noexcept;
+void operator-=(EntityID id) noexcept;
 ```
 
 Removes an `Entity`, and calls [OnEntityRemoved](components/functions/OnEntityRemoved.md) on all `Entities` which have it.

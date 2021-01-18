@@ -58,6 +58,14 @@ namespace kengine {
 		impl::state->_freeList = id;
 	}
 
+	void Entities::operator-=(Entity e) noexcept {
+		remove(e.id);
+	}
+
+	void Entities::operator-=(EntityID id) noexcept {
+		remove(id);
+	}
+
 	void Entities::setActive(Entity e, bool active) noexcept {
 		setActive(e.id, active);
 	}

@@ -9,18 +9,19 @@ namespace kengine {
 	public:
 		template<typename Func> // Func: EntityCreator
 		Entity create(Func && postCreate) noexcept;
+		template<typename Func>
+		Entity operator+=(Func && postCreate) noexcept;
 
 		void remove(Entity e) noexcept;
 		void remove(EntityID id) noexcept;
+		void operator-=(Entity e) noexcept;
+		void operator-=(EntityID id) noexcept;
 
 		Entity get(EntityID id) noexcept;
 		Entity operator[](EntityID id) noexcept;
 
 		void setActive(Entity e, bool active) noexcept;
 		void setActive(EntityID id, bool active) noexcept;
-
-		template<typename Func>
-		Entity operator+=(Func && postCreate) noexcept;
 
 		template<typename ... Comps>
 		impl::ComponentCollection<Comps...> with() const noexcept;
