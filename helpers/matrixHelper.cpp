@@ -63,6 +63,8 @@ namespace kengine::matrixHelper {
 		}
 
 		if (modelTransform != nullptr) { // Model
+			model = glm::scale(model, toVec(modelTransform->boundingBox.size));
+
 			model = glm::rotate(model,
 				modelTransform->yaw,
 				{ 0.f, 1.f, 0.f }
@@ -77,7 +79,6 @@ namespace kengine::matrixHelper {
 			);
 
 			model = glm::translate(model, toVec(modelTransform->boundingBox.position)); // Re-center
-			model = glm::scale(model, toVec(modelTransform->boundingBox.size));
 		}
 
 		return model;
