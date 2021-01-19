@@ -1,9 +1,8 @@
-#include "registerComponentMatcher.hpp"
+#include "registerMatchString.hpp"
 
-#include "kengine.hpp"
 #include "meta/MatchString.hpp"
-#include "helpers/typeHelper.hpp"
-#include "sol.hpp"
+#include "helpers/registerMetaComponentImplementation.hpp"
+#include "reflection/imgui_helper.hpp"
 
 namespace kengine {
 	namespace impl {
@@ -54,28 +53,29 @@ namespace kengine {
 
 			return false;
 		}
-
-		template<typename Comp>
-		static bool componentMatches(const Entity & e, const char * str) noexcept {
-			if (strstr(putils::reflection::get_class_name<Comp>(), str))
-				return true;
-
-			bool matches = false;
-			auto & comp = e.get<Comp>();
-			putils::reflection::for_each_attribute(comp, [&](const char *name, auto &&member) noexcept {
-				if (matchAttribute(member, str))
-					matches = true;
-			});
-			return matches;
-		}
 	}
 
 	template<typename ... Comps>
-	void registerComponentMatcher() noexcept {
-		putils::for_each_type<Comps...>([](auto t) noexcept {
-			using Type = putils_wrapped_type(t);
-			auto type = typeHelper::getTypeEntity<Type>();
-			type += meta::MatchString{ impl::componentMatches<Type> };
-		});
+	void registerMatchString() noexcept {
+		registerMetaComponentImplementation<meta::MatchString, Comps...>(
+			[](const auto t, const Entity & e, const char * str) noexcept {
+				using Comp = putils_wrapped_type(t);
+				const auto comp = e.tryGet<Comp>();
+				if (!comp)
+					return false;
+
+				if (strstr(putils::reflection::get_class_name<Comp>(), str))
+					return true;
+
+				bool matches = false;
+				putils::reflection::for_each_attribute(*comp, [&](const char * name, auto && member) noexcept {
+					if (impl::matchAttribute(member, str))
+						matches = true;
+					}
+				);
+				return matches;
+			}
+		);
 	}
 }
+

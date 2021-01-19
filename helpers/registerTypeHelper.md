@@ -28,12 +28,16 @@ Registers a set of component types:
 
 * calls `registerTypes<Comps...>()`
 * adds a [NameComponent](../components/data/NameComponent.md) to the `type Entities` for `Comps` with their class names
-* calls [`registerComponentsFunctions<Comps...>()`](meta/registerComponentFunctions.md)
-* calls [`registerComponentEditors<Comps...>()`](meta/registerComponentEditor.md)
-* calls [`registerComponentMatchers<Comps...>()`](meta/registerComponentMatcher.md)
-* calls [`registerComponentJSONLoaders<Comps...>()`](meta/registerComponentJSONLoader.md)
-* calls [`registerComponentEntityIterators<Comps...>()`](meta/registerComponentEntityIterators.md)
-* calls [`registerComponentAttributeIterators<Comps...>()`](meta/registerComponentAttributeIterator.md)
+* calls [`registerAttachTo<Comps...>()`](meta/registerAttachTo.md)
+* calls [`registerDetachFrom<Comps...>()`](meta/registerDetachFrom.md)
+* calls [`registerDisplayImGui<Comps...>()`](meta/registerDisplayImGui.md)
+* calls [`registerEditImGui<Comps...>()`](meta/registerEditImGui.md)
+* calls [`registerForEachAttribute<Comps...>()`](meta/registerForEachAttribute.md)
+* calls [`registerForEachEntity<Comps...>()`](meta/registerForEachEntity.md)
+* calls [`registerHas<Comps...>()`](meta/registerHas.md)
+* calls [`registerLoadFromJSON<Comps...>()`](meta/registerLoadFromJSON.md)
+* calls [`registerMatchString<Comps...>()`](meta/registerMatchString.md)
+* calls [`registerSaveToJSON<Comps...>()`](meta/registerSaveToJSON.md)
 
 ### registerFunction
 

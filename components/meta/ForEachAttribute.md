@@ -19,4 +19,4 @@ using AttributeIteratorSignature = void(const char * name, const void * member, 
 
 It is up to the user to implement this `meta Component` for the `Component` types whose attributes they'd like to be able to iterate over.
 
-A helper [registerComponentAttributeIterator](../../helpers/RegisterComponentAttributeIterators.md) function is provided that takes as a template parameter a `Component` type and implements the `ForEachAttribute` `meta Component` for it.
+A helper [registerForEachAttribute](../../helpers/meta/registerForEachAttribute.md) function is provided that takes as a template parameter a set of `Component` types and implements the `ForEachAttribute` `meta Component` for them.

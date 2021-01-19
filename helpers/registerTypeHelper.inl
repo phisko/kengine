@@ -6,12 +6,16 @@
 #include "luaHelper.hpp"
 #include "assertHelper.hpp"
 
-#include "meta/registerComponentFunctions.hpp"
-#include "meta/registerComponentEditor.hpp"
-#include "meta/registerComponentMatcher.hpp"
-#include "meta/registerComponentJSONLoader.hpp"
-#include "meta/registerComponentEntityIterator.hpp"
-#include "meta/registerComponentAttributeIterator.hpp"
+#include "meta/registerAttachTo.hpp"
+#include "meta/registerDetachFrom.hpp"
+#include "meta/registerDisplayImGui.hpp"
+#include "meta/registerEditImGui.hpp"
+#include "meta/registerForEachAttribute.hpp"
+#include "meta/registerForEachEntity.hpp"
+#include "meta/registerHas.hpp"
+#include "meta/registerLoadFromJSON.hpp"
+#include "meta/registerMatchString.hpp"
+#include "meta/registerSaveToJSON.hpp"
 
 #include "data/NameComponent.hpp"
 
@@ -65,12 +69,17 @@ namespace kengine {
 			impl::registerWithLanguage<T>(pythonHelper::registerComponents<T>, "Python");
 			impl::registerWithLanguage<T>(luaHelper::registerComponents<T>, "Lua");
 		});
-		registerComponentFunctions<Comps...>();
-		registerComponentEditor<Comps...>();
-		registerComponentMatcher<Comps...>();
-		registerComponentJSONLoader<Comps...>();
-		registerComponentEntityIterator<Comps...>();
-		registerComponentAttributeIterator<Comps...>();
+
+		registerAttachTo<Comps...>();
+		registerDetachFrom<Comps...>();
+		registerDisplayImGui<Comps...>();
+		registerEditImGui<Comps...>();
+		registerForEachAttribute<Comps...>();
+		registerForEachEntity<Comps...>();
+		registerHas<Comps...>();
+		registerLoadFromJSON<Comps...>();
+		registerMatchString<Comps...>();
+		registerSaveToJSON<Comps...>();
 	}
 
 	template<typename F>
