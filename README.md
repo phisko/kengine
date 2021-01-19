@@ -348,6 +348,7 @@ These are helper functions to factorize typical manipulations of `Components`.
 
 * [cameraHelper](helpers/cameraHelper.md)
 * [imguiHelper](helpers/imguiHelper.md): provides helpers to display and edit `Entities` in ImGui
+* [jsonHelper](helpers/jsonHelper.md): provides helpers to serialize and de-serialize `Entities` from json
 * [mainLoop](helpers/mainLoop.md)
 * [matrixHelper](helpers/matrixHelper.md)
 * [pluginHelper](helpers/pluginHelper.md): provides an `initPlugin` function to be called from DLLs
@@ -358,11 +359,18 @@ These are helper functions to factorize typical manipulations of `Components`.
 
 ##### Meta component helpers
 
-* [registerComponentFunctions](helpers/meta/registerComponentFunctions.md): provides implementations for the [Has](components/meta/Has.md), [AttachTo](components/meta/AttachTo.md) and [DetachFrom](components/meta/DetachFrom.md) meta components
-* [registerComponentEntityIterators](helpers/meta/registerComponentEntityIterators.md): provides implementations for the [ForEachEntity](components/meta/ForEachEntity.md) and [ForEachEntityWithout](components/meta/ForEachEntity.md) meta components
-* [registerComponentJSONLoader](helpers/meta/registerComponentJSONLoader.md): provides an implementation for the [LoadFromJSON](components/meta/LoadFromJSON.md)
-* [registerComponentEditor](helpers/meta/registerComponentEditor.md): provides implementations for the [EditImGui](components/meta/ImGuiEditor.md) and [DisplayImGui](components/meta/ImGuiEditor.md) meta components
-* [registerComponentMatcher](helpers/meta/registerComponentMatcher.md): provides an implementation for the [MatchString](components/meta/MatchString.md) meta component
+These provide helper functions to register standard implementations for the respective `meta Components`.
+
+* [registerAttachTo](helpers/meta/registerAttachTo.md)
+* [registerDetachFrom](helpers/meta/registerDetachFrom.md)
+* [registerDisplayImGui](helpers/meta/registerDisplayImGui.md)
+* [registerEditImGui](helpers/meta/registerEditImGui.md)
+* [registerForEachAttribute](helpers/meta/registerForEachAttribute.md)
+* [registerForEachEntity](helpers/meta/registerForEachEntity.md)
+* [registerHas](helpers/meta/registerHas.md)
+* [registerLoadFromJSON](helpers/meta/registerLoadFromJSON.md)
+* [registerMatchString](helpers/meta/registerMatchString.md)
+* [registerSaveToJSON](helpers/meta/registerSaveToJSON.md)
 
 ## Example
 
