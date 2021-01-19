@@ -98,7 +98,7 @@ namespace kengine::opengl::shaders {
 
 			for (const auto & element : debug.elements) {
 				_color = element.color;
-				_entityID = (float)e.id;
+				_entityID = 0.f; // don't want the debug elements to be clickable/highlighted
 
 				glm::mat4 model{ 1.f };
 				std::visit(putils::overloaded{
