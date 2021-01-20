@@ -293,6 +293,7 @@ In all following descriptions, the "parent" `Component` refers to the `Component
 * [ImGuiEngineStats](systems/imgui_engine_stats/ImGuiEngineStatsSystem.md): displays an ImGui window with engine stats
 * [ImGuiEntityEditorSystem](systems/imgui_entity_editor/ImGuiEntityEditorSystem.md): displays ImGui windows to edit `Entities` with a `SelectedComponent`
 * [ImGuiEntitySelectorSystem](systems/imgui_entity_selector/ImGuiEntitySelectorSystem.md): displays an ImGui window that lets users search for and select `Entities`
+* [ImGuiPromptSystem](systems/imgui_prompt/ImGuiPromptSystem.md): displays an ImGui window that lets users run arbitrary code in Lua and Python
 * [ImGuiToolSystem](systems/imgui_tool/ImGuiToolSystem.md): manages ImGui [tool windows](components/data/ImGuiToolComponent.md) through ImGui's MainMenuBar
 
 #### 3D Graphics
@@ -301,10 +302,15 @@ In all following descriptions, the "parent" `Component` refers to the `Component
 * [AssimpSystem](systems/assimp/AssimpSystem.md): loads 3D models using the assimp library, animates them and provides shaders to render them
 * [PolyVoxSystem](systems/polyvox/PolyVoxSystem.md): generates 3D models based on `PolyVoxComponents` and provides shaders to render them
 * [MagicaVoxelSystem](systems/polyvox/MagicaVoxelSystem.md): loads 3D models in the MagicaVoxel ".vox" format, which can then be drawn by the `PolyVoxSystem`'s shader
+* [GLFWSystem](systems/glfw/GLFWSystem.md): creates GLFW windows and handles their input
 
 #### Physics
 * [BulletSystem](systems/bullet/BulletSystem.md): simulates physics using Bullet Physics
 * [KinematicSystem](systems/kinematic/KinematicSystem.md): moves kinematic `Entities`
+
+#### General
+* [RecastSystem](systems/recast/RecastSystem.md): generates navmeshes and performs pathfinding
+* [ModelCreatorSystem](systems/model_creator/ModelCreatorSystem.md): handles [model Entities](components/data/ModelComponent.md)
 
 These systems must be enabled by setting the corresponding CMake variable to `true` in your `CMakeLists.txt`. Alternatively, you can set `KENGINE_ALL_SYSTEMS` to build them all.
 
@@ -327,6 +333,7 @@ These systems must be enabled by setting the corresponding CMake variable to `tr
 | OpenGLSpritesSystem       | KENGINE_OPENGL_SPRITES        |
 | PolyVoxSystem             | KENGINE_POLYVOX               |
 | MagicaVoxelSystem         | KENGINE_POLYVOX               |
+| ModelCreatorSystem        | KENGINE_MODEL_CREATOR         |
 | PythonSystem              | KENGINE_PYTHON                |
 | RecastSystem              | KENGINE_RECAST                |
 
