@@ -41,10 +41,9 @@ namespace kengine::matrixHelper {
 
 	glm::mat4 getModelMatrix(const TransformComponent & transform, const TransformComponent * modelTransform) noexcept {
 		glm::mat4 model(1.f);
-		const auto & centre = transform.boundingBox.position;
 
 		{ // Object
-			model = glm::translate(model, toVec(centre));
+			model = glm::translate(model, toVec(transform.boundingBox.position));
 
 			model = glm::rotate(model,
 				transform.yaw,
