@@ -29,6 +29,7 @@
 #include "helpers/assertHelper.hpp"
 #include "helpers/matrixHelper.hpp"
 #include "helpers/resourceHelper.hpp"
+#include "helpers/instanceHelper.hpp"
 #include "AssImpHelper.hpp"
 
 #include "opengl/Program.hpp"
@@ -123,31 +124,24 @@ namespace kengine::assimp {
 			if (e.has<ModelComponent>())
 				loadModel(e);
 			else if (e.has<GraphicsComponent>())
-				setModel(e);
+				initObject(e);
 		}
 
-		static void setModel(Entity & e) noexcept {
+		static void initObject(Entity & e) noexcept {
 			const auto & graphics = e.get<GraphicsComponent>();
+			const char * path = graphics.appearance;
 
-			if (!helpers::importer.IsExtensionSupported(putils::file_extension(graphics.appearance.c_str()).data()))
+			const auto instance = e.tryGet<InstanceComponent>();
+			if (instance && instance->model != INVALID_ID) {
+				const auto &model = instanceHelper::getModel<ModelComponent>(*instance);
+				path = model.file;
+			}
+
+			if (!helpers::importer.IsExtensionSupported(putils::file_extension(path).data()))
 				return;
 
 			e += AssImpObjectComponent{};
 			e += SkeletonComponent{};
-
-			if (e.has<InstanceComponent>() && e.get<InstanceComponent>().model != INVALID_ID)
-				return;
-
-			for (const auto & [model, comp] : entities.with<ModelComponent>())
-				if (comp.file == graphics.appearance) {
-					e += InstanceComponent{ model.id };
-					return;
-				}
-
-			entities += [&](Entity & model) noexcept {
-				model += ModelComponent{ graphics.appearance.c_str() };
-				e += InstanceComponent{ model.id };
-			};
 		}
 
 #pragma region loadModel

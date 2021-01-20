@@ -21,6 +21,7 @@
 #include "functions/OnEntityCreated.hpp"
 
 #include "helpers/assertHelper.hpp"
+#include "helpers/instanceHelper.hpp"
 
 #include "string.hpp"
 #include "concat.hpp"
@@ -51,31 +52,24 @@ namespace kengine {
 				if (e.has<ModelComponent>())
 					loadModel(e);
 				else if (e.has<GraphicsComponent>())
-					setModel(e);
+					initObject(e);
 			}
 
-			static void setModel(Entity & e) noexcept {
+			static void initObject(Entity & e) noexcept {
 				auto & graphics = e.get<GraphicsComponent>();
+				const char * path = graphics.appearance;
 
-				if (putils::file_extension(graphics.appearance.c_str()) != "vox")
+				const auto instance = e.tryGet<InstanceComponent>();
+				if (instance && instance->model != INVALID_ID) {
+					const auto & model = instanceHelper::getModel<ModelComponent>(*instance);
+					path = model.file;
+				}
+
+				if (putils::file_extension(path) != "vox")
 					return;
 
 				e += PolyVoxObjectComponent{};
 				e += DefaultShadowComponent{};
-
-				if (e.has<InstanceComponent>() && e.get<InstanceComponent>().model != INVALID_ID)
-					return;
-
-				for (const auto & [model, comp] : entities.with<ModelComponent>())
-					if (comp.file == graphics.appearance) {
-						e += InstanceComponent{ model.id };
-						return;
-					}
-
-				entities += [&](Entity & model) noexcept {
-					model += ModelComponent{ graphics.appearance.c_str() };
-					e += InstanceComponent{ model.id };
-				};
 			}
 
 			using MeshType = decltype(buildMesh(PolyVox::RawVolume<PolyVoxComponent::VertexData>{ {} }));
