@@ -30,8 +30,6 @@ namespace kengine {
 			}
 		};
 
-		return [](Entity & e) {
-			impl::init(e);
-		};
+		return impl::init;
 	}
 }
