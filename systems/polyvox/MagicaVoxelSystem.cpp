@@ -121,6 +121,9 @@ namespace kengine {
 				modelData.init<MeshType::VertexType>();
 				e += std::move(modelData);
 
+				if (e.has<TransformComponent>())
+					return;
+
 				auto & box = e.attach<TransformComponent>().boundingBox;
 				box.position.x -= size.x / 2.f * box.size.x;
 				box.position.z -= size.y / 2.f * box.size.z;
@@ -255,6 +258,9 @@ namespace kengine {
 			}
 
 			static void applyOffset(Entity & e, const MagicaVoxel::ChunkContent::Size & size) noexcept {
+				if (e.has<TransformComponent>())
+					return;
+
 				auto & box = e.attach<TransformComponent>().boundingBox;
 				box.position.x -= size.x / 2.f * box.size.x;
 				box.position.z -= size.y / 2.f * box.size.z;
