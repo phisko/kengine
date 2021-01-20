@@ -6,39 +6,26 @@
 #include "data/ModelComponent.hpp"
 #include "data/TextureDataComponent.hpp"
 
-#ifdef KENGINE_OPENGL
-#include "opengl/RAII.hpp"
-#endif
-
-#ifdef KENGINE_VULKAN
-#include "vulkan/Image.hpp"
-#endif
-
 #include "stb_image.h"
 #include "concat.hpp"
 
 namespace kengine::resourceHelper {
 	EntityID loadTexture(const char * file) noexcept {
-		const std::filesystem::path path = file;
-
-		const auto directory = path.parent_path();
-		const auto filename = path.filename();
-
-		for (const auto [e, model] : entities.with<ModelComponent>())
+		for (const auto [e, model, textureData] : entities.with<ModelComponent, TextureDataComponent>())
 			if (model.file == file)
 				return e.id;
 
-		EntityID modelID;
+		TextureDataComponent textureData;
+		textureData.data = stbi_load(file, &textureData.width, &textureData.height, &textureData.components, 0);
+		if (textureData.data == nullptr)
+			return INVALID_ID;
+		textureData.free = stbi_image_free;
 
+		EntityID modelID;
 		entities += [&](Entity & e) noexcept {
 			modelID = e.id;
-
 			e.attach<ModelComponent>().file = file;
-
-			auto & textureData = e.attach<TextureDataComponent>();
-			textureData.data = stbi_load(file, &textureData.width, &textureData.height, &textureData.components, 0);
-			kengine_assert_with_message(textureData.data != nullptr, putils::concat("Error loading texture file '", file, "'"));
-			textureData.free = stbi_image_free;
+			e += std::move(textureData);
 		};
 
 		return modelID;
@@ -53,26 +40,29 @@ namespace kengine::resourceHelper {
 			if (loaded.data == data)
 				return e.id;
 
-		EntityID modelID;
+		static constexpr auto expectedChannels = 4;
 
+		TextureDataComponent textureData;
+		if (height == 0) {
+			textureData.data = stbi_load_from_memory((const unsigned char *)data, (int)width, &textureData.width, &textureData.height, &textureData.components, expectedChannels);
+			if (textureData.data == nullptr) {
+				kengine_assert_failed("Error loading texture from memory");
+				return INVALID_ID;
+			}
+			textureData.free = stbi_image_free;
+		}
+		else {
+			textureData.data = data;
+			textureData.width = (int)width;
+			textureData.height = (int)height;
+			textureData.components = expectedChannels;
+		}
+
+		EntityID modelID;
 		entities += [&](Entity & e) noexcept {
 			modelID = e.id;
 			e.attach<LoadedFromMemory>().data = data;
-
-			static constexpr auto expectedChannels = 4;
-
-			auto & textureData = e.attach<TextureDataComponent>();
-			if (height == 0) { // Compressed format
-				textureData.data = stbi_load_from_memory((const unsigned char *)data, (int)width, &textureData.width, &textureData.height, &textureData.components, expectedChannels);
-				kengine_assert_with_message(textureData.data != nullptr, "Error loading texture from memory");
-				textureData.free = stbi_image_free;
-			}
-			else {
-				textureData.data = data;
-				textureData.width = (int)width;
-				textureData.height = (int)height;
-				textureData.components = expectedChannels;
-			}
+			e += std::move(textureData);
 		};
 
 		return modelID;
