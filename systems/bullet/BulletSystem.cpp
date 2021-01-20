@@ -15,7 +15,6 @@
 #include "data/InstanceComponent.hpp"
 #include "data/KinematicComponent.hpp"
 #include "data/ModelColliderComponent.hpp"
-#include "data/ModelComponent.hpp"
 #include "data/ModelSkeletonComponent.hpp"
 #include "data/PhysicsComponent.hpp"
 #include "data/SkeletonComponent.hpp"

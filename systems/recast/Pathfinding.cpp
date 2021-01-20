@@ -2,7 +2,6 @@
 # define KENGINE_RECAST_MAX_AGENTS 1024
 #endif
 
-#include "data/ModelComponent.hpp"
 #include "data/PathfindingComponent.hpp"
 #include "data/PhysicsComponent.hpp"
 #include "data/TransformComponent.hpp"

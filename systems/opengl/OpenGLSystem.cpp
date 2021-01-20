@@ -17,7 +17,6 @@
 #include "data/ModelDataComponent.hpp"
 #include "data/SystemSpecificTextureComponent.hpp"
 #include "data/TextureDataComponent.hpp"
-#include "data/ModelComponent.hpp"
 #include "data/SystemSpecificModelComponent.hpp"
 #include "data/ImGuiContextComponent.hpp"
 #include "data/ImGuiScaleComponent.hpp"

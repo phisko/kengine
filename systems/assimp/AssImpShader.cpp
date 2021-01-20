@@ -2,7 +2,6 @@
 
 #include "data/GraphicsComponent.hpp"
 #include "data/TransformComponent.hpp"
-#include "data/ModelComponent.hpp"
 #include "data/SkeletonComponent.hpp"
 
 #include "helpers/cameraHelper.hpp"
