@@ -4,6 +4,8 @@
 # define KENGINE_TEXTURE_PATH_MAX_LENGTH 256
 #endif
 
+#include "reflection.hpp"
+
 namespace kengine {
 	struct TextureDataComponent {
 		void * data = nullptr;
@@ -37,3 +39,15 @@ namespace kengine {
 		}
 	};
 }
+
+#define refltype kengine::TextureDataComponent
+putils_reflection_info{
+	putils_reflection_class_name;
+	putils_reflection_attributes(
+		putils_reflection_attribute(data),
+		putils_reflection_attribute(width),
+		putils_reflection_attribute(height),
+		putils_reflection_attribute(components)
+	);
+};
+#undef refltype
