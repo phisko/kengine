@@ -8,8 +8,8 @@
 
 #ifdef KENGINE_NDEBUG
 # define kengine_assert(x) (void)0
-# define kengine_assert_with_message(x, message) (void)0
-# define kengine_assert_failed(message) (void)0
+# define kengine_assert_with_message(x, ...) (void)0
+# define kengine_assert_failed(...) (void)0
 # define kengine_debug_break (void)0
 #else
 # include <string>
@@ -22,19 +22,21 @@
 #  define kengine_debub_break (void)0
 # endif
 
-# define kengine_assert_failed(message) \
+#include "concat.hpp"
+
+# define kengine_assert_failed(...) \
 	do {\
-		kengine::assertHelper::assertFailed(__FILE__, __LINE__, message); \
+		kengine::assertHelper::assertFailed(__FILE__, __LINE__, putils::concat(__VA_ARGS__)); \
 		if (kengine::assertHelper::isDebuggerPresent()) \
 			kengine_debug_break; \
 	} while(false)
 
-# define kengine_assert_with_message(x, message) \
+# define kengine_assert_with_message(x, ...) \
 	do {\
 		if (!!(x)) \
 			(void)0; \
 		else \
-			kengine_assert_failed(message); \
+			kengine_assert_failed(putils::concat(__VA_ARGS__)); \
 		kengine_assume(!!(x)); \
 	} while (false)
 
