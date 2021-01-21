@@ -58,7 +58,6 @@
 #include "shaders/Text.hpp"
 
 #include "Timer.hpp"
-#include "concat.hpp"
 
 #ifndef KENGINE_MAX_VIEWPORTS
 # define KENGINE_MAX_VIEWPORTS 8
@@ -445,7 +444,7 @@ namespace kengine::opengl {
 					format = GL_RGBA;
 					break;
 				default:
-					kengine_assert_failed(putils::concat("Incompatible number of texture components: ", textureData.components));
+					kengine_assert_failed("Incompatible number of texture components: ", textureData.components);
 				}
 
 				glBindTexture(GL_TEXTURE_2D, textureModel.texture);

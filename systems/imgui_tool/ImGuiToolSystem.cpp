@@ -12,7 +12,6 @@
 #include "imgui.h"
 
 #include "to_string.hpp"
-#include "concat.hpp"
 
 #ifndef KENGINE_IMGUI_TOOLS_SAVE_FILE
 # define KENGINE_IMGUI_TOOLS_SAVE_FILE "tools.cnf"
@@ -72,7 +71,7 @@ namespace kengine::imgui_tool {
 		static void saveTools() noexcept {
 			std::ofstream f(KENGINE_IMGUI_TOOLS_SAVE_FILE);
 			if (!f) {
-				kengine_assert_failed(putils::concat("Failed to open '", KENGINE_IMGUI_TOOLS_SAVE_FILE, "' with write permission"));
+				kengine_assert_failed("Failed to open '", KENGINE_IMGUI_TOOLS_SAVE_FILE, "' with write permission");
 				return;
 			}
 			const auto sorted = sortHelper::getNameSortedEntities<KENGINE_IMGUI_MAX_TOOLS, ImGuiToolComponent>();
