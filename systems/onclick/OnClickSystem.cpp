@@ -1,9 +1,9 @@
 #include "OnClickSystem.hpp"
 #include "kengine.hpp"
 
-#include "data/OnClickComponent.hpp"
 #include "data/InputComponent.hpp"
 #include "functions/GetEntityInPixel.hpp"
+#include "functions/OnClick.hpp"
 
 namespace kengine::onclick {
 	struct impl {
@@ -24,9 +24,9 @@ namespace kengine::onclick {
 
 				const auto e = entities[id];
 
-				const auto onClick = e.tryGet<OnClickComponent>();
+				const auto onClick = e.tryGet<functions::OnClick>();
 				if (onClick)
-					onClick->onClick();
+					onClick->call(button);
 			}
 		}
 	};

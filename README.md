@@ -221,7 +221,6 @@ These are pre-built, extensible and pluggable elements that can be used to boots
 * [LuaTableComponent](components/data/LuaTableComponent.md): holds a [sol::table](https://github.com/ThePhD/sol2) that lua scripts can use to hold any information related to an `Entity`
 * [PythonComponent](components/data/PythonComponent.md): defines the Python scripts to be run by the `PythonSystem` for an `Entity`
 * [CollisionComponent](components/data/CollisionComponent.md): defines a function to be called when an `Entity` collides with another
-* [OnClickComponent](components/data/OnClickComponent.md): defines a function to be called when an `Entity` is clicked
 
 ##### Debug tools
 * [AdjustableComponent](components/data/AdjustableComponent.md): lets users modify variables through a GUI (such as the [ImGuiAdjustableSystem](systems/imgui_adjustable/ImGuiAdjustableSystem.md))
@@ -257,6 +256,7 @@ These are pre-built, extensible and pluggable elements that can be used to boots
 #### Function components
 
 * [Execute](components/functions/Execute.md): called each frame
+* [OnClick](components/functions/OnClick.md): called when the parent `Entity` is clicked
 * [OnEntityCreated](components/functions/OnEntityCreated.md): called for each new `Entity`
 * [OnEntityRemoved](components/functions/OnEntityRemoved.md): called whenever an `Entity` is removed
 * [OnTerminate](components/functions/OnTerminate.md): called when terminating the engine
