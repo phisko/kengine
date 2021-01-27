@@ -65,7 +65,8 @@ namespace kengine {
 	template<typename T>
 	void kengine::Entity::detach() noexcept {
 		auto & comp = get<T>();
-		comp = T{};
+		comp.~T();
+		new (&comp) T;
 
 		static const auto component = impl::Component<T>::id();
 		componentMask.set(component, false);

@@ -11,7 +11,8 @@ namespace kengine::impl {
 	template<typename Comp>
 	void Metadata<Comp>::reset(ID entity) noexcept {
 		auto & val = Component<Comp>::get(entity);
-		val = Comp{};
+		val.~Comp();
+		new (&val) Comp;
 	}
 
 	template<typename Comp>
