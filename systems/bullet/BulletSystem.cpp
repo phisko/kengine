@@ -50,6 +50,7 @@ namespace kengine::bullet {
 	struct impl {
 		static inline struct {
 			bool enableDebug = false;
+			bool editorMode = false;
 			float gravity = 1.f;
 		} adjustables;
 
@@ -98,6 +99,7 @@ namespace kengine::bullet {
 					{ "Gravity", &adjustables.gravity }
 #ifndef KENGINE_NDEBUG
 					, {"Debug", &adjustables.enableDebug }
+					, {"Editor mode (reload colliders each frame)", &adjustables.editorMode }
 #endif
 				}
 			};
@@ -112,6 +114,13 @@ namespace kengine::bullet {
 				const auto model = entities[instance.model];
 				if (!model.has<ModelColliderComponent>())
 					continue;
+#ifndef KENGINE_NDEBUG
+				if (adjustables.editorMode) {
+					e.detach<BulletPhysicsComponent>();
+					addBulletComponent(e, transform, physics, model);
+				}
+				else
+#endif
 				updateBulletComponent(e, comp, transform, physics, model);
 			}
 
@@ -158,43 +167,8 @@ namespace kengine::bullet {
 			const auto modelSkeleton = modelEntity.tryGet<ModelSkeletonComponent>();
 			const auto modelTransform = modelEntity.tryGet<TransformComponent>();
 
-			for (const auto & collider : modelCollider.colliders) {
-				const auto size = collider.boundingBox.size * transform.boundingBox.size;
-
-				btCollisionShape * shape; {
-					switch (collider.shape) {
-					case ModelColliderComponent::Collider::Box: {
-						static CollisionShapeMap shapes;
-						shape = getCollisionShape(shapes, size, [&] { return new btBoxShape({ size.x / 2.f, size.y / 2.f, size.z / 2.f }); });
-						break;
-					}
-					case ModelColliderComponent::Collider::Capsule: {
-						static CollisionShapeMap shapes;
-						shape = getCollisionShape(shapes, size, [&] { return new btCapsuleShape(std::min(size.x, size.z) / 2.f, size.y); });
-						break;
-					}
-					case ModelColliderComponent::Collider::Cone: {
-						static CollisionShapeMap shapes;
-						shape = getCollisionShape(shapes, size, [&] { return new btConeShape(std::min(size.x, size.z) / 2.f, size.y); });
-						break;
-					}
-					case ModelColliderComponent::Collider::Cylinder: {
-						static CollisionShapeMap shapes;
-						shape = getCollisionShape(shapes, size, [&] { return new btCylinderShape({ size.x / 2.f, size.y / 2.f, size.z / 2.f }); });
-						break;
-					}
-					case ModelColliderComponent::Collider::Sphere: {
-						static CollisionShapeMap shapes;
-						shape = getCollisionShape(shapes, size, [&] { return new btSphereShape(std::min(std::min(size.x, size.y), size.y) / 2.f); });
-						break;
-					}
-					default:
-						static_assert(putils::magic_enum::enum_count<ModelColliderComponent::Collider::Shape>() == 5);
-						break;
-					}
-				}
-				comp.shape.addChildShape(helpers::toBullet(transform, collider, skeleton, modelSkeleton, modelTransform), shape);
-			}
+			for (const auto & collider : modelCollider.colliders)
+				addShape(comp, collider, transform, skeleton, modelSkeleton, modelTransform);
 
 			btVector3 localInertia{ 0.f, 0.f, 0.f }; {
 				if (physics.mass != 0.f)
@@ -207,6 +181,44 @@ namespace kengine::bullet {
 
 			updateBulletComponent(e, comp, transform, physics, modelEntity, true);
 			dynamicsWorld.addRigidBody(&comp.body);
+		}
+
+		static void addShape(BulletPhysicsComponent & comp, const ModelColliderComponent::Collider & collider, const TransformComponent & transform, const SkeletonComponent * skeleton, const ModelSkeletonComponent * modelSkeleton, const TransformComponent * modelTransform) {
+			const auto size = collider.boundingBox.size * transform.boundingBox.size;
+
+			btCollisionShape * shape; {
+				switch (collider.shape) {
+				case ModelColliderComponent::Collider::Box: {
+					static CollisionShapeMap shapes;
+					shape = getCollisionShape(shapes, size, [&] { return new btBoxShape({ size.x / 2.f, size.y / 2.f, size.z / 2.f }); });
+					break;
+				}
+				case ModelColliderComponent::Collider::Capsule: {
+					static CollisionShapeMap shapes;
+					shape = getCollisionShape(shapes, size, [&] { return new btCapsuleShape(std::min(size.x, size.z) / 2.f, size.y); });
+					break;
+				}
+				case ModelColliderComponent::Collider::Cone: {
+					static CollisionShapeMap shapes;
+					shape = getCollisionShape(shapes, size, [&] { return new btConeShape(std::min(size.x, size.z) / 2.f, size.y); });
+					break;
+				}
+				case ModelColliderComponent::Collider::Cylinder: {
+					static CollisionShapeMap shapes;
+					shape = getCollisionShape(shapes, size, [&] { return new btCylinderShape({ size.x / 2.f, size.y / 2.f, size.z / 2.f }); });
+					break;
+				}
+				case ModelColliderComponent::Collider::Sphere: {
+					static CollisionShapeMap shapes;
+					shape = getCollisionShape(shapes, size, [&] { return new btSphereShape(std::min(std::min(size.x, size.y), size.y) / 2.f); });
+					break;
+				}
+				default:
+					static_assert(putils::magic_enum::enum_count<ModelColliderComponent::Collider::Shape>() == 5);
+					break;
+				}
+			}
+			comp.shape.addChildShape(helpers::toBullet(transform, collider, skeleton, modelSkeleton, modelTransform), shape);
 		}
 
 		static void updateBulletComponent(Entity & e, BulletPhysicsComponent & comp, const TransformComponent & transform, PhysicsComponent & physics, const Entity & modelEntity, bool first = false) noexcept {
@@ -248,9 +260,9 @@ namespace kengine::bullet {
 
 			const auto skeleton = e.tryGet<SkeletonComponent>();
 			const auto modelSkeleton = modelEntity.tryGet<ModelSkeletonComponent>();
+
 			if (skeleton && modelSkeleton) {
 				const auto modelTransform = modelEntity.tryGet<TransformComponent>();
-
 				int i = 0;
 				for (const auto & collider : modelEntity.get<ModelColliderComponent>().colliders) {
 					comp.shape.updateChildTransform(i, helpers::toBullet(transform, collider, skeleton, modelSkeleton, modelTransform));
