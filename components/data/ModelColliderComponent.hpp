@@ -12,6 +12,7 @@
 
 #include "string.hpp"
 #include "vector.hpp"
+#include "data/TransformComponent.hpp"
 
 namespace kengine {
 	struct ModelColliderComponent {
@@ -29,10 +30,7 @@ namespace kengine {
 
 			Shape shape;
 			string boneName;
-			putils::Rect3f boundingBox = { {}, { 1.f, 1.f, 1.f } };
-			float yaw = 0.f;
-			float pitch = 0.f;
-			float roll = 0.f;
+			TransformComponent transform;
 		};
 
 		std::vector<Collider> colliders;
@@ -57,13 +55,11 @@ putils_reflection_info {
 	putils_reflection_attributes(
 		putils_reflection_attribute(shape),
 		putils_reflection_attribute(boneName),
-		putils_reflection_attribute(boundingBox),
-		putils_reflection_attribute(yaw),
-		putils_reflection_attribute(pitch),
-		putils_reflection_attribute(roll)
+		putils_reflection_attribute(transform)
 	);
 	putils_reflection_used_types(
-		putils_reflection_type(refltype::string)
+		putils_reflection_type(refltype::string),
+		putils_reflection_type(kengine::TransformComponent)
 	);
 };
 #undef refltype

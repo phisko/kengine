@@ -184,9 +184,9 @@ namespace kengine::bullet {
 		}
 
 		static void addShape(BulletPhysicsComponent & comp, const ModelColliderComponent::Collider & collider, const TransformComponent & transform, const SkeletonComponent * skeleton, const ModelSkeletonComponent * modelSkeleton, const TransformComponent * modelTransform) {
-			const auto size = collider.boundingBox.size * transform.boundingBox.size;
+			const auto size = collider.transform.boundingBox.size * transform.boundingBox.size;
 
-			btCollisionShape * shape; {
+			btCollisionShape * shape = nullptr; {
 				switch (collider.shape) {
 				case ModelColliderComponent::Collider::Box: {
 					static CollisionShapeMap shapes;
@@ -215,7 +215,7 @@ namespace kengine::bullet {
 				}
 				default:
 					static_assert(putils::magic_enum::enum_count<ModelColliderComponent::Collider::Shape>() == 5);
-					break;
+					return;
 				}
 			}
 			comp.shape.addChildShape(helpers::toBullet(transform, collider, skeleton, modelSkeleton, modelTransform), shape);
@@ -355,10 +355,10 @@ namespace kengine::bullet {
 				}
 
 				glm::mat4 colliderMat(1.f);
-				colliderMat = glm::translate(colliderMat, toVec(collider.boundingBox.position * parent.boundingBox.size));
-				colliderMat = glm::rotate(colliderMat, collider.yaw, { 0.f, 1.f, 0.f });
-				colliderMat = glm::rotate(colliderMat, collider.pitch, { 1.f, 0.f, 0.f });
-				colliderMat = glm::rotate(colliderMat, collider.roll, { 0.f, 0.f, 1.f });
+				colliderMat = glm::translate(colliderMat, toVec(collider.transform.boundingBox.position * parent.boundingBox.size));
+				colliderMat = glm::rotate(colliderMat, collider.transform.yaw, { 0.f, 1.f, 0.f });
+				colliderMat = glm::rotate(colliderMat, collider.transform.pitch, { 1.f, 0.f, 0.f });
+				colliderMat = glm::rotate(colliderMat, collider.transform.roll, { 0.f, 0.f, 1.f });
 
 				const auto mat = parentMat * colliderMat;
 				btTransform ret;
