@@ -323,41 +323,35 @@ namespace kengine::imgui_adjustable {
 				return;
 			}
 
-			const auto entities = sortHelper::getSortedEntities<AdjustableComponent>([](const auto & a, const auto & b) noexcept {
-				return strcmp(std::get<1>(a)->section.c_str(), std::get<1>(b)->section.c_str()) < 0;
-			});
+			putils::IniFile ini;
 
-			for (const auto & [e, comp] : entities) {
-				f << '[' << comp->section << ']' << std::endl;
+			for (const auto & [e, comp] : entities.with<AdjustableComponent>()) {
+				auto & section = ini.sections[comp.section.c_str()];
 
-				auto values = comp->values;
-				std::sort(values.begin(), values.end(), [](const auto & lhs, const auto & rhs) noexcept {
-					return strcmp(lhs.name.c_str(), rhs.name.c_str()) < 0;
-				});
+				for (const auto & value : comp.values) {
+					auto & iniValue = section.values[value.name.c_str()];
 
-				for (const auto & value : values) {
-					f << value.name << '=';
 					std::visit(putils::overloaded{
 						[&](const AdjustableComponent::Value::IntStorage & s) noexcept {
-							f << s.value;
+							iniValue = putils::toString(s.value);
 						},
 						[&](const AdjustableComponent::Value::FloatStorage & s) noexcept {
-							f << s.value;
+							iniValue = putils::toString(s.value);
 						},
 						[&](const AdjustableComponent::Value::BoolStorage & s) noexcept {
-							f << std::boolalpha << s.value << std::noboolalpha;
+							iniValue = putils::toString(s.value);
 						},
 						[&](const AdjustableComponent::Value::ColorStorage & s) noexcept {
-							f << putils::toRGBA(s.value);
+							iniValue = putils::toString(putils::toRGBA(s.value));
 						},
 						[&](auto && t) noexcept {
 							static_assert(putils::always_false<decltype(t)>(), "Non exhaustive visitor");
 						}
 					}, value.storage);
-					f << std::endl;
 				}
-				f << std::endl;
 			}
+
+			f << ini;
 		}
 	};
 }
