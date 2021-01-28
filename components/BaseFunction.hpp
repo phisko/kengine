@@ -23,6 +23,8 @@ namespace kengine {
 
 		template<typename Ret, typename ... Args>
 		struct BaseFunction<Ret(Args...)> {
+			using Base = BaseFunction<Ret(Args...)>;
+
 			putils::function<Ret(Args...), KENGINE_FUNCTION_MAX_SIZE> func = nullptr;
 
 			bool operator==(nullptr_t) const noexcept { return func == nullptr; }
