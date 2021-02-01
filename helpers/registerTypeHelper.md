@@ -29,6 +29,7 @@ Registers a set of component types:
 * calls `registerTypes<Comps...>()`
 * adds a [NameComponent](../components/data/NameComponent.md) to the `type Entities` for `Comps` with their class names
 * calls [`registerAttachTo<Comps...>()`](meta/registerAttachTo.md)
+* calls [`registerCount<Comps...>()`](meta/registerCount.md)
 * calls [`registerDetachFrom<Comps...>()`](meta/registerDetachFrom.md)
 * calls [`registerDisplayImGui<Comps...>()`](meta/registerDisplayImGui.md)
 * calls [`registerEditImGui<Comps...>()`](meta/registerEditImGui.md)

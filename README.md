@@ -369,6 +369,7 @@ These are helper functions to factorize typical manipulations of `Components`.
 These provide helper functions to register standard implementations for the respective `meta Components`.
 
 * [registerAttachTo](helpers/meta/registerAttachTo.md)
+* [registerCount](helpers/meta/registerCount.md)
 * [registerDetachFrom](helpers/meta/registerDetachFrom.md)
 * [registerDisplayImGui](helpers/meta/registerDisplayImGui.md)
 * [registerEditImGui](helpers/meta/registerEditImGui.md)

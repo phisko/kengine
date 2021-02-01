@@ -7,6 +7,7 @@
 #include "assertHelper.hpp"
 
 #include "meta/registerAttachTo.hpp"
+#include "meta/registerCount.hpp"
 #include "meta/registerDetachFrom.hpp"
 #include "meta/registerDisplayImGui.hpp"
 #include "meta/registerEditImGui.hpp"
@@ -71,6 +72,7 @@ namespace kengine {
 		});
 
 		registerAttachTo<Comps...>();
+		registerCount<Comps...>();
 		registerDetachFrom<Comps...>();
 		registerDisplayImGui<Comps...>();
 		registerEditImGui<Comps...>();
