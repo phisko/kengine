@@ -34,6 +34,7 @@ namespace kengine::impl {
 
 		ComponentIterator<Comps...> begin() const noexcept;
 		ComponentIterator<Comps...> end() const noexcept;
+		size_t size() const noexcept;
 	};
 }
 

@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "ComponentCollection.hpp"
 #include "kengine.hpp"
 
@@ -31,6 +32,27 @@ namespace kengine::impl {
 	template<typename ... Comps>
 	TIterator TCollection::end() const noexcept {
 		return { (size_t)-1, 0 };
+	}
+
+	template<typename ... Comps>
+	size_t TCollection::size() const noexcept {
+		ReadLock l(state->_archetypesMutex);
+
+		size_t ret = 0;
+
+		size_t archetypeIndex = 0;
+		for (auto & archetype : state->_archetypes) {
+			if (archetype.matches<Comps...>()) {
+				ReadLock l(archetype.mutex);
+				ReadLock l2(state->_entitiesMutex);
+
+				ret += std::count_if(archetype.entities.begin(), archetype.entities.end(), [](EntityID id) {
+					return state->_entities[id].active;
+				});
+			}
+		}
+
+		return ret;
 	}
 
 	template<typename ... Comps>
