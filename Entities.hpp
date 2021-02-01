@@ -32,6 +32,7 @@ namespace kengine {
 
 		impl::EntityIterator begin() const noexcept;
 		impl::EntityIterator end() const noexcept;
+		size_t size() const noexcept;
 	};
 }
 

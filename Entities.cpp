@@ -90,4 +90,11 @@ namespace kengine {
 		impl::ReadLock l(impl::state->_entitiesMutex);
 		return { impl::state->_entities.size() };
 	}
+
+	size_t Entities::size() const noexcept {
+		impl::ReadLock l(impl::state->_entitiesMutex);
+		return std::count_if(impl::state->_entities.begin(), impl::state->_entities.end(), [](const auto & e) {
+			return e.mask != 0 && e.active;
+		});
+	}
 }
