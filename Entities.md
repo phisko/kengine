@@ -73,3 +73,11 @@ impl::EntityIterator end() const noexcept;
 ```
 
 Lets you iterate over all active `Entities`. Dereferencing an iterator returns an `Entity`.
+
+### size
+
+```cpp
+size_t size() const noexcept;
+```
+
+Returns the number of active `Entities`.
