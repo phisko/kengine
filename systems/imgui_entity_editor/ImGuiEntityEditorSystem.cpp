@@ -2,6 +2,7 @@
 #include "kengine.hpp"
 
 #include "data/ImGuiToolComponent.hpp"
+#include "data/InstanceComponent.hpp"
 #include "data/SelectedComponent.hpp"
 #include "data/NameComponent.hpp"
 
@@ -35,25 +36,14 @@ namespace kengine {
 
 					ImGui::SetNextWindowSize({ 200.f * scale, 200.f * scale }, ImGuiCond_FirstUseEver);
 
-					const auto beginWindow = [&selected, &open] {
-						const auto name = selected.tryGet<NameComponent>();
-						if (name)
-							return ImGui::Begin(putils::string<64>("%s##[%d]", name->name.c_str(), selected.id), &open, ImGuiWindowFlags_NoSavedSettings);
-						else
-							return ImGui::Begin(putils::string<64>("[%d] Entity editor", selected.id), nullptr, ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoTitleBar);
-					};
+					const auto name = selected.tryGet<NameComponent>();
+					const auto windowTitle =
+						name ?
+						putils::string<64>("%s##[%d]", name->name.c_str(), selected.id) :
+						putils::string<64>("[%d] Entity editor", selected.id);
 
-					if (beginWindow()) {
-						if (!selected.has<NameComponent>()) { // no title bar
-							if (ImGui::Button("x"))
-								selected.detach<SelectedComponent>();
-							ImGui::Separator();
-						}
-
-						ImGui::BeginChild("##child");
-						imguiHelper::editEntity(selected);
-						ImGui::EndChild();
-					}
+					if (ImGui::Begin(windowTitle, &open, ImGuiWindowFlags_NoSavedSettings))
+						imguiHelper::editEntityAndModel(selected);
 					ImGui::End();
 
 					if (!open)
