@@ -5,6 +5,7 @@
 #include "helpers/sortHelper.hpp"
 
 #include "data/ImGuiScaleComponent.hpp"
+#include "data/InstanceComponent.hpp"
 
 #include "meta/Has.hpp"
 #include "meta/AttachTo.hpp"
@@ -26,6 +27,28 @@ namespace kengine::imguiHelper {
 					display->call(e);
 					ImGui::TreePop();
 				}
+	}
+
+	void displayEntityAndModel(const Entity & e) noexcept {
+		const auto instance = e.tryGet<InstanceComponent>();
+		if (!instance || instance->model == INVALID_ID) {
+			displayEntity(e);
+			return;
+		}
+
+		if (ImGui::BeginTabBar("##tabs")) {
+			if (ImGui::BeginTabItem("Object")) {
+				displayEntity(e);
+				ImGui::EndTabItem();
+			}
+
+			if (ImGui::BeginTabItem("Model")) {
+				displayEntity(entities[instance->model]);
+				ImGui::EndTabItem();
+			}
+
+			ImGui::EndTabBar();
+		}
 	}
 
 	void editEntity(Entity & e) noexcept {
@@ -63,6 +86,33 @@ namespace kengine::imguiHelper {
 				edit->call(e);
 				ImGui::TreePop();
 			}
+		}
+	}
+
+	void editEntityAndModel(Entity & e) noexcept {
+		const auto instance = e.tryGet<InstanceComponent>();
+		if (!instance || instance->model == INVALID_ID) {
+			editEntity(e);
+			return;
+		}
+
+		if (ImGui::BeginTabBar("##tabs")) {
+			ImGui::PushItemWidth(ImGui::GetWindowWidth() / 2.f);
+
+			if (ImGui::BeginTabItem("Object")) {
+				editEntity(e);
+				ImGui::EndTabItem();
+			}
+
+			if (ImGui::BeginTabItem("Model")) {
+				auto model = entities[instance->model];
+				editEntity(model);
+				ImGui::EndTabItem();
+			}
+
+			ImGui::PopItemWidth();
+
+			ImGui::EndTabBar();
 		}
 	}
 
