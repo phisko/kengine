@@ -110,16 +110,18 @@ namespace kengine::opengl::shaders {
 					[&](const DebugGraphicsComponent::Sphere & sphere) noexcept {
 						model = glm::translate(model, shaderHelper::toVec(element.pos));
 						commonMatrixTransform(model, transform, element.referenceSpace);
+						model = glm::scale(model, glm::vec3(sphere.radius));
 						if (element.referenceSpace == DebugGraphicsComponent::ReferenceSpace::Object)
-							model = glm::scale(model, shaderHelper::toVec(transform.boundingBox.size * sphere.radius));
+							model = glm::scale(model, shaderHelper::toVec(transform.boundingBox.size));
 						_model = model;
 						shaderHelper::shapes::drawSphere();
 					},
 					[&](const DebugGraphicsComponent::Box & box) noexcept {
 						model = glm::translate(model, shaderHelper::toVec(element.pos));
 						commonMatrixTransform(model, transform, element.referenceSpace);
+						model = glm::scale(model, shaderHelper::toVec(box.size));
 						if (element.referenceSpace == DebugGraphicsComponent::ReferenceSpace::Object)
-							model = glm::scale(model, shaderHelper::toVec(transform.boundingBox.size * box.size));
+							model = glm::scale(model, shaderHelper::toVec(transform.boundingBox.size));
 						_model = model;
 						shaderHelper::shapes::drawCube();
 					},
