@@ -337,30 +337,31 @@ namespace kengine::bullet {
 			}
 
 			static btTransform toBullet(const TransformComponent & parent, const ModelColliderComponent::Collider & collider, const SkeletonComponent * skeleton, const ModelSkeletonComponent * modelSkeleton, const TransformComponent * modelTransform) noexcept {
-				glm::mat4 parentMat(1.f);
-				parentMat = glm::scale(parentMat, { -1.f, 1.f, -1.f });
+				auto parentMat = matrixHelper::getModelMatrix({}, modelTransform);
+				parentMat = glm::scale(parentMat, toVec(parent.boundingBox.size));
 
+				const auto tmp = matrixHelper::getPosition(parentMat);
+
+				glm::mat4 boneMat(1.f);
 				if (!collider.boneName.empty()) {
 					// Apply model scale to bone transformation
 					kengine_assert(skeleton != nullptr && modelSkeleton != nullptr);
-
-					const auto worldSpaceBone = skeletonHelper::getBoneMatrix(collider.boneName.c_str(), *skeleton, *modelSkeleton);
-					const auto pos = matrixHelper::getPosition(worldSpaceBone);
-					auto parentScale = pos * parent.boundingBox.size;
-					if (modelTransform != nullptr)
-						parentScale *= modelTransform->boundingBox.size;
-					parentMat = glm::translate(parentMat, toVec(parentScale));
-					parentMat = glm::translate(parentMat, -toVec(pos));
-					parentMat *= worldSpaceBone;
+					boneMat = skeletonHelper::getBoneMatrix(collider.boneName.c_str(), *skeleton, *modelSkeleton);
 				}
 
+				const auto tmp1 = matrixHelper::getPosition(boneMat);
+
 				glm::mat4 colliderMat(1.f);
-				colliderMat = glm::translate(colliderMat, toVec(collider.transform.boundingBox.position * parent.boundingBox.size));
+				colliderMat = glm::translate(colliderMat, toVec(collider.transform.boundingBox.position));
 				colliderMat = glm::rotate(colliderMat, collider.transform.yaw, { 0.f, 1.f, 0.f });
 				colliderMat = glm::rotate(colliderMat, collider.transform.pitch, { 1.f, 0.f, 0.f });
 				colliderMat = glm::rotate(colliderMat, collider.transform.roll, { 0.f, 0.f, 1.f });
 
-				const auto mat = parentMat * colliderMat;
+				const auto tmp2 = matrixHelper::getPosition(colliderMat);
+
+				const auto mat = parentMat * boneMat * colliderMat;
+
+				const auto tmp3 = matrixHelper::getPosition(mat);
 				btTransform ret;
 				ret.setFromOpenGLMatrix(glm::value_ptr(mat));
 
