@@ -1,6 +1,6 @@
 # [ModelAnimationComponent](ModelAnimationComponent.hpp)
 
-`Component` providing a list of animation files to be loaded for a [model](ModelComponent.md) `Entity`. Once processed by an animation system, it holds a list of all the animations that were loaded, along with functions to extract information from the animations.
+`Component` holding a list of all animations loaded for a [model](ModelComponent.md) `Entity`, along with functions to extract information from the animations.
 
 ## Specs
 
@@ -8,14 +8,6 @@
 * Not serializable (holds dynamic pointers)
 
 ## Members
-
-### files
-
-```cpp
-std::vector<std::string>> files;
-```
-
-List of all animation files to be loaded for the model.
 
 ### animations
 

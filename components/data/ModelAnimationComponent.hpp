@@ -10,8 +10,6 @@
 
 namespace kengine {
 	struct ModelAnimationComponent {
-		std::vector<std::string> files; // Filled by user
-
 		struct Anim {
 			std::string name;
 			float totalTime;
@@ -32,7 +30,6 @@ namespace kengine {
 putils_reflection_info {
 	putils_reflection_class_name;
 	putils_reflection_attributes(
-		putils_reflection_attribute(files),
 		putils_reflection_attribute(animations),
 		putils_reflection_attribute(getAnimationMovementUntilTime),
 		putils_reflection_attribute(getAnimationRotationUntilTime),

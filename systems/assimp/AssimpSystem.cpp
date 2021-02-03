@@ -11,7 +11,9 @@
 #include "AssImpShadowMap.hpp"
 #include "AssImpShadowCube.hpp"
 
+#include "data/AdjustableComponent.hpp"
 #include "data/AnimationComponent.hpp"
+#include "data/AnimationFilesComponent.hpp"
 #include "data/GraphicsComponent.hpp"
 #include "data/InstanceComponent.hpp"
 #include "data/ModelAnimationComponent.hpp"
@@ -99,10 +101,20 @@ putils_reflection_info {
 #undef refltype
 
 namespace kengine::assimp {
+	struct {
+		bool editorMode = false;
+	} adjustables;
+
 	struct impl {
 		static void init(Entity & e) noexcept {
 			e += functions::Execute{ execute };
 			e += functions::OnEntityCreated{ onEntityCreated };
+
+			e += AdjustableComponent{
+				"Animation", {
+					{ "Editor mode (reload files each frame)", &adjustables.editorMode }
+				}
+			};
 
 			entities += [&](Entity & e) noexcept {
 				e += SystemSpecificShaderComponent<putils::gl::Program>{ std::make_unique<AssImpShader>() };
@@ -367,19 +379,26 @@ namespace kengine::assimp {
 
 		static void loadAnims(Entity & e, const char * file, const aiScene * scene) noexcept {
 			auto & anims = e.attach<ModelAnimationComponent>();
+
+			initExtractedMotionGetters(e, anims);
+
+			anims.animations.clear();
 			addAnims(file, scene, anims);
 
-			auto & assimpAnimFiles = e.attach<AssImpModelAnimComponent>();
+			const auto animFiles = e.tryGet<AnimationFilesComponent>();
+			if (!animFiles)
+				return;
 
-			for (const auto & f : anims.files) {
+			auto & assimpAnimFiles = e.attach<AssImpModelAnimComponent>();
+			assimpAnimFiles.animEntities.clear();
+
+			for (const auto & f : animFiles->files) {
 				const auto animEntity = loadAnimFile(f.c_str());
 				assimpAnimFiles.animEntities.push_back(animEntity);
 
 				const auto & assimpAnim = entities[animEntity.id].get<AssImpAnimFileComponent>();
 				addAnims(f.c_str(), assimpAnim.importer->GetScene(), anims);
 			}
-
-			initExtractedMotionGetters(e, anims, assimpAnimFiles);
 		}
 
 		static AssImpModelAnimComponent::AnimEntity loadAnimFile(const char * file) noexcept {
@@ -424,13 +443,13 @@ namespace kengine::assimp {
 			}
 		}
 
-		static void initExtractedMotionGetters(const Entity & e, ModelAnimationComponent & anims, const AssImpModelAnimComponent & assimpAnimFiles) noexcept {
+		static void initExtractedMotionGetters(const Entity & e, ModelAnimationComponent & anims) noexcept {
 			struct MovementExtractorParams {
 				glm::mat4 toWorldSpace;
 				const aiNodeAnim * nodeAnim;
 			};
 
-			const auto getExtractorParams = [&assimpAnimFiles, modelID = e.id](const Entity & e, size_t anim) noexcept {
+			const auto getExtractorParams = [modelID = e.id](const Entity & e, size_t anim) noexcept {
 				const auto modelEntity = entities[modelID];
 
 				auto noTranslateTransform = e.get<TransformComponent>();
@@ -540,6 +559,12 @@ namespace kengine::assimp {
 		};
 
 		static void execute(float deltaTime) noexcept {
+			runAnimations(deltaTime);
+			if (adjustables.editorMode)
+				reloadAnimations();
+		}
+
+		static void runAnimations(float deltaTime) noexcept {
 			std::atomic<size_t> jobsLeft = 0;
 
 			for (auto [e, instance, skeleton, anim, transform] : entities.with<InstanceComponent, SkeletonComponent, AnimationComponent, TransformComponent>())
@@ -600,6 +625,11 @@ namespace kengine::assimp {
 			}
 
 			while (jobsLeft > 0);
+		}
+
+		static void reloadAnimations() noexcept {
+			for (auto [e, model, assimpModel] : entities.with<ModelComponent, AssImpModelComponent>())
+				loadAnims(e, model.file, assimpModel.importer->GetScene());
 		}
 
 		static void updateBoneMats(const aiNode * node, const aiAnimation * anim, float time, const AssImpModelSkeletonComponent & assimpSkeleton, SkeletonComponent & comp, const glm::mat4 & parentTransform, const AnimationComponent & animComponent, TransformComponent & transform, LastFrameMovementComponent & lastFrame, const glm::mat4 & modelMatrix, bool firstNodeAnim) noexcept {
