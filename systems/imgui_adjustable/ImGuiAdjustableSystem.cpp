@@ -68,10 +68,10 @@ namespace kengine::imgui_adjustable {
 				static char nameSearch[1024] = "";
 
 				ImGui::Columns(2);
-				if (ImGui::Button("Save"))
+				if (ImGui::Button("Save", { -1.f, 0.f }))
 					save();
 				ImGui::NextColumn();
-				if (ImGui::Button("Load"))
+				if (ImGui::Button("Load", { -1.f,0.f }))
 					load();
 				ImGui::Columns();
 
