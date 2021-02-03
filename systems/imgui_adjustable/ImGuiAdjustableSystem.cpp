@@ -71,7 +71,7 @@ namespace kengine::imgui_adjustable {
 				if (ImGui::Button("Save", { -1.f, 0.f }))
 					save();
 				ImGui::NextColumn();
-				if (ImGui::Button("Load", { -1.f,0.f }))
+				if (ImGui::Button("Load", { -1.f, 0.f }))
 					load();
 				ImGui::Columns();
 
