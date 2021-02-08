@@ -92,7 +92,7 @@ namespace kengine::recast {
 				if (mustSave)
 					saveBinaryFile(binaryFile, data, navMesh);
 
-				navMesh.getPath = getPath(e.tryGet<TransformComponent>(), navMesh, recast);
+				e += functions::GetPath{ getPath(e.tryGet<TransformComponent>(), navMesh, recast) };
 			}
 
 			static NavMeshData loadBinaryFile(const char * binaryFile, const NavMeshComponent & navMesh) noexcept {
@@ -441,7 +441,7 @@ namespace kengine::recast {
 				return navMeshQuery;
 			}
 
-			static NavMeshComponent::GetPathFunc getPath(const TransformComponent * modelTransform, const NavMeshComponent & navMesh, const RecastNavMeshComponent & recast) noexcept {
+			static functions::GetPath::Callable getPath(const TransformComponent * modelTransform, const NavMeshComponent & navMesh, const RecastNavMeshComponent & recast) noexcept {
 				return [&, modelTransform](const Entity & environment, const putils::Point3f & startWorldSpace, const putils::Point3f & endWorldSpace) {
 					static const dtQueryFilter filter;
 
@@ -451,7 +451,7 @@ namespace kengine::recast {
 					const auto start = matrixHelper::convertToReferencial(startWorldSpace, worldToModel);
 					const auto end = matrixHelper::convertToReferencial(endWorldSpace, worldToModel);
 
-					NavMeshComponent::Path ret;
+					functions::GetPathImpl::Path ret;
 
 					const auto maxExtent = std::max(navMesh.characterRadius * 2.f, navMesh.characterHeight);
 					const float extents[3] = { maxExtent, maxExtent, maxExtent };

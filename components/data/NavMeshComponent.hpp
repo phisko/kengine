@@ -12,21 +12,12 @@
 #include "angle.hpp"
 #include "Point.hpp"
 #include "vector.hpp"
-#include "function.hpp"
+#include "BaseFunction.hpp"
 
 namespace kengine {
 	class Entity;
 
-	// Indicates that the navmesh should be rebuilt
-	struct RebuildNavMeshComponent {};
-
 	struct NavMeshComponent {
-		static constexpr char PathName[] = "NavMeshComponentPath";
-		using Path = putils::vector<putils::Point3f, KENGINE_NAVMESH_MAX_PATH_LENGTH, PathName>;
-		using GetPathFunc = putils::function<Path(const Entity & environment, const putils::Point3f & start, const putils::Point3f & end), KENGINE_NAVMESH_FUNC_SIZE>;
-		// `environment` is the entity instantiating the `model Entity` this component is attached to
-
-		GetPathFunc getPath = nullptr; // Filled by System that generates navmesh
 		size_t concernedMesh = 0; // Index into ModelDataComponent::meshes, pointing to the mesh for which to generate the navmesh
 		float cellSize = .25f;
 		float cellHeight = .25f;
@@ -43,19 +34,24 @@ namespace kengine {
 		float detailSampleMaxError = 20.f;
 		int queryMaxSearchNodes = 65535;
 	};
-}
 
-#define refltype kengine::RebuildNavMeshComponent
-putils_reflection_info {
-	putils_reflection_class_name;
-};
-#undef refltype
+	namespace functions {
+		namespace GetPathImpl {
+			static constexpr char PathName[] = "NavMeshComponentPath";
+			using Path = putils::vector<putils::Point3f, KENGINE_NAVMESH_MAX_PATH_LENGTH, PathName>;
+		}
+
+		struct GetPath : BaseFunction<
+			GetPathImpl::Path (const Entity & environment, const putils::Point3f & start, const putils::Point3f & end)
+			// `environment` is the entity instantiating the `model Entity` this component is attached to
+		> {};
+	}
+}
 
 #define refltype kengine::NavMeshComponent
 putils_reflection_info {
 	putils_reflection_class_name;
 	putils_reflection_attributes(
-		putils_reflection_attribute(getPath),
 		putils_reflection_attribute(concernedMesh),
 		putils_reflection_attribute(cellSize),
 		putils_reflection_attribute(cellHeight),
@@ -72,8 +68,17 @@ putils_reflection_info {
 		putils_reflection_attribute(detailSampleMaxError),
 		putils_reflection_attribute(queryMaxSearchNodes)
 	);
+};
+#undef refltype
+
+#define refltype kengine::functions::GetPath
+putils_reflection_info{
+	putils_reflection_class_name;
+	putils_reflection_parents(
+		putils_reflection_type(refltype::Base)
+	);
 	putils_reflection_used_types(
-		putils_reflection_type(kengine::NavMeshComponent::Path)
+		putils_reflection_type(kengine::functions::GetPathImpl::Path)
 	);
 };
 #undef refltype
