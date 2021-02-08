@@ -60,13 +60,17 @@ Specifies whether an element's position is specified in world-space or object-sp
 
 ```cpp
 struct Element {
-    putils::Point3f pos;
+    putils::Point3f pos{ 0.f, 0.f, 0.f };
     putils::NormalizedColor color;
-    std::variant<Text, Line, Sphere, Box> data;
-    ReferenceSpace referenceSpace;
 
-    template<typename T>
-    explicit Element(T && val, const putils::Point3f & pos = { 0.f, 0.f, 0.f }, const putils::NormalizedColor & color = {}, ReferenceSpace referenceSpace = ReferenceSpace::Object);
+    ReferenceSpace referenceSpace = ReferenceSpace::Object;
+
+    Text text;
+    Line line;
+    Sphere sphere;
+    Box box;
+
+    Type type;
 };
 
 std::vector<Element> elements;

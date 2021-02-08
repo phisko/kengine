@@ -633,9 +633,9 @@ namespace kengine::opengl {
 			size_t indexForPixel = 0;
 		};
 
+		static constexpr auto GBUFFER_ENTITY_LOCATION = offsetof(GBufferTextures, entityID) / sizeof(GBufferTextures::entityID);
+		static constexpr auto GBUFFER_POSITION_LOCATION = offsetof(GBufferTextures, position) / sizeof(GBufferTextures::position);
 		static EntityID getEntityInPixel(EntityID window, const putils::Point2ui & pixel) noexcept {
-			static constexpr auto GBUFFER_ENTITY_LOCATION = offsetof(GBufferTextures, entityID) / sizeof(GBufferTextures::entityID);
-
 			const auto info = getGBufferInfo(window, pixel);
 			if (info.gBuffer == nullptr)
 				return INVALID_ID;
@@ -644,9 +644,6 @@ namespace kengine::opengl {
 			{ // Release texture asap
 				const auto texture = info.gBuffer->getTexture(GBUFFER_ENTITY_LOCATION);
 				const auto & size = info.gBuffer->getSize();
-				for (size_t i = 0; i < size.x * size.y; ++i)
-					if (texture.data[i] != 0.f)
-						break;
 				ret = (EntityID)texture.data[info.indexForPixel];
 			}
 			if (ret == 0)
@@ -655,11 +652,17 @@ namespace kengine::opengl {
 		}
 
 		static std::optional<putils::Point3f> getPositionInPixel(EntityID window, const putils::Point2ui & pixel) noexcept {
-			static constexpr auto GBUFFER_POSITION_LOCATION = offsetof(GBufferTextures, position) / sizeof(GBufferTextures::position);
-
 			const auto info = getGBufferInfo(window, pixel);
 			if (info.gBuffer == nullptr)
 				return std::nullopt;
+
+			{ // Release texture asap
+				const auto texture = info.gBuffer->getTexture(GBUFFER_ENTITY_LOCATION);
+				const auto & size = info.gBuffer->getSize();
+				const auto entityInPixel = (EntityID)texture.data[info.indexForPixel];
+				if (entityInPixel == 0)
+					return std::nullopt;
+			}
 
 			const auto texture = info.gBuffer->getTexture(GBUFFER_POSITION_LOCATION);
 			const auto & size = info.gBuffer->getSize();

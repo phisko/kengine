@@ -7,13 +7,13 @@ This `function Component` is typically attached to graphics systems (such as the
 ## Prototype
 
 ```cpp
-putils::Point3f (Entity::ID window, const putils::Point2ui & pixel);
+std::optional<putils::Point3f> (Entity::ID window, const putils::Point2ui & pixel);
 ```
 
 ### Return value
 
-* `{ 0.f, 0.f, 0.f }` if the `window` is unknown to this handler (i.e. it is handled by another graphics system)
-* `{ 0.f, 0.f, 0.f }` if no `Entity` is seen in the pixel
+* `std::nullopt` if the `window` is unknown to this handler (i.e. it is handled by another graphics system)
+* `std::nullopt` if no `Entity` is seen in the pixel
 * the position seen in the pixel otherwise
 
 ### Parameters
