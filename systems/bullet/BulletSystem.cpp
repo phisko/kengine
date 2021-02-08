@@ -389,11 +389,15 @@ namespace kengine::bullet {
 			DebugGraphicsComponent & getDebugComponent() noexcept { return entities[_debugEntity].get<DebugGraphicsComponent>(); }
 
 			void drawLine(const btVector3 & from, const btVector3 & to, const btVector3 & color) noexcept override {
+				DebugGraphicsComponent::Element debugElement; {
+					debugElement.type = DebugGraphicsComponent::Type::Line;
+					debugElement.line.end = helpers::toPutils(from);
+					debugElement.pos = helpers::toPutils(to);
+					debugElement.color = putils::NormalizedColor{ color[0], color[1], color[2], 1.f };
+					debugElement.referenceSpace = DebugGraphicsComponent::ReferenceSpace::World;
+				}
 				auto & comp = getDebugComponent();
-				const auto a = helpers::toPutils(from);
-				const auto b = helpers::toPutils(to);
-				const auto putilsColor = putils::NormalizedColor{ color[0], color[1], color[2], 1.f };
-				comp.elements.emplace_back(DebugGraphicsComponent::Line{ a }, b, putilsColor, DebugGraphicsComponent::ReferenceSpace::World);
+				comp.elements.emplace_back(std::move(debugElement));
 			}
 
 			void drawContactPoint(const btVector3 & PointOnB, const btVector3 & normalOnB, btScalar distance, int lifeTime, const btVector3 & color) override {}

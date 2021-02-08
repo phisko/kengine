@@ -8,8 +8,7 @@
 #include "shaderHelper.hpp"
 #include "ApplyTransparencySrc.hpp"
 
-#include "visit.hpp"
-#include "static_assert.hpp"
+#include "magic_enum.hpp"
 
 #pragma region GLSL
 static const char * vert = R"(
@@ -101,37 +100,38 @@ namespace kengine::opengl::shaders {
 				_entityID = 0.f; // don't want the debug elements to be clickable/highlighted
 
 				glm::mat4 model{ 1.f };
-				std::visit(putils::overloaded{
-					[&](const DebugGraphicsComponent::Line & line) noexcept {
-						commonMatrixTransform(model, transform, element.referenceSpace);
-						_model = model;
-						shaderHelper::shapes::drawLine(shaderHelper::toVec(element.pos), shaderHelper::toVec(line.end));
-					},
-					[&](const DebugGraphicsComponent::Sphere & sphere) noexcept {
-						model = glm::translate(model, shaderHelper::toVec(element.pos));
-						commonMatrixTransform(model, transform, element.referenceSpace);
-						model = glm::scale(model, glm::vec3(sphere.radius));
-						if (element.referenceSpace == DebugGraphicsComponent::ReferenceSpace::Object)
-							model = glm::scale(model, shaderHelper::toVec(transform.boundingBox.size));
-						_model = model;
-						shaderHelper::shapes::drawSphere();
-					},
-					[&](const DebugGraphicsComponent::Box & box) noexcept {
-						model = glm::translate(model, shaderHelper::toVec(element.pos));
-						commonMatrixTransform(model, transform, element.referenceSpace);
-						model = glm::scale(model, shaderHelper::toVec(box.size));
-						if (element.referenceSpace == DebugGraphicsComponent::ReferenceSpace::Object)
-							model = glm::scale(model, shaderHelper::toVec(transform.boundingBox.size));
-						_model = model;
-						shaderHelper::shapes::drawCube();
-					},
-					[&](const DebugGraphicsComponent::Text & text) noexcept {
-						// TODO
-					},
-					[&](auto && v) noexcept {
-						static_assert(putils::always_false<decltype(v)>(), "Non exhaustive visitor");
-					}
-				}, element.data);
+				using ElementType = DebugGraphicsComponent::Type;
+				switch (element.type) {
+				case ElementType::Line:
+					commonMatrixTransform(model, transform, element.referenceSpace);
+					_model = model;
+					shaderHelper::shapes::drawLine(shaderHelper::toVec(element.pos), shaderHelper::toVec(element.line.end));
+					break;
+				case ElementType::Sphere:
+					model = glm::translate(model, shaderHelper::toVec(element.pos));
+					commonMatrixTransform(model, transform, element.referenceSpace);
+					model = glm::scale(model, glm::vec3(element.sphere.radius));
+					if (element.referenceSpace == DebugGraphicsComponent::ReferenceSpace::Object)
+						model = glm::scale(model, shaderHelper::toVec(transform.boundingBox.size));
+					_model = model;
+					shaderHelper::shapes::drawSphere();
+					break;
+				case ElementType::Box:
+					model = glm::translate(model, shaderHelper::toVec(element.pos));
+					commonMatrixTransform(model, transform, element.referenceSpace);
+					model = glm::scale(model, shaderHelper::toVec(element.box.size));
+					if (element.referenceSpace == DebugGraphicsComponent::ReferenceSpace::Object)
+						model = glm::scale(model, shaderHelper::toVec(transform.boundingBox.size));
+					_model = model;
+					shaderHelper::shapes::drawCube();
+					break;
+				case ElementType::Text:
+					// TODO
+					break;
+				default:
+					static_assert(putils::magic_enum::enum_count<ElementType>() == 4);
+					break;
+				}
 			}
 		}
 	}

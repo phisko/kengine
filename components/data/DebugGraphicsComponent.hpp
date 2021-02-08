@@ -14,7 +14,7 @@ namespace kengine {
 		};
 
 		struct Line {
-			putils::Point3f end = {};
+			putils::Point3f end{ 0.f, 0.f, 0.f };
 			float thickness = 1.f;
 		};
 
@@ -26,27 +26,30 @@ namespace kengine {
 			putils::Vector3f size = { 1.f, 1.f, 1.f };
 		};
 
+		enum class Type {
+			Text,
+			Line,
+			Sphere,
+			Box
+		};
+
 		enum class ReferenceSpace {
 			World,
 			Object
 		};
 
 		struct Element {
-			putils::Point3f pos;
+			putils::Point3f pos{ 0.f, 0.f, 0.f };
 			putils::NormalizedColor color;
-			std::variant<Text, Line, Sphere, Box> data;
-			ReferenceSpace referenceSpace;
 
-			Element() = default;
-			Element(const Element &) = default;
-			Element & operator=(const Element &) = default;
-			Element(Element &&) = default;
-			Element & operator=(Element &&) = default;
+			ReferenceSpace referenceSpace = ReferenceSpace::Object;
 
-			template<typename T, typename = std::enable_if_t<!std::is_same<std::decay_t<T>, Element>()>>
-			explicit Element(T && val, const putils::Point3f & pos = { 0.f, 0.f, 0.f }, const putils::NormalizedColor & color = {}, ReferenceSpace referenceSpace = ReferenceSpace::Object)
-				: data(FWD(val)), pos(pos), color(color), referenceSpace(referenceSpace)
-			{}
+			Text text;
+			Line line;
+			Sphere sphere;
+			Box box;
+
+			Type type;
 		};
 
 		std::vector<Element> elements;
@@ -60,11 +63,11 @@ putils_reflection_info{
 		putils_reflection_attribute(elements)
 	);
 	putils_reflection_used_types(
-		putils_reflection_type(refltype::Element),
 		putils_reflection_type(refltype::Text),
 		putils_reflection_type(refltype::Line),
 		putils_reflection_type(refltype::Sphere),
-		putils_reflection_type(refltype::Box)
+		putils_reflection_type(refltype::Box),
+		putils_reflection_type(refltype::Element)
 	);
 };
 #undef refltype
@@ -75,7 +78,12 @@ putils_reflection_info{
 	putils_reflection_attributes(
 		putils_reflection_attribute(pos),
 		putils_reflection_attribute(color),
-		putils_reflection_attribute(data)
+		putils_reflection_attribute(text),
+		putils_reflection_attribute(line),
+		putils_reflection_attribute(sphere),
+		putils_reflection_attribute(box),
+		putils_reflection_attribute(type),
+		putils_reflection_attribute(referenceSpace)
 	);
 };
 #undef refltype
