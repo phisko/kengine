@@ -654,12 +654,12 @@ namespace kengine::opengl {
 			return ret;
 		}
 
-		static putils::Point3f getPositionInPixel(EntityID window, const putils::Point2ui & pixel) noexcept {
+		static std::optional<putils::Point3f> getPositionInPixel(EntityID window, const putils::Point2ui & pixel) noexcept {
 			static constexpr auto GBUFFER_POSITION_LOCATION = offsetof(GBufferTextures, position) / sizeof(GBufferTextures::position);
 
 			const auto info = getGBufferInfo(window, pixel);
 			if (info.gBuffer == nullptr)
-				return {};
+				return std::nullopt;
 
 			const auto texture = info.gBuffer->getTexture(GBUFFER_POSITION_LOCATION);
 			const auto & size = info.gBuffer->getSize();

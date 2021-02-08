@@ -6,7 +6,7 @@
 
 namespace kengine::functions {
     struct GetPositionInPixel : BaseFunction<
-        putils::Point3f(EntityID window, const putils::Point2ui & pixel)
+        std::optional<putils::Point3f> (EntityID window, const putils::Point2ui & pixel)
     > {};
 }
 
