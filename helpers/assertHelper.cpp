@@ -24,11 +24,11 @@ using AssertMap = std::unordered_map<const char *, File>; // Map of files
 static AssertMap g_assertMap;
 
 namespace kengine::assertHelper {
-	void assertFailed(const char * file, int line, const std::string & expr) noexcept {
+	bool assertFailed(const char * file, int line, const std::string & expr) noexcept {
 		struct impl {
-			static void assertFailed(const char * file, int line, const std::string & expr) noexcept {
+			static bool assertFailed(const char * file, int line, const std::string & expr) noexcept {
 				if (isIgnored(file, line))
-					return;
+					return false;
 
 				entities += [file, line, expr](Entity & e) {
 					auto & info = e.attach<AssertInfo>();
@@ -75,6 +75,7 @@ namespace kengine::assertHelper {
 					} };
 				};
 
+				return true;
 			}
 
 			static void ignore(const char * file, int line) noexcept {
@@ -98,7 +99,7 @@ namespace kengine::assertHelper {
 
 		};
 
-		impl::assertFailed(file, line, expr);
+		return impl::assertFailed(file, line, expr);
 	}
 
 	bool isDebuggerPresent() noexcept {

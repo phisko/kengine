@@ -26,8 +26,8 @@
 
 # define kengine_assert_failed(...) \
 	do {\
-		kengine::assertHelper::assertFailed(__FILE__, __LINE__, putils::concat(__VA_ARGS__)); \
-		if (kengine::assertHelper::isDebuggerPresent()) \
+		const bool shouldBreak = kengine::assertHelper::assertFailed(__FILE__, __LINE__, putils::concat(__VA_ARGS__)); \
+		if (shouldBreak && kengine::assertHelper::isDebuggerPresent()) \
 			kengine_debug_break; \
 	} while(false)
 
@@ -45,7 +45,7 @@
 
 namespace kengine {
 	namespace assertHelper {
-		void assertFailed(const char * file, int line, const std::string & expr) noexcept;
+		bool assertFailed(const char * file, int line, const std::string & expr) noexcept;
 		bool isDebuggerPresent() noexcept;
 	}
 }
