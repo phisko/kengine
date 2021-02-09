@@ -216,9 +216,10 @@ namespace kengine::recast {
 
 			static void updateAgentComponent(Entity & e, const ObjectInfo & objectInfo, const RecastCrowdComponent & crowd) noexcept {
 				const auto & agent = e.get<RecastAgentComponent>();
-				dtCrowdAgentParams params = crowd.crowd->getAgent(agent.index)->params;
-				fillCrowdAgentParams(params, objectInfo);
-				crowd.crowd->updateAgentParameters(agent.index, &params);
+				const auto editableAgent = crowd.crowd->getEditableAgent(agent.index);
+				fillCrowdAgentParams(editableAgent->params, objectInfo);
+				memcpy(editableAgent->npos, objectInfo.objectInNavMesh.position, sizeof(float[3]));
+				memcpy(editableAgent->nvel, e.get<PhysicsComponent>().movement, sizeof(float[3]));
 			}
 
 			static void updateDestination(Entity & e, const RecastNavMeshComponent & navMesh, const RecastCrowdComponent & crowd, const putils::Point3f & destinationInModel, const putils::Point3f & searchExtents) noexcept {
