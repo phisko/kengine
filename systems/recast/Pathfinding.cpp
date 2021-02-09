@@ -152,8 +152,9 @@ namespace kengine::recast {
 						continue;
 
 					auto oldEnvironment = entities[agent.crowd];
-					auto & oldCrowd = oldEnvironment.get<RecastCrowdComponent>();
-					oldCrowd.crowd->removeAgent(agent.index);
+					const auto oldCrowd = oldEnvironment.tryGet<RecastCrowdComponent>();
+					if (oldCrowd)
+						oldCrowd->crowd->removeAgent(agent.index);
 
 					auto newEnvironment = entities[pathfinding.environment];
 					auto newCrowd = newEnvironment.tryGet<RecastCrowdComponent>();
