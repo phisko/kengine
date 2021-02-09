@@ -5,6 +5,7 @@
 #include "data/PathfindingComponent.hpp"
 #include "data/PhysicsComponent.hpp"
 #include "data/TransformComponent.hpp"
+#include "data/NavMeshComponent.hpp"
 
 #include "helpers/instanceHelper.hpp"
 #include "helpers/matrixHelper.hpp"
