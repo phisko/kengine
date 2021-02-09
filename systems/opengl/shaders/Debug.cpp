@@ -45,18 +45,18 @@ layout (location = 0) out vec4 gposition;
 layout (location = 1) out vec3 gnormal;
 layout (location = 2) out vec4 gdiffuse;
 layout (location = 3) out vec4 gspecular;
-layout (location = 4) out float gentityID;
+layout (location = 4) out vec4 gentityID;
 
 void applyTransparency(float alpha);
 
 void main() {
 	applyTransparency(color.a);
 
-    gposition = WorldPosition;
+    gposition = vec4(0.0);
     gnormal = -normalize(cross(dFdy(EyeRelativePos), dFdx(EyeRelativePos)));
 	gdiffuse = vec4(color.rgb, 1.0); // don't apply lighting
 	gspecular = vec4(0.0);
-	gentityID = entityID;
+	gentityID = vec4(0.0);
 }
 )";
 #pragma endregion GLSL
@@ -77,6 +77,11 @@ namespace kengine::opengl::shaders {
 
 	void Debug::run(const Parameters & params) noexcept {
 		use();
+
+		shaderHelper::Enable blend(GL_BLEND);
+			
+		glBlendFunci(0, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // position
+		glBlendFunci(4, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // entityID
 
 		_view = params.view;
 		_proj = params.proj;
@@ -134,5 +139,8 @@ namespace kengine::opengl::shaders {
 				}
 			}
 		}
+
+		glBlendFunci(0, GL_ONE, GL_ZERO); // position
+		glBlendFunci(4, GL_ONE, GL_ZERO); // entityID
 	}
 }

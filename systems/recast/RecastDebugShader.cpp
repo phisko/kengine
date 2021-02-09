@@ -18,7 +18,10 @@
 #include "helpers/assertHelper.hpp"
 #include "helpers/matrixHelper.hpp"
 #include "helpers/cameraHelper.hpp"
+#include "systems/opengl/shaders/shaderHelper.hpp"
 #include "systems/opengl/shaders/ApplyTransparencySrc.hpp"
+
+#include "opengl/RAII.hpp"
 
 #include "RecastNavMeshComponent.hpp"
 
@@ -57,18 +60,18 @@ layout (location = 0) out vec4 gposition;
 layout (location = 1) out vec3 gnormal;
 layout (location = 2) out vec4 gdiffuse;
 layout (location = 3) out vec4 gspecular;
-layout (location = 4) out float gentityid;
+layout (location = 4) out vec4 gentityid;
 
 void applyTransparency(float alpha);
 
 void main() {
 	applyTransparency(Color.a);
 
-    gposition = WorldPosition;
+    gposition = vec4(0.0);
     gnormal = -normalize(cross(dFdy(EyeRelativePos), dFdx(EyeRelativePos)));
 	gdiffuse = vec4(Color.rgb, 1.0); // don't apply lighting
 	gspecular = vec4(0.0);
-	gentityid = 0.0;
+	gentityid = vec4(0.0);
 }
 )";
 #pragma endregion GLSL
@@ -112,6 +115,11 @@ namespace kengine {
 
 		use();
 
+		shaderHelper::Enable blend(GL_BLEND);
+		
+		glBlendFunci(0, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // position
+		glBlendFunci(4, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // entityID
+
 		_view = params.view;
 		_proj = params.proj;
 		_viewPos = params.camPos;
@@ -129,6 +137,9 @@ namespace kengine {
 
 			duDebugDrawNavMesh(this, *recastNavMesh->navMesh, 0);
 		}
+
+		glBlendFunci(0, GL_ONE, GL_ZERO); // position
+		glBlendFunci(4, GL_ONE, GL_ZERO); // entityID
 	}
 #pragma endregion Program
 
