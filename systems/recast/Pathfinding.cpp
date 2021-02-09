@@ -21,10 +21,33 @@ namespace kengine::recast {
 	void doPathfinding(float deltaTime) noexcept {
 		struct impl {
 			static void doPathfinding(float deltaTime) noexcept {
+				if (g_adjustables.editorMode)
+					recreateCrowds();
 				removeOldAgents();
 				moveChangedAgents();
 				createNewAgents();
 				updateCrowds(deltaTime);
+			}
+
+			static void recreateCrowds() noexcept {
+				for (auto [e, agent, transform, pathfinding] : entities.with<RecastAgentComponent, TransformComponent, PathfindingComponent>()) {
+					auto environment = entities[agent.crowd];
+					const auto navMesh = instanceHelper::tryGetModel<NavMeshComponent>(environment);
+					if (!navMesh)
+						continue;
+
+					struct NavMeshComponentBackup : NavMeshComponent {};
+					const auto backup = environment.tryGet<NavMeshComponentBackup>();
+					if (backup)
+						if (std::memcmp(navMesh, backup, sizeof(*navMesh)) == 0)
+							continue;
+
+					environment += NavMeshComponentBackup{ *navMesh };
+
+					auto & crowd = attachCrowdComponent(environment);
+					const auto objectInfo = getObjectInfo(getEnvironmentInfo(environment), transform, pathfinding);
+					attachAgentComponent(e, objectInfo, crowd, environment.id);
+				}
 			}
 
 			static void removeOldAgents() noexcept {

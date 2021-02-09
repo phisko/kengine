@@ -30,7 +30,8 @@ namespace kengine {
 
 				e += AdjustableComponent{
 					"Recast", {
-						{ "Path optimization range", &recast::g_adjustables.pathOptimizationRange }
+						{ "Path optimization range", &recast::g_adjustables.pathOptimizationRange },
+						{ "Editor mode (rebuild navmesh each frame)", &recast::g_adjustables.editorMode }
 					}
 				};
 			}

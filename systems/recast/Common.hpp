@@ -10,6 +10,7 @@ static_assert(false, "RecastSystem requires GLM");
 namespace kengine::recast {
 	struct Adjustables {
 		float pathOptimizationRange = 2.f;
+		bool editorMode = false;
 	};
 
 	extern Adjustables g_adjustables;

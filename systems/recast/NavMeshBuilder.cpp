@@ -33,22 +33,30 @@ namespace kengine::recast {
 			static void buildNavMeshes() noexcept {
 				std::atomic<size_t> jobsLeft = 0;
 
-				static const auto buildRecastComponent = [&](auto && entities) noexcept {
-					for (auto [e, model, modelData, navMesh, _] : entities) {
-						++jobsLeft;
-						threadPool().runTask([&, id = e.id]() noexcept {
-							const auto cleanup = putils::onScopeExit([&] { --jobsLeft; });
-							kengine_assert(navMesh.vertsPerPoly <= DT_VERTS_PER_POLYGON);
-							createRecastMesh(model.file, kengine::entities[id], navMesh, modelData);
-							if constexpr (std::is_same<RebuildNavMeshComponent, putils_typeof(_)>())
-								e.detach<RebuildNavMeshComponent>();
-						});
+				if (g_adjustables.editorMode)
+					for (auto [e, model, modelData, navMesh] : entities.with<ModelComponent, ModelDataComponent, NavMeshComponent>()) {
+						struct NavMeshComponentBackup : NavMeshComponent {};
+						const auto backup = e.tryGet<NavMeshComponentBackup>();
+						if (backup)
+							if (std::memcmp(&navMesh, backup, sizeof(navMesh)) == 0)
+								continue;
+						e += NavMeshComponentBackup{ navMesh };
+						buildRecastComponent(e, model, modelData, navMesh, jobsLeft);
 					}
-				};
+				else
+					for (auto [e, model, modelData, navMesh, _] : entities.with<ModelComponent, ModelDataComponent, NavMeshComponent, no<RecastNavMeshComponent>>())
+						buildRecastComponent(e, model, modelData, navMesh, jobsLeft);
 
-				buildRecastComponent(kengine::entities.with<ModelComponent, ModelDataComponent, NavMeshComponent, no<RecastNavMeshComponent>>());
-				buildRecastComponent(kengine::entities.with<ModelComponent, ModelDataComponent, NavMeshComponent, RebuildNavMeshComponent>());
 				while (jobsLeft > 0);
+			}
+
+			static void buildRecastComponent(Entity & e, const ModelComponent & model, const ModelDataComponent & modelData, NavMeshComponent & navMesh, std::atomic<size_t> & jobsLeft) noexcept {
+				++jobsLeft;
+				threadPool().runTask([&, id = e.id]() noexcept {
+					const auto cleanup = putils::onScopeExit([&] { --jobsLeft; });
+					kengine_assert(navMesh.vertsPerPoly <= DT_VERTS_PER_POLYGON);
+					createRecastMesh(model.file, kengine::entities[id], navMesh, modelData);
+				});
 			}
 
 			using HeightfieldPtr = UniquePtr<rcHeightfield, rcFreeHeightField>;
