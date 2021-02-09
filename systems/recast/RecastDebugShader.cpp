@@ -84,24 +84,10 @@ namespace kengine {
 	{
 		entities += [](Entity & e) noexcept {
 			e += AdjustableComponent{
-				"Navmesh", {
-					{ "Debug", &g_adjustables.enabled }
+				"Recast", {
+					{ "Debug navmesh", &g_adjustables.enabled }
 				}
 			};
-
-			e += functions::Execute{[&](float deltaTime) noexcept {
-				if (!g_adjustables.enabled)
-					return;
-				if (ImGui::Begin("RecastShader")) {
-					if (ImGui::BeginCombo("File", g_adjustables.fileName.c_str())) {
-						for (const auto & [e, model, recast] : entities.with<ModelComponent, RecastNavMeshComponent>())
-							if (ImGui::Selectable(model.file))
-								g_adjustables.fileName = model.file;
-						ImGui::EndCombo();
-					}
-				}
-				ImGui::End();
-			}};
 		};
 	}
 
@@ -131,17 +117,17 @@ namespace kengine {
 		_viewPos = params.camPos;
 
 		for (const auto & [e, graphics, instance, transform] : entities.with<GraphicsComponent, InstanceComponent, TransformComponent>()) {
-			if (graphics.appearance != g_adjustables.fileName)
-				continue;
-
 			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
 			const auto model = entities[instance.model];
+			const auto recastNavMesh = model.tryGet<RecastNavMeshComponent>();
+			if (!recastNavMesh)
+				continue;
+
 			_model = matrixHelper::getModelMatrix(transform, model.tryGet<TransformComponent>());
 
-			const auto & comp = model.get<RecastNavMeshComponent>();
-			duDebugDrawNavMesh(this, *comp.navMesh, 0);
+			duDebugDrawNavMesh(this, *recastNavMesh->navMesh, 0);
 		}
 	}
 #pragma endregion Program
