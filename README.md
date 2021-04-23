@@ -2,6 +2,8 @@
 
 The Koala engine is a type-safe and self-documenting implementation of an Entity-Component-System (ECS), with a focus on runtime extensibility and compile-time type safety and clarity.
 
+*The latest version is available on the [develop](https://github.com/phisko/kengine/tree/develop) branch.*
+
 ![koala](koala.png)
 
 ## Table of contents
