@@ -25,7 +25,7 @@ namespace kengine::opengl {
 					return;
 
 				if (ImGui::Begin("Shaders", &tool.enabled)) {
-					static const auto displayShaders = [](const char * groupName, auto && shaders) {
+					static const auto displayShaders = [&](const char * groupName, auto && shaders) {
 						if (ImGui::CollapsingHeader(groupName))
 							for (auto [e, shader, tag] : shaders) {
 								ImGui::MenuItem(shader.shader->getName().c_str(), nullptr, &shader.enabled);
