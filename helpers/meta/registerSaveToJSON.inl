@@ -2,7 +2,7 @@
 
 #include "meta/SaveToJSON.hpp"
 #include "helpers/registerMetaComponentImplementation.hpp"
-#include "reflection/json_helper.hpp"
+#include "reflection_helpers/json_helper.hpp"
 
 namespace kengine {
 	template<typename ... Comps>

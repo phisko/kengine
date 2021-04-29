@@ -2,7 +2,7 @@
 
 #include "meta/EditImGui.hpp"
 #include "helpers/registerMetaComponentImplementation.hpp"
-#include "reflection/imgui_helper.hpp"
+#include "reflection_helpers/imgui_helper.hpp"
 
 namespace kengine {
 	template<typename ... Comps>
