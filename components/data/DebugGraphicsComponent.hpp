@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vector>
-#include <variant>
 #include "Color.hpp"
 #include "Point.hpp"
 
