@@ -224,7 +224,6 @@ These are pre-built, extensible and pluggable elements that can be used to boots
 
 ##### Debug tools
 * [AdjustableComponent](components/data/AdjustableComponent.md): lets users modify variables through a GUI (such as the [ImGuiAdjustableSystem](systems/imgui_adjustable/ImGuiAdjustableSystem.md))
-* [ImGuiComponent](components/data/ImGuiComponent.md): lets `Entities` render debug elements using [ImGui](https://github.com/ocornut/imgui/)
 * [ImGuiToolComponent](components/data/ImGuiToolComponent.md): indicates that an `Entity`'s `ImGuiComponent` is a tool that can be enabled or disabled by the [ImGuiToolSystem](systems/imgui_tool/ImGuiToolSystem.md)
 * [ImGuiScaleComponent](components/data/ImGuiScaleComponent.md): custom scale to be applied to all ImGui elements
 * [DebugGraphicsComponent](components/data/DebugGraphicsComponent.md): lets an `Entity` be used to draw debug information (such as lines, rectangles or spheres)
