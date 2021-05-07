@@ -3,17 +3,20 @@
 #include "data/InputComponent.hpp"
 #include "data/InputBufferComponent.hpp"
 #include "functions/Execute.hpp"
+#include "helpers/logHelper.hpp"
 
 namespace kengine::input {
 	struct impl {
 		static inline InputBufferComponent * buffer;
 
 		static void init(Entity & e) noexcept {
+			kengine_log(Log, "Init", "InputSystem");
 			buffer = &e.attach<InputBufferComponent>();
 			e += functions::Execute{ execute };
 		}
 
 		static void execute(float deltaTime) noexcept {
+			kengine_log(Verbose, "Execute", "InputSystem");
 			for (const auto & [e, comp] : entities.with<InputComponent>()) {
 				for (const auto & e : buffer->keys)
 					if (comp.onKey != nullptr)

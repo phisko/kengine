@@ -4,6 +4,7 @@
 #include "kengine.hpp"
 
 #include "helpers/sortHelper.hpp"
+#include "helpers/logHelper.hpp"
 
 #include "functions/OnTerminate.hpp"
 #include "functions/Execute.hpp"
@@ -24,27 +25,36 @@
 namespace kengine::imgui_tool {
 	struct impl {
 		static void init(Entity & e) noexcept {
-			e += functions::OnEntityCreated{ imgui_tool::impl::onEntityCreated };
-			e += functions::OnTerminate{ imgui_tool::impl::saveTools };
-			e += functions::Execute{ imgui_tool::impl::execute };
+			kengine_log(Log, "Init", "ImGuiToolSystem");
 
-			imgui_tool::impl::confFile.parse();
-			for (const auto & [e, name, tool] : entities.with<NameComponent, ImGuiToolComponent>())
-				tool.enabled = imgui_tool::impl::confFile.getValue(name.name);
+			e += functions::OnEntityCreated{ onEntityCreated };
+			e += functions::OnTerminate{ saveTools };
+			e += functions::Execute{ execute };
+
+			confFile.parse();
+			for (const auto & [e, name, tool] : entities.with<NameComponent, ImGuiToolComponent>()) {
+				kengine_logf(Log, "Init/ImGuiToolSystem", "Initializing %s", name.name.c_str());
+				tool.enabled = confFile.getValue(name.name);
+			}
 		}
 
 		static void execute(float deltaTime) noexcept {
+			kengine_log(Verbose, "Execute", "ImGuiToolSystem");
+
 			if (ImGui::BeginMainMenuBar()) {
 				bool mustSave = false;
 				if (ImGui::BeginMenu("Tools")) {
-					if (ImGui::MenuItem("Disable all"))
+					if (ImGui::MenuItem("Disable all")) {
+						kengine_log(Log, "ImGuiToolSystem", "Disabling all tools");
 						for (auto [e, tool] : entities.with<ImGuiToolComponent>())
 							tool.enabled = false;
+					}
 
 					const auto sorted = sortHelper::getNameSortedEntities<KENGINE_IMGUI_MAX_TOOLS, ImGuiToolComponent>();
 					for (auto & [e, name, tool] : sorted)
 						if (ImGui::MenuItem(name->name)) {
 							tool->enabled = !tool->enabled;
+							kengine_logf(Log, "ImGuiToolSystem", "Turned %s %s", tool->enabled ? "on" : "off", name->name.c_str());
 							mustSave = true;
 						}
 					ImGui::EndMenu();
@@ -65,10 +75,13 @@ namespace kengine::imgui_tool {
 			if (!tool)
 				return;
 
+			kengine_logf(Log, "Init/ImGuiToolSystem", "Initializing %s", name->name.c_str());
 			tool->enabled = confFile.getValue(name->name);
 		}
 
 		static void saveTools() noexcept {
+			kengine_log(Log, "ImGuiToolSystem", "Saving to " KENGINE_IMGUI_TOOLS_SAVE_FILE);
+
 			std::ofstream f(KENGINE_IMGUI_TOOLS_SAVE_FILE);
 			if (!f) {
 				kengine_assert_failed("Failed to open '", KENGINE_IMGUI_TOOLS_SAVE_FILE, "' with write permission");

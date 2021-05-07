@@ -23,7 +23,6 @@
 #include "data/ShaderComponent.hpp"
 #include "data/SkeletonComponent.hpp"
 #include "data/TextureDataComponent.hpp"
-#include "data/SystemSpecificTextureComponent.hpp"
 
 #include "functions/Execute.hpp"
 #include "functions/OnEntityCreated.hpp"
@@ -32,6 +31,7 @@
 #include "helpers/matrixHelper.hpp"
 #include "helpers/resourceHelper.hpp"
 #include "helpers/instanceHelper.hpp"
+#include "helpers/logHelper.hpp"
 #include "AssImpHelper.hpp"
 
 #include "opengl/Program.hpp"
@@ -107,6 +107,8 @@ namespace kengine::assimp {
 
 	struct impl {
 		static void init(Entity & e) noexcept {
+			kengine_log(Log, "Init", "AssimpSystem");
+
 			e += functions::Execute{ execute };
 			e += functions::OnEntityCreated{ onEntityCreated };
 
@@ -152,6 +154,7 @@ namespace kengine::assimp {
 			if (!helpers::importer.IsExtensionSupported(putils::file_extension(path).data()))
 				return;
 
+			kengine_logf(Verbose, "AssimpSystem", "Marking %zu as an AssImp object", e.id);
 			e += AssImpObjectComponent{};
 			e += SkeletonComponent{};
 		}
@@ -182,9 +185,7 @@ namespace kengine::assimp {
 			if (!helpers::importer.IsExtensionSupported(putils::file_extension(f).data()))
 				return false;
 
-#ifndef KENGINE_NDEBUG
-			std::cout << putils::termcolor::green << "[AssImp] Loading " << putils::termcolor::cyan << f << putils::termcolor::green << "..." << putils::termcolor::reset;
-#endif
+			kengine_logf(Log, "AssimpSystem", "Loading %s for %zu", f, e.id);
 
 			auto & model = e.attach<AssImpModelComponent>();
 			model.importer = std::make_unique<Assimp::Importer>();
@@ -203,10 +204,6 @@ namespace kengine::assimp {
 			loadSkeleton(e, scene);
 			loadAnims(e, f, scene);
 
-			// Load animations
-#ifndef KENGINE_NDEBUG
-			std::cout << putils::termcolor::green << "Done\n" << putils::termcolor::reset;
-#endif
 			return true;
 		}
 
@@ -219,6 +216,7 @@ namespace kengine::assimp {
 		static void processNode(AssImpModelComponent & modelData, AssImpTexturesModelComponent & textures, const char * directory, const aiNode * node, const aiScene * scene) noexcept {
 			for (unsigned int i = 0; i < node->mNumMeshes; ++i) {
 				const aiMesh * mesh = scene->mMeshes[node->mMeshes[i]];
+				kengine_logf(Log, "AssimpSystem/loadFile/loadMeshes", "Loading mesh %s", mesh->mName.C_Str());
 				modelData.meshes.push_back(processMesh(mesh));
 				textures.meshes.push_back(processMeshTextures(directory, mesh, scene));
 			}
@@ -324,15 +322,17 @@ namespace kengine::assimp {
 
 				EntityID modelID = INVALID_ID;
 				if (const auto texture = scene->GetEmbeddedTexture(cPath))
-					modelID = resourceHelper::loadTexture(texture->pcData, texture->mWidth, texture->mHeight);
+					modelID = resourceHelper::createTextureModel(texture->pcData, texture->mWidth, texture->mHeight);
 				else
-					modelID = resourceHelper::loadTexture(putils::string<KENGINE_TEXTURE_PATH_MAX_LENGTH>("%s/%s", directory, cPath));
+					modelID = resourceHelper::createTextureModel(putils::string<KENGINE_TEXTURE_PATH_MAX_LENGTH>("%s/%s", directory, cPath));
 
 				textures.push_back(modelID);
 			}
 		}
 
 		static void loadSkeleton(Entity & e, const aiScene * scene) noexcept {
+			kengine_log(Log, "AssimpSystem/loadFile", "Loading skeleton");
+
 			std::vector<aiNode *> allNodes;
 			addNode(allNodes, scene->mRootNode);
 
@@ -348,6 +348,8 @@ namespace kengine::assimp {
 				for (unsigned int i = 0; i < mesh->mNumBones; ++i) {
 					const auto aiBone = mesh->mBones[i];
 					const auto name = aiBone->mName.data;
+
+					kengine_logf(Log, "AssimpSystem/loadFile/loadSkeleton", "Adding bone %s", name);
 
 					AssImpModelSkeletonComponent::Mesh::Bone bone;
 					bone.node = findNode(allNodes, name);
@@ -378,6 +380,8 @@ namespace kengine::assimp {
 		}
 
 		static void loadAnims(Entity & e, const char * file, const aiScene * scene) noexcept {
+			kengine_log(Log, "AssimpSystem/loadFile", "Loading animations");
+
 			auto & anims = e.attach<ModelAnimationComponent>();
 
 			initExtractedMotionGetters(e, anims);
@@ -419,10 +423,8 @@ namespace kengine::assimp {
 				comp.importer = std::make_unique<Assimp::Importer>();
 
 				const auto scene = comp.importer->ReadFile(file, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals /*| aiProcess_OptimizeMeshes*/ | aiProcess_JoinIdenticalVertices);
-				if (scene == nullptr || scene->mRootNode == nullptr) {
-					std::cerr << '\n' << putils::termcolor::red << comp.importer->GetErrorString() << '\n' << putils::termcolor::reset;
+				if (scene == nullptr || scene->mRootNode == nullptr)
 					kengine_assert_failed(putils::string<1024>("Error loading anims from %s: %s", file, comp.importer->GetErrorString()).c_str());
-				}
 				else
 					ret.nbAnims = scene->mNumAnimations;
 			};
@@ -431,8 +433,10 @@ namespace kengine::assimp {
 		}
 
 		static void addAnims(const char * animFile, const aiScene * scene, ModelAnimationComponent & anims) noexcept {
+			kengine_logf(Log, "AssimpSystem/loadFile/loadAnims", "Loading animations from %s", animFile);
 			for (unsigned int i = 0; i < scene->mNumAnimations; ++i) {
 				const auto aiAnim = scene->mAnimations[i];
+				kengine_logf(Log, "AssimpSystem/loadFile/loadAnims", "Found animation '%s'", aiAnim->mName.C_Str());
 				ModelAnimationComponent::Anim anim;
 				anim.name = animFile;
 				anim.name += '/';
@@ -543,6 +547,7 @@ namespace kengine::assimp {
 
 		static ModelDataComponent::FreeFunc release(EntityID id) noexcept {
 			return [id] {
+				kengine_logf(Log, "AssimpSystem", "Releasing AssImpModelComponent for %zu", id);
 				auto e = entities[id];
 				auto & model = e.get<AssImpModelComponent>(); // previous attach hasn't been processed yet, so `get` would assert
 				model.importer->FreeScene();
@@ -559,6 +564,7 @@ namespace kengine::assimp {
 		};
 
 		static void execute(float deltaTime) noexcept {
+			kengine_log(Verbose, "Execute", "AssimpSystem");
 			runAnimations(deltaTime);
 			if (adjustables.editorMode)
 				reloadAnimations();
@@ -628,8 +634,11 @@ namespace kengine::assimp {
 		}
 
 		static void reloadAnimations() noexcept {
-			for (auto [e, model, assimpModel] : entities.with<ModelComponent, AssImpModelComponent>())
+			kengine_log(Verbose, "Execute/Assimp", "Reloading animations for editor mode");
+			for (auto [e, model, assimpModel] : entities.with<ModelComponent, AssImpModelComponent>()) {
+				kengine_logf(Verbose, "Execute/Assimp/reloadAnimations", "Reloading animations for %zu", e.id);
 				loadAnims(e, model.file, assimpModel.importer->GetScene());
+			}
 		}
 
 		static void updateBoneMats(const aiNode * node, const aiAnimation * anim, float time, const AssImpModelSkeletonComponent & assimpSkeleton, SkeletonComponent & comp, const glm::mat4 & parentTransform, const AnimationComponent & animComponent, TransformComponent & transform, LastFrameMovementComponent & lastFrame, const glm::mat4 & modelMatrix, bool firstNodeAnim) noexcept {

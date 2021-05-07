@@ -2,15 +2,12 @@
 
 #include <atomic>
 #include <vector>
-#include <unordered_map>
 #include <memory>
 
 #include "impl/Mutex.hpp"
 #include "impl/Archetype.hpp"
 #include "impl/ComponentMetadata.hpp"
 #include "ThreadPool.hpp"
-
-#include "meta/type.hpp"
 
 namespace kengine {
 	class Entity;

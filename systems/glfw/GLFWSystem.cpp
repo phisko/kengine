@@ -11,8 +11,9 @@
 #include "functions/OnMouseCaptured.hpp"
 #include "functions/Execute.hpp"
 
+#include "helpers/logHelper.hpp"
+
 #include "imgui.h"
-#include "with.hpp"
 
 namespace kengine {
 	namespace Input {
@@ -76,6 +77,7 @@ namespace kengine {
 	EntityCreator * GLFWSystem() noexcept {
 		struct impl {
 			static void init(Entity & e) noexcept {
+				kengine_log(Log, "Init", "GLFWSystem");
 				e += functions::Execute{ execute };
 				e += functions::OnEntityCreated{ onEntityCreated };
 				e += functions::OnTerminate{ terminate };
@@ -91,27 +93,32 @@ namespace kengine {
 			}
 
 			static void terminate() noexcept {
+				kengine_log(Log, "Terminate", "GLFWSystem");
 				glfwTerminate();
 			}
 
 			static void onMouseCaptured(EntityID window, bool captured) noexcept {
 				const auto inputMode = captured ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL;
+				const auto state = captured ? "captured" : "released";
 
+				kengine_logf(Log, "GLFWSystem", "Mouse %s for ImGui", state);
 				if (captured)
 					ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NoMouse;
 				else
 					ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
 
 				if (window == INVALID_ID) {
-					for (const auto & [e, glfw] : entities.with<GLFWWindowComponent>())
+					for (const auto & [e, glfw] : entities.with<GLFWWindowComponent>()) {
+						kengine_logf(Log, "GLFWSystem", "Mouse %s for %zu", state, e.id);
 						glfwSetInputMode(glfw.window.get(), GLFW_CURSOR, inputMode);
+					}
 					return;
 				}
 
 				const auto glfw = entities[window].tryGet<GLFWWindowComponent>();
 				if (glfw == nullptr)
 					return;
-
+				kengine_logf(Log, "GLFWSystem", "Mouse %s for %zu", state, window);
 				glfwSetInputMode(glfw->window.get(), GLFW_CURSOR, inputMode);
 			}
 
@@ -128,6 +135,7 @@ namespace kengine {
 			}
 
 			static void execute(float deltaTime) noexcept {
+				kengine_log(Verbose, "Execute", "GLFWSystem");
 				for (const auto & [e, window, glfw] : entities.with<WindowComponent, GLFWWindowComponent>())
 					if (glfwWindowShouldClose(glfw.window.get())) {
 						if (window.shutdownOnClose)
@@ -143,6 +151,7 @@ namespace kengine {
 			}
 
 			static void createWindow(Entity & e, WindowComponent & window, const GLFWWindowInitComponent & initGlfw) noexcept {
+				kengine_logf(Log, "GLFWSystem", "Initializing window for %zu", e.id);
 				auto & glfwComp = e.attach<GLFWWindowComponent>();
 
 				if (initGlfw.setHints)

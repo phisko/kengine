@@ -2,13 +2,13 @@
 
 #include <unordered_set>
 
-#include "AssertHelper.hpp"
+#include "assertHelper.hpp"
 #include "kengine.hpp"
 
 #include "data/TimeModulatorComponent.hpp"
 #include "functions/Execute.hpp"
+#include "logHelper.hpp"
 #include "imgui.h"
-#include "lengthof.hpp"
 #include "string.hpp"
 #include "get_call_stack.hpp"
 
@@ -29,6 +29,8 @@ namespace kengine::assertHelper {
 			static bool assertFailed(const char * file, int line, const std::string & expr) noexcept {
 				if (isIgnored(file, line))
 					return false;
+
+				kengine_logf(Error, "Assert", "%s:%d %s", file, line, expr.c_str());
 
 				entities += [file, line, expr](Entity & e) {
 					auto & info = e.attach<AssertInfo>();
@@ -79,6 +81,8 @@ namespace kengine::assertHelper {
 			}
 
 			static void ignore(const char * file, int line) noexcept {
+				kengine_logf(Verbose, "Assert", "Ignoring asserts for %s:%d", file, line);
+
 				std::vector<kengine::EntityID> toRemove;
 				g_assertMap[file].insert(line);
 				for (const auto & [e, info] : kengine::entities.with<AssertInfo>())

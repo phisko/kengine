@@ -11,7 +11,7 @@
 #include "functions/OnTerminate.hpp"
 #include "functions/OnEntityCreated.hpp"
 
-#include "helpers/sortHelper.hpp"
+#include "helpers/logHelper.hpp"
 
 #include "imgui.h"
 #include "vector.hpp"
@@ -59,6 +59,7 @@ namespace kengine::imgui_adjustable {
 			e += functions::Execute{ [&](float deltaTime) noexcept {
 				if (!tool.enabled)
 					return;
+				kengine_log(Verbose, "Execute", "ImGuiAdjustableSystem");
 				drawImGui(tool.enabled);
 			} };
 		}
@@ -268,14 +269,22 @@ namespace kengine::imgui_adjustable {
 		}
 
 		static void initAdjustable(AdjustableComponent & comp) noexcept {
+			kengine_logf(Log, "Init/ImGuiAdjustableSystem", "Initializing section %s", comp.section.c_str());
+
 			const auto it = loadedFile.sections.find(comp.section.c_str());
-			if (it == loadedFile.sections.end())
+			if (it == loadedFile.sections.end()) {
+				kengine_log(Warning, "Init/ImGuiAdjustableSystem", "Section not found in INI file");
 				return;
+			}
 			const auto & section = it->second;
 			for (auto & value : comp.values) {
 				const auto it = section.values.find(value.name.c_str());
-				if (it != section.values.end())
+				if (it != section.values.end()) {
+					kengine_logf(Log, "Init/ImGuiAdjustableSystem", "Initializing %s", value.name.c_str());
 					setValue(value, it->second.c_str());
+				}
+				else
+					kengine_logf(Log, "Init/ImGuiAdjustableSystem", "Value not found in INI for %s", value.name.c_str());
 			}
 		}
 
@@ -311,12 +320,16 @@ namespace kengine::imgui_adjustable {
 		}
 
 		static void load() noexcept {
+			kengine_log(Log, "ImGuiAdjustableSystem", "Loading from " KENGINE_ADJUSTABLE_SAVE_FILE);
+
 			loadedFile = putils::parseIniFile(KENGINE_ADJUSTABLE_SAVE_FILE);
 			for (auto [e, comp] : entities.with<AdjustableComponent>())
 				initAdjustable(comp);
 		}
 
 		static void save() noexcept {
+			kengine_log(Log, "ImGuiAdjustableSystem", "Saving to " KENGINE_ADJUSTABLE_SAVE_FILE);
+
 			std::ofstream f(KENGINE_ADJUSTABLE_SAVE_FILE, std::ofstream::trunc);
 			if (!f) {
 				kengine_assert_failed("Failed to open '", KENGINE_ADJUSTABLE_SAVE_FILE, "' with write permissions");

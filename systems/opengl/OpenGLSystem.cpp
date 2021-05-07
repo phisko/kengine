@@ -32,7 +32,6 @@
 #include "functions/OnTerminate.hpp"
 #include "functions/OnEntityCreated.hpp"
 #include "functions/OnEntityRemoved.hpp"
-#include "functions/OnMouseCaptured.hpp"
 #include "functions/GetEntityInPixel.hpp"
 #include "functions/GetPositionInPixel.hpp"
 #include "functions/InitGBuffer.hpp"
@@ -42,6 +41,7 @@
 #include "helpers/matrixHelper.hpp"
 #include "helpers/assertHelper.hpp"
 #include "helpers/imguiHelper.hpp"
+#include "helpers/logHelper.hpp"
 
 #include "shaders/ShadowMap.hpp"
 #include "shaders/ShadowCube.hpp"
@@ -81,11 +81,12 @@ namespace kengine::opengl {
 		} window;
 
 		static void init(Entity & e) noexcept {
+			kengine_log(Log, "Init", "OpenGLSystem");
+
 			e += functions::Execute{ execute };
 			e += functions::OnEntityCreated{ onEntityCreated };
 			e += functions::OnEntityRemoved{ onEntityRemoved };
 			e += functions::OnTerminate{ terminate };
-			e += functions::OnMouseCaptured{ onMouseCaptured };
 			e += functions::GetEntityInPixel{ getEntityInPixel };
 			e += functions::GetPositionInPixel{ getPositionInPixel };
 
@@ -100,7 +101,9 @@ namespace kengine::opengl {
 			e += functions::InitGBuffer{ initGBuffer };
 
 #if !defined(KENGINE_NDEBUG) && !defined(KENGINE_OPENGL_NO_DEBUG_TOOLS)
+			kengine_log(Log, "Init/OpenGLSystem", "Creating ShaderController");
 			entities += opengl::ShaderController();
+			kengine_log(Log, "Init/OpenGLSystem", "Creating GBufferDebugger");
 			entities += opengl::GBufferDebugger(gBufferIterator);
 #endif
 
@@ -115,6 +118,7 @@ namespace kengine::opengl {
 				for (const auto & [e, w] : entities.with<WindowComponent>()) {
 					if (!w.assignedSystem.empty())
 						continue;
+					kengine_logf(Log, "Init/OpenGLSystem", "Found existing window: %zu", e.id);
 					window.id = e.id;
 					window.comp = &w;
 					break;
@@ -122,6 +126,7 @@ namespace kengine::opengl {
 
 				if (window.id == INVALID_ID) {
 					entities += [](Entity & e) {
+						kengine_logf(Log, "Init/OpenGLSystem", "Created default window: %zu", e.id);
 						window.comp = &e.attach<WindowComponent>();
 						window.comp->name = "Kengine";
 						window.comp->size = { 1280, 720 };
@@ -135,6 +140,7 @@ namespace kengine::opengl {
 			auto e = entities[window.id];
 			e += GLFWWindowInitComponent{
 				.setHints = []() noexcept {
+					kengine_log(Log, "Init/OpenGLSystem", "Setting window hints");
 					glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 					glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 					glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -144,7 +150,11 @@ namespace kengine::opengl {
 			#endif
 				},
 				.onWindowCreated = []() noexcept {
+					kengine_log(Log, "Init/OpenGLSystem", "GLFW window created");
+
 					window.glfw = &entities[window.id].get<GLFWWindowComponent>();
+
+					kengine_log(Log, "Init/OpenGLSystem", "Initializing glew");
 					glewExperimental = true;
 					const bool ret = glewInit();
 					kengine_assert(ret == GLEW_OK);
@@ -152,15 +162,18 @@ namespace kengine::opengl {
 					initImGui();
 
 			#ifndef KENGINE_NDEBUG
+					kengine_log(Log, "Init/OpenGLSystem", "Enabling debug output");
 					glEnable(GL_DEBUG_OUTPUT);
 					glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 					glDebugMessageCallback([](GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar * message, const void * userParam) {
-						if (severity != GL_DEBUG_SEVERITY_NOTIFICATION)
-							std::cerr <<
-							putils::termcolor::red <<
-							"G: severity = 0x" << std::ios::hex << severity << std::ios::dec <<
-							", message: " << message << '\n' <<
-							putils::termcolor::reset;
+						if (severity == GL_DEBUG_SEVERITY_LOW)
+							kengine_log(Log, "OpenGLSystem", message);
+						else if (severity == GL_DEBUG_SEVERITY_MEDIUM)
+							kengine_log(Warning, "OpenGLSystem", message);
+						else if (severity == GL_DEBUG_SEVERITY_HIGH)
+							kengine_log(Error, "OpenGLSystem", message);
+						else
+							kengine_log(Verbose, "OpenGLSystem", message);
 					}, nullptr);
 			#endif
 
@@ -172,6 +185,7 @@ namespace kengine::opengl {
 		}
 
 		static void initImGui() noexcept {
+			kengine_log(Log, "Init/OpenGLSystem", "Initializing ImGui");
 			entities[window.id] += ImGuiContextComponent{
 				ImGui::CreateContext()
 			};
@@ -190,6 +204,7 @@ namespace kengine::opengl {
 		}
 
 		static void addShaders() noexcept {
+			kengine_log(Log, "Init/OpenGLSystem", "Adding default shaders");
 			{ // GBuffer
 				entities += [=](Entity & e) noexcept {
 					e += MyShaderComponent{ std::make_unique<shaders::Debug>() };
@@ -267,6 +282,11 @@ namespace kengine::opengl {
 		}
 
 		static void initShader(putils::gl::Program & p) noexcept {
+#ifndef PUTILS_NDEBUG
+			kengine_logf(Log, "Init/OpenGLSystem", "Initializing shader '%s'", p.getName().c_str());
+#else
+			kengine_log(Log, "Init/OpenGLSystem", "Initializing shader");
+#endif
 			p.init(gBufferTextureCount);
 
 			kengine_assert(gBufferIterator != nullptr);
@@ -280,6 +300,7 @@ namespace kengine::opengl {
 			const auto viewport = e.tryGet<ViewportComponent>();
 			if (viewport) {
 				if (viewport->window == window.id) {
+					kengine_logf(Log, "OpenGLSystem", "Deleting render texture for ViewportComponent in %zu", e.id);
 					GLuint texture = (GLuint)viewport->renderTexture;
 					glDeleteTextures(1, &texture);
 				}
@@ -287,35 +308,28 @@ namespace kengine::opengl {
 
 			if (e.id != window.id)
 				return;
+			kengine_logf(Log, "OpenGLSystem", "Window removed (%zu)", e.id);
 			window.id = INVALID_ID;
 			window.glfw = nullptr;
 			window.comp = nullptr;
 			terminate();
 		}
 
-		static void onMouseCaptured(EntityID w, bool captured) noexcept {
-			if (w != INVALID_ID && w != window.id)
-				return;
-
-			if (captured) {
-				glfwSetInputMode(window.glfw->window.get(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-				ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NoMouse;
-			}
-			else {
-				glfwSetInputMode(window.glfw->window.get(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-				ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
-			}
-		}
-
 		static void execute(float deltaTime) noexcept {
 			if (window.id == INVALID_ID || window.glfw == nullptr)
 				return;
 
-			for (auto [e, modelData, noOpenGL] : entities.with<ModelDataComponent, no<MyModelComponent>>())
-				createObject(e, modelData);
+			kengine_log(Verbose, "Execute", "OpenGLSystem");
 
-			for (auto [e, textureData, noTextureModel] : entities.with<TextureDataComponent, no<MyTextureComponent>>())
+			for (auto [e, modelData, noOpenGL] : entities.with<ModelDataComponent, no<MyModelComponent>>()) {
+				kengine_logf(Verbose, "Execute/OpenGLSystem", "Creating meshes for %zu", e.id);
+				createObject(e, modelData);
+			}
+
+			for (auto [e, textureData, noTextureModel] : entities.with<TextureDataComponent, no<MyTextureComponent>>()) {
+				kengine_logf(Verbose, "Execute/OpenGLSystem", "Uploading texture for %zu", e.id);
 				loadTexture(e, textureData);
+			}
 
 			doOpenGL();
 
@@ -475,11 +489,14 @@ namespace kengine::opengl {
 			putils::vector<ToBlit, KENGINE_MAX_VIEWPORTS> toBlit;
 
 			for (auto [e, cam, viewport] : entities.with<CameraComponent, ViewportComponent>()) {
-				if (viewport.window == INVALID_ID)
+				if (viewport.window == INVALID_ID) {
+					kengine_logf(Log, "OpenGLSystem", "Setting target window for ViewportComponent in %zu", e.id);
 					viewport.window = window.id;
+				}
 				else if (viewport.window != window.id)
 					continue;
 
+				kengine_logf(Verbose, "Execute/OpenGLSystem", "Drawing to ViewportComponent for %zu", e.id);
 				params.viewportID = e.id;
 				setupParams(cam, viewport);
 				fillGBuffer(e, viewport);
@@ -491,6 +508,7 @@ namespace kengine::opengl {
 						continue;
 				}
 
+				kengine_logf(Verbose, "Execute/OpenGLSystem", "Rendering to CameraFramebuffer for %zu", e.id);
 				renderToTexture(*fb);
 				if (viewport.boundingBox.size.x > 0 && viewport.boundingBox.size.y > 0)
 					toBlit.push_back(ToBlit{ fb, &viewport });
@@ -500,6 +518,7 @@ namespace kengine::opengl {
 				return lhs.viewport->zOrder < rhs.viewport->zOrder;
 				});
 
+			kengine_log(Verbose, "Execute/OpenGLSystem", "Blitting Viewports to window");
 			for (const auto & blit : toBlit)
 				blitTextureToViewport(*blit.fb, *blit.viewport);
 		}
@@ -516,9 +535,13 @@ namespace kengine::opengl {
 		}
 
 		static CameraFramebufferComponent * initFramebuffer(Entity & e) noexcept {
+			kengine_logf(Log, "Execute/OpenGLSystem", "Initializing CameraFramebuffer for %zu", e.id);
+
 			auto & viewport = e.get<ViewportComponent>();
-			if (viewport.resolution.x == 0 || viewport.resolution.y == 0)
+			if (viewport.resolution.x == 0 || viewport.resolution.y == 0) {
+				kengine_logf(Warning, "Execute/OpenGLSystem", "Viewport for %zu has 0 width or height. Aborting framebuffer initialization", e.id);
 				return nullptr;
+			}
 
 			auto & fb = e.attach<CameraFramebufferComponent>();
 			fb.resolution = viewport.resolution;
@@ -580,12 +603,16 @@ namespace kengine::opengl {
 		static void fillGBuffer(Entity & e, const ViewportComponent & viewport) noexcept {
 			auto gbuffer = e.tryGet<GBufferComponent>();
 			if (!gbuffer) {
+				kengine_logf(Log, "Execute/OpenGLSystem", "Initializing GBuffer for %zu", e.id);
 				gbuffer = &e.attach<GBufferComponent>();
 				gbuffer->init(viewport.resolution.x, viewport.resolution.y, gBufferTextureCount);
 			}
-			if (gbuffer->getSize() != viewport.resolution)
+			if (gbuffer->getSize() != viewport.resolution) {
+				kengine_logf(Log, "Execute/OpenGLSystem", "Resizing GBuffer for %zu", e.id);
 				gbuffer->resize(viewport.resolution.x, viewport.resolution.y);
+			}
 
+			kengine_logf(Verbose, "Execute/OpenGLSystem", "Filling GBuffer for %zu", e.id);
 			gbuffer->bindForWriting();
 			{
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -636,6 +663,7 @@ namespace kengine::opengl {
 		static constexpr auto GBUFFER_ENTITY_LOCATION = offsetof(GBufferTextures, entityID) / sizeof(GBufferTextures::entityID);
 		static constexpr auto GBUFFER_POSITION_LOCATION = offsetof(GBufferTextures, position) / sizeof(GBufferTextures::position);
 		static EntityID getEntityInPixel(EntityID window, const putils::Point2ui & pixel) noexcept {
+			kengine_logf(Verbose, "OpenGLSystem", "Getting entity in { %zu, %zu } of %zu", pixel.x, pixel.y, window);
 			const auto info = getGBufferInfo(window, pixel);
 			if (info.gBuffer == nullptr)
 				return INVALID_ID;
@@ -646,12 +674,17 @@ namespace kengine::opengl {
 				const auto & size = info.gBuffer->getSize();
 				ret = (EntityID)texture.data[info.indexForPixel];
 			}
-			if (ret == 0)
+			if (ret == 0) {
+				kengine_log(Verbose, "OpenGLSystem/getEntityInPixel", "Found no Entity");
 				ret = INVALID_ID;
+			}
+			else
+				kengine_logf(Verbose, "OpenGLSystem/getEntityInPixel", "Found %zu", ret);
 			return ret;
 		}
 
 		static std::optional<putils::Point3f> getPositionInPixel(EntityID window, const putils::Point2ui & pixel) noexcept {
+			kengine_logf(Verbose, "OpenGLSystem", "Getting position in { %zu, %zu } of %zu", pixel.x, pixel.y, window);
 			const auto info = getGBufferInfo(window, pixel);
 			if (info.gBuffer == nullptr)
 				return std::nullopt;
@@ -660,15 +693,17 @@ namespace kengine::opengl {
 				const auto texture = info.gBuffer->getTexture(GBUFFER_ENTITY_LOCATION);
 				const auto & size = info.gBuffer->getSize();
 				const auto entityInPixel = (EntityID)texture.data[info.indexForPixel];
-				if (entityInPixel == 0)
+				if (entityInPixel == 0) {
+					kengine_log(Verbose, "OpenGLSystem/getPositionInPixel", "Found no Entity");
 					return std::nullopt;
+				}
 			}
 
 			const auto texture = info.gBuffer->getTexture(GBUFFER_POSITION_LOCATION);
-			const auto & size = info.gBuffer->getSize();
-
 			static_assert(sizeof(putils::Point3f) == sizeof(float[3]));
-			return texture.data + info.indexForPixel;
+			const putils::Point3f ret = texture.data + info.indexForPixel;
+			kengine_logf(Verbose, "OpenGLSystem/getPositionInPixel", "Found { %f, %f, %f }", ret.x, ret.y, ret.z);
+			return ret;
 		}
 
 		static GBufferInfo getGBufferInfo(EntityID w, const putils::Point2ui & pixel) noexcept {
@@ -676,22 +711,30 @@ namespace kengine::opengl {
 
 			GBufferInfo ret;
 
-			if (w != INVALID_ID && w != window.id)
+			if (w != INVALID_ID && w != window.id) {
+				kengine_logf(Warning, "OpenGLSystem/getEntityInPixel", "%zu is not my window", window);
 				return ret;
+			}
 
 			const auto viewportInfo = cameraHelper::getViewportForPixel(window.id, pixel);
-			if (viewportInfo.camera == INVALID_ID)
+			if (viewportInfo.camera == INVALID_ID) {
+				kengine_logf(Warning, "OpenGLSystem/getEntityInPixel", "Found no viewport containing pixel");
 				return ret;
+			}
 
 			auto camera = entities[viewportInfo.camera];
 			const auto gBuffer = camera.tryGet<GBufferComponent>();
-			if (!gBuffer)
+			if (!gBuffer) {
+				kengine_logf(Warning, "OpenGLSystem/getEntityInPixel", "Viewport %zu does not have a GBufferComponent", camera.id);
 				return ret;
+			}
 
 			const putils::Point2ui gBufferSize = gBuffer->getSize();
 			const auto pixelInGBuffer = putils::Point2ui(viewportInfo.viewportPercent * gBufferSize);
-			if (pixelInGBuffer.x >= gBufferSize.x || pixelInGBuffer.y > gBufferSize.y || pixelInGBuffer.y == 0)
+			if (pixelInGBuffer.x >= gBufferSize.x || pixelInGBuffer.y > gBufferSize.y || pixelInGBuffer.y == 0) {
+				kengine_logf(Warning, "OpenGLSystem/getEntityInPixel", "Pixel is out of %zu's GBuffer's bounds", camera.id);
 				return ret;
+			}
 
 			ret.gBuffer = gBuffer;
 			ret.indexForPixel = (pixelInGBuffer.x + (gBufferSize.y - pixelInGBuffer.y) * gBufferSize.x) * GBUFFER_TEXTURE_COMPONENTS;
@@ -723,6 +766,7 @@ namespace kengine::opengl {
 		}
 
 		static void terminate() noexcept {
+			kengine_log(Log, "OpenGLSystem", "Terminating ImGui");
 			ImGui_ImplOpenGL3_Shutdown();
 			ImGui_ImplGlfw_Shutdown();
 			ImGui::DestroyContext();
@@ -737,6 +781,7 @@ namespace kengine {
 		};
 
 #ifndef KENGINE_NO_DEFAULT_GBUFFER
+		kengine_log(Log, "Init/OpenGLSystem", "Initializing GBuffer with kengine::GBufferTextures");
 		kengine::initGBuffer<GBufferTextures>();
 #endif
 

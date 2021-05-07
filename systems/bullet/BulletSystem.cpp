@@ -27,6 +27,7 @@
 #include "helpers/matrixHelper.hpp"
 #include "helpers/skeletonHelper.hpp"
 #include "helpers/assertHelper.hpp"
+#include "helpers/logHelper.hpp"
 
 #include "termcolor.hpp"
 #include "magic_enum.hpp"
@@ -91,6 +92,7 @@ namespace kengine::bullet {
 		};
 
 		static void init(Entity & e) noexcept {
+			kengine_log(Log, "Init", "BulletSystem");
 			e += functions::Execute{ execute };
 			e += functions::QueryPosition{ queryPosition };
 
@@ -110,12 +112,15 @@ namespace kengine::bullet {
 		}
 
 		static void execute(float deltaTime) noexcept {
+			kengine_log(Verbose, "Execute", "BulletSystem");
+
 			for (auto [e, instance, transform, physics, comp] : entities.with<InstanceComponent, TransformComponent, PhysicsComponent, BulletPhysicsComponent>()) {
 				const auto model = entities[instance.model];
 				if (!model.has<ModelColliderComponent>())
 					continue;
 #ifndef KENGINE_NDEBUG
 				if (adjustables.editorMode) {
+					kengine_logf(Verbose, "Execute/BulletSystem", "Re-adding BulletComponent to %zu for editor mode", e.id);
 					e.detach<BulletPhysicsComponent>();
 					addBulletComponent(e, transform, physics, model);
 				}
@@ -128,11 +133,14 @@ namespace kengine::bullet {
 				const auto model = entities[instance.model];
 				if (!model.has<ModelColliderComponent>())
 					continue;
+				kengine_logf(Verbose, "Execute/BulletSystem", "Adding BulletComponent to %zu", e.id);
 				addBulletComponent(e, transform, physics, model);
 			}
 
-			for (auto [e, bullet, noPhys] : entities.with<BulletPhysicsComponent, no<PhysicsComponent>>())
+			for (auto [e, bullet, noPhys] : entities.with<BulletPhysicsComponent, no<PhysicsComponent>>()) {
+				kengine_logf(Verbose, "Execute/BulletSystem", "Removing BulletComponent from %zu", e.id);
 				e.detach<BulletPhysicsComponent>();
+			}
 
 			dynamicsWorld.setGravity({ 0.f, -adjustables.gravity, 0.f });
 			dynamicsWorld.stepSimulation(deltaTime);
@@ -275,6 +283,7 @@ namespace kengine::bullet {
 			const auto numManifolds = dispatcher.getNumManifolds();
 			if (numManifolds <= 0)
 				return;
+			kengine_log(Verbose, "Execute/BulletSystem", "Detecting collisions");
 			for (const auto & [_, onCollision] : entities.with<functions::OnCollision>())
 				for (int i = 0; i < numManifolds; ++i) {
 					const auto contactManifold = dispatcher.getManifoldByIndexInternal(i);
@@ -285,11 +294,14 @@ namespace kengine::bullet {
 					const auto id2 = objectB->getUserIndex();
 					auto e1 = entities[id1];
 					auto e2 = entities[id2];
+					kengine_logf(Verbose, "Execute/BulletSystem/detectCollisions", "Found collision between %zu & %zu", id1, id2);
 					onCollision(e1, e2);
 				}
 		}
 
 		static void queryPosition(const putils::Point3f & pos, float radius, const EntityIteratorFunc & func) noexcept {
+			kengine_logf(Verbose, "BulletSystem", "Querying radius %f around position { %f, %f, %f }", radius, pos.x, pos.y, pos.z);
+
 			btSphereShape sphere(radius);
 			btPairCachingGhostObject ghost;
 			btTransform transform;
@@ -305,6 +317,7 @@ namespace kengine::bullet {
 				btScalar addSingleResult(btManifoldPoint & cp, const btCollisionObjectWrapper * colObj0Wrap, int partId0, int index0, const btCollisionObjectWrapper * colObj1Wrap, int partId1, int index1) final {
 					kengine_assert(colObj1Wrap->m_collisionObject == &ghost);
 					const auto id = colObj0Wrap->m_collisionObject->getUserIndex();
+					kengine_logf(Verbose, "BulletSystem/queryPosition", "Found %zu", id);
 					func(entities[id]);
 					return 1.f;
 				}

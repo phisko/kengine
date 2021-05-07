@@ -2,6 +2,7 @@
 
 #include "data/PythonStateComponent.hpp"
 #include "python/python_helper.hpp"
+#include "logHelper.hpp"
 
 namespace kengine::pythonHelper {
 	namespace impl {
@@ -55,6 +56,7 @@ namespace kengine::pythonHelper {
 		putils::for_each_type<Types...>([](auto && t) noexcept {
 			using T = putils_wrapped_type(t);
 
+			kengine_logf(Log, "Python/registerTypes", "Registering %s", putils::reflection::get_class_name<T>());
 			for (const auto & [e, comp] : entities.with<PythonStateComponent>())
 				impl::registerTypeWithState<T>(*comp.data);
 		});
@@ -65,6 +67,7 @@ namespace kengine::pythonHelper {
 		putils::for_each_type<Comps...>([&](auto && t) noexcept {
 			using T = putils_wrapped_type(t);
 
+			kengine_logf(Log, "Python/registerComponents", "Registering %s", putils::reflection::get_class_name<T>());
 			for (const auto & [e, comp] : entities.with<PythonStateComponent>())
 				impl::registerComponentWithState<T>(*comp.data);
 		});
@@ -72,6 +75,7 @@ namespace kengine::pythonHelper {
 
 	template<typename Ret, typename ...Args>
 	void registerFunction(const char * name, const scriptLanguageHelper::function<Ret(Args...)> & func) noexcept {
+		kengine_logf(Log, "Python/registerFunction", "Registering %s", name);
 		for (const auto & [e, comp] : entities.with<PythonStateComponent>())
 			impl::registerFunctionWithState(*comp.data, name, func);
 	}

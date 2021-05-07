@@ -1,6 +1,6 @@
 #pragma once
 
-#include "reflection.hpp"
+#include <iterator>
 
 namespace kengine {
 	class Entity;

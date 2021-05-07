@@ -11,6 +11,8 @@
 #include "functions/Execute.hpp"
 #include "functions/OnEntityRemoved.hpp"
 
+#include "helpers/logHelper.hpp"
+
 namespace kengine {
 	namespace recast {
 		Adjustables g_adjustables;
@@ -22,6 +24,8 @@ namespace kengine {
 	EntityCreator * RecastSystem() noexcept {
 		struct impl {
 			static void init(Entity & e) noexcept {
+				kengine_log(Log, "Init", "RecastSystem");
+
 				e += functions::OnEntityRemoved{ onEntityRemoved };
 				e += functions::Execute{ execute };
 
@@ -39,6 +43,7 @@ namespace kengine {
 			static void onEntityRemoved(Entity & e) noexcept {
 				const auto agent = e.tryGet<RecastAgentComponent>();
 				if (agent) {
+					kengine_logf(Log, "RecastSystem", "Removing agent %zu from crowd %zu", e.id, agent->crowd);
 					auto environment = entities[agent->crowd];
 					environment.get<RecastCrowdComponent>().crowd->removeAgent(agent->index);
 				}
@@ -47,6 +52,7 @@ namespace kengine {
 			}
 
 			static void execute(float deltaTime) noexcept {
+				kengine_log(Verbose, "Execute", "RecastSystem");
 				recast::buildNavMeshes();
 				recast::doPathfinding(deltaTime);
 			}

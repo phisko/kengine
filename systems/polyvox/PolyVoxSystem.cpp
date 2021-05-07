@@ -11,6 +11,8 @@
 
 #include "functions/Execute.hpp"
 
+#include "helpers/logHelper.hpp"
+
 #include "meta/type.hpp"
 
 namespace kengine {
@@ -28,15 +30,18 @@ namespace kengine {
 
 		struct impl {
 			static void init(Entity & e) noexcept {
+				kengine_log(Log, "Init", "PolyVoxSystem");
 				e += functions::Execute{ execute };
 				e += SystemSpecificShaderComponent<putils::gl::Program>{ std::make_unique<PolyVoxShader>() };
 				e += GBufferShaderComponent{};
 			}
 
 			static void execute(float deltaTime) noexcept {
+				kengine_log(Verbose, "Execute", "PolyVoxSystem");
 				for (auto [e, poly] : entities.with<PolyVoxComponent>()) {
 					if (!poly.changed)
 						continue;
+					kengine_logf(Verbose, "Execute/PolyVoxSystem", "Rebuilding mesh for %zu", e.id);
 					poly.changed = false;
 
 					ModelDataComponent modelData;
@@ -63,6 +68,7 @@ namespace kengine {
 
 			static ModelDataComponent::FreeFunc FreePolyVoxMeshData(EntityID id) noexcept {
 				return [id]() noexcept {
+					kengine_logf(Log, "PolyVoxSystem", "Releasing PolyVoxMeshContainer for %zu", id);
 					auto e = entities[id];
 					auto & mesh = e.attach<PolyVoxMeshContainerComponent>().mesh; // previous `attach` hasn't been processed yet, so `get` would assert
 					mesh.clear();

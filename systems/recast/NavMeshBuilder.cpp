@@ -13,6 +13,7 @@
 
 #include "helpers/assertHelper.hpp"
 #include "helpers/matrixHelper.hpp"
+#include "helpers/logHelper.hpp"
 
 #include "Common.hpp"
 #include "RecastNavMeshComponent.hpp"
@@ -40,12 +41,15 @@ namespace kengine::recast {
 						if (backup)
 							if (std::memcmp(&navMesh, backup, sizeof(navMesh)) == 0)
 								continue;
+						kengine_logf(Verbose, "Execute/RecastSystem", "Rebuilding navmesh for %zu for editor mode", e.id);
 						e += NavMeshComponentBackup{ navMesh };
 						buildRecastComponent(e, model, modelData, navMesh, jobsLeft);
 					}
 				else
-					for (auto [e, model, modelData, navMesh, _] : entities.with<ModelComponent, ModelDataComponent, NavMeshComponent, no<RecastNavMeshComponent>>())
+					for (auto [e, model, modelData, navMesh, _] : entities.with<ModelComponent, ModelDataComponent, NavMeshComponent, no<RecastNavMeshComponent>>()) {
+						kengine_logf(Verbose, "Execute/RecastSystem", "Building navmesh for %zu", e.id);
 						buildRecastComponent(e, model, modelData, navMesh, jobsLeft);
+					}
 
 				while (jobsLeft > 0);
 			}
@@ -78,11 +82,14 @@ namespace kengine::recast {
 				bool mustSave = false;
 				data = loadBinaryFile(binaryFile, navMesh);
 				if (data.data == nullptr) {
+					kengine_logf(Verbose, "Execute/RecastSystem/createRecastMesh", "Found no binary file for %s, creating nav mesh data", file);
 					data = createNavMeshData(navMesh, modelData, modelData.meshes[navMesh.concernedMesh]);
 					if (data.data == nullptr)
 						return;
 					mustSave = true;
 				}
+				else
+					kengine_logf(Verbose, "Execute/RecastSystem/createRecastMesh", "Found binary file for %s", file);
 
 				auto & recast = e.attach<RecastNavMeshComponent>();
 				recast.navMesh = createNavMesh(data);
@@ -123,6 +130,7 @@ namespace kengine::recast {
 			}
 
 			static void saveBinaryFile(const char * binaryFile, const NavMeshData & data, const NavMeshComponent & navMesh) noexcept {
+				kengine_logf(Verbose, "Execute/RecastSystem/createRecastMesh", "Saving binary file %s", binaryFile);
 				std::ofstream f(binaryFile, std::ofstream::trunc | std::ofstream::binary);
 				f.write((const char *)&navMesh, sizeof(navMesh));
 				f.write((const char *)&data.size, sizeof(data.size));
@@ -451,6 +459,8 @@ namespace kengine::recast {
 
 			static functions::GetPath::Callable getPath(const TransformComponent * modelTransform, const NavMeshComponent & navMesh, const RecastNavMeshComponent & recast) noexcept {
 				return [&, modelTransform](const Entity & environment, const putils::Point3f & startWorldSpace, const putils::Point3f & endWorldSpace) {
+					kengine_logf(Verbose, "RecastSystem", "Getting path in %zu from { %f, %f, %f } to { %f, %f, %f }",
+						environment.id, startWorldSpace.x, startWorldSpace.y, startWorldSpace.z, endWorldSpace.x, endWorldSpace.y, endWorldSpace.z);
 					static const dtQueryFilter filter;
 
 					const auto modelToWorld = matrixHelper::getModelMatrix(environment.get<TransformComponent>(), modelTransform);
@@ -467,28 +477,36 @@ namespace kengine::recast {
 					dtPolyRef startRef;
 					float startPt[3];
 					auto status = recast.navMeshQuery->findNearestPoly(start, extents, &filter, &startRef, startPt);
-					if (dtStatusFailed(status) || startRef == 0)
+					if (dtStatusFailed(status) || startRef == 0) {
+						kengine_log(Error, "RecastSystem/getPath", "Failed to find nearest poly to start");
 						return ret;
+					}
 
 					dtPolyRef endRef;
 					float endPt[3];
 					status = recast.navMeshQuery->findNearestPoly(end, extents, &filter, &endRef, endPt);
-					if (dtStatusFailed(status) || endRef == 0)
+					if (dtStatusFailed(status) || endRef == 0) {
+						kengine_log(Error, "RecastSystem/getPath", "Failed to find nearest poly to end");
 						return ret;
+					}
 
 					dtPolyRef path[KENGINE_NAVMESH_MAX_PATH_LENGTH];
 					int pathCount = 0;
 					status = recast.navMeshQuery->findPath(startRef, endRef, startPt, endPt, &filter, path, &pathCount, (int)putils::lengthof(path));
-					if (dtStatusFailed(status))
+					if (dtStatusFailed(status)) {
+						kengine_log(Error, "RecastSystem/getPath", "Failed to find path");
 						return ret;
+					}
 
 					ret.resize(ret.capacity());
 					int straightPathCount = 0;
 
 					static_assert(sizeof(putils::Point3f) == sizeof(float[3]));
 					status = recast.navMeshQuery->findStraightPath(startPt, endPt, path, pathCount, ret[0].raw, nullptr, nullptr, &straightPathCount, (int)ret.capacity());
-					if (dtStatusFailed(status))
+					if (dtStatusFailed(status)) {
+						kengine_log(Error, "RecastSystem/getPath", "Failed to find straight path");
 						return ret;
+					}
 
 					ret.resize(straightPathCount);
 					for (auto & step : ret)

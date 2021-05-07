@@ -4,10 +4,12 @@
 #include "data/InputComponent.hpp"
 #include "functions/GetEntityInPixel.hpp"
 #include "functions/OnClick.hpp"
+#include "helpers/logHelper.hpp"
 
 namespace kengine::onclick {
 	struct impl {
 		static void init(Entity & e) noexcept {
+			kengine_log(Log, "Init", "OnClickSystem");
 			InputComponent input;
 			input.onMouseButton = onMouseButton;
 			e += input;
@@ -17,6 +19,8 @@ namespace kengine::onclick {
 			if (!pressed)
 				return;
 
+			kengine_logf(Log, "OnClickSystem", "Click in { %f, %f }", coords.x, coords.y);
+
 			for (const auto & [e, getEntity] : entities.with<functions::GetEntityInPixel>()) {
 				const auto id = getEntity(window, coords);
 				if (id == INVALID_ID)
@@ -25,8 +29,12 @@ namespace kengine::onclick {
 				const auto e = entities[id];
 
 				const auto onClick = e.tryGet<functions::OnClick>();
-				if (onClick)
+				if (onClick) {
+					kengine_logf(Log, "OnClickSystem", "Calling OnClick on %zu", id);
 					onClick->call(button);
+				}
+				else
+					kengine_logf(Log, "OnClickSystem", "Clicked %zu, did not have OnClick", id);
 			}
 		}
 	};

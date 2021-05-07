@@ -27,6 +27,7 @@
 #include "Export.hpp"
 #include "file_extension.hpp"
 #include "MagicaVoxel.hpp"
+#include "helpers/logHelper.hpp"
 
 namespace kengine {
 	static auto buildMesh(PolyVox::RawVolume<PolyVoxComponent::VertexData> && volume) noexcept {
@@ -44,6 +45,7 @@ namespace kengine {
 	EntityCreator * MagicaVoxelSystem() noexcept {
 		struct impl {
 			static void init(Entity & e) noexcept {
+				kengine_log(Log, "Init", "MagicaVoxelSystem");
 				e += functions::OnEntityCreated{ onEntityCreated };
 			}
 
@@ -67,6 +69,7 @@ namespace kengine {
 				if (putils::file_extension(path) != "vox")
 					return;
 
+				kengine_logf(Verbose, "MagicaVoxelSystem", "Marking %zu as a PolyVox object", e.id);
 				e += PolyVoxObjectComponent{};
 				e += DefaultShadowComponent{};
 			}
@@ -85,16 +88,15 @@ namespace kengine {
 				if (putils::file_extension(f) != "vox")
 					return;
 
+				kengine_logf(Log, "MagicaVoxelSystem", "Loading model %zu for %s", e.id, f);
 				const putils::string<256> binaryFile("%s.bin", f);
 
 				if (std::filesystem::exists(binaryFile.c_str())) {
+					kengine_logf(Log, "MagicaVoxelSystem/loadModel", "Binary file exists, loading it");
 					loadBinaryModel(e, binaryFile.c_str());
 					return;
 				}
 
-#ifndef KENGINE_NDEBUG
-				std::cout << putils::termcolor::green << "[MagicaVoxel] Loading " << putils::termcolor::cyan << f << putils::termcolor::green << "..." << putils::termcolor::reset;
-#endif
 				auto meshInfo = loadVoxModel(f);
 				auto & mesh = e.attach<MagicaVoxelModelComponent>().mesh;
 				mesh = std::move(meshInfo.mesh);
@@ -104,10 +106,6 @@ namespace kengine {
 				e += std::move(modelData);
 
 				applyOffset(e, meshInfo.size);
-
-#ifndef KENGINE_NDEBUG
-				std::cout << putils::termcolor::green << " Done.\n" << putils::termcolor::reset;
-#endif
 			}
 
 			static void loadBinaryModel(Entity & e, const char * binaryFile) noexcept {
@@ -120,8 +118,11 @@ namespace kengine {
 				modelData.init<MeshType::VertexType>();
 				e += std::move(modelData);
 
-				if (e.has<TransformComponent>())
+				if (e.has<TransformComponent>()) {
+					kengine_logf(Log, "MagicaVoxelSystem/loadModel", "%zu already has a TransformComponent. Mesh offset will not be applied", e.id);
 					return;
+				}
+				kengine_log(Log, "MagicaVoxelSystem/loadModel", "Applying mesh offset");
 
 				auto & box = e.attach<TransformComponent>().boundingBox;
 				box.position.x -= size.x / 2.f * box.size.x;
@@ -162,13 +163,16 @@ namespace kengine {
 
 			static ModelDataComponent::FreeFunc release(EntityID id) noexcept {
 				return [id] {
+					kengine_logf(Log, "MagicaVoxelSystem", "Releasing model data for %zu", id);
 					auto e = entities[id];
 					const auto model = e.tryGet<MagicaVoxelModelComponent>();
 					if (model) {
+						kengine_log(Log, "MagicaVoxelSystem/release", "Releasing MagicaVoxelModelComponent");
 						model->mesh.clear();
 						e.detach<MagicaVoxelModelComponent>();
 					}
 					else { // Was unserialized and we (violently) `new`-ed the data buffers
+						kengine_log(Log, "MagicaVoxelSystem/release", "Releasing binary data");
 						const auto & modelData = e.get<ModelDataComponent>();
 						delete[] modelData.meshes[0].vertices.data;
 						delete[] modelData.meshes[0].indices.data;
@@ -257,8 +261,11 @@ namespace kengine {
 			}
 
 			static void applyOffset(Entity & e, const MagicaVoxel::ChunkContent::Size & size) noexcept {
-				if (e.has<TransformComponent>())
+				if (e.has<TransformComponent>()) {
+					kengine_logf(Log, "MagicaVoxelSystem/loadModel", "%zu already has a TransformComponent. Mesh offset will not be applied", e.id);
 					return;
+				}
+				kengine_log(Log, "MagicaVoxelSystem/loadModel", "Applying mesh offset");
 
 				auto & box = e.attach<TransformComponent>().boundingBox;
 				box.position.x -= size.x / 2.f * box.size.x;

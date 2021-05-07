@@ -7,15 +7,19 @@
 
 #include "functions/Execute.hpp"
 
+#include "helpers/logHelper.hpp"
+
 #include "angle.hpp"
 
 namespace kengine::kinematic {
 	struct impl {
 		static void init(Entity & e) noexcept {
+			kengine_log(Log, "Init", "KinematicSystem");
 			e += functions::Execute{ execute };
 		}
 
 		static void execute(float deltaTime) noexcept {
+			kengine_log(Verbose, "Execute", "KinematicSystem");
 			for (const auto & [e, transform, physics, kinematic] : entities.with<TransformComponent, PhysicsComponent, KinematicComponent>()) {
 				transform.boundingBox.position += physics.movement * deltaTime;
 

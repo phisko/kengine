@@ -64,7 +64,9 @@ namespace kengine::impl {
 			}
 
 #ifndef KENGINE_NDEBUG
-			std::cout << putils::termcolor::green << ptr->id << ' ' << putils::termcolor::cyan << putils::reflection::get_class_name<Comp>() << '\n' << putils::termcolor::reset;
+			std::cout << putils::termcolor::cyan;
+			std::cout << putils::reflection::get_class_name<Comp>() << '\t' << ptr->id << '\n';
+			std::cout << putils::termcolor::reset;
 #endif
 			return ptr;
 		}();

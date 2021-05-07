@@ -8,7 +8,7 @@
 
 #include "functions/Execute.hpp"
 
-#include "helpers/typeHelper.hpp"
+#include "helpers/logHelper.hpp"
 #include "helpers/imGuiHelper.hpp"
 #include "imgui.h"
 
@@ -18,6 +18,8 @@ namespace kengine {
 
 		struct impl {
 			static void init(Entity & e) noexcept {
+				kengine_log(Log, "Init", "ImGuiEntityEditorSystem");
+
 				e += NameComponent{ "Entity editor" };
 				auto & tool = e.attach<ImGuiToolComponent>();
 				tool.enabled = true;
@@ -30,6 +32,7 @@ namespace kengine {
 				if (!*enabled)
 					return;
 
+				kengine_log(Verbose, "Execute", "ImGuiEntityEditorSystem");
 				const auto scale = imguiHelper::getScale();
 				for (auto [selected, _] : entities.with<SelectedComponent>()) {
 					bool open = true;

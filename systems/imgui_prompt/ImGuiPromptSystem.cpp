@@ -15,6 +15,7 @@
 
 #include "imgui.h"
 #include "reflection_helpers/imgui_helper.hpp"
+#include "helpers/logHelper.hpp"
 
 enum class Language {
 	Lua,
@@ -50,6 +51,8 @@ namespace kengine::imgui_prompt {
 		} history;
 
 		static void init(Entity & e) noexcept {
+			kengine_log(Log, "Init", "ImGuiPromptSystem");
+
 			auto & tool = e.attach<ImGuiToolComponent>();
 			enabled = &tool.enabled;
 			e += NameComponent{ "Prompt" };
@@ -59,6 +62,8 @@ namespace kengine::imgui_prompt {
 		static void draw(float deltaTime) noexcept {
 			if (!*enabled)
 				return;
+
+			kengine_log(Verbose, "Execute", "ImGuiPromptSystem");
 
 			if (ImGui::Begin("Prompt", enabled)) {
 				ImGui::Columns(2);
@@ -143,6 +148,7 @@ namespace kengine::imgui_prompt {
 		static inline bool active = false;
 		static void evalLua() noexcept {
 #ifndef KENGINE_LUA
+			kengine_log(Error, "Execute/ImGuiPromptSystem", "Attempt to evaluate Lua script but KENGINE_LUA is not defined");
 			addLineToHistory(
 				"Please compile with KENGINE_LUA",
 				false,
@@ -150,6 +156,8 @@ namespace kengine::imgui_prompt {
 			);
 #else
 			static bool first = true;
+
+			kengine_logf(Log, "Execute/ImGuiPromptSystem", "Evaluating Lua script: '%s'", buff);
 
 			for (const auto & [e, state] : entities.with<kengine::LuaStateComponent>()) {
 				if (first) {
@@ -170,6 +178,7 @@ namespace kengine::imgui_prompt {
 		}
 
 		static void setupOutputRedirect(sol::state & state) noexcept {
+			kengine_log(Log, "Init/ImGuiPromptSystem", "Setting up output redirection for Lua");
 			static const luaL_Reg printlib[] = {
 				{ "print", [](lua_State * L) { return addToHistoryOrPrint(L, {}); } },
 				{ "error", [](lua_State * L) { return addToHistoryOrPrint(L, { 1.f, 0.f, 0.f }); } },
@@ -242,12 +251,15 @@ namespace kengine::imgui_prompt {
 #endif
 		static void evalPython() {
 #ifndef KENGINE_PYTHON
+			kengine_log(Error, "Execute/ImGuiPromptSystem", "Attempt to evaluate Python script but KENGINE_PYTHON is not defined");
 			addLineToHistory(
 				"Please compile with KENGINE_PYTHON",
 				false,
 				putils::NormalizedColor{ 1.f, 0.f, 0.f }
 			);
 #else
+			kengine_logf(Log, "Execute/ImGuiPromptSystem", "Evaluating Python script: '%s'", buff);
+
 			PyStdErrOutStreamRedirect redirect;
 			try {
 				py::exec(buff);

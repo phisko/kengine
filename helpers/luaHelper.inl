@@ -1,4 +1,5 @@
 #include "luaHelper.hpp"
+#include "logHelper.hpp"
 
 namespace kengine::luaHelper {
 	namespace impl {
@@ -35,6 +36,7 @@ namespace kengine::luaHelper {
 	void registerTypes() noexcept {
 		putils::for_each_type<Types...>([](auto && t) noexcept {
 			using T = putils_wrapped_type(t);
+			kengine_logf(Log, "Lua/registerTypes", "Registering %s", putils::reflection::get_class_name<T>());
 			for (const auto & [e, comp] : entities.with<LuaStateComponent>())
 				impl::registerTypeWithState<T>(*comp.state);
 		});
@@ -44,6 +46,7 @@ namespace kengine::luaHelper {
 	void registerComponents() noexcept {
 		putils::for_each_type<Comps...>([](auto && t) noexcept {
 			using T = putils_wrapped_type(t);
+			kengine_logf(Log, "Lua/registerComponents", "Registering %s", putils::reflection::get_class_name<T>());
 			for (const auto & [e, comp] : entities.with<LuaStateComponent>())
 				impl::registerComponentWithState<T>(*comp.state);
 		});
@@ -51,6 +54,7 @@ namespace kengine::luaHelper {
 
 	template<typename Func>
 	void registerFunction(const char * name, Func && func) noexcept {
+		kengine_logf(Log, "Lua/registerFunction", "Registering %s", name);
 		for (const auto & [e, comp] : entities.with<LuaStateComponent>())
 			impl::registerFunctionWithState(*comp.state, name, func);
 	}

@@ -5,7 +5,7 @@
 #include "data/SelectedComponent.hpp"
 #include "functions/Execute.hpp"
 
-#include "helpers/typeHelper.hpp"
+#include "helpers/logHelper.hpp"
 #include "helpers/sortHelper.hpp"
 #include "meta/Has.hpp"
 #include "meta/MatchString.hpp"
@@ -21,6 +21,8 @@ namespace kengine::imgui_entity_selector {
 		static inline bool * enabled;
 
 		static void init(Entity & e) noexcept {
+			kengine_log(Log, "Init", "ImGuiEntitySelector");
+
 			e += NameComponent{ "Entity selector" };
 			auto & tool = e.attach<ImGuiToolComponent>();
 			tool.enabled = true;
@@ -32,6 +34,7 @@ namespace kengine::imgui_entity_selector {
 		static void execute(float deltaTime) noexcept {
 			if (!*enabled)
 				return;
+			kengine_log(Verbose, "Execute", "ImGuiEntitySelector");
 
 			if (ImGui::Begin("Entity selector", enabled)) {
 				static char nameSearch[1024];

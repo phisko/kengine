@@ -14,6 +14,7 @@
 #include "meta/Has.hpp"
 
 #include "helpers/sortHelper.hpp"
+#include "helpers/logHelper.hpp"
 
 #include "json.hpp"
 #include "imgui.h"
@@ -28,6 +29,8 @@ namespace kengine {
 
 		struct impl {
 			static void init(Entity & e) noexcept {
+				kengine_log(Log, "Init", "ImGuiEngineStatsSystem");
+
 				e += NameComponent{ "Engine stats" };
 				auto & tool = e.attach<ImGuiToolComponent>();
 				tool.enabled = true;
@@ -39,6 +42,8 @@ namespace kengine {
 			static void execute(float deltaTime) noexcept {
 				if (!*enabled)
 					return;
+
+				kengine_log(Verbose, "Execute", "ImGuiEngineStatsSystem");
 
 				if (ImGui::Begin("Engine stats")) {
 					const auto entityCount = std::count_if(
@@ -68,6 +73,7 @@ namespace kengine {
 
 				const auto newCollection = displayCombinationCreator();
 				if (newCollection) {
+					kengine_logf(Log, "ImGuiEngineStatsSystem", "New tracked collection: %s", newCollection->name.c_str());
 					tracked.push_back(*newCollection);
 					saveTrackedCollections(tracked);
 				}
@@ -100,8 +106,6 @@ namespace kengine {
 						}
 						ImGui::EndPopup();
 					}
-				}
-				for (const auto & collection : tracked) {
 				}
 			}
 
@@ -178,6 +182,8 @@ namespace kengine {
 			}
 
 			static void saveTrackedCollections(const std::vector<Collection> & collections) noexcept {
+				kengine_log(Log, "ImGuiEngineStatsSystem", "Saving tracked collections to " KENGINE_STATS_TRACKED_COLLECTIONS_SAVE_FILE);
+
 				std::ofstream f(KENGINE_STATS_TRACKED_COLLECTIONS_SAVE_FILE);
 				if (!f) {
 					kengine_assert_failed("Failed to open '", KENGINE_STATS_TRACKED_COLLECTIONS_SAVE_FILE, "' for writing");
@@ -199,6 +205,8 @@ namespace kengine {
 			}
 
 			static std::vector<Collection> loadTrackedCollections() noexcept {
+				kengine_log(Log, "ImGuiEngineStatsSystem", "Loading tracked collections from " KENGINE_STATS_TRACKED_COLLECTIONS_SAVE_FILE);
+
 				std::vector<Collection> ret;
 
 				std::ifstream f(KENGINE_STATS_TRACKED_COLLECTIONS_SAVE_FILE);
@@ -224,8 +232,10 @@ namespace kengine {
 								break;
 							}
 
-						if (!found)
+						if (!found) {
+							kengine_logf(Log, "ImGuiEngineStatsSystem/loadTrackedCollections", "Missing component Entity for %s", std::string(nameJSON).c_str());
 							collection.missingComponents.push_back(nameJSON);
+						}
 					}
 
 					ret.push_back(std::move(collection));
@@ -239,6 +249,7 @@ namespace kengine {
 					const auto & compName = collection.missingComponents[i];
 					for (const auto & [e, name] : entities.with<NameComponent>())
 						if (compName == name.name) {
+							kengine_logf(Log, "ImGuiEngineStatsSystem", "Found component Entity for %s", compName.c_str());
 							collection.components.push_back(e.id);
 							collection.missingComponents.erase(collection.missingComponents.begin() + i);
 							--i;

@@ -9,6 +9,7 @@
 
 #include "helpers/instanceHelper.hpp"
 #include "helpers/matrixHelper.hpp"
+#include "helpers/logHelper.hpp"
 
 #include "Common.hpp"
 #include "RecastAgentComponent.hpp"
@@ -31,6 +32,7 @@ namespace kengine::recast {
 			}
 
 			static void recreateCrowds() noexcept {
+				kengine_log(Verbose, "Execute/RecastSystem", "Recreating crowds for editor mode");
 				for (auto [e, agent, transform, pathfinding] : entities.with<RecastAgentComponent, TransformComponent, PathfindingComponent>()) {
 					auto environment = entities[agent.crowd];
 					const auto navMesh = instanceHelper::tryGetModel<NavMeshComponent>(environment);
@@ -53,6 +55,7 @@ namespace kengine::recast {
 
 			static void removeOldAgents() noexcept {
 				for (auto [e, agent, noPathfinding] : entities.with<RecastAgentComponent, no<PathfindingComponent>>()) {
+					kengine_logf(Verbose, "Execute/RecastSystem", "Removing agent %zu from crowd %zu", e.id, agent.crowd);
 					auto environment = entities[agent.crowd];
 					auto & crowd = environment.get<RecastCrowdComponent>();
 					crowd.crowd->removeAgent(agent.index);
@@ -66,6 +69,7 @@ namespace kengine::recast {
 						continue;
 
 					auto environment = entities[pathfinding.environment];
+					kengine_logf(Verbose, "Execute/RecastSystem", "Adding agent %zu to crowd %zu", e.id, environment.id);
 
 					auto crowd = environment.tryGet<RecastCrowdComponent>();
 					if (!crowd)
@@ -224,6 +228,7 @@ namespace kengine::recast {
 			}
 
 			static void updateDestination(Entity & e, const RecastNavMeshComponent & navMesh, const RecastCrowdComponent & crowd, const putils::Point3f & destinationInModel, const putils::Point3f & searchExtents) noexcept {
+
 				static const dtQueryFilter filter;
 				dtPolyRef nearestPoly;
 				float nearestPt[3];
