@@ -8,7 +8,7 @@
 
 namespace kengine {
 	struct ImGuiToolComponent {
-		bool enabled;
+		bool enabled = false;
 	};
 }
 
