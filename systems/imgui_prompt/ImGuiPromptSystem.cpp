@@ -97,7 +97,7 @@ namespace kengine::imgui_prompt {
 			}
 
 			if (shouldScrollDown) {
-				ImGui::SetScrollHere();
+				ImGui::SetScrollHereY();
 				shouldScrollDown = false;
 			}
 

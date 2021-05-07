@@ -3,8 +3,8 @@ set(name kengine_opengl)
 set(IMGUI_DIR ../../putils/imgui)
 file(GLOB src
 	*.cpp *.hpp
-	${IMGUI_DIR}/examples/imgui_impl_glfw.cpp
-	${IMGUI_DIR}/examples/imgui_impl_opengl3.cpp
+	${IMGUI_DIR}/backends/imgui_impl_glfw.cpp
+	${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
 )
 
 if (KENGINE_OPENGL_NO_DEBUG_TOOLS)

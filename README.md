@@ -255,6 +255,7 @@ These are pre-built, extensible and pluggable elements that can be used to boots
 #### Function components
 
 * [Execute](components/functions/Execute.md): called each frame
+* [Log](components/functions/Log.md): logs messages
 * [OnClick](components/functions/OnClick.md): called when the parent `Entity` is clicked
 * [OnEntityCreated](components/functions/OnEntityCreated.md): called for each new `Entity`
 * [OnEntityRemoved](components/functions/OnEntityRemoved.md): called whenever an `Entity` is removed
@@ -295,6 +296,11 @@ In all following descriptions, the "parent" `Component` refers to the `Component
 * [ImGuiPromptSystem](systems/imgui_prompt/ImGuiPromptSystem.md): displays an ImGui window that lets users run arbitrary code in Lua and Python
 * [ImGuiToolSystem](systems/imgui_tool/ImGuiToolSystem.md): manages ImGui [tool windows](components/data/ImGuiToolComponent.md) through ImGui's MainMenuBar
 
+#### Logging
+* [LogImGuiSystem](systems/log_imgui/LogImGuiSystem.md): outputs logs to an ImGui window
+* [LogStdoutSystem](systems/log_stdout/LogStdoutSystem.md): outputs logs to stdout
+* [LogVisualStudioSystem](systems/log_visual_studio/LogVisualStudioSystem.md): outputs logs to Visual Studio's output window
+
 #### 3D Graphics
 * [OpenGLSystem](systems/opengl/OpenGLSystem.md): displays entities in an OpenGL render window
 * [OpenGLSpritesSystem](systems/opengl_sprites/OpenGLSpritesSystem.md): loads sprites and provides shaders to render them 
@@ -327,6 +333,9 @@ These systems must be enabled by setting the corresponding CMake variable to `tr
 | InputSystem               | KENGINE_INPUT                 |
 | KinematicSystem           | KENGINE_KINEMATIC             |
 | LuaSystem                 | KENGINE_LUA                   |
+| LogImGuiSystem            | KENGINE_LOG_IMGUI             |
+| LogStdoutSystem           | KENGINE_LOG_STDOUT            |
+| LogVisualStudioSystem     | KENGINE_LOG_VISUAL_STUDIO     |
 | OnClickSystem             | KENGINE_ONCLICK               |
 | OpenGLSystem              | KENGINE_OPENGL                |
 | OpenGLSpritesSystem       | KENGINE_OPENGL_SPRITES        |
