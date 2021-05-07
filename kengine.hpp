@@ -1,7 +1,6 @@
 #pragma once
 
 #include "impl/GlobalState.hpp"
-#include "Entity.hpp"
 #include "Entities.hpp"
 
 namespace kengine {
