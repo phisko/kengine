@@ -30,17 +30,24 @@ namespace kengine {
 						using T = putils_wrapped_type(type);
 						pythonHelper::impl::registerTypeWithState<T>(state);
 					}
-					);
+				);
 			}
 
 			static void execute(float deltaTime) noexcept {
 				kengine_log(Verbose, "Execute", "PythonSystem");
 				module_->attr("deltaTime") = deltaTime;
+
 				for (auto [e, comp] : entities.with<PythonComponent>()) {
 					module_->attr("self") = &e;
+
 					for (const auto & s : comp.scripts) {
 						kengine_logf(Verbose, "Execute/PythonSystem", "%zu: %s", e.id, s.c_str());
-						py::eval_file(s.c_str(), py::globals());
+						try {
+							py::eval_file(s.c_str(), py::globals());
+						}
+						catch (const std::exception & e) {
+							kengine_assert_failed(e.what());
+						}
 					}
 				}
 			}

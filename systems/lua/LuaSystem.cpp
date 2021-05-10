@@ -35,11 +35,18 @@ namespace kengine::lua {
 		static void execute(float deltaTime) noexcept {
 			kengine_log(Verbose, "Execute", "LuaSystem");
 			(*state)["deltaTime"] = deltaTime;
+
 			for (auto [e, comp] : entities.with<LuaComponent>()) {
 				(*state)["self"] = &e;
+
 				for (const auto & s : comp.scripts) {
 					kengine_logf(Verbose, "Execute/LuaSystem", "%zu: %s", e.id, s.c_str());
-					state->script_file(s.c_str());
+
+					state->safe_script_file(s.c_str(), [](lua_State *, sol::protected_function_result pfr) {
+						const sol::error err = pfr;
+						kengine_assert_failed(err.what());
+						return pfr;
+					});
 				}
 			}
 		}
