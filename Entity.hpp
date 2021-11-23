@@ -32,7 +32,7 @@ namespace kengine {
 		T & attach() noexcept;
 
 		template<typename T>
-		void attach(T && rhs) noexcept;
+		std::decay_t<T> & attach(T && value) noexcept;
 
 		template<typename T>
 		void detach() noexcept;
