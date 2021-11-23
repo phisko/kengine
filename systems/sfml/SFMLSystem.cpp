@@ -1,5 +1,6 @@
 #include "SFMLSystem.hpp"
 
+#include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Window/Event.hpp>
 
 #include "kengine.hpp"
@@ -16,8 +17,15 @@
 #include "helpers/logHelper.hpp"
 
 #include "SFMLWindowComponent.hpp"
+#include "SFMLTextureComponent.hpp"
+#include "data/GraphicsComponent.hpp"
+
 #include "data/InputBufferComponent.hpp"
+#include "data/ModelComponent.hpp"
+#include "data/TransformComponent.hpp"
 #include "data/WindowComponent.hpp"
+#include "helpers/instanceHelper.hpp"
+#include "helpers/resourceHelper.hpp"
 
 namespace kengine {
 	struct sfml {
@@ -48,30 +56,30 @@ namespace kengine {
 				}
 			}
 
-			for (auto [windowEntity, sfWindowComp] : entities.with<SFMLWindowComponent>()) {
-				const auto * windowComp = windowEntity.tryGet<WindowComponent>();
-				if (windowComp == nullptr) {
-					windowEntity.detach<SFMLWindowComponent>();
-					continue;
-				}
-
-				if (!sfWindowComp.window.isOpen()) {
-					if (windowComp->shutdownOnClose)
-						stopRunning();
-					else
-						entities -= windowEntity;
-					continue;
-				}
-
-				sfWindowComp.window.setSize({ windowComp->size.x, windowComp->size.y });
-
-				processEvents(windowEntity.id, sfWindowComp.window);
-
-				sfWindowComp.window.clear();
-				ImGui::SFML::Render(sfWindowComp.window);
-				sfWindowComp.window.display();
-				ImGui::SFML::Update(sfWindowComp.window, sfDeltaTime);
+			for (auto [window, sfWindow] : entities.with<SFMLWindowComponent>()) {
+				updateWindowState(window, sfWindow);
+				processEvents(window.id, sfWindow.window);
+				render(sfWindow, sfDeltaTime);
 			}
+		}
+
+		static bool updateWindowState(Entity & windowEntity, SFMLWindowComponent & sfWindowComp) noexcept {
+			const auto * windowComp = windowEntity.tryGet<WindowComponent>();
+			if (windowComp == nullptr) {
+				windowEntity.detach<SFMLWindowComponent>();
+				return false;
+			}
+
+			if (!sfWindowComp.window.isOpen()) {
+				if (windowComp->shutdownOnClose)
+					stopRunning();
+				else
+					entities -= windowEntity;
+				return false;
+			}
+			
+			sfWindowComp.window.setSize({ windowComp->size.x, windowComp->size.y });
+			return true;
 		}
 
 		static void processEvents(EntityID window, sf::RenderWindow & sfWindow) noexcept {
@@ -135,23 +143,76 @@ namespace kengine {
 			}
 		}
 
-		static void onEntityCreated(Entity & e) noexcept {
-			if (const auto * window = e.tryGet<WindowComponent>()) {
-				auto & sfWindow = e.attach<SFMLWindowComponent>();
-				sfWindow.window.create(
-					sf::VideoMode{ window->size.x, window->size.y },
-					window->name.c_str(),
-					window->fullscreen ? sf::Style::Fullscreen : sf::Style::Default);
+		static void render(SFMLWindowComponent & window, sf::Time deltaTime) {
+			window.window.clear();
+			ImGui::SFML::Render(window.window);
 
-				ImGui::SFML::Init(sfWindow.window);
-				ImGui::SFML::Update(sfWindow.window, g_deltaClock.restart());
+			struct ZOrderedSprite {
+				sf::Sprite sprite;
+				float height;
+			};
+			std::vector<ZOrderedSprite> sprites;
+
+			for (const auto & [e, transform, graphics] : entities.with<TransformComponent, GraphicsComponent>()) {
+				const auto * texture = instanceHelper::tryGetModel<SFMLTextureComponent>(e);
+				if (texture == nullptr)
+					continue;
+
+				sf::Sprite sprite(texture->texture);
+				sprite.setColor(sf::Color(toColor(graphics.color).rgba));
+				sprite.setPosition(transform.boundingBox.position.x, transform.boundingBox.position.z);
+				sprite.setScale(transform.boundingBox.size.x, transform.boundingBox.size.y);
+				sprite.setRotation(transform.yaw);
+				sprites.push_back({ .sprite = std::move(sprite), .height = transform.boundingBox.position.y });
+			}
+
+			std::sort(sprites.begin(), sprites.end(), [](const auto & lhs, const auto & rhs) { return lhs.height > rhs.height; });
+			for (const auto & sprite : sprites)
+				window.window.draw(sprite.sprite);
+			
+			window.window.display();
+			ImGui::SFML::Update(window.window, deltaTime);
+		}
+
+		static void onEntityCreated(Entity & e) noexcept {
+			if (const auto * window = e.tryGet<WindowComponent>())
+				createWindow(e, *window);
+
+			if (const auto * model = e.tryGet<ModelComponent>())
+				createTexture(e, *model);
+		}
+
+		static void createWindow(Entity & e, const WindowComponent & windowComp) noexcept {
+			kengine_log(Log, "SFML", "Creating window '%s'", windowComp.name.c_str());
+			
+			auto & sfWindow = e.attach<SFMLWindowComponent>();
+			sfWindow.window.create(
+				sf::VideoMode{ windowComp.size.x, windowComp.size.y },
+				windowComp.name.c_str(),
+				windowComp.fullscreen ? sf::Style::Fullscreen : sf::Style::Default);
+
+			ImGui::SFML::Init(sfWindow.window);
+			ImGui::SFML::Update(sfWindow.window, g_deltaClock.restart());
+		}
+
+		static void createTexture(Entity & e, const ModelComponent & model) noexcept {
+			sf::Texture texture;
+			if (texture.loadFromFile(model.file.c_str())) {
+				kengine_log(Log, "SFML", "Loaded texture for '%s'", model.file.c_str());
+				e += SFMLTextureComponent{ std::move(texture) };
 			}
 		}
 
 		static void onEntityRemoved(Entity & e) noexcept {
+			if (const auto * sfWindow = e.tryGet<SFMLWindowComponent>()) {
+				kengine_log(Log, "SFML", "Shutting down ImGui for window");
+				ImGui::SFML::Shutdown(sfWindow->window);
+			}
 		}
 
 		static void terminate() noexcept {
+			kengine_log(Log, "Terminate/SFML", "Shutting down ImGui");
+			ImGui::SFML::Shutdown();
 		}
 
 		static inline sf::Clock g_deltaClock;
