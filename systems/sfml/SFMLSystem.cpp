@@ -1,11 +1,15 @@
 #include "SFMLSystem.hpp"
 
+#include "kengine.hpp"
+
+#include <imgui.h>
+#include <SFML/Graphics/RenderTexture.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Window/Event.hpp>
 
-#include "kengine.hpp"
-
 #include "imgui-sfml/imgui-SFML.h"
+#include "SFMLWindowComponent.hpp"
+#include "SFMLTextureComponent.hpp"
 
 #include "data/AdjustableComponent.hpp"
 #include "data/ImGuiScaleComponent.hpp"
@@ -16,16 +20,23 @@
 
 #include "helpers/logHelper.hpp"
 
-#include "SFMLWindowComponent.hpp"
-#include "SFMLTextureComponent.hpp"
+#include "data/CameraComponent.hpp"
 #include "data/GraphicsComponent.hpp"
-
+#include "data/ImGuiContextComponent.hpp"
 #include "data/InputBufferComponent.hpp"
 #include "data/ModelComponent.hpp"
 #include "data/TransformComponent.hpp"
+#include "data/ViewportComponent.hpp"
 #include "data/WindowComponent.hpp"
+
+#include "helpers/cameraHelper.hpp"
 #include "helpers/instanceHelper.hpp"
-#include "helpers/resourceHelper.hpp"
+
+#include "vector.hpp"
+
+#ifndef KENGINE_MAX_VIEWPORTS
+# define KENGINE_MAX_VIEWPORTS 8
+#endif
 
 namespace kengine {
 	struct sfml {
@@ -59,9 +70,13 @@ namespace kengine {
 			}
 
 			for (auto [window, sfWindow] : entities.with<SFMLWindowComponent>()) {
-				updateWindowState(window, sfWindow);
-				processEvents(window.id, sfWindow.window);
-				render(sfWindow, sfDeltaTime);
+				kengine_logf(Verbose, "Execute/SFMLSystem", "Processing window %zu", window.id);
+				if (!updateWindowState(window, sfWindow))
+					continue;
+				// We process events after rendering, even though it's not the expected order, because
+				// of how the SFML-ImGui binding handles input :(
+				render(window, sfWindow);
+				processEvents(window.id, sfWindow.window, sfDeltaTime);
 			}
 		}
 
@@ -86,7 +101,7 @@ namespace kengine {
 			return true;
 		}
 
-		static void processEvents(EntityID window, sf::RenderWindow & sfWindow) noexcept {
+		static void processEvents(EntityID window, sf::RenderWindow & sfWindow, sf::Time deltaTime) noexcept {
 			sf::Event event;
 			while (sfWindow.pollEvent(event)) {
 				ImGui::SFML::ProcessEvent(sfWindow, event);
@@ -96,6 +111,7 @@ namespace kengine {
 
 				processInput(window, event);
 			}
+			ImGui::SFML::Update(sfWindow, deltaTime);
 		}
 
 		static void processInput(EntityID window, const sf::Event & e) noexcept {
@@ -163,9 +179,53 @@ namespace kengine {
 			}
 		}
 
-		static void render(SFMLWindowComponent & window, sf::Time deltaTime) {
-			window.window.clear();
-			ImGui::SFML::Render(window.window);
+		static void render(const Entity & windowEntity, SFMLWindowComponent & sfWindow) noexcept {
+			sfWindow.window.clear();
+
+			struct ToBlit {
+				const sf::RenderTexture * renderTexture;
+				const ViewportComponent * viewport;
+			};
+			putils::vector<ToBlit, KENGINE_MAX_VIEWPORTS> toBlit;
+
+			for (auto [e, cam, viewport] : entities.with<CameraComponent, ViewportComponent>()) {
+				if (viewport.window == INVALID_ID) {
+					kengine_logf(Log, "OpenGLSystem", "Setting target window for ViewportComponent in %zu", e.id);
+					viewport.window = windowEntity.id;
+				}
+				else if (viewport.window != windowEntity.id)
+					continue;
+
+				sf::RenderTexture * renderTexture = (sf::RenderTexture *)viewport.renderTexture;
+				if (viewport.renderTexture == ViewportComponent::INVALID_RENDER_TEXTURE) {
+					renderTexture = new sf::RenderTexture;
+					renderTexture->create(viewport.resolution.x, viewport.resolution.y);
+					viewport.renderTexture = renderTexture;
+				}
+
+				renderTexture->setView(sf::View{
+					{ cam.frustum.position.x, cam.frustum.position.y },
+					{ cam.frustum.size.x, cam.frustum.size.y }
+				});
+				renderToTexture(*renderTexture);
+				toBlit.push_back(ToBlit{ renderTexture, &viewport });
+			}
+
+			std::sort(toBlit.begin(), toBlit.end(), [](const ToBlit & lhs, const ToBlit & rhs) noexcept {
+				return lhs.viewport->zOrder < rhs.viewport->zOrder;
+			});
+
+			for (const auto & blit : toBlit) {
+				auto renderTextureSprite = createRenderTextureSprite(*blit.renderTexture, sfWindow.window, *blit.viewport);
+				sfWindow.window.draw(std::move(renderTextureSprite));
+			}
+		
+			ImGui::SFML::Render(sfWindow.window);
+			sfWindow.window.display();
+		}
+
+		static void renderToTexture(sf::RenderTexture & renderTexture) noexcept {
+			renderTexture.clear();
 
 			struct ZOrderedSprite {
 				sf::Sprite sprite;
@@ -174,24 +234,44 @@ namespace kengine {
 			std::vector<ZOrderedSprite> sprites;
 
 			for (const auto & [e, transform, graphics] : entities.with<TransformComponent, GraphicsComponent>()) {
-				const auto * texture = instanceHelper::tryGetModel<SFMLTextureComponent>(e);
-				if (texture == nullptr)
-					continue;
-
-				sf::Sprite sprite(texture->texture);
-				sprite.setColor(sf::Color(toColor(graphics.color).rgba));
-				sprite.setPosition(transform.boundingBox.position.x, transform.boundingBox.position.z);
-				sprite.setScale(transform.boundingBox.size.x, transform.boundingBox.size.y);
-				sprite.setRotation(transform.yaw);
-				sprites.push_back({ .sprite = std::move(sprite), .height = transform.boundingBox.position.y });
+				auto sprite = createEntitySprite(e, transform, graphics);
+				if (sprite != std::nullopt)
+					sprites.push_back({ .sprite = std::move(*sprite), .height = transform.boundingBox.position.y });
 			}
 
-			std::sort(sprites.begin(), sprites.end(), [](const auto & lhs, const auto & rhs) { return lhs.height > rhs.height; });
+			std::sort(sprites.begin(), sprites.end(), [](const auto & lhs, const auto & rhs) noexcept { return lhs.height > rhs.height; });
 			for (const auto & sprite : sprites)
-				window.window.draw(sprite.sprite);
+				renderTexture.draw(sprite.sprite);
+
+			renderTexture.display();
+		}
+
+		static std::optional<sf::Sprite> createEntitySprite(const Entity & e, const TransformComponent & transform, const GraphicsComponent & graphics) noexcept {
+			const auto * texture = instanceHelper::tryGetModel<SFMLTextureComponent>(e);
+			if (texture == nullptr)
+				return std::nullopt;
 			
-			window.window.display();
-			ImGui::SFML::Update(window.window, deltaTime);
+			sf::Sprite sprite(texture->texture);
+			sprite.setColor(sf::Color(toColor(graphics.color).rgba));
+			sprite.setPosition(transform.boundingBox.position.x - transform.boundingBox.size.x / 2.f, transform.boundingBox.position.y - transform.boundingBox.size.y / 2.f);
+
+			const auto textureSize = texture->texture.getSize();
+			sprite.setScale(transform.boundingBox.size.x / textureSize.x, transform.boundingBox.size.y / textureSize.y);
+			sprite.setRotation(transform.yaw);
+			return sprite;
+		}
+
+		static sf::Sprite createRenderTextureSprite(const sf::RenderTexture & renderTexture, const sf::RenderWindow & window, const ViewportComponent & viewport) noexcept {
+			sf::Sprite renderTextureSprite(renderTexture.getTexture());
+
+			const auto screenSize = window.getSize();
+			const auto box = cameraHelper::convertToScreenPercentage({ viewport.boundingBox.position, viewport.boundingBox.size }, { (float)screenSize.x, (float)screenSize.y }, viewport);
+			renderTextureSprite.setPosition(screenSize.x * box.position.x, screenSize.y * box.position.y);
+
+			const auto textureSize = renderTexture.getTexture().getSize();
+			renderTextureSprite.setScale(screenSize.x / textureSize.x * box.size.x, screenSize.y / textureSize.y * box.size.y);
+
+			return renderTextureSprite;
 		}
 
 		static void onEntityCreated(Entity & e) noexcept {
