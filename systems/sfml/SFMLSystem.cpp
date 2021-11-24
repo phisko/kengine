@@ -94,20 +94,27 @@ namespace kengine {
 			}
 		}
 
-		static void processInput(EntityID window, const sf::Event & e) {
+		static void processInput(EntityID window, const sf::Event & e) noexcept {
 			if (g_inputBuffer == nullptr)
 				return;
 			
 			switch (e.type) {
 				case sf::Event::KeyPressed:
-				case sf::Event::KeyReleased:
+				case sf::Event::KeyReleased: {
+					if (ImGui::GetIO().WantCaptureKeyboard)
+						break;
+
 					g_inputBuffer->keys.push_back(InputBufferComponent::KeyEvent{
 						.window = window,
 						.key = e.key.code,
 						.pressed = e.type == sf::Event::KeyPressed
 					});
 					break;
-				case sf::Event::MouseMoved:
+				}
+				case sf::Event::MouseMoved: {
+					if (ImGui::GetIO().WantCaptureMouse)
+						break;
+
 					static putils::Point2f previousPos{ 0.f, 0.f };
 
 					const putils::Point2f pos{ (float)e.mouseMove.x, (float)e.mouseMove.y };
@@ -120,8 +127,12 @@ namespace kengine {
 						.rel = rel
 					});
 					break;
+				}
 				case sf::Event::MouseButtonPressed:
-				case sf::Event::MouseButtonReleased:
+				case sf::Event::MouseButtonReleased: {
+					if (ImGui::GetIO().WantCaptureMouse)
+						break;
+
 					g_inputBuffer->clicks.push_back(InputBufferComponent::ClickEvent{
 						.window = window,
 						.pos = { (float)e.mouseButton.x, (float)e.mouseButton.y },
@@ -129,7 +140,11 @@ namespace kengine {
 						.pressed = e.type == sf::Event::MouseButtonPressed
 					});
 					break;
-				case sf::Event::MouseWheelScrolled:
+				}
+				case sf::Event::MouseWheelScrolled: {
+					if (ImGui::GetIO().WantCaptureMouse)
+						return;
+
 					g_inputBuffer->scrolls.push_back(InputBufferComponent::MouseScrollEvent{
 						.window = window,
 						.xoffset = 0,
@@ -137,6 +152,7 @@ namespace kengine {
 						.pos = { (float)e.mouseWheelScroll.x, (float)e.mouseWheelScroll.y }
 					});
 					break;
+				}
 				default:
 					// don't assert, this could be a joystick event or something
 					break;
