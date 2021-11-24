@@ -550,7 +550,7 @@ namespace kengine::opengl {
 			glBindFramebuffer(GL_FRAMEBUFFER, fb.fbo);
 
 			GLuint texture = (GLuint)viewport.renderTexture;
-			if (viewport.renderTexture == (ViewportComponent::RenderTexture) - 1)
+			if (viewport.renderTexture == ViewportComponent::INVALID_RENDER_TEXTURE)
 				glGenTextures(1, &texture);
 			glBindTexture(GL_TEXTURE_2D, texture);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, viewport.resolution.x, viewport.resolution.y, 0, GL_RGBA, GL_FLOAT, nullptr);

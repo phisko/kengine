@@ -7,12 +7,13 @@
 namespace kengine {
 	struct ViewportComponent : OnScreenComponent {
 		using RenderTexture = void *;
+		static constexpr auto INVALID_RENDER_TEXTURE = (RenderTexture)-1;
 
 		putils::Rect2f boundingBox = { { 0.f, 0.f }, { 1.f, 1.f } };
 		putils::Point2i resolution = { 1280, 720 };
 		float zOrder = 1.f;
 		EntityID window = INVALID_ID;
-		RenderTexture renderTexture = (RenderTexture)-1;
+		RenderTexture renderTexture = INVALID_RENDER_TEXTURE;
 
 		ViewportComponent() noexcept {
 			coordinateType = CoordinateType::ScreenPercentage;
