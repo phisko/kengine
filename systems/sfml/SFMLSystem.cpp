@@ -47,6 +47,8 @@ namespace kengine {
 		}
 
 		static void execute(float deltaTime) noexcept {
+			kengine_log(Verbose, "Execute", "SFMLSystem");
+
 			const auto sfDeltaTime = g_deltaClock.restart();
 
 			if (g_inputBuffer == nullptr) {
@@ -66,11 +68,13 @@ namespace kengine {
 		static bool updateWindowState(Entity & windowEntity, SFMLWindowComponent & sfWindowComp) noexcept {
 			const auto * windowComp = windowEntity.tryGet<WindowComponent>();
 			if (windowComp == nullptr) {
+				kengine_logf(Verbose, "Execute/SFMLSystem", "%zu: destroying window as WindowComponent was removed", windowEntity.id);
 				windowEntity.detach<SFMLWindowComponent>();
 				return false;
 			}
 
 			if (!sfWindowComp.window.isOpen()) {
+				kengine_logf(Verbose, "Execute/SFMLSystem", "%zu: window was closed", windowEntity.id);
 				if (windowComp->shutdownOnClose)
 					stopRunning();
 				else
@@ -199,7 +203,7 @@ namespace kengine {
 		}
 
 		static void createWindow(Entity & e, const WindowComponent & windowComp) noexcept {
-			kengine_log(Log, "SFML", "Creating window '%s'", windowComp.name.c_str());
+			kengine_logf(Log, "SFML", "Creating window '%s'", windowComp.name.c_str());
 			
 			auto & sfWindow = e.attach<SFMLWindowComponent>();
 			sfWindow.window.create(
@@ -214,7 +218,7 @@ namespace kengine {
 		static void createTexture(Entity & e, const ModelComponent & model) noexcept {
 			sf::Texture texture;
 			if (texture.loadFromFile(model.file.c_str())) {
-				kengine_log(Log, "SFML", "Loaded texture for '%s'", model.file.c_str());
+				kengine_logf(Log, "SFML", "Loaded texture for '%s'", model.file.c_str());
 				e += SFMLTextureComponent{ std::move(texture) };
 			}
 		}
