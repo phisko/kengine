@@ -212,6 +212,14 @@ namespace kengine {
 				windowComp.fullscreen ? sf::Style::Fullscreen : sf::Style::Default);
 
 			ImGui::SFML::Init(sfWindow.window);
+
+			e += ImGuiContextComponent{ ImGui::GetCurrentContext() };
+#if 0
+			auto & io = ImGui::GetIO();
+			io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+			io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+			io.ConfigViewportsNoTaskBarIcon = true;
+#endif
 			ImGui::SFML::Update(sfWindow.window, g_deltaClock.restart());
 		}
 
