@@ -31,39 +31,54 @@ after 'kengine::init()'.
 For more information, see kengine/helpers/registerTypeHelper.md
 ''')
 
-parser.add_argument('input_file', help = 'JSON input file')
+parser.add_argument('input_files', help = 'JSON input files', nargs = '+')
 parser.add_argument('--output', default = '', help = 'output directory')
+parser.add_argument('--force', action = 'store_true', help = 'overwrite existing files (only use if a component has changed headers)')
 
-args = parser.parse_args()
-
-json_file = open(args.input_file)
-json_data = json.load(json_file)
+# Impl
 
 all_functions = []
 
-def generate_files(json_array_name, kengine_register_helper):
-	if not json_data[json_array_name]:
+def process_file(input_file):
+	json_file = open(input_file)
+	json_data = json.load(json_file)
+
+	def generate_files(json_array_name, kengine_register_helper):
+		if not json_array_name in json_data:
+			return
+		for p in json_data[json_array_name]:
+			process_type(p['type'], p['header'], json_array_name, kengine_register_helper)
+
+	generate_files('components', 'kengine::registerComponents')
+	generate_files('types', 'kengine::registerComponents')
+
+def process_type(type, header, json_array_name, kengine_register_helper):
+	clean_name = type.replace(':', '') 
+	function_name = 'register' + clean_name
+	all_functions.append(function_name)
+
+	out_path = os.path.join(args.output, function_name + '.cpp')
+
+	if os.path.exists(out_path) and not args.force:
+		print('Skipping "' + type + '": ' + out_path + ' exists')
 		return
-	for p in json_data[json_array_name]:
-		clean_name = p['type'].replace(':', '') 
-		function_name = 'register' + clean_name
-		all_functions.append(function_name)
 
-		out_path = os.path.join(args.output, clean_name + '.cpp')
+	print('Generating ' + json_array_name + ' registration for "' + type + '" from header "' + header + '" in "' + out_path + '"')
 
-		print('Generating ' + json_array_name + ' registration for "' + p['type'] + '" from header "' + p['header'] + '" in "' + out_path + '"')
-
-		open(out_path, 'w').write('''
+	open(out_path, 'w').write('''
 #include "helpers/registerTypeHelper.hpp"
-#include "''' + p['header'] + '''"
+#include "''' + header + '''"
 
 void ''' + function_name + '''() noexcept {
-	''' + kengine_register_helper + '''<''' + p['type'] + '''>();
-}
-			''')
+	''' + kengine_register_helper + '''<''' + type + '''>();
+}''')
 
-generate_files('components', 'kengine::registerComponents')
-generate_files('types', 'kengine::registerComponents')
+# Main
+
+args = parser.parse_args()
+
+for f in args.input_files:
+	process_file(f)
 
 main_file = os.path.join(args.output, 'registerTypes')
 
@@ -82,7 +97,6 @@ main_file_cpp += '''
 '''
 
 open(main_file + '.cpp', 'w').write(main_file_cpp)
-
 open(main_file + '.hpp', 'w').write('''
 #pragma once
 
