@@ -5,6 +5,9 @@
 #include <imgui.h>
 #include <SFML/Graphics/RenderTexture.hpp>
 #include <SFML/Graphics/Sprite.hpp>
+#include <SFML/Graphics/CircleShape.hpp>
+#include <SFML/Graphics/RectangleShape.hpp>
+#include <SFML/Graphics/Text.hpp>
 #include <SFML/Window/Event.hpp>
 
 #include "imgui-sfml/imgui-SFML.h"
@@ -33,12 +36,36 @@
 #include "helpers/instanceHelper.hpp"
 
 #include "vector.hpp"
+#include "data/DebugGraphicsComponent.hpp"
 
 #ifndef KENGINE_MAX_VIEWPORTS
 # define KENGINE_MAX_VIEWPORTS 8
 #endif
 
-namespace kengine {
+namespace {
+	using namespace kengine;
+
+	template<typename PointType>
+	struct VectorConverter {
+		const PointType & p;
+
+		template<typename T>
+		operator sf::Vector2<T>() const noexcept {
+			return { p.x, p.y };
+		}
+
+		template<typename T>
+		operator sf::Vector3<T>() const noexcept {
+			return { p.x, p.y, p.z };
+		}
+	};
+#define convertVector(vec) VectorConverter<decltype(vec)>(vec)
+
+	sf::Color convertColor(const putils::NormalizedColor & color) noexcept {
+		const auto tmp = toColor(color);
+		return { tmp.r, tmp.g, tmp.b, tmp.a };
+	}
+
 	struct sfml {
 		static void init(Entity & e) noexcept {
 			kengine_log(Log, "Init", "SFMLSystem");
@@ -96,8 +123,8 @@ namespace kengine {
 					entities -= windowEntity;
 				return false;
 			}
-			
-			sfWindowComp.window.setSize({ windowComp->size.x, windowComp->size.y });
+
+			sfWindowComp.window.setSize(convertVector(windowComp->size));
 			return true;
 		}
 
@@ -117,7 +144,7 @@ namespace kengine {
 		static void processInput(EntityID window, const sf::Event & e) noexcept {
 			if (g_inputBuffer == nullptr)
 				return;
-			
+
 			switch (e.type) {
 				case sf::Event::KeyPressed:
 				case sf::Event::KeyReleased: {
@@ -190,7 +217,7 @@ namespace kengine {
 
 			for (auto [e, cam, viewport] : entities.with<CameraComponent, ViewportComponent>()) {
 				if (viewport.window == INVALID_ID) {
-					kengine_logf(Log, "OpenGLSystem", "Setting target window for ViewportComponent in %zu", e.id);
+					kengine_logf(Log, "SFMLSystem", "Setting target window for ViewportComponent in %zu", e.id);
 					viewport.window = windowEntity.id;
 				}
 				else if (viewport.window != windowEntity.id)
@@ -203,15 +230,12 @@ namespace kengine {
 					viewport.renderTexture = renderTexture;
 				}
 
-				renderTexture->setView(sf::View{
-					{ cam.frustum.position.x, cam.frustum.position.y },
-					{ cam.frustum.size.x, cam.frustum.size.y }
-				});
+				renderTexture->setView(sf::View{ convertVector(cam.frustum.position), convertVector(cam.frustum.size) });
 				renderToTexture(*renderTexture);
 				toBlit.push_back(ToBlit{ renderTexture, &viewport });
 			}
 
-			std::sort(toBlit.begin(), toBlit.end(), [](const ToBlit & lhs, const ToBlit & rhs) noexcept {
+			std::ranges::sort(toBlit, [](const ToBlit & lhs, const ToBlit & rhs) noexcept {
 				return lhs.viewport->zOrder < rhs.viewport->zOrder;
 			});
 
@@ -219,7 +243,7 @@ namespace kengine {
 				auto renderTextureSprite = createRenderTextureSprite(*blit.renderTexture, sfWindow.window, *blit.viewport);
 				sfWindow.window.draw(std::move(renderTextureSprite));
 			}
-		
+
 			ImGui::SFML::Render(sfWindow.window);
 			sfWindow.window.display();
 		}
@@ -227,21 +251,152 @@ namespace kengine {
 		static void renderToTexture(sf::RenderTexture & renderTexture) noexcept {
 			renderTexture.clear();
 
-			struct ZOrderedSprite {
-				sf::Sprite sprite;
-				float height;
-			};
-			std::vector<ZOrderedSprite> sprites;
+			struct Drawables {
+				std::vector<sf::Sprite> sprites;
+				std::vector<sf::CircleShape> circles;
+				std::vector<sf::RectangleShape> rectangles;
+				std::vector<sf::Text> texts;
+
+				struct Line {
+					sf::Vertex vertices[2];
+				};
+				std::vector<Line> lines;
+
+				struct Element {
+					enum {
+						Sprite,
+						Circle,
+						Rectangle,
+						Text,
+						Line
+					} type;
+					size_t index;
+					float height;
+				};
+				std::vector<Element> orderedElements;
+			} drawables;
 
 			for (const auto & [e, transform, graphics] : entities.with<TransformComponent, GraphicsComponent>()) {
 				auto sprite = createEntitySprite(e, transform, graphics);
-				if (sprite != std::nullopt)
-					sprites.push_back({ .sprite = std::move(*sprite), .height = transform.boundingBox.position.y });
+				if (sprite != std::nullopt) {
+					drawables.sprites.emplace_back(std::move(*sprite));
+					drawables.orderedElements.push_back({
+						.type = Drawables::Element::Sprite,
+						.index = drawables.sprites.size() - 1,
+						.height = transform.boundingBox.position.y });
+				}
 			}
 
-			std::sort(sprites.begin(), sprites.end(), [](const auto & lhs, const auto & rhs) noexcept { return lhs.height > rhs.height; });
-			for (const auto & sprite : sprites)
-				renderTexture.draw(sprite.sprite);
+			for (const auto & [e, transform, debug] : entities.with<TransformComponent, DebugGraphicsComponent>()) {
+				for (const auto & element : debug.elements) {
+					const sf::Color color(convertColor(element.color));
+
+					auto pos = element.pos;
+					if (element.referenceSpace == DebugGraphicsComponent::ReferenceSpace::Object)
+						pos += transform.boundingBox.position;
+
+					const auto height = pos.z;
+
+					using ElementType = DebugGraphicsComponent::Type;
+					switch (element.type) {
+						case ElementType::Line: {
+							Drawables::Line line;
+							line.vertices[0].color = color;
+							line.vertices[0].position = convertVector(element.pos); // lines are always in world space
+							line.vertices[1].color = color;
+							line.vertices[1].position = convertVector(element.line.end);
+							drawables.lines.push_back(std::move(line));
+							drawables.orderedElements.push_back({
+								.type = Drawables::Element::Line,
+								.index = drawables.lines.size() - 1,
+								.height = height });
+							break;
+						}
+						case ElementType::Sphere: {
+							sf::CircleShape circle(element.sphere.radius);
+							circle.setFillColor(color);
+							const sf::Vector2f sfPos = convertVector(pos);
+							circle.setPosition(sfPos - sf::Vector2f{ element.sphere.radius, element.sphere.radius });
+							drawables.circles.emplace_back(std::move(circle));
+							drawables.orderedElements.push_back({
+								.type = Drawables::Element::Circle,
+								.index = drawables.circles.size() - 1,
+								.height = height });
+							break;
+						}
+						case ElementType::Box: {
+							auto size = element.box.size;
+							if (element.referenceSpace == DebugGraphicsComponent::ReferenceSpace::Object)
+								size *= transform.boundingBox.size;
+							sf::RectangleShape rectangle{ convertVector(size) };
+							rectangle.setFillColor(color);
+							rectangle.setPosition(convertVector(pos - size / 2.f));
+							drawables.rectangles.emplace_back(std::move(rectangle));
+							drawables.orderedElements.push_back({
+								.type = Drawables::Element::Rectangle,
+								.index = drawables.rectangles.size() - 1,
+								.height = height });
+							break;
+						}
+						case ElementType::Text: {
+							static std::unordered_map<std::string, sf::Font> fonts;
+							auto it = fonts.find(element.text.font);
+							if (it == fonts.end()) {
+								it = fonts.emplace(element.text.font.c_str(), sf::Font{}).first;
+								if (!it->second.loadFromFile(element.text.font.c_str()))
+									kengine_logf(Error, "SFML", "Failed to load font '%s'", element.text.font.c_str());
+							}
+							sf::Text text(element.text.text.c_str(), it->second, (unsigned int)element.text.size);
+							text.setFillColor(color);
+							text.setPosition(convertVector(pos));
+							drawables.texts.emplace_back(std::move(text));
+							drawables.orderedElements.push_back({
+								.type = Drawables::Element::Text,
+								.index = drawables.texts.size() - 1,
+								.height = height });
+							break;
+						}
+						default:
+							static_assert(putils::magic_enum::enum_count<ElementType>() == 4);
+							kengine_assert_failed("Unknown type");
+							break;
+					}
+				}
+			}
+
+			std::ranges::sort(drawables.orderedElements, [](const Drawables::Element & lhs, const Drawables::Element & rhs) noexcept {
+				return lhs.height < rhs.height;
+			});
+
+			for (const auto & element : drawables.orderedElements) {
+				switch (element.type) {
+					case Drawables::Element::Sprite: {
+						renderTexture.draw(drawables.sprites[element.index]);
+						break;
+					}
+					case Drawables::Element::Circle: {
+						renderTexture.draw(drawables.circles[element.index]);
+						break;
+					}
+					case Drawables::Element::Line: {
+						renderTexture.draw(drawables.lines[element.index].vertices, 2, sf::PrimitiveType::Lines);
+						break;
+					}
+					case Drawables::Element::Rectangle: {
+						renderTexture.draw(drawables.rectangles[element.index]);
+						break;
+					}
+					case Drawables::Element::Text: {
+						// FreeType 2.11.0 (used by SFML as of 26/11/2021) is affected by an MSVC bug
+						// Uncomment this as of the next FreeType version
+						// renderTexture.draw(drawables.texts[element.index]);
+						break;
+					}
+					default:
+						kengine_assert_failed("Unknown type");
+						break;
+				}
+			}
 
 			renderTexture.display();
 		}
@@ -250,9 +405,9 @@ namespace kengine {
 			const auto * texture = instanceHelper::tryGetModel<SFMLTextureComponent>(e);
 			if (texture == nullptr)
 				return std::nullopt;
-			
+
 			sf::Sprite sprite(texture->texture);
-			sprite.setColor(sf::Color(toColor(graphics.color).rgba));
+			sprite.setColor(convertColor(graphics.color));
 			sprite.setPosition(transform.boundingBox.position.x - transform.boundingBox.size.x / 2.f, transform.boundingBox.position.y - transform.boundingBox.size.y / 2.f);
 
 			const auto textureSize = texture->texture.getSize();
@@ -284,7 +439,7 @@ namespace kengine {
 
 		static void createWindow(Entity & e, const WindowComponent & windowComp) noexcept {
 			kengine_logf(Log, "SFML", "Creating window '%s'", windowComp.name.c_str());
-			
+
 			auto & sfWindow = e.attach<SFMLWindowComponent>();
 			sfWindow.window.create(
 				sf::VideoMode{ windowComp.size.x, windowComp.size.y },
