@@ -8,10 +8,14 @@
 
 namespace kengine {
 	namespace meta {
-		// Note that `member` is a pointer to the actual member, not a member pointer
-		// e.g.	("value", &value, putils::meta::type<float>::index)
-		// NOT	("value", &Class::value, putils::meta::type<float>::index)
-		using AttributeIteratorSignature = void(const char * name, const void * member, putils::meta::type_index memberType);
+		struct AttributeInfo {
+			const char * name;
+			void * member; // pointer to the actual member, not a member pointer
+			size_t size;
+			putils::meta::type_index type;
+		};
+
+		using AttributeIteratorSignature = void(const AttributeInfo & attribute);
 		using AttributeIteratorFunc = putils::function<AttributeIteratorSignature, KENGINE_ATTRIBUTE_ITERATOR_FUNC_SIZE>;
 
 		struct ForEachAttribute : functions::BaseFunction<

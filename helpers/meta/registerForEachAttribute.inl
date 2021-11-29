@@ -12,7 +12,13 @@ namespace kengine {
 				putils::reflection::for_each_attribute(comp,
 					[&](const char * name, auto && member) {
 						const auto typeIndex = putils::meta::type<putils_typeof(member)>::index;
-						func(name, &member, typeIndex);
+						const meta::AttributeInfo attribute{
+							.name = name,
+							.member = &member,
+							.size = sizeof(member),
+							.type = typeIndex
+						};
+						func(attribute);
 					}
 				);
 			}
