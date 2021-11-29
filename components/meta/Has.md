@@ -20,4 +20,4 @@ Whether `e` has the parent `Component`.
 
 It is up to the user to implement this `meta Component` for the `Component` types they wish to be able to use it with.
 
-A helper [registerHas](../../helpers/meta/registerHas.md) function is provided which takes as a template parameter a set of `Component` types and implements the `Has` `meta Component` for them.
+A helper [registerHas](../../helpers/meta/impl/registerHas.md) function is provided which takes as a template parameter a set of `Component` types and implements the `Has` `meta Component` for them.

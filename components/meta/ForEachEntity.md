@@ -18,4 +18,4 @@ using EntityIteratorSignature = void(Entity &);
 
 It is up to the user to implement these `meta Components` for the `Component` types they wish to be able to filter.
 
-A helper [registerForEachEntity](../../helpers/meta/registerForEachEntity.md) function is provided that takes as a template parameter a set of `Component` types and implements the `ForEachEntity` and `ForEachEntityWithout` `meta Components` for them.
+A helper [registerForEachEntity](../../helpers/meta/impl/registerForEachEntity.md) function is provided that takes as a template parameter a set of `Component` types and implements the `ForEachEntity` and `ForEachEntityWithout` `meta Components` for them.

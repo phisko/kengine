@@ -51,6 +51,7 @@ putils_src_files(src_files
 	components/functions
 	components/meta
 	helpers
+	helpers/meta
 )
 
 add_library(kengine STATIC ${src_files})

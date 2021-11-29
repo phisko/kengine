@@ -16,7 +16,7 @@ void (const Entity & e);
 
 It is up to the user to implement this `meta Component` for the `Component` types they wish to be able to edit.
 
-A helper [registerEditImGui](../../helpers/registerEditImGui.md) function is provided that takes as a template parameter a set of `Component` types and implements the `EditImGui` `meta Component` for them.
+A helper [registerEditImGui](../../helpers/impl/registerEditImGui.md) function is provided that takes as a template parameter a set of `Component` types and implements the `EditImGui` `meta Component` for them.
 
 Note that the implementation provided in `registerEditImGui` is only a sample, and users may freely replace it with any other implementation they desire.
 

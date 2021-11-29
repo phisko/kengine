@@ -12,4 +12,4 @@ size_t ();
 
 It is up to the user to implement this `meta Component` for the `Component` types they wish to be able to use it with.
 
-A helper [registerCount](../../helpers/meta/registerCount.md) function is provided which takes as a template parameter a set of `Component` types and implements the `Count` `meta Component` for them.
+A helper [registerCount](../../helpers/meta/impl/registerCount.md) function is provided which takes as a template parameter a set of `Component` types and implements the `Count` `meta Component` for them.

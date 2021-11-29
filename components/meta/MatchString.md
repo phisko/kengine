@@ -23,6 +23,6 @@ bool (const Entity & e, const char * str);
 
 It is up to the user to implement this `meta Component` for the `Component` types they wish to be able to parse.
 
-A helper [registerMatchString](../../helpers/meta/registerMatchString.md) function is provided that takes as a template parameter a `Component` type and implements the `MatchString` `meta Component` for it.
+A helper [registerMatchString](../../helpers/meta/impl/registerMatchString.md) function is provided that takes as a template parameter a `Component` type and implements the `MatchString` `meta Component` for it.
 
 Note that the implementation provided in `registerMatchString` is only a sample, and users may freely replace it with any other implementation they desire.

@@ -16,7 +16,7 @@ putils::json (const Entity & e);
 
 It is up to the user to implement this `meta Component` for the `Component` types they wish to be able to parse.
 
-A helper [registerSaveToJSON](../../helpers/meta/registerSaveToJSON.md) function is provided that takes as a template parameter a set of `Component` types and implements the `SaveToJSON` `meta Component` for them.
+A helper [registerSaveToJSON](../../helpers/meta/impl/registerSaveToJSON.md) function is provided that takes as a template parameter a set of `Component` types and implements the `SaveToJSON` `meta Component` for them.
 
 Note that the implementation provided in `registerSaveToJSON` is only a sample, and users may freely replace it with any other implementation they desire.
 
