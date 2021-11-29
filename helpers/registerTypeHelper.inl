@@ -13,10 +13,12 @@
 #include "meta/registerEditImGui.hpp"
 #include "meta/registerForEachAttribute.hpp"
 #include "meta/registerForEachEntity.hpp"
+#include "meta/registerGet.hpp"
 #include "meta/registerHas.hpp"
 #include "meta/registerLoadFromJSON.hpp"
 #include "meta/registerMatchString.hpp"
 #include "meta/registerSaveToJSON.hpp"
+#include "meta/Size.hpp"
 
 #include "data/NameComponent.hpp"
 
@@ -66,7 +68,9 @@ namespace kengine {
 	void registerComponents() noexcept {
 		impl::registerTypes<Comps...>([](auto && t) noexcept {
 			using T = putils_wrapped_type(t);
-			typeHelper::getTypeEntity<T>() += kengine::NameComponent{ putils::reflection::get_class_name<T>() };
+			auto e = typeHelper::getTypeEntity<T>();
+			e += NameComponent{ putils::reflection::get_class_name<T>() };
+			e += meta::Size{ sizeof(T) };
 			impl::registerWithLanguage<T>(pythonHelper::registerComponents<T>, "Python");
 			impl::registerWithLanguage<T>(luaHelper::registerComponents<T>, "Lua");
 		});
@@ -78,6 +82,7 @@ namespace kengine {
 		registerEditImGui<Comps...>();
 		registerForEachAttribute<Comps...>();
 		registerForEachEntity<Comps...>();
+		registerGet<Comps...>();
 		registerHas<Comps...>();
 		registerLoadFromJSON<Comps...>();
 		registerMatchString<Comps...>();
