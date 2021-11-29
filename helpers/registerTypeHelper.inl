@@ -74,6 +74,7 @@ namespace kengine {
 		});
 
 		registerAttachTo<Comps...>();
+		registerAttributes<Comps...>();
 		registerCount<Comps...>();
 		registerDetachFrom<Comps...>();
 		registerDisplayImGui<Comps...>();
