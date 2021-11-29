@@ -80,7 +80,6 @@ namespace kengine {
 		registerDetachFrom<Comps...>();
 		registerDisplayImGui<Comps...>();
 		registerEditImGui<Comps...>();
-		registerForEachAttribute<Comps...>();
 		registerForEachEntity<Comps...>();
 		registerGet<Comps...>();
 		registerHas<Comps...>();
