@@ -1,5 +1,6 @@
 #include "kengine.hpp"
 #include "Component.hpp"
+#include "ComponentMask.hpp"
 
 #ifndef KENGINE_NDEBUG
 # include <iostream>
@@ -61,6 +62,7 @@ namespace kengine::impl {
 				WriteLock l(state->_componentsMutex);
 				state->_components.push_back(std::move(tmp));
 				ptr->id = state->_components.size() - 1;
+				assert(ptr->id < KENGINE_COMPONENT_COUNT);
 			}
 
 #ifndef KENGINE_NDEBUG
