@@ -4,7 +4,7 @@
 
 namespace kengine {
     struct CameraComponent {
-        putils::Rect3f frustum{ {}, { 1.f, 1.f, 1.f } };
+        putils::Rect3f frustum{ { 0.f, 0.f, 0.f }, { 1.f, 1.f, 1.f } };
         float pitch = 0; // Radians
         float yaw = 0; // Radians
 		float roll = 0; // Radians
