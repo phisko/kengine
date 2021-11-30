@@ -377,13 +377,22 @@ pip install conan
 
 These are helper functions to factorize typical manipulations of `Components`.
 
+* [assertHelper](helpers/assertHelper.md): higher-level assertions
 * [cameraHelper](helpers/cameraHelper.md)
 * [imguiHelper](helpers/imguiHelper.md): provides helpers to display and edit `Entities` in ImGui
+* [imguiLuaHelper](helpers/imguiLuaHelper.md)
+* [instanceHelper](helpers/instanceHelper.md)
 * [jsonHelper](helpers/jsonHelper.md): provides helpers to serialize and de-serialize `Entities` from json
+* [lightHelper](helpers/lightHelper.md)
+* [logHelper](helpers/logHelper.md)
+* [luaHelper](helpers/luaHelper.md)
 * [mainLoop](helpers/mainLoop.md)
 * [matrixHelper](helpers/matrixHelper.md)
 * [pluginHelper](helpers/pluginHelper.md): provides an `initPlugin` function to be called from DLLs
-* [shaderHelper](systems/opengl/shaderHelper.md)
+* [pythonHelper](helpers/pythonHelper.md)
+* [registerTypeHelper](helpers/registerTypeHelper.md)
+* [resourceHelper](helpers/resourceHelper.md)
+* [scriptLanguageHelper](helpers/scriptLanguageHelper.md): helpers to easily implement new scripting languages
 * [skeletonHelper](helpers/skeletonHelper.md)
 * [sortHelper](helpers/sortHelper.md): provides functions to sort `Entities`
 * [typeHelper](helpers/typeHelper.md): provides a `getTypeEntity<T>` function to get a "singleton" entity representing a given type
