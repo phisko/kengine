@@ -7,7 +7,7 @@ This `function Component` is typically attached to graphics systems (such as the
 ## Prototype
 
 ```cpp
-std::optional<putils::Point3f> (Entity::ID window, const putils::Point2ui & pixel);
+std::optional<putils::Point3f> (EntityID window, const putils::Point2ui & pixel);
 ```
 
 ### Return value
@@ -30,7 +30,7 @@ This piece of code is very similar to the behavior of the [OnClickSystem](../../
 ```cpp
 entities += [](Entity & e) {
     InputComponent input;
-    input.onMouseButton = [](Entity::ID window, int button, const putils::Point2f & pixel, bool pressed) {
+    input.onMouseButton = [](EntityID window, int button, const putils::Point2f & pixel, bool pressed) {
         for (const auto & [e, getPosition] : entities.with<functions::GetPositionInPixel>()) {
             const auto pos = getPosition(window, pixel);
             std::cout << pos.x << ' ' << pos.y << ' ' << pos.z << '\n';

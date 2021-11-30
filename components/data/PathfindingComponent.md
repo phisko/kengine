@@ -13,7 +13,7 @@
 ### environment
 
 ```cpp
-Entity::ID environment;
+EntityID environment;
 ```
 `Entity` in which we are navigating. It must be an [instance](InstanceComponent.md) of a model with a [NavMeshComponent](NavMeshComponent.md).
 

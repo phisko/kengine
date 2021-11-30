@@ -8,11 +8,11 @@ Helper functions for manipulating [camera Entities](../components/data/CameraCom
 
 ```cpp
 struct ViewportInfo {
-    Entity::ID camera = Entity::INVALID_ID;
+    EntityID camera = INVALID_ID;
     putils::Point2f pixel = { -1.f, 1.f }; // [0,1]
 };
 
-ViewportInfo getViewportForPixel(Entity::ID windowID, const putils::Point2ui & pixel) noexcept;
+ViewportInfo getViewportForPixel(EntityID windowID, const putils::Point2ui & pixel) noexcept;
 ```
 
 Returns the ID of the [camera Entity](../components/data/CameraComponent.md) which is displayed in a given pixel of a given [window](../components/data/WindowComponent.md).

@@ -12,17 +12,10 @@ Some specializations are pre-defined:
 
 ## Members
 
-### Constructor
-
-```cpp
-TransformComponent(const putils::Point3f &pos = { 0, 0, 0 },
-                   const putils::Point3f &size = { 1, 1, 1 });
-```
-
 ### boundingBox
 
 ```cpp
-putils::Rect3f boundingBox;
+putils::Rect3f boundingBox{ { 0.f, 0.f, 0.f }, { 1.f, 1.f, 1.f } };
 ```
 
 The `Entity`'s position is stored as `boundingBox.position`, and its scale as `boundingBox.size`.
@@ -30,7 +23,7 @@ The `Entity`'s position is stored as `boundingBox.position`, and its scale as `b
 ### pitch, yaw, roll
 
 ```cpp
-Precision pitch = 0; // Radians
-Precision yaw = 0; // Radians
-Precision roll = 0; // Radians
+float pitch = 0; // Radians
+float yaw = 0; // Radians
+float roll = 0; // Radians
 ```

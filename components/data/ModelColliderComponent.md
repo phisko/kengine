@@ -24,10 +24,7 @@ struct Collider {
 
     Shape shape;
     putils::string<KENGINE_BONE_NAME_MAX_LENGTH> boneName;
-    putils::Rect3f boundingBox = { {}, { 1.f, 1.f, 1.f } };
-    float yaw = 0.f;
-    float pitch = 0.f;
-    float roll = 0.f;
+    TransformComponent transform;
 };
 ```
 

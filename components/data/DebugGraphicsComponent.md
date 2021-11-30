@@ -30,7 +30,7 @@ struct Text {
 };
 
 struct Line {
-    putils::Point3f end = {};
+    putils::Point3f end = { 0.f, 0.f, 0.f };
     float thickness = 1.f;
 };
 

@@ -14,7 +14,7 @@
 
 ```cpp
 struct KeyEvent {
-    Entity::ID window;
+    EntityID window;
     int key;
     bool pressed;
 };
@@ -27,7 +27,7 @@ Key events for the current frame.
 
 ```cpp
 struct ClickEvent {
-    Entity::ID window;
+    EntityID window;
     putils::Point2f pos;
     int button;
     bool pressed;
@@ -41,7 +41,7 @@ Click events for the current frame.
 
 ```cpp
 struct MouseMoveEvent {
-    Entity::ID window;
+    EntityID window;
     putils::Point2f pos;
     putils::Point2f rel;
 };
@@ -54,7 +54,7 @@ Mouse move events for the current frame.
 
 ```cpp
 struct MouseScrollEvent {
-    Entity::ID window;
+    EntityID window;
     float xoffset;
     float yoffset;
     putils::Point2f pos;

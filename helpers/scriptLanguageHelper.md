@@ -17,8 +17,8 @@ Calls `registerFunction` for the following functions:
 
 * `createEntity(function postCreate)`
 * `removeEntity(Entity e)`
-* `removeEntityById(Entity::ID id)`
-* `getEntity(Entity::ID id)`
+* `removeEntityById(EntityID id)`
+* `getEntity(EntityID id)`
 * `forEachEntity(function f)`
 * `stopRunning()`
 

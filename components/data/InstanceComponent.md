@@ -12,7 +12,7 @@
 ### model
 
 ```cpp
-Entity::ID model = Entity::INVALID_ID;
+EntityID model = INVALID_ID;
 ```
 
 id of the `model Entity`.
