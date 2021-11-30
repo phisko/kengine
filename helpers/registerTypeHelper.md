@@ -24,21 +24,7 @@ template<typename ... Comps>
 void registerComponents() noexcept;
 ```
 
-Registers a set of component types:
-
-* calls `registerTypes<Comps...>()`
-* adds a [NameComponent](../components/data/NameComponent.md) to the `type Entities` for `Comps` with their class names
-* calls [`registerAttachTo<Comps...>()`](meta/registerAttachTo.md)
-* calls [`registerCount<Comps...>()`](meta/registerCount.md)
-* calls [`registerDetachFrom<Comps...>()`](meta/registerDetachFrom.md)
-* calls [`registerDisplayImGui<Comps...>()`](meta/registerDisplayImGui.md)
-* calls [`registerEditImGui<Comps...>()`](meta/registerEditImGui.md)
-* calls [`registerForEachAttribute<Comps...>()`](meta/registerForEachAttribute.md)
-* calls [`registerForEachEntity<Comps...>()`](meta/registerForEachEntity.md)
-* calls [`registerHas<Comps...>()`](meta/registerHas.md)
-* calls [`registerLoadFromJSON<Comps...>()`](meta/registerLoadFromJSON.md)
-* calls [`registerMatchString<Comps...>()`](meta/registerMatchString.md)
-* calls [`registerSaveToJSON<Comps...>()`](meta/registerSaveToJSON.md)
+Calls `registerTypes<Comps...>()`, registers all the existing [meta Components](../components/meta) and adds a [NameComponent](../components/data/NameComponent.md) to the `type Entities` for `Comps`.
 
 ### registerFunction
 

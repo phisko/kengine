@@ -6,6 +6,7 @@
 
 #include "meta/impl/registerAttachTo.hpp"
 #include "meta/impl/registerAttributes.hpp"
+#include "meta/impl/registerCopy.hpp"
 #include "meta/impl/registerCount.hpp"
 #include "meta/impl/registerDetachFrom.hpp"
 #include "meta/impl/registerDisplayImGui.hpp"
@@ -75,6 +76,7 @@ namespace kengine {
 
 		registerAttachTo<Comps...>();
 		registerAttributes<Comps...>();
+		registerCopy<Comps...>();
 		registerCount<Comps...>();
 		registerDetachFrom<Comps...>();
 		registerDisplayImGui<Comps...>();
