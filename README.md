@@ -215,6 +215,7 @@ These are pre-built, extensible and pluggable elements that can be used to boots
 * [InputComponent](components/data/InputComponent.md): lets `Entities` receive keyboard and mouse events
 * [SelectedComponent](components/data/SelectedComponent.md): indicates that an `Entity` has been selected
 * [NameComponent](components/data/NameComponent.md): provides an `Entity`'s name
+* [TimeModulatorComponent](components/data/TimeModulatorComponent.md): lets an `Entity` affect the passing of time
 
 ##### Behaviors
 * [LuaComponent](components/data/LuaComponent.md): defines the lua scripts to be run by the `LuaSystem` for an `Entity`
@@ -231,6 +232,7 @@ These are pre-built, extensible and pluggable elements that can be used to boots
 ##### Graphics
 * [GraphicsComponent](components/data/GraphicsComponent.md): specifies the appearance of an `Entity`
 * [ModelComponent](components/data/ModelComponent.md): describes a model file (be it a 3D model, a 2D sprite or any other graphical asset)
+* [InstanceComponent](components/data/InstanceComponent.md): specifies an `Entity`'s model
 * [CameraComponent](components/data/CameraComponent.md): lets `Entities` be used as in-game cameras, to define a frustum
 * [ViewportComponent](components/data/ViewportComponent.md): specifies the screen area for a "camera entity"
 * [WindowComponent](components/data/WindowComponent.md): lets `Entities` be used as windows
@@ -247,6 +249,7 @@ These are pre-built, extensible and pluggable elements that can be used to boots
 
 ##### Skeletal animation
 * [AnimationComponent](components/data/AnimationComponent.md): provides skeletal animation information for `Entities`.
+* [AnimationFilesComponent](components/data/AnimationFilesComponent.md): provides a list of animation files to load for a `model Entity`
 * [SkeletonComponent](components/data/SkeletonComponent.md): provides bone information for an `Entity`'s skeletal animation
 
 ##### Physics
@@ -261,23 +264,31 @@ These are pre-built, extensible and pluggable elements that can be used to boots
 * [OnEntityRemoved](components/functions/OnEntityRemoved.md): called whenever an `Entity` is removed
 * [OnTerminate](components/functions/OnTerminate.md): called when terminating the engine
 * [GetEntityInPixel](components/functions/GetEntityInPixel.md): returns the `Entity` seen in a given pixel
+* [GetPositionInPixel](components/functions/GetPositionInPixel.md): returns the position seen in a given pixel
 * [OnCollision](components/functions/OnCollision.md): called whenever two `Entities` collide
 * [OnMouseCaptured](components/functions/OnMouseCaptured.md): indicates whether the mouse should be captured by the window
 * [QueryPosition](components/functions/QueryPosition.md): returns a list of `Entities` found within a certain distance of a position
+* [AppearsInViewport](components/functions/AppearsInViewport.md): returns whether or not the `Entity` should appear in a given viewport
 
 #### Meta components
 
 In all following descriptions, the "parent" `Component` refers to the `Component` type represented by the type entity which has the meta component.
 
-* [Has](components/meta/Has.md): returns whether an `Entity` has the parent `Component`
 * [AttachTo](components/meta/AttachTo.md): attaches the parent `Component` to an `Entity`
+* [Attributes](components/meta/Attributes.md): recursively lists the parent `Component`'s attributes
+* [Copy](components/meta/Copy.md): copies the parent `Component` from one `Entity` to another
+* [Count](components/meta/Count.md): counts the number of `Entities` with the parent `Component`
 * [DetachFrom](components/meta/DetachFrom.md): detaches the parent `Component` from an `Entity`
+* [DisplayImGui](components/meta/DisplayImGui.md): displays the parent `Component` attached to an `Entity` in ImGui with read-only attributes
+* [EditImGui](components/meta/EditImGui.md): displays the parent `Component` attached to an `Entity` in ImGui and lets users edit attributes
 * [ForEachEntity](components/meta/ForEachEntity.md): iterates on all entities with the parent `Component`
 * [ForEachEntityWithout](components/meta/ForEachEntity.md): iterates on all entities without the parent `Component`
-* [EditImGui](components/meta/EditImGui.md): displays the parent `Component` attached to an `Entity` in ImGui and lets users edit attributes
-* [DisplayImGui](components/meta/DisplayImGui.md): displays the parent `Component` attached to an `Entity` in ImGui with read-only attributes
+* [Get](components/meta/Get.md): returns a pointer to the parent `Component` attached to an `Entity`
+* [Has](components/meta/Has.md): returns whether an `Entity` has the parent `Component`
 * [LoadFromJSON](components/meta/LoadFromJSON.md): initializes the parent `Component` attached to an `Entity` from a [putils::json](https://github.com/nlohmann/json) object
 * [MatchString](components/meta/MatchString.md): returns whether the parent `Component` attached to an `Entity` matches a given string
+* [SaveToJSON](components/meta/SaveToJSON.md): serializes the parent `Component` into a JSON object
+* [Size](components/meta/Size.md): contains the size of the parent `Component`
 
 ### Systems
 
@@ -300,6 +311,9 @@ In all following descriptions, the "parent" `Component` refers to the `Component
 * [LogImGuiSystem](systems/log_imgui/LogImGuiSystem.md): outputs logs to an ImGui window
 * [LogStdoutSystem](systems/log_stdout/LogStdoutSystem.md): outputs logs to stdout
 * [LogVisualStudioSystem](systems/log_visual_studio/LogVisualStudioSystem.md): outputs logs to Visual Studio's output window
+
+#### 2D Graphics
+* [SFMLSystem](systems/sfml/SFMLSystem.md): displays entities in an SFML render window
 
 #### 3D Graphics
 * [OpenGLSystem](systems/opengl/OpenGLSystem.md): displays entities in an OpenGL render window
