@@ -8,7 +8,9 @@ The Koala engine is a type-safe and self-documenting implementation of an Entity
 
 ## Table of contents
 
-* [Classes](#classes)
+* [Members](#members)
+    + [Classes](#classes)
+    + [API](#api)
 * [Reflection](#reflection)
 * [Components](#components)
     + [Data components](#data-components)
@@ -53,14 +55,85 @@ Alternatively, the entire source code can be found in ZIP form in the latest rel
 
 The engine requires a **C++17** compiler.
 
-## Classes
+## Members
+
+### Classes
 
 * [Entity](Entity.md): can be used to represent anything (generally an in-game entity). Is simply a container of `Components`
-* [EntityManager](EntityManager.md): manages `Entities` and `Components`
+* [Entities](Entities.md): lets users create, remove, access and iterate over entities.
 
 Note that there is no `Component` class. Any type can be used as a `Component`, and dynamically attached/detached to `Entities`.
 
 Similarly, there is no `System` class to hold game logic. `Systems` are simply `Entities` with an `Execute` component. This lets users introspect `Systems` or add behavior to them (such as profiling) just like they would with any other `Entity`.
+
+### [API](kengine.hpp)
+
+#### init
+
+```cpp
+void init(size_t threads = 0) noexcept;
+```
+
+Initializes the engine and creates a [ThreadPool](putils/ThreadPool.md) with the given number of worker threads.
+
+#### entities
+
+```cpp
+Entities entities;
+```
+
+Global [Entities](Entities.md) object that allows for creation, removal, access and iteration over entities.
+
+#### threadPool
+
+```cpp
+putils::ThreadPool & threadPool() noexcept;
+```
+
+Returns the engine's [ThreadPool](putils/ThreadPool.md) to allow for controlled asynchronous tasks.
+
+#### isRunning, stopRunning
+
+```cpp
+bool isRunning() noexcept;
+void stopRunning() noexcept;
+```
+
+Lets code query and control whether the engine should keep running or not.
+
+#### terminate
+
+```cpp
+void terminate() noexcept;
+```
+
+Cleans up the engine. All [OnTerminate](components/functions/OnTerminate.md) function `Components` will be called, the ThreadPool's workers will be joined and the internal state will be deleted.
+
+This function should typically only be called right before exiting `main`.
+
+#### getState
+
+```cpp
+void * getState() noexcept;
+```
+
+Returns a pointer to the engine's internal state. This state is required when initializing a plugin (as it is not shared across DLL boundaries).
+
+#### initPlugin
+
+```cpp
+void initPlugin(void * state) noexcept;
+```
+
+Initializes the current plugin with the provided internal state pointer.
+
+#### cleanupArchetypes
+
+```cpp
+void cleanupArchetypes() noexcept;
+```
+
+Removes any unused [Archetypes](impl/Archetype.md) to speed up future iteration over `Entities`. This is called at the end of each frame by the [mainLoop](helpers/mainLoop.md) helper.
 
 ## Reflection
 
@@ -90,7 +163,7 @@ These are simply holders for functors that can be attached as `Components` to `E
 * to register callbacks for system-wide events (for instance, the [OnEntityCreated](components/functions/OnEntityCreated.md) function gets called whenever a new `Entity` is created)
 * to provide new functionality that is implemented in a specific system (for instance, the [QueryPosition](components/functions/QueryPosition.md) function can only be implemented in a physics system)
 
-Function components are types that inherit from [BaseFunction](components/functions/BaseFunction.hpp), giving it the function signature as a template parameter.
+Function components are types that inherit from [BaseFunction](components/BaseFunction.hpp), giving it the function signature as a template parameter.
 
 To call a function component, one can use its `operator()` or its `call` function.
 
@@ -106,27 +179,25 @@ execute.call(42.f); // Alternatively
 
 ### Meta components
 
-These provide a type-specific implementation of a generic function for a given `Component` type. They are attached to "type entities", i.e. `Entities` used to represent a `Component` type. These entities can be obtained by calling the `getTypeEntity<T>()` function from [TypeHelper](helpers/TypeHelper.md).
+These provide a type-specific implementation of a generic function for a given `Component` type. They are attached to "type entities", i.e. `Entities` used to represent a `Component` type. These entities can be obtained by calling the `getTypeEntity<T>()` function from [typeHelper](helpers/typeHelper.md).
 
-At their core, meta components are function components: they also inherit from [BaseFunction](components/functions/BaseFunction.hpp) and are used the same way.
+At their core, meta components are function components: they also inherit from [BaseFunction](components/BaseFunction.hpp) and are used the same way.
 
 As an example, the [Has](components/meta/Has.md) meta component, attached to the type entity for `T`, takes an `Entity` as parameter and returns whether it has a `T` component.
 
 ```cpp
-EntityManager em;
-
-auto type = getTypeEntity<TransformComponent>(em); // Get the type entity
+auto type = getTypeEntity<TransformComponent>(); // Get the type entity
 type += NameComponent{ "TransformComponent" }; // You'll typically want to provide the type name as information
 type += meta::Has{ // Provide the implementation for `Has`
     [](const Entity & e) { return e.has<TransformComponent>(); }
 };
 
-auto e = em.createEntity([](Entity & e) { // Create an entity with a TransformComponent
+auto e = entities.create([](Entity & e) { // Create an entity with a TransformComponent
     e += TransformComponent{};
 });
 
 // For each entity with a NameComponent and a Has meta component
-for (const auto & [type, name, has] : em.getEntities<NameComponent, meta::Has>())
+for (const auto & [type, name, has] : entities.with<NameComponent, meta::Has>())
     if (has(e)) // if `e` has the component represented by `type`
         std::cout << e.id << " has a " << name.name << '\n';
 ```
@@ -150,14 +221,13 @@ These are pre-built, extensible and pluggable elements that can be used to boots
 ##### Behaviors
 * [LuaComponent](components/data/LuaComponent.md): defines the lua scripts to be run by the `LuaSystem` for an `Entity`
 * [LuaTableComponent](components/data/LuaTableComponent.md): holds a [sol::table](https://github.com/ThePhD/sol2) that lua scripts can use to hold any information related to an `Entity`
-* [PyComponent](components/data/PyComponent.md): defines the Python scripts to be run by the `PySystem` for an `Entity`
+* [PythonComponent](components/data/PythonComponent.md): defines the Python scripts to be run by the `PythonSystem` for an `Entity`
 * [CollisionComponent](components/data/CollisionComponent.md): defines a function to be called when an `Entity` collides with another
-* [OnClickComponent](components/data/OnClickComponent.md): defines a function to be called when an `Entity` is clicked
 
 ##### Debug tools
-* [AdjustableComponent](components/data/AdjustableComponent.md): lets users modify variables through a GUI (such as the [ImGuiAdjustableSystem](systems/ImGuiAdjustableSystem.md))
-* [ImGuiComponent](components/data/ImGuiComponent.md): lets `Entities` render debug elements using [ImGui](https://github.com/ocornut/imgui/)
-* [ImGuiToolComponent](components/data/ImGuiToolComponent.md): indicates that an `Entity`'s `ImGuiComponent` is a tool that can be enabled or disabled by the [ImGuiToolSystem](systems/ImGuiToolSystem.md)
+* [AdjustableComponent](components/data/AdjustableComponent.md): lets users modify variables through a GUI (such as the [ImGuiAdjustableSystem](systems/imgui_adjustable/ImGuiAdjustableSystem.md))
+* [ImGuiToolComponent](components/data/ImGuiToolComponent.md): indicates that an `Entity`'s `ImGuiComponent` is a tool that can be enabled or disabled by the [ImGuiToolSystem](systems/imgui_tool/ImGuiToolSystem.md)
+* [ImGuiScaleComponent](components/data/ImGuiScaleComponent.md): custom scale to be applied to all ImGui elements
 * [DebugGraphicsComponent](components/data/DebugGraphicsComponent.md): lets an `Entity` be used to draw debug information (such as lines, rectangles or spheres)
 
 ##### Graphics
@@ -187,11 +257,12 @@ These are pre-built, extensible and pluggable elements that can be used to boots
 #### Function components
 
 * [Execute](components/functions/Execute.md): called each frame
+* [Log](components/functions/Log.md): logs messages
+* [OnClick](components/functions/OnClick.md): called when the parent `Entity` is clicked
 * [OnEntityCreated](components/functions/OnEntityCreated.md): called for each new `Entity`
 * [OnEntityRemoved](components/functions/OnEntityRemoved.md): called whenever an `Entity` is removed
-* [OnTerminate](components/functions/OnTerminate.md): called during `EntityManager` destruction
+* [OnTerminate](components/functions/OnTerminate.md): called when terminating the engine
 * [GetEntityInPixel](components/functions/GetEntityInPixel.md): returns the `Entity` seen in a given pixel
-* [GetImGuiScale](components/functions/GetImGuiScale.md): returns the scale to apply to ImGui widgets
 * [OnCollision](components/functions/OnCollision.md): called whenever two `Entities` collide
 * [OnMouseCaptured](components/functions/OnMouseCaptured.md): indicates whether the mouse should be captured by the window
 * [QueryPosition](components/functions/QueryPosition.md): returns a list of `Entities` found within a certain distance of a position
@@ -213,47 +284,77 @@ In all following descriptions, the "parent" `Component` refers to the `Component
 ### Systems
 
 #### Behaviors
-* [LuaSystem](systems/LuaSystem.md): executes lua scripts attached to `Entities`
-* [PySystem](systems/PySystem.md): executes Python scripts attached to `Entities`
-* [CollisionSystem](systems/CollisionSystem.md): forwards collision notifications to `Entities`
-* [OnClickSystem](systems/OnClickSystem.md): forwards click notifications to `Entities`
-* [InputSystem](systems/InputSystem.md): forwards input events buffered by graphics systems to `Entities`
+* [LuaSystem](systems/lua/LuaSystem.md): executes lua scripts attached to `Entities`
+* [PythonSystem](systems/python/PythonSystem.md): executes Python scripts attached to `Entities`
+* [CollisionSystem](systems/collision/CollisionSystem.md): forwards collision notifications to `Entities`
+* [OnClickSystem](systems/onclick/OnClickSystem.md): forwards click notifications to `Entities`
+* [InputSystem](systems/input/InputSystem.md): forwards input events buffered by graphics systems to `Entities`
 
 #### Debug tools
-* [ImGuiAdjustableSystem](systems/ImGuiAdjustableSystem.md): displays an ImGui window to edit `AdjustableComponents`
-* [ImGuiEntityEditorSystem](systems/ImGuiEntityEditorSystem.md): displays ImGui windows to edit `Entities` with a `SelectedComponent`
-* [ImGuiEntitySelectorSystem](systems/ImGuiEntitySelectorSystem.md): displays an ImGui window that lets users search for and select `Entities`
-* [ImGuiToolSystem](systems/ImGuiToolSystem.md): manages ImGui [tool windows](components/data/ImGuiToolComponent.md) through ImGui's MainMenuBar
+* [ImGuiAdjustableSystem](systems/imgui_adjustable/ImGuiAdjustableSystem.md): displays an ImGui window to edit `AdjustableComponents`
+* [ImGuiEngineStats](systems/imgui_engine_stats/ImGuiEngineStatsSystem.md): displays an ImGui window with engine stats
+* [ImGuiEntityEditorSystem](systems/imgui_entity_editor/ImGuiEntityEditorSystem.md): displays ImGui windows to edit `Entities` with a `SelectedComponent`
+* [ImGuiEntitySelectorSystem](systems/imgui_entity_selector/ImGuiEntitySelectorSystem.md): displays an ImGui window that lets users search for and select `Entities`
+* [ImGuiPromptSystem](systems/imgui_prompt/ImGuiPromptSystem.md): displays an ImGui window that lets users run arbitrary code in Lua and Python
+* [ImGuiToolSystem](systems/imgui_tool/ImGuiToolSystem.md): manages ImGui [tool windows](components/data/ImGuiToolComponent.md) through ImGui's MainMenuBar
+
+#### Logging
+* [LogImGuiSystem](systems/log_imgui/LogImGuiSystem.md): outputs logs to an ImGui window
+* [LogStdoutSystem](systems/log_stdout/LogStdoutSystem.md): outputs logs to stdout
+* [LogVisualStudioSystem](systems/log_visual_studio/LogVisualStudioSystem.md): outputs logs to Visual Studio's output window
 
 #### 3D Graphics
 * [OpenGLSystem](systems/opengl/OpenGLSystem.md): displays entities in an OpenGL render window
 * [OpenGLSpritesSystem](systems/opengl_sprites/OpenGLSpritesSystem.md): loads sprites and provides shaders to render them 
 * [AssimpSystem](systems/assimp/AssimpSystem.md): loads 3D models using the assimp library, animates them and provides shaders to render them
 * [PolyVoxSystem](systems/polyvox/PolyVoxSystem.md): generates 3D models based on `PolyVoxComponents` and provides shaders to render them
-* [MagicaVoxelSystem](systems/polyvox/PolyVoxSystem.md): loads 3D models in the MagicaVoxel ".vox" format, which can then be drawn by the `PolyVoxSystem`'s shader
-
-#### 2D Graphics
-This system hasn't been updated in a while and won't currently compile. Let me know if you have an urgent need for it, but you're probably better off writing your own simplistic graphics system
-* [SfSystem](systems/sfml/SfSystem.md): displays entities in an SFML render window
+* [MagicaVoxelSystem](systems/polyvox/MagicaVoxelSystem.md): loads 3D models in the MagicaVoxel ".vox" format, which can then be drawn by the `PolyVoxSystem`'s shader
+* [GLFWSystem](systems/glfw/GLFWSystem.md): creates GLFW windows and handles their input
 
 #### Physics
 * [BulletSystem](systems/bullet/BulletSystem.md): simulates physics using Bullet Physics
-* [KinematicSystem](systems/bullet/KinematicSystem.md): moves kinematic `Entities`
+* [KinematicSystem](systems/kinematic/KinematicSystem.md): moves kinematic `Entities`
 
-Some of these systems make use of external libraries which you may not want to depend upon, and are therefore disabled by default. To enable them, set the corresponding CMake variable to `true` in your `CMakeLists.txt`:
+#### General
+* [RecastSystem](systems/recast/RecastSystem.md): generates navmeshes and performs pathfinding
+* [ModelCreatorSystem](systems/model_creator/ModelCreatorSystem.md): handles [model Entities](components/data/ModelComponent.md)
 
-| System         | Variable        |
-|----------------|-----------------|
-| AssimpSystem   | KENGINE_ASSIMP  |
-| BulletSystem   | KENGINE_BULLET  |
-| MagicaVoxelSystem | KENGINE_POLYVOX |
-| OpenGLSystem   | KENGINE_OPENGL  |
-| PolyVoxSystem  | KENGINE_POLYVOX |
-| SfSystem       | KENGINE_SFML    |
-| lua library    | KENGINE_LUA     |
-| python library | KENGINE_PYTHON  |
+These systems must be enabled by setting the corresponding CMake variable to `true` in your `CMakeLists.txt`. Alternatively, you can set `KENGINE_ALL_SYSTEMS` to build them all.
 
-These systems make use of [Conan](https://conan.io/) for dependency management. The necessary packages will be automatically downloaded when you run CMake, but Conan must be installed separately by running:
+| System                    | Variable                      |
+|---------------------------|-------------------------------|
+| AssimpSystem              | KENGINE_ASSIMP                |
+| BulletSystem              | KENGINE_BULLET                |
+| CollisionSytem            | KENGINE_COLLISION             |
+| ImGuiAdjustableSystem     | KENGINE_IMGUI_ADJUSTABLE      |
+| ImGuiEngineStatsSystem    | KENGINE_IMGUI_ENGINE_STATS    |
+| ImGuiEntityEditorSystem   | KENGINE_IMGUI_ENTITY_EDITOR   |
+| ImGuiEntitySelectorSystem | KENGINE_IMGUI_ENTITY_SELECTOR |
+| ImGuiPromptSystem         | KENGINE_IMGUI_PROMPT          |
+| ImGuiToolSystem           | KENGINE_IMGUI_TOOL            |
+| InputSystem               | KENGINE_INPUT                 |
+| KinematicSystem           | KENGINE_KINEMATIC             |
+| LuaSystem                 | KENGINE_LUA                   |
+| LogImGuiSystem            | KENGINE_LOG_IMGUI             |
+| LogStdoutSystem           | KENGINE_LOG_STDOUT            |
+| LogVisualStudioSystem     | KENGINE_LOG_VISUAL_STUDIO     |
+| OnClickSystem             | KENGINE_ONCLICK               |
+| OpenGLSystem              | KENGINE_OPENGL                |
+| OpenGLSpritesSystem       | KENGINE_OPENGL_SPRITES        |
+| PolyVoxSystem             | KENGINE_POLYVOX               |
+| MagicaVoxelSystem         | KENGINE_POLYVOX               |
+| ModelCreatorSystem        | KENGINE_MODEL_CREATOR         |
+| PythonSystem              | KENGINE_PYTHON                |
+| RecastSystem              | KENGINE_RECAST                |
+
+It is possible to test for the existence of these systems during compilation thanks to C++ define macros. These have the same name as the CMake variables, e.g.:
+```cpp
+#ifdef KENGINE_LUA
+// The LuaSystem exists, and we can safely use the lua library
+#endif
+```
+
+Some of these systems make use of [Conan](https://conan.io/) for dependency management. The necessary packages will be automatically downloaded when you run CMake, but Conan must be installed separately by running:
 ```
 pip install conan
 ```
@@ -262,23 +363,32 @@ pip install conan
 
 These are helper functions to factorize typical manipulations of `Components`.
 
-* [CameraHelper](helpers/CameraHelper.md)
-* [ImGuiHelper](helpers/ImGuiHelper.md): provides helpers to display and edit `Entities` in ImGui
-* [MainLoop](helpers/MainLoop.md)
-* [MatrixHelper](helpers/MatrixHelper.md)
-* [PluginHelper](helpers/PluginHelper.md): provides an `initPlugin` function to be called from DLLs
-* [ShaderHelper](systems/opengl/ShaderHelper.md)
-* [SkeletonHelper](helpers/SkeletonHelper.md)
-* [SortHelper](helpers/SortHelper.md): provides functions to sort `Entities`
-* [TypeHelper](helpers/TypeHelper.md): provides a `getTypeEntity<T>` function to get a "singleton" entity representing a given type
+* [cameraHelper](helpers/cameraHelper.md)
+* [imguiHelper](helpers/imguiHelper.md): provides helpers to display and edit `Entities` in ImGui
+* [jsonHelper](helpers/jsonHelper.md): provides helpers to serialize and de-serialize `Entities` from json
+* [mainLoop](helpers/mainLoop.md)
+* [matrixHelper](helpers/matrixHelper.md)
+* [pluginHelper](helpers/pluginHelper.md): provides an `initPlugin` function to be called from DLLs
+* [shaderHelper](systems/opengl/shaderHelper.md)
+* [skeletonHelper](helpers/skeletonHelper.md)
+* [sortHelper](helpers/sortHelper.md): provides functions to sort `Entities`
+* [typeHelper](helpers/typeHelper.md): provides a `getTypeEntity<T>` function to get a "singleton" entity representing a given type
 
 ##### Meta component helpers
 
-* [RegisterComponentFunctions](helpers/RegisterComponentFunctions.md): provides implementations for the [Has](components/meta/Has.md), [AttachTo](components/meta/AttachTo.md) and [DetachFrom](components/meta/DetachFrom.md) meta components
-* [RegisterComponentEntityIterators](helpers/RegisterComponentEntityIterators.md): provides implementations for the [ForEachEntity](components/meta/ForEachEntity.md) and [ForEachEntityWithout](components/meta/ForEachEntity.md) meta components
-* [RegisterComponentJSONLoader](helpers/RegisterComponentJSONLoader.md): provides an implementation for the [LoadFromJSON](components/meta/LoadFromJSON.md)
-* [RegisterComponentEditor](helpers/RegisterComponentEditor.md): provides implementations for the [EditImGui](components/meta/ImGuiEditor.md) and [DisplayImGui](components/meta/ImGuiEditor.md) meta components
-* [RegisterComponentMatcher](helpers/RegisterComponentMatcher.md): provides an implementation for the [MatchString](components/meta/MatchString.md) meta component
+These provide helper functions to register standard implementations for the respective `meta Components`.
+
+* [registerAttachTo](helpers/meta/registerAttachTo.md)
+* [registerCount](helpers/meta/registerCount.md)
+* [registerDetachFrom](helpers/meta/registerDetachFrom.md)
+* [registerDisplayImGui](helpers/meta/registerDisplayImGui.md)
+* [registerEditImGui](helpers/meta/registerEditImGui.md)
+* [registerForEachAttribute](helpers/meta/registerForEachAttribute.md)
+* [registerForEachEntity](helpers/meta/registerForEachEntity.md)
+* [registerHas](helpers/meta/registerHas.md)
+* [registerLoadFromJSON](helpers/meta/registerLoadFromJSON.md)
+* [registerMatchString](helpers/meta/registerMatchString.md)
+* [registerSaveToJSON](helpers/meta/registerSaveToJSON.md)
 
 ## Example
 
@@ -291,33 +401,31 @@ Below is a commented main function that creates an entity and attaches some comp
 
 #include "go_to_bin_dir.hpp"
 
-#include "EntityManager.hpp"
-#include "Entity.hpp"
+#include "kengine.hpp"
 
-#include "systems/LuaSystem.hpp"
+#include "systems/lua/LuaSystem.hpp"
 
 #include "data/GraphicsComponent.hpp"
 #include "data/TransformComponent.hpp"
 #include "functions/Execute.hpp"
 
-#include "helpers/MainLoop.hpp"
+#include "helpers/mainLoop.hpp"
+#include "helpers/luaHelper.hpp"
 
 // Simple system that outputs the transform and lua components of each entity that has them
 //- Forward declaration
-static float execute(kengine::EntityManager & em, float deltaTime);
+static float execute(float deltaTime);
 //-
-auto DebugSystem(kengine::EntityManager & em) {
+auto DebugSystem() {
     return [&](kengine::Entity & e) {
         // Attach an Execute component that will be called each frame
-        e += kengine::functions::Execute{
-             [&](float deltaTime) { execute(em, deltaTime); }
-        };
+        e += kengine::functions::Execute{ execute };
     };
 }
 
 // This could be defined as a lambda in DebugSystem but is moved out here for readability
-static float execute(kengine::EntityManager & em, float deltaTime) {
-    for (const auto & [e, transform, lua] : em.getEntities<kengine::TransformComponent, kengine::LuaComponent>()) {
+static float execute(float deltaTime) {
+    for (const auto & [e, transform, lua] : kengine::entities.with<kengine::TransformComponent, kengine::LuaComponent>()) {
         std::cout << "Entity " << e.id << '\n';
         std::cout << "\tTransform: "
             << transform.boundingBox.position.x << ' '
@@ -336,26 +444,25 @@ int main(int, char **av) {
     // Go to the executable's directory to be next to resources and scripts
     putils::goToBinDir(av[0]);
 
-    // Create an EntityManager
-    kengine::EntityManager em; // Optionally, pass a number of threads as parameter -> kengine::EntityManager em(4);
+    kengine::init(); // Optionally, pass a number of threads as parameter
 
-    em += DebugSystem(em);
-    em += kengine::LuaSystem(em);
+    kengine::entities += DebugSystem();
+    kengine::entities += kengine::LuaSystem();
 
     // Create an Entity and attach Components to it
-    em += [](kengine::Entity e) {
+    kengine::entities += [](kengine::Entity e) {
         e += kengine::TransformComponent({ 42.f, 0.f, 42.f }); // Parameter is a Point3f for position
         e += kengine::LuaComponent({ "scripts/unit.lua" }); // Parameter is a vector of scripts
     };
 
 	// Register types to be used in lua
-    kengine::lua::registerTypes<
+    kengine::luaHelper::registerTypes<
         kengine::TransformComponent, putils::Point3f, putils::Rect3f,
         kengine::LuaComponent
     >();
 
     // Start game
-    kengine::MainLoop::run(em);
+    kengine::MainLoop::run();
 
     return 0;
 }

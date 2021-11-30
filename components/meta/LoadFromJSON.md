@@ -17,7 +17,7 @@ void (const putils::json & json, Entity & e);
 
 It is up to the user to implement this `meta Component` for the `Component` types they wish to be able to parse.
 
-A helper [registerComponentJSONLoader](../../helpers/RegisterComponentJSONLoader.md) function is provided that takes as a template parameter a `Component` type and implements the `LoadFromJSON` `meta Component` for it.
+A helper [registerLoadFromJSON](../../helpers/meta/impl/registerLoadFromJSON.md) function is provided that takes as a template parameter a `Component` type and implements the `LoadFromJSON` `meta Component` for it.
 
-Note that the implementation provided in `registerComponentJSONLoader` is only a sample, and users may freely replace it with any other implementation they desire.
+Note that the implementation provided in `registerLoadFromJSON` is only a sample, and users may freely replace it with any other implementation they desire.
 

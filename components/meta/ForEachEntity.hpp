@@ -2,27 +2,32 @@
 
 #include "BaseFunction.hpp"
 
-#ifndef KENGINE_ENTITY_ITERATOR_FUNC_SIZE
-# define KENGINE_ENTITY_ITERATOR_FUNC_SIZE 64
-#endif
-
 namespace kengine {
-	class Entity;
-	class EntityManager;
-
 	namespace meta {
-		using EntityIteratorFunc = putils::function<void(Entity &), KENGINE_ENTITY_ITERATOR_FUNC_SIZE>;
-
 		struct ForEachEntity : functions::BaseFunction<
-			void(EntityManager &, const EntityIteratorFunc & func)
-		> {
-			putils_reflection_class_name(ForEachEntity);
-		};
+			void(const EntityIteratorFunc & func)
+		> {};
 
 		struct ForEachEntityWithout : functions::BaseFunction<
-			void(EntityManager &, const EntityIteratorFunc & func)
-		> {
-			putils_reflection_class_name(ForEachEntityWithout);
-		};
+			void(const EntityIteratorFunc & func)
+		> {};
 	}
 }
+
+#define refltype kengine::meta::ForEachEntity
+putils_reflection_info {
+	putils_reflection_class_name;
+	putils_reflection_parents(
+		putils_reflection_type(refltype::Base)
+	);
+};
+#undef refltype
+
+#define refltype kengine::meta::ForEachEntityWithout
+putils_reflection_info {
+	putils_reflection_class_name;
+	putils_reflection_parents(
+		putils_reflection_type(refltype::Base)
+	);
+};
+#undef refltype

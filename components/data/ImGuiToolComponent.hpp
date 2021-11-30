@@ -8,12 +8,15 @@
 
 namespace kengine {
 	struct ImGuiToolComponent {
-		static constexpr char stringName[] = "ImGuiToolComponentString";
-		bool enabled;
-
-		putils_reflection_class_name(ImGuiToolComponent);
-		putils_reflection_attributes(
-			putils_reflection_attribute(&ImGuiToolComponent::enabled)
-		);
+		bool enabled = false;
 	};
 }
+
+#define refltype kengine::ImGuiToolComponent
+putils_reflection_info{
+	putils_reflection_class_name;
+	putils_reflection_attributes(
+		putils_reflection_attribute(enabled)
+	);
+};
+#undef refltype

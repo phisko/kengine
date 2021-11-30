@@ -1,56 +1,127 @@
 #pragma once
 
-#ifndef KENGINE_DEBUG_GRAPHICS_TEXT_MAX_LENGTH
-# define KENGINE_DEBUG_GRAPHICS_TEXT_MAX_LENGTH 64
-#endif
-
-#include "string.hpp"
+#include <vector>
 #include "Color.hpp"
 #include "Point.hpp"
 
 namespace kengine {
-	class DebugGraphicsComponent {
-	public:
-		static constexpr char stringName[] = "DebugGraphicsComponentString";
-		using string = putils::string<KENGINE_DEBUG_GRAPHICS_TEXT_MAX_LENGTH, stringName>;
+	struct DebugGraphicsComponent {
+		struct Text {
+			std::string text;
+			std::string font;
+			float size = 1.f;
+		};
 
-		enum Type {
+		struct Line {
+			putils::Point3f end{ 0.f, 0.f, 0.f };
+			float thickness = 1.f;
+		};
+
+		struct Sphere {
+			float radius = .5f;
+		};
+
+		struct Box {
+			putils::Vector3f size = { 1.f, 1.f, 1.f };
+		};
+
+		enum class Type {
 			Text,
 			Line,
 			Sphere,
 			Box
 		};
 
-	public:
-		DebugGraphicsComponent() = default;
+		enum class ReferenceSpace {
+			World,
+			Object
+		};
 
-		// Text
-		DebugGraphicsComponent(const char * text, unsigned int textSize, const char * font, const putils::Rect3f & offset, const putils::NormalizedColor & color)
-			: text(text), offset(offset), font(font), color(color), debugType(Text) {}
+		struct Element {
+			putils::Point3f pos{ 0.f, 0.f, 0.f };
+			putils::NormalizedColor color;
 
-		// Sphere/Line/Box
-		DebugGraphicsComponent(Type type, const putils::Rect3f & offset = { {}, { 1.f, 1.f, 1.f } }, const putils::NormalizedColor & color = {})
-			: offset(offset), color(color), debugType(type) {}
+			ReferenceSpace referenceSpace = ReferenceSpace::Object;
 
-		string text; 
-		string font;
+			Text text;
+			Line line;
+			Sphere sphere;
+			Box box;
 
-		putils::NormalizedColor color;
-		putils::Rect3f offset{ {}, { 1.f, 1.f, 1.f } };
-		putils::Point3f lineEnd;
-		// text size: offset.size.x
-		// circle radius: offset.size.x
-		// line thickness: offset.size.y
+			Type type;
+		};
 
-		Type debugType = Type::Box;
-
-		putils_reflection_class_name(DebugGraphicsComponent);
-		putils_reflection_attributes(
-			putils_reflection_attribute(&DebugGraphicsComponent::text),
-			putils_reflection_attribute(&DebugGraphicsComponent::font),
-			putils_reflection_attribute(&DebugGraphicsComponent::color),
-			putils_reflection_attribute(&DebugGraphicsComponent::offset),
-			putils_reflection_attribute(&DebugGraphicsComponent::debugType)
-		);
+		std::vector<Element> elements;
 	};
 }
+
+#define refltype kengine::DebugGraphicsComponent
+putils_reflection_info{
+	putils_reflection_class_name;
+	putils_reflection_attributes(
+		putils_reflection_attribute(elements)
+	);
+	putils_reflection_used_types(
+		putils_reflection_type(refltype::Text),
+		putils_reflection_type(refltype::Line),
+		putils_reflection_type(refltype::Sphere),
+		putils_reflection_type(refltype::Box),
+		putils_reflection_type(refltype::Element)
+	);
+};
+#undef refltype
+
+#define refltype kengine::DebugGraphicsComponent::Element
+putils_reflection_info{
+	putils_reflection_custom_class_name(DebugGraphicsComponentElement);
+	putils_reflection_attributes(
+		putils_reflection_attribute(pos),
+		putils_reflection_attribute(color),
+		putils_reflection_attribute(text),
+		putils_reflection_attribute(line),
+		putils_reflection_attribute(sphere),
+		putils_reflection_attribute(box),
+		putils_reflection_attribute(type),
+		putils_reflection_attribute(referenceSpace)
+	);
+};
+#undef refltype
+
+#define refltype kengine::DebugGraphicsComponent::Box
+putils_reflection_info{
+	putils_reflection_custom_class_name(DebugGraphicsComponentBox);
+	putils_reflection_attributes(
+		putils_reflection_attribute(size)
+	);
+};
+#undef refltype
+
+#define refltype kengine::DebugGraphicsComponent::Sphere
+putils_reflection_info{
+	putils_reflection_custom_class_name(DebugGraphicsComponentSphere);
+	putils_reflection_attributes(
+		putils_reflection_attribute(radius)
+	);
+};
+#undef refltype
+
+#define refltype kengine::DebugGraphicsComponent::Line
+putils_reflection_info{
+	putils_reflection_custom_class_name(DebugGraphicsComponentLine);
+	putils_reflection_attributes(
+		putils_reflection_attribute(end),
+		putils_reflection_attribute(thickness)
+	);
+};
+#undef refltype
+
+#define refltype kengine::DebugGraphicsComponent::Text
+putils_reflection_info{
+	putils_reflection_custom_class_name(DebugGraphicsComponentText);
+	putils_reflection_attributes(
+		putils_reflection_attribute(text),
+		putils_reflection_attribute(font),
+		putils_reflection_attribute(size)
+	);
+};
+#undef refltype

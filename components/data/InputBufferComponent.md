@@ -6,28 +6,19 @@
 
 * [Reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
 * Serializable (POD)
-* Processed by the [InputSystem](../../systems/InputSystem.md), filled in by graphics systems (such as the [OpenGLSystem](../../systems/opengl/OpenGLSystem.md))
+* Processed by the [InputSystem](../../systems/input/InputSystem.md), filled in by graphics systems (such as the [OpenGLSystem](../../systems/opengl/OpenGLSystem.md))
 
 ## Members
-
-### EventVector type
-
-```cpp
-template<typename T>
-using EventVector = putils::vector<T, KENGINE_INPUT_MAX_BUFFERED_EVENTS>;
-```
-
-This template container is used for all event buffers. The maximum number of events of each type defaults to 128 and can be modified by defining the `KENGINE_INPUT_MAX_BUFFERED_EVENTS` macro.
 
 ### keys
 
 ```cpp
 struct KeyEvent {
-    Entity::ID window;
+    EntityID window;
     int key;
     bool pressed;
 };
-EventVector<KeyEvent> keys;
+std::vector<KeyEvent> keys;
 ```
 
 Key events for the current frame.
@@ -36,12 +27,12 @@ Key events for the current frame.
 
 ```cpp
 struct ClickEvent {
-    Entity::ID window;
+    EntityID window;
     putils::Point2f pos;
     int button;
     bool pressed;
 };
-EventVector<ClickEvent> clicks;
+std::vector<ClickEvent> clicks;
 ```
 
 Click events for the current frame.
@@ -50,11 +41,11 @@ Click events for the current frame.
 
 ```cpp
 struct MouseMoveEvent {
-    Entity::ID window;
+    EntityID window;
     putils::Point2f pos;
     putils::Point2f rel;
 };
-EventVector<MouseMoveEvent> moves;
+std::vector<MouseMoveEvent> moves;
 ```
 
 Mouse move events for the current frame.
@@ -63,12 +54,12 @@ Mouse move events for the current frame.
 
 ```cpp
 struct MouseScrollEvent {
-    Entity::ID window;
+    EntityID window;
     float xoffset;
     float yoffset;
     putils::Point2f pos;
 };
-EventVector<MouseScrollEvent> scrolls;
+std::vector<MouseScrollEvent> scrolls;
 ```
 
 Mouse scroll events for the current frame.

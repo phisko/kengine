@@ -6,32 +6,32 @@
 
 * [Reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
 * Not serializable as it contains functors
-* Processed by the [InputSystem](../../systems/InputSystem.md)
+* Processed by the [InputSystem](../../systems/input/InputSystem.md)
 
 ## Members
 
 ### onKey
 
 ```cpp
-putils::function<void(Entity::ID window, int keycode, bool pressed), KENGINE_INPUT_FUNCTION_SIZE> onKey;
+putils::function<void(EntityID window, int keycode, bool pressed), KENGINE_INPUT_FUNCTION_SIZE> onKey;
 ```
 
 ### onMouseMove
 
 ```cpp
-putils::function<void(Entity::ID window, const putils::Point2f & screenCoordinates, const putils::Point2f & relativeMovement), KENGINE_INPUT_FUNCTION_SIZE> onMouseMove;
+putils::function<void(EntityID window, const putils::Point2f & screenCoordinates, const putils::Point2f & relativeMovement), KENGINE_INPUT_FUNCTION_SIZE> onMouseMove;
 ```
 
 ### onMouseButton
 
 ```cpp
-putils::function<void(Entity::ID window, int button, const putils::Point2f & screenCoordinates, bool pressed), KENGINE_INPUT_FUNCTION_SIZE> onMouseButton;
+putils::function<void(EntityID window, int button, const putils::Point2f & screenCoordinates, bool pressed), KENGINE_INPUT_FUNCTION_SIZE> onMouseButton;
 ```
 
-### onMouseWheel
+### onScroll
 
 ```cpp
-putils::function<void(Entity::ID window, float xoffset, float yoffset, const putils::Point2f & screenCoordinates), KENGINE_INPUT_FUNCTION_SIZE)> onMouseWheel;
+putils::function<void(EntityID window, float xoffset, float yoffset, const putils::Point2f & screenCoordinates), KENGINE_INPUT_FUNCTION_SIZE)> onScroll;
 ```
 
 All these callbacks take as a first parameter the `id` of the [window entity](WindowComponent.md) in which the event happened.

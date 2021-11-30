@@ -1,0 +1,3 @@
+# [ModelCreatorSystem](ModelCreatorSystem.hpp)
+
+System that automatically creates new [model Entities](../../components/data/ModelComponent.md) when an `Entity`'s [GraphicsComponent](../../components/data/GraphicsComponent.md) refers to a non-existing model. The system also takes care of assigning an [InstanceComponent](../../components/data/InstanceComponent.md) to `Entities` which don't have one.

@@ -3,7 +3,11 @@
 #include "reflection.hpp"
 
 namespace kengine {
-	struct KinematicComponent {
-		putils_reflection_class_name(KinematicComponent);
-	};
+	struct KinematicComponent {};
 }
+
+#define refltype kengine::KinematicComponent
+putils_reflection_info {
+	putils_reflection_class_name;
+};
+#undef refltype

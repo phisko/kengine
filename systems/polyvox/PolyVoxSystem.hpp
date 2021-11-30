@@ -3,7 +3,5 @@
 #include "EntityCreator.hpp"
 
 namespace kengine {
-	class EntityManager;
-
-	EntityCreator * PolyVoxSystem(EntityManager & em);
+	EntityCreator * PolyVoxSystem() noexcept;
 }

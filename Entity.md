@@ -2,15 +2,13 @@
 
 Represents an in-game entity. `Entities` do not hold any data themselves, but instead contain `Components`. Any type can be used as a `Component`.
 
-Depending on the context (e.g. when iterating over entities) you may receive `EntityView` objects instead of `Entities`. An `EntityView` is simply the `const` version of an `Entity`.
-
 ## Members
 
 ### attach
 
 ```cpp
 template<typename T>
-T & attach();
+T & attach() noexcept;
 ```
 Creates and attaches a new `Component` of type `T`.
 
@@ -18,7 +16,7 @@ Creates and attaches a new `Component` of type `T`.
 
 ```cpp
 template<typename T>
-Entity & operator+=(T && comp);
+Entity & operator+=(T && comp) noexcept;
 ```
 Attaches a new `Component` of type `T` and assigns `comp` to it.
 
@@ -26,14 +24,14 @@ Attaches a new `Component` of type `T` and assigns `comp` to it.
 
 ```cpp
 template<typename T>
-void detach();
+void detach() noexcept;
 ```
 
 ### get
 
 ```cpp
 template<class T>
-T & get() const;
+T & get() noexcept;
 ```
 
 Returns the `Component` of type `T` attached to this.
@@ -43,7 +41,16 @@ Returns the `Component` of type `T` attached to this.
 
 ```cpp
 template<typename T>
-bool has() const;
+bool has() const noexcept;
 ```
 
 Returns whether a `Component` of type `T` is attached to this.
+
+### tryGet
+
+```cpp
+template<typename T>
+T * tryGet() noexcept;
+```
+
+Returns the `Component` of type `T` attached to this if there is one. If not, returns `nullptr`.

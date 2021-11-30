@@ -5,7 +5,7 @@
 ## Prototype
 
 ```cpp
-void (Entity::ID window, bool captured);
+void (EntityID window, bool captured);
 ```
 
 ### Parameters

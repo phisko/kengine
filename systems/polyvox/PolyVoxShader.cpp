@@ -1,17 +1,19 @@
 #include "PolyVoxShader.hpp"
 
-#include "EntityManager.hpp"
+#include "kengine.hpp"
 
+#include "data/InstanceComponent.hpp"
 #include "data/TransformComponent.hpp"
 #include "data/PolyVoxComponent.hpp"
 #include "data/GraphicsComponent.hpp"
-#include "data/ModelComponent.hpp"
-#include "data/OpenGLModelComponent.hpp"
+#include "data/SystemSpecificModelComponent.hpp"
 
+#include "helpers/cameraHelper.hpp"
+#include "helpers/matrixHelper.hpp"
 #include "systems/opengl/shaders/ApplyTransparencySrc.hpp"
+#include "systems/opengl/shaders/shaderHelper.hpp"
 
-#include "systems/opengl/ShaderHelper.hpp"
-
+#pragma region GLSL
 static inline const char * vert = R"(
 #version 330
 
@@ -49,8 +51,9 @@ uniform float entityID;
 
 layout (location = 0) out vec4 gposition;
 layout (location = 1) out vec3 gnormal;
-layout (location = 2) out vec4 gcolor;
-layout (location = 3) out float gentityID;
+layout (location = 2) out vec4 gdiffuse;
+layout (location = 3) out vec4 gspecular;
+layout (location = 4) out float gentityID;
 
 void applyTransparency(float a);
 
@@ -59,50 +62,49 @@ void main() {
 
     gposition = WorldPosition;
     gnormal = -normalize(cross(dFdy(EyeRelativePos), dFdx(EyeRelativePos)));
-    gcolor = vec4(Color * color.rgb, 0.0);
+    gdiffuse = vec4(Color * color.rgb, 0.0);
+    gspecular = vec4(Color * color.rgb, 0.0);
 	gentityID = entityID;
 }
         )";
+#pragma endregion GLSL
 
 namespace kengine {
-	static glm::vec3 toVec(const putils::Point3f & p) { return { p.x, p.y, p.z }; }
+	static glm::vec3 toVec(const putils::Point3f & p) noexcept { return { p.x, p.y, p.z }; }
 
-	PolyVoxShader::PolyVoxShader(EntityManager & em)
-		: Program(false, putils_nameof(PolyVoxShader)),
-		_em(em)
+	PolyVoxShader::PolyVoxShader() noexcept
+		: Program(false, putils_nameof(PolyVoxShader))
 	{}
 
-	void PolyVoxShader::init(size_t firstTextureID) {
+	void PolyVoxShader::init(size_t firstTextureID) noexcept {
 		initWithShaders<PolyVoxShader>(putils::make_vector(
 			ShaderDescription{ vert, GL_VERTEX_SHADER },
 			ShaderDescription{ frag, GL_FRAGMENT_SHADER },
-			ShaderDescription{ Shaders::src::ApplyTransparency::Frag::glsl, GL_FRAGMENT_SHADER }
+			ShaderDescription{ opengl::shaders::src::ApplyTransparency::Frag::glsl, GL_FRAGMENT_SHADER }
 		));
 	}
 
-	void PolyVoxShader::run(const Parameters & params) {
+	void PolyVoxShader::run(const Parameters & params) noexcept {
 		use();
 
 		_view = params.view;
 		_proj = params.proj;
 		_viewPos = params.camPos;
 
-		for (const auto &[e, poly, graphics, transform] : _em.getEntities<PolyVoxObjectComponent, GraphicsComponent, TransformComponent>()) {
-			if (graphics.model == Entity::INVALID_ID)
+		for (const auto &[e, poly, graphics, instance, transform] : entities.with<PolyVoxObjectComponent, GraphicsComponent, InstanceComponent, TransformComponent>()) {
+			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
 				continue;
 
-			const auto & modelInfoEntity = _em.getEntity(graphics.model);
-			if (!modelInfoEntity.has<OpenGLModelComponent>() || !modelInfoEntity.has<ModelComponent>())
+			const auto model = entities[instance.model];
+			const auto openGL = model.tryGet<SystemSpecificModelComponent<putils::gl::Mesh>>();
+			if (!openGL)
 				continue;
 
-			const auto & modelInfo = modelInfoEntity.get<ModelComponent>();
-			const auto & openGL = modelInfoEntity.get<OpenGLModelComponent>();
-
-			_model = ShaderHelper::getModelMatrix(modelInfo, transform);
+			_model = matrixHelper::getModelMatrix(transform, model.tryGet<TransformComponent>());
 			_entityID = (float)e.id;
 			_color = graphics.color;
 
-			ShaderHelper::drawModel(openGL);
+			shaderHelper::drawModel(*openGL);
 		}
 	}
 }

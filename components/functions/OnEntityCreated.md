@@ -14,4 +14,4 @@ void (Entity & e);
 
 ## Usage
 
-The `EntityManager` automatically calls this `function Component` whenever a new `Entity` is created.
+The engine automatically calls this `function Component` whenever a new `Entity` is created.

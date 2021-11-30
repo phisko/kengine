@@ -1,57 +1,37 @@
 #pragma once
 
-#ifndef KENGINE_ANIMATION_FILE_PATH_LENGTH
-# define KENGINE_ANIMATION_FILE_PATH_LENGTH 128
-#endif
-
-#include <string>
-#include <vector>
 #include "reflection.hpp"
 
 namespace kengine {
 	struct AnimationComponent {
-		unsigned int currentAnim = 0; // Index into AnimListComponent.anims
+		unsigned int currentAnim = 0; // Index into ModelAnimationComponent.animations
 		float currentTime = 0.f;
 		float speed = 1.f;
 		bool loop = true;
 
-		putils_reflection_class_name(AnimationComponent);
-		putils_reflection_attributes(
-			putils_reflection_attribute(&AnimationComponent::currentAnim),
-			putils_reflection_attribute(&AnimationComponent::currentTime),
-			putils_reflection_attribute(&AnimationComponent::speed),
-			putils_reflection_attribute(&AnimationComponent::loop)
-		);
-	};
-
-	struct AnimListComponent {
-		struct Anim {
-			std::string name;
-			float totalTime;
-			float ticksPerSecond;
-
-			putils_reflection_class_name(AnimListComponentAnim);
-			putils_reflection_attributes(
-				putils_reflection_attribute(&Anim::name),
-				putils_reflection_attribute(&Anim::totalTime),
-				putils_reflection_attribute(&Anim::ticksPerSecond)
-			);
+		enum class MoverBehavior { // Determines what the animation "mover" (transformations applied to the whole Entity) will be applied to
+			UpdateTransformComponent,
+			UpdateBones,
+			None
 		};
 
-		std::vector<Anim> anims;
-
-		putils_reflection_class_name(AnimListComponent);
-		putils_reflection_attributes(
-			putils_reflection_attribute(&AnimListComponent::anims)
-		);
-	};
-
-	struct AnimFilesComponent {
-		std::vector<std::string> files;
-
-		putils_reflection_class_name(AnimFilesComponent);
-		putils_reflection_attributes(
-			putils_reflection_attribute(&AnimFilesComponent::files)
-		);
+		MoverBehavior positionMoverBehavior = MoverBehavior::UpdateBones;
+		MoverBehavior rotationMoverBehavior = MoverBehavior::UpdateBones;
+		MoverBehavior scaleMoverBehavior = MoverBehavior::UpdateBones;
 	};
 }
+
+#define refltype kengine::AnimationComponent
+putils_reflection_info {
+	putils_reflection_class_name;
+	putils_reflection_attributes(
+		putils_reflection_attribute(currentAnim),
+		putils_reflection_attribute(currentTime),
+		putils_reflection_attribute(speed),
+		putils_reflection_attribute(loop),
+		putils_reflection_attribute(positionMoverBehavior),
+		putils_reflection_attribute(rotationMoverBehavior),
+		putils_reflection_attribute(scaleMoverBehavior)
+	);
+};
+#undef refltype

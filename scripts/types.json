@@ -1,0 +1,167 @@
+{
+	"components": [
+		{
+			"type": "kengine::AdjustableComponent",
+			"header": "data/AdjustableComponent.hpp"
+		},
+		{
+			"type": "kengine::AnimationComponent",
+			"header": "data/AnimationComponent.hpp"
+		},
+		{
+			"type": "kengine::AnimationFilesComponent",
+			"header": "data/AnimationFilesComponent.hpp"
+		},
+		{
+			"type": "kengine::ModelAnimationComponent",
+			"header": "data/ModelAnimationComponent.hpp"
+		},
+		{
+			"type": "kengine::functions::AppearsInViewport",
+			"header": "functions/AppearsInViewport.hpp"
+		},
+		{
+			"type": "kengine::CameraComponent",
+			"header": "data/CameraComponent.hpp"
+		},
+		{
+			"type": "kengine::ViewportComponent",
+			"header": "data/ViewportComponent.hpp"
+		},
+		{
+			"type": "kengine::WindowComponent",
+			"header": "data/WindowComponent.hpp"
+		},
+		{
+			"type": "kengine::DebugGraphicsComponent",
+			"header": "data/DebugGraphicsComponent.hpp"
+		},
+		{
+			"type": "kengine::functions::Execute",
+			"header": "functions/Execute.hpp"
+		},
+		{
+			"type": "kengine::GodRaysComponent",
+			"header": "data/GodRaysComponent.hpp"
+		},
+		{
+			"type": "kengine::GraphicsComponent",
+			"header": "data/GraphicsComponent.hpp"
+		},
+		{
+			"type": "kengine::HighlightComponent",
+			"header": "data/HighlightComponent.hpp"
+		},
+		{
+			"type": "kengine::ImGuiToolComponent",
+			"header": "data/ImGuiToolComponent.hpp"
+		},
+		{
+			"type": "kengine::InputComponent",
+			"header": "data/InputComponent.hpp"
+		},
+		{
+			"type": "kengine::InstanceComponent",
+			"header": "data/InstanceComponent.hpp"
+		},
+		{
+			"type": "kengine::DirLightComponent",
+			"header": "data/LightComponent.hpp"
+		},
+		{
+			"type": "kengine::PointLightComponent",
+			"header": "data/LightComponent.hpp"
+		},
+		{
+			"type": "kengine::SpotLightComponent",
+			"header": "data/LightComponent.hpp"
+		},
+		{
+			"type": "kengine::LuaComponent",
+			"header": "data/LuaComponent.hpp"
+		},
+		{
+			"type": "kengine::LuaTableComponent",
+			"header": "data/LuaTableComponent.hpp"
+		},
+		{
+			"type": "kengine::ModelColliderComponent",
+			"header": "data/ModelColliderComponent.hpp"
+		},
+		{
+			"type": "kengine::ModelComponent",
+			"header": "data/ModelComponent.hpp"
+		},
+		{
+			"type": "kengine::NameComponent",
+			"header": "data/NameComponent.hpp"
+		},
+
+		{
+			"type": "kengine::NavMeshComponent",
+			"header": "data/NavMeshComponent.hpp"
+		},
+		{
+			"type": "kengine::functions::OnClick",
+			"header": "functions/OnClick.hpp"
+		},
+		{
+			"type": "kengine::PathfindingComponent",
+			"header": "data/PathfindingComponent.hpp"
+		},
+		{
+			"type": "kengine::PhysicsComponent",
+			"header": "data/PhysicsComponent.hpp"
+		},
+		{
+			"type": "kengine::PythonComponent",
+			"header": "data/PythonComponent.hpp"
+		},
+		{
+			"type": "kengine::SelectedComponent",
+			"header": "data/SelectedComponent.hpp"
+		},
+		{
+			"type": "kengine::ModelSkeletonComponent",
+			"header": "data/ModelSkeletonComponent.hpp"
+		},
+		{
+			"type": "kengine::SkyBoxComponent",
+			"header": "data/SkyBoxComponent.hpp"
+		},
+		{
+			"type": "kengine::SpriteComponent2D",
+			"header": "data/SpriteComponent.hpp"
+		},
+		{
+			"type": "kengine::SpriteComponent3D",
+			"header": "data/SpriteComponent.hpp"
+		},
+		{
+			"type": "kengine::TextComponent2D",
+			"header": "data/TextComponent.hpp"
+		},
+		{
+			"type": "kengine::TextComponent3D",
+			"header": "data/TextComponent.hpp"
+		},
+		{
+			"type": "kengine::TimeModulatorComponent",
+			"header": "data/TimeModulatorComponent.hpp"
+		},
+		{
+			"type": "kengine::TransformComponent",
+			"header": "data/TransformComponent.hpp"
+		},
+		{
+			"type": "kengine::TransformComponent",
+			"header": "data/TransformComponent.hpp"
+		}
+	],
+	"types": [
+		{
+			"type": "putils::Point2f",
+			"header": "Point.hpp"
+		}
+	]
+}

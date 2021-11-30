@@ -1,8 +1,6 @@
 # [ModelDataComponent](ModelDataComponent.hpp)
 
-Used only by model loading systems.
-
-Provides data to loaded for a model into the [OpenGLSystem](../../systems/opengl/OpenGLSystem.md).
+Contains the vertices and indices for a model. These are used by graphics systems (such as the [OpenGLSystem](../../systems/opengl/OpenGLSystem.md)) to load the model onto the GPU. Other systems may also want to access these elements (such as the [RecastSystem](../../systems/recast/RecastSystem.md), which uses them to generate the navmesh).
 
 ## Specs
 
@@ -12,46 +10,56 @@ Provides data to loaded for a model into the [OpenGLSystem](../../systems/opengl
 
 ## Members
 
-### Mesh
+### meshes
 
 ```cpp
 struct Mesh {
-	struct DataInfo {
+	struct Buffer {
 		size_t nbElements;
 		size_t elementSize;
 		const void * data;
 	};
 
-	DataInfo vertices;
-	DataInfo indices;
-	int indexType; // GLenum (GL_UNSIGNED_SHORT / GL_UNSIGNED_INT / ...)
+	Buffer vertices;
+	Buffer indices;
+	putils::meta::type_index indexType; // unsigned int, unsigned short...
 };
-```
 
-Holds vertex information about a mesh.
-
-### meshes
-
-```cpp
 std::vector<MeshData> meshes;
 ```
 
-Represents a model, made up of several meshes.
+Represents a model, made up of several meshes, each with their set of vertices and indices.
 
 ### free
 
 ```cpp
-putils::function<void(), KENGINE_MODEL_LOADER_FUNCTION_SIZE> free;
+putils::function<void(), KENGINE_MODEL_LOADER_FUNCTION_SIZE> free = nullptr;
 ```
 
 Called to release the model data once it has been loaded into the OpenGL context.
 
 The maximum size for the `free` functor defaults to 64 and can be adjusted by defining the `KENGINE_MODEL_LOADER_FUNCTION_SIZE` macro.
 
-### vertexRegisterFunc
+### vertexAttributes, vertexSize
 
 ```cpp
-void (*vertexRegisterFunc)();
+struct VertexAttribute {
+	const char * name;
+	size_t offset;
+	putils::meta::type_index type;
+};
+
+std::vector<VertexAttribute> vertexAttributes;
+size_t vertexSize;
 ```
 
-Function to set the OpenGL vertex array buffer attributes, which can be done by calling `putils::gl::setVertexType` or `putils::gl::setPolyVoxVertexType` functions.
+Information about the vertex type for the model.
+
+### init
+
+```cpp
+template<typename VertexType>
+void init() noexcept;
+```
+
+Initializes the `vertexAttributes` and `vertexSize` fields according to `VertexType`.

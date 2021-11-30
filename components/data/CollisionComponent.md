@@ -7,7 +7,7 @@
 
 * [Reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
 * Not serializable as it contains a functor
-* Processed by the [CollisionSystem](../../systems/CollisionSystem.md).
+* Processed by the [CollisionSystem](../../systems/collision/CollisionSystem.md).
 
 ## Members
 

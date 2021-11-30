@@ -5,7 +5,7 @@
 ## Specs
 
 * [Reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
-* Serializable (POD)
+* Not serializable (holds dynamic pointers)
 * Processed by physics systems (such as the [BulletSystem](../../systems/bullet/BulletSystem.md))
 
 ## Members
@@ -24,10 +24,7 @@ struct Collider {
 
     Shape shape;
     putils::string<KENGINE_BONE_NAME_MAX_LENGTH> boneName;
-    putils::Rect3f boundingBox = { {}, { 1.f, 1.f, 1.f } };
-    float yaw = 0.f;
-    float pitch = 0.f;
-    float roll = 0.f;
+    TransformComponent transform;
 };
 ```
 
@@ -36,7 +33,5 @@ The maximum length of a bone name (stored as a [putils::string](https://github.c
 ### colliders
 
 ```cpp
-putils::vector<Collider, KENGINE_MAX_MODEL_COLLIDERS, vectorName> colliders;
+std::vector<Collider> colliders;
 ```
-
-The maximum number of colliders defaults to 64 and can be adjusted by defining the `KENGINE_MAX_MODEL_COLLIDERS` macro.

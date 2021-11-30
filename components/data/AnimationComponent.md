@@ -16,7 +16,7 @@ Attached to the `Entity` itself.
 unsigned int currentAnim = 0;
 ```
 
-Index into the `AnimListComponent::anims` vector of this `Entity`'s [model Entity](ModelComponent.md).
+Index into the [ModelAnimationComponent::animations](ModelAnimationComponent.md) vector of this `Entity`'s [model Entity](ModelComponent.md).
 
 ### currentTime
 
@@ -34,62 +34,29 @@ float speed = 1.f;
 
 Speed of the animation.
 
-# [AnimFilesComponent](AnimationComponent.hpp)
-
-`Component` providing a list of animation files to be loaded for a [model](ModelComponent.md) `Entity`.
-It is used to populate the `Entity`'s `AnimListComponent`.
-
-## Specs
-
-* [Reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
-* Serializable (POD)
-
-## Members
-
-### files
+### loop
 
 ```cpp
-putils::vector<putils::string<KENGINE_ANIMATION_FILE_PATH_LENGTH>, KENGINE_MAX_ANIMATION_FILES> files;
+bool loop = true;
 ```
 
-List of all animation files.
+Whether the animation should loop or not.
 
-The maximum length of a file path defaults to 128 and can be adjusted by defining the `KENGINE_ANIMATION_FILE_PATH_LENGTH` macro.
-
-The maximum number of files defaults to 16 and can be adjusted by defining the `KENGINE_MAX_ANIMATION_FILES` macro.
-
-# [AnimListComponent](AnimationComponent.hpp)
-
-`Component` providing a list of animations that can be applied to a given model.
-Attached to a [model](ModelComponent.md) `Entity`, this information is shared by all `Entities` using that model.
-
-## Specs
-
-* [Reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
-* Serializable (POD)
-
-## Anim type
-
-Describes an animation.
+### Mover behaviors
 
 ```cpp
-struct Anim {
-    putils::string<KENGINE_ANIMATION_FILE_PATH_LENGTH> name;
-    float totalTime;
-    float ticksPerSecond;
+enum class MoverBehavior {
+    UpdateTransformComponent,
+    UpdateBones,
+    None
 };
+
+MoverBehavior positionMoverBehavior = MoverBehavior::UpdateBones;
+MoverBehavior rotationMoverBehavior = MoverBehavior::UpdateBones;
+MoverBehavior scaleMoverBehavior = MoverBehavior::UpdateBones;
 ```
 
-The maximum length of an animation name defaults to 128 and can be adjusted by defining the `KENGINE_ANIMATION_FILE_PATH_LENGTH` macro.
-
-## Members
-
-### anims
-
-```cpp
-putils::vector<Anim, KENGINE_MAX_ANIMATION_FILES> anims;
-```
-
-List of all animations that can be applied to a model.
-
-The maximum number of files defaults to 8 and can be adjusted by defining the `KENGINE_MAX_ANIMATION_FILES` macro.
+Specifies how the animation's movement should be retranscribed:
+* by updating the `Entity`'s actual position through the [TransformComponent](TransformComponent.md)
+* by updating the bone matrices in the [SkeletonComponent](SkeletonComponent.md)
+* not at all

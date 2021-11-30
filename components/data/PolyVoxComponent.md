@@ -7,8 +7,8 @@ The length, width and height of the voxel volume default to 16 and can be adjust
 ## Specs
 
 * Not reflectible
-* Not serializable (contains )
-* Processed by the [PolyVoxSystem](../../systems/PolyVoxSystem.md)
+* Not serializable
+* Processed by the [PolyVoxSystem](../../systems/polyvox/PolyVoxSystem.md)
 
 ## Members
 

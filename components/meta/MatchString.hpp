@@ -8,8 +8,15 @@ namespace kengine {
 	namespace meta {
 		struct MatchString : functions::BaseFunction<
 			bool(const Entity &, const char *)
-		> {
-			putils_reflection_class_name(MatchString);
-		};
+		> {};
 	}
 }
+
+#define refltype kengine::meta::MatchString
+putils_reflection_info {
+	putils_reflection_class_name;
+	putils_reflection_parents(
+		putils_reflection_type(refltype::Base)
+	);
+};
+#undef refltype

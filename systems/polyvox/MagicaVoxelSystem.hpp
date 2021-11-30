@@ -3,7 +3,5 @@
 #include "EntityCreator.hpp"
 
 namespace kengine {
-	class EntityManager;
-
-	EntityCreator * MagicaVoxelSystem(EntityManager & em);
+	EntityCreator * MagicaVoxelSystem() noexcept;
 }

@@ -7,7 +7,14 @@ namespace kengine { class Entity; }
 namespace kengine::functions {
     struct OnEntityRemoved : BaseFunction<
         void(Entity & e)
-    > {
-        putils_reflection_class_name(OnEntityRemoved);
-    };
+    > {};
 }
+
+#define refltype kengine::functions::OnEntityRemoved
+putils_reflection_info{
+    putils_reflection_class_name;
+	putils_reflection_parents(
+		putils_reflection_type(refltype::Base)
+	);
+};
+#undef refltype

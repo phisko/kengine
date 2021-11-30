@@ -1,4 +1,4 @@
-namespace kengine::Shaders::src {
+namespace kengine::opengl::shaders::src {
     namespace Color {
 		namespace Frag {
 			const char * glsl = R"(

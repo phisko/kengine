@@ -1,30 +1,43 @@
 #include "AssImpHelper.hpp"
-#include "EntityManager.hpp"
+#include "kengine.hpp"
 
-#include "data/ModelComponent.hpp"
-#include "data/TextureModelComponent.hpp"
-#include "data/OpenGLModelComponent.hpp"
-#include "systems/opengl/ShaderHelper.hpp"
+#include "data/SystemSpecificTextureComponent.hpp"
+#include "data/SystemSpecificModelComponent.hpp"
+#include "helpers/matrixHelper.hpp"
 
 #include "opengl/Program.hpp"
+#include "opengl/Mesh.hpp"
 
-namespace kengine {
-	namespace AssImpHelper {
-		void drawModel(EntityManager & em, const GraphicsComponent & graphics, const TransformComponent & transform, const SkeletonComponent & skeleton, bool useTextures, const Uniforms & uniforms) {
-			if (graphics.model == Entity::INVALID_ID)
-				return;
+namespace kengine::AssImpHelper {
+	void drawModel(const InstanceComponent & instance, const TransformComponent & transform, const SkeletonComponent & skeleton, bool useTextures, const Uniforms & uniforms) noexcept {
+		struct impl {
+			static void drawModel(const InstanceComponent & instance, const TransformComponent & transform, const SkeletonComponent & skeleton, bool useTextures, const Uniforms & uniforms) noexcept {
+				const auto model = entities[instance.model];
 
-			const auto & modelInfoEntity = em.getEntity(graphics.model);
-			if (!modelInfoEntity.has<ModelComponent>() || !modelInfoEntity.has<OpenGLModelComponent>() || !modelInfoEntity.has<AssImpTexturesModelComponent>())
-				return;
+				const auto openGL = model.tryGet<SystemSpecificModelComponent<putils::gl::Mesh>>();
+				if (!openGL)
+					return;
 
-			const auto & openGL = modelInfoEntity.get<OpenGLModelComponent>();
-			const auto & modelInfo = modelInfoEntity.get<ModelComponent>();
-			const auto & textures = modelInfoEntity.get<AssImpTexturesModelComponent>();
+				uniforms.model = matrixHelper::getModelMatrix(transform, model.tryGet<TransformComponent>());
 
-			uniforms.model = ShaderHelper::getModelMatrix(modelInfo, transform);
+				const bool noSkeleton = skeleton.meshes.empty();
+				if (noSkeleton)
+					uploadDefaultBones(skeleton, uniforms);
 
-			if (skeleton.meshes.empty()) {
+				const auto & textures = model.get<AssImpTexturesModelComponent>();
+
+				for (unsigned int i = 0; i < openGL->meshes.size(); ++i) {
+					if (!noSkeleton)
+						glUniformMatrix4fv(uniforms.bones, KENGINE_SKELETON_MAX_BONES, GL_FALSE, glm::value_ptr(skeleton.meshes[i].boneMatsBoneSpace[0]));
+
+					if (useTextures)
+						bindTextures(i, textures, uniforms);
+
+					putils::gl::draw(openGL->meshes[i]);
+				}
+			}
+
+			static void uploadDefaultBones(const SkeletonComponent & skeleton, const Uniforms & uniforms) noexcept {
 				static glm::mat4 defaultMats[KENGINE_SKELETON_MAX_BONES];
 				static bool first = true;
 				if (first) {
@@ -35,36 +48,38 @@ namespace kengine {
 				glUniformMatrix4fv(uniforms.bones, KENGINE_SKELETON_MAX_BONES, GL_FALSE, glm::value_ptr(defaultMats[0]));
 			}
 
-			for (unsigned int i = 0; i < openGL.meshes.size(); ++i) {
-				if (!skeleton.meshes.empty())
-					glUniformMatrix4fv(uniforms.bones, KENGINE_SKELETON_MAX_BONES, GL_FALSE, glm::value_ptr(skeleton.meshes[i].boneMatsBoneSpace[0]));
+			static void bindTextures(unsigned int meshIndex, const AssImpTexturesModelComponent & textures, const Uniforms & uniforms) noexcept {
+				const auto & meshTextures = textures.meshes[meshIndex];
 
-				if (useTextures) {
-					const auto & meshTextures = textures.meshes[i];
-					if (!meshTextures.diffuse.empty()) {
-						glActiveTexture((GLenum)(GL_TEXTURE0 + uniforms.diffuseTextureID));
-						const auto & modelEntity = em.getEntity(meshTextures.diffuse[0]);
-						glBindTexture(GL_TEXTURE_2D, modelEntity.get<TextureModelComponent>().texture);
-					}
+				{ // Diffuse
+					if (!meshTextures.diffuse.empty())
+						bindTexture(uniforms.diffuseTextureID, meshTextures.diffuse[0]);
 					else
 						uniforms.diffuseColor = meshTextures.diffuseColor;
 
 					uniforms.hasTexture = !meshTextures.diffuse.empty();
-
-					// glActiveTexture(GL_TEXTURE0 + locations.specularTextureID);
-					// if (!meshTextures.specular.empty())
-					// 	glBindTexture(GL_TEXTURE_2D, meshTextures.specular[0]);
-					// else if (!meshTextures.diffuse.empty())
-					// 	glBindTexture(GL_TEXTURE_2D, meshTextures.diffuse[0]);
-					// else
-					// 	putils::gl::setUniform(locations.specularColor, meshTextures.specularColor);
 				}
 
-				const auto & meshInfo = openGL.meshes[i];
-				glBindVertexArray(meshInfo.vertexArrayObject);
-				glBindBuffer(GL_ARRAY_BUFFER, meshInfo.vertexBuffer);
-				glDrawElements(GL_TRIANGLES, (GLsizei)meshInfo.nbIndices, meshInfo.indexType, nullptr);
+				{ // Specular
+					const auto textureID = uniforms.specularTextureID;
+					if (!meshTextures.specular.empty())
+						bindTexture(textureID, meshTextures.specular[0]);
+					else if (!meshTextures.diffuse.empty())
+						bindTexture(textureID, meshTextures.diffuse[0]);
+					else
+						uniforms.specularColor = meshTextures.specularColor;
+				}
 			}
-		}
+
+			static void bindTexture(size_t texture, EntityID modelID) noexcept {
+				glActiveTexture((GLenum)(GL_TEXTURE0 + texture));
+				const auto modelEntity = entities[modelID];
+				const auto openGL = modelEntity.tryGet<SystemSpecificTextureComponent<putils::gl::Texture>>();
+				if (openGL)
+					glBindTexture(GL_TEXTURE_2D, openGL->texture);
+			}
+		};
+
+		impl::drawModel(instance, transform, skeleton, useTextures, uniforms);
 	}
 }

@@ -14,4 +14,4 @@ void (Entity & e);
 
 ## Usage
 
-The `EntityManager` automatically calls this `function Component` whenever an `Entity` is removed.
+The engine automatically calls this `function Component` whenever an `Entity` is removed.

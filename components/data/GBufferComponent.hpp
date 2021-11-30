@@ -4,6 +4,8 @@
 #include <GL/glew.h>
 #include <GL/GL.h>
 #include "Point.hpp"
+#include "opengl/RAII.hpp"
+#include "helpers/assertHelper.hpp"
 
 namespace kengine {
 	class GBufferComponent {
@@ -19,11 +21,12 @@ namespace kengine {
 
 			std::vector<GLenum> attachments;
 
-			glGenFramebuffers(1, &_fbo);
+			_fbo.generate();
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fbo);
 
-			glGenTextures((GLsizei)textures.size(), textures.data());
-			glGenTextures(1, &_depthTexture);
+			for (auto & t : textures)
+				t.generate();
+			_depthTexture.generate();
 
 			for (size_t i = 0; i < textures.size(); ++i) {
 				glBindTexture(GL_TEXTURE_2D, textures[i]);
@@ -44,7 +47,7 @@ namespace kengine {
 
 			glDrawBuffers((GLsizei)attachments.size(), attachments.data());
 
-			assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+			kengine_assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
 
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 		}
@@ -54,7 +57,7 @@ namespace kengine {
 
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fbo);
 
-			for (const auto texture : textures) {
+			for (const auto & texture : textures) {
 				glBindTexture(GL_TEXTURE_2D, texture);
 				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, (GLsizei)screenWidth, (GLsizei)screenHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
 			}
@@ -88,7 +91,7 @@ namespace kengine {
 		}
 
 		auto getTextureCount() const { return textures.size(); }
-		auto getFBO() const { return _fbo; }
+		auto getFBO() const { return _fbo.get(); }
 
 		const auto & getSize() const { return _size; }
 
@@ -96,12 +99,12 @@ namespace kengine {
 			const float * data;
 
 			// Impl
-			Texture(GLuint pbo) : _pbo(pbo) {
+			Texture(GLuint pbo) noexcept : _pbo(pbo) {
 				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
 				data = (const float *)glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
 			}
 
-			~Texture() {
+			~Texture() noexcept {
 				glBindBuffer(GL_PIXEL_PACK_BUFFER, _pbo);
 				glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
 				glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
@@ -115,8 +118,8 @@ namespace kengine {
 			auto & pbo = pbos[textureIndex];
 			if (!pbo.init) {
 				pbo.init = true;
-				glGenBuffers(1, &pbo.forRead);
-				glGenBuffers(1, &pbo.forWrite);
+				pbo.forRead.generate();
+				pbo.forWrite.generate();
 
 				const auto size = _size.x * _size.y * sizeof(float) * 4 /*GL_RGBA*/;
 				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo.forRead);
@@ -128,7 +131,7 @@ namespace kengine {
 			if (!pbo.upToDate) {
 				pbo.upToDate = true;
 
-				std::swap(pbo.forRead, pbo.forWrite);
+				std::swap(pbo.forRead.get(), pbo.forWrite.get());
 
 				glBindTexture(GL_TEXTURE_2D, textures[textureIndex]);
 				glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo.forWrite);
@@ -138,11 +141,11 @@ namespace kengine {
 			return Texture(pbo.forRead);
 		}
 
-		std::vector<GLuint> textures;
+		std::vector<putils::gl::Texture> textures;
 
 		struct PBO {
-			GLuint forWrite;
-			GLuint forRead;
+			putils::gl::Buffer forWrite;
+			putils::gl::Buffer forRead;
 			bool init = false;
 			bool upToDate = false;
 		};
@@ -151,8 +154,8 @@ namespace kengine {
 		bool isInit() const { return !textures.empty(); }
 
 	private:
-		GLuint _fbo;
-		GLuint _depthTexture;
+		putils::gl::FrameBuffer _fbo;
+		putils::gl::Texture _depthTexture;
 		putils::Point2ui _size;
 	};
 }

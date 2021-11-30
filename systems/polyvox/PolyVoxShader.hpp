@@ -3,15 +3,14 @@
 #include "opengl/Program.hpp"
 
 namespace kengine {
-	class EntityManager;
-
 	class PolyVoxShader : public putils::gl::Program {
 	public:
-		PolyVoxShader(EntityManager & em);
+		PolyVoxShader() noexcept;
 
-		void init(size_t firstTextureID) override;
-		void run(const Parameters & params) override;
+		void init(size_t firstTextureID) noexcept override;
+		void run(const Parameters & params) noexcept override;
 
+#pragma region Uniforms
 	public:
 		putils::gl::Uniform<glm::mat4> _model;
 		putils::gl::Uniform<glm::mat4> _view;
@@ -20,18 +19,20 @@ namespace kengine {
 
 		putils::gl::Uniform<float> _entityID;
 		putils::gl::Uniform<putils::NormalizedColor> _color;
-
-		putils_reflection_attributes(
-			putils_reflection_attribute_private(&PolyVoxShader::_model),
-			putils_reflection_attribute_private(&PolyVoxShader::_view),
-			putils_reflection_attribute_private(&PolyVoxShader::_proj),
-			putils_reflection_attribute_private(&PolyVoxShader::_viewPos),
-
-			putils_reflection_attribute_private(&PolyVoxShader::_entityID),
-			putils_reflection_attribute_private(&PolyVoxShader::_color)
-		);
-
-	private:
-		EntityManager & _em;
+#pragma endregion Uniforms
 	};
 }
+
+#define refltype kengine::PolyVoxShader
+putils_reflection_info{
+	putils_reflection_attributes(
+		putils_reflection_attribute_private(_model),
+		putils_reflection_attribute_private(_view),
+		putils_reflection_attribute_private(_proj),
+		putils_reflection_attribute_private(_viewPos),
+
+		putils_reflection_attribute_private(_entityID),
+		putils_reflection_attribute_private(_color)
+	);
+};
+#undef refltype

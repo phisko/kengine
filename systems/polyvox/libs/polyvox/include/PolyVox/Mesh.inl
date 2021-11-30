@@ -102,7 +102,7 @@ namespace PolyVox
 		POLYVOX_THROW_IF(m_vecVertices.size() >= std::numeric_limits<IndexType>::max(), std::out_of_range, "Mesh has more vertices that the chosen index type allows.");
 
 		m_vecVertices.push_back(vertex);
-		return m_vecVertices.size() - 1;
+		return (IndexType)m_vecVertices.size() - 1;
 	}
 
 	template <typename VertexType, typename IndexType>

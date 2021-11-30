@@ -26,11 +26,10 @@ The shadow map resolution defaults to 8192 (this seems like a lot, but I've only
 
 ## Function components
 
-The following `function Components` are implemented:
+The following `function Component` is implemented:
 
-* [OnMouseCaptured](../../components/data/functions/OnMouseCaptured.md): captures the mouse into the GLFW window
-* [GetImGuiScale](../../components/data/functions/GetImGuiScale.md): returns the user-specified ImGui scale
 * [GetEntityInPixel](../../components/data/functions/GetEntityInPixel.md)
+* [GetPositionInPixel](../../components/data/functions/GetPositionInPixel.md)
 
 ## Functionality
 
@@ -68,21 +67,16 @@ The default shaders provided with this system assume you make use of a type with
 
 ### Model construction
 
-[ModelDataComponents](../../components/data/ModelDataComponent.md) are processed to generate meshes and transformed into [OpenGLModelComponent](../../components/data/OpenGLModelComponent.md).
+[ModelDataComponents](../../components/data/ModelDataComponent.md) are processed to generate meshes and transformed into [SystemSpecificModelComponent](../../components/data/SystemSpecificModelComponent.md).
 
 ### Shader initialization and vertex type registration
 
-The shader [Programs](../../putils/opengl/Program.md) for the various [ShaderComponents](../../components/data/ShaderComponent.md) are initialized by the `OpenGLSystem`, and the vertex type registration functions provided by the [ModelDataComponents](../../components/data/ModelDataComponent.md) are called.
+The shader [Programs](../../putils/opengl/Program.md) for the various [ShaderComponents](../../components/data/ShaderComponent.md) are initialized by the `OpenGLSystem`, using the vertex type registration information provided by the [ModelDataComponents](../../components/data/ModelDataComponent.md).
 
 ### ImGui
 
-ImGui elements can be rendered by [ImGuiComponents](../../components/data/ImGuiComponent.md).
+The `OpenGLSystem` initializes an ImGui context which can be retrieved through its [ImGuiContextComponent](../../components/data/ImGuiContextComponent.hpp).
 
 If building in debug mode, the following debug elements are automatically added (from [Controllers.hpp](Controllers.hpp)):
 * A shader controller, letting you enable/disable individual shaders
-* A light debugger, letting you adjust the properties of [LightComponents](../../components/data/LightComponent.md)
 * A texture debugger, letting you draw the individual components of the GBuffer or any texture registered by shaders
-
-### Input
-
-Input is captured and transferred to [InputBufferComponents](../../components/data/InputBufferComponent.md).

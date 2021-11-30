@@ -33,13 +33,6 @@ Radians to turn in the current frame.
 float mass = 1.f;
 ```
 
-### speed
-
-```cpp
-float speed = 1;
-```
-Indicates a factor for the `movement` vector's properties.
-
 ### changed
 
 ```cpp

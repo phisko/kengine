@@ -10,7 +10,7 @@ In all the following functions, a `script` is the path to a file containing a sc
 
 * [Reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
 * Serializable (POD)
-* Processed by the [LuaSystem](../../systems/LuaSystem.md)
+* Processed by the [LuaSystem](../../systems/lua/LuaSystem.md)
 
 ## Members
 

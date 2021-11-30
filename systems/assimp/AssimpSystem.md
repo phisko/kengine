@@ -1,6 +1,6 @@
 # [AssImpSystem](AssImpSystem.hpp)
 
-System that loads 3D models for `Entities` with a [GraphicsComponent](../../components/GraphicsComponent.md) using the `assimp library`.
+System that loads 3D models for `Entities` with a [GraphicsComponent](../../components/GraphicsComponent.md) using the `assimp` library. The system also takes care of animating the `Entities` after they have been created.
 
 ## Shader
 

@@ -7,7 +7,14 @@ namespace kengine { class Entity; }
 namespace kengine::meta {
     struct AttachTo : functions::BaseFunction<
         void(Entity &)
-    > {
-        putils_reflection_class_name(AttachTo)
-    };
-} // namespace functions
+    > {};
+}
+
+#define refltype kengine::meta::AttachTo
+putils_reflection_info{
+	putils_reflection_class_name;
+	putils_reflection_parents(
+		putils_reflection_type(refltype::Base)
+	);
+};
+#undef refltype

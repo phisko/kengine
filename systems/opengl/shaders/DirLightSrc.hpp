@@ -2,7 +2,7 @@
 
 #include "opengl/Uniform.hpp"
 
-namespace kengine::Shaders::src {
+namespace kengine::opengl::shaders::src {
 	namespace DirLight {
 		namespace Frag {
 			extern const char * glsl;
@@ -16,17 +16,6 @@ namespace kengine::Shaders::src {
 				putils::gl::Uniform<float> _diffuseStrength;
 				putils::gl::Uniform<float> _specularStrength;
 				putils::gl::Uniform<bool> _debugCSM;
-
-				putils_reflection_attributes(
-					putils_reflection_attribute_private(&Uniforms::_viewPos), 
-					putils_reflection_attribute_private(&Uniforms::_screenSize), 
-					putils_reflection_attribute_private(&Uniforms::_color), 
-					putils_reflection_attribute_private(&Uniforms::_direction), 
-					putils_reflection_attribute_private(&Uniforms::_ambientStrength), 
-					putils_reflection_attribute_private(&Uniforms::_diffuseStrength), 
-					putils_reflection_attribute_private(&Uniforms::_specularStrength), 
-					putils_reflection_attribute_private(&Uniforms::_debugCSM)
-				);
 			};
 		}
 
@@ -35,11 +24,30 @@ namespace kengine::Shaders::src {
 
 			struct Uniforms {
 				putils::gl::Uniform<putils::Vector3f> _direction;
-
-				putils_reflection_attributes(
-					putils_reflection_attribute_private(&Uniforms::_direction)
-				);
 			};
 		}
 	}
 }
+
+#define refltype kengine::opengl::shaders::src::DirLight::Frag::Uniforms
+putils_reflection_info{
+	putils_reflection_attributes(
+		putils_reflection_attribute_private(_viewPos),
+		putils_reflection_attribute_private(_screenSize),
+		putils_reflection_attribute_private(_color),
+		putils_reflection_attribute_private(_direction),
+		putils_reflection_attribute_private(_ambientStrength),
+		putils_reflection_attribute_private(_diffuseStrength),
+		putils_reflection_attribute_private(_specularStrength),
+		putils_reflection_attribute_private(_debugCSM)
+	);
+};
+#undef refltype
+
+#define refltype kengine::opengl::shaders::src::DirLight::GetDirection::Uniforms
+putils_reflection_info{
+	putils_reflection_attributes(
+		putils_reflection_attribute_private(_direction)
+	);
+};
+#undef refltype

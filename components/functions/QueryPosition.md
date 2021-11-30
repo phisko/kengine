@@ -1,21 +1,18 @@
 # [QueryPosition](QueryPosition.hpp)
 
-`Function Component` used to get a list of `Entities` within a certain radius of a given position.
+`Function Component` used to iterate over all `Entities` within a certain radius of a given position.
 
 ## Prototype
 
 ```cpp
-putils::vector<Entity::ID, KENGINE_QUERY_POSITION_MAX_RESULTS> (const putils::Point3f & pos, float radius);
+void (const putils::Point3f & pos, float radius, const EntityIteratorFunc & func);
 ```
-
-### Return value
-
-A vector of `Entity` IDs found within the specified area. The maximum number of `Entities` returned defaults to 64 and can be adjusted by defining the `KENGINE_QUERY_POSITION_MAX_RESULTS` macro.
 
 ### Parameters
 
 * `pos`: the center of the area to be inspected
 * `radius`: the maximum distance an `Entity` should be from `pos` to be considered in the area
+* `func`: function that will be called for each `Entity`. Its maximum size defaults to 64 and can be adjusted by defining the `KENGINE_ITERATOR_FUNC_SIZE` macro
 
 ## Usage
 

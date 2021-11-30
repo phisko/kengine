@@ -13,7 +13,7 @@
 ### window
 
 ```cpp
-Entity::ID window = Entity::INVALID_ID;
+EntityID window = INVALID_ID;
 ```
 
 ["Window" Entity](WindowComponent.md) in which this camera should be rendered. If this is not set explicitly by the user, the first graphics system to be processed will set it to the window `Entity` they created.
@@ -46,7 +46,7 @@ Rendering resolution for the camera. This is independant of the final display re
 
 ```cpp
 using RenderTexture = void *;
-RenderTexture renderTexture = (RenderTexture)-1;
+RenderTexture renderTexture = INVALID_RENDER_TEXTURE;
 ```
 
 ID for a texture to which the camera is rendered (in addition to being displayed on-screen). The type of this field depends on the graphics systems (for instance, it's a `GLuint` for the [OpenGLSystem](../../systems/opengl/OpenGLSystem.md)).

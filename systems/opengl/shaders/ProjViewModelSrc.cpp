@@ -1,4 +1,4 @@
-namespace kengine::Shaders::src {
+namespace kengine::opengl::shaders::src {
 	namespace ProjViewModel {
 		namespace Vert {
 			const char * glsl = R"(

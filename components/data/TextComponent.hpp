@@ -8,6 +8,7 @@
 
 #include "string.hpp"
 #include "Color.hpp"
+#include "OnScreenComponent.hpp"
 
 namespace kengine {
 	struct TextComponent {
@@ -25,21 +26,45 @@ namespace kengine {
 		size_t fontSize;
 		putils::NormalizedColor color;
 		Alignment alignment = Alignment::Center;
-
-		putils_reflection_attributes(
-			putils_reflection_attribute(&TextComponent::font),
-			putils_reflection_attribute(&TextComponent::text),
-			putils_reflection_attribute(&TextComponent::fontSize),
-			putils_reflection_attribute(&TextComponent::color),
-			putils_reflection_attribute(&TextComponent::alignment)
-		);
 	};
 
-	struct TextComponent2D : TextComponent { // UI element
-		putils_reflection_class_name(TextComponent2D);
-	};
+	// UI element
+	struct TextComponent2D : TextComponent, OnScreenComponent {};
 
-	struct TextComponent3D : TextComponent { // Ground feedback and such
-		putils_reflection_class_name(TextComponent3D);
-	};
+	// Ground feedback and such
+	struct TextComponent3D : TextComponent {};
 }
+
+#define refltype kengine::TextComponent
+putils_reflection_info{
+	putils_reflection_attributes(
+		putils_reflection_attribute(font),
+		putils_reflection_attribute(text),
+		putils_reflection_attribute(fontSize),
+		putils_reflection_attribute(color),
+		putils_reflection_attribute(alignment)
+	);
+	putils_reflection_used_types(
+		putils_reflection_type(refltype::string)
+	);
+};
+#undef refltype
+
+#define refltype kengine::TextComponent2D
+putils_reflection_info{
+	putils_reflection_class_name;
+	putils_reflection_parents(
+		putils_reflection_type(kengine::TextComponent),
+		putils_reflection_type(kengine::OnScreenComponent)
+	);
+};
+#undef refltype
+
+#define refltype kengine::TextComponent3D
+putils_reflection_info {
+	putils_reflection_class_name;
+	putils_reflection_parents(
+		putils_reflection_type(kengine::TextComponent)
+	);
+};
+#undef refltype

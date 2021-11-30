@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Point.hpp"
+#include "Rect.hpp"
 
 #ifndef KENGINE_BONE_NAME_MAX_LENGTH
 # define KENGINE_BONE_NAME_MAX_LENGTH 64
@@ -12,6 +12,7 @@
 
 #include "string.hpp"
 #include "vector.hpp"
+#include "data/TransformComponent.hpp"
 
 namespace kengine {
 	struct ModelColliderComponent {
@@ -29,29 +30,36 @@ namespace kengine {
 
 			Shape shape;
 			string boneName;
-			putils::Rect3f boundingBox = { {}, { 1.f, 1.f, 1.f } };
-			float yaw = 0.f;
-			float pitch = 0.f;
-			float roll = 0.f;
-
-			putils_reflection_class_name(ModelColliderComponentCollider);
-			putils_reflection_attributes(
-				putils_reflection_attribute(&Collider::shape),
-				putils_reflection_attribute(&Collider::boneName),
-				putils_reflection_attribute(&Collider::boundingBox),
-				putils_reflection_attribute(&Collider::yaw),
-				putils_reflection_attribute(&Collider::pitch),
-				putils_reflection_attribute(&Collider::roll)
-			);
+			TransformComponent transform;
 		};
 
-		static constexpr char vectorName[] = "ModelColliderComponentVector";
-		using vector = putils::vector<Collider, KENGINE_MAX_MODEL_COLLIDERS, vectorName>;
-		vector colliders;
-
-		putils_reflection_class_name(ModelColliderComponent);
-		putils_reflection_attributes(
-			putils_reflection_attribute(&ModelColliderComponent::colliders)
-		);
+		std::vector<Collider> colliders;
 	};
 }
+
+#define refltype kengine::ModelColliderComponent
+putils_reflection_info {
+	putils_reflection_class_name;
+	putils_reflection_attributes(
+		putils_reflection_attribute(colliders)
+	);
+	putils_reflection_used_types(
+		putils_reflection_type(refltype::Collider)
+	);
+};
+#undef refltype
+
+#define refltype kengine::ModelColliderComponent::Collider
+putils_reflection_info {
+	putils_reflection_custom_class_name(ModelColliderComponentCollider);
+	putils_reflection_attributes(
+		putils_reflection_attribute(shape),
+		putils_reflection_attribute(boneName),
+		putils_reflection_attribute(transform)
+	);
+	putils_reflection_used_types(
+		putils_reflection_type(refltype::string),
+		putils_reflection_type(kengine::TransformComponent)
+	);
+};
+#undef refltype

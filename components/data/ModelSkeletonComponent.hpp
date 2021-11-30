@@ -16,17 +16,28 @@ namespace kengine {
 	struct ModelSkeletonComponent {
 		struct Mesh {
 			std::vector<std::string> boneNames;
-
-			putils_reflection_class_name(ModelSkeletonComponentMesh);
-			putils_reflection_attributes(
-				putils_reflection_attribute(&Mesh::boneNames)
-			);
 		};
 		std::vector<Mesh> meshes;
-
-		putils_reflection_class_name(ModelSkeletonComponent);
-		putils_reflection_attributes(
-			putils_reflection_attribute(&ModelSkeletonComponent::meshes)
-		);
 	};
 }
+
+#define refltype kengine::ModelSkeletonComponent
+putils_reflection_info {
+	putils_reflection_custom_class_name(ModelSkeletonComponent);
+	putils_reflection_attributes(
+		putils_reflection_attribute(meshes)
+	);
+	putils_reflection_used_types(
+		putils_reflection_type(refltype::Mesh)
+	);
+};
+#undef refltype
+
+#define refltype kengine::ModelSkeletonComponent::Mesh
+putils_reflection_info {
+	putils_reflection_custom_class_name(ModelSkeletonComponentMesh);
+	putils_reflection_attributes(
+		putils_reflection_attribute(boneNames)
+	);
+};
+#undef refltype

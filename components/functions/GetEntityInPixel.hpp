@@ -1,13 +1,20 @@
 #pragma once
 
 #include "BaseFunction.hpp"
-#include "Entity.hpp"
+#include "impl/ID.hpp"
 #include "Point.hpp"
 
 namespace kengine::functions {
     struct GetEntityInPixel : BaseFunction<
-        Entity::ID(Entity::ID window, const putils::Point2ui & pixel)
-    > {
-        putils_reflection_class_name(GetEntityInPixel);
-    };
+        EntityID(EntityID window, const putils::Point2ui & pixel)
+    > {};
 }
+
+#define refltype kengine::functions::GetEntityInPixel
+putils_reflection_info{
+    putils_reflection_class_name;
+	putils_reflection_parents(
+		putils_reflection_type(refltype::Base)
+	);
+};
+#undef refltype

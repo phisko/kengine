@@ -4,43 +4,46 @@
 # define KENGINE_INPUT_MAX_BUFFERED_EVENTS 128
 #endif
 
-#include "vector.hpp"
+#include <vector>
+#include "Point.hpp"
+#include "Entity.hpp"
 
 namespace kengine {
 	struct InputBufferComponent {
-		template<typename T>
-		using EventVector = putils::vector<T, KENGINE_INPUT_MAX_BUFFERED_EVENTS>;
-
 		struct KeyEvent {
-			Entity::ID window;
+			EntityID window;
 			int key;
 			bool pressed;
 		};
-		EventVector<KeyEvent> keys;
+		std::vector<KeyEvent> keys;
 
 		struct ClickEvent {
-			Entity::ID window;
+			EntityID window;
 			putils::Point2f pos;
 			int button;
 			bool pressed;
 		};
-		EventVector<ClickEvent> clicks;
+		std::vector<ClickEvent> clicks;
 
 		struct MouseMoveEvent {
-			Entity::ID window;
+			EntityID window;
 			putils::Point2f pos;
 			putils::Point2f rel;
 		};
-		EventVector<MouseMoveEvent> moves;
+		std::vector<MouseMoveEvent> moves;
 
 		struct MouseScrollEvent {
-			Entity::ID window;
+			EntityID window;
 			float xoffset;
 			float yoffset;
 			putils::Point2f pos;
 		};
-		EventVector<MouseScrollEvent> scrolls;
-
-		putils_reflection_class_name(InputBufferComponent);
+		std::vector<MouseScrollEvent> scrolls;
 	};
 }
+
+#define refltype kengine::InputBufferComponent
+putils_reflection_info{
+	putils_reflection_class_name;
+};
+#undef refltype

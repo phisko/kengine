@@ -1,73 +1,42 @@
 #include "OpenGLSpritesSystem.hpp"
 
-#include "EntityManager.hpp"
 #include "SpritesShader.hpp"
-#include "data/ModelComponent.hpp"
-#include "data/TextureModelComponent.hpp"
-#include "data/TextureDataComponent.hpp"
 #include "data/ShaderComponent.hpp"
-#include "data/GraphicsComponent.hpp"
-#include "data/SpriteComponent.hpp"
+#include "data/ModelComponent.hpp"
 
 #include "functions/OnEntityCreated.hpp"
-
-#include "stb_image.h"
+#include "helpers/resourceHelper.hpp"
+#include "helpers/logHelper.hpp"
 
 namespace kengine {
-	static EntityManager * g_em;
-
-	// declarations
-	static void onEntityCreated(Entity & e);
-	//
-	EntityCreator * OpenGLSpritesSystem(EntityManager & em) {
-		g_em = &em;
-
-		em += [&](Entity & e) {
-			e += makeGBufferShaderComponent<SpritesShader>(em);
-		};
-
-		return [](Entity & e) {
-			e += functions::OnEntityCreated{ onEntityCreated };
-		};
-	}
-
-	void onEntityCreated(Entity & e) {
-		if (!e.has<GraphicsComponent>())
-			return;
-
-		if (!e.has<SpriteComponent2D>() && !e.has<SpriteComponent3D>())
-			return;
-
-		auto & graphics = e.get<GraphicsComponent>();
-		const auto & file = graphics.appearance;
-
-		for (const auto &[e, model] : g_em->getEntities<TextureModelComponent>())
-			if (model.file == file) {
-				graphics.model = e.id;
-				return;
+	EntityCreator * OpenGLSpritesSystem() noexcept {
+		struct impl {
+			static void init(Entity & e) noexcept {
+				kengine_log(Log, "Init", "OpenGLSpritesSystem");
+				e += functions::OnEntityCreated{ onEntityCreated };
+				e += SystemSpecificShaderComponent<putils::gl::Program>{ std::make_unique<SpritesShader>() };
+				e += GBufferShaderComponent{};
 			}
 
-		int width, height, components;
-		const auto data = stbi_load(file.c_str(), &width, &height, &components, 0);
-		if (data == nullptr)
-			return; // Not supported image type
+			static void onEntityCreated(Entity & e) noexcept {
+				if (e.has<TextureDataComponent>())
+					return;
 
-		*g_em += [&](Entity & e) {
-			graphics.model = e.id;
+				const auto model = e.tryGet<ModelComponent>();
+				if (model == nullptr)
+					return;
 
-			auto & comp = e.attach<TextureModelComponent>();
-			comp.file = file;
+				const auto & file = e.get<ModelComponent>().file;
+				if (!resourceHelper::isSupportedTextureFormat(file.c_str()))
+					return;
 
-			TextureDataComponent textureLoader; {
-				textureLoader.textureID = &comp.texture;
-
-				textureLoader.data = data;
-				textureLoader.width = width;
-				textureLoader.height = height;
-				textureLoader.components = components;
-
-				textureLoader.free = stbi_image_free;
-			} e += textureLoader;
+				kengine_logf(Log, "OpenGLSpritesSystem", "Loading texture %s for %zu", file.c_str(), e.id);
+				auto textureData = resourceHelper::loadTexture(file);
+				if (textureData)
+					e += std::move(*textureData);
+			}
 		};
+
+		return impl::init;
 	}
 }

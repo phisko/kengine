@@ -20,10 +20,18 @@ namespace kengine {
 		using script_vector = putils::vector<script, KENGINE_MAX_LUA_SCRIPTS>;
 
         script_vector scripts;
-
-        putils_reflection_class_name(LuaComponent);
-        putils_reflection_attributes(
-                putils_reflection_attribute(&LuaComponent::scripts)
-        );
-    };
+	};
 }
+
+#define refltype kengine::LuaComponent
+putils_reflection_info {
+	putils_reflection_class_name;
+	putils_reflection_attributes(
+		putils_reflection_attribute(scripts)
+	);
+	putils_reflection_used_types(
+		putils_reflection_type(refltype::script),
+		putils_reflection_type(refltype::script_vector)
+	);
+};
+#undef refltype

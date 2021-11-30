@@ -10,24 +10,13 @@
 
 ## Members
 
-### Mesh type
+### meshes
 
 ```cpp
 struct Mesh {
     std::vector<std::string> boneNames;
-
-    putils_reflection_class_name(ModelSkeletonComponentMesh);
-    putils_reflection_attributes(
-        putils_reflection_attribute(&Mesh::boneNames)
-    );
 };
-```
 
-Provides the names for bones in a given mesh.
-
-### meshes
-
-```cpp
 std::vector<Mesh> meshes;
 ```
 

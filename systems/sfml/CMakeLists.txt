@@ -1,8 +1,11 @@
 set(name kengine_sfml)
 
-file(GLOB src *.cpp *.hpp)
-add_library(${name} STATIC ${src})
-target_link_libraries(${name} kengine pse pluginManager lua)
-target_include_directories(${name} PRIVATE ${CMAKE_CURRENT_LIST_DIR})
+set(IMGUI_DIR ../../putils/imgui)
+file(GLOB src
+	*.cpp *.hpp
+	imgui-sfml/*.cpp imgui-sfml/*.hpp)
 
-file(COPY sf-config.json DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+add_library(${name} STATIC ${src})
+
+putils_conan(sfml/2.5.1)
+target_link_libraries(${name} kengine CONAN_PKG::sfml)

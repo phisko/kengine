@@ -1,17 +1,19 @@
 #include "SpritesShader.hpp"
 
-#include "EntityManager.hpp"
+#include "kengine.hpp"
 
-#include "data/TextureModelComponent.hpp"
+#include "data/SystemSpecificTextureComponent.hpp"
 #include "data/TransformComponent.hpp"
 #include "data/GraphicsComponent.hpp"
-#include "data/OpenGLModelComponent.hpp"
 #include "data/SpriteComponent.hpp"
 
 #include "systems/opengl/shaders/ApplyTransparencySrc.hpp"
+#include "systems/opengl/shaders/shaderHelper.hpp"
 
-#include "systems/opengl/ShaderHelper.hpp"
+#include "helpers/instanceHelper.hpp"
+#include "helpers/cameraHelper.hpp"
 
+#pragma region GLSL
 static inline const char * vert = R"(
 #version 330
 
@@ -49,8 +51,9 @@ in vec2 TexCoords;
 
 layout (location = 0) out vec4 gposition;
 layout (location = 1) out vec3 gnormal;
-layout (location = 2) out vec4 gcolor;
-layout (location = 3) out float gentityID;
+layout (location = 2) out vec4 gdiffuse;
+layout (location = 3) out vec4 gspecular;
+layout (location = 4) out float gentityID;
 
 void applyTransparency(float alpha);
 
@@ -62,24 +65,23 @@ void main() {
 
     gposition = WorldPosition;
     gnormal = -normalize(cross(dFdy(EyeRelativePos), dFdx(EyeRelativePos)));
-	gcolor = vec4(pix.rgb, 1.0); // don't apply lighting
+	gdiffuse = vec4(pix.rgb, 1.0); // don't apply lighting
+	gspecular = vec4(0.0); // don't apply lighting
 	gentityID = entityID;
 }
         )";
+#pragma endregion GLSL
 
 namespace kengine {
-	static glm::vec3 toVec(const putils::Point3f & p) { return { p.x, p.y, p.z }; }
-
-	SpritesShader::SpritesShader(EntityManager & em)
-		: Program(false, putils_nameof(SpritesShader)),
-		_em(em)
+	SpritesShader::SpritesShader() noexcept
+		: Program(false, putils_nameof(SpritesShader))
 	{}
 
-	void SpritesShader::init(size_t firstTextureID) {
+	void SpritesShader::init(size_t firstTextureID) noexcept {
 		initWithShaders<SpritesShader>(putils::make_vector(
 			ShaderDescription{ vert, GL_VERTEX_SHADER },
 			ShaderDescription{ frag, GL_FRAGMENT_SHADER },
-			ShaderDescription{ Shaders::src::ApplyTransparency::Frag::glsl, GL_FRAGMENT_SHADER }
+			ShaderDescription{ opengl::shaders::src::ApplyTransparency::Frag::glsl, GL_FRAGMENT_SHADER }
 		));
 
 		_textureID = firstTextureID;
@@ -92,33 +94,69 @@ namespace kengine {
 		putils::gl::Uniform<glm::mat4> model;
 	};
 
-	static void drawObject(EntityManager & em, const GraphicsComponent & graphics, const TransformComponent & transform, Uniforms uniforms, bool in2D = false) {
-		if (graphics.model == Entity::INVALID_ID)
-			return;
+#pragma region declarations
+	static void drawObject(const putils::gl::Program::Parameters & params, const GraphicsComponent & graphics, const InstanceComponent & instance, const TransformComponent & transform, Uniforms uniforms, const SpriteComponent2D * comp = nullptr) noexcept;
+#pragma endregion
+	void SpritesShader::run(const Parameters & params) noexcept {
+		const Uniforms uniforms{ _textureID, _color, _model };
 
-		const auto & modelEntity = em.getEntity(graphics.model);
-		if (!modelEntity.has<TextureModelComponent>())
-			return;
-		const auto texture = modelEntity.get<TextureModelComponent>().texture;
+		use();
+		
+		_viewPos = params.camPos;
+		glActiveTexture((GLenum)(GL_TEXTURE0 + uniforms.textureID));
 
+		_view = glm::mat4(1.f);
+		_proj = glm::mat4(1.f);
+		for (const auto &[e, instance, graphics, transform, sprite] : entities.with<InstanceComponent, GraphicsComponent, TransformComponent, SpriteComponent2D>()) {
+			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
+				continue;
+
+			_entityID = (float)e.id;
+			drawObject(params, graphics, instance, transform, uniforms, &sprite);
+		}
+
+		_view = params.view;
+		_proj = params.proj;
+		for (const auto &[e, instance, graphics, transform, sprite] : entities.with<InstanceComponent, GraphicsComponent, TransformComponent, SpriteComponent3D>()) {
+			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
+				continue;
+
+			_entityID = (float)e.id;
+			drawObject(params, graphics, instance, transform, uniforms);
+		}
+	}
+
+	static void drawObject(const putils::gl::Program::Parameters & params, const GraphicsComponent & graphics, const InstanceComponent & instance, const TransformComponent & transform, Uniforms uniforms, const SpriteComponent2D * comp) noexcept {
 		uniforms.color = graphics.color;
 
-		glBindTexture(GL_TEXTURE_2D, texture);
+		const auto modelEntity = entities[instance.model];
+		const auto texture = modelEntity.tryGet<SystemSpecificTextureComponent<putils::gl::Texture>>();
+		if (!texture)
+			return;
+
+		glBindTexture(GL_TEXTURE_2D, texture->texture);
 
 		{
+			const auto & box =
+				comp == nullptr ?
+				transform.boundingBox : // 3D
+				cameraHelper::convertToScreenPercentage(transform.boundingBox, params.viewport.size, *comp); // 2D
+
+			auto centre = shaderHelper::toVec(box.position);
+			const auto size = shaderHelper::toVec(box.size);
+
 			glm::mat4 model(1.f);
 
-			auto centre = toVec(transform.boundingBox.position);
-			if (in2D) {
-				centre.y = 1 - centre.y;
+			if (comp != nullptr) {
+				centre.y = 1.f - centre.y;
 				model = glm::translate(model, glm::vec3(-1.f, -1.f, 0.f));
 				centre *= 2.f;
 			}
 
 			model = glm::translate(model, centre);
 
-			if (in2D)
-				model = glm::scale(model, toVec(transform.boundingBox.size));
+			if (comp != nullptr)
+				model = glm::scale(model, size);
 
 			model = glm::rotate(model,
 				transform.yaw,
@@ -133,8 +171,8 @@ namespace kengine {
 				{ 0.f, 0.f, 1.f }
 			);
 
-			if (!in2D) {
-				model = glm::scale(model, toVec(transform.boundingBox.size));
+			if (comp == nullptr) {
+				model = glm::scale(model, size);
 				model = glm::scale(model, { -1.f, 1.f, 1.f });
 			}
 
@@ -143,29 +181,6 @@ namespace kengine {
 			uniforms.model = model;
 		}
 
-		ShaderHelper::shapes::drawTexturedQuad();
-	}
-
-	void SpritesShader::run(const Parameters & params) {
-		const Uniforms uniforms{ _textureID, _color, _model };
-
-		use();
-		
-		_viewPos = params.camPos;
-		glActiveTexture((GLenum)(GL_TEXTURE0 + uniforms.textureID));
-
-		_view = glm::mat4(1.f);
-		_proj = glm::mat4(1.f);
-		for (const auto &[e, graphics, transform, sprite] : _em.getEntities<GraphicsComponent, TransformComponent, SpriteComponent2D>()) {
-			_entityID = (float)e.id;
-			drawObject(_em, graphics, transform, uniforms, true);
-		}
-
-		_view = params.view;
-		_proj = params.proj;
-		for (const auto &[e, graphics, transform, sprite] : _em.getEntities<GraphicsComponent, TransformComponent, SpriteComponent3D>()) {
-			_entityID = (float)e.id;
-			drawObject(_em, graphics, transform, uniforms);
-		}
+		shaderHelper::shapes::drawTexturedQuad();
 	}
 }

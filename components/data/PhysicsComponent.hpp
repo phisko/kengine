@@ -10,19 +10,20 @@ namespace kengine {
 		float yaw = 0.f; // radians to turn in frame
 		float pitch = 0.f; // radians to turn in frame
 		float roll = 0.f; // radians to turn in frame
-		float speed = 1.f;
 		bool changed = false;
-
-		putils_reflection_class_name(PhysicsComponent);
-		putils_reflection_attributes(
-			putils_reflection_attribute(&PhysicsComponent::mass),
-
-			putils_reflection_attribute(&PhysicsComponent::movement),
-			putils_reflection_attribute(&PhysicsComponent::yaw),
-			putils_reflection_attribute(&PhysicsComponent::pitch),
-			putils_reflection_attribute(&PhysicsComponent::roll),
-			putils_reflection_attribute(&PhysicsComponent::speed),
-			putils_reflection_attribute(&PhysicsComponent::changed)
-		);
 	};
 }
+
+#define refltype kengine::PhysicsComponent
+putils_reflection_info{
+	putils_reflection_class_name;
+	putils_reflection_attributes(
+		putils_reflection_attribute(mass),
+		putils_reflection_attribute(movement),
+		putils_reflection_attribute(yaw),
+		putils_reflection_attribute(pitch),
+		putils_reflection_attribute(roll),
+		putils_reflection_attribute(changed)
+	);
+};
+#undef refltype
