@@ -28,7 +28,6 @@ namespace kengine::meta::attributeHelper {
 
 			const auto it = currentAttributes->find(nextAttribute.c_str());
 			if (it == currentAttributes->end()) {
-				kengine_assert_failed("Unknown attribute '", path, "' in '", typeName, "'");
 				return nullptr;
 			}
 
@@ -37,7 +36,6 @@ namespace kengine::meta::attributeHelper {
 
 		const auto it = currentAttributes->find(currentPath.c_str());
 		if (it == currentAttributes->end()) {
-			kengine_assert_failed("Unknown attribute '", path, "' in '", typeName, "'");
 			return nullptr;
 		}
 
