@@ -14,7 +14,7 @@
 namespace kengine {
 	// Helper type when a callback is needed as an iterator
 	class Entity;
-	using EntityIteratorSignature = void(Entity);
+	using EntityIteratorSignature = void(Entity &);
 	using EntityIteratorFunc = putils::function<EntityIteratorSignature, KENGINE_ENTITY_ITERATOR_FUNC_SIZE>;
 
 	namespace functions {

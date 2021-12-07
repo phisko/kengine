@@ -318,7 +318,8 @@ namespace kengine::bullet {
 					kengine_assert(colObj1Wrap->m_collisionObject == &ghost);
 					const auto id = colObj0Wrap->m_collisionObject->getUserIndex();
 					kengine_logf(Verbose, "BulletSystem/queryPosition", "Found %zu", id);
-					func(entities[id]);
+					auto e = entities[id];
+					func(e);
 					return 1.f;
 				}
 
