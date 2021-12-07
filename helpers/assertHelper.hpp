@@ -22,11 +22,11 @@
 #  define kengine_debub_break (void)0
 # endif
 
-#include "concat.hpp"
+#include "concatenate.hpp"
 
 # define kengine_assert_failed(...) \
 	do {\
-		const bool shouldBreak = kengine::assertHelper::assertFailed(__FILE__, __LINE__, putils::concat(__VA_ARGS__)); \
+		const bool shouldBreak = kengine::assertHelper::assertFailed(__FILE__, __LINE__, putils::concatenate(__VA_ARGS__)); \
 		if (shouldBreak && kengine::assertHelper::isDebuggerPresent()) \
 			kengine_debug_break; \
 	} while(false)
@@ -36,7 +36,7 @@
 		if (!!(x)) \
 			(void)0; \
 		else \
-			kengine_assert_failed(putils::concat(__VA_ARGS__)); \
+			kengine_assert_failed(putils::concatenate(__VA_ARGS__)); \
 		kengine_assume(!!(x)); \
 	} while (false)
 

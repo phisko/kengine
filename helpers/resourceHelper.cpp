@@ -7,7 +7,6 @@
 #include "data/ModelComponent.hpp"
 
 #include "stb_image.h"
-#include "concat.hpp"
 
 namespace kengine::resourceHelper {
 	bool isSupportedTextureFormat(const char * file) noexcept {

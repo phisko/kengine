@@ -7,6 +7,7 @@
 #include "Point.hpp"
 #include "function.hpp"
 #include "reflection.hpp"
+#include "meta/traits/has_nested_type.hpp"
 
 namespace detail {
 	putils_nested_type_detector(DataType);
