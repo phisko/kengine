@@ -10,9 +10,9 @@ namespace kengine {
 		registerMetaComponentImplementation<meta::DisplayImGui, Comps...>(
 			[](const auto t, const Entity & e) noexcept {
 				using Comp = putils_wrapped_type(t);
-				const auto comp = e.tryGet<Comp>();
+				const Comp * comp = e.tryGet<Comp>();
 				if (comp)
-					putils::reflection::imguiDisplay(*comp);
+					putils::reflection::imguiEdit(*comp);
 			}
 		);
 	}
