@@ -1,7 +1,12 @@
 #include "registerMatchString.hpp"
 
+// kengine
 #include "meta/MatchString.hpp"
 #include "helpers/registerMetaComponentImplementation.hpp"
+
+// putils
+#include "to_string.hpp"
+#include "sol.hpp"
 #include "reflection_helpers/imgui_helper.hpp"
 
 namespace kengine {

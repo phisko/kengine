@@ -7,8 +7,11 @@
 #include <string>
 #include <vector>
 #include "Point.hpp"
+#include "function.hpp"
 
 namespace kengine {
+	class Entity;
+
 	struct ModelAnimationComponent {
 		struct Anim {
 			std::string name;

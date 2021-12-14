@@ -1,6 +1,7 @@
 #pragma once
 
 #include "lua/sol.hpp"
+#include "reflection.hpp"
 
 namespace kengine {
 	struct LuaTableComponent {

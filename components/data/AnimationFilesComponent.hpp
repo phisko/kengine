@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 
+#include "reflection.hpp"
+
 namespace kengine {
 	struct AnimationFilesComponent {
 		std::vector<std::string> files;
