@@ -1,0 +1,14 @@
+{
+	"components": [
+		{
+			"registration": "kengine::registerComponents",
+			"header": "helpers/registerTypeHelper.hpp"
+		}
+	],
+	"types": [
+		{
+			"registration": "kengine::registerTypes",
+			"header": "helpers/registerTypeHelper.hpp"
+		}
+	]
+}
