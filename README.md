@@ -35,6 +35,7 @@ The Koala engine is a type-safe and self-documenting implementation of an Entity
     + [Helpers](#helpers)
         * [Meta component helpers](#meta-component-helpers)
 * [Example](#example-1)
+* [Scripts](#scripts)
 
 ## Example
 
@@ -498,3 +499,9 @@ local transform = self:getTransformComponent()
 local pos = transform.boundingBox.position
 pos.x = pos.x + 1
 ```
+
+## Scripts
+
+A [generateTypeRegistration](scripts/generateTypeRegistration.md) Python script is provided, which can be used to generate C++ files containing functions that will register a set of given types with the engine.
+
+This is **absolutely not mandatory**.
