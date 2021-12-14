@@ -54,6 +54,13 @@ putils_src_files(src_files
 	helpers/meta
 )
 
+if (KENGINE_NO_TYPE_REGISTRATION)
+    target_compile_definitions(kengine PUBLIC KENGINE_NO_TYPE_REGISTRATION)
+else()
+    file(GLOB type_files impl/types/*.cpp impl/types/*.hpp)
+    set(src_files ${src_files} ${type_files})
+endif()
+
 add_library(kengine STATIC ${src_files})
 target_link_libraries(kengine PUBLIC putils)
 

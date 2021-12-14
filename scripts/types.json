@@ -154,8 +154,64 @@
 			"header": "data/TransformComponent.hpp"
 		},
 		{
-			"type": "kengine::TransformComponent",
-			"header": "data/TransformComponent.hpp"
+			"type": "kengine::meta::AttachTo",
+			"header": "meta/AttachTo.hpp"
+		},
+		{
+			"type": "kengine::meta::Attributes",
+			"header": "meta/Attributes.hpp"
+		},
+		{
+			"type": "kengine::meta::Copy",
+			"header": "meta/Copy.hpp"
+		},
+		{
+			"type": "kengine::meta::Count",
+			"header": "meta/Count.hpp"
+		},
+		{
+			"type": "kengine::meta::DetachFrom",
+			"header": "meta/DetachFrom.hpp"
+		},
+		{
+			"type": "kengine::meta::DisplayImGui",
+			"header": "meta/DisplayImGui.hpp"
+		},
+		{
+			"type": "kengine::meta::EditImGui",
+			"header": "meta/EditImGui.hpp"
+		},
+		{
+			"type": "kengine::meta::ForEachEntity",
+			"header": "meta/ForEachEntity.hpp"
+		},
+		{
+			"type": "kengine::meta::ForEachEntityWithout",
+			"header": "meta/ForEachEntity.hpp"
+		},
+		{
+			"type": "kengine::meta::Get",
+			"header": "meta/Get.hpp"
+		},
+		{
+			"type": "kengine::meta::Has",
+			"header": "meta/Has.hpp"
+		},
+		{
+			"type": "kengine::meta::LoadFromJSON",
+			"header": "meta/LoadFromJSON.hpp"
+		},
+		{
+			"type": "kengine::meta::MatchString",
+			"header": "meta/MatchString.hpp"
+		},
+		{
+			"type": "kengine::meta::SaveToJSON",
+			"header": "meta/SaveToJSON.hpp"
+		},
+		{
+			"type": "kengine::meta::Size",
+			"header": "meta/Size.hpp"
 		}
 	],
 	"types": [

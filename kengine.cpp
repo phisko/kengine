@@ -1,5 +1,6 @@
 #include "kengine.hpp"
 #include "remove_if.hpp"
+#include "impl/types/registerTypes.hpp"
 #include "functions/OnTerminate.hpp"
 
 namespace kengine {
@@ -7,6 +8,10 @@ namespace kengine {
 
 	void init(size_t threads) noexcept {
 		impl::state = new impl::GlobalState(threads);
+
+#ifndef KENGINE_NO_TYPE_REGISTRATION
+		impl::types::registerTypes();
+#endif
 	}
 
 	void * getState() noexcept {
