@@ -1,13 +1,14 @@
 #include "attributeHelper.hpp"
 
+// kengine
 #include "data/NameComponent.hpp"
+#include "helpers/typeHelper.hpp"
 
-#ifndef KENGINE_ATTRIBUTE_MAX_PATH
-# define KENGINE_ATTRIBUTE_MAX_PATH 1024
-#endif
+// putils
+#include "reflection_Helpers/runtime_helper.hpp"
 
 namespace kengine::meta::attributeHelper {
-	const Attributes::AttributeInfo * findAttribute(const Entity & typeEntity, std::string_view path, std::string_view separator) noexcept {
+	const putils::reflection::AttributeInfo * findAttribute(const Entity & typeEntity, std::string_view path, std::string_view separator) noexcept {
 		const auto nameComp = typeEntity.tryGet<NameComponent>();
 		const auto typeName = nameComp ? nameComp->name.c_str() : "<unknown>";
 
@@ -17,28 +18,6 @@ namespace kengine::meta::attributeHelper {
 			return nullptr;
 		}
 
-		const Attributes::AttributeMap * currentAttributes = &attributes->attributes;
-		putils::string<KENGINE_ATTRIBUTE_MAX_PATH> currentPath(path);
-
-		auto dotPos = currentPath.find(separator);
-		while (dotPos != std::string::npos) {
-			const auto nextAttribute = currentPath.substr(0, dotPos);
-			currentPath = currentPath.substr(dotPos + separator.length());
-			dotPos = currentPath.find(separator);
-
-			const auto it = currentAttributes->find(nextAttribute.c_str());
-			if (it == currentAttributes->end()) {
-				return nullptr;
-			}
-
-			currentAttributes = &it->second.attributes;
-		}
-
-		const auto it = currentAttributes->find(currentPath.c_str());
-		if (it == currentAttributes->end()) {
-			return nullptr;
-		}
-
-		return &it->second;
+		return putils::reflection::runtime::findAttribute(attributes->attributes, path, separator);
 	}
 }
