@@ -8,10 +8,6 @@ namespace kengine {
 
 	void init(size_t threads) noexcept {
 		impl::state = new impl::GlobalState(threads);
-
-#ifndef KENGINE_NO_TYPE_REGISTRATION
-		impl::types::registerTypes();
-#endif
 	}
 
 	void * getState() noexcept {

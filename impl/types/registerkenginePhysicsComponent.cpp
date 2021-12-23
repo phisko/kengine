@@ -1,7 +1,7 @@
 #include "helpers/registerTypeHelper.hpp"
 #include "data/PhysicsComponent.hpp"
 
-namespace kengine::impl::types{
+namespace kengine::types{
 	void registerkenginePhysicsComponent() noexcept {
 		kengine::registerComponents<kengine::PhysicsComponent>();
 

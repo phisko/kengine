@@ -1,7 +1,7 @@
 #include "helpers/registerTypeHelper.hpp"
 #include "data/GraphicsComponent.hpp"
 
-namespace kengine::impl::types{
+namespace kengine::types{
 	void registerkengineGraphicsComponent() noexcept {
 		kengine::registerComponents<kengine::GraphicsComponent>();
 

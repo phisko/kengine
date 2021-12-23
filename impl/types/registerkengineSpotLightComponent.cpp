@@ -1,7 +1,7 @@
 #include "helpers/registerTypeHelper.hpp"
 #include "data/LightComponent.hpp"
 
-namespace kengine::impl::types{
+namespace kengine::types{
 	void registerkengineSpotLightComponent() noexcept {
 		kengine::registerComponents<kengine::SpotLightComponent>();
 

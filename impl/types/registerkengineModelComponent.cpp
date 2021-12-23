@@ -1,7 +1,7 @@
 #include "helpers/registerTypeHelper.hpp"
 #include "data/ModelComponent.hpp"
 
-namespace kengine::impl::types{
+namespace kengine::types{
 	void registerkengineModelComponent() noexcept {
 		kengine::registerComponents<kengine::ModelComponent>();
 

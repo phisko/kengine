@@ -1,7 +1,7 @@
 #include "helpers/registerTypeHelper.hpp"
 #include "data/CameraComponent.hpp"
 
-namespace kengine::impl::types{
+namespace kengine::types{
 	void registerkengineCameraComponent() noexcept {
 		kengine::registerComponents<kengine::CameraComponent>();
 

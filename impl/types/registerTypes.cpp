@@ -1,5 +1,5 @@
 
-namespace kengine::impl::types{
+namespace kengine::types{
 	void registerTypes() noexcept {
 
 		extern void registerkengineAdjustableComponent() noexcept;

@@ -1,7 +1,7 @@
 #include "helpers/registerTypeHelper.hpp"
 #include "data/GodRaysComponent.hpp"
 
-namespace kengine::impl::types{
+namespace kengine::types{
 	void registerkengineGodRaysComponent() noexcept {
 		kengine::registerComponents<kengine::GodRaysComponent>();
 

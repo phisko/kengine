@@ -1,7 +1,7 @@
 #include "helpers/registerTypeHelper.hpp"
 #include "data/TransformComponent.hpp"
 
-namespace kengine::impl::types{
+namespace kengine::types{
 	void registerkengineTransformComponent() noexcept {
 		kengine::registerComponents<kengine::TransformComponent>();
 

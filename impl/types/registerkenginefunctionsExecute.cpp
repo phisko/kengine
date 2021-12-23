@@ -1,7 +1,7 @@
 #include "helpers/registerTypeHelper.hpp"
 #include "functions/Execute.hpp"
 
-namespace kengine::impl::types{
+namespace kengine::types{
 	void registerkenginefunctionsExecute() noexcept {
 		kengine::registerComponents<kengine::functions::Execute>();
 

@@ -1,7 +1,7 @@
 #include "helpers/registerTypeHelper.hpp"
 #include "meta/Copy.hpp"
 
-namespace kengine::impl::types{
+namespace kengine::types{
 	void registerkenginemetaCopy() noexcept {
 		kengine::registerComponents<kengine::meta::Copy>();
 

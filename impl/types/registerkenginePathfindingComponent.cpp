@@ -1,7 +1,7 @@
 #include "helpers/registerTypeHelper.hpp"
 #include "data/PathfindingComponent.hpp"
 
-namespace kengine::impl::types{
+namespace kengine::types{
 	void registerkenginePathfindingComponent() noexcept {
 		kengine::registerComponents<kengine::PathfindingComponent>();
 

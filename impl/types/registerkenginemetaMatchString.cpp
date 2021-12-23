@@ -1,7 +1,7 @@
 #include "helpers/registerTypeHelper.hpp"
 #include "meta/MatchString.hpp"
 
-namespace kengine::impl::types{
+namespace kengine::types{
 	void registerkenginemetaMatchString() noexcept {
 		kengine::registerComponents<kengine::meta::MatchString>();
 

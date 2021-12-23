@@ -1,7 +1,7 @@
 #include "helpers/registerTypeHelper.hpp"
 #include "meta/Get.hpp"
 
-namespace kengine::impl::types{
+namespace kengine::types{
 	void registerkenginemetaGet() noexcept {
 		kengine::registerComponents<kengine::meta::Get>();
 

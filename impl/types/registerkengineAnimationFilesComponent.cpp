@@ -1,7 +1,7 @@
 #include "helpers/registerTypeHelper.hpp"
 #include "data/AnimationFilesComponent.hpp"
 
-namespace kengine::impl::types{
+namespace kengine::types{
 	void registerkengineAnimationFilesComponent() noexcept {
 		kengine::registerComponents<kengine::AnimationFilesComponent>();
 

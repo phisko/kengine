@@ -1,7 +1,7 @@
 #include "helpers/registerTypeHelper.hpp"
 #include "data/ImGuiToolComponent.hpp"
 
-namespace kengine::impl::types{
+namespace kengine::types{
 	void registerkengineImGuiToolComponent() noexcept {
 		kengine::registerComponents<kengine::ImGuiToolComponent>();
 

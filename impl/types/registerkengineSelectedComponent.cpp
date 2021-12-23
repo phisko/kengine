@@ -1,7 +1,7 @@
 #include "helpers/registerTypeHelper.hpp"
 #include "data/SelectedComponent.hpp"
 
-namespace kengine::impl::types{
+namespace kengine::types{
 	void registerkengineSelectedComponent() noexcept {
 		kengine::registerComponents<kengine::SelectedComponent>();
 

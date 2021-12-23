@@ -1,6 +1,6 @@
 
 #pragma once
 
-namespace kengine::impl::types{
+namespace kengine::types{
 	void registerTypes() noexcept;
 }

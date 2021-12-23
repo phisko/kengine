@@ -1,7 +1,7 @@
 #include "helpers/registerTypeHelper.hpp"
 #include "data/PythonComponent.hpp"
 
-namespace kengine::impl::types{
+namespace kengine::types{
 	void registerkenginePythonComponent() noexcept {
 		kengine::registerComponents<kengine::PythonComponent>();
 
