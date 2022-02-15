@@ -217,6 +217,7 @@ These are pre-built, extensible and pluggable elements that can be used to boots
 * [SelectedComponent](components/data/SelectedComponent.md): indicates that an `Entity` has been selected
 * [NameComponent](components/data/NameComponent.md): provides an `Entity`'s name
 * [TimeModulatorComponent](components/data/TimeModulatorComponent.md): lets an `Entity` affect the passing of time
+* [CommandLineComponent](components/data/CommandLineComponent.md): holds the command-line arguments
 
 ##### Behaviors
 * [LuaComponent](components/data/LuaComponent.md): defines the lua scripts to be run by the `LuaSystem` for an `Entity`
