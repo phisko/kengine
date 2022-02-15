@@ -54,9 +54,7 @@ putils_src_files(src_files
 	helpers/meta
 )
 
-if (KENGINE_NO_TYPE_REGISTRATION)
-    target_compile_definitions(kengine PUBLIC KENGINE_NO_TYPE_REGISTRATION)
-else()
+if (NOT KENGINE_NO_TYPE_REGISTRATION)
     file(GLOB type_files impl/types/*.cpp impl/types/*.hpp)
     set(src_files ${src_files} ${type_files})
 endif()
@@ -71,6 +69,10 @@ if (WIN32)
     if (NOT KENGINE_NDEBUG)
         target_link_libraries(kengine PUBLIC Dbghelp)
     endif()
+endif()
+
+if (KENGINE_NO_TYPE_REGISTRATION)
+    target_compile_definitions(kengine PUBLIC KENGINE_NO_TYPE_REGISTRATION)
 endif()
 
 # Add systems
