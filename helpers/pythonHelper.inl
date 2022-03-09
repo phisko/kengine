@@ -26,11 +26,11 @@ namespace kengine::pythonHelper {
 		void registerTypeWithState(PythonStateComponent::Data & state) noexcept {
 			if constexpr (std::is_same<T, Entity>()) {
 				state.entity = new py::class_<Entity>(state.module_, putils::reflection::get_class_name<Entity>(), py::dynamic_attr());
-				putils::reflection::for_each_attribute<Entity>([&](auto name, auto member) noexcept {
-					state.entity->def_readwrite(name, member);
+				putils::reflection::for_each_attribute<Entity>([&](const auto & attr) noexcept {
+					state.entity->def_readwrite(attr.name, attr.ptr);
 				});
-				putils::reflection::for_each_method<Entity>([&](auto name, auto member) noexcept {
-					state.entity->def(name, member);
+				putils::reflection::for_each_method<Entity>([&](const auto & attr) noexcept {
+					state.entity->def(attr.name, attr.ptr);
 				});
 			}
 			else

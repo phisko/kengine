@@ -34,8 +34,8 @@ namespace kengine {
 
 			else if constexpr (putils::reflection::has_attributes<Member>() || putils::reflection::has_parents<Member>()) {
 				bool matches = false;
-				putils::reflection::for_each_attribute(member, [&](const char * name, auto && attr) noexcept {
-					matches |= matchAttribute(attr, str);
+				putils::reflection::for_each_attribute(member, [&](const auto & attr) noexcept {
+					matches |= matchAttribute(attr.member, str);
 				});
 				return matches;
 			}
@@ -73,8 +73,8 @@ namespace kengine {
 					return true;
 
 				bool matches = false;
-				putils::reflection::for_each_attribute(*comp, [&](const char * name, auto && member) noexcept {
-					if (impl::matchAttribute(member, str))
+				putils::reflection::for_each_attribute(*comp, [&](const auto & attr) noexcept {
+					if (impl::matchAttribute(attr.member, str))
 						matches = true;
 					}
 				);

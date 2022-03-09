@@ -44,8 +44,8 @@ namespace kengine {
 				registerWithLanguages(t);
 
 				using T = putils_wrapped_type(t);
-				putils::reflection::for_each_used_type<T>([](auto && type) noexcept {
-					using Used = putils_wrapped_type(type);
+				putils::reflection::for_each_used_type<T>([](const auto & type) noexcept {
+					using Used = putils_wrapped_type(type.type);
 					kengine::registerTypes<Used>();
 				});
 			});

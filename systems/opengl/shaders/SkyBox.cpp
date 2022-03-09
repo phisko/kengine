@@ -67,10 +67,10 @@ namespace kengine::opengl::shaders {
 		glBindTexture(GL_TEXTURE_CUBE_MAP, skyBox.textureID);
 
 		unsigned int i = 0;
-		putils::reflection::for_each_attribute(comp, [&i](const char * name, auto && member) noexcept {
+		putils::reflection::for_each_attribute(comp, [&i](const auto & attr) noexcept {
 			if constexpr (std::is_same<putils_typeof(member), SkyBoxComponent::string>()) {
 				int width, height, nrChannels;
-				const auto data = stbi_load(member.c_str(), &width, &height, &nrChannels, 0);
+				const auto data = stbi_load(attr.member.c_str(), &width, &height, &nrChannels, 0);
 				kengine_assert(data != nullptr);
 				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
 				stbi_image_free(data);

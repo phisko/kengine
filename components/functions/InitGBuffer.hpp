@@ -23,8 +23,8 @@ namespace kengine {
 		for (const auto & [e, initGBuffer] : entities.with<functions::InitGBuffer>()) {
 			initGBuffer(std::tuple_size_v<putils_typeof(putils::reflection::get_attributes<Textures>())>,
 				[](auto func) {
-					putils::reflection::for_each_attribute<Textures>([&](auto name, auto member) {
-						func(name);
+					putils::reflection::for_each_attribute<Textures>([&](const auto & attr) {
+						func(attr.name);
 					});
 				}
 			);

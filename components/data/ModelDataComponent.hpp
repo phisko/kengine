@@ -56,15 +56,15 @@ namespace kengine {
 
 				using Data = typename VertexType::DataType;
 				const auto dataOffset = offsetof(VertexType, data);
-				putils::reflection::for_each_attribute<Data>([&](const char * name, auto member) noexcept {
-					using Member = putils::MemberType<putils_typeof(member)>;
-					vertexAttributes.push_back({ name, dataOffset + (size_t)putils::member_offset(member), putils::meta::type<Member>::index });
+				putils::reflection::for_each_attribute<Data>([&](const auto & attr) noexcept {
+					using Member = putils::MemberType<putils_typeof(attr.ptr)>;
+					vertexAttributes.push_back({ attr.name, dataOffset + (size_t)putils::member_offset(attr.ptr), putils::meta::type<Member>::index });
 				});
 			}
 			else {
-				putils::reflection::for_each_attribute<VertexType>([&](const char * name, auto member) noexcept {
-					using Member = putils::MemberType<putils_typeof(member)>;
-					vertexAttributes.push_back({ name, (size_t)putils::member_offset(member), putils::meta::type<Member>::index });
+				putils::reflection::for_each_attribute<VertexType>([&](const auto & attr) noexcept {
+					using Member = putils::MemberType<putils_typeof(attr.ptr)>;
+					vertexAttributes.push_back({ attr.name, (size_t)putils::member_offset(attr.ptr), putils::meta::type<Member>::index });
 				});
 			}
 
