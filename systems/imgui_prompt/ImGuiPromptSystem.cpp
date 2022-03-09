@@ -40,13 +40,13 @@ namespace kengine::imgui_prompt {
 			std::list<Line> lines;
 
 			template<typename S>
-			void addLine(S && s, bool separator = false, const putils::NormalizedColor & color = {}) noexcept {
+			void addLine(S && s, bool separator = false, const putils::NormalizedColor & color = putils::NormalizedColor{}) noexcept {
 				lines.push_back({ FWD(s), separator, color });
 			}
 
 			template<typename S>
 			void addError(S && s, bool separator = false) noexcept {
-				addLine(FWD(s), separator, { 1.f, 0.f, 0.f });
+				addLine(FWD(s), separator, putils::NormalizedColor{ 1.f, 0.f, 0.f });
 			}
 		} history;
 
@@ -180,8 +180,8 @@ namespace kengine::imgui_prompt {
 		static void setupOutputRedirect(sol::state & state) noexcept {
 			kengine_log(Log, "Init/ImGuiPromptSystem", "Setting up output redirection for Lua");
 			static const luaL_Reg printlib[] = {
-				{ "print", [](lua_State * L) { return addToHistoryOrPrint(L, {}); } },
-				{ "error", [](lua_State * L) { return addToHistoryOrPrint(L, { 1.f, 0.f, 0.f }); } },
+				{ "print", [](lua_State * L) { return addToHistoryOrPrint(L, putils::NormalizedColor{}); } },
+				{ "error", [](lua_State * L) { return addToHistoryOrPrint(L, putils::NormalizedColor{ 1.f, 0.f, 0.f }); } },
 				{ nullptr, nullptr }
 			};
 

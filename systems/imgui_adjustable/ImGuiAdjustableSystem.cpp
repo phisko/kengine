@@ -322,7 +322,8 @@ namespace kengine::imgui_adjustable {
 		static void load() noexcept {
 			kengine_log(Log, "ImGuiAdjustableSystem", "Loading from " KENGINE_ADJUSTABLE_SAVE_FILE);
 
-			loadedFile = putils::parseIniFile(KENGINE_ADJUSTABLE_SAVE_FILE);
+            std::ifstream f(KENGINE_ADJUSTABLE_SAVE_FILE);
+            f >> loadedFile;
 			for (auto [e, comp] : entities.with<AdjustableComponent>())
 				initAdjustable(comp);
 		}
