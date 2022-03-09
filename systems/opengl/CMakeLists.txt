@@ -21,8 +21,8 @@ endif()
 add_library(${name} STATIC ${src})
 
 putils_conan(
-	freetype/2.10.0@bincrafters/stable
-	glfw/3.3@bincrafters/stable
+	freetype/2.11.1
+	glfw/3.3.6
 	OPTIONS glfw:shared=True
 )
 target_link_libraries(${name} kengine CONAN_PKG::glfw CONAN_PKG::freetype)
