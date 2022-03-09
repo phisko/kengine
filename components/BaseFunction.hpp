@@ -28,8 +28,8 @@ namespace kengine {
 
 			Callable func = nullptr;
 
-			bool operator==(nullptr_t) const noexcept { return func == nullptr; }
-			bool operator!=(nullptr_t) const noexcept { return func != nullptr; }
+			bool operator==(std::nullptr_t) const noexcept { return func == nullptr; }
+			bool operator!=(std::nullptr_t) const noexcept { return func != nullptr; }
 
 			Ret operator()(Args... args) const noexcept { return func(args...); }
 			Ret call(Args ... args) const noexcept { return func(args...); }
