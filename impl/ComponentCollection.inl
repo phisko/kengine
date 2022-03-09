@@ -1,5 +1,6 @@
 #include <algorithm>
 #include "ComponentCollection.hpp"
+#include "Archetype.hpp"
 #include "kengine.hpp"
 
 #define TCollection ComponentCollection<Comps...>

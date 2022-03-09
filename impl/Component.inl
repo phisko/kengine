@@ -1,6 +1,10 @@
 #include "kengine.hpp"
 #include "Component.hpp"
+
+#include <cassert>
+
 #include "ComponentMask.hpp"
+#include "impl/GlobalState.hpp"
 
 #ifndef KENGINE_NDEBUG
 # include <iostream>
@@ -47,11 +51,11 @@ namespace kengine::impl {
 			const auto typeIndex = putils::meta::type<Comp>::index;
 
 			{
-				ReadLock l(state->_componentsMutex);
-				const auto it = std::find_if(state->_components.begin(), state->_components.end(),
+				ReadLock l(kengine::impl::state->_componentsMutex);
+				const auto it = std::find_if(kengine::impl::state->_components.begin(), kengine::impl::state->_components.end(),
 					[typeIndex](const std::unique_ptr<ComponentMetadata> & meta) noexcept { return meta->type == typeIndex; }
 				);
-				if (it != state->_components.end())
+				if (it != kengine::impl::state->_components.end())
 					return static_cast<Metadata<Comp> *>(it->get());
 			}
 
@@ -59,9 +63,9 @@ namespace kengine::impl {
 			tmp->type = typeIndex;
 			auto ptr = static_cast<Metadata<Comp> *>(tmp.get());
 			{
-				WriteLock l(state->_componentsMutex);
-				state->_components.push_back(std::move(tmp));
-				ptr->id = state->_components.size() - 1;
+				WriteLock l(kengine::impl::state->_componentsMutex);
+				kengine::impl::state->_components.push_back(std::move(tmp));
+				ptr->id = kengine::impl::state->_components.size() - 1;
 				assert(ptr->id < KENGINE_COMPONENT_COUNT);
 			}
 

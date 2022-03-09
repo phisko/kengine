@@ -1,5 +1,6 @@
 #include "meta/for_each.hpp"
 #include "no.hpp"
+#include "Component.hpp"
 
 namespace kengine::impl {
 	template<typename ... Comps>

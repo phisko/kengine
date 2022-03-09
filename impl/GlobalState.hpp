@@ -5,12 +5,12 @@
 #include <memory>
 
 #include "impl/Mutex.hpp"
-#include "impl/Archetype.hpp"
+#include "impl/ComponentMask.hpp"
 #include "impl/ComponentMetadata.hpp"
 #include "ThreadPool.hpp"
 
 namespace kengine {
-	class Entity;
+    class Entity;
 }
 
 namespace kengine::impl {
@@ -35,7 +35,7 @@ namespace kengine::impl {
 		std::vector<EntityMetadata> _entities;
 		Mutex _entitiesMutex;
 
-		std::vector<Archetype> _archetypes;
+		std::vector<struct Archetype> _archetypes;
 		Mutex _archetypesMutex;
 
 		ID _freeList = INVALID_ID;
