@@ -13,6 +13,11 @@
 #endif
 
 namespace kengine::impl {
+    template<typename Comp>
+    Metadata<Comp>::~Metadata() noexcept {
+        singleton = nullptr;
+    }
+
 	template<typename Comp>
 	void Metadata<Comp>::reset(ID entity) noexcept {
 		auto & val = Component<Comp>::get(entity);
@@ -27,7 +32,7 @@ namespace kengine::impl {
 			return ret;
 		}
 		else {
-			static auto & meta = metadata();
+			auto & meta = metadata();
 			ReadLock r(meta._mutex);
 			const auto it = meta._map.find(entity);
 			if (it != meta._map.end())
@@ -41,13 +46,12 @@ namespace kengine::impl {
 
 	template<typename Comp>
 	ID Component<Comp>::id() noexcept {
-		static const size_t ret = metadata().id;
-		return ret;
+		return metadata().id;
 	}
 
 	template<typename Comp>
 	Metadata<Comp> & Component<Comp>::metadata() noexcept {
-		static Metadata<Comp> * ret = []() noexcept {
+        static const auto init = [](Metadata<Comp> * & singleton) noexcept {
 			const auto typeIndex = putils::meta::type<Comp>::index;
 
 			{
@@ -59,7 +63,7 @@ namespace kengine::impl {
 					return static_cast<Metadata<Comp> *>(it->get());
 			}
 
-			auto tmp = std::make_unique<Metadata<Comp>>();
+			auto tmp = std::make_unique<Metadata<Comp>>(singleton);
 			tmp->type = typeIndex;
 			auto ptr = static_cast<Metadata<Comp> *>(tmp.get());
 			{
@@ -75,8 +79,11 @@ namespace kengine::impl {
 			std::cout << putils::termcolor::reset;
 #endif
 			return ptr;
-		}();
+		};
 
+        static Metadata<Comp> * ret = nullptr;
+        if (ret == nullptr) // handle re-init
+            ret = init(ret);
 		return *ret;
 	}
 }

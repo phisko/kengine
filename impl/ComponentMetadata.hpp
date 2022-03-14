@@ -15,6 +15,10 @@ namespace kengine::impl {
 
 	template<typename Comp>
 	struct Metadata : ComponentMetadata {
+        Metadata(Metadata * & singleton) noexcept : singleton(singleton) {}
+        ~Metadata() noexcept;
+
+        Metadata * & singleton;
 		componentSettings::map<Comp> _map;
 		Mutex _mutex;
 		void reset(ID id) noexcept final;

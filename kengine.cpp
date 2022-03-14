@@ -1,12 +1,12 @@
 #include "kengine.hpp"
 #include "remove_if.hpp"
-#include "impl/types/registerTypes.hpp"
 #include "functions/OnTerminate.hpp"
 
 namespace kengine {
 	Entities entities;
 
 	void init(size_t threads) noexcept {
+        delete impl::state;
 		impl::state = new impl::GlobalState(threads);
 	}
 
@@ -21,6 +21,8 @@ namespace kengine {
 	void terminate() noexcept {
 		for (const auto & [e, func] : entities.with<functions::OnTerminate>())
 			func();
+        delete impl::state;
+		impl::state = nullptr;
 	}
 
 	putils::ThreadPool & threadPool() noexcept {
