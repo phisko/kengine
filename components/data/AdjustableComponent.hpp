@@ -23,9 +23,9 @@ namespace kengine {
 		struct Value {
 			template<typename T, const char * Name, typename = std::enable_if_t < !std::is_pointer<T>{} >>
 				struct Storage {
-				Storage() = default;
-				explicit Storage(T * ptr) : ptr(ptr), value(*ptr) {}
-				explicit Storage(T value) : value(value) {}
+				Storage() noexcept = default;
+				explicit Storage(T * ptr) noexcept : ptr(ptr), value(*ptr) {}
+				explicit Storage(T value) noexcept : value(value) {}
 				T * ptr = nullptr;
 				T value;
 			};
@@ -42,27 +42,27 @@ namespace kengine {
 			static constexpr char _colorStorageName[] = "AdjustableComponentStorageColor";
 			using ColorStorage = Storage<putils::NormalizedColor, _colorStorageName>;
 
-			Value() = default;
-			Value(const Value &) = default;
-			Value & operator=(const Value &) = default;
-			Value(Value &&) = default;
-			Value & operator=(Value &&) = default;
+			Value() noexcept {}
+			Value(const Value &) noexcept = default;
+			Value & operator=(const Value &) noexcept = default;
+			Value(Value &&) noexcept = default;
+			Value & operator=(Value &&) noexcept = default;
 
-			Value(const char * name, bool * b) : name(name), storage(BoolStorage{ b }) {}
-			Value(const char * name, bool b) : name(name), storage(BoolStorage{ b }) {}
+			Value(const char * name, bool * b) noexcept : name(name), boolStorage(b), type(Type::Bool) {}
+			Value(const char * name, bool b) noexcept : name(name), boolStorage(b), type(Type::Bool) {}
 
-			Value(const char * name, float * f) : name(name), storage(FloatStorage{ f }) {}
-			Value(const char * name, float f) : name(name), storage(FloatStorage{ f }) {}
+			Value(const char * name, float * f) noexcept : name(name), floatStorage(f), type(Type::Float) {}
+			Value(const char * name, float f) noexcept : name(name), floatStorage(f), type(Type::Float) {}
 
-			Value(const char * name, int * i) : name(name), storage(IntStorage{ i }) {}
-			Value(const char * name, int i) : name(name), storage(IntStorage{ i }) {}
+			Value(const char * name, int * i) noexcept : name(name), intStorage(i), type(Type::Int) {}
+			Value(const char * name, int i) noexcept : name(name), intStorage(i), type(Type::Int) {}
 
-			Value(const char * name, putils::NormalizedColor * color) : name(name), storage(ColorStorage{ color }) {}
-			Value(const char * name, putils::NormalizedColor color) : name(name), storage(ColorStorage{ color }) {}
-			Value(const char * name, putils::Color color) : name(name), storage(ColorStorage{ putils::toNormalizedColor(color) }) {}
+			Value(const char * name, putils::NormalizedColor * color) noexcept : name(name), colorStorage(color), type(Type::Color) {}
+			Value(const char * name, putils::NormalizedColor color) noexcept : name(name), colorStorage(color), type(Type::Color) {}
+			Value(const char * name, putils::Color color) noexcept : name(name), colorStorage(putils::toNormalizedColor(color)), type(Type::Color) {}
 
 			template<typename E>
-			static const char ** getEnumNamesImpl() {
+			static const char ** getEnumNamesImpl() noexcept {
 				static putils::string<64> names[putils::magic_enum::enum_count<E>()];
 				static const char * ret[putils::lengthof(names)];
 				static bool first = true;
@@ -77,14 +77,14 @@ namespace kengine {
 			}
 
 			template<typename E>
-			Value(const char * name, E * enumType) : name(name), storage(IntStorage{ (int *)enumType }) {
+			Value(const char * name, E * enumType) noexcept : name(name), intStorage((int *)enumType), type(Type::Int) {
 				static_assert(std::is_enum_v<E> && std::is_same_v<std::underlying_type_t<E>, int>);
 				getEnumNames = getEnumNamesImpl<E>;
 				enumCount = putils::magic_enum::enum_count<E>();
 			}
 
 			template<typename E>
-			Value(const char * name, E enumType) : name(name), storage(IntStorage{ (int)enumType }) {
+			Value(const char * name, E enumType) noexcept : name(name), intStorage((int)enumType), type(Type::Int) {
 				static_assert(std::is_enum_v<E> && std::is_same_v<std::underlying_type_t<E>, int>);
 				getEnumNames = getEnumNamesImpl<E>();
 				enumCount = putils::magic_enum::enum_count<E>();
@@ -92,7 +92,22 @@ namespace kengine {
 
 			string name;
 
-			std::variant<BoolStorage, FloatStorage, IntStorage, ColorStorage> storage;
+			union {
+                BoolStorage boolStorage;
+                FloatStorage floatStorage;
+                IntStorage intStorage;
+                ColorStorage colorStorage;
+            };
+
+            enum class Type {
+                Bool,
+                Float,
+                Int,
+                Color,
+                Invalid
+            };
+
+            Type type = Type::Invalid;
 
 			using EnumNameFunc = const char ** ();
 			EnumNameFunc * getEnumNames = nullptr;
@@ -120,7 +135,11 @@ putils_reflection_info {
 	putils_reflection_custom_class_name(AdjustableComponentValue);
 	putils_reflection_attributes(
 		putils_reflection_attribute(name),
-		putils_reflection_attribute(storage)
+		putils_reflection_attribute(boolStorage),
+        putils_reflection_attribute(floatStorage),
+        putils_reflection_attribute(intStorage),
+        putils_reflection_attribute(colorStorage),
+        putils_reflection_attribute(type)
 	);
 	putils_reflection_used_types(
 		putils_reflection_type(refltype::BoolStorage),

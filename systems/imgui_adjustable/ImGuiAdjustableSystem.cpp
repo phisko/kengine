@@ -209,53 +209,62 @@ namespace kengine::imgui_adjustable {
 			ImGui::Text(name);
 			ImGui::NextColumn();
 
-			std::visit(putils::overloaded{
-				[&](AdjustableComponent::Value::IntStorage & s) noexcept {
-					if (value.getEnumNames != nullptr)
-						ImGui::Combo((string("##") + value.name).c_str(), s.ptr != nullptr ? s.ptr : &s.value, value.getEnumNames(), (int)value.enumCount);
-					else {
-						ImGui::PushItemWidth(-1.f);
-						auto val = s.ptr != nullptr ? *s.ptr : s.value;
-						if (ImGui::InputInt((string("##") + value.name).c_str(), &val, 1, 100, ImGuiInputTextFlags_EnterReturnsTrue)) {
-							s.value = val;
-							if (s.ptr != nullptr)
-								*s.ptr = val;
-						}
-						ImGui::PopItemWidth();
-					}
-				},
-				[&](AdjustableComponent::Value::FloatStorage & s) noexcept {
-					ImGui::PushItemWidth(-1.f);
-					auto val = s.ptr != nullptr ? *s.ptr : s.value;
-					if (ImGui::InputFloat((string("##") + value.name).c_str(), &val, 0.f, 0.f, "%.6f", ImGuiInputTextFlags_EnterReturnsTrue)) {
-						s.value = val;
-						if (s.ptr != nullptr)
-							*s.ptr = val;
-					}
-					ImGui::PopItemWidth();
-				},
-				[&](AdjustableComponent::Value::BoolStorage & s) noexcept {
-					ImGui::Checkbox((string("##") + value.name).c_str(), s.ptr != nullptr ? s.ptr : &s.value);
-					if (s.ptr != nullptr)
-						s.value = *s.ptr;
-				},
-				[&](AdjustableComponent::Value::ColorStorage & s) noexcept {
-					const auto color = s.ptr != nullptr ? s.ptr->attributes : s.value.attributes;
-					if (ImGui::ColorButton((string("##") + value.name).c_str(), ImVec4(color[0], color[1], color[2], color[3])))
-						ImGui::OpenPopup("color picker popup");
+            switch (value.type) {
+                case AdjustableComponent::Value::Type::Int: {
+                    auto & s = value.intStorage;
+                    if (value.getEnumNames != nullptr)
+                        ImGui::Combo((string("##") + value.name).c_str(), s.ptr != nullptr ? s.ptr : &s.value, value.getEnumNames(), (int)value.enumCount);
+                    else {
+                        ImGui::PushItemWidth(-1.f);
+                        auto val = s.ptr != nullptr ? *s.ptr : s.value;
+                        if (ImGui::InputInt((string("##") + value.name).c_str(), &val, 1, 100, ImGuiInputTextFlags_EnterReturnsTrue)) {
+                            s.value = val;
+                            if (s.ptr != nullptr)
+                                *s.ptr = val;
+                        }
+                        ImGui::PopItemWidth();
+                    }
+                    break;
+                }
+                case AdjustableComponent::Value::Type::Float: {
+                    auto & s = value.floatStorage;
+                    ImGui::PushItemWidth(-1.f);
+                    auto val = s.ptr != nullptr ? *s.ptr : s.value;
+                    if (ImGui::InputFloat((string("##") + value.name).c_str(), &val, 0.f, 0.f, "%.6f", ImGuiInputTextFlags_EnterReturnsTrue)) {
+                        s.value = val;
+                        if (s.ptr != nullptr)
+                            *s.ptr = val;
+                    }
+                    ImGui::PopItemWidth();
+                    break;
+                }
+                case AdjustableComponent::Value::Type::Bool: {
+                    auto & s = value.boolStorage;
+                    ImGui::Checkbox((string("##") + value.name).c_str(), s.ptr != nullptr ? s.ptr : &s.value);
+                    if (s.ptr != nullptr)
+                        s.value = *s.ptr;
+                    break;
+                }
+                case AdjustableComponent::Value::Type::Color: {
+                    auto & s = value.colorStorage;
+                    const auto color = s.ptr != nullptr ? s.ptr->attributes : s.value.attributes;
+                    if (ImGui::ColorButton((string("##") + value.name).c_str(), ImVec4(color[0], color[1], color[2], color[3])))
+                        ImGui::OpenPopup("color picker popup");
 
-					if (ImGui::BeginPopup("color picker popup")) {
-						ImGui::ColorPicker4(value.name, color);
-						ImGui::EndPopup();
-					}
-
-					if (s.ptr != nullptr)
-						s.value = *s.ptr;
-				},
-				[&](auto && t) noexcept {
-					static_assert(putils::always_false<decltype(t)>(), "Non exhaustive visitor");
-				}
-				}, value.storage);
+                    if (ImGui::BeginPopup("color picker popup")) {
+                        ImGui::ColorPicker4(value.name, color);
+                        ImGui::EndPopup();
+                    }
+                    if (s.ptr != nullptr)
+                        s.value = *s.ptr;
+                    break;
+                }
+                default: {
+                    static_assert(putils::magic_enum::enum_count<AdjustableComponent::Value::Type>() == 5); // + 1 for Invalid
+                    kengine_assert_failed("Unknown AdjustableComponent::Value type");
+                    break;
+                }
+            }
 
 			ImGui::Columns();
 		}
@@ -294,29 +303,35 @@ namespace kengine::imgui_adjustable {
 					*storage.ptr = storage.value;
 			};
 
-			std::visit(putils::overloaded{
-				[&](AdjustableComponent::Value::IntStorage & storage) noexcept {
-					storage.value = putils::parse<int>(s);
-					assignPtr(storage);
-				},
-				[&](AdjustableComponent::Value::FloatStorage & storage) noexcept {
-					storage.value = putils::parse<float>(s);
-					assignPtr(storage);
-				},
-				[&](AdjustableComponent::Value::BoolStorage & storage) noexcept {
-					storage.value = putils::parse<bool>(s);
-					assignPtr(storage);
-				},
-				[&](AdjustableComponent::Value::ColorStorage & storage) noexcept {
-					putils::Color tmp;
-					tmp.rgba = putils::parse<unsigned int>(s);
-					storage.value = putils::toNormalizedColor(tmp);
-					assignPtr(storage);
-				},
-				[&](auto && t) noexcept {
-					static_assert(putils::always_false<decltype(t)>(), "Non exhaustive visitor");
-				}
-				}, value.storage);
+            switch (value.type) {
+                case AdjustableComponent::Value::Type::Int: {
+                    value.intStorage.value = putils::parse<int>(s);
+                    assignPtr(value.intStorage);
+                    break;
+                }
+                case AdjustableComponent::Value::Type::Float: {
+                    value.floatStorage.value = putils::parse<float>(s);
+                    assignPtr(value.floatStorage);
+                    break;
+                }
+                case AdjustableComponent::Value::Type::Bool: {
+                    value.boolStorage.value = putils::parse<bool>(s);
+                    assignPtr(value.boolStorage);
+                    break;
+                }
+                case AdjustableComponent::Value::Type::Color: {
+                    putils::Color tmp;
+                    tmp.rgba = putils::parse<unsigned int>(s);
+                    value.colorStorage.value = putils::toNormalizedColor(tmp);
+                    assignPtr(value.colorStorage);
+                    break;
+                }
+                default: {
+                    static_assert(putils::magic_enum::enum_count<AdjustableComponent::Value::Type>() == 5); // + 1 for Invalid
+                    kengine_assert_failed("Unknown AdjustableComponent::Value type");
+                    break;
+                }
+            }
 		}
 
 		static void load() noexcept {
@@ -345,23 +360,29 @@ namespace kengine::imgui_adjustable {
 				for (const auto & value : comp.values) {
 					auto & iniValue = section.values[value.name.c_str()];
 
-					std::visit(putils::overloaded{
-						[&](const AdjustableComponent::Value::IntStorage & s) noexcept {
-							iniValue = putils::toString(s.value);
-						},
-						[&](const AdjustableComponent::Value::FloatStorage & s) noexcept {
-							iniValue = putils::toString(s.value);
-						},
-						[&](const AdjustableComponent::Value::BoolStorage & s) noexcept {
-							iniValue = putils::toString(s.value);
-						},
-						[&](const AdjustableComponent::Value::ColorStorage & s) noexcept {
-							iniValue = putils::toString(putils::toRGBA(s.value));
-						},
-						[&](auto && t) noexcept {
-							static_assert(putils::always_false<decltype(t)>(), "Non exhaustive visitor");
-						}
-					}, value.storage);
+                    switch (value.type) {
+                        case AdjustableComponent::Value::Type::Int: {
+                            iniValue = putils::toString(value.intStorage.value);
+                            break;
+                        }
+                        case AdjustableComponent::Value::Type::Float: {
+                            iniValue = putils::toString(value.floatStorage.value);
+                            break;
+                        }
+                        case AdjustableComponent::Value::Type::Bool: {
+                            iniValue = putils::toString(value.boolStorage.value);
+                            break;
+                        }
+                        case AdjustableComponent::Value::Type::Color: {
+                            iniValue = putils::toString(putils::toRGBA(value.colorStorage.value));
+                            break;
+                        }
+                        default: {
+                            static_assert(putils::magic_enum::enum_count<AdjustableComponent::Value::Type>() == 5); // + 1 for Invalid
+                            kengine_assert_failed("Unknown AdjustableComponent::Value type");
+                            break;
+                        }
+                    }
 				}
 			}
 
