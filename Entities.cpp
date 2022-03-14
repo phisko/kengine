@@ -1,11 +1,12 @@
 #include "Entities.hpp"
 #include "functions/OnEntityRemoved.hpp"
 #include "impl/ComponentMask.hpp"
+#include "impl/ID.hpp"
 
 namespace kengine {
 	Entity Entities::get(EntityID id) noexcept {
 		impl::ReadLock l(impl::state->_entitiesMutex);
-		return { id, impl::state->_entities[id].mask };
+		return { id, impl::state->_entities[id].data.mask };
 	}
 
 	Entity Entities::operator[](EntityID id) noexcept {
@@ -34,7 +35,7 @@ namespace kengine {
 		impl::ComponentMask mask;
 		{
 			impl::ReadLock entities(impl::state->_entitiesMutex);
-			mask = impl::state->_entities[id].mask;
+			mask = impl::state->_entities[id].data.mask;
 		}
 
 		if (mask != 0) {
@@ -48,7 +49,7 @@ namespace kengine {
 
 		{
 			impl::WriteLock entities(impl::state->_entitiesMutex);
-			auto & entityData = impl::state->_entities[id];
+			auto & entityData = impl::state->_entities[id].data;
 			entityData.mask = 0;
 			entityData.active = false;
 			entityData.shouldActivateAfterInit = true;
@@ -74,14 +75,14 @@ namespace kengine {
 
 	void Entities::setActive(EntityID id, bool active) noexcept {
 		impl::WriteLock l(impl::state->_entitiesMutex);
-		impl::state->_entities[id].active = active;
-		impl::state->_entities[id].shouldActivateAfterInit = active;
+		impl::state->_entities[id].data.active = active;
+		impl::state->_entities[id].data.shouldActivateAfterInit = active;
 	}
 
 	impl::EntityIterator Entities::begin() const noexcept {
 		size_t i = 0;
 		impl::ReadLock l(impl::state->_entitiesMutex);
-		while (i < impl::state->_entities.size() && (impl::state->_entities[i].mask == 0 || !impl::state->_entities[i].active))
+		while (i < impl::state->_entities.size() && (impl::state->_entities[i].data.mask == 0 || !impl::state->_entities[i].data.active))
 			++i;
 		return { i };
 	}
@@ -94,7 +95,7 @@ namespace kengine {
 	size_t Entities::size() const noexcept {
 		impl::ReadLock l(impl::state->_entitiesMutex);
 		return std::count_if(impl::state->_entities.begin(), impl::state->_entities.end(), [](const auto & e) {
-			return e.mask != 0 && e.active;
+			return e.data.mask != 0 && e.data.active;
 		});
 	}
 }

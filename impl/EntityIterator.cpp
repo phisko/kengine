@@ -6,7 +6,7 @@ namespace kengine::impl {
 	EntityIterator & EntityIterator::operator++() noexcept {
 		++index;
 		ReadLock l(state->_entitiesMutex);
-		while (index < state->_entities.size() && (state->_entities[index].mask == 0 || !state->_entities[index].active))
+		while (index < state->_entities.size() && (state->_entities[index].data.mask == 0 || !state->_entities[index].data.active))
 			++index;
 		return *this;
 	}
@@ -22,6 +22,6 @@ namespace kengine::impl {
 
 	Entity EntityIterator::operator*() const noexcept {
 		ReadLock l(state->_entitiesMutex);
-		return { index, state->_entities[index].mask };
+		return { index, state->_entities[index].data.mask };
 	}
 }

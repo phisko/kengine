@@ -29,7 +29,7 @@ namespace kengine::impl {
 				bool active;
 				ComponentMask mask;
 				bool shouldActivateAfterInit;
-			};
+			} data;
 			ID freeListNext;
 		};
 		std::vector<EntityMetadata> _entities;

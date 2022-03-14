@@ -19,7 +19,7 @@ namespace kengine::impl {
 
 				size_t entityIndex = 0;
 				for (const auto entityID : archetype.entities) {
-					if (state->_entities[entityID].active)
+					if (state->_entities[entityID].data.active)
 						return { archetypeIndex, entityIndex };
 					++entityIndex;
 				}
@@ -48,7 +48,7 @@ namespace kengine::impl {
 				ReadLock l2(state->_entitiesMutex);
 
 				ret += std::count_if(archetype.entities.begin(), archetype.entities.end(), [](EntityID id) {
-					return state->_entities[id].active;
+					return state->_entities[id].data.active;
 				});
 			}
 		}
@@ -68,7 +68,7 @@ namespace kengine::impl {
 			if (currentEntity < archetype.entities.size())
 			{
 				ReadLock entitiesLock(state->_entitiesMutex);
-				if (state->_entities[archetype.entities[currentEntity]].active)
+				if (state->_entities[archetype.entities[currentEntity]].data.active)
 					return *this;
 			}
 		}

@@ -7,7 +7,7 @@ namespace kengine::impl {
 		ComponentMask oldMask;
 		{
 			ReadLock l(state->_entitiesMutex);
-			oldMask = state->_entities[entity].mask;
+			oldMask = state->_entities[entity].data.mask;
 		}
 
 		auto updatedMask = oldMask;
@@ -39,7 +39,7 @@ namespace kengine::impl {
 		}
 
 		WriteLock l(state->_entitiesMutex);
-		state->_entities[entity].mask = updatedMask;
+		state->_entities[entity].data.mask = updatedMask;
 	}
 
 	void addComponent(EntityID entity, ComponentID component) noexcept {

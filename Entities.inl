@@ -14,7 +14,7 @@ namespace kengine {
 		bool shouldActivate;
 		{
 			impl::ReadLock l(impl::state->_entitiesMutex);
-			shouldActivate = impl::state->_entities[e.id].shouldActivateAfterInit;
+			shouldActivate = impl::state->_entities[e.id].data.shouldActivateAfterInit;
 		}
 		if (shouldActivate)
 			setActive(e, true);
