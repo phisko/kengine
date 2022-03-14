@@ -168,11 +168,11 @@ namespace kengine {
 				glfwSetWindowAspectRatio(glfwComp.window.get(), window.size.x, window.size.y);
 
 				glfwMakeContextCurrent(glfwComp.window.get());
-				glfwSetWindowSizeCallback(glfwComp.window.get(), [](auto window, int width, int height) noexcept {
+				glfwSetWindowSizeCallback(glfwComp.window.get(), [](GLFWwindow * window, int width, int height) noexcept {
 					const auto id = (EntityID)glfwGetWindowUserPointer(window);
 					auto & comp = entities[id].get<WindowComponent>();
 					comp.size = { (unsigned int)width, (unsigned int)height };
-					});
+                });
 
 				glfwSetMouseButtonCallback(glfwComp.window.get(), Input::onClick);
 				glfwSetCursorPosCallback(glfwComp.window.get(), Input::onMouseMove);

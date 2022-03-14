@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef WIN32
+#ifdef _MSC_VER
 # define kengine_assume(x) __assume(x)
 #else
 # define kengine_assume(x) (void)0

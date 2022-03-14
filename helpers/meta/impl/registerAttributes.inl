@@ -16,7 +16,7 @@ namespace kengine {
 				kengine_logf(Log, "Init/registerMetaComponents", "Registering Attributes for %s", putils::reflection::get_class_name<Type>());
 
         	auto type = typeHelper::getTypeEntity<Type>();
-        	type += meta::Attributes{ putils::reflection::runtime::getAttributes<Type>() };
+        	type += meta::Attributes{ &putils::reflection::runtime::getAttributes<Type>() };
         });
     }
 }

@@ -4,7 +4,7 @@
 
 namespace kengine::meta {
     struct Attributes {
-    	putils::reflection::Attributes attributes;
+    	const putils::reflection::runtime::Attributes * attributes;
     };
 }
 
@@ -15,7 +15,7 @@ putils_reflection_info {
 		putils_reflection_attribute(attributes)
 	);
 	putils_reflection_used_types(
-		putils_reflection_type(putils::reflection::Attributes)
+		putils_reflection_type(putils::reflection::runtime::Attributes)
 	);
 };
 #undef refltype

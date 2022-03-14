@@ -87,7 +87,7 @@ namespace kengine::lightHelper {
 
 	float getRadius(const PointLightComponent & light) noexcept {
 		const auto maxChannel = std::fmax(std::fmax(light.color.r, light.color.g), light.color.b);
-		return (-light.linear + std::sqrtf(light.linear * light.linear -
+		return (-light.linear + sqrtf(light.linear * light.linear -
 			4.f * light.quadratic * (light.constant - 256.f * maxChannel * light.diffuseStrength)))
 			/
 			(2.f * light.quadratic);

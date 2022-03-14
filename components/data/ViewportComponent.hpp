@@ -6,8 +6,8 @@
 
 namespace kengine {
 	struct ViewportComponent : OnScreenComponent {
-		using RenderTexture = void *;
-		static constexpr auto INVALID_RENDER_TEXTURE = (RenderTexture)-1;
+		using RenderTexture = std::intptr_t;
+		static constexpr auto INVALID_RENDER_TEXTURE = -1;
 
 		putils::Rect2f boundingBox = { { 0.f, 0.f }, { 1.f, 1.f } };
 		putils::Point2i resolution = { 1280, 720 };

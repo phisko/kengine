@@ -68,17 +68,20 @@ namespace kengine::opengl {
 	using MyModelComponent = SystemSpecificModelComponent<putils::gl::Mesh>;
 	using MyTextureComponent = SystemSpecificTextureComponent<putils::gl::Texture>;
 
-	struct impl {
+    namespace detail {
+        struct Window {
+            EntityID id = INVALID_ID;
+            GLFWWindowComponent * glfw = nullptr;
+            WindowComponent * comp = nullptr;
+        };
+    }
+
+    struct impl {
 		static inline putils::gl::Program::Parameters params;
 
 		static inline size_t gBufferTextureCount = 0;
 		static inline functions::GBufferAttributeIterator gBufferIterator = nullptr;
-
-		static inline struct {
-			EntityID id = INVALID_ID;
-			GLFWWindowComponent * glfw = nullptr;
-			WindowComponent * comp = nullptr;
-		} window;
+        static inline detail::Window window;
 
 		static void init(Entity & e) noexcept {
 			kengine_log(Log, "Init", "OpenGLSystem");
@@ -718,7 +721,7 @@ namespace kengine::opengl {
 
 			const auto viewportInfo = cameraHelper::getViewportForPixel(window.id, pixel);
 			if (viewportInfo.camera == INVALID_ID) {
-				kengine_logf(Warning, "OpenGLSystem/getEntityInPixel", "Found no viewport containing pixel");
+				kengine_log(Warning, "OpenGLSystem/getEntityInPixel", "Found no viewport containing pixel");
 				return ret;
 			}
 

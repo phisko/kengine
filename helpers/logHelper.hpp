@@ -1,6 +1,7 @@
 #pragma once
 
 #include "functions/Log.hpp"
+#include "string.hpp"
 
 namespace kengine::logHelper {
     void log(LogSeverity severity, const char * category, const char * message) noexcept;

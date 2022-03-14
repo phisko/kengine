@@ -8,7 +8,7 @@
 #include "reflection_Helpers/runtime_helper.hpp"
 
 namespace kengine::meta::attributeHelper {
-	const putils::reflection::AttributeInfo * findAttribute(const Entity & typeEntity, std::string_view path, std::string_view separator) noexcept {
+	const putils::reflection::runtime::AttributeInfo * findAttribute(const Entity & typeEntity, std::string_view path, std::string_view separator) noexcept {
 		const auto nameComp = typeEntity.tryGet<NameComponent>();
 		const auto typeName = nameComp ? nameComp->name.c_str() : "<unknown>";
 
@@ -18,6 +18,6 @@ namespace kengine::meta::attributeHelper {
 			return nullptr;
 		}
 
-		return putils::reflection::runtime::findAttribute(attributes->attributes, path, separator);
+		return putils::reflection::runtime::findAttribute(*attributes->attributes, path, separator);
 	}
 }

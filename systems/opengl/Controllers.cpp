@@ -30,7 +30,7 @@ namespace kengine::opengl {
 							for (auto [e, shader, tag] : shaders) {
 								ImGui::MenuItem(shader.shader->getName().c_str(), nullptr, &shader.enabled);
 
-								const auto prof = e.tryGet<ShaderProfileComponent>();
+								const auto prof = e.template tryGet<ShaderProfileComponent>();
 								if (prof) {
 									ImGui::SameLine();
 									ImGui::Text("%f", prof->executionTime);

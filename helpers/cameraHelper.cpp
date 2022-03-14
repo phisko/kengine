@@ -11,11 +11,11 @@ namespace kengine::cameraHelper {
 
 		const auto & window = entities[windowID].get<WindowComponent>();
 
-		float highestZ = -FLT_MAX;
+		float highestZ = -std::numeric_limits<float>::max();
 		for (const auto & [e, viewport] : entities.with<ViewportComponent>()) {
 			if (viewport.window != windowID)
 				continue;
-			if (highestZ != -FLT_MAX && highestZ >= viewport.zOrder)
+			if (highestZ != -std::numeric_limits<float>::max() && highestZ >= viewport.zOrder)
 				continue;
 
 			const auto box = cameraHelper::convertToScreenPercentage({ viewport.boundingBox.position, viewport.boundingBox.size }, window.size, viewport);
