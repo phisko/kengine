@@ -20,6 +20,9 @@ namespace kengine::types{
 		extern void registerkengineCameraComponent() noexcept;
 		registerkengineCameraComponent();
 
+		extern void registerkengineCommandLineComponent() noexcept;
+		registerkengineCommandLineComponent();
+
 		extern void registerkengineViewportComponent() noexcept;
 		registerkengineViewportComponent();
 

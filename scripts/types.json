@@ -25,6 +25,10 @@
 			"header": "data/CameraComponent.hpp"
 		},
 		{
+			"type": "kengine::CommandLineComponent",
+			"header": "data/CommandLineComponent.hpp"
+		},
+		{
 			"type": "kengine::ViewportComponent",
 			"header": "data/ViewportComponent.hpp"
 		},
