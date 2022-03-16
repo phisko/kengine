@@ -5,6 +5,8 @@
 
 #include "impl/ID.hpp"
 
+// #define KENGINE_DEBUG_PRINT_COMPONENT_ID
+
 namespace kengine::componentSettings {
 	template<typename T>
 	constexpr size_t memoryPoolBlockSize = 4096;

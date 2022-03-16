@@ -73,11 +73,12 @@ namespace kengine::impl {
 				assert(ptr->id < KENGINE_COMPONENT_COUNT);
 			}
 
-#ifndef KENGINE_NDEBUG
+#ifdef KENGINE_DEBUG_PRINT_COMPONENT_ID
 			std::cout << putils::termcolor::cyan;
 			std::cout << putils::reflection::get_class_name<Comp>() << '\t' << ptr->id << '\n';
 			std::cout << putils::termcolor::reset;
 #endif
+
 			return ptr;
 		};
 
