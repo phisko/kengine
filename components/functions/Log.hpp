@@ -10,13 +10,19 @@ namespace kengine {
         Error
     };
 
+    struct LogEvent {
+        LogSeverity severity;
+        const char * category;
+        const char * message;
+    };
+
     struct LogSeverityControl {
         LogSeverity severity = LogSeverity::Log;
     };
 
     namespace functions {
         struct Log : BaseFunction<
-            void(LogSeverity severity, const char * category, const char * message)
+            void(const LogEvent & log)
         > {};
     }
 }

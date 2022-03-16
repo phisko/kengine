@@ -1,7 +1,6 @@
 #include "LogStdoutSystem.hpp"
 
 #include <iostream>
-#include <iomanip>
 #include <mutex>
 
 #include "kengine.hpp"
@@ -23,23 +22,23 @@ namespace kengine {
 			};
 
 			e += functions::Log{
-				[&](LogSeverity severity, const char * category, const char * message) noexcept {
+				[&](const kengine::LogEvent & event) noexcept {
 					static std::mutex mutex;
-					if (severity < severityControl.severity)
+					if (event.severity < severityControl.severity)
 						return;
 
 					const std::lock_guard lock(mutex);
 
-					if (severity == LogSeverity::Warning)
+					if (event.severity == LogSeverity::Warning)
 						std::cout << putils::termcolor::yellow;
-					else if (severity == LogSeverity::Error)
+					else if (event.severity == LogSeverity::Error)
 						std::cout << putils::termcolor::red;
 
 					const auto & threadName = putils::get_thread_name();
 					if (!threadName.empty())
 						std::cout << '{' << threadName << "}\t";
 
-					std::cout << putils::magic_enum::enum_name<LogSeverity>(severity) << "\t[" << category << "]\t" << message << '\n';
+					std::cout << putils::magic_enum::enum_name<LogSeverity>(event.severity) << "\t[" << event.category << "]\t" << event.message << '\n';
 
 					std::cout << putils::termcolor::reset;
 				}

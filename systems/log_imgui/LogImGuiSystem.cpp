@@ -18,12 +18,14 @@
 #include "lengthof.hpp"
 #include "imgui.h"
 
-struct LogEvent {
-	kengine::LogSeverity severity;
-	const std::string & thread;
-	std::string category;
-	std::string message;
-};
+namespace detail {
+    struct LogEvent {
+        kengine::LogSeverity severity;
+        const std::string &thread;
+        std::string category;
+        std::string message;
+    };
+}
 
 static bool * g_enabled;
 
@@ -35,8 +37,8 @@ static struct {
 
 static std::mutex g_mutex;
 static int g_maxEvents = 4096;
-static std::list<LogEvent> g_events;
-static std::vector<LogEvent> g_filteredEvents;
+static std::list<detail::LogEvent> g_events;
+static std::vector<detail::LogEvent> g_filteredEvents;
 
 namespace kengine {
 	EntityCreator * LogImGuiSystem() noexcept {
@@ -61,12 +63,12 @@ namespace kengine {
 				};
 			}
 
-			static void log(LogSeverity severity, const char * category, const char * message) noexcept {
-				LogEvent e{
-					 severity,
+			static void log(const kengine::LogEvent & event) noexcept {
+				detail::LogEvent e{
+					 event.severity,
 					 putils::get_thread_name(),
-					 category,
-					 message
+					 event.category,
+					 event.message
 				};
 
 				if (matchesFilters(e)) {
@@ -121,7 +123,7 @@ namespace kengine {
 						g_filteredEvents.push_back(event);
 			}
 
-			static bool matchesFilters(const LogEvent & e) noexcept {
+			static bool matchesFilters(const detail::LogEvent & e) noexcept {
 				if (!g_filters.severities[(int)e.severity])
 					return false;
 

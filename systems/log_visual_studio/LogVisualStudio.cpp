@@ -20,8 +20,8 @@ namespace kengine {
 			};
 
 			e += functions::Log{
-				[&](LogSeverity severity, const char * category, const char * message) noexcept {
-					if (severity < severityControl.severity)
+				[&](const kengine::LogEvent & event) noexcept {
+					if (event.severity < severityControl.severity)
 						return;
 
 					putils::string<4096> s;
@@ -29,11 +29,11 @@ namespace kengine {
 					const auto & threadName = putils::get_thread_name();
 					if (!threadName.empty())
 						s += '{' + threadName + "}\t";
-					s += putils::magic_enum::enum_name<LogSeverity>(severity);
+					s += putils::magic_enum::enum_name<LogSeverity>(event.severity);
 					s += "\t[";
-					s += category;
+					s += event.category;
 					s += "]\t";
-					s += message;
+					s += event.message;
 					s += '\n';
 
 					static std::mutex mutex;
