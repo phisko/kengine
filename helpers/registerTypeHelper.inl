@@ -37,6 +37,9 @@ namespace kengine {
 		void registerTypes(Func && registerWithLanguages) noexcept {
 			putils::for_each_type<Types...>([&](auto && t) noexcept {
 				static bool registered = false;
+                entities += [&](Entity & e) {
+                    e += functions::OnTerminate{ [&] { registered = false; }};
+                };
 				if (registered)
 					return;
 				registered = true;

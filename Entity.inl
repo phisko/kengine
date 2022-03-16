@@ -43,7 +43,7 @@ namespace kengine {
 	template<typename T>
 	T & Entity::attach() noexcept {
 		if (!has<T>()) {
-			static const auto component = impl::Component<T>::id();
+			const auto component = impl::Component<T>::id();
 			componentMask.set(component, true);
 			impl::addComponent(id, component);
 		}
@@ -57,7 +57,7 @@ namespace kengine {
 		auto & ret = impl::Component<Comp>::get(id);
 		ret = FWD(value);
 		if (!has<Comp>()) {
-			static const auto component = impl::Component<Comp>::id();
+			const auto component = impl::Component<Comp>::id();
 			componentMask.set(component, true);
 			impl::addComponent(id, component);
 		}
@@ -71,7 +71,7 @@ namespace kengine {
 		comp.~T();
 		new (&comp) T;
 
-		static const auto component = impl::Component<T>::id();
+		const auto component = impl::Component<T>::id();
 		componentMask.set(component, false);
 		impl::removeComponent(id, component);
 	}
