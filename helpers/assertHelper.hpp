@@ -45,8 +45,10 @@
 
 namespace kengine {
 	namespace assertHelper {
+        extern std::function<bool(const char * file, int line, const std::string & expr)> assertHandler;
+
 		bool assertFailed(const char * file, int line, const std::string & expr) noexcept;
 		bool isDebuggerPresent() noexcept;
-	}
+    }
 }
 #endif
