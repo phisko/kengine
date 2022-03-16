@@ -18,7 +18,7 @@ namespace kengine::cameraHelper {
 			if (highestZ != -std::numeric_limits<float>::max() && highestZ >= viewport.zOrder)
 				continue;
 
-			const auto box = cameraHelper::convertToScreenPercentage({ viewport.boundingBox.position, viewport.boundingBox.size }, window.size, viewport);
+			const auto box = cameraHelper::convertToScreenPercentage(viewport.boundingBox, window.size, viewport);
 
 			const auto startX = box.position.x * window.size.x;
 			const auto startY = box.position.y * window.size.y;
@@ -45,23 +45,32 @@ namespace kengine::cameraHelper {
 		return !appearsInViewport || appearsInViewport->call(viewport);
 	}
 
+    template<size_t N>
+    static putils::Rect<float, N> convertToScreenPercentageImpl(const putils::Rect<float, N> & rect, const putils::Point2f & screenSize, const OnScreenComponent & comp) noexcept {
+        switch (comp.coordinateType) {
+            case OnScreenComponent::CoordinateType::Pixels: {
+                putils::Rect<float, N> ret = rect;
+                ret.position.x /= screenSize.x;
+                ret.position.y /= screenSize.y;
+                ret.size.x /= screenSize.x;
+                ret.size.y /= screenSize.y;
+                return ret;
+            }
+            case OnScreenComponent::CoordinateType::ScreenPercentage:
+                return rect;
+            default:
+                static_assert(putils::magic_enum::enum_count<OnScreenComponent::CoordinateType>() == 2);
+                return rect;
+        }
+    }
+
 	putils::Rect3f convertToScreenPercentage(const putils::Rect3f & rect, const putils::Point2f & screenSize, const OnScreenComponent & comp) noexcept {
-		switch (comp.coordinateType) {
-		case OnScreenComponent::CoordinateType::Pixels: {
-			putils::Rect3f ret = rect;
-			ret.position.x /= screenSize.x;
-			ret.position.y /= screenSize.y;
-			ret.size.x /= screenSize.x;
-			ret.size.y /= screenSize.y;
-			return ret;
-		}
-		case OnScreenComponent::CoordinateType::ScreenPercentage:
-			return rect;
-		default:
-			static_assert(putils::magic_enum::enum_count<OnScreenComponent::CoordinateType>() == 2);
-			return rect;
-		}
+        return convertToScreenPercentageImpl(rect, screenSize, comp);
 	}
+
+    putils::Rect2f convertToScreenPercentage(const putils::Rect2f & rect, const putils::Point2f & screenSize, const OnScreenComponent & comp) noexcept {
+        return convertToScreenPercentageImpl(rect, screenSize, comp);
+    }
 
 	Facings getFacings(const CameraComponent & camera) noexcept {
 		struct impl {

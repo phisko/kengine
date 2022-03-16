@@ -19,7 +19,8 @@ namespace kengine::cameraHelper {
 	ViewportInfo getViewportForPixel(EntityID windowID, const putils::Point2ui & pixel) noexcept; 
 
 	bool entityAppearsInViewport(const Entity & e, EntityID viewport) noexcept;
-	putils::Rect3f convertToScreenPercentage(const putils::Rect3f & rect, const putils::Point2f & screenSize, const OnScreenComponent & comp) noexcept;
+    putils::Rect3f convertToScreenPercentage(const putils::Rect3f & rect, const putils::Point2f & screenSize, const OnScreenComponent & comp) noexcept;
+    putils::Rect2f convertToScreenPercentage(const putils::Rect2f & rect, const putils::Point2f & screenSize, const OnScreenComponent & comp) noexcept;
 
 	struct Facings {
 		putils::Vector3f front;

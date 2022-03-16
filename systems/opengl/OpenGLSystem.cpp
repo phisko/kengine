@@ -640,7 +640,7 @@ namespace kengine::opengl {
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, fb.fbo);
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
-			const auto box = cameraHelper::convertToScreenPercentage({ viewport.boundingBox.position, viewport.boundingBox.size }, window.comp->size, viewport);
+			const auto box = cameraHelper::convertToScreenPercentage(viewport.boundingBox, window.comp->size, viewport);
 
 			const auto destSizeX = (GLint)(box.size.x * window.comp->size.x);
 			const auto destSizeY = (GLint)(box.size.y * window.comp->size.y);
