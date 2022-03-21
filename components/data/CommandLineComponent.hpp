@@ -6,7 +6,7 @@
 
 namespace kengine {
     struct CommandLineComponent {
-        std::vector<std::string> arguments;
+        std::vector<std::string_view> arguments;
     };
 }
 
