@@ -1,6 +1,7 @@
 #include "LogImGuiSystem.hpp"
 
 #include <mutex>
+#include <list>
 
 #include "kengine.hpp"
 
@@ -46,8 +47,11 @@ namespace kengine {
 			static void init(Entity & e) noexcept {
 				kengine_log(Log, "Init", "LogImGuiSystem");
 
-				std::fill(std::begin(g_filters.severities), std::end(g_filters.severities), true);
-				g_filters.severities[(int)LogSeverity::Verbose] = false;
+                std::fill(std::begin(g_filters.severities), std::end(g_filters.severities), true);
+
+                const auto severity = logHelper::parseCommandLineSeverity();
+                for (int i = 0; i < (int)severity; ++i)
+                    g_filters.severities[i] = false;
 
 				auto & tool = e.attach<ImGuiToolComponent>();
 				g_enabled = &tool.enabled;

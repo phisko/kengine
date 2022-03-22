@@ -1,11 +1,16 @@
 #include "LogStdoutSystem.hpp"
 
+// stl
 #include <iostream>
 #include <mutex>
 
+// kengine
 #include "kengine.hpp"
 #include "data/AdjustableComponent.hpp"
 #include "functions/Log.hpp"
+#include "helpers/logHelper.hpp"
+
+// putils
 #include "magic_enum.hpp"
 #include "termcolor.hpp"
 #include "thread_name.hpp"
@@ -14,6 +19,7 @@ namespace kengine {
 	EntityCreator * LogStdoutSystem() noexcept {
 		return [](Entity & e) noexcept {
 			auto & severityControl = e.attach<LogSeverityControl>();
+            severityControl.severity = logHelper::parseCommandLineSeverity();
 
 			e += AdjustableComponent{
 				"Log", {

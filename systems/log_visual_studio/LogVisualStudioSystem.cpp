@@ -1,10 +1,15 @@
-#include "LogVisualStudio.hpp"
+#include "LogVisualStudioSystem.hpp"
 
+// stl
 #include <mutex>
 
+// kengine
 #include "kengine.hpp"
 #include "data/AdjustableComponent.hpp"
 #include "functions/Log.hpp"
+#include "helpers/logHelper.hpp"
+
+// putils
 #include "magic_enum.hpp"
 #include "thread_name.hpp"
 
@@ -12,6 +17,7 @@ namespace kengine {
 	EntityCreator * LogVisualStudioSystem() noexcept {
 		return [](Entity & e) noexcept {
 			auto & severityControl = e.attach<LogSeverityControl>();
+            severityControl.severity = logHelper::parseCommandLineSeverity();
 
 			e += AdjustableComponent{
 				"Log", {
