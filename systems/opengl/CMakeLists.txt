@@ -20,11 +20,6 @@ endif()
 
 add_library(${name} STATIC ${src})
 
-putils_conan(
-	freetype/2.11.1
-	glfw/3.3.6
-	OPTIONS glfw:shared=True
-)
-target_link_libraries(${name} kengine CONAN_PKG::glfw CONAN_PKG::freetype)
+putils_conan(freetype/2.11.1)
+target_link_libraries(${name} kengine kengine_glfw CONAN_PKG::freetype)
 target_compile_definitions(${name} PUBLIC KENGINE_FREETYPE)
-target_compile_definitions(${name} PUBLIC KENGINE_GLFW)
