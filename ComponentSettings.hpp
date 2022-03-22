@@ -1,18 +1,13 @@
 #pragma once
 
 #include <unordered_map>
-#include "MemoryPool.hpp"
-
 #include "impl/ID.hpp"
 
 // #define KENGINE_DEBUG_PRINT_COMPONENT_ID
 
 namespace kengine::componentSettings {
-	template<typename T>
-	constexpr size_t memoryPoolBlockSize = 4096;
-
-	template<typename T>
-	using allocator = putils::MemoryPool<std::pair<const EntityID, T>, memoryPoolBlockSize<T>>;
+    template<typename T>
+    using allocator = std::allocator<std::pair<const EntityID, T>>;
 
 	template<typename T>
 	using map = std::unordered_map<EntityID, T, std::hash<EntityID>, std::equal_to<EntityID>, allocator<T>>;
