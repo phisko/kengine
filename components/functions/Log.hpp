@@ -4,10 +4,12 @@
 
 namespace kengine {
     enum class LogSeverity {
+        All,
         Verbose,
         Log,
         Warning,
-        Error
+        Error,
+        None
     };
 
     struct LogEvent {
