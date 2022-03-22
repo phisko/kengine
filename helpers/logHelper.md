@@ -10,6 +10,14 @@ void log(LogSeverity severity, const char * category, const char * message) noex
 
 Calls the [Log](../components/functions/Log.md) `function Component` on all `Entities` which have it.
 
+## parseCommandLineSeverity
+
+```cpp
+LogSeverity parseCommandLineSeverity() noexcept;
+```
+
+Parses the command-line for a `--logLevel` parameter indicating the maximum log verbosity desired by the user.
+
 ## kengine_log
 
 ```cpp
