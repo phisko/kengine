@@ -227,7 +227,7 @@ namespace {
 				if (viewport.renderTexture == ViewportComponent::INVALID_RENDER_TEXTURE) {
 					renderTexture = new sf::RenderTexture;
 					renderTexture->create(viewport.resolution.x, viewport.resolution.y);
-					viewport.renderTexture = renderTexture;
+					viewport.renderTexture = (ViewportComponent::RenderTexture)renderTexture;
 				}
 
 				renderTexture->setView(sf::View{ convertVector(cam.frustum.position), convertVector(cam.frustum.size) });
@@ -420,7 +420,7 @@ namespace {
 			sf::Sprite renderTextureSprite(renderTexture.getTexture());
 
 			const auto screenSize = window.getSize();
-			const auto box = cameraHelper::convertToScreenPercentage({ viewport.boundingBox.position, viewport.boundingBox.size }, { (float)screenSize.x, (float)screenSize.y }, viewport);
+			const auto box = cameraHelper::convertToScreenPercentage(viewport.boundingBox, { (float)screenSize.x, (float)screenSize.y }, viewport);
 			renderTextureSprite.setPosition(screenSize.x * box.position.x, screenSize.y * box.position.y);
 
 			const auto textureSize = renderTexture.getTexture().getSize();

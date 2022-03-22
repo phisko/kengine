@@ -13,7 +13,7 @@ namespace kengine {
 		using string = putils::string<KENGINE_GRAPHICS_STRING_MAX_LENGTH, stringName>;
 
 		string appearance;
-		putils::NormalizedColor color = { 1.f, 1.f, 1.f, 1.f };
+		putils::NormalizedColor color{ 1.f, 1.f, 1.f, 1.f };
 	};
 }
 

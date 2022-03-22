@@ -49,7 +49,7 @@ namespace kengine {
 					const auto entityCount = std::count_if(
 						kengine::impl::state->_entities.begin(), kengine::impl::state->_entities.end(),
 						[](const kengine::impl::GlobalState::EntityMetadata & e) {
-							return e.active && e.mask != 0;
+							return e.data.active && e.data.mask != 0;
 						}
 					);
 
