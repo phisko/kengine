@@ -6,7 +6,7 @@
 
 // putils
 #include "to_string.hpp"
-#include "sol.hpp"
+#include "sol/sol.hpp"
 #include "reflection_helpers/imgui_helper.hpp"
 
 namespace kengine {

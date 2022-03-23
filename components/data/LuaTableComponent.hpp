@@ -1,6 +1,6 @@
 #pragma once
 
-#include "lua/sol.hpp"
+#include "sol/sol.hpp"
 #include "reflection.hpp"
 
 namespace kengine {
