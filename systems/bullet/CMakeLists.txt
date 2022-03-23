@@ -1,6 +1,6 @@
 set(name kengine_bullet)
 
-putils_conan(bullet3/2.88@bincrafters/stable)
+putils_conan(bullet3/3.21)
 
 file(GLOB src *.cpp *.hpp)
 add_library(${name} STATIC ${src})
