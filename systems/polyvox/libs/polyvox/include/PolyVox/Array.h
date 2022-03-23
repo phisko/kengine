@@ -71,8 +71,8 @@ namespace PolyVox
 		}
 
 		// These are deleted to avoid accidental copying.
-		Array<noOfDims, ElementType>(const Array<noOfDims, ElementType>&) = delete;
-		Array<noOfDims, ElementType>& operator=(const Array<noOfDims, ElementType>&) = delete;
+		Array(const Array<noOfDims, ElementType>&) = delete;
+		Array& operator=(const Array<noOfDims, ElementType>&) = delete;
 
 		~Array()
 		{
