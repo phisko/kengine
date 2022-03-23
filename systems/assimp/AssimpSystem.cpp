@@ -1,16 +1,19 @@
+// assimp
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+// stb
 #include <stb_image.h>
 
+// local
 #include "AssimpSystem.hpp"
 #include "kengine.hpp"
-
 #include "AssImpShader.hpp"
 #include "AssImpShadowMap.hpp"
 #include "AssImpShadowCube.hpp"
 
+// kengine data
 #include "data/AdjustableComponent.hpp"
 #include "data/AnimationComponent.hpp"
 #include "data/AnimationFilesComponent.hpp"
@@ -24,9 +27,11 @@
 #include "data/SkeletonComponent.hpp"
 #include "data/TextureDataComponent.hpp"
 
+// kengine functions
 #include "functions/Execute.hpp"
 #include "functions/OnEntityCreated.hpp"
 
+// kengine helpers
 #include "helpers/assertHelper.hpp"
 #include "helpers/matrixHelper.hpp"
 #include "helpers/resourceHelper.hpp"
@@ -34,10 +39,11 @@
 #include "helpers/logHelper.hpp"
 #include "AssImpHelper.hpp"
 
+// putils
 #include "opengl/Program.hpp"
-
 #include "file_extension.hpp"
 #include "on_scope_exit.hpp"
+#include "string.hpp"
 #include "imgui.h"
 
 namespace kengine::assimp {
@@ -305,9 +311,9 @@ namespace kengine::assimp {
 
 				aiColor3D color{ 0.f, 0.f, 0.f };
 				material->Get(AI_MATKEY_COLOR_DIFFUSE, color);
-				meshTextures.diffuseColor = { color.r, color.g, color.b };
+				meshTextures.diffuseColor = putils::NormalizedColor{ color.r, color.g, color.b };
 				material->Get(AI_MATKEY_COLOR_SPECULAR, color);
-				meshTextures.specularColor = { color.r, color.g, color.b };
+				meshTextures.specularColor = putils::NormalizedColor{ color.r, color.g, color.b };
 			}
 			else
 				kengine_assert_failed("Unkown material");

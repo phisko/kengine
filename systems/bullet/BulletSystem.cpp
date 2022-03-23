@@ -48,13 +48,13 @@ namespace putils {
 }
 
 namespace kengine::bullet {
-	struct impl {
-		static inline struct {
-			bool enableDebug = false;
-			bool editorMode = false;
-			float gravity = 1.f;
-		} adjustables;
+    static struct {
+        bool enableDebug = false;
+        bool editorMode = false;
+        float gravity = 1.f;
+    } adjustables;
 
+    struct impl {
 		static inline btDefaultCollisionConfiguration collisionConfiguration;
 		static inline btCollisionDispatcher dispatcher{ &collisionConfiguration };
 		static inline btDbvtBroadphase overlappingPairCache;

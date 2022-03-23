@@ -21,7 +21,7 @@ namespace kengine::onclick {
 
 			kengine_logf(Log, "OnClickSystem", "Click in { %f, %f }", coords.x, coords.y);
 
-			for (const auto & [e, getEntity] : entities.with<functions::GetEntityInPixel>()) {
+			for (const auto & [_, getEntity] : entities.with<functions::GetEntityInPixel>()) {
 				const auto id = getEntity(window, coords);
 				if (id == INVALID_ID)
 					continue;
