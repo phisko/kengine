@@ -4,12 +4,21 @@
 struct logHelper : KengineTest {};
 
 TEST_F(logHelper, logHelper) {
-    std::vector<kengine::LogEvent> output;
+    struct Event {
+        kengine::LogSeverity severity;
+        std::string category;
+        std::string message;
+    };
+    std::vector<Event> output;
 
     kengine::entities += [&](kengine::Entity & e) {
         e += kengine::functions::Log{
             [&](const kengine::LogEvent & log) {
-                output.push_back(log);
+                output.push_back({
+                    .severity = log.severity,
+                    .category = log.category,
+                    .message = log.message
+                });
             }
         };
     };
@@ -20,10 +29,10 @@ TEST_F(logHelper, logHelper) {
     EXPECT_EQ(output.size(), 2);
 
     EXPECT_EQ(output[0].severity, kengine::LogSeverity::Verbose);
-    EXPECT_STREQ(output[0].category, "Category");
-    EXPECT_STREQ(output[0].message, "Message");
+    EXPECT_EQ(output[0].category, "Category");
+    EXPECT_EQ(output[0].message, "Message");
 
     EXPECT_EQ(output[1].severity, kengine::LogSeverity::Warning);
-    EXPECT_STREQ(output[1].category, "OtherCategory");
-    EXPECT_STREQ(output[1].message, "OtherMessage");
+    EXPECT_EQ(output[1].category, "OtherCategory");
+    EXPECT_EQ(output[1].message, "OtherMessage");
 }
