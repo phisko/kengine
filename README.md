@@ -50,6 +50,8 @@ git clone https://github.com/phisko/kengine --recursive
 
 Alternatively, the entire source code can be found in ZIP form in the latest release.
 
+The engine has been tested on Windows with MSVC and MinGW. MinGW is a bit finnicky, as some build configurations simply don't work. This is mostly due to external dependencies pulled from [conan](https://conan.io/), which could be built from source in order to fix the errors. At the time of writing I don't have a personal need for it, so I haven't gone out of my way to do so.
+
 ## C++ version
 
 The engine requires a **C++17** compiler.
@@ -316,11 +318,15 @@ In all following descriptions, the "parent" `Component` refers to the `Component
 
 #### 2D Graphics
 * [SFMLSystem](systems/sfml/SFMLSystem.md): displays entities in an SFML render window
+        
+    ⬆ ⚠ Doesn't compile on MinGW in Release ⚠ ⬆
 
 #### 3D Graphics
 * [OpenGLSystem](systems/opengl/OpenGLSystem.md): displays entities in an OpenGL render window
 * [OpenGLSpritesSystem](systems/opengl_sprites/OpenGLSpritesSystem.md): loads sprites and provides shaders to render them 
 * [AssimpSystem](systems/assimp/AssimpSystem.md): loads 3D models using the assimp library, animates them and provides shaders to render them
+        
+    ⬆ ⚠ Doesn't compile on MinGW in Debug ⚠ ⬆
 * [PolyVoxSystem](systems/polyvox/PolyVoxSystem.md): generates 3D models based on `PolyVoxComponents` and provides shaders to render them
 * [MagicaVoxelSystem](systems/polyvox/MagicaVoxelSystem.md): loads 3D models in the MagicaVoxel ".vox" format, which can then be drawn by the `PolyVoxSystem`'s shader
 * [GLFWSystem](systems/glfw/GLFWSystem.md): creates GLFW windows and handles their input
