@@ -92,7 +92,7 @@ namespace kengine {
 				const putils::string<256> binaryFile("%s.bin", f);
 
 				if (std::filesystem::exists(binaryFile.c_str())) {
-					kengine_logf(Log, "MagicaVoxelSystem/loadModel", "Binary file exists, loading it");
+					kengine_log(Log, "MagicaVoxelSystem/loadModel", "Binary file exists, loading it");
 					loadBinaryModel(e, binaryFile.c_str());
 					return;
 				}
