@@ -54,7 +54,7 @@ The engine has been tested on Windows with MSVC and MinGW. MinGW is a bit finnic
 
 ## C++ version
 
-The engine requires a **C++17** compiler.
+The engine requires a **C++20** compiler.
 
 ## Members
 
