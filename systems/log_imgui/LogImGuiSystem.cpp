@@ -92,7 +92,7 @@ namespace kengine {
 
 				kengine_log(Verbose, "Execute", "LogImGuiSystem");
 
-				if (ImGui::Begin("Log")) {
+				if (ImGui::Begin("Log", g_enabled)) {
 					drawFilters();
 					drawFilteredEvents();
 				}
