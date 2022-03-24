@@ -2,7 +2,7 @@
 
 #include <vector>
 #include <GL/glew.h>
-#include <GL/GL.h>
+#include <GL/gl.h>
 #include "Point.hpp"
 #include "opengl/RAII.hpp"
 #include "helpers/assertHelper.hpp"

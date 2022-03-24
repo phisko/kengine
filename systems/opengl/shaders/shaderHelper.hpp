@@ -1,7 +1,7 @@
 #pragma once
 
 #include "GL/glew.h"
-#include "GL/GL.h"
+#include "GL/gl.h"
 
 #include <cmath>
 #include <glm/glm.hpp>

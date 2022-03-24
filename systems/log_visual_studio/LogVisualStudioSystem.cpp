@@ -16,6 +16,7 @@
 namespace kengine {
 	EntityCreator * LogVisualStudioSystem() noexcept {
 		return [](Entity & e) noexcept {
+#ifdef _WIN32
 			auto & severityControl = e.attach<LogSeverityControl>();
             severityControl.severity = logHelper::parseCommandLineSeverity();
 
@@ -47,6 +48,7 @@ namespace kengine {
 					OutputDebugStringA(s.str().c_str());
 				}
 			};
+#endif
 		};
 	}
 }

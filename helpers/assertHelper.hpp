@@ -19,7 +19,7 @@
 #  include "dbghelp.h"
 #  define kengine_debug_break DebugBreak()
 # else
-#  define kengine_debub_break (void)0
+#  define kengine_debug_break __builtin_trap()
 # endif
 
 #include "concatenate.hpp"

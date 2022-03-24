@@ -1,5 +1,5 @@
 #include <GL/glew.h>
-#include <GL/GL.h>
+#include <GL/gl.h>
 
 #include "ShadowMapShader.hpp"
 #include "data/LightComponent.hpp"
