@@ -1,9 +1,12 @@
 #include "CameraHelper.hpp"
 
+// kengine
 #include "data/ViewportComponent.hpp"
 #include "data/WindowComponent.hpp"
 #include "data/OnScreenComponent.hpp"
-#include "magic_enum.hpp"
+
+// putils
+#include <magic_enum.hpp>
 
 namespace kengine::cameraHelper {
 	ViewportInfo getViewportForPixel(EntityID windowID, const putils::Point2ui & pixel) noexcept {
@@ -59,7 +62,7 @@ namespace kengine::cameraHelper {
             case OnScreenComponent::CoordinateType::ScreenPercentage:
                 return rect;
             default:
-                static_assert(putils::magic_enum::enum_count<OnScreenComponent::CoordinateType>() == 2);
+                static_assert(magic_enum::enum_count<OnScreenComponent::CoordinateType>() == 2);
                 return rect;
         }
     }

@@ -357,7 +357,7 @@ namespace {
 							break;
 						}
 						default:
-							static_assert(putils::magic_enum::enum_count<ElementType>() == 4);
+							static_assert(magic_enum::enum_count<ElementType>() == 4);
 							kengine_assert_failed("Unknown type");
 							break;
 					}

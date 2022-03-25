@@ -4,11 +4,14 @@
 # define KENGINE_ADJUSTABLE_NAME_MAX_LENGTH 64
 #endif
 
+// stl
 #include <variant>
 #include <vector>
+
+// putils
+#include <magic_enum.hpp>
 #include "string.hpp"
 #include "Color.hpp"
-#include "magic_enum.hpp"
 #include "lengthof.hpp"
 
 namespace kengine {
@@ -63,12 +66,12 @@ namespace kengine {
 
 			template<typename E>
 			static const char ** getEnumNamesImpl() noexcept {
-				static putils::string<64> names[putils::magic_enum::enum_count<E>()];
+				static putils::string<64> names[magic_enum::enum_count<E>()];
 				static const char * ret[putils::lengthof(names)];
 				static bool first = true;
 				if (first) {
 					for (size_t i = 0; i < putils::lengthof(names); ++i) {
-						names[i] = putils::magic_enum::enum_names<E>()[i];
+						names[i] = magic_enum::enum_names<E>()[i];
 						ret[i] = names[i];
 					}
 					first = false;
@@ -80,14 +83,14 @@ namespace kengine {
 			Value(const char * name, E * enumType) noexcept : name(name), intStorage((int *)enumType), type(Type::Int) {
 				static_assert(std::is_enum_v<E> && std::is_same_v<std::underlying_type_t<E>, int>);
 				getEnumNames = getEnumNamesImpl<E>;
-				enumCount = putils::magic_enum::enum_count<E>();
+				enumCount = magic_enum::enum_count<E>();
 			}
 
 			template<typename E>
 			Value(const char * name, E enumType) noexcept : name(name), intStorage((int)enumType), type(Type::Int) {
 				static_assert(std::is_enum_v<E> && std::is_same_v<std::underlying_type_t<E>, int>);
 				getEnumNames = getEnumNamesImpl<E>();
-				enumCount = putils::magic_enum::enum_count<E>();
+				enumCount = magic_enum::enum_count<E>();
 			}
 
 			string name;

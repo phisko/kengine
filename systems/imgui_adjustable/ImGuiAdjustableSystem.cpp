@@ -1,22 +1,27 @@
 #include "ImGuiAdjustableSystem.hpp"
 #include "kengine.hpp"
 
+// stl
 #include <fstream>
 
+// kengine data
 #include "data/AdjustableComponent.hpp"
 #include "data/ImGuiToolComponent.hpp"
 #include "data/NameComponent.hpp"
 
+// kengine functions
 #include "functions/Execute.hpp"
 #include "functions/OnTerminate.hpp"
 #include "functions/OnEntityCreated.hpp"
 
+// kengine helpers
 #include "helpers/logHelper.hpp"
 
+// putils
+#include <magic_enum.hpp>
 #include "imgui.h"
 #include "vector.hpp"
 #include "to_string.hpp"
-#include "magic_enum.hpp"
 #include "visit.hpp"
 #include "IniFile.hpp"
 #include "static_assert.hpp"
@@ -260,7 +265,7 @@ namespace kengine::imgui_adjustable {
                     break;
                 }
                 default: {
-                    static_assert(putils::magic_enum::enum_count<AdjustableComponent::Value::Type>() == 5); // + 1 for Invalid
+                    static_assert(magic_enum::enum_count<AdjustableComponent::Value::Type>() == 5); // + 1 for Invalid
                     kengine_assert_failed("Unknown AdjustableComponent::Value type");
                     break;
                 }
@@ -327,7 +332,7 @@ namespace kengine::imgui_adjustable {
                     break;
                 }
                 default: {
-                    static_assert(putils::magic_enum::enum_count<AdjustableComponent::Value::Type>() == 5); // + 1 for Invalid
+                    static_assert(magic_enum::enum_count<AdjustableComponent::Value::Type>() == 5); // + 1 for Invalid
                     kengine_assert_failed("Unknown AdjustableComponent::Value type");
                     break;
                 }
@@ -378,7 +383,7 @@ namespace kengine::imgui_adjustable {
                             break;
                         }
                         default: {
-                            static_assert(putils::magic_enum::enum_count<AdjustableComponent::Value::Type>() == 5); // + 1 for Invalid
+                            static_assert(magic_enum::enum_count<AdjustableComponent::Value::Type>() == 5); // + 1 for Invalid
                             kengine_assert_failed("Unknown AdjustableComponent::Value type");
                             break;
                         }

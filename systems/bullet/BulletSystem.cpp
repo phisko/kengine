@@ -29,8 +29,8 @@
 #include "helpers/assertHelper.hpp"
 #include "helpers/logHelper.hpp"
 
-#include "termcolor.hpp"
-#include "magic_enum.hpp"
+#include <termcolor/termcolor.hpp>
+#include <magic_enum.hpp>
 
 #include "btBulletDynamicsCommon.h"
 #include "BulletCollision/CollisionDispatch/btGhostObject.h"
@@ -222,7 +222,7 @@ namespace kengine::bullet {
 					break;
 				}
 				default:
-					static_assert(putils::magic_enum::enum_count<ModelColliderComponent::Collider::Shape>() == 5);
+					static_assert(magic_enum::enum_count<ModelColliderComponent::Collider::Shape>() == 5);
 					return;
 				}
 			}
@@ -418,7 +418,7 @@ namespace kengine::bullet {
 
 			void draw3dText(const btVector3 & location, const char * textString) override {}
 
-			void reportErrorWarning(const char * warningString) override { std::cerr << putils::termcolor::red << "[Bullet] " << warningString << putils::termcolor::reset; }
+			void reportErrorWarning(const char * warningString) override { std::cerr << termcolor::red << "[Bullet] " << warningString << termcolor::reset; }
 
 			void setDebugMode(int debugMode) override {}
 			int getDebugMode() const override { return DBG_DrawWireframe; }

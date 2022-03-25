@@ -199,7 +199,7 @@ namespace kengine::assimp {
 			if (model.importer->GetScene() == nullptr) {
 				const auto scene = model.importer->ReadFile(f, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals /*| aiProcess_OptimizeMeshes*/ | aiProcess_JoinIdenticalVertices);
 				if (scene == nullptr || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || scene->mRootNode == nullptr) {
-					std::cerr << putils::termcolor::red << model.importer->GetErrorString() << '\n' << putils::termcolor::reset;
+					std::cerr << termcolor::red << model.importer->GetErrorString() << '\n' << termcolor::reset;
 					kengine_assert_failed(putils::string<1024>("Error loading %s: %s", f, model.importer->GetErrorString()).c_str());
 					return false;
 				}

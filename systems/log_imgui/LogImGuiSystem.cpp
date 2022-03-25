@@ -1,21 +1,26 @@
 #include "LogImGuiSystem.hpp"
 
+// stl
 #include <mutex>
 #include <list>
 
 #include "kengine.hpp"
 
+// kengine data
 #include "data/AdjustableComponent.hpp"
 #include "data/ImGuiToolComponent.hpp"
 #include "data/NameComponent.hpp"
 
+// kengine functions
 #include "functions/Log.hpp"
 #include "functions/Execute.hpp"
 
+// kengine helpers
 #include "helpers/logHelper.hpp"
 
+// putils
+#include <magic_enum.hpp>
 #include "thread_name.hpp"
-#include "magic_enum.hpp"
 #include "lengthof.hpp"
 #include "imgui.h"
 
@@ -31,7 +36,7 @@ namespace detail {
 static bool * g_enabled;
 
 static struct {
-	bool severities[putils::magic_enum::enum_count<kengine::LogSeverity>()];
+	bool severities[magic_enum::enum_count<kengine::LogSeverity>()];
 	char categorySearch[4096] = "";
 	char threadSearch[4096] = "";
 } g_filters;
@@ -101,7 +106,7 @@ namespace kengine {
 
 			static void drawFilters() noexcept {
 				bool changed = false;
-				for (const auto & [severity, name] : putils::magic_enum::enum_entries<LogSeverity>())
+				for (const auto & [severity, name] : magic_enum::enum_entries<LogSeverity>())
 					if (ImGui::Checkbox(putils::string<32>(name), &g_filters.severities[(int)severity]))
 						changed = true;
 
@@ -150,7 +155,7 @@ namespace kengine {
 
 					for (const auto& event : g_filteredEvents) {
 						ImGui::TableNextColumn();
-						ImGui::Text(putils::string<1024>(putils::magic_enum::enum_name(event.severity)));
+						ImGui::Text(putils::string<1024>(magic_enum::enum_name(event.severity)));
 						ImGui::TableNextColumn();
 						ImGui::Text(event.thread.c_str());
 						ImGui::TableNextColumn();

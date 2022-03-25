@@ -1,14 +1,14 @@
 #pragma once
 
+#include <nlohmann/json.hpp>
 #include "BaseFunction.hpp"
-#include "json.hpp"
 
 namespace kengine {
 	class Entity;
 
 	namespace meta {
 		struct LoadFromJSON : functions::BaseFunction<
-			void(const putils::json &, Entity &)
+			void(const nlohmann::json &, Entity &)
 		> {};
 	}
 }

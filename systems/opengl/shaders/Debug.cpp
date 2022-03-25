@@ -1,14 +1,17 @@
 #include "Debug.hpp"
 #include "kengine.hpp"
 
+// kengine data
 #include "data/DebugGraphicsComponent.hpp"
 #include "data/TransformComponent.hpp"
 
+// kengine helpers
 #include "helpers/cameraHelper.hpp"
 #include "shaderHelper.hpp"
 #include "ApplyTransparencySrc.hpp"
 
-#include "magic_enum.hpp"
+// putils
+#include <magic_enum.hpp>
 
 #pragma region GLSL
 static const char * vert = R"(
@@ -134,7 +137,7 @@ namespace kengine::opengl::shaders {
 					// TODO
 					break;
 				default:
-					static_assert(putils::magic_enum::enum_count<ElementType>() == 4);
+					static_assert(magic_enum::enum_count<ElementType>() == 4);
 					break;
 				}
 			}

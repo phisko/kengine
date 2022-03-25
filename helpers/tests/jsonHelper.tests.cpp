@@ -23,7 +23,7 @@ struct jsonHelper : KengineTest {
     const char * expectedName = "hello";
     const putils::Point3f expectedPos = { 42.f, -42.f, 84.f };
     const putils::Point3f expectedSize = { 1.f, 2.f, 3.f };
-    putils::json json;
+    nlohmann::json json;
 };
 
 TEST_F(jsonHelper, createEntity) {

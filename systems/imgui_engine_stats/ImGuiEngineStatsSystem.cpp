@@ -1,22 +1,28 @@
 #include "ImGuiEngineStatsSystem.hpp"
 
+// stl
 #include <fstream>
 
 #include "kengine.hpp"
 #include "impl/GlobalState.hpp"
 
+// kengine data
 #include "data/NameComponent.hpp"
 #include "data/ImGuiToolComponent.hpp"
 
+// kengine functions
 #include "functions/Execute.hpp"
 
+// kengine meta
 #include "meta/Count.hpp"
 #include "meta/Has.hpp"
 
+// kengine helpers
 #include "helpers/sortHelper.hpp"
 #include "helpers/logHelper.hpp"
 
-#include "json.hpp"
+// putils
+#include <nlohmann/json.hpp>
 #include "imgui.h"
 
 #ifndef KENGINE_STATS_TRACKED_COLLECTIONS_SAVE_FILE
@@ -190,10 +196,10 @@ namespace kengine {
 					return;
 				}
 
-				putils::json fileJSON;
+				nlohmann::json fileJSON;
 
 				for (const auto & collection : collections) {
-					putils::json collectionJSON;
+					nlohmann::json collectionJSON;
 					for (const auto id : collection.components) {
 						const auto & name = entities[id].get<NameComponent>();
 						collectionJSON.push_back(name.name.c_str());
@@ -213,7 +219,7 @@ namespace kengine {
 				if (!f)
 					return ret;
 
-				const auto fileJSON = putils::json::parse(f);
+				const auto fileJSON = nlohmann::json::parse(f);
 				for (const auto & collectionJSON : fileJSON) {
 					Collection collection;
 

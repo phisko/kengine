@@ -289,7 +289,7 @@ In all following descriptions, the "parent" `Component` refers to the `Component
 * [ForEachEntityWithout](components/meta/ForEachEntity.md): iterates on all entities without the parent `Component`
 * [Get](components/meta/Get.md): returns a pointer to the parent `Component` attached to an `Entity`
 * [Has](components/meta/Has.md): returns whether an `Entity` has the parent `Component`
-* [LoadFromJSON](components/meta/LoadFromJSON.md): initializes the parent `Component` attached to an `Entity` from a [putils::json](https://github.com/nlohmann/json) object
+* [LoadFromJSON](components/meta/LoadFromJSON.md): initializes the parent `Component` attached to an `Entity` from a [nlohmann::json](https://github.com/nlohmann/json) object
 * [MatchString](components/meta/MatchString.md): returns whether the parent `Component` attached to an `Entity` matches a given string
 * [SaveToJSON](components/meta/SaveToJSON.md): serializes the parent `Component` into a JSON object
 * [Size](components/meta/Size.md): contains the size of the parent `Component`

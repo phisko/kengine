@@ -12,7 +12,7 @@ namespace kengine {
 				using Type = putils_wrapped_type(t);
 				const auto comp = e.tryGet<Type>();
 				if (!comp)
-					return putils::json{};
+					return nlohmann::json{};
 				return putils::reflection::toJSON(*comp);
 			}
 		);

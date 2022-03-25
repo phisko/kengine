@@ -5,7 +5,7 @@
 ## Prototype
 
 ```cpp
-void (const putils::json & json, Entity & e);
+void (const nlohmann::json & json, Entity & e);
 ```
 
 ### Parameters

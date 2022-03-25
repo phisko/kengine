@@ -10,7 +10,7 @@
 #include "helpers/logHelper.hpp"
 
 // putils
-#include "magic_enum.hpp"
+#include <magic_enum.hpp>
 #include "thread_name.hpp"
 
 namespace kengine {
@@ -36,7 +36,7 @@ namespace kengine {
 					const auto & threadName = putils::get_thread_name();
 					if (!threadName.empty())
 						s += '{' + threadName + "}\t";
-					s += putils::magic_enum::enum_name<LogSeverity>(event.severity);
+					s += magic_enum::enum_name<LogSeverity>(event.severity);
 					s += "\t[";
 					s += event.category;
 					s += "]\t";

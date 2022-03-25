@@ -8,7 +8,7 @@
 
 #ifndef KENGINE_NDEBUG
 # include <iostream>
-# include "termcolor.hpp"
+# include <termcolor/termcolor.hpp>
 # include "reflection.hpp"
 #endif
 
@@ -74,9 +74,9 @@ namespace kengine::impl {
 			}
 
 #ifdef KENGINE_DEBUG_PRINT_COMPONENT_ID
-			std::cout << putils::termcolor::cyan;
+			std::cout << termcolor::cyan;
 			std::cout << putils::reflection::get_class_name<Comp>() << '\t' << ptr->id << '\n';
-			std::cout << putils::termcolor::reset;
+			std::cout << termcolor::reset;
 #endif
 
 			return ptr;

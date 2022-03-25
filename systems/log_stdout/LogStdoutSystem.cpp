@@ -11,8 +11,8 @@
 #include "helpers/logHelper.hpp"
 
 // putils
-#include "magic_enum.hpp"
-#include "termcolor.hpp"
+#include <magic_enum.hpp>
+#include <termcolor/termcolor.hpp>
 #include "thread_name.hpp"
 
 namespace kengine {
@@ -36,17 +36,17 @@ namespace kengine {
 					const std::lock_guard lock(mutex);
 
 					if (event.severity == LogSeverity::Warning)
-						std::cout << putils::termcolor::yellow;
+						std::cout << termcolor::yellow;
 					else if (event.severity == LogSeverity::Error)
-						std::cout << putils::termcolor::red;
+						std::cout << termcolor::red;
 
 					const auto & threadName = putils::get_thread_name();
 					if (!threadName.empty())
 						std::cout << '{' << threadName << "}\t";
 
-					std::cout << putils::magic_enum::enum_name<LogSeverity>(event.severity) << "\t[" << event.category << "]\t" << event.message << '\n';
+					std::cout << magic_enum::enum_name<LogSeverity>(event.severity) << "\t[" << event.category << "]\t" << event.message << '\n';
 
-					std::cout << putils::termcolor::reset;
+					std::cout << termcolor::reset;
 				}
 			};
 		};

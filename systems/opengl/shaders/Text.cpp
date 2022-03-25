@@ -1,20 +1,24 @@
-#include <ft2build.h>
-#include FT_FREETYPE_H
-
 #include "Text.hpp"
 #include "kengine.hpp"
 
+// freetype
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
+// kengine data
 #include "data/TextComponent.hpp"
 #include "data/TransformComponent.hpp"
 
+// kengine helpers
 #include "helpers/cameraHelper.hpp"
 #include "helpers/assertHelper.hpp"
 #include "shaderHelper.hpp"
 
 #include "ApplyTransparencySrc.hpp"
 
-#include "termcolor.hpp"
-#include "magic_enum.hpp"
+// putils
+#include <termcolor/termcolor.hpp>
+#include <magic_enum.hpp>
 
 static FT_Library g_ft;
 static GLuint g_vao, g_vbo;
@@ -91,7 +95,7 @@ namespace kengine::opengl::shaders {
 
 		auto createCharacter(unsigned long c) noexcept {
 			if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
-				std::cerr << putils::termcolor::red << "[FreeType] Error loading glyph `" << c << "`\n" << putils::termcolor::reset;
+				std::cerr << termcolor::red << "[FreeType] Error loading glyph `" << c << "`\n" << termcolor::reset;
 				return characters.end();
 			}
 
@@ -220,7 +224,7 @@ namespace kengine::opengl::shaders {
 						break;
 					case TextComponent2D::CoordinateType::ScreenPercentage:
 					default:
-						static_assert(putils::magic_enum::enum_count<TextComponent2D::CoordinateType>() == 2);
+						static_assert(magic_enum::enum_count<TextComponent2D::CoordinateType>() == 2);
 						break;
 					}
 				}
@@ -283,7 +287,7 @@ namespace kengine::opengl::shaders {
 						x = -size.x;
 						break;
 					default:
-						static_assert(putils::magic_enum::enum_count<TextComponent::Alignment>() == 3);
+						static_assert(magic_enum::enum_count<TextComponent::Alignment>() == 3);
 					}
 				}
 
@@ -323,12 +327,12 @@ namespace kengine::opengl::shaders {
 				Font font;
 
 				if (FT_New_Face(g_ft, file, 0, &font.face)) {
-					std::cerr << putils::termcolor::red << "[FreeType] Error loading font `" << file << "`\n" << putils::termcolor::reset;
+					std::cerr << termcolor::red << "[FreeType] Error loading font `" << file << "`\n" << termcolor::reset;
 					return g_fonts[file].sizes.end();
 				}
 
 				if (FT_Set_Pixel_Sizes(font.face, 0, (FT_UInt)size)) {
-					std::cerr << putils::termcolor::red << "[FreeType] Error setting size `" << size << "` for font `" << file << "`\n" << putils::termcolor::red;
+					std::cerr << termcolor::red << "[FreeType] Error setting size `" << size << "` for font `" << file << "`\n" << termcolor::red;
 					return g_fonts[file].sizes.end();
 				}
 

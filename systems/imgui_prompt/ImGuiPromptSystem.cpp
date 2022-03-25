@@ -113,7 +113,7 @@ namespace kengine::imgui_prompt {
 			static bool first = true;
 			if (putils::reflection::imguiEnumCombo("##Language", selectedLanguage) || first) {
 				history.addLine(
-					std::string(putils::magic_enum::enum_names<Language>()[(int)selectedLanguage]),
+					std::string(magic_enum::enum_names<Language>()[(int)selectedLanguage]),
 					true,
 					putils::NormalizedColor{ 1.f, 1.f, 0.f }
 				);
@@ -141,7 +141,7 @@ namespace kengine::imgui_prompt {
 				evalPython();
 				break;
 			default:
-				static_assert(putils::magic_enum::enum_count<Language>() == 2);
+				static_assert(magic_enum::enum_count<Language>() == 2);
 			}
 		}
 
