@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ScriptLanguageHelper.hpp"
+#include "scriptLanguageHelper.hpp"
 #include "data/LuaStateComponent.hpp"
 #include "lua_helper.hpp"
 
