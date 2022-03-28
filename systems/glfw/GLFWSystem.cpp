@@ -88,7 +88,8 @@ namespace kengine {
 					break;
 				}
 
-				glfwInit();
+				const auto ret = glfwInit();
+                kengine_assert(ret == GLFW_TRUE);
 				execute(0.f); // init already existing windows
 			}
 
