@@ -53,7 +53,7 @@ float calcShadow(vec3 worldPos, vec3 normal, vec3 lightDir) {
 	namespace CSM {
 		namespace Frag {
 			const char * glsl = R"(
-#version 330
+#version 450
 
 const int CSM_COUNT = )" putils_macro_as_string(KENGINE_MAX_CSM_COUNT) R"(;
 uniform sampler2D shadowMap[CSM_COUNT];
