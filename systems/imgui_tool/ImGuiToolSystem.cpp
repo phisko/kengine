@@ -89,7 +89,7 @@ namespace kengine::imgui_tool {
 			}
 			const auto sorted = sortHelper::getNameSortedEntities<KENGINE_IMGUI_MAX_TOOLS, ImGuiToolComponent>();
 			for (const auto & [e, name, tool] : sorted)
-				f << name->name << ';' << std::boolalpha << tool->enabled << std::noboolalpha << '\n';
+				f << name->name << ';' << std::boolalpha << tool->enabled << std::noboolalpha << std::endl;
 			f.flush();
 		}
 

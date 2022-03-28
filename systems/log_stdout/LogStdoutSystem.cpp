@@ -44,7 +44,7 @@ namespace kengine {
 					if (!threadName.empty())
 						std::cout << '{' << threadName << "}\t";
 
-					std::cout << magic_enum::enum_name<LogSeverity>(event.severity) << "\t[" << event.category << "]\t" << event.message << '\n';
+					std::cout << magic_enum::enum_name<LogSeverity>(event.severity) << "\t[" << event.category << "]\t" << event.message << std::endl;
 
 					std::cout << termcolor::reset;
 				}

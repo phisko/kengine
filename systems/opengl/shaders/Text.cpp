@@ -95,7 +95,7 @@ namespace kengine::opengl::shaders {
 
 		auto createCharacter(unsigned long c) noexcept {
 			if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
-				std::cerr << termcolor::red << "[FreeType] Error loading glyph `" << c << "`\n" << termcolor::reset;
+				std::cerr << termcolor::red << "[FreeType] Error loading glyph `" << c << '`' << std::endl << termcolor::reset;
 				return characters.end();
 			}
 
@@ -327,12 +327,12 @@ namespace kengine::opengl::shaders {
 				Font font;
 
 				if (FT_New_Face(g_ft, file, 0, &font.face)) {
-					std::cerr << termcolor::red << "[FreeType] Error loading font `" << file << "`\n" << termcolor::reset;
+					std::cerr << termcolor::red << "[FreeType] Error loading font `" << file << '`' << std::endl << termcolor::reset;
 					return g_fonts[file].sizes.end();
 				}
 
 				if (FT_Set_Pixel_Sizes(font.face, 0, (FT_UInt)size)) {
-					std::cerr << termcolor::red << "[FreeType] Error setting size `" << size << "` for font `" << file << "`\n" << termcolor::red;
+					std::cerr << termcolor::red << "[FreeType] Error setting size `" << size << "` for font `" << file << '`' << std::endl << termcolor::red;
 					return g_fonts[file].sizes.end();
 				}
 

@@ -171,7 +171,7 @@ To call a function component, one can use its `operator()` or its `call` functio
 ```cpp
 // have an Entity e
 e += functions::Execute{ // Attach a function
-    [](float deltaTime) { std::cout << "Yay!\n"; }
+    [](float deltaTime) { std::cout << "Yay!" << std::endl; }
 };
 const auto & execute = e.get<functions::Execute>(); // Get the function
 execute(0.f); // Call it with its parameters
@@ -200,7 +200,7 @@ auto e = entities.create([](Entity & e) { // Create an entity with a TransformCo
 // For each entity with a NameComponent and a Has meta component
 for (const auto & [type, name, has] : entities.with<NameComponent, meta::Has>())
     if (has(e)) // if `e` has the component represented by `type`
-        std::cout << e.id << " has a " << name.name << '\n';
+        std::cout << e.id << " has a " << name.name << std::endl;
 ```
 
 ## Samples
@@ -455,17 +455,17 @@ auto DebugSystem() {
 // This could be defined as a lambda in DebugSystem but is moved out here for readability
 static float execute(float deltaTime) {
     for (const auto & [e, transform, lua] : kengine::entities.with<kengine::TransformComponent, kengine::LuaComponent>()) {
-        std::cout << "Entity " << e.id << '\n';
+        std::cout << "Entity " << e.id << std::endl;
         std::cout << "\tTransform: "
             << transform.boundingBox.position.x << ' '
             << transform.boundingBox.position.y << ' '
-            << transform.boundingBox.position.z << '\n';
+            << transform.boundingBox.position.z << std::endl;
 
-        std::cout << "\tScripts:" << '\n';
+        std::cout << "\tScripts:" << std::endl;
         for (const auto & script : lua.scripts)
-            std::cout << "\t\t[" << script << "]\n";
+            std::cout << "\t\t[" << script << "]" << std::endl;
 
-        std::cout << '\n';
+        std::cout << std::endl;
     }
 }
 

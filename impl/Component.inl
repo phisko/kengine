@@ -75,7 +75,7 @@ namespace kengine::impl {
 
 #ifdef KENGINE_DEBUG_PRINT_COMPONENT_ID
 			std::cout << termcolor::cyan;
-			std::cout << putils::reflection::get_class_name<Comp>() << '\t' << ptr->id << '\n';
+			std::cout << putils::reflection::get_class_name<Comp>() << '\t' << ptr->id << std::endl;
 			std::cout << termcolor::reset;
 #endif
 

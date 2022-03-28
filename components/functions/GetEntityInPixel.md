@@ -33,7 +33,7 @@ entities += [](Entity & e) {
     input.onMouseButton = [](EntityID window, int button, const putils::Point2f & pixel, bool pressed) {
         for (const auto & [e, getEntity] : entities.with<functions::GetEntityInPixel>()) {
             const auto id = getEntity(window, pixel);
-            std::cout << id << '\n';
+            std::cout << id << std::endl;
         }
     };
 

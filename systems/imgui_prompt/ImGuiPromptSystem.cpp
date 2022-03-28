@@ -212,7 +212,7 @@ namespace kengine::imgui_prompt {
 			if (active)
 				history.addLine(std::move(line), false, color);
 			else
-				std::cout << line << '\n';
+				std::cout << line << std::endl;
 			return 0;
 		}
 

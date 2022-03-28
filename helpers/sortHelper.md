@@ -34,8 +34,8 @@ const auto sorted = sortHelper::getSortedEntities<64, NameComponent, TransformCo
 );
 
 for (const auto & [e, name, transform] : sorted) {
-    std::cout << name->name << '\n';
-    std::cout << transform->boundingBox << '\n';
+    std::cout << name->name << std::endl;
+    std::cout << transform->boundingBox << std::endl;
 }
 ```
 
@@ -61,7 +61,7 @@ If `MaxCount` is provided, the function returns a fixed-size `putils::vector` in
 const auto sorted = sortHelper::getNameSortedEntities<64, TransformComponent>();
 
 for (const auto & [e, name, transform] : sorted) {
-    std::cout << name->name << '\n';
-    std::cout << transform->boundingBox << '\n';
+    std::cout << name->name << std::endl;
+    std::cout << transform->boundingBox << std::endl;
 }
 ```
