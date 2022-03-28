@@ -172,7 +172,7 @@ namespace kengine::shaderHelper {
 			std::vector<glm::vec3> pts;
 			for (int i = 0; i < radialSlices; ++i) {
 				const auto rad = angInc * i;
-				const auto p = c + (e0 * cos(rad) + e1 * sin(rad)) * radius;
+				const auto p = c + (e0 * std::cos(rad) + e1 * std::sin(rad)) * radius;
 				pts.push_back(p);
 			}
 

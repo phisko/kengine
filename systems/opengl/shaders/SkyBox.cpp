@@ -1,14 +1,21 @@
 #include "SkyBox.hpp"
 #include "kengine.hpp"
 
+// stb
+namespace {
+#include <stb_image.c>
+}
+
+// kengine data
 #include "data/SkyBoxComponent.hpp"
 
+// kengine helpers
 #include "helpers/cameraHelper.hpp"
 #include "helpers/assertHelper.hpp"
 #include "shaderHelper.hpp"
 
+// putils
 #include "opengl/RAII.hpp"
-#include "stb_image.h"
 
 struct SkyBoxOpenGLComponent {
 	putils::gl::Texture textureID;
@@ -68,7 +75,7 @@ namespace kengine::opengl::shaders {
 
 		unsigned int i = 0;
 		putils::reflection::for_each_attribute(comp, [&i](const auto & attr) noexcept {
-			if constexpr (std::is_same<putils_typeof(member), SkyBoxComponent::string>()) {
+			if constexpr (std::is_same<putils_typeof(attr.member), SkyBoxComponent::string>()) {
 				int width, height, nrChannels;
 				const auto data = stbi_load(attr.member.c_str(), &width, &height, &nrChannels, 0);
 				kengine_assert(data != nullptr);
