@@ -8,6 +8,7 @@
 #include "kengine.hpp"
 #include "data/AdjustableComponent.hpp"
 #include "functions/Log.hpp"
+#include "helpers/commandLineHelper.hpp"
 #include "helpers/logHelper.hpp"
 
 // putils
@@ -18,15 +19,35 @@
 # define KENGINE_LOG_FILE_LOCATION "kengine.log"
 #endif
 
-namespace kengine {
-    namespace {
-        std::ofstream file(KENGINE_LOG_FILE_LOCATION);
-    }
+namespace {
+    // Command-line arguments
+    struct Options {
+        std::optional<std::string> logFile;
+    };
+}
 
+#define refltype Options
+putils_reflection_info {
+    putils_reflection_custom_class_name(Log file)
+    putils_reflection_attributes(
+        putils_reflection_attribute(logFile)
+    )
+};
+#undef refltype
+
+namespace kengine {
 	EntityCreator * LogFileSystem() noexcept {
 		return [](Entity & e) noexcept {
+            const auto options = kengine::parseCommandLine<Options>();
+
+            const char * fileName = options.logFile ?
+                    options.logFile->c_str() :
+                    KENGINE_LOG_FILE_LOCATION;
+
+            static std::ofstream file(fileName);
+
             if (!file) {
-                kengine_assert_failed("LogFileSystem couldn't open output file '%s'", KENGINE_LOG_FILE_LOCATION);
+                kengine_assert_failed("LogFileSystem couldn't open output file '%s'", fileName);
                 return;
             }
 
