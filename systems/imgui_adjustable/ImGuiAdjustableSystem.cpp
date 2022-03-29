@@ -148,6 +148,8 @@ namespace kengine::imgui_adjustable {
 			size_t next = 0;
 			while (next < s.size()) {
 				next = s.find(delim, previous);
+                if (next == string::npos)
+                    next = s.size();
 				ret.emplace_back(s.substr(previous, next - previous));
 				previous = next + 1;
 			}
