@@ -25,6 +25,11 @@ namespace kengine {
 
 	EntityCreator * LogFileSystem() noexcept {
 		return [](Entity & e) noexcept {
+            if (!file) {
+                kengine_assert_failed("LogFileSystem couldn't open output file '%s'", KENGINE_LOG_FILE_LOCATION);
+                return;
+            }
+
 			auto & severityControl = e.attach<LogSeverityControl>();
             severityControl.severity = logHelper::parseCommandLineSeverity();
 
