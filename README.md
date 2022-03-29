@@ -312,6 +312,7 @@ In all following descriptions, the "parent" `Component` refers to the `Component
 * [ImGuiToolSystem](systems/imgui_tool/ImGuiToolSystem.md): manages ImGui [tool windows](components/data/ImGuiToolComponent.md) through ImGui's MainMenuBar
 
 #### Logging
+* [LogFileSystem](systems/log_file/LogFileSystem.md): outputs logs to a file
 * [LogImGuiSystem](systems/log_imgui/LogImGuiSystem.md): outputs logs to an ImGui window
 * [LogStdoutSystem](systems/log_stdout/LogStdoutSystem.md): outputs logs to stdout
 * [LogVisualStudioSystem](systems/log_visual_studio/LogVisualStudioSystem.md): outputs logs to Visual Studio's output window
