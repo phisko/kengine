@@ -11,7 +11,7 @@
 
 namespace kengine::scriptLanguageHelper {
 	template<typename Func>
-	using function = putils::function<Func, KENGINE_SCRIPT_SYSTEM_MAX_FUNCTION_SIZE>;
+	using function = std::function<Func>;
 
 	template<typename Func, typename Func2>
 	void init(Func && registerFunction, Func2 && registerType) noexcept {
