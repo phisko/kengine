@@ -1,6 +1,9 @@
 
+#include "helpers/logHelper.hpp"
+
 namespace kengine::types{
 	void registerTypes() noexcept {
+		kengine_log(Log, "Init", "Registering types");
 
 		extern void registerkengineAdjustableComponent() noexcept;
 		registerkengineAdjustableComponent();

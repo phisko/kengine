@@ -116,9 +116,11 @@ def generate_registration(type):
 
 	open(out_path, 'w').write(generate_registration_headers(type) +
 '''#include "''' + type['header'] + '''"
+#include "helpers/logHelper.hpp"
 
 namespace ''' + args.namespace + '''{
 	void ''' + type['function_name'] + '''() noexcept {
+		kengine_log(Log, "Init/registerTypes", "Registering \'''' + type['type'] + '''\'");
 		''' + generate_registration_implementation(type) + '''
 	}
 }''')
@@ -157,8 +159,11 @@ for type in all_types:
 main_file = os.path.join(args.output, 'registerTypes')
 
 main_file_cpp = '''
+#include "helpers/logHelper.hpp"
+
 namespace ''' + args.namespace + '''{
 	void registerTypes() noexcept {
+		kengine_log(Log, "Init", "Registering types");
 '''
 
 for type in all_types:
