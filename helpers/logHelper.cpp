@@ -29,7 +29,7 @@ namespace kengine::logHelper {
         if (commandLineSeverity != std::nullopt)
             return *commandLineSeverity;
 
-        LogSeverity result;
+        LogSeverity result = LogSeverity::Log;
         for (const auto & [e, commandLine] : entities.with<CommandLineComponent>()) {
             const auto options = putils::parseArguments<Options>(commandLine.arguments);
             result = options.logLevel;
