@@ -88,6 +88,10 @@ namespace kengine {
 					break;
 				}
 
+                glfwSetErrorCallback([](int error, const char * desc) {
+                    kengine_logf(Error, "GLFW", "Error code: %d. Description: '%s'", error, desc);
+                });
+
 				const auto ret = glfwInit();
                 kengine_assert(ret == GLFW_TRUE);
 				execute(0.f); // init already existing windows
