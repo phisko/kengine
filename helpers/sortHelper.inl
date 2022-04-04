@@ -3,7 +3,7 @@
 #include "kengine.hpp"
 #include "data/NameComponent.hpp"
 #include "vector.hpp"
-#include "fwd.hpp"
+#include "meta/fwd.hpp"
 
 namespace kengine::sortHelper {
 	namespace detail {

@@ -2,7 +2,7 @@
 #include "helpers/typeHelper.hpp"
 #include "helpers/logHelper.hpp"
 #include "meta/for_each.hpp"
-#include "fwd.hpp"
+#include "meta/fwd.hpp"
 
 namespace kengine {
 	template<typename Meta, typename ... Comps, typename Func>

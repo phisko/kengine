@@ -36,12 +36,14 @@ if (MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /DNOMINMAX")
 endif()
 
-set(PUTILS_BUILD_TESTS ${KENGINE_BUILD_TESTS})
-set(PUTILS_BUILD_PSE ${KENGINE_SFML})
-set(PUTILS_BUILD_LUA ${KENGINE_LUA})
-set(PUTILS_BUILD_PYTHON ${KENGINE_PYTHON})
+set(PUTILS_TESTS ${KENGINE_TESTS})
+set(PUTILS_PSE ${KENGINE_SFML})
+set(PUTILS_LUA ${KENGINE_LUA})
+set(PUTILS_PYTHON ${KENGINE_PYTHON})
 set(PUTILS_NO_SHADER_DEBUG ${KENGINE_NO_SHADER_DEBUG})
-set(PUTILS_BUILD_OPENGL ${KENGINE_OPENGL})
+set(PUTILS_OPENGL ${KENGINE_OPENGL})
+set(PUTILS_IMGUI TRUE)
+set(PUTILS_PLUGIN_MANAGER TRUE)
 add_subdirectory(putils)
 
 # Add C++ macros
@@ -117,17 +119,19 @@ ADD_SYSTEM(KENGINE_SFML systems/sfml kengine_sfml)
 # Tests
 #
 
-if (KENGINE_BUILD_TESTS)
-    putils_conan(gtest/cci.20210126)
+if (KENGINE_TESTS)
+    set(test_exe_name kengine_tests)
 
-    file(GLOB_RECURSE test_src
+    file(GLOB test_src
             tests/*.tests.cpp
             helpers/tests/*.tests.cpp
             impl/tests/*.tests.cpp)
 
-    add_executable(kengine_tests ${test_src})
-    target_link_libraries(kengine_tests CONAN_PKG::gtest kengine)
+    add_executable(${test_exe_name} ${test_src})
+
+    putils_conan(gtest/cci.20210126)
+    target_link_libraries(${test_exe_name} CONAN_PKG::gtest kengine)
 
     include(GoogleTest)
-    gtest_discover_tests(kengine_tests)
+    gtest_discover_tests(${test_exe_name})
 endif()

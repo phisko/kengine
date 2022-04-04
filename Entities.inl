@@ -1,6 +1,6 @@
 #include "Entities.hpp"
 #include "functions/OnEntityCreated.hpp"
-#include "fwd.hpp"
+#include "meta/fwd.hpp"
 
 namespace kengine {
 	template<typename Func>
