@@ -7,10 +7,12 @@ file(GLOB src
 	${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
 )
 
+option(KENGINE_OPENGL_NO_DEBUG_TOOLS "Disable OpenGL debug tools" OFF)
 if (KENGINE_OPENGL_NO_DEBUG_TOOLS)
 	add_compile_definitions(KENGINE_OPENGL_NO_DEBUG_TOOLS)
 endif()
 
+option(KENGINE_OPENGL_NO_DEFAULT_SHADERS "Disable OpenGL default shaders" OFF)
 if (KENGINE_OPENGL_NO_DEFAULT_SHADERS)
 	add_compile_definitions(KENGINE_OPENGL_NO_DEFAULT_SHADERS)
 else()
