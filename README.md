@@ -80,7 +80,7 @@ Similarly, there is no `System` class to hold game logic. `Systems` are simply `
 void init(size_t threads = 0) noexcept;
 ```
 
-Initializes the engine and creates a [ThreadPool](putils/ThreadPool.md) with the given number of worker threads.
+Initializes the engine and creates a [ThreadPool](https://github.com/phisko/putils/blob/main/ThreadPool.md) with the given number of worker threads.
 
 #### entities
 
@@ -96,7 +96,7 @@ Global [Entities](Entities.md) object that allows for creation, removal, access 
 putils::ThreadPool & threadPool() noexcept;
 ```
 
-Returns the engine's [ThreadPool](putils/ThreadPool.md) to allow for controlled asynchronous tasks.
+Returns the engine's [ThreadPool](https://github.com/phisko/putils/blob/main/ThreadPool.md) to allow for controlled asynchronous tasks.
 
 #### isRunning, stopRunning
 
@@ -143,7 +143,7 @@ Removes any unused [Archetypes](impl/Archetype.md) to speed up future iteration 
 
 ## Reflection
 
-Many parts of the engine (such as the scripting systems or the OpenGL system) make use of `putils`' [reflection API](https://github.com/phisko/putils/blob/master/reflection.md). Most of the components in the following samples are thus defined as reflectible.
+Many parts of the engine (such as the scripting systems or the OpenGL system) make use of `putils`' [reflection API](https://github.com/phisko/reflection). Most of the components in the following samples are thus defined as reflectible.
 
 ## Components
 
@@ -372,6 +372,7 @@ These systems must be enabled by setting the corresponding CMake variable to `tr
 | ModelCreatorSystem        | KENGINE_MODEL_CREATOR         |
 | PythonSystem              | KENGINE_PYTHON                |
 | RecastSystem              | KENGINE_RECAST                |
+| SFMLSystem                | KENGINE_SFML                  |
 
 It is possible to test for the existence of these systems during compilation thanks to C++ define macros. These have the same name as the CMake variables, e.g.:
 ```cpp
