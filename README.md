@@ -1,5 +1,8 @@
 # Kengine 
 
+[![gcc](https://github.com/phisko/kengine/workflows/gcc/badge.svg)](https://github.com/phisko/kengine/actions/workflows/gcc.yml)
+[![msvc](https://github.com/phisko/kengine/workflows/msvc/badge.svg)](https://github.com/phisko/kengine/actions/workflows/msvc.yml)
+
 The Koala engine is a type-safe and self-documenting implementation of an Entity-Component-System (ECS), with a focus on runtime extensibility and compile-time type safety and clarity.
 
 ![koala](koala.png)
