@@ -40,7 +40,7 @@ add_system(KENGINE_OPENGL systems/opengl kengine_opengl PUTILS_OPENGL)
 add_system(KENGINE_OPENGL_SPRITES systems/opengl_sprites kengine_opengl_sprites KENGINE_NO_DEPENDENCY)
 add_system(KENGINE_POLYVOX systems/polyvox kengine_polyvox KENGINE_NO_DEPENDENCY)
 add_system(KENGINE_PYTHON systems/python kengine_python PUTILS_PYTHON)
-add_system(KENGINE_RECAST systems/recast kengine_recast KENGINE_NO_DEPENDENCY)
+add_system(KENGINE_RECAST systems/recast kengine_recast PUTILS_OPENGL)
 add_system(KENGINE_SFML systems/sfml kengine_sfml PUTILS_PSE)
 
 list(LENGTH system_options system_count)
@@ -61,17 +61,21 @@ foreach(i RANGE ${system_count})
     endif()
 
     foreach(opt in ${sys_dependent_options})
-        set(${opt} ${sys_option})
+		if(${sys_option})
+			option(${opt} OFF)
+			set(${opt} ON)
+		endif()
     endforeach()
 endforeach()
 
-
 # putils
 
-
-
+option(PUTILS_IMGUI "Build ImGui" OFF)
 set(PUTILS_IMGUI ON)
+
+option(PUTILS_PLUGIN_MANAGER "Build PluginManager" OFF)
 set(PUTILS_PLUGIN_MANAGER ON)
+
 add_subdirectory(putils)
 
 # Library
