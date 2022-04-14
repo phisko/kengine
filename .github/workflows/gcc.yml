@@ -1,0 +1,16 @@
+name: gcc
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: phisko/cmake-cxx-conan/.github/workflows/test.yml@main
+    with:
+      os: ubuntu-latest
+      apt_dependencies: libgl-dev libglu1-mesa-dev
+      cmake_options: -DKENGINE_ALL_SYSTEMS=ON -DKENGINE_TESTS=ON

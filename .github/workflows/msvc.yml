@@ -1,0 +1,15 @@
+name: msvc
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    uses: phisko/cmake-cxx-conan/.github/workflows/test.yml@main
+    with:
+      os: windows-latest
+      cmake_options: -DKENGINE_ALL_SYSTEMS=ON -DKENGINE_TESTS=ON
