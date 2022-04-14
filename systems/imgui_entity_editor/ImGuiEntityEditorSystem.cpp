@@ -9,7 +9,7 @@
 #include "functions/Execute.hpp"
 
 #include "helpers/logHelper.hpp"
-#include "helpers/imGuiHelper.hpp"
+#include "helpers/imguiHelper.hpp"
 #include "imgui.h"
 
 namespace kengine {

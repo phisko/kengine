@@ -1,4 +1,4 @@
-#include "PluginHelper.hpp"
+#include "pluginHelper.hpp"
 #include "kengine.hpp"
 
 #include "data/ImGuiContextComponent.hpp"

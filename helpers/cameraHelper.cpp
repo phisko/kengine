@@ -1,4 +1,4 @@
-#include "CameraHelper.hpp"
+#include "cameraHelper.hpp"
 
 // kengine
 #include "data/ViewportComponent.hpp"

@@ -1,6 +1,6 @@
 #include <chrono>
 
-#include "MainLoop.hpp"
+#include "mainLoop.hpp"
 #include "kengine.hpp"
 
 #include "data/TimeModulatorComponent.hpp"
