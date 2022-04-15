@@ -22,8 +22,16 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  debug:
     uses: phisko/cmake-cxx-conan/.github/workflows/test.yml@main
     with:
       os: windows-latest
+      configuration: Debug
+      cmake_options: -DKENGINE_ALL_SYSTEMS=ON -DKENGINE_TESTS=ON
+
+  release:
+    uses: phisko/cmake-cxx-conan/.github/workflows/test.yml@main
+    with:
+      os: windows-latest
+      configuration: Release
       cmake_options: -DKENGINE_ALL_SYSTEMS=ON -DKENGINE_TESTS=ON
