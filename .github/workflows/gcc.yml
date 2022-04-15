@@ -3,8 +3,22 @@ name: gcc
 on:
   push:
     branches: [ main ]
+    paths:
+      - '**.cpp'
+      - '**.hpp'
+      - '**.inl'
+      - '**/CMakeLists.txt'
+      - '**.cmake'
+      - 'putils'
   pull_request:
     branches: [ main ]
+    paths:
+      - '**.cpp'
+      - '**.hpp'
+      - '**.inl'
+      - '**/CMakeLists.txt'
+      - '**.cmake'
+      - 'putils'
   workflow_dispatch:
 
 jobs:
