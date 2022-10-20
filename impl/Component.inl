@@ -20,27 +20,54 @@ namespace kengine::impl {
 
 	template<typename Comp>
 	void Metadata<Comp>::reset(ID entity) noexcept {
-		auto & val = Component<Comp>::get(entity);
-		val.~Comp();
-		new (&val) Comp;
+        const ReadLock r(_mutex);
+        if (const auto it = _map.find(entity); it != _map.end())
+            it->second.reset();
 	}
 
-	template<typename Comp>
-	Comp & Component<Comp>::get(ID entity) noexcept {
+    template<typename Comp>
+    Comp & Component<Comp>::get(ID entity) noexcept {
+        if constexpr (std::is_empty<Comp>()) {
+            static Comp ret;
+            return ret;
+        }
+        else {
+            auto & meta = metadata();
+            const ReadLock r(meta._mutex);
+            const auto it = meta._map.find(entity);
+            return *it->second;
+        }
+    }
+
+    template<typename Comp>
+	template<typename InitialValue>
+	Comp & Component<Comp>::set(ID entity, InitialValue && initialValue) noexcept {
 		if constexpr (std::is_empty<Comp>()) {
 			static Comp ret;
 			return ret;
 		}
 		else {
 			auto & meta = metadata();
-			ReadLock r(meta._mutex);
-			const auto it = meta._map.find(entity);
-			if (it != meta._map.end())
-				return it->second;
-			r.unlock();
+			{
+				const ReadLock r(meta._mutex);
+				const auto it = meta._map.find(entity);
+				if (it != meta._map.end()) {
+					if (it->second == std::nullopt) {
+						if constexpr (!std::is_same<InitialValue, std::nullptr_t>())
+							it->second.emplace(FWD(initialValue));
+						else
+							it->second.emplace();
+					}
+					return *it->second;
+				}
+			}
 
-			WriteLock l(meta._mutex);
-			return meta._map[entity];
+			const WriteLock l(meta._mutex);
+            auto & ret = meta._map[entity];
+            if constexpr (!std::is_same<InitialValue, std::nullptr_t>())
+                return ret.emplace(FWD(initialValue));
+            else
+                return ret.emplace();
 		}
 	}
 

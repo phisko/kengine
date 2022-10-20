@@ -10,7 +10,11 @@ namespace kengine::impl {
 	template<typename Comp>
 	class Component {
 	public:
-		static Comp & get(ID entity) noexcept;
+        static Comp & get(ID entity) noexcept;
+
+        template<typename InitialValue = std::nullptr_t>
+		static Comp & set(ID entity, InitialValue && initialValue = nullptr) noexcept;
+
 		static ID id() noexcept;
 
 		static Metadata<Comp> & metadata() noexcept;

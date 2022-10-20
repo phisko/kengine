@@ -42,20 +42,23 @@ namespace kengine {
 
 	template<typename T>
 	T & Entity::attach() noexcept {
-		if (!has<T>()) {
-			const auto component = impl::Component<T>::id();
+        using Comp = std::decay_t<T>;
+
+		auto & ret = impl::Component<Comp>::set(id);
+		if (!has<Comp>()) {
+			const auto component = impl::Component<Comp>::id();
 			componentMask.set(component, true);
 			impl::addComponent(id, component);
 		}
-		return get<T>();
+
+		return ret;
 	}
 
 	template<typename T>
 	std::decay_t<T> & Entity::attach(T && value) noexcept {
 		using Comp = std::decay_t<T>;
 
-		auto & ret = impl::Component<Comp>::get(id);
-		ret = FWD(value);
+		auto & ret = impl::Component<Comp>::set(id, FWD(value));
 		if (!has<Comp>()) {
 			const auto component = impl::Component<Comp>::id();
 			componentMask.set(component, true);
@@ -67,9 +70,7 @@ namespace kengine {
 
 	template<typename T>
 	void kengine::Entity::detach() noexcept {
-		auto & comp = get<T>();
-		comp.~T();
-		new (&comp) T;
+        impl::Component<T>::metadata().reset(id);
 
 		const auto component = impl::Component<T>::id();
 		componentMask.set(component, false);

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <optional>
 #include <unordered_map>
 #include "impl/ID.hpp"
 
@@ -7,10 +8,10 @@
 
 namespace kengine::componentSettings {
     template<typename T>
-    using allocator = std::allocator<std::pair<const EntityID, T>>;
+    using allocator = std::allocator<std::pair<const EntityID, std::optional<T>>>;
 
 	template<typename T>
-	using map = std::unordered_map<EntityID, T, std::hash<EntityID>, std::equal_to<EntityID>, allocator<T>>;
+	using map = std::unordered_map<EntityID, std::optional<T>, std::hash<EntityID>, std::equal_to<EntityID>, allocator<T>>;
 }
 
 #define KENGINE_COMPONENT_MEMORY_POOL_BLOCK_SIZE(T, size)\
