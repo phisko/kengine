@@ -17,7 +17,7 @@ namespace kengine {
 
 		MoverBehavior positionMoverBehavior = MoverBehavior::UpdateBones;
 		MoverBehavior rotationMoverBehavior = MoverBehavior::UpdateBones;
-		MoverBehavior scaleMoverBehavior = MoverBehavior::UpdateBones;
+		MoverBehavior scaleMoverBehavior = MoverBehavior::None;
 	};
 }
 
