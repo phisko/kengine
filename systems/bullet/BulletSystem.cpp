@@ -133,6 +133,12 @@ namespace kengine::bullet {
 				const auto model = entities[instance.model];
 				if (!model.has<ModelColliderComponent>())
 					continue;
+
+				if (model.has<ModelSkeletonComponent>() && !e.has<ModelSkeletonComponent>()) {
+					kengine_logf(Verbose, "Execute/BulletSystem", "Not adding BulletComponent to %zu because it doesn't have a skeleton yet, while its model does", e.id);
+					continue;
+				}
+
 				kengine_logf(Verbose, "Execute/BulletSystem", "Adding BulletComponent to %zu", e.id);
 				addBulletComponent(e, transform, physics, model);
 			}
