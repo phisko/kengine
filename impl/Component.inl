@@ -42,7 +42,7 @@ namespace kengine::impl {
     template<typename Comp>
 	template<typename InitialValue>
 	Comp & Component<Comp>::set(ID entity, InitialValue && initialValue) noexcept {
-		if constexpr (std::is_empty<Comp>()) {
+		if constexpr (std::is_empty<Comp>() && std::is_trivially_destructible<Comp>()) {
 			static Comp ret;
 			return ret;
 		}
