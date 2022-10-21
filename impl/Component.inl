@@ -34,8 +34,7 @@ namespace kengine::impl {
         else {
             auto & meta = metadata();
             const ReadLock r(meta._mutex);
-            const auto it = meta._map.find(entity);
-            return *it->second;
+            return *meta._map.at(entity);
         }
     }
 
@@ -48,6 +47,7 @@ namespace kengine::impl {
 		}
 		else {
 			auto & meta = metadata();
+
 			{
 				const ReadLock r(meta._mutex);
 				const auto it = meta._map.find(entity);
