@@ -1,12 +1,17 @@
 #include "tests/KengineTest.hpp"
 #include "impl/Component.hpp"
+#include "scoped_setter.hpp"
 
 struct Component : KengineTest {};
 
 TEST_F(Component, get) {
-    auto & i = kengine::impl::Component<int>::get(0);
-    i = 42;
+    auto & i = kengine::impl::Component<int>::set(0, 42);
+    EXPECT_EQ(i, 42);
     EXPECT_EQ(kengine::impl::Component<int>::get(0), 42);
+}
+
+TEST_F(Component, get_missing) {
+	EXPECT_DEATH(kengine::impl::Component<int>::get(0), ".*");
 }
 
 TEST_F(Component, id) {
