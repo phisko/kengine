@@ -81,10 +81,8 @@ namespace kengine {
 				};
 
 				if (matchesFilters(e)) {
+                    const std::lock_guard lock(g_mutex);
 					g_filteredEvents.push_back(e);
-
-					const std::lock_guard lock(g_mutex);
-
 					g_events.emplace_back(std::move(e));
 					if (g_events.size() >= g_maxEvents)
 						g_events.pop_front();
@@ -123,10 +121,8 @@ namespace kengine {
 			static void updateFilteredEvents() noexcept {
 				kengine_log(Verbose, "Execute/LogImGuiSystem", "Updating filters");
 
+                const std::lock_guard lock(g_mutex);
 				g_filteredEvents.clear();
-
-				const std::lock_guard lock(g_mutex);
-
 				for (const auto & event : g_events)
 					if (matchesFilters(event))
 						g_filteredEvents.push_back(event);
@@ -153,6 +149,7 @@ namespace kengine {
 					ImGui::TableSetupColumn("Message");
 					ImGui::TableHeadersRow();
 
+                    std::lock_guard lockGuard(g_mutex);
 					for (const auto& event : g_filteredEvents) {
 						ImGui::TableNextColumn();
 						ImGui::Text(putils::string<1024>(magic_enum::enum_name(event.severity)));
