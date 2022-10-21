@@ -93,7 +93,7 @@ namespace kengine::imgui_prompt {
 					ImGui::Separator();
 
 				ImGui::PushTextWrapPos();
-				ImGui::TextColored({ line.color.r, line.color.g, line.color.b, line.color.a }, line.text.c_str());
+				ImGui::TextColored({ line.color.r, line.color.g, line.color.b, line.color.a }, "%s", line.text.c_str());
 				ImGui::PopTextWrapPos();
 				if (ImGui::IsItemClicked(1))
 					ImGui::SetClipboardText(line.text.c_str());
