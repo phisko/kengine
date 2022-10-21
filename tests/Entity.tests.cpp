@@ -6,14 +6,7 @@ struct Entity : KengineTest {};
 
 TEST_F(Entity, getMissing) {
     const auto e = kengine::entities += [](kengine::Entity & e) {};
-
-    bool asserted = false;
-    const auto _ = putils::setForScope(kengine::assertHelper::assertHandler, [&](auto && ...) {
-        asserted = true;
-        return false;
-    });
-    e.get<int>();
-    EXPECT_TRUE(asserted);
+	EXPECT_DEATH(e.get<int>(), ".*");
 }
 
 TEST_F(Entity, get) {

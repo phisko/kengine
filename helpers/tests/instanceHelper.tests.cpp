@@ -1,6 +1,5 @@
 #include "tests/KengineTest.hpp"
 #include "helpers/instanceHelper.hpp"
-#include "scoped_setter.hpp"
 
 struct instanceHelper : KengineTest{
     instanceHelper() noexcept {
@@ -29,37 +28,21 @@ TEST_F(instanceHelper, modelHas_Component) {
 }
 
 TEST_F(instanceHelper, getModel_Entity) {
-    static bool asserted = false;
-    const auto _ = putils::setForScope(kengine::assertHelper::assertHandler, [](auto && ...) {
-        asserted = true;
-        return false;
-    });
+	EXPECT_EQ(kengine::instanceHelper::getModel<std::string>(instance), "hello");
+}
 
-    asserted = false;
-    kengine::instanceHelper::getModel<int>(instance);
-    EXPECT_TRUE(asserted);
-
-    asserted = false;
-    EXPECT_EQ(kengine::instanceHelper::getModel<std::string>(instance), "hello");
-    EXPECT_FALSE(asserted);
+TEST_F(instanceHelper, getModel_Entity_missing) {
+	EXPECT_DEATH(kengine::instanceHelper::getModel<int>(instance), ".*");
 }
 
 TEST_F(instanceHelper, getModel_Component) {
-    static bool asserted = false;
-    const auto _ = putils::setForScope(kengine::assertHelper::assertHandler, [](auto && ...) {
-        asserted = true;
-        return false;
-    });
-
     const auto & comp = instance.get<kengine::InstanceComponent>();
-
-    asserted = false;
-    kengine::instanceHelper::getModel<int>(comp);
-    EXPECT_TRUE(asserted);
-
-    asserted = false;
     EXPECT_EQ(kengine::instanceHelper::getModel<std::string>(comp), "hello");
-    EXPECT_FALSE(asserted);
+}
+
+TEST_F(instanceHelper, getModel_Component_missing) {
+	const auto & comp = instance.get<kengine::InstanceComponent>();
+	EXPECT_DEATH(kengine::instanceHelper::getModel<int>(comp), ".*");
 }
 
 TEST_F(instanceHelper, tryGetModel_Entity) {
