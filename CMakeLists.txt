@@ -90,8 +90,8 @@ putils_src_files(src_files
 	helpers/meta
 )
 
-option(KENGINE_NO_TYPE_REGISTRATION "Do not register kengine types" OFF)
-if (NOT KENGINE_NO_TYPE_REGISTRATION)
+option(KENGINE_TYPE_REGISTRATION "Automatically register kengine types" OFF)
+if (KENGINE_TYPE_REGISTRATION)
     file(GLOB type_files impl/types/*.cpp impl/types/*.hpp)
     set(src_files ${src_files} ${type_files})
 endif()
@@ -112,8 +112,8 @@ if (MSVC)
     endif()
 endif()
 
-if (KENGINE_NO_TYPE_REGISTRATION)
-    target_compile_definitions(kengine PUBLIC KENGINE_NO_TYPE_REGISTRATION)
+if (KENGINE_TYPE_REGISTRATION)
+    target_compile_definitions(kengine PUBLIC KENGINE_TYPE_REGISTRATION)
 endif()
 
 # Add systems
