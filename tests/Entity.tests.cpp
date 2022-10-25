@@ -1,5 +1,4 @@
 #include "tests/KengineTest.hpp"
-#include "kengine.hpp"
 #include "scoped_setter.hpp"
 
 struct Entity : KengineTest {};
@@ -40,6 +39,21 @@ TEST_F(Entity, attachNothing) {
     kengine::entities += [](kengine::Entity & e) {
         e.attach<std::string>();
         EXPECT_EQ(e.get<std::string>(), "");
+    };
+}
+
+TEST_F(Entity, attachSomething) {
+    kengine::entities += [](kengine::Entity & e) {
+        e.attach(std::string("hello"));
+        EXPECT_EQ(e.get<std::string>(), "hello");
+    };
+}
+
+TEST_F(Entity, attachOverwrite) {
+    kengine::entities += [](kengine::Entity & e) {
+        e.attach(std::string("hello"));
+		e.attach(std::string("hey"));
+        EXPECT_EQ(e.get<std::string>(), "hey");
     };
 }
 
