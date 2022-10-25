@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef KENGINE_PYTHON
+
 #ifndef KENGINE_MAX_PYTHON_SCRIPT_PATH
 # define KENGINE_MAX_PYTHON_SCRIPT_PATH 64
 #endif
@@ -34,3 +36,5 @@ putils_reflection_info{
 	);
 };
 #undef refltype
+
+#endif

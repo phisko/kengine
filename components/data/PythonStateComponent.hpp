@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef KENGINE_PYTHON
+
 #include "python/python_helper.hpp"
 #include "Entity.hpp"
 
@@ -20,3 +22,5 @@ putils_reflection_info{
 	putils_reflection_class_name;
 };
 #undef refltype
+
+#endif

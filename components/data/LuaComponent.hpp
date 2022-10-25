@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef KENGINE_LUA
+
 #ifndef KENGINE_MAX_LUA_SCRIPT_PATH
 # define KENGINE_MAX_LUA_SCRIPT_PATH 64
 #endif
@@ -35,3 +37,5 @@ putils_reflection_info {
 	);
 };
 #undef refltype
+
+#endif

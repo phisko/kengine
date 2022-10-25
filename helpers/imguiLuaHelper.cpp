@@ -1,3 +1,5 @@
+#ifdef KENGINE_LUA
+
 #include "imguiHelper.hpp"
 #include "kengine.hpp"
 #include "data/LuaStateComponent.hpp"
@@ -15,3 +17,5 @@ namespace kengine::imguiLuaHelper {
 		}
 	}
 }
+
+#endif

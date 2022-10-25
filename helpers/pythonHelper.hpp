@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef KENGINE_PYTHON
+
 #include "scriptLanguageHelper.hpp"
 
 namespace kengine::pythonHelper {
@@ -14,3 +16,5 @@ namespace kengine::pythonHelper {
 }
 
 #include "pythonHelper.inl"
+
+#endif

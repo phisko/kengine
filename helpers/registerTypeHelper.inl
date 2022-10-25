@@ -59,8 +59,13 @@ namespace kengine {
 	void registerTypes() noexcept {
 		impl::registerTypes<Types...>([](auto && t) noexcept {
 			using T = putils_wrapped_type(t);
+#ifdef KENGINE_PYTHON
 			impl::registerWithLanguage<T>(pythonHelper::registerTypes<T>, "Python");
+#endif
+
+#ifdef KENGINE_LUA
 			impl::registerWithLanguage<T>(luaHelper::registerTypes<T>, "Lua");
+#endif
 		});
 	}
 
@@ -71,8 +76,14 @@ namespace kengine {
 			auto e = typeHelper::getTypeEntity<T>();
 			e += NameComponent{ putils::reflection::get_class_name<T>() };
 			e += meta::Size{ sizeof(T) };
+
+#ifdef KENGINE_PYTHON
 			impl::registerWithLanguage<T>(pythonHelper::registerComponents<T>, "Python");
+#endif
+
+#ifdef KENGINE_LUA
 			impl::registerWithLanguage<T>(luaHelper::registerComponents<T>, "Lua");
+#endif
 		});
 
 		registerAttachTo<Comps...>();
@@ -92,7 +103,12 @@ namespace kengine {
 
 	template<typename F>
 	void registerFunction(const char * name, F && func) noexcept {
-		luaHelper::registerFunction(name, func);
+#ifdef KENGINE_PYTHON
 		pythonHelper::registerFunction(name, func);
+#endif
+
+#ifdef KENGINE_LUA
+		luaHelper::registerFunction(name, func);
+#endif
 	}
 }

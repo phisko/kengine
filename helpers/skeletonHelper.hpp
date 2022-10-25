@@ -1,8 +1,6 @@
 #pragma once
 
-#ifndef PUTILS_GLM
-static_assert(false, "Skeleton helper requires glm");
-#else
+#ifdef PUTILS_GLM
 
 #include <glm/glm.hpp>
 #include "data/SkeletonComponent.hpp"
