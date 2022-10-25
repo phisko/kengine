@@ -6,7 +6,7 @@
 namespace kengine {
 	void init(size_t threads = 0) noexcept;
 
-#ifndef KENGINE_NO_TYPE_REGISTRATION
+#ifdef KENGINE_TYPE_REGISTRATION
 	namespace types {
 		void registerTypes() noexcept;
 	}
