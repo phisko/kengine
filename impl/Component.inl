@@ -52,12 +52,10 @@ namespace kengine::impl {
 				const ReadLock r(meta._mutex);
 				const auto it = meta._map.find(entity);
 				if (it != meta._map.end()) {
-					if (it->second == std::nullopt) {
-						if constexpr (!std::is_same<InitialValue, std::nullptr_t>())
-							it->second.emplace(FWD(initialValue));
-						else
-							it->second.emplace();
-					}
+					if constexpr (!std::is_same<InitialValue, std::nullptr_t>()) // Always overwrite if a value was passed
+						it->second.emplace(FWD(initialValue));
+					else if (it->second == std::nullopt) // Only initialize if empty
+						it->second.emplace();
 					return *it->second;
 				}
 			}
