@@ -6,6 +6,5 @@ namespace kengine::types{
 	void registerkenginemetaGet() noexcept {
 		kengine_log(Log, "Init/registerTypes", "Registering 'kengine::meta::Get'");
 		kengine::registerComponents<kengine::meta::Get>();
-
 	}
 }

@@ -6,6 +6,5 @@ namespace kengine::types{
 	void registerkengineModelColliderComponent() noexcept {
 		kengine_log(Log, "Init/registerTypes", "Registering 'kengine::ModelColliderComponent'");
 		kengine::registerComponents<kengine::ModelColliderComponent>();
-
 	}
 }

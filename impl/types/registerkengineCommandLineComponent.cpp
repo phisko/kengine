@@ -6,6 +6,5 @@ namespace kengine::types{
 	void registerkengineCommandLineComponent() noexcept {
 		kengine_log(Log, "Init/registerTypes", "Registering 'kengine::CommandLineComponent'");
 		kengine::registerComponents<kengine::CommandLineComponent>();
-
 	}
 }

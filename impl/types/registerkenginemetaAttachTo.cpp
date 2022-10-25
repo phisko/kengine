@@ -6,6 +6,5 @@ namespace kengine::types{
 	void registerkenginemetaAttachTo() noexcept {
 		kengine_log(Log, "Init/registerTypes", "Registering 'kengine::meta::AttachTo'");
 		kengine::registerComponents<kengine::meta::AttachTo>();
-
 	}
 }

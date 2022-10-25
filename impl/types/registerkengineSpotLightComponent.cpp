@@ -6,6 +6,5 @@ namespace kengine::types{
 	void registerkengineSpotLightComponent() noexcept {
 		kengine_log(Log, "Init/registerTypes", "Registering 'kengine::SpotLightComponent'");
 		kengine::registerComponents<kengine::SpotLightComponent>();
-
 	}
 }

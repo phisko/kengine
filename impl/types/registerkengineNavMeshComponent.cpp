@@ -6,6 +6,5 @@ namespace kengine::types{
 	void registerkengineNavMeshComponent() noexcept {
 		kengine_log(Log, "Init/registerTypes", "Registering 'kengine::NavMeshComponent'");
 		kengine::registerComponents<kengine::NavMeshComponent>();
-
 	}
 }

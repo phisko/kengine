@@ -6,6 +6,5 @@ namespace kengine::types{
 	void registerkengineWindowComponent() noexcept {
 		kengine_log(Log, "Init/registerTypes", "Registering 'kengine::WindowComponent'");
 		kengine::registerComponents<kengine::WindowComponent>();
-
 	}
 }

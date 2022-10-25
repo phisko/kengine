@@ -70,16 +70,16 @@ def process_type_file(input_file):
 	def process_types(json_array_name, is_component):
 		if not json_array_name in json_data:
 			return
-		for p in json_data[json_array_name]:
-			process_type(p['type'], p['header'], is_component)
+		for type in json_data[json_array_name]:
+			process_type(type, is_component)
 
 	process_types('components', True)
 	process_types('types', False)
 
-def process_type(type, header, is_component):
-	clean_name = type.replace(':', '') 
+def process_type(type, is_component):
+	clean_name = type['type'].replace(':', '')
 	function_name = 'register' + clean_name
-	all_types.append({ 'type': type, 'header': header, 'is_component': is_component, 'function_name': function_name, 'clean_name': clean_name })
+	all_types.append({ 'json_type': type, 'is_component': is_component, 'function_name': function_name, 'clean_name': clean_name })
 
 all_registrations = [] # output
 
@@ -109,20 +109,17 @@ def generate_registration(type):
 	out_path = os.path.join(args.output, type['function_name'] + '.cpp')
 
 	if os.path.exists(out_path) and not args.force:
-		print('Skipping "' + type['type'] + '": ' + out_path + ' exists')
+		print('Skipping "' + type['json_type']['type'] + '": ' + out_path + ' exists')
 		return
 
-	print('Generating registration for "' + type['type'] + '" from header "' + type['header'] + '" in "' + out_path + '"')
+	print('Generating registration for "' + type['json_type']['type'] + '" from header "' + type['json_type']['header'] + '" in "' + out_path + '"')
 
 	open(out_path, 'w').write(generate_registration_headers(type) +
-'''#include "''' + type['header'] + '''"
+'''#include "''' + type['json_type']['header'] + '''"
 #include "helpers/logHelper.hpp"
 
 namespace ''' + args.namespace + '''{
-	void ''' + type['function_name'] + '''() noexcept {
-		kengine_log(Log, "Init/registerTypes", "Registering \'''' + type['type'] + '''\'");
-		''' + generate_registration_implementation(type) + '''
-	}
+	void ''' + type['function_name'] + '''() noexcept {''' + generate_conditional_registration(type) + '''	}
 }''')
 
 def generate_registration_headers(type):
@@ -133,12 +130,27 @@ def generate_registration_headers(type):
 		ret += '#include "' + registration['header'] + '"\n'
 	return ret
 
+def generate_conditional_registration(type):
+	ret = ''
+	if 'condition' in type['json_type']:
+		ret += '''
+#ifdef ''' + type['json_type']['condition']
+	ret += '''
+		kengine_log(Log, "Init/registerTypes", "Registering \'''' + type['json_type']['type'] + '''\'");
+		''' + generate_registration_implementation(type)
+	if 'condition' in type['json_type']:
+		ret += '''#else
+		kengine_log(Log, "Init/registerTypes", "Not registering \'''' + type['json_type']['type'] + '''\' because \'''' + type['json_type']['condition'] + '''\' is not defined");
+#endif
+'''
+	return ret
+
 def generate_registration_implementation(type):
 	ret = ''
 	for registration in all_registrations:
 		if type['is_component'] != registration['is_component']:
 			continue
-		ret += registration['registration'] + '<' + type['type'] + '>();\n'
+		ret += registration['registration'] + '<' + type['json_type']['type'] + '>();\n'
 	return ret
 
 #

@@ -6,6 +6,5 @@ namespace kengine::types{
 	void registerkenginemetaDetachFrom() noexcept {
 		kengine_log(Log, "Init/registerTypes", "Registering 'kengine::meta::DetachFrom'");
 		kengine::registerComponents<kengine::meta::DetachFrom>();
-
 	}
 }

@@ -82,11 +82,13 @@
 		},
 		{
 			"type": "kengine::LuaComponent",
-			"header": "data/LuaComponent.hpp"
+			"header": "data/LuaComponent.hpp",
+			"condition": "KENGINE_LUA"
 		},
 		{
 			"type": "kengine::LuaTableComponent",
-			"header": "data/LuaTableComponent.hpp"
+			"header": "data/LuaTableComponent.hpp",
+			"condition": "KENGINE_LUA"
 		},
 		{
 			"type": "kengine::ModelColliderComponent",
@@ -119,7 +121,8 @@
 		},
 		{
 			"type": "kengine::PythonComponent",
-			"header": "data/PythonComponent.hpp"
+			"header": "data/PythonComponent.hpp",
+			"condition": "KENGINE_PYTHON"
 		},
 		{
 			"type": "kengine::SelectedComponent",

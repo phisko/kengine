@@ -6,6 +6,5 @@ namespace kengine::types{
 	void registerkenginemetaEditImGui() noexcept {
 		kengine_log(Log, "Init/registerTypes", "Registering 'kengine::meta::EditImGui'");
 		kengine::registerComponents<kengine::meta::EditImGui>();
-
 	}
 }

@@ -6,6 +6,5 @@ namespace kengine::types{
 	void registerkengineImGuiToolComponent() noexcept {
 		kengine_log(Log, "Init/registerTypes", "Registering 'kengine::ImGuiToolComponent'");
 		kengine::registerComponents<kengine::ImGuiToolComponent>();
-
 	}
 }
