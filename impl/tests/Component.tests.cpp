@@ -53,3 +53,10 @@ TEST_F(Component, dtor) {
 
     EXPECT_EQ(dtorCount, 2);
 }
+
+TEST_F(Component, overwrite) {
+	auto & i = kengine::impl::Component<int>::set(0, 42);
+	kengine::impl::Component<int>::set(0, 84);
+	EXPECT_EQ(i, 84);
+	EXPECT_EQ(kengine::impl::Component<int>::get(0), 84);
+}
