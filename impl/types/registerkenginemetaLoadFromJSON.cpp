@@ -6,6 +6,5 @@ namespace kengine::types{
 	void registerkenginemetaLoadFromJSON() noexcept {
 		kengine_log(Log, "Init/registerTypes", "Registering 'kengine::meta::LoadFromJSON'");
 		kengine::registerComponents<kengine::meta::LoadFromJSON>();
-
 	}
 }

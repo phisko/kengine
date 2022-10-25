@@ -6,6 +6,5 @@ namespace kengine::types{
 	void registerkengineCameraComponent() noexcept {
 		kengine_log(Log, "Init/registerTypes", "Registering 'kengine::CameraComponent'");
 		kengine::registerComponents<kengine::CameraComponent>();
-
 	}
 }

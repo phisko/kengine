@@ -6,6 +6,5 @@ namespace kengine::types{
 	void registerkenginemetaHas() noexcept {
 		kengine_log(Log, "Init/registerTypes", "Registering 'kengine::meta::Has'");
 		kengine::registerComponents<kengine::meta::Has>();
-
 	}
 }

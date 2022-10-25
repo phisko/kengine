@@ -6,6 +6,5 @@ namespace kengine::types{
 	void registerkenginemetaSaveToJSON() noexcept {
 		kengine_log(Log, "Init/registerTypes", "Registering 'kengine::meta::SaveToJSON'");
 		kengine::registerComponents<kengine::meta::SaveToJSON>();
-
 	}
 }

@@ -6,6 +6,5 @@ namespace kengine::types{
 	void registerkengineGodRaysComponent() noexcept {
 		kengine_log(Log, "Init/registerTypes", "Registering 'kengine::GodRaysComponent'");
 		kengine::registerComponents<kengine::GodRaysComponent>();
-
 	}
 }

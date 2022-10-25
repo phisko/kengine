@@ -6,6 +6,5 @@ namespace kengine::types{
 	void registerkengineSpriteComponent2D() noexcept {
 		kengine_log(Log, "Init/registerTypes", "Registering 'kengine::SpriteComponent2D'");
 		kengine::registerComponents<kengine::SpriteComponent2D>();
-
 	}
 }

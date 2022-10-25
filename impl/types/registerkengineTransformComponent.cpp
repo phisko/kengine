@@ -6,6 +6,5 @@ namespace kengine::types{
 	void registerkengineTransformComponent() noexcept {
 		kengine_log(Log, "Init/registerTypes", "Registering 'kengine::TransformComponent'");
 		kengine::registerComponents<kengine::TransformComponent>();
-
 	}
 }

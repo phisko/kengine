@@ -6,6 +6,5 @@ namespace kengine::types{
 	void registerkengineGraphicsComponent() noexcept {
 		kengine_log(Log, "Init/registerTypes", "Registering 'kengine::GraphicsComponent'");
 		kengine::registerComponents<kengine::GraphicsComponent>();
-
 	}
 }

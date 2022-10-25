@@ -6,6 +6,5 @@ namespace kengine::types{
 	void registerkengineViewportComponent() noexcept {
 		kengine_log(Log, "Init/registerTypes", "Registering 'kengine::ViewportComponent'");
 		kengine::registerComponents<kengine::ViewportComponent>();
-
 	}
 }

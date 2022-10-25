@@ -6,6 +6,5 @@ namespace kengine::types{
 	void registerkengineInstanceComponent() noexcept {
 		kengine_log(Log, "Init/registerTypes", "Registering 'kengine::InstanceComponent'");
 		kengine::registerComponents<kengine::InstanceComponent>();
-
 	}
 }

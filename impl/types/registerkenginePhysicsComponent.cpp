@@ -6,6 +6,5 @@ namespace kengine::types{
 	void registerkenginePhysicsComponent() noexcept {
 		kengine_log(Log, "Init/registerTypes", "Registering 'kengine::PhysicsComponent'");
 		kengine::registerComponents<kengine::PhysicsComponent>();
-
 	}
 }

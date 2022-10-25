@@ -6,6 +6,5 @@ namespace kengine::types{
 	void registerkengineTimeModulatorComponent() noexcept {
 		kengine_log(Log, "Init/registerTypes", "Registering 'kengine::TimeModulatorComponent'");
 		kengine::registerComponents<kengine::TimeModulatorComponent>();
-
 	}
 }

@@ -6,6 +6,5 @@ namespace kengine::types{
 	void registerkengineDirLightComponent() noexcept {
 		kengine_log(Log, "Init/registerTypes", "Registering 'kengine::DirLightComponent'");
 		kengine::registerComponents<kengine::DirLightComponent>();
-
 	}
 }

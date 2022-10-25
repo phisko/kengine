@@ -6,6 +6,5 @@ namespace kengine::types{
 	void registerkenginemetaMatchString() noexcept {
 		kengine_log(Log, "Init/registerTypes", "Registering 'kengine::meta::MatchString'");
 		kengine::registerComponents<kengine::meta::MatchString>();
-
 	}
 }

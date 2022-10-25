@@ -6,6 +6,5 @@ namespace kengine::types{
 	void registerkenginemetaForEachEntityWithout() noexcept {
 		kengine_log(Log, "Init/registerTypes", "Registering 'kengine::meta::ForEachEntityWithout'");
 		kengine::registerComponents<kengine::meta::ForEachEntityWithout>();
-
 	}
 }

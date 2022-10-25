@@ -6,6 +6,5 @@ namespace kengine::types{
 	void registerkengineModelAnimationComponent() noexcept {
 		kengine_log(Log, "Init/registerTypes", "Registering 'kengine::ModelAnimationComponent'");
 		kengine::registerComponents<kengine::ModelAnimationComponent>();
-
 	}
 }
