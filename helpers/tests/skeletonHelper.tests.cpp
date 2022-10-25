@@ -1,3 +1,5 @@
+#ifdef PUTILS_GLM
+
 #include "tests/KengineTest.hpp"
 #include "helpers/skeletonHelper.hpp"
 
@@ -69,3 +71,5 @@ TEST_F(skeletonHelper, setBoneMatrix) {
     const auto mat = kengine::skeletonHelper::getBoneMatrix(boneName, comp, model);
     EXPECT_EQ(mat, expected);
 }
+
+#endif

@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef KENGINE_LUA
+
 #include "scriptLanguageHelper.hpp"
 #include "data/LuaStateComponent.hpp"
 #include "lua_helper.hpp"
@@ -16,3 +18,5 @@ namespace kengine::luaHelper {
 }
 
 #include "luaHelper.inl"
+
+#endif

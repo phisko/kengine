@@ -6,7 +6,9 @@
 
 // putils
 #include "to_string.hpp"
-#include "sol/sol.hpp"
+#ifdef KENGINE_LUA
+# include "sol/sol.hpp"
+#endif
 #include "reflection_helpers/imgui_helper.hpp"
 
 namespace kengine {
@@ -23,10 +25,13 @@ namespace kengine {
 			// else if constexpr (std::is_same_v<Member, const char *>::value)
 			// 	ImGui::LabelText(name, member);
 
-			else if constexpr (putils::is_iterable<Member>() &&
-				!std::is_same<sol::object, Member>() &&
-				!std::is_base_of<sol::object, Member>()) {
-				for (const auto & val : member)
+			else if constexpr (putils::is_iterable<Member>()
+#ifdef KENGINE_LUA
+							   && !std::is_same<sol::object, Member>()
+							   && !std::is_base_of<sol::object, Member>()
+#endif
+				) {
+				for (const auto & val: member)
 					if (matchAttribute(val, str))
 						return true;
 				return false;

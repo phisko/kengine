@@ -1,3 +1,5 @@
+#ifdef PUTILS_GLM
+
 #include "tests/KengineTest.hpp"
 #include "helpers/matrixHelper.hpp"
 #include "data/TransformComponent.hpp"
@@ -65,3 +67,5 @@ TEST_F(matrixHelper, getModelMatrix) {
     const auto rotation = kengine::matrixHelper::getRotation(mat);
     EXPECT_EQ(rotation, expectedRotation);
 }
+
+#endif

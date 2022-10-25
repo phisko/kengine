@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef KENGINE_LUA
+
 #include "sol/sol.hpp"
 #include "reflection.hpp"
 
@@ -17,3 +19,5 @@ putils_reflection_info {
 	);
 };
 #undef refltype
+
+#endif

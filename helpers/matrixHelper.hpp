@@ -1,8 +1,6 @@
 #pragma once
 
-#ifndef PUTILS_GLM
-static_assert(false, "matrixHelper requires GLM");
-#else
+#ifdef PUTILS_GLM
 
 #include <glm/glm.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
