@@ -91,6 +91,11 @@ namespace kengine::impl {
 	}
 
 	template<typename ... Comps>
+	TIterator::operator bool() const noexcept {
+		return currentType != (size_t)-1;
+	}
+
+	template<typename ... Comps>
 	bool TIterator::operator==(const TIterator & rhs) const noexcept {
 		return !(*this != rhs);
 	}

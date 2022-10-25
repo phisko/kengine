@@ -15,6 +15,7 @@ namespace kengine::impl {
 		ComponentIterator & operator++() noexcept;
 		bool operator!=(const ComponentIterator & rhs) const noexcept;
 		bool operator==(const ComponentIterator & rhs) const noexcept;
+        operator bool() const noexcept;
 
 		std::tuple<Entity, Comps &...> operator*() const noexcept;
 
