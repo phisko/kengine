@@ -6,10 +6,10 @@
 namespace kengine {
 	template<typename ... Comps>
 	void registerCopy() noexcept {
-		registerMetaComponentImplementation<meta::Copy, Comps...>(
+		registerMetaComponentImplementationWithPredicate<meta::Copy, std::is_copy_constructible, Comps...>(
 			[](const auto t, const Entity & src, Entity & dst) noexcept {
 				using T = putils_wrapped_type(t);
-				dst += src.get<T>();
+                dst += src.get<T>();
 			}
 		);
 	}
