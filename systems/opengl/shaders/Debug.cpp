@@ -100,7 +100,7 @@ namespace kengine::opengl::shaders {
 		};
 
 		for (const auto &[e, debug, transform] : entities.with<DebugGraphicsComponent, TransformComponent>()) {
-			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!cameraHelper::entityAppearsInViewport(e, entities[params.viewportID]))
 				continue;
 
 			for (const auto & element : debug.elements) {

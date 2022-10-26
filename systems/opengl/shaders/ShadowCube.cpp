@@ -24,7 +24,7 @@ namespace kengine::opengl::shaders {
 
 	void ShadowCube::drawObjects(const Parameters & params) noexcept {
 		for (const auto &[e, instance, transform, shadow, noNoShadow] : entities.with<InstanceComponent, TransformComponent, DefaultShadowComponent, no<NoShadowComponent>>()) {
-			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!cameraHelper::entityAppearsInViewport(e, entities[params.viewportID]))
 				continue;
 
 			const auto & model = entities[instance.model];

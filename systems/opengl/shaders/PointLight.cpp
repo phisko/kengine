@@ -39,7 +39,7 @@ namespace kengine::opengl::shaders {
 		glActiveTexture((GLenum)(GL_TEXTURE0 + _shadowMapTextureID));
 
 		for (auto [e, light, transform] : entities.with<PointLightComponent, TransformComponent>()) {
-			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!cameraHelper::entityAppearsInViewport(e, entities[params.viewportID]))
 				continue;
 
 			const auto radius = lightHelper::getRadius(light);

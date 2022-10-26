@@ -45,14 +45,14 @@ namespace kengine::opengl::shaders {
 		_view = params.view;
 
 		for (const auto & [e, light] : entities.with<DirLightComponent>()) {
-			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!cameraHelper::entityAppearsInViewport(e, entities[params.viewportID]))
 				continue;
 
 			drawLight(light, params.camPos - toVec(light.direction) * SUN_DIST, SUN_SIZE);
 		}
 
 		for (const auto & [e, light, transform] : entities.with<PointLightComponent, TransformComponent>()) {
-			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!cameraHelper::entityAppearsInViewport(e, entities[params.viewportID]))
 				continue;
 
 			const auto & pos = transform.boundingBox.position;
@@ -60,7 +60,7 @@ namespace kengine::opengl::shaders {
 		}
 
 		for (const auto & [e, light, transform] : entities.with<SpotLightComponent, TransformComponent>()) {
-			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!cameraHelper::entityAppearsInViewport(e, entities[params.viewportID]))
 				continue;
 
 			const auto & pos = transform.boundingBox.position;

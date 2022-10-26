@@ -578,7 +578,7 @@ namespace kengine::opengl {
 		template<typename Tag>
 		static void runShaders() noexcept {
 			for (auto [e, comp, tag] : entities.with<MyShaderComponent, Tag>()) {
-				if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
+				if (!cameraHelper::entityAppearsInViewport(e, entities[params.viewportID]))
 					continue;
 				if (!comp.enabled)
 					continue;

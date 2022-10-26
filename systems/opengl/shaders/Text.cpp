@@ -183,7 +183,7 @@ namespace kengine::opengl::shaders {
 		_view = glm::mat4(1.f);
 		_proj = glm::mat4(1.f);
 		for (const auto &[e, text, transform] : entities.with<TextComponent2D, TransformComponent>()) {
-			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!cameraHelper::entityAppearsInViewport(e, entities[params.viewportID]))
 				continue;
 
 			_entityID = (float)e.id;
@@ -193,7 +193,7 @@ namespace kengine::opengl::shaders {
 		_view = params.view;
 		_proj = params.proj;
 		for (const auto &[e, text, transform] : entities.with<TextComponent3D, TransformComponent>()) {
-			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!cameraHelper::entityAppearsInViewport(e, entities[params.viewportID]))
 				continue;
 
 			_entityID = (float)e.id;

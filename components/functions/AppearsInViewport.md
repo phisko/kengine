@@ -1,16 +1,16 @@
 # [AppearsInViewport](AppearsInViewport.hpp)
 
-`Function Component` returning whether the parent `Entity` should appear in a given viewport.
+`Function Component` used to determine whether `Entities` should appear in [Viewports](../data/ViewportComponent.md).
 
 ## Prototype
 
 ```cpp
-bool (EntityID viewport);
+bool (const Entity & entity);
 ```
 
-### Parameters
+If attached to a "viewport `Entity`", the function will be called for each `Entity` that might be drawn into the viewport.
 
-* `viewport`: viewport for which we need to know whether to draw the parent `Entity` or not
+If attached to a non-viewport `Entity`, the function will be called for each "viewport `Entity`" it might be drawn into.
 
 ## Usage
 

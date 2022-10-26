@@ -84,7 +84,7 @@ namespace kengine::opengl::shaders {
 		_screenSize = putils::Point2f(params.viewport.size);
 
 		for (const auto & [e, highlight] : entities.with<HighlightComponent>()) {
-			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!cameraHelper::entityAppearsInViewport(e, entities[params.viewportID]))
 				continue;
 
 			_entityID = (float)e.id;

@@ -45,7 +45,7 @@ namespace kengine::opengl::shaders {
 		_screenSize = putils::Point2f(params.viewport.size);
 
 		for (const auto &[e, light, depthMap, comp] : entities.with<DirLightComponent, CSMComponent, GodRaysComponent>()) {
-			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!cameraHelper::entityAppearsInViewport(e, entities[params.viewportID]))
 				continue;
 
 			_scattering = comp.scattering;

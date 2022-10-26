@@ -57,7 +57,7 @@ namespace kengine::opengl::shaders {
 		_screenSize = putils::Point2f(params.viewport.size);
 
 		for (auto [e, light] : entities.with<DirLightComponent>()) {
-			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!cameraHelper::entityAppearsInViewport(e, entities[params.viewportID]))
 				continue;
 
 			const putils::Point3f pos = { params.camPos.x, params.camPos.y, params.camPos.z };

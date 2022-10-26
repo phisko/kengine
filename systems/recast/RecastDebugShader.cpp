@@ -125,7 +125,7 @@ namespace kengine {
 		_viewPos = params.camPos;
 
 		for (const auto & [e, graphics, instance, transform] : entities.with<GraphicsComponent, InstanceComponent, TransformComponent>()) {
-			if (!cameraHelper::entityAppearsInViewport(e, params.viewportID))
+			if (!cameraHelper::entityAppearsInViewport(e, entities[params.viewportID]))
 				continue;
 
 			const auto model = entities[instance.model];
