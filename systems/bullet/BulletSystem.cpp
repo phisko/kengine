@@ -47,6 +47,8 @@ namespace putils {
 	}
 }
 
+#include "data/NameComponent.hpp"
+
 namespace kengine::bullet {
     static struct {
         bool enableDebug = false;
@@ -130,11 +132,12 @@ namespace kengine::bullet {
 			}
 
 			for (auto [e, instance, transform, physics, noComp] : entities.with<InstanceComponent, TransformComponent, PhysicsComponent, no<BulletPhysicsComponent>>()) {
+				const auto name = e.tryGet<NameComponent>();
 				const auto model = entities[instance.model];
 				if (!model.has<ModelColliderComponent>())
 					continue;
 
-				if (model.has<ModelSkeletonComponent>() && !e.has<ModelSkeletonComponent>()) {
+				if (model.has<ModelSkeletonComponent>() && !e.has<SkeletonComponent>()) {
 					kengine_logf(Verbose, "Execute/BulletSystem", "Not adding BulletComponent to %zu because it doesn't have a skeleton yet, while its model does", e.id);
 					continue;
 				}
@@ -175,6 +178,7 @@ namespace kengine::bullet {
 			auto & comp = e.attach<BulletPhysicsComponent>();
 			comp.motionState.transform = &transform;
 
+			const auto name = e.tryGet<NameComponent>();
 			const auto & modelCollider = modelEntity.get<ModelColliderComponent>();
 
 			const auto skeleton = e.tryGet<SkeletonComponent>();
@@ -360,16 +364,11 @@ namespace kengine::bullet {
 				auto parentMat = matrixHelper::getModelMatrix({}, modelTransform);
 				parentMat = glm::scale(parentMat, toVec(parent.boundingBox.size));
 
-				const auto tmp = matrixHelper::getPosition(parentMat);
-
 				glm::mat4 boneMat(1.f);
 				if (!collider.boneName.empty()) {
-					// Apply model scale to bone transformation
 					kengine_assert(skeleton != nullptr && modelSkeleton != nullptr);
 					boneMat = skeletonHelper::getBoneMatrix(collider.boneName.c_str(), *skeleton, *modelSkeleton);
 				}
-
-				const auto tmp1 = matrixHelper::getPosition(boneMat);
 
 				glm::mat4 colliderMat(1.f);
 				colliderMat = glm::translate(colliderMat, toVec(collider.transform.boundingBox.position));
@@ -377,11 +376,8 @@ namespace kengine::bullet {
 				colliderMat = glm::rotate(colliderMat, collider.transform.pitch, { 1.f, 0.f, 0.f });
 				colliderMat = glm::rotate(colliderMat, collider.transform.roll, { 0.f, 0.f, 1.f });
 
-				const auto tmp2 = matrixHelper::getPosition(colliderMat);
-
 				const auto mat = parentMat * boneMat * colliderMat;
 
-				const auto tmp3 = matrixHelper::getPosition(mat);
 				btTransform ret;
 				ret.setFromOpenGLMatrix(glm::value_ptr(mat));
 
