@@ -49,7 +49,8 @@ Size of the shadow map texture. Increasing this will increase shadow accuracy at
 ### shadowMapBias
 
 ```cpp
-float shadowMapBias = .00001f;
+float shadowMapMaxBias = .1f;
+float shadowMapMinBias = .01f;
 ```
 
 Bias applied when reading the shadow map. Increasing this will reduce "shadow acne", but also increase the risk of shadows not being applied properly.
@@ -70,6 +71,14 @@ putils::Vector3f direction;
 float ambientStrength;
 ```
 
+### lightSphereDistance
+
+```cpp
+float lightSphereDistance = 500.f;
+```
+
+The distance at which a sphere should be drawn to symbolize this.
+
 ### cascadeEnds
 
 ```cpp
@@ -82,12 +91,12 @@ Distances for each "cascade" of the [Cascaded Shadow Map](https://docs.microsoft
 
 Used to represent a point light, such as a light bulb.
 
-### constant, linear, quadratic
+### attenuationConstant, attenuationLinear, attenuationQuadratic
 
 ```cpp
-float constant = 1.f;
-float linear = .09f;
-float quadratic = .032f;
+float attenuationConstant = 1.f;
+float attenuationLinear = .09f;
+float attenuationQuadratic = .032f;
 ```
 
 Reference values provided by [Ogre3D](http://wiki.ogre3d.org/tiki-index.php?page=-Point+Light+Attenuation).
