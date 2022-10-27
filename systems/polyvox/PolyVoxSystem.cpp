@@ -3,8 +3,6 @@
 #include <PolyVox/CubicSurfaceExtractor.h>
 
 #include "kengine.hpp"
-#include "PolyVoxShader.hpp"
-#include "data/ShaderComponent.hpp"
 #include "data/ModelDataComponent.hpp"
 #include "data/PolyVoxComponent.hpp"
 #include "data/TransformComponent.hpp"
@@ -32,8 +30,6 @@ namespace kengine {
 			static void init(Entity & e) noexcept {
 				kengine_log(Log, "Init", "PolyVoxSystem");
 				e += functions::Execute{ execute };
-				e += SystemSpecificShaderComponent<putils::gl::Program>{ std::make_unique<PolyVoxShader>() };
-				e += GBufferShaderComponent{};
 			}
 
 			static void execute(float deltaTime) noexcept {

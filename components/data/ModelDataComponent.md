@@ -6,7 +6,7 @@ Contains the vertices and indices for a model. These are used by graphics system
 
 * Not reflectible
 * Not serializable
-* Initialized by model loading systems (such as the [AssImpSystem](../../systems/assimp/AssImpSystem.md)) and processed by the [OpenGLSystem](../../systems/opengl/OpenGLSystem.md).
+* Initialized by model loading systems (such as the [PolyVoxSystem](../../systems/polyvox/PolyVoxSystem.md)) and processed by graphics systems.
 
 ## Members
 

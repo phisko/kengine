@@ -6,7 +6,7 @@
 
 * [Reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
 * Not serializable (contains pointers)
-* Initialized by model-loading systems (such as the [AssImpSystem](../../systems/assimp/AssImpSystem.md)) and then used by other systems to query the names of bones
+* Initialized by model-loading systems and then used by other systems to query the names of bones
 
 ## Members
 

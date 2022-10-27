@@ -52,7 +52,6 @@ namespace kengine {
 
 			if constexpr (isPolyVoxType) {
 				vertexAttributes.push_back({ "position", offsetof(VertexType, position), putils::meta::type<float[3]>::index });
-				vertexAttributes.push_back({ "normal", offsetof(VertexType, normal), putils::meta::type<float[3]>::index });
 
 				using Data = typename VertexType::DataType;
 				const auto dataOffset = offsetof(VertexType, data);
