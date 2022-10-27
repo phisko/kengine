@@ -17,7 +17,8 @@ namespace kengine {
 		bool castShadows = true;
 		int shadowPCFSamples = 1;
 		int shadowMapSize = 1024;
-		float shadowMapBias = .00001f;
+        float shadowMapMaxBias = .1f;
+        float shadowMapMinBias = .01f;
 	};
 
 	struct DirLightComponent : LightComponent {
@@ -26,15 +27,17 @@ namespace kengine {
 
 		putils::Vector3f direction = { 0.f, -1.f, 0.f };
 		float ambientStrength = .1f;
+        float lightSphereDistance = 500.f;
+
 		vector cascadeEnds = { 50.f };
 		float shadowCasterMaxDistance = 100.f;
 	};
 
 	struct PointLightComponent : LightComponent {
 		float range = 1000.f;
-		float constant = 1.f;
-		float linear = .09f;
-		float quadratic = .032f;
+		float attenuationConstant = 1.f;
+		float attenuationLinear = .09f;
+		float attenuationQuadratic = .032f;
 	};
 
 	struct SpotLightComponent : PointLightComponent {
@@ -53,7 +56,8 @@ putils_reflection_info{
 		putils_reflection_attribute(castShadows),
 		putils_reflection_attribute(shadowPCFSamples),
 		putils_reflection_attribute(shadowMapSize),
-		putils_reflection_attribute(shadowMapBias)
+		putils_reflection_attribute(shadowMapMaxBias),
+        putils_reflection_attribute(shadowMapMinBias)
 	);
 };
 #undef refltype
@@ -64,6 +68,7 @@ putils_reflection_info{
 	putils_reflection_attributes(
 		putils_reflection_attribute(direction),
 		putils_reflection_attribute(ambientStrength),
+        putils_reflection_attribute(lightSphereDistance),
 		putils_reflection_attribute(cascadeEnds),
 		putils_reflection_attribute(shadowCasterMaxDistance)
 	);
@@ -81,9 +86,9 @@ putils_reflection_info{
 	putils_reflection_class_name;
 	putils_reflection_attributes(
 		putils_reflection_attribute(range),
-		putils_reflection_attribute(constant),
-		putils_reflection_attribute(linear),
-		putils_reflection_attribute(quadratic)
+		putils_reflection_attribute(attenuationConstant),
+		putils_reflection_attribute(attenuationLinear),
+		putils_reflection_attribute(attenuationQuadratic)
 	);
 	putils_reflection_parents(
 		putils_reflection_type(kengine::LightComponent)
