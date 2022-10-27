@@ -152,13 +152,13 @@ namespace kengine {
                     std::lock_guard lockGuard(g_mutex);
 					for (const auto& event : g_filteredEvents) {
 						ImGui::TableNextColumn();
-						ImGui::Text(putils::string<1024>(magic_enum::enum_name(event.severity)));
+						ImGui::Text("%s", putils::string<1024>(magic_enum::enum_name(event.severity)).c_str());
 						ImGui::TableNextColumn();
-						ImGui::Text(event.thread.c_str());
+						ImGui::Text("%s", event.thread.c_str());
 						ImGui::TableNextColumn();
-						ImGui::Text(event.category.c_str());
+						ImGui::Text("%s", event.category.c_str());
 						ImGui::TableNextColumn();
-						ImGui::Text(event.message.c_str());
+						ImGui::Text("%s", event.message.c_str());
 					}
 
 					ImGui::EndTable();
