@@ -361,22 +361,19 @@ namespace kengine::bullet {
 			}
 
 			static btTransform toBullet(const TransformComponent & parent, const ModelColliderComponent::Collider & collider, const SkeletonComponent * skeleton, const ModelSkeletonComponent * modelSkeleton, const TransformComponent * modelTransform) noexcept {
-				auto parentMat = matrixHelper::getModelMatrix({}, modelTransform);
-				parentMat = glm::scale(parentMat, toVec(parent.boundingBox.size));
+				glm::mat4 mat{ 1.f };
 
-				glm::mat4 boneMat(1.f);
 				if (!collider.boneName.empty()) {
+					// Also apply model transform to re-align bones
+					mat *= matrixHelper::getModelMatrix({}, modelTransform);
 					kengine_assert(skeleton != nullptr && modelSkeleton != nullptr);
-					boneMat = skeletonHelper::getBoneMatrix(collider.boneName.c_str(), *skeleton, *modelSkeleton);
+					mat *= skeletonHelper::getBoneMatrix(collider.boneName.c_str(), *skeleton, *modelSkeleton);
 				}
 
-				glm::mat4 colliderMat(1.f);
-				colliderMat = glm::translate(colliderMat, toVec(collider.transform.boundingBox.position));
-				colliderMat = glm::rotate(colliderMat, collider.transform.yaw, { 0.f, 1.f, 0.f });
-				colliderMat = glm::rotate(colliderMat, collider.transform.pitch, { 1.f, 0.f, 0.f });
-				colliderMat = glm::rotate(colliderMat, collider.transform.roll, { 0.f, 0.f, 1.f });
-
-				const auto mat = parentMat * boneMat * colliderMat;
+				mat = glm::translate(mat, toVec(collider.transform.boundingBox.position));
+				mat = glm::rotate(mat, collider.transform.yaw, { 0.f, 1.f, 0.f });
+				mat = glm::rotate(mat, collider.transform.pitch, { 1.f, 0.f, 0.f });
+				mat = glm::rotate(mat, collider.transform.roll, { 0.f, 0.f, 1.f });
 
 				btTransform ret;
 				ret.setFromOpenGLMatrix(glm::value_ptr(mat));
