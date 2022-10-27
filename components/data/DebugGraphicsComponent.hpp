@@ -6,12 +6,6 @@
 
 namespace kengine {
 	struct DebugGraphicsComponent {
-		struct Text {
-			std::string text;
-			std::string font;
-			float size = 1.f;
-		};
-
 		struct Line {
 			putils::Point3f end{ 0.f, 0.f, 0.f };
 			float thickness = 1.f;
@@ -26,7 +20,6 @@ namespace kengine {
 		};
 
 		enum class Type {
-			Text,
 			Line,
 			Sphere,
 			Box
@@ -43,7 +36,6 @@ namespace kengine {
 
 			ReferenceSpace referenceSpace = ReferenceSpace::Object;
 
-			Text text;
 			Line line;
 			Sphere sphere;
 			Box box;
@@ -62,7 +54,6 @@ putils_reflection_info{
 		putils_reflection_attribute(elements)
 	);
 	putils_reflection_used_types(
-		putils_reflection_type(refltype::Text),
 		putils_reflection_type(refltype::Line),
 		putils_reflection_type(refltype::Sphere),
 		putils_reflection_type(refltype::Box),
@@ -77,7 +68,6 @@ putils_reflection_info{
 	putils_reflection_attributes(
 		putils_reflection_attribute(pos),
 		putils_reflection_attribute(color),
-		putils_reflection_attribute(text),
 		putils_reflection_attribute(line),
 		putils_reflection_attribute(sphere),
 		putils_reflection_attribute(box),
@@ -111,17 +101,6 @@ putils_reflection_info{
 	putils_reflection_attributes(
 		putils_reflection_attribute(end),
 		putils_reflection_attribute(thickness)
-	);
-};
-#undef refltype
-
-#define refltype kengine::DebugGraphicsComponent::Text
-putils_reflection_info{
-	putils_reflection_custom_class_name(DebugGraphicsComponentText);
-	putils_reflection_attributes(
-		putils_reflection_attribute(text),
-		putils_reflection_attribute(font),
-		putils_reflection_attribute(size)
 	);
 };
 #undef refltype

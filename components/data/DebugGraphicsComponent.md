@@ -5,12 +5,9 @@
 The position and scale of the element that will be drawn is relative to the `Entity`'s [TransformComponent](TransformComponent.md).
 
 Debug information can be:
-* text
 * line
 * sphere
 * box
-
-The maximum length of the debug text and font (stored as [putils::strings](https://github.com/phisko/putils/blob/master/string.hpp)) defaults to 64, and can be adjusted by defining the `KENGINE_DEBUG_GRAPHICS_TEXT_MAX_LENGTH` macro.
 
 ## Specs
 
@@ -23,12 +20,6 @@ The maximum length of the debug text and font (stored as [putils::strings](https
 ### Element types
 
 ```cpp
-struct Text {
-    std::string text;
-    std::string font;
-    float size = 1.f;
-};
-
 struct Line {
     putils::Point3f end = { 0.f, 0.f, 0.f };
     float thickness = 1.f;
@@ -65,7 +56,6 @@ struct Element {
 
     ReferenceSpace referenceSpace = ReferenceSpace::Object;
 
-    Text text;
     Line line;
     Sphere sphere;
     Box box;

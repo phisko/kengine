@@ -338,26 +338,8 @@ namespace {
 								.height = height });
 							break;
 						}
-						case ElementType::Text: {
-							static std::unordered_map<std::string, sf::Font> fonts;
-							auto it = fonts.find(element.text.font);
-							if (it == fonts.end()) {
-								it = fonts.emplace(element.text.font.c_str(), sf::Font{}).first;
-								if (!it->second.loadFromFile(element.text.font.c_str()))
-									kengine_logf(Error, "SFML", "Failed to load font '%s'", element.text.font.c_str());
-							}
-							sf::Text text(element.text.text.c_str(), it->second, (unsigned int)element.text.size);
-							text.setFillColor(color);
-							text.setPosition(convertVector(pos));
-							drawables.texts.emplace_back(std::move(text));
-							drawables.orderedElements.push_back({
-								.type = Drawables::Element::Text,
-								.index = drawables.texts.size() - 1,
-								.height = height });
-							break;
-						}
 						default:
-							static_assert(magic_enum::enum_count<ElementType>() == 4);
+							static_assert(magic_enum::enum_count<ElementType>() == 3);
 							kengine_assert_failed("Unknown type");
 							break;
 					}
