@@ -25,3 +25,10 @@ float pitch; // Radians
 float yaw; // Radians
 float roll; // Radians
 ```
+
+### nearPlane, farPlane
+
+```cpp
+float nearPlane = 1.f;
+float farPlane = 1000.f;
+```
