@@ -25,7 +25,7 @@ float scattering = .1f;
 ### nbSteps, defaultStepLength
 
 ```cpp
-float nbSteps = 10.f;
+int nbSteps = 10;
 float defaultStepLength = 25.f;
 ```
 
