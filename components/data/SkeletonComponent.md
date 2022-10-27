@@ -6,7 +6,7 @@
 
 * Not [reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
 * Not serializable (contains pointers)
-* Initialized by model loading systems (such as the [AssImpSystem](../../systems/assimp/AssImpSystem.md)) and used by physics systems (such as the [BulletSystem](../../systems/bullet/BulletSystem.md)) (among others)
+* Initialized by model loading systems and used by physics systems (such as the [BulletSystem](../../systems/bullet/BulletSystem.md)) (among others)
 
 ## Members
 

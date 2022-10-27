@@ -1,5 +1,4 @@
 #include "RecastSystem.hpp"
-#include "RecastDebugShader.hpp"
 #include "Common.hpp"
 
 #include "data/AdjustableComponent.hpp"
@@ -28,9 +27,6 @@ namespace kengine {
 
 				e += functions::OnEntityRemoved{ onEntityRemoved };
 				e += functions::Execute{ execute };
-
-				e += SystemSpecificShaderComponent<putils::gl::Program>{ std::make_unique<RecastDebugShader>() };
-				e += GBufferShaderComponent{};
 
 				e += AdjustableComponent{
 					"Recast", {

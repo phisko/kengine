@@ -327,13 +327,8 @@ In all following descriptions, the "parent" `Component` refers to the `Component
     ⬆ ⚠ Doesn't compile on MinGW in Release ⚠ ⬆
 
 #### 3D Graphics
-* [OpenGLSystem](systems/opengl/OpenGLSystem.md): displays entities in an OpenGL render window
-* [OpenGLSpritesSystem](systems/opengl_sprites/OpenGLSpritesSystem.md): loads sprites and provides shaders to render them 
-* [AssimpSystem](systems/assimp/AssimpSystem.md): loads 3D models using the assimp library, animates them and provides shaders to render them
-        
-    ⬆ ⚠ Doesn't compile on MinGW in Debug ⚠ ⬆
-* [PolyVoxSystem](systems/polyvox/PolyVoxSystem.md): generates 3D models based on `PolyVoxComponents` and provides shaders to render them
-* [MagicaVoxelSystem](systems/polyvox/MagicaVoxelSystem.md): loads 3D models in the MagicaVoxel ".vox" format, which can then be drawn by the `PolyVoxSystem`'s shader
+* [PolyVoxSystem](systems/polyvox/PolyVoxSystem.md): generates 3D models based on `PolyVoxComponents`
+* [MagicaVoxelSystem](systems/polyvox/MagicaVoxelSystem.md): loads 3D models in the MagicaVoxel ".vox" format
 * [GLFWSystem](systems/glfw/GLFWSystem.md): creates GLFW windows and handles their input
 
 #### Physics
@@ -348,7 +343,6 @@ These systems must be enabled by setting the corresponding CMake variable to `tr
 
 | System                    | Variable                      |
 |---------------------------|-------------------------------|
-| AssimpSystem              | KENGINE_ASSIMP                |
 | BulletSystem              | KENGINE_BULLET                |
 | CollisionSytem            | KENGINE_COLLISION             |
 | ImGuiAdjustableSystem     | KENGINE_IMGUI_ADJUSTABLE      |
@@ -364,8 +358,6 @@ These systems must be enabled by setting the corresponding CMake variable to `tr
 | LogStdoutSystem           | KENGINE_LOG_STDOUT            |
 | LogVisualStudioSystem     | KENGINE_LOG_VISUAL_STUDIO     |
 | OnClickSystem             | KENGINE_ONCLICK               |
-| OpenGLSystem              | KENGINE_OPENGL                |
-| OpenGLSpritesSystem       | KENGINE_OPENGL_SPRITES        |
 | PolyVoxSystem             | KENGINE_POLYVOX               |
 | MagicaVoxelSystem         | KENGINE_POLYVOX               |
 | ModelCreatorSystem        | KENGINE_MODEL_CREATOR         |
@@ -395,7 +387,6 @@ These are helper functions to factorize typical manipulations of `Components`.
 * [imguiLuaHelper](helpers/imguiLuaHelper.md)
 * [instanceHelper](helpers/instanceHelper.md)
 * [jsonHelper](helpers/jsonHelper.md): provides helpers to serialize and de-serialize `Entities` from json
-* [lightHelper](helpers/lightHelper.md)
 * [logHelper](helpers/logHelper.md)
 * [luaHelper](helpers/luaHelper.md)
 * [mainLoop](helpers/mainLoop.md)
@@ -403,7 +394,6 @@ These are helper functions to factorize typical manipulations of `Components`.
 * [pluginHelper](helpers/pluginHelper.md): provides an `initPlugin` function to be called from DLLs
 * [pythonHelper](helpers/pythonHelper.md)
 * [registerTypeHelper](helpers/registerTypeHelper.md)
-* [resourceHelper](helpers/resourceHelper.md)
 * [scriptLanguageHelper](helpers/scriptLanguageHelper.md): helpers to easily implement new scripting languages
 * [skeletonHelper](helpers/skeletonHelper.md)
 * [sortHelper](helpers/sortHelper.md): provides functions to sort `Entities`
