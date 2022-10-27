@@ -27,7 +27,7 @@
 namespace detail {
     struct LogEvent {
         kengine::LogSeverity severity;
-        const std::string &thread;
+        std::string thread;
         std::string category;
         std::string message;
     };
