@@ -142,9 +142,16 @@ if (KENGINE_TESTS)
             impl/tests/*.tests.cpp)
 
     add_executable(${test_exe_name} ${test_src})
+    target_link_libraries(${test_exe_name} PRIVATE kengine)
 
-    putils_conan(gtest/cci.20210126)
-    target_link_libraries(${test_exe_name} CONAN_PKG::gtest kengine)
+    set(customFindPackageNames gtest:GTest)
+    set(customLibraryNames gtest:GTest)
+    putils_conan_download_and_link_packages_with_names(
+        ${test_exe_name} PRIVATE
+        "${customFindPackageNames}"
+        "${customLibraryNames}"
+        gtest/cci.20210126
+    )
 
     include(GoogleTest)
     gtest_discover_tests(${test_exe_name})
