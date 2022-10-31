@@ -22,10 +22,10 @@ In addition to the camera's ID, the function also returns the pixel's position a
 ### entityAppearsInViewport
 
 ```cpp
-bool entityAppearsInViewport(const Entity & e, EntityID viewport) noexcept;
+bool entityAppearsInViewport(const Entity & entity, const Entity & viewport) noexcept;
 ```
 
-Returns whether `e` should appear in `viewport`.
+Returns whether `entity` should appear in `viewport`.
 
 ### convertToScreenPercentage
 
