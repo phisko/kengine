@@ -43,9 +43,15 @@ namespace kengine::cameraHelper {
 		return ret;
 	}
 
-	bool entityAppearsInViewport(const Entity & e, EntityID viewport) noexcept {
-		const auto appearsInViewport = e.tryGet<functions::AppearsInViewport>();
-		return !appearsInViewport || appearsInViewport->call(viewport);
+	bool entityAppearsInViewport(const Entity & entity, const Entity & viewportEntity) noexcept {
+		const auto wantsToAppear = [](const Entity & lhs, const Entity & rhs) noexcept {
+			if (const auto appearsInViewport = lhs.tryGet<functions::AppearsInViewport>())
+				if (!appearsInViewport->call(rhs))
+					return false;
+			return true;
+		};
+
+		return wantsToAppear(entity, viewportEntity) && wantsToAppear(viewportEntity, entity);
 	}
 
     template<size_t N>
