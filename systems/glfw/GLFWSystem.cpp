@@ -141,13 +141,15 @@ namespace kengine {
 
 			static void execute(float deltaTime) noexcept {
 				kengine_log(Verbose, "Execute", "GLFWSystem");
-				for (const auto & [e, window, glfw] : entities.with<WindowComponent, GLFWWindowComponent>())
+				glfwPollEvents();
+				for (const auto & [e, window, glfw] : entities.with<WindowComponent, GLFWWindowComponent>()) {
 					if (glfwWindowShouldClose(glfw.window.get())) {
 						if (window.shutdownOnClose)
 							stopRunning();
 						else
 							entities -= e.id;
 					}
+				}
 
 				for (auto [e, window, initGlfw, noGLFW] : entities.with<WindowComponent, GLFWWindowInitComponent, no<GLFWWindowComponent>>()) {
 					createWindow(e, window, initGlfw);
