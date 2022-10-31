@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef PUTILS_GLM
+#ifdef KENGINE_GLM
 
 #include <glm/glm.hpp>
 #define GLM_ENABLE_EXPERIMENTAL

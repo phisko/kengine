@@ -1,4 +1,4 @@
-#ifdef PUTILS_GLM
+#ifdef KENGINE_GLM
 
 #include "skeletonHelper.hpp"
 #include "assertHelper.hpp"

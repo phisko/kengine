@@ -1,4 +1,4 @@
-#ifdef PUTILS_GLM
+#ifdef KENGINE_GLM
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>

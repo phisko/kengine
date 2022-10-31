@@ -17,7 +17,7 @@ macro(add_system)
     list(APPEND system_dependent_options ${ARGV3})
 endmacro()
 
-add_system(KENGINE_BULLET systems/bullet kengine_bullet KENGINE_NO_DEPENDENCY)
+add_system(KENGINE_BULLET systems/bullet kengine_bullet KENGINE_GLM)
 add_system(KENGINE_COLLISION systems/collision kengine_collision KENGINE_NO_DEPENDENCY)
 add_system(KENGINE_GLFW systems/glfw kengine_glfw KENGINE_NO_DEPENDENCY)
 add_system(KENGINE_IMGUI_ADJUSTABLE systems/imgui_adjustable kengine_imgui_adjustable KENGINE_NO_DEPENDENCY)
@@ -37,7 +37,7 @@ add_system(KENGINE_MODEL_CREATOR systems/model_creator kengine_model_creator KEN
 add_system(KENGINE_ONCLICK systems/onclick kengine_onclick KENGINE_NO_DEPENDENCY)
 add_system(KENGINE_POLYVOX systems/polyvox kengine_polyvox KENGINE_NO_DEPENDENCY)
 add_system(KENGINE_PYTHON systems/python kengine_python PUTILS_PYTHON)
-add_system(KENGINE_RECAST systems/recast kengine_recast KENGINE_NO_DEPENDENCY)
+add_system(KENGINE_RECAST systems/recast kengine_recast KENGINE_GLM)
 add_system(KENGINE_SFML systems/sfml kengine_sfml PUTILS_PSE)
 
 list(LENGTH system_options system_count)
@@ -95,6 +95,11 @@ endif()
 
 add_library(kengine STATIC ${src_files})
 target_link_libraries(kengine PUBLIC putils)
+
+if (KENGINE_GLM)
+    target_compile_definitions(kengine PUBLIC KENGINE_GLM)
+    putils_conan_download_and_link_packages(kengine PUBLIC glm/0.9.9.8)
+endif()
 
 option(KENGINE_NDEBUG "Disable debug" OFF)
 if (KENGINE_NDEBUG)
