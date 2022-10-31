@@ -28,6 +28,7 @@ add_system(KENGINE_IMGUI_PROMPT systems/imgui_prompt kengine_imgui_prompt KENGIN
 add_system(KENGINE_IMGUI_TOOL systems/imgui_tool kengine_imgui_tool KENGINE_NO_DEPENDENCY)
 add_system(KENGINE_INPUT systems/input kengine_input KENGINE_NO_DEPENDENCY)
 add_system(KENGINE_KINEMATIC systems/kinematic kengine_kinematic KENGINE_NO_DEPENDENCY)
+add_system(KENGINE_KREOGL systems/kreogl kengine_kreogl KENGINE_NO_DEPENDENCY)
 add_system(KENGINE_LOG_FILE systems/log_file kengine_log_file KENGINE_NO_DEPENDENCY)
 add_system(KENGINE_LOG_IMGUI systems/log_imgui kengine_log_imgui KENGINE_NO_DEPENDENCY)
 add_system(KENGINE_LOG_STDOUT systems/log_stdout kengine_log_stdout KENGINE_NO_DEPENDENCY)
