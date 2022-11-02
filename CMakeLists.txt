@@ -47,7 +47,6 @@ math(EXPR system_count "${system_count} - 1")
 # Options
 
 option(KENGINE_ALL_SYSTEMS "Build all systems" OFF)
-
 foreach(i RANGE ${system_count})
     list(GET system_options ${i} sys_option)
     list(GET system_libs ${i} sys_lib)
@@ -141,24 +140,11 @@ option(KENGINE_TESTS "Build kengine tests" OFF)
 if (KENGINE_TESTS)
     enable_testing()
     set(test_exe_name kengine_tests)
-
     file(GLOB test_src
             tests/*.tests.cpp
             helpers/tests/*.tests.cpp
             impl/tests/*.tests.cpp)
 
-    add_executable(${test_exe_name} ${test_src})
+    putils_add_test_executable(${test_exe_name} ${test_src})
     target_link_libraries(${test_exe_name} PRIVATE kengine)
-
-    set(customFindPackageNames gtest:GTest)
-    set(customLibraryNames gtest:GTest)
-    putils_conan_download_and_link_packages_with_names(
-        ${test_exe_name} PRIVATE
-        "${customFindPackageNames}"
-        "${customLibraryNames}"
-        gtest/cci.20210126
-    )
-
-    include(GoogleTest)
-    gtest_discover_tests(${test_exe_name})
 endif()
