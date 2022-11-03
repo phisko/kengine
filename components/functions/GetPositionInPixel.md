@@ -2,7 +2,7 @@
 
 `Function Component` that lets users query the position of the `Entity` seen in a given pixel. The returned position is the precise position seen in the pixel, not the general position of the `Entity`.
 
-This `function Component` is typically attached to graphics systems (such as the [OpenGLSystem](../../systems/opengl/OpenGLSystem.md)), as they are the ones able to implement it according to their rendering technique.
+This `function Component` is typically attached to graphics systems, as they are the ones able to implement it according to their rendering technique.
 
 ## Prototype
 

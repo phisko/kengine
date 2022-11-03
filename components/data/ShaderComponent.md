@@ -5,7 +5,7 @@ template<typename T>
 struct SystemSpecificShaderComponent;
 ```
 
-`Component` that lets `Entities` be used as custom shaders. `T` is a system-specific type ([putils::gl::Program](../../putils/opengl/Program.md) for the [OpenGLSystem](../../systems/opengl/OpenGLSystem.md), for instance).
+`Component` that lets `Entities` be used as custom shaders. `T` is a system-specific type.
 
 Shaders can either be:
 * GBuffer shaders: used to fill the deferred rendering GBuffer
@@ -21,7 +21,7 @@ Tag `Components` are provided to mark the type of a shader.
 
 * [Reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
 * Not serializable (contains pointers)
-* Processed by the [OpenGLSystem](../../systems/opengl/OpenGLSystem.md)
+* Processed by graphics systems
 
 ## Members
 

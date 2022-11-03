@@ -6,7 +6,7 @@
 
 * [Reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
 * Serializable (POD)
-* Processed by graphics systems (such as the [OpenGLSystem](../../systems/opengl/OpenGLSystem.md))
+* Processed by graphics systems
 
 ## Members
 
@@ -29,7 +29,7 @@ int nbSteps = 10;
 float defaultStepLength = 25.f;
 ```
 
-In the [OpenGLSystem](../../systems/opengl/OpenGLSystem.md)'s god ray shaders, volumetric lighting is achieved by performing a raycast from the camera's position for each pixel, up to the position of the object seen in that pixel. At each step of the raycast, the algorithm increments a value if the ray's position is lit, and that value indicates the total illumination for the pixel.
+In [kreogl](https://github.com/phisko/kreogl)'s god ray shaders, volumetric lighting is achieved by performing a raycast from the camera's position for each pixel, up to the position of the object seen in that pixel. At each step of the raycast, the algorithm increments a value if the ray's position is lit, and that value indicates the total illumination for the pixel.
 
 `nbSteps` is the number of steps in each ray cast. Higher values mean better accuracy in the volumetric lighting, but also a much larger performance cost.
 

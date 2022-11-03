@@ -8,7 +8,7 @@ Some specializations are pre-defined:
 
 * [Reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
 * Serializable (POD)
-* Processed by graphics systems (such as the [OpenGLSystem](../../systems/opengl/OpenGLSystem.md)), physics systems (such as the [BulletSystem](../../systems/bullet/BulletSystem.md))...
+* Processed by graphics systems, physics systems (such as the [BulletSystem](../../systems/bullet/BulletSystem.md))...
 
 ## Members
 

@@ -15,7 +15,7 @@ void (EntityID window, bool captured);
 
 ## Usage
 
-This `function Component` is implemented in graphics systems (such as the [OpenGLSystem](../../systems/opengl/OpenGLSystem.md)) to perform the actual mouse capture.
+This `function Component` is implemented in graphics systems to perform the actual mouse capture.
 
 It may also be implemented in user `systems` to be used as a callback, so that they may be notified when the mouse is captured.
 

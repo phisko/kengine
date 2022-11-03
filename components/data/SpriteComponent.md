@@ -11,4 +11,4 @@ struct SpriteComponent3D;
 
 * [Reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
 * Serializable (empty for 3D, POD for 2D)
-* Processed by graphics systems (such as the [OpenGLSystem](../../systems/opengl/OpenGLSystem.md))
+* Processed by graphics systems
