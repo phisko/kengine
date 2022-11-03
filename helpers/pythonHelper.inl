@@ -8,11 +8,14 @@
 
 // kengine helpers
 #include "helpers/logHelper.hpp"
+#include "helpers/profilingHelper.hpp"
 
 namespace kengine::pythonHelper {
 	namespace impl {
 		template<typename Ret, typename ...Args>
 		void registerEntityMember(py::class_<Entity> & entity, const char * name, const scriptLanguageHelper::function<Ret(Args...)> & func) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			if constexpr (std::is_reference_v<Ret>)
 				entity.def(name, func, py::return_value_policy::reference);
 			else
@@ -21,6 +24,8 @@ namespace kengine::pythonHelper {
 
 		template<typename Ret, typename ...Args>
 		void registerFunctionWithState(PythonStateComponent::Data & state, const char * name, const scriptLanguageHelper::function<Ret(Args...)> & func) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			if constexpr (std::is_reference_v<Ret>)
 				state.module_.def(name, func, py::return_value_policy::reference);
 			else
@@ -29,6 +34,8 @@ namespace kengine::pythonHelper {
 
 		template<typename T>
 		void registerTypeWithState(PythonStateComponent::Data & state) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			if constexpr (std::is_same<T, Entity>()) {
 				state.entity = new py::class_<Entity>(state.module_, putils::reflection::get_class_name<Entity>(), py::dynamic_attr());
 				putils::reflection::for_each_attribute<Entity>([&](const auto & attr) noexcept {
@@ -44,6 +51,8 @@ namespace kengine::pythonHelper {
 
 		template<typename T>
 		void registerComponentWithState(PythonStateComponent::Data & state) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			registerTypeWithState<T>(state);
 			scriptLanguageHelper::registerComponent<T>(
 				[&](auto && ... args) noexcept {
@@ -58,6 +67,8 @@ namespace kengine::pythonHelper {
 
 	template<typename ...Types>
 	void registerTypes() noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		putils::for_each_type<Types...>([](auto && t) noexcept {
 			using T = putils_wrapped_type(t);
 
@@ -69,6 +80,8 @@ namespace kengine::pythonHelper {
 
 	template<typename ... Comps>
 	void registerComponents() noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		putils::for_each_type<Comps...>([&](auto && t) noexcept {
 			using T = putils_wrapped_type(t);
 
@@ -80,7 +93,9 @@ namespace kengine::pythonHelper {
 
 	template<typename Ret, typename ...Args>
 	void registerFunction(const char * name, const scriptLanguageHelper::function<Ret(Args...)> & func) noexcept {
+		KENGINE_PROFILING_SCOPE;
 		kengine_logf(Log, "Python/registerFunction", "Registering %s", name);
+
 		for (const auto & [e, comp] : entities.with<PythonStateComponent>())
 			impl::registerFunctionWithState(*comp.data, name, func);
 	}

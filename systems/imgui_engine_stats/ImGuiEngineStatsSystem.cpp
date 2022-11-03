@@ -24,6 +24,7 @@
 // kengine helpers
 #include "helpers/sortHelper.hpp"
 #include "helpers/logHelper.hpp"
+#include "helpers/profilingHelper.hpp"
 
 // kengine impl
 #include "impl/GlobalState.hpp"
@@ -34,10 +35,13 @@
 
 namespace kengine {
 	EntityCreator * ImGuiEngineStatsSystem() noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		static bool * enabled;
 
 		struct impl {
 			static void init(Entity & e) noexcept {
+				KENGINE_PROFILING_SCOPE;
 				kengine_log(Log, "Init", "ImGuiEngineStatsSystem");
 
 				e += NameComponent{ "Engine stats" };
@@ -49,6 +53,8 @@ namespace kengine {
 			}
 
 			static void execute(float deltaTime) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				if (!*enabled)
 					return;
 
@@ -78,6 +84,8 @@ namespace kengine {
 			};
 
 			static void displayTrackedCombinations() noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				static std::vector<Collection> tracked = loadTrackedCollections();
 
 				const auto newCollection = displayCombinationCreator();
@@ -119,6 +127,8 @@ namespace kengine {
 			}
 
 			static std::optional<Collection> displayCombinationCreator() noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				if (ImGui::Button("Track new collection", { -1.f, 0.f }))
 					ImGui::OpenPopup("Create collection");
 
@@ -163,6 +173,8 @@ namespace kengine {
 			}
 
 			static size_t getCollectionCount(const Collection & collection) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				if (collection.components.size() == 1) {
 					const auto comp = entities[collection.components[0]];
 					const auto count = comp.tryGet<meta::Count>();
@@ -191,6 +203,7 @@ namespace kengine {
 			}
 
 			static void saveTrackedCollections(const std::vector<Collection> & collections) noexcept {
+				KENGINE_PROFILING_SCOPE;
 				kengine_log(Log, "ImGuiEngineStatsSystem", "Saving tracked collections to " KENGINE_STATS_TRACKED_COLLECTIONS_SAVE_FILE);
 
 				std::ofstream f(KENGINE_STATS_TRACKED_COLLECTIONS_SAVE_FILE);
@@ -214,6 +227,7 @@ namespace kengine {
 			}
 
 			static std::vector<Collection> loadTrackedCollections() noexcept {
+				KENGINE_PROFILING_SCOPE;
 				kengine_log(Log, "ImGuiEngineStatsSystem", "Loading tracked collections from " KENGINE_STATS_TRACKED_COLLECTIONS_SAVE_FILE);
 
 				std::vector<Collection> ret;
@@ -254,6 +268,8 @@ namespace kengine {
 			}
 
 			static void findMissingComponentEntities(Collection & collection) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				for (size_t i = 0; i < collection.missingComponents.size(); ++i) {
 					const auto & compName = collection.missingComponents[i];
 					for (const auto & [e, name] : entities.with<NameComponent>())

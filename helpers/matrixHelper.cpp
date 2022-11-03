@@ -10,6 +10,7 @@
 
 // kengine helpers
 #include "helpers/cameraHelper.hpp"
+#include "helpers/profilingHelper.hpp"
 
 namespace kengine::matrixHelper {
 	glm::vec3 toVec(const putils::Point3f & pos) noexcept {
@@ -40,6 +41,8 @@ namespace kengine::matrixHelper {
 	}
 
 	glm::mat4 getModelMatrix(const TransformComponent & transform, const TransformComponent * modelTransform) noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		glm::mat4 model(1.f);
 
 		{ // Object

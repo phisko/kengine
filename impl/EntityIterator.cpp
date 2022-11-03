@@ -3,11 +3,16 @@
 // kengine
 #include "Entity.hpp"
 
+// kengine helpers
+#include "helpers/profilingHelper.hpp"
+
 // kengine impl
 #include "Mutex.hpp"
 
 namespace kengine::impl {
 	EntityIterator & EntityIterator::operator++() noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		++index;
 		ReadLock l(state->_entitiesMutex);
 		while (index < state->_entities.size() && (state->_entities[index].data.mask == 0 || !state->_entities[index].data.active))
@@ -25,6 +30,8 @@ namespace kengine::impl {
 	}
 
 	Entity EntityIterator::operator*() const noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		ReadLock l(state->_entitiesMutex);
 		return { index, state->_entities[index].data.mask };
 	}

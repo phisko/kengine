@@ -18,9 +18,12 @@
 // kengine helpers
 #include "helpers/typeHelper.hpp"
 #include "helpers/sortHelper.hpp"
+#include "helpers/profilingHelper.hpp"
 
 namespace kengine::imguiHelper {
 	void displayEntity(const Entity & e) noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		const auto types = sortHelper::getNameSortedEntities<KENGINE_COMPONENT_COUNT,
 			meta::Has, meta::DisplayImGui
 		>();
@@ -34,6 +37,8 @@ namespace kengine::imguiHelper {
 	}
 
 	void displayEntityAndModel(const Entity & e) noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		const auto instance = e.tryGet<InstanceComponent>();
 		if (!instance || instance->model == INVALID_ID) {
 			displayEntity(e);
@@ -56,6 +61,8 @@ namespace kengine::imguiHelper {
 	}
 
 	void editEntity(Entity & e) noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		if (ImGui::BeginPopupContextWindow()) {
 			const auto types = sortHelper::getNameSortedEntities<KENGINE_COMPONENT_COUNT,
 				meta::Has, meta::AttachTo
@@ -94,6 +101,8 @@ namespace kengine::imguiHelper {
 	}
 
 	void editEntityAndModel(Entity & e) noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		const auto instance = e.tryGet<InstanceComponent>();
 		if (!instance || instance->model == INVALID_ID) {
 			editEntity(e);
@@ -121,6 +130,8 @@ namespace kengine::imguiHelper {
 	}
 
 	float getScale() noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		float scale = 1.f;
 		for (const auto & [e, comp] : entities.with<ImGuiScaleComponent>())
 			scale *= comp.scale;

@@ -21,6 +21,7 @@
 
 // kengine helpers
 #include "helpers/logHelper.hpp"
+#include "helpers/profilingHelper.hpp"
 
 namespace kengine::assertHelper {
 #ifdef KENGINE_IMGUI_ASSERT_HANDLER
@@ -35,13 +36,16 @@ namespace kengine::assertHelper {
 #endif
 
     bool assertFailed(const char * file, int line, const std::string & expr) noexcept {
+		KENGINE_PROFILING_SCOPE;
         kengine_logf(Error, "Assert", "%s:%d %s", file, line, expr.c_str());
+
         if (assertHandler)
             return assertHandler(file, line, expr);
         return true;
     }
 
     bool isDebuggerPresent() noexcept {
+		KENGINE_PROFILING_SCOPE;
 #ifdef WIN32
 		return IsDebuggerPresent();
 #else
@@ -51,6 +55,8 @@ namespace kengine::assertHelper {
 
 #ifdef KENGINE_IMGUI_ASSERT_HANDLER
     static bool imguiAssertHandler(const char * file, int line, const std::string & expr) noexcept {
+		KENGINE_PROFILING_SCOPE;
+
         using File = std::unordered_set<int>; // Set of ignored lines
         using AssertMap = std::unordered_map<const char *, File>; // Map of files
         static AssertMap g_assertMap;
@@ -64,6 +70,8 @@ namespace kengine::assertHelper {
             };
 
             static bool assertFailed(const char *file, int line, const std::string &expr) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
                 if (isIgnored(file, line))
                     return false;
 
@@ -116,6 +124,7 @@ namespace kengine::assertHelper {
             }
 
             static void ignore(const char *file, int line) noexcept {
+				KENGINE_PROFILING_SCOPE;
                 kengine_logf(Verbose, "Assert", "Ignoring asserts for %s:%d", file, line);
 
                 std::vector<kengine::EntityID> toRemove;
@@ -129,6 +138,8 @@ namespace kengine::assertHelper {
             }
 
             static bool isIgnored(const char *file, int line) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
                 const auto it = g_assertMap.find(file);
                 if (it == g_assertMap.end())
                     return false;

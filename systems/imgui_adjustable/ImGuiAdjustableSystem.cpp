@@ -29,6 +29,7 @@
 
 // kengine helpers
 #include "helpers/logHelper.hpp"
+#include "helpers/profilingHelper.hpp"
 
 #ifndef KENGINE_DEFAULT_ADJUSTABLE_SAVE_PATH
 # define KENGINE_DEFAULT_ADJUSTABLE_SAVE_PATH "."
@@ -57,6 +58,8 @@ namespace kengine::imgui_adjustable {
 		using Sections = putils::vector<string, KENGINE_MAX_ADJUSTABLES_SECTIONS>;
 
 		static void init(Entity & e) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			load();
 			e += functions::OnTerminate{ save };
 			e += functions::OnEntityCreated{ onEntityCreated };
@@ -74,6 +77,8 @@ namespace kengine::imgui_adjustable {
 		}
 
 		static void drawImGui(bool & enabled) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			if (ImGui::Begin("Adjustables", &enabled)) {
 				static char nameSearch[1024] = "";
 
@@ -123,6 +128,8 @@ namespace kengine::imgui_adjustable {
 		}
 
 		static putils::vector<AdjustableComponent *, KENGINE_MAX_ADJUSTABLES> getFilteredComps(const char * nameSearch) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			putils::vector<AdjustableComponent *, KENGINE_MAX_ADJUSTABLES> comps;
 
 			for (const auto & [e, comp] : entities.with<AdjustableComponent>()) {
@@ -146,6 +153,8 @@ namespace kengine::imgui_adjustable {
 		}
 
 		static Sections split(const string & s, char delim) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			Sections ret;
 
 			size_t previous = 0;
@@ -162,6 +171,8 @@ namespace kengine::imgui_adjustable {
 		}
 
 		static string reconstitutePath(const Sections & subSections) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			string ret;
 
 			bool first = true;
@@ -176,6 +187,8 @@ namespace kengine::imgui_adjustable {
 		}
 
 		static size_t updateImGuiTree(bool & hidden, const Sections & subs, const Sections & previousSubsections) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			auto current = previousSubsections.size() - 1;
 
 			if (!previousSubsections.empty()) {
@@ -216,6 +229,8 @@ namespace kengine::imgui_adjustable {
 		}
 
 		static void draw(const char * name, AdjustableComponent::Value & value) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			ImGui::Columns(2);
 			ImGui::Text(name);
 			ImGui::NextColumn();
@@ -281,6 +296,8 @@ namespace kengine::imgui_adjustable {
 		}
 
 		static void onEntityCreated(Entity & e) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			const auto adjustable = e.tryGet<AdjustableComponent>();
 			if (!adjustable)
 				return;
@@ -289,6 +306,8 @@ namespace kengine::imgui_adjustable {
 		}
 
 		static void initAdjustable(AdjustableComponent & comp) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			kengine_logf(Log, "Init/ImGuiAdjustableSystem", "Initializing section %s", comp.section.c_str());
 
 			const auto it = loadedFile.sections.find(comp.section.c_str());
@@ -309,6 +328,8 @@ namespace kengine::imgui_adjustable {
 		}
 
 		static void setValue(AdjustableComponent::Value & value, const char * s) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			const auto assignPtr = [](auto & storage) {
 				if (storage.ptr != nullptr)
 					*storage.ptr = storage.value;
@@ -346,6 +367,7 @@ namespace kengine::imgui_adjustable {
 		}
 
 		static void load() noexcept {
+			KENGINE_PROFILING_SCOPE;
 			kengine_log(Log, "ImGuiAdjustableSystem", "Loading from " KENGINE_ADJUSTABLE_SAVE_FILE);
 
             std::ifstream f(KENGINE_ADJUSTABLE_SAVE_FILE);
@@ -355,6 +377,7 @@ namespace kengine::imgui_adjustable {
 		}
 
 		static void save() noexcept {
+			KENGINE_PROFILING_SCOPE;
 			kengine_log(Log, "ImGuiAdjustableSystem", "Saving to " KENGINE_ADJUSTABLE_SAVE_FILE);
 
 			std::ofstream f(KENGINE_ADJUSTABLE_SAVE_FILE, std::ofstream::trunc);
@@ -404,6 +427,7 @@ namespace kengine::imgui_adjustable {
 
 namespace kengine {
 	EntityCreator * ImGuiAdjustableSystem() noexcept {
+		KENGINE_PROFILING_SCOPE;
 		return [](Entity & e) noexcept {
 			imgui_adjustable::impl::init(e);
 		};

@@ -7,10 +7,14 @@
 // kengine data
 #include "data/ImGuiContextComponent.hpp"
 
+// kengine helpers
+#include "helpers/profilingHelper.hpp"
+
 namespace kengine::pluginHelper {
     void initPlugin(void * state) noexcept {
-        kengine::initPlugin(state);
+		KENGINE_PROFILING_SCOPE;
 
+        kengine::initPlugin(state);
         for (const auto & [e, context] : entities.with<kengine::ImGuiContextComponent>())
             ImGui::SetCurrentContext(context.context);
     }

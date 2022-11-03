@@ -14,16 +14,20 @@
 
 // kengine helpers
 #include "helpers/logHelper.hpp"
+#include "helpers/profilingHelper.hpp"
 
 namespace kengine::kinematic {
 	struct impl {
 		static void init(Entity & e) noexcept {
+			KENGINE_PROFILING_SCOPE;
 			kengine_log(Log, "Init", "KinematicSystem");
 			e += functions::Execute{ execute };
 		}
 
 		static void execute(float deltaTime) noexcept {
+			KENGINE_PROFILING_SCOPE;
 			kengine_log(Verbose, "Execute", "KinematicSystem");
+
 			for (const auto & [e, transform, physics, kinematic] : entities.with<TransformComponent, PhysicsComponent, KinematicComponent>()) {
 				transform.boundingBox.position += physics.movement * deltaTime;
 
@@ -42,9 +46,9 @@ namespace kengine::kinematic {
 
 namespace kengine {
 	EntityCreator * KinematicSystem() noexcept {
+		KENGINE_PROFILING_SCOPE;
 		return [](Entity & e) noexcept {
 			kinematic::impl::init(e);
 		};
 	}
-
 }

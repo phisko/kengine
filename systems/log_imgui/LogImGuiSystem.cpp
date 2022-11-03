@@ -26,6 +26,7 @@
 
 // kengine helpers
 #include "helpers/logHelper.hpp"
+#include "helpers/profilingHelper.hpp"
 
 namespace detail {
     struct LogEvent {
@@ -51,8 +52,11 @@ static std::vector<detail::LogEvent> g_filteredEvents;
 
 namespace kengine {
 	EntityCreator * LogImGuiSystem() noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		struct impl {
 			static void init(Entity & e) noexcept {
+				KENGINE_PROFILING_SCOPE;
 				kengine_log(Log, "Init", "LogImGuiSystem");
 
                 std::fill(std::begin(g_filters.severities), std::end(g_filters.severities), true);
@@ -76,6 +80,8 @@ namespace kengine {
 			}
 
 			static void log(const kengine::LogEvent & event) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				detail::LogEvent e{
 					 event.severity,
 					 putils::get_thread_name(),
@@ -93,6 +99,8 @@ namespace kengine {
 			}
 
 			static void execute(float) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				if (!*g_enabled)
 					return;
 
@@ -106,6 +114,8 @@ namespace kengine {
 			}
 
 			static void drawFilters() noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				bool changed = false;
 				for (const auto & [severity, name] : magic_enum::enum_entries<LogSeverity>())
 					if (ImGui::Checkbox(putils::string<32>(name), &g_filters.severities[(int)severity]))
@@ -122,6 +132,7 @@ namespace kengine {
 			}
 
 			static void updateFilteredEvents() noexcept {
+				KENGINE_PROFILING_SCOPE;
 				kengine_log(Verbose, "Execute/LogImGuiSystem", "Updating filters");
 
                 const std::lock_guard lock(g_mutex);
@@ -132,6 +143,8 @@ namespace kengine {
 			}
 
 			static bool matchesFilters(const detail::LogEvent & e) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				if (!g_filters.severities[(int)e.severity])
 					return false;
 
@@ -145,6 +158,8 @@ namespace kengine {
 			}
 
 			static void drawFilteredEvents() noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				if (ImGui::BeginTable("##logEvents", 4)) {
 					ImGui::TableSetupColumn("Severity");
 					ImGui::TableSetupColumn("Thread");

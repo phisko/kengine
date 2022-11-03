@@ -20,6 +20,7 @@
 // kengine helpers
 #include "helpers/commandLineHelper.hpp"
 #include "helpers/logHelper.hpp"
+#include "helpers/profilingHelper.hpp"
 
 #ifndef KENGINE_LOG_FILE_LOCATION
 # define KENGINE_LOG_FILE_LOCATION "kengine.log"
@@ -42,45 +43,55 @@ putils_reflection_info {
 #undef refltype
 
 namespace kengine {
-	EntityCreator * LogFileSystem() noexcept {
-		return [](Entity & e) noexcept {
-            const auto options = kengine::parseCommandLine<Options>();
+	namespace {
+		struct logFileImpl {
+			static inline std::ofstream file;
+			static inline const LogSeverity * severity = nullptr;
 
-            const char * fileName = options.logFile ?
-                    options.logFile->c_str() :
-                    KENGINE_LOG_FILE_LOCATION;
+			static void init(Entity & e) noexcept {
+				const auto options = kengine::parseCommandLine<Options>();
+				const char * fileName = options.logFile ? options.logFile->c_str() : KENGINE_LOG_FILE_LOCATION;
 
-            static std::ofstream file(fileName);
-
-            if (!file) {
-                kengine_assert_failed("LogFileSystem couldn't open output file '%s'", fileName);
-                return;
-            }
-
-			auto & severityControl = e.attach<LogSeverityControl>();
-            severityControl.severity = logHelper::parseCommandLineSeverity();
-
-			e += AdjustableComponent{
-				"Log", {
-					{ "File", &severityControl.severity }
+				file.open(fileName);
+				if (!file) {
+					kengine_assert_failed("LogFileSystem couldn't open output file '%s'", fileName);
+					return;
 				}
-			};
 
-			e += functions::Log{
-				[&](const kengine::LogEvent & event) noexcept {
-					static std::mutex mutex;
-					if (event.severity < severityControl.severity)
-						return;
+				auto & severityControl = e.attach<LogSeverityControl>();
+				severityControl.severity = logHelper::parseCommandLineSeverity();
+				severity = &severityControl.severity;
 
-					const std::lock_guard lock(mutex);
+				e += AdjustableComponent{
+					"Log", {
+						{"File", &severityControl.severity}
+					}
+				};
 
-					const auto & threadName = putils::get_thread_name();
-					if (!threadName.empty())
-						file << '{' << threadName << "}\t";
+				e += functions::Log{ log };
+			}
 
-					file << magic_enum::enum_name<LogSeverity>(event.severity) << "\t[" << event.category << "]\t" << event.message << std::endl;
-				}
-			};
+			static void log(const LogEvent & event) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
+				static std::mutex mutex;
+				if (event.severity < *severity)
+					return;
+
+				const std::lock_guard lock(mutex);
+
+				const auto & threadName = putils::get_thread_name();
+				if (!threadName.empty())
+					file << '{' << threadName << "}\t";
+
+				file << magic_enum::enum_name<LogSeverity>(event.severity) << "\t[" << event.category << "]\t"
+					 << event.message << std::endl;
+			}
 		};
+	}
+
+	EntityCreator * LogFileSystem() noexcept {
+		KENGINE_PROFILING_SCOPE;
+		return logFileImpl::init;
 	}
 }

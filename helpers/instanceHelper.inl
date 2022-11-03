@@ -1,8 +1,13 @@
 #include "instanceHelper.hpp"
 
+// kengine helpers
+#include "helpers/profilingHelper.hpp"
+
 namespace kengine::instanceHelper {
 	template<typename Comp>
 	bool modelHas(const InstanceComponent & instance) noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		kengine_assert(instance.model != INVALID_ID);
 		const auto model = entities[instance.model];
 		return model.has<Comp>();
@@ -15,6 +20,8 @@ namespace kengine::instanceHelper {
 
 	template<typename Comp>
 	const Comp & getModel(const InstanceComponent & instance) noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		kengine_assert(instance.model != INVALID_ID);
 		const auto model = entities[instance.model];
 		return model.get<Comp>();

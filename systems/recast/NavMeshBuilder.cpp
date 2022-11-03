@@ -23,6 +23,7 @@
 #include "helpers/assertHelper.hpp"
 #include "helpers/matrixHelper.hpp"
 #include "helpers/logHelper.hpp"
+#include "helpers/profilingHelper.hpp"
 
 // impl
 #include "Common.hpp"
@@ -36,8 +37,12 @@ namespace Flags {
 
 namespace kengine::recast {
 	void buildNavMeshes() noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		struct impl {
 			static void buildNavMeshes() noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				std::atomic<size_t> jobsLeft = 0;
 
 				if (g_adjustables.editorMode)
@@ -61,6 +66,8 @@ namespace kengine::recast {
 			}
 
 			static void buildRecastComponent(Entity & e, const ModelComponent & model, const ModelDataComponent & modelData, NavMeshComponent & navMesh, std::atomic<size_t> & jobsLeft) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				++jobsLeft;
 				threadPool().runTask([&, id = e.id]() noexcept {
 					const auto cleanup = putils::onScopeExit([&] { --jobsLeft; });
@@ -82,6 +89,8 @@ namespace kengine::recast {
 			};
 
 			static void createRecastMesh(const char * file, Entity e, NavMeshComponent & navMesh, const ModelDataComponent & modelData) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				NavMeshData data;
 
 				const putils::string<4096> binaryFile("%s.nav", file);
@@ -117,6 +126,8 @@ namespace kengine::recast {
 			}
 
 			static NavMeshData loadBinaryFile(const char * binaryFile, const NavMeshComponent & navMesh) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				NavMeshData data;
 
 				std::ifstream f(binaryFile, std::ifstream::binary);
@@ -136,7 +147,9 @@ namespace kengine::recast {
 			}
 
 			static void saveBinaryFile(const char * binaryFile, const NavMeshData & data, const NavMeshComponent & navMesh) noexcept {
+				KENGINE_PROFILING_SCOPE;
 				kengine_logf(Verbose, "Execute/RecastSystem/createRecastMesh", "Saving binary file %s", binaryFile);
+
 				std::ofstream f(binaryFile, std::ofstream::trunc | std::ofstream::binary);
 				f.write((const char *)&navMesh, sizeof(navMesh));
 				f.write((const char *)&data.size, sizeof(data.size));
@@ -144,6 +157,8 @@ namespace kengine::recast {
 			}
 
 			static NavMeshData createNavMeshData(const NavMeshComponent & navMesh, const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				NavMeshData ret;
 
 				const auto vertices = getVertices(modelData, meshData);
@@ -220,6 +235,8 @@ namespace kengine::recast {
 			}
 
 			static std::unique_ptr<float[]> getVertices(const ModelDataComponent & modelData, const ModelDataComponent::Mesh & meshData) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				const auto positionOffset = getVertexPositionOffset(modelData);
 				if (positionOffset == std::nullopt)
 					return nullptr;
@@ -236,6 +253,8 @@ namespace kengine::recast {
 			}
 
 			static std::optional<std::ptrdiff_t> getVertexPositionOffset(const ModelDataComponent & modelData) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				static const char * potentialNames[] = { "pos", "position" };
 
 				for (const auto name : potentialNames)
@@ -248,11 +267,15 @@ namespace kengine::recast {
 			}
 
 			static const float * getVertexPosition(const void * vertices, size_t index, size_t vertexSize, std::ptrdiff_t positionOffset) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				const auto vertex = (const char *)vertices + index * vertexSize;
 				return (const float *)(vertex + positionOffset);
 			}
 
 			static rcConfig getConfig(const NavMeshComponent & navMesh, const ModelDataComponent::Mesh & meshData, const float * vertices) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				rcConfig cfg;
 				memset(&cfg, 0, sizeof(cfg));
 
@@ -304,6 +327,8 @@ namespace kengine::recast {
 			}
 
 			static HeightfieldPtr createHeightField(rcContext & ctx, const rcConfig & cfg, const kengine::ModelDataComponent::Mesh & meshData, const float * vertices) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				HeightfieldPtr heightField{ rcAllocHeightfield() };
 
 				if (heightField == nullptr) {
@@ -350,6 +375,8 @@ namespace kengine::recast {
 			}
 
 			static CompactHeightfieldPtr createCompactHeightField(rcContext & ctx, const rcConfig & cfg, rcHeightfield & heightField) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				CompactHeightfieldPtr compactHeightField{ rcAllocCompactHeightfield() };
 
 				if (compactHeightField == nullptr) {
@@ -382,6 +409,8 @@ namespace kengine::recast {
 			}
 
 			static ContourSetPtr createContourSet(rcContext & ctx, const rcConfig & cfg, rcCompactHeightfield & chf) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				ContourSetPtr contourSet{ rcAllocContourSet() };
 
 				if (contourSet == nullptr) {
@@ -398,6 +427,8 @@ namespace kengine::recast {
 			}
 
 			static PolyMeshPtr createPolyMesh(rcContext & ctx, const rcConfig & cfg, rcContourSet & contourSet) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				PolyMeshPtr polyMesh{ rcAllocPolyMesh() };
 
 				if (polyMesh == nullptr) {
@@ -414,6 +445,8 @@ namespace kengine::recast {
 			}
 
 			static PolyMeshDetailPtr createPolyMeshDetail(rcContext & ctx, const rcConfig & cfg, const rcPolyMesh & polyMesh, const rcCompactHeightfield & chf) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				PolyMeshDetailPtr polyMeshDetail{ rcAllocPolyMeshDetail() };
 				if (polyMeshDetail == nullptr) {
 					kengine_assert_failed("[Recast] Failed to allocate poly mesh detail");
@@ -429,6 +462,8 @@ namespace kengine::recast {
 			}
 
 			static NavMeshPtr createNavMesh(const NavMeshData & data) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				NavMeshPtr navMesh{ dtAllocNavMesh() };
 				if (navMesh == nullptr) {
 					kengine_assert_failed("[Recast] Failed to allocate Detour navmesh");
@@ -445,6 +480,8 @@ namespace kengine::recast {
 			}
 
 			static NavMeshQueryPtr createNavMeshQuery(const NavMeshComponent & params, const dtNavMesh & navMesh) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				NavMeshQueryPtr navMeshQuery{ dtAllocNavMeshQuery() };
 
 				if (navMeshQuery == nullptr) {
@@ -464,8 +501,12 @@ namespace kengine::recast {
 			}
 
 			static functions::GetPath::Callable getPath(const TransformComponent * modelTransform, const NavMeshComponent & navMesh, const RecastNavMeshComponent & recast) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				return [&, modelTransform](const Entity & environment, const putils::Point3f & startWorldSpace, const putils::Point3f & endWorldSpace) {
+					KENGINE_PROFILING_SCOPE;
 					kengine_logf(Verbose, "RecastSystem", "Getting path in %zu from { %f, %f, %f } to { %f, %f, %f }",
+
 						environment.id, startWorldSpace.x, startWorldSpace.y, startWorldSpace.z, endWorldSpace.x, endWorldSpace.y, endWorldSpace.z);
 					static const dtQueryFilter filter;
 

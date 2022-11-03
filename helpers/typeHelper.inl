@@ -8,6 +8,7 @@
 
 // kengine helpers
 #include "helpers/logHelper.hpp"
+#include "helpers/profilingHelper.hpp"
 
 namespace kengine::typeHelper {
     namespace impl {
@@ -18,6 +19,8 @@ namespace kengine::typeHelper {
 
     template <typename T>
     Entity getTypeEntity() noexcept {
+		KENGINE_PROFILING_SCOPE;
+
         static const auto init = [](EntityID & toReset) noexcept {
             for (const auto [e, comp] : entities.with<impl::TypeEntityTag>())
                 if (comp.type == putils::meta::type<T>::index)

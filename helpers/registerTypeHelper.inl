@@ -10,6 +10,7 @@
 #include "helpers/pythonHelper.hpp"
 #include "helpers/luaHelper.hpp"
 #include "helpers/assertHelper.hpp"
+#include "helpers/profilingHelper.hpp"
 #include "helpers/meta/impl/registerAttachTo.hpp"
 #include "helpers/meta/impl/registerAttributes.hpp"
 #include "helpers/meta/impl/registerCopy.hpp"
@@ -28,6 +29,8 @@ namespace kengine {
 	namespace impl {
 		template<typename T>
 		void registerWithLanguage(void (*func)(), const char * name) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			try {
 				func();
 			}
@@ -38,6 +41,8 @@ namespace kengine {
 
 		template<typename ...Types, typename Func>
 		void registerTypes(Func && registerWithLanguages) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			putils::for_each_type<Types...>([&](auto && t) noexcept {
 				static bool registered = false;
                 entities += [&](Entity & e) {
@@ -60,6 +65,8 @@ namespace kengine {
 
 	template<typename ...Types>
 	void registerTypes() noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		impl::registerTypes<Types...>([](auto && t) noexcept {
 			using T = putils_wrapped_type(t);
 #ifdef KENGINE_PYTHON
@@ -74,6 +81,8 @@ namespace kengine {
 
 	template<typename ... Comps>
 	void registerComponents() noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		impl::registerTypes<Comps...>([](auto && t) noexcept {
 			using T = putils_wrapped_type(t);
 			auto e = typeHelper::getTypeEntity<T>();
@@ -106,6 +115,8 @@ namespace kengine {
 
 	template<typename F>
 	void registerFunction(const char * name, F && func) noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 #ifdef KENGINE_PYTHON
 		pythonHelper::registerFunction(name, func);
 #endif

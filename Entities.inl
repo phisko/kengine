@@ -6,12 +6,17 @@
 // kengine functions
 #include "functions/OnEntityCreated.hpp"
 
+// kengine helpers
+#include "helpers/profilingHelper.hpp"
+
 // kengine impl
 #include "impl/GlobalState.hpp"
 
 namespace kengine {
 	template<typename Func>
 	Entity Entities::create(Func && postCreate) noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		auto e = impl::alloc();
 		postCreate(e);
 
@@ -35,6 +40,7 @@ namespace kengine {
 
 	template<typename ... Comps>
 	impl::ComponentCollection<Comps...> Entities::with() const noexcept {
+		KENGINE_PROFILING_SCOPE;
 		return impl::ComponentCollection<Comps...>{};
 	}
 }

@@ -9,12 +9,14 @@
 // kengine helpers
 #include "helpers/logHelper.hpp"
 #include "helpers/luaHelper.hpp"
+#include "helpers/profilingHelper.hpp"
 
 namespace kengine::lua {
 	struct impl {
 		static inline sol::state * state;
 
 		static void init(Entity & e) noexcept {
+			KENGINE_PROFILING_SCOPE;
 			kengine_log(Log, "Init", "LuaSystem");
 
 			e += functions::Execute{ execute };
@@ -39,7 +41,9 @@ namespace kengine::lua {
 		}
 
 		static void execute(float deltaTime) noexcept {
+			KENGINE_PROFILING_SCOPE;
 			kengine_log(Verbose, "Execute", "LuaSystem");
+
 			(*state)["deltaTime"] = deltaTime;
 
 			for (auto [e, comp] : entities.with<LuaComponent>()) {
@@ -61,8 +65,7 @@ namespace kengine::lua {
 
 namespace kengine {
 	EntityCreator * LuaSystem() noexcept {
-		return [](Entity & e) noexcept {
-			lua::impl::init(e);
-		};
+		KENGINE_PROFILING_SCOPE;
+		return lua::impl::init;
 	}
 }

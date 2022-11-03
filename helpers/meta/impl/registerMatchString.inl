@@ -14,6 +14,7 @@
 
 // kengine helpers
 #include "helpers/registerMetaComponentImplementation.hpp"
+#include "helpers/profilingHelper.hpp"
 
 namespace kengine {
 	namespace impl {
@@ -23,6 +24,8 @@ namespace kengine {
 
 		template<typename Member>
 		static bool matchAttribute(const Member & member, const char * str) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			if constexpr (matcher::has_member_c_str<Member>()) {
 				return strstr(member.c_str(), str);
 			}
@@ -71,8 +74,12 @@ namespace kengine {
 
 	template<typename ... Comps>
 	void registerMatchString() noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		registerMetaComponentImplementation<meta::MatchString, Comps...>(
 			[](const auto t, const Entity & e, const char * str) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				using Comp = putils_wrapped_type(t);
 				const auto comp = e.tryGet<Comp>();
 				if (!comp)

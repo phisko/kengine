@@ -117,6 +117,7 @@ def generate_registration(type):
 	open(out_path, 'w').write(generate_registration_headers(type) +
 '''#include "''' + type['json_type']['header'] + '''"
 #include "helpers/logHelper.hpp"
+#include "helpers/profilingHelper.hpp"
 
 namespace ''' + args.namespace + '''{
 	void ''' + type['function_name'] + '''() noexcept {''' + generate_conditional_registration(type) + '''	}
@@ -136,6 +137,7 @@ def generate_conditional_registration(type):
 		ret += '''
 #ifdef ''' + type['json_type']['condition']
 	ret += '''
+		KENGINE_PROFILING_SCOPE;
 		kengine_log(Log, "Init/registerTypes", "Registering \'''' + type['json_type']['type'] + '''\'");
 		''' + generate_registration_implementation(type)
 	if 'condition' in type['json_type']:
@@ -172,9 +174,11 @@ main_file = os.path.join(args.output, 'registerTypes')
 
 main_file_cpp = '''
 #include "helpers/logHelper.hpp"
+#include "helpers/profilingHelper.hpp"
 
 namespace ''' + args.namespace + '''{
 	void registerTypes() noexcept {
+		KENGINE_PROFILING_SCOPE;
 		kengine_log(Log, "Init", "Registering types");
 '''
 

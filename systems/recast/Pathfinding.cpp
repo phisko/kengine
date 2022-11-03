@@ -16,6 +16,7 @@
 #include "helpers/instanceHelper.hpp"
 #include "helpers/matrixHelper.hpp"
 #include "helpers/logHelper.hpp"
+#include "helpers/profilingHelper.hpp"
 
 // impl
 #include "Common.hpp"
@@ -25,8 +26,12 @@
 
 namespace kengine::recast {
 	void doPathfinding(float deltaTime) noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		struct impl {
 			static void doPathfinding(float deltaTime) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				if (g_adjustables.editorMode)
 					recreateCrowds();
 				removeOldAgents();
@@ -36,7 +41,9 @@ namespace kengine::recast {
 			}
 
 			static void recreateCrowds() noexcept {
+				KENGINE_PROFILING_SCOPE;
 				kengine_log(Verbose, "Execute/RecastSystem", "Recreating crowds for editor mode");
+
 				for (auto [e, agent, transform, pathfinding] : entities.with<RecastAgentComponent, TransformComponent, PathfindingComponent>()) {
 					auto environment = entities[agent.crowd];
 					const auto navMesh = instanceHelper::tryGetModel<NavMeshComponent>(environment);
@@ -58,6 +65,8 @@ namespace kengine::recast {
 			}
 
 			static void removeOldAgents() noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				for (auto [e, agent, noPathfinding] : entities.with<RecastAgentComponent, no<PathfindingComponent>>()) {
 					kengine_logf(Verbose, "Execute/RecastSystem", "Removing agent %zu from crowd %zu", e.id, agent.crowd);
 					auto environment = entities[agent.crowd];
@@ -68,6 +77,8 @@ namespace kengine::recast {
 			}
 
 			static void createNewAgents() noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				for (auto [e, pathfinding, transform, noRecast] : entities.with<PathfindingComponent, TransformComponent, no<RecastAgentComponent>>()) {
 					if (pathfinding.environment == INVALID_ID)
 						continue;
@@ -90,6 +101,8 @@ namespace kengine::recast {
 				glm::mat4 worldToModel;
 			};
 			static EnvironmentInfo getEnvironmentInfo(const Entity & environment) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				EnvironmentInfo ret;
 
 				const auto modelTransform = instanceHelper::tryGetModel<TransformComponent>(environment);
@@ -108,6 +121,8 @@ namespace kengine::recast {
 				float maxSpeed;
 			};
 			static ObjectInfo getObjectInfo(const EnvironmentInfo & environment, const TransformComponent & transform, const PathfindingComponent & pathfinding) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				ObjectInfo ret;
 				ret.objectInNavMesh = {
 					matrixHelper::convertToReferencial(transform.boundingBox.position, environment.worldToModel),
@@ -118,6 +133,8 @@ namespace kengine::recast {
 			}
 
 			static RecastCrowdComponent & attachCrowdComponent(Entity & e) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				auto & crowd = e.attach<RecastCrowdComponent>();
 				crowd.crowd.reset(dtAllocCrowd());
 
@@ -128,6 +145,8 @@ namespace kengine::recast {
 			}
 
 			static void attachAgentComponent(Entity & e, const ObjectInfo & objectInfo, const RecastCrowdComponent & crowd, EntityID crowdId) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				dtCrowdAgentParams params;
 				fillCrowdAgentParams(params, objectInfo);
 
@@ -146,6 +165,8 @@ namespace kengine::recast {
 			}
 
 			static void fillCrowdAgentParams(dtCrowdAgentParams & params, const ObjectInfo & objectInfo) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				params.radius = std::max(objectInfo.objectInNavMesh.size.x, objectInfo.objectInNavMesh.size.z);
 				params.height = objectInfo.objectInNavMesh.size.y;
 				params.maxAcceleration = objectInfo.maxSpeed;
@@ -156,6 +177,8 @@ namespace kengine::recast {
 			}
 
 			static void moveChangedAgents() noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				for (auto [e, pathfinding, agent] : entities.with<PathfindingComponent, RecastAgentComponent>()) {
 					if (pathfinding.environment == agent.crowd)
 						continue;
@@ -176,6 +199,8 @@ namespace kengine::recast {
 			}
 
 			static void updateCrowds(float deltaTime) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				std::atomic<size_t> jobsLeft = 0;
 
 				for (const auto & [environment, crowd, environmentTransform] : entities.with<RecastCrowdComponent, TransformComponent>()) {
@@ -210,11 +235,15 @@ namespace kengine::recast {
 			}
 
 			static void readFromAgent(TransformComponent & transform, PhysicsComponent & physics, const dtCrowdAgent & agent, const EnvironmentInfo & environmentInfo) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				physics.movement = environmentInfo.environmentScale * putils::Point3f{ agent.vel };
 				transform.boundingBox.position = matrixHelper::convertToReferencial(agent.npos, environmentInfo.modelToWorld);
 			}
 
 			static void writeToAgent(Entity & e, const TransformComponent & transform, const PathfindingComponent & pathfinding, const EnvironmentInfo & environmentInfo, const RecastNavMeshComponent & navMesh, const RecastCrowdComponent & crowd) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				const auto objectInfo = getObjectInfo(environmentInfo, transform, pathfinding);
 				updateAgentComponent(e, objectInfo, crowd);
 
@@ -224,6 +253,8 @@ namespace kengine::recast {
 			}
 
 			static void updateAgentComponent(Entity & e, const ObjectInfo & objectInfo, const RecastCrowdComponent & crowd) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				const auto & agent = e.get<RecastAgentComponent>();
 				const auto editableAgent = crowd.crowd->getEditableAgent(agent.index);
 				fillCrowdAgentParams(editableAgent->params, objectInfo);
@@ -232,6 +263,7 @@ namespace kengine::recast {
 			}
 
 			static void updateDestination(Entity & e, const RecastNavMeshComponent & navMesh, const RecastCrowdComponent & crowd, const putils::Point3f & destinationInModel, const putils::Point3f & searchExtents) noexcept {
+				KENGINE_PROFILING_SCOPE;
 
 				static const dtQueryFilter filter;
 				dtPolyRef nearestPoly;

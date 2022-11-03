@@ -10,19 +10,24 @@
 
 // kengine helpers
 #include "helpers/logHelper.hpp"
+#include "helpers/profilingHelper.hpp"
 
 namespace kengine::input {
 	struct impl {
 		static inline InputBufferComponent * buffer;
 
 		static void init(Entity & e) noexcept {
+			KENGINE_PROFILING_SCOPE;
 			kengine_log(Log, "Init", "InputSystem");
+
 			buffer = &e.attach<InputBufferComponent>();
 			e += functions::Execute{ execute };
 		}
 
 		static void execute(float deltaTime) noexcept {
+			KENGINE_PROFILING_SCOPE;
 			kengine_log(Verbose, "Execute", "InputSystem");
+
 			for (const auto & [e, comp] : entities.with<InputComponent>()) {
 				for (const auto & e : buffer->keys)
 					if (comp.onKey != nullptr)
@@ -50,6 +55,7 @@ namespace kengine::input {
 
 namespace kengine {
 	EntityCreator * InputSystem() noexcept {
+		KENGINE_PROFILING_SCOPE;
 		return [](Entity & e) noexcept {
 			input::impl::init(e);
 		};

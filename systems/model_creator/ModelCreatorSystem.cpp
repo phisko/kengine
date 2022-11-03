@@ -8,16 +8,22 @@
 
 // kengine helpers
 #include "helpers/logHelper.hpp"
+#include "helpers/profilingHelper.hpp"
 
 namespace kengine {
 	EntityCreator * ModelCreatorSystem() noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		struct impl {
 			static void init(Entity & e) noexcept {
+				KENGINE_PROFILING_SCOPE;
 				kengine_log(Log, "Init", "ModelCreatorSystem");
 				e += functions::OnEntityCreated{ onEntityCreated };
 			}
 
 			static void onEntityCreated(Entity & e) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				const auto graphics = e.tryGet<GraphicsComponent>();
 				if (!graphics)
 					return;

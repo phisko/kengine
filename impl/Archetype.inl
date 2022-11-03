@@ -1,6 +1,9 @@
 // meta
 #include "meta/for_each.hpp"
 
+// kengine helpers
+#include "helpers/profilingHelper.hpp"
+
 // kengine impl
 #include "no.hpp"
 #include "Component.hpp"
@@ -8,6 +11,8 @@
 namespace kengine::impl {
 	template<typename ... Comps>
 	bool Archetype::matches() noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		{
 			ReadLock l(mutex);
 			if (entities.empty())

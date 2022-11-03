@@ -32,6 +32,7 @@
 #include "helpers/assertHelper.hpp"
 #include "helpers/instanceHelper.hpp"
 #include "helpers/logHelper.hpp"
+#include "helpers/profilingHelper.hpp"
 
 namespace kengine {
 	static auto buildMesh(PolyVox::RawVolume<PolyVoxComponent::VertexData> && volume) noexcept {
@@ -47,13 +48,18 @@ namespace kengine {
 	}
 
 	EntityCreator * MagicaVoxelSystem() noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		struct impl {
 			static void init(Entity & e) noexcept {
+				KENGINE_PROFILING_SCOPE;
 				kengine_log(Log, "Init", "MagicaVoxelSystem");
 				e += functions::OnEntityCreated{ onEntityCreated };
 			}
 
 			static void onEntityCreated(Entity & e) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				if (e.has<ModelComponent>())
 					loadModel(e);
 				else if (e.has<GraphicsComponent>())
@@ -61,6 +67,8 @@ namespace kengine {
 			}
 
 			static void initObject(Entity & e) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				auto & graphics = e.get<GraphicsComponent>();
 				const char * path = graphics.appearance;
 
@@ -88,6 +96,8 @@ namespace kengine {
 			};
 
 			static void loadModel(Entity & e) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				const auto & f = e.get<ModelComponent>().file.c_str();
 				if (putils::file_extension(f) != "vox")
 					return;
@@ -113,6 +123,8 @@ namespace kengine {
 			}
 
 			static void loadBinaryModel(Entity & e, const char * binaryFile) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				MagicaVoxel::ChunkContent::Size size;
 
 				ModelDataComponent modelData;
@@ -134,6 +146,8 @@ namespace kengine {
 			}
 
 			static void unserialize(const char * f, ModelDataComponent::Mesh & meshData, MagicaVoxel::ChunkContent::Size & size) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				std::ifstream file(f, std::ofstream::binary);
 				if (!file) {
 					kengine_assert_failed("[MagicaVoxel] Failed to load '", f, "'");
@@ -166,6 +180,8 @@ namespace kengine {
 			}
 
 			static ModelDataComponent::FreeFunc release(EntityID id) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				return [id] {
 					kengine_logf(Log, "MagicaVoxelSystem", "Releasing model data for %zu", id);
 					auto e = entities[id];
@@ -185,6 +201,8 @@ namespace kengine {
 			}
 
 			static MeshInfo loadVoxModel(const char * f) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				std::ifstream stream(f, std::ios::binary);
 				if (!stream) {
 					kengine_assert_failed("[MagicaVoxel] Failed to load '", f, "'");
@@ -244,6 +262,8 @@ namespace kengine {
 			}
 
 			static void checkHeader(std::istream & s) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				MagicaVoxel::FileHeader header;
 				readFromStream(header, s);
 				kengine_assert(idMatches(header.id, "VOX "));
@@ -251,6 +271,8 @@ namespace kengine {
 			}
 
 			static ModelDataComponent generateModelData(Entity & e, const MeshType & mesh) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				ModelDataComponent modelData;
 				modelData.meshes.push_back({});
 				auto & meshData = modelData.meshes.back();
@@ -265,6 +287,8 @@ namespace kengine {
 			}
 
 			static void applyOffset(Entity & e, const MagicaVoxel::ChunkContent::Size & size) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				if (e.has<TransformComponent>()) {
 					kengine_logf(Log, "MagicaVoxelSystem/loadModel", "%zu already has a TransformComponent. Mesh offset will not be applied", e.id);
 					return;
@@ -277,6 +301,8 @@ namespace kengine {
 			}
 
 			static void serialize(const char * f, const ModelDataComponent & modelData, const MagicaVoxel::ChunkContent::Size & size) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				std::ofstream file(f, std::ofstream::binary | std::ofstream::trunc);
 				if (!file) {
 					kengine_assert_failed("[MagicaVoxel] Failed to serialize to '", f, "'");
@@ -309,8 +335,6 @@ namespace kengine {
 			}
 		};
 
-		return [](Entity & e) noexcept {
-			impl::init(e);
-		};
+		return impl::init;
 	}
 }

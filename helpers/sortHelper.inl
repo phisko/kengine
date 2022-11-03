@@ -10,6 +10,9 @@
 // kengine data
 #include "data/NameComponent.hpp"
 
+// kengine helpers
+#include "helpers/profilingHelper.hpp"
+
 namespace kengine::sortHelper {
 	namespace detail {
 		template<typename PointerTuple, typename RefTuple>
@@ -29,7 +32,9 @@ namespace kengine::sortHelper {
 	}
 
 	template<size_t MaxCount, typename ... Comps, typename Pred>
-	auto getSortedEntities(Pred && pred) noexcept { 
+	auto getSortedEntities(Pred && pred) noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		using Type = std::tuple<Entity, Comps *...>;
 
 		using Ret = std::conditional_t<
@@ -58,6 +63,8 @@ namespace kengine::sortHelper {
 
 	template<size_t MaxCount, typename ... Comps>
 	auto getNameSortedEntities() noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		return getSortedEntities<MaxCount, NameComponent, Comps...>(
 			[](const auto & lhs, const auto & rhs) noexcept {
 				return strcmp(std::get<1>(lhs)->name, std::get<1>(rhs)->name) < 0;

@@ -10,7 +10,12 @@
 // kengine data
 #include "data/HighlightComponent.hpp"
 
+// kengine helpers
+#include "helpers/profilingHelper.hpp"
+
 kengine::HighlightShader::HighlightShader() noexcept {
+	KENGINE_PROFILING_SCOPE;
+
 	init("HighlightShader");
 
 	useWithoutUniformCheck();
@@ -21,6 +26,8 @@ kengine::HighlightShader::HighlightShader() noexcept {
 }
 
 void kengine::HighlightShader::addSourceFiles() noexcept {
+	KENGINE_PROFILING_SCOPE;
+
 	addSourceFile(kreogl::QuadGLSL::vert, GL_VERTEX_SHADER);
 	addSourceFile(HighlightGLSL::frag, GL_FRAGMENT_SHADER);
 }
@@ -39,6 +46,8 @@ std::vector<kreogl::UniformBase *> kengine::HighlightShader::getUniforms() noexc
 }
 
 void kengine::HighlightShader::draw(const kreogl::DrawParams & params) noexcept {
+	KENGINE_PROFILING_SCOPE;
+
 	auto uniformChecker = use(false);
 
 	const kreogl::ScopedGLFeature blend(GL_BLEND);
