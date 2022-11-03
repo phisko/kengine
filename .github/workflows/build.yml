@@ -19,6 +19,7 @@ on:
       - '**/CMakeLists.txt'
       - '**.cmake'
       - 'putils'
+      - 'kreogl'
   workflow_dispatch:
 
 jobs:
