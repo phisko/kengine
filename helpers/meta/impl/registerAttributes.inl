@@ -1,11 +1,13 @@
 #pragma once
 
-// kengine
-#include "meta/Attributes.hpp"
-#include "helpers/typeHelper.hpp"
-
 // putils
 #include "reflection_helpers/runtime_helper.hpp"
+
+// kengine meta
+#include "meta/Attributes.hpp"
+
+// kengine helpers
+#include "helpers/typeHelper.hpp"
 
 namespace kengine {
     template<typename ... Comps>

@@ -2,7 +2,8 @@
 
 #ifdef KENGINE_LUA
 
-#include "sol/sol.hpp"
+// sol
+#include <sol/sol.hpp>
 
 namespace kengine {
 	struct LuaStateComponent {

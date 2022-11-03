@@ -1,19 +1,27 @@
 #include "LogStdoutSystem.hpp"
+#include "kengine.hpp"
 
 // stl
 #include <iostream>
 #include <mutex>
 
-// kengine
-#include "kengine.hpp"
-#include "data/AdjustableComponent.hpp"
-#include "functions/Log.hpp"
-#include "helpers/logHelper.hpp"
+// magic_enum
+#include <magic_enum.hpp>
+
+// termcolor
+#include <termcolor/termcolor.hpp>
 
 // putils
-#include <magic_enum.hpp>
-#include <termcolor/termcolor.hpp>
 #include "thread_name.hpp"
+
+// kengine data
+#include "data/AdjustableComponent.hpp"
+
+// kengine functions
+#include "functions/Log.hpp"
+
+// kengine helpers
+#include "helpers/logHelper.hpp"
 
 namespace kengine {
 	EntityCreator * LogStdoutSystem() noexcept {

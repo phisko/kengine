@@ -1,8 +1,14 @@
 #include "LuaSystem.hpp"
+
+// kengine data
+#include "data/LuaComponent.hpp"
+
+// kengine functions
+#include "functions/Execute.hpp"
+
+// kengine helpers
 #include "helpers/logHelper.hpp"
 #include "helpers/luaHelper.hpp"
-#include "data/LuaComponent.hpp"
-#include "functions/Execute.hpp"
 
 namespace kengine::lua {
 	struct impl {

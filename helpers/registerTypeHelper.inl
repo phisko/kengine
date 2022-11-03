@@ -1,25 +1,28 @@
 #pragma once
 
-#include "pythonHelper.hpp"
-#include "luaHelper.hpp"
-#include "assertHelper.hpp"
+// kengine data
+#include "data/NameComponent.hpp"
 
-#include "meta/impl/registerAttachTo.hpp"
-#include "meta/impl/registerAttributes.hpp"
-#include "meta/impl/registerCopy.hpp"
-#include "meta/impl/registerCount.hpp"
-#include "meta/impl/registerDetachFrom.hpp"
-#include "meta/impl/registerDisplayImGui.hpp"
-#include "meta/impl/registerEditImGui.hpp"
-#include "meta/impl/registerForEachEntity.hpp"
-#include "meta/impl/registerGet.hpp"
-#include "meta/impl/registerHas.hpp"
-#include "meta/impl/registerLoadFromJSON.hpp"
-#include "meta/impl/registerMatchString.hpp"
-#include "meta/impl/registerSaveToJSON.hpp"
+// kengine meta
 #include "meta/Size.hpp"
 
-#include "data/NameComponent.hpp"
+// kengine helpers
+#include "helpers/pythonHelper.hpp"
+#include "helpers/luaHelper.hpp"
+#include "helpers/assertHelper.hpp"
+#include "helpers/meta/impl/registerAttachTo.hpp"
+#include "helpers/meta/impl/registerAttributes.hpp"
+#include "helpers/meta/impl/registerCopy.hpp"
+#include "helpers/meta/impl/registerCount.hpp"
+#include "helpers/meta/impl/registerDetachFrom.hpp"
+#include "helpers/meta/impl/registerDisplayImGui.hpp"
+#include "helpers/meta/impl/registerEditImGui.hpp"
+#include "helpers/meta/impl/registerForEachEntity.hpp"
+#include "helpers/meta/impl/registerGet.hpp"
+#include "helpers/meta/impl/registerHas.hpp"
+#include "helpers/meta/impl/registerLoadFromJSON.hpp"
+#include "helpers/meta/impl/registerMatchString.hpp"
+#include "helpers/meta/impl/registerSaveToJSON.hpp"
 
 namespace kengine {
 	namespace impl {

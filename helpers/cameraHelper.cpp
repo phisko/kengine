@@ -1,12 +1,12 @@
 #include "cameraHelper.hpp"
 
-// kengine
+// magic_enum
+#include <magic_enum.hpp>
+
+// kengine data
 #include "data/ViewportComponent.hpp"
 #include "data/WindowComponent.hpp"
 #include "data/OnScreenComponent.hpp"
-
-// putils
-#include <magic_enum.hpp>
 
 namespace kengine::cameraHelper {
 	ViewportInfo getViewportForPixel(EntityID windowID, const putils::Point2ui & pixel) noexcept {

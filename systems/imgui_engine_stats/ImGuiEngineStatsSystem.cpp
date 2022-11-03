@@ -1,10 +1,14 @@
 #include "ImGuiEngineStatsSystem.hpp"
+#include "kengine.hpp"
 
 // stl
 #include <fstream>
 
-#include "kengine.hpp"
-#include "impl/GlobalState.hpp"
+// nlohmann
+#include <nlohmann/json.hpp>
+
+// imgui
+#include <imgui.h>
 
 // kengine data
 #include "data/NameComponent.hpp"
@@ -21,9 +25,8 @@
 #include "helpers/sortHelper.hpp"
 #include "helpers/logHelper.hpp"
 
-// putils
-#include <nlohmann/json.hpp>
-#include "imgui.h"
+// kengine impl
+#include "impl/GlobalState.hpp"
 
 #ifndef KENGINE_STATS_TRACKED_COLLECTIONS_SAVE_FILE
 # define KENGINE_STATS_TRACKED_COLLECTIONS_SAVE_FILE "trackedEntityCollections.json"

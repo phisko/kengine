@@ -1,8 +1,14 @@
 #include "PythonSystem.hpp"
+
+// kengine data
+#include "data/PythonComponent.hpp"
+
+// kengine functions
+#include "functions/Execute.hpp"
+
+// kengine helpers
 #include "helpers/logHelper.hpp"
 #include "helpers/pythonHelper.hpp"
-#include "data/PythonComponent.hpp"
-#include "functions/Execute.hpp"
 
 namespace kengine {
 	EntityCreator * PythonSystem() noexcept {

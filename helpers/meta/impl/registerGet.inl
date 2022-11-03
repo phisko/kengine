@@ -1,6 +1,9 @@
 #include "registerGet.hpp"
 
+// kengine meta
 #include "meta/Get.hpp"
+
+// kengine helpers
 #include "helpers/registerMetaComponentImplementation.hpp"
 
 namespace kengine {

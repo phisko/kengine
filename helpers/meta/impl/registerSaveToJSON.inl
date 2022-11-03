@@ -1,8 +1,13 @@
 #include "registerSaveToJSON.hpp"
 
-#include "meta/SaveToJSON.hpp"
-#include "helpers/registerMetaComponentImplementation.hpp"
+// putils
 #include "reflection_helpers/json_helper.hpp"
+
+// kengine meta
+#include "meta/SaveToJSON.hpp"
+
+// kengine helpers
+#include "helpers/registerMetaComponentImplementation.hpp"
 
 namespace kengine {
 	template<typename ... Comps>

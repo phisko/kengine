@@ -1,6 +1,9 @@
 #include "registerDetachFrom.hpp"
 
+// kengine meta
 #include "meta/DetachFrom.hpp"
+
+// kengine helpers
 #include "helpers/registerMetaComponentImplementation.hpp"
 
 namespace kengine {

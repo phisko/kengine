@@ -1,8 +1,12 @@
 #pragma once
 
 #include "kengine.hpp"
+
+// kengine data
 #include "data/InstanceComponent.hpp"
-#include "assertHelper.hpp"
+
+// kengine helpers
+#include "helpers/assertHelper.hpp"
 
 namespace kengine::instanceHelper {
 	template<typename Comp>

@@ -4,8 +4,13 @@
 # define KENGINE_INPUT_MAX_BUFFERED_EVENTS 128
 #endif
 
+// stl
 #include <vector>
+
+// putils
 #include "Point.hpp"
+
+// kengine
 #include "Entity.hpp"
 
 namespace kengine {

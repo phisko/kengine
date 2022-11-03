@@ -2,9 +2,14 @@
 
 #ifdef KENGINE_LUA
 
-#include "scriptLanguageHelper.hpp"
-#include "data/LuaStateComponent.hpp"
+// putils
 #include "lua_helper.hpp"
+
+// kengine helpers
+#include "helpers/scriptLanguageHelper.hpp"
+
+// kengine data
+#include "data/LuaStateComponent.hpp"
 
 namespace kengine::luaHelper {
 	template<typename ... Types>

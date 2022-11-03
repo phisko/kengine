@@ -1,19 +1,23 @@
 #include "imguiHelper.hpp"
 #include "kengine.hpp"
 
-#include "helpers/typeHelper.hpp"
-#include "helpers/sortHelper.hpp"
+// imgui
+#include <imgui.h>
 
+// kengine data
 #include "data/ImGuiScaleComponent.hpp"
 #include "data/InstanceComponent.hpp"
 
+// kengine meta
 #include "meta/Has.hpp"
 #include "meta/AttachTo.hpp"
 #include "meta/DetachFrom.hpp"
 #include "meta/DisplayImGui.hpp"
 #include "meta/EditImGui.hpp"
 
-#include "imgui.h"
+// kengine helpers
+#include "helpers/typeHelper.hpp"
+#include "helpers/sortHelper.hpp"
 
 namespace kengine::imguiHelper {
 	void displayEntity(const Entity & e) noexcept {

@@ -1,8 +1,13 @@
 #pragma once
 
-#include "Entity.hpp"
-#include "Point.hpp"
+// reflection
 #include "reflection.hpp"
+
+// putils
+#include "Point.hpp"
+
+// kengine
+#include "Entity.hpp"
 
 namespace kengine {
 	struct PathfindingComponent {

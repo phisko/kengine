@@ -1,8 +1,11 @@
 #pragma once
 
+// reflection
+#include "reflection.hpp"
+
+// kengine impl
 #include "impl/ID.hpp"
 #include "impl/ComponentMask.hpp"
-#include "reflection.hpp"
 
 namespace kengine {
 	class Entity {

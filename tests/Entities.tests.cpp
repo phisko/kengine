@@ -1,6 +1,10 @@
 #include "tests/KengineTest.hpp"
-#include "Entities.hpp"
+
+// putils
 #include "RAII.hpp"
+
+// kengine
+#include "Entities.hpp"
 
 struct Entities : KengineTest {};
 

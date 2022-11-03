@@ -1,20 +1,28 @@
 #include "ImGuiEntitySelectorSystem.hpp"
 
+// imgui
+#include <imgui.h>
+
+// putils
+#include "string.hpp"
+#include "to_string.hpp"
+
+// kengine data
 #include "data/ImGuiToolComponent.hpp"
 #include "data/NameComponent.hpp"
 #include "data/SelectedComponent.hpp"
+
+// kengine functions
 #include "functions/Execute.hpp"
 
-#include "helpers/logHelper.hpp"
-#include "helpers/sortHelper.hpp"
+// kengine meta
 #include "meta/Has.hpp"
 #include "meta/MatchString.hpp"
 
+// kengine helpers
+#include "helpers/logHelper.hpp"
+#include "helpers/sortHelper.hpp"
 #include "helpers/imguiHelper.hpp"
-#include "imgui.h"
-
-#include "string.hpp"
-#include "to_string.hpp"
 
 namespace kengine::imgui_entity_selector {
 	struct impl {

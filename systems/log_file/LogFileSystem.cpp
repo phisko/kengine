@@ -1,19 +1,25 @@
 #include "LogFileSystem.hpp"
+#include "kengine.hpp"
 
 // stl
 #include <fstream>
 #include <mutex>
 
-// kengine
-#include "kengine.hpp"
-#include "data/AdjustableComponent.hpp"
-#include "functions/Log.hpp"
-#include "helpers/commandLineHelper.hpp"
-#include "helpers/logHelper.hpp"
+// magic_enum
+#include <magic_enum.hpp>
 
 // putils
-#include <magic_enum.hpp>
 #include "thread_name.hpp"
+
+// kengine data
+#include "data/AdjustableComponent.hpp"
+
+// kengine functions
+#include "functions/Log.hpp"
+
+// kengine helpers
+#include "helpers/commandLineHelper.hpp"
+#include "helpers/logHelper.hpp"
 
 #ifndef KENGINE_LOG_FILE_LOCATION
 # define KENGINE_LOG_FILE_LOCATION "kengine.log"

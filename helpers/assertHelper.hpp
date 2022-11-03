@@ -12,8 +12,10 @@
 # define kengine_assert_failed(...) (void)0
 # define kengine_debug_break (void)0
 #else
+// stl
 # include <string>
 
+// windows
 # ifdef WIN32
 #  include "windows.h"
 #  include "dbghelp.h"
@@ -22,6 +24,7 @@
 #  define kengine_debug_break __builtin_trap()
 # endif
 
+// putils
 #include "concatenate.hpp"
 
 # define kengine_assert_failed(...) \

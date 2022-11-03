@@ -1,8 +1,10 @@
-#include "kengine.hpp"
 #include "Component.hpp"
+#include "kengine.hpp"
 
+// stl
 #include <cassert>
 
+// kengine impl
 #include "ComponentMask.hpp"
 #include "impl/GlobalState.hpp"
 

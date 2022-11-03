@@ -1,13 +1,17 @@
 #pragma once
 
+// stl
 #include <atomic>
 #include <vector>
 #include <memory>
 
+// putils
+#include "ThreadPool.hpp"
+
+// kengine impl
 #include "impl/Mutex.hpp"
 #include "impl/ComponentMask.hpp"
 #include "impl/ComponentMetadata.hpp"
-#include "ThreadPool.hpp"
 
 namespace kengine {
     class Entity;

@@ -1,7 +1,9 @@
 #ifdef KENGINE_GLM
 
 #include "skeletonHelper.hpp"
-#include "assertHelper.hpp"
+
+// kengine helpers
+#include "helpers/assertHelper.hpp"
 
 namespace kengine::skeletonHelper {
 	BoneIndexes getBoneIndex(const char * bone, const ModelSkeletonComponent & model) noexcept {

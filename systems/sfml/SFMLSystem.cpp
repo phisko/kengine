@@ -1,8 +1,10 @@
 #include "SFMLSystem.hpp"
-
 #include "kengine.hpp"
 
+// imgui
 #include <imgui.h>
+
+// sfml
 #include <SFML/Graphics/RenderTexture.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/CircleShape.hpp>
@@ -10,20 +12,12 @@
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/Window/Event.hpp>
 
-#include "imgui-sfml/imgui-SFML.h"
-#include "SFMLWindowComponent.hpp"
-#include "SFMLTextureComponent.hpp"
+// putils
+#include "vector.hpp"
 
-#include "data/AdjustableComponent.hpp"
-#include "data/ImGuiScaleComponent.hpp"
-
-#include "functions/Execute.hpp"
-#include "functions/OnEntityRemoved.hpp"
-#include "functions/OnTerminate.hpp"
-
-#include "helpers/logHelper.hpp"
-
+// kengine data
 #include "data/CameraComponent.hpp"
+#include "data/DebugGraphicsComponent.hpp"
 #include "data/GraphicsComponent.hpp"
 #include "data/ImGuiContextComponent.hpp"
 #include "data/InputBufferComponent.hpp"
@@ -31,12 +25,23 @@
 #include "data/TransformComponent.hpp"
 #include "data/ViewportComponent.hpp"
 #include "data/WindowComponent.hpp"
+#include "data/AdjustableComponent.hpp"
+#include "data/ImGuiScaleComponent.hpp"
 
+// kengine functions
+#include "functions/Execute.hpp"
+#include "functions/OnEntityRemoved.hpp"
+#include "functions/OnTerminate.hpp"
+
+// kengine helpers
 #include "helpers/cameraHelper.hpp"
 #include "helpers/instanceHelper.hpp"
+#include "helpers/logHelper.hpp"
 
-#include "vector.hpp"
-#include "data/DebugGraphicsComponent.hpp"
+// impl
+#include "imgui-sfml/imgui-SFML.h"
+#include "SFMLWindowComponent.hpp"
+#include "SFMLTextureComponent.hpp"
 
 #ifndef KENGINE_MAX_VIEWPORTS
 # define KENGINE_MAX_VIEWPORTS 8

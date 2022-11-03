@@ -1,20 +1,22 @@
 #include "ImGuiPromptSystem.hpp"
 #include "kengine.hpp"
 
+// imgui
+#include <imgui.h>
+
+// putils
+#include "reflection_helpers/imgui_helper.hpp"
+
+// kengine data
 #include "data/NameComponent.hpp"
 #include "data/ImGuiToolComponent.hpp"
+#include "data/LuaStateComponent.hpp"
+#include "data/PythonStateComponent.hpp"
+
+// kengine functions
 #include "functions/Execute.hpp"
 
-#ifdef KENGINE_LUA
-# include "data/LuaStateComponent.hpp"
-#endif
-
-#ifdef KENGINE_PYTHON
-# include "data/PythonStateComponent.hpp"
-#endif
-
-#include "imgui.h"
-#include "reflection_helpers/imgui_helper.hpp"
+// kengine helpers
 #include "helpers/logHelper.hpp"
 
 enum class Language {

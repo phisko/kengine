@@ -1,6 +1,9 @@
 #pragma once
 
+// kengine functions
 #include "BaseFunction.hpp"
+
+// kengine
 #include "Entity.hpp"
 
 namespace kengine::functions {

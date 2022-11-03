@@ -1,7 +1,12 @@
-#include <algorithm>
 #include "ComponentCollection.hpp"
-#include "Archetype.hpp"
 #include "kengine.hpp"
+
+// stl
+#include <algorithm>
+
+// kengine impl
+#include "Archetype.hpp"
+#include "GlobalState.hpp"
 
 #define TCollection ComponentCollection<Comps...>
 #define TIterator ComponentIterator<Comps...>

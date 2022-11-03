@@ -1,7 +1,10 @@
 #pragma once
 
-#include "impl/GlobalState.hpp"
+// kengine
 #include "Entities.hpp"
+
+// kengine impl
+#include "impl/GlobalState.hpp"
 
 namespace kengine {
 	void init(size_t threads = 0) noexcept;

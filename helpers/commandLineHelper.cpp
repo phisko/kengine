@@ -3,7 +3,7 @@
 // stl
 #include <span>
 
-// data
+// kengine data
 #include "data/CommandLineComponent.hpp"
 
 namespace kengine {

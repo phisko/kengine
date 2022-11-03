@@ -1,8 +1,13 @@
 #pragma once
 
-#include "BaseFunction.hpp"
-#include "impl/ID.hpp"
+// putils
 #include "Point.hpp"
+
+// kengine functions
+#include "BaseFunction.hpp"
+
+// kengine impl
+#include "impl/ID.hpp"
 
 namespace kengine::functions {
     struct GetPositionInPixel : BaseFunction<

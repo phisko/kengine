@@ -8,8 +8,10 @@
 #include <variant>
 #include <vector>
 
-// putils
+// magic_enum
 #include <magic_enum.hpp>
+
+// putils
 #include "string.hpp"
 #include "Color.hpp"
 #include "lengthof.hpp"

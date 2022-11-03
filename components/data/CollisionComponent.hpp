@@ -4,8 +4,11 @@
 # define KENGINE_COLLISION_FUNCTION_SIZE 64
 #endif
 
-#include "function.hpp"
+// reflection
 #include "reflection.hpp"
+
+// putils
+#include "function.hpp"
 
 namespace kengine {
 	class Entity;

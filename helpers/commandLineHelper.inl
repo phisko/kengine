@@ -1,8 +1,11 @@
 #include "commandLineHelper.hpp"
 #include "kengine.hpp"
 
-#include "data/CommandLineComponent.hpp"
+// putils
 #include "command_line_arguments.hpp"
+
+// kengine data
+#include "data/CommandLineComponent.hpp"
 
 namespace kengine {
     template<typename T>

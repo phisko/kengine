@@ -1,8 +1,10 @@
 #pragma once
 
+// glfw
 #include <GLFW/glfw3.h>
+
+// putils
 #include "RAII.hpp"
-#include "BaseFunction.hpp"
 
 namespace kengine {
 	struct GLFWWindowComponent {

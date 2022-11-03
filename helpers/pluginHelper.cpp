@@ -1,8 +1,11 @@
 #include "pluginHelper.hpp"
 #include "kengine.hpp"
 
+// imgui
+#include <imgui.h>
+
+// kengine data
 #include "data/ImGuiContextComponent.hpp"
-#include "imgui.h"
 
 namespace kengine::pluginHelper {
     void initPlugin(void * state) noexcept {

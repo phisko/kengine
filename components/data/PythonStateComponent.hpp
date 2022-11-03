@@ -2,7 +2,10 @@
 
 #ifdef KENGINE_PYTHON
 
+// putils
 #include "python/python_helper.hpp"
+
+// kengine
 #include "Entity.hpp"
 
 namespace kengine {

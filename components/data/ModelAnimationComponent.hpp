@@ -4,8 +4,11 @@
 # define KENGINE_ANIMATION_EXTRACTED_MOTION_FUNC_SIZE 64
 #endif
 
+// stl
 #include <string>
 #include <vector>
+
+// putils
 #include "Point.hpp"
 #include "function.hpp"
 

@@ -1,15 +1,19 @@
 #include "KinematicSystem.hpp"
 #include "kengine.hpp"
 
+// putils
+#include "angle.hpp"
+
+// kengine data
 #include "data/KinematicComponent.hpp"
 #include "data/PhysicsComponent.hpp"
 #include "data/TransformComponent.hpp"
 
+// kengine functions
 #include "functions/Execute.hpp"
 
+// kengine helpers
 #include "helpers/logHelper.hpp"
-
-#include "angle.hpp"
 
 namespace kengine::kinematic {
 	struct impl {

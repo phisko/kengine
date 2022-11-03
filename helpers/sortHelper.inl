@@ -1,9 +1,14 @@
 #include "sortHelper.hpp"
-
 #include "kengine.hpp"
-#include "data/NameComponent.hpp"
-#include "vector.hpp"
+
+// meta
 #include "meta/fwd.hpp"
+
+// putils
+#include "vector.hpp"
+
+// kengine data
+#include "data/NameComponent.hpp"
 
 namespace kengine::sortHelper {
 	namespace detail {

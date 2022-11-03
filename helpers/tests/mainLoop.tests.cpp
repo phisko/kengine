@@ -1,6 +1,10 @@
 #include "tests/KengineTest.hpp"
-#include "helpers/mainLoop.hpp"
+
+// kengine functions
 #include "functions/Execute.hpp"
+
+// kengine helpers
+#include "helpers/mainLoop.hpp"
 
 struct mainLoop : KengineTest {};
 

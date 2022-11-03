@@ -1,7 +1,10 @@
 #pragma once
 
-#include "Entity.hpp"
+// reflection
 #include "reflection.hpp"
+
+// kengine
+#include "Entity.hpp"
 
 namespace kengine::impl {
 	template<typename ... Comps>

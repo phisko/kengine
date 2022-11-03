@@ -2,9 +2,14 @@
 
 #include "kengine.hpp"
 
-#include "data/CameraComponent.hpp"
-#include "functions/AppearsInViewport.hpp"
+// putils
 #include "Rect.hpp"
+
+// kengine data
+#include "data/CameraComponent.hpp"
+
+// kengine functions
+#include "functions/AppearsInViewport.hpp"
 
 namespace kengine {
 	struct OnScreenComponent;

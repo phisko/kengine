@@ -1,6 +1,13 @@
 #include "Entities.hpp"
-#include "functions/OnEntityCreated.hpp"
+
+// meta
 #include "meta/fwd.hpp"
+
+// kengine functions
+#include "functions/OnEntityCreated.hpp"
+
+// kengine impl
+#include "impl/GlobalState.hpp"
 
 namespace kengine {
 	template<typename Func>

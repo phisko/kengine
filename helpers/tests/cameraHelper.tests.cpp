@@ -1,7 +1,11 @@
 #include "tests/KengineTest.hpp"
-#include "helpers/cameraHelper.hpp"
+
+// kengine data
 #include "data/WindowComponent.hpp"
 #include "data/ViewportComponent.hpp"
+
+// kengine helpers
+#include "helpers/cameraHelper.hpp"
 
 struct cameraHelper : KengineTest {};
 

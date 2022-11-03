@@ -1,9 +1,12 @@
 #pragma once
 
+// meta
+#include "meta/type.hpp"
+
+// kengine impl
 #include "ID.hpp"
 #include "Mutex.hpp"
 #include "ComponentSettings.hpp"
-#include "meta/type.hpp"
 
 namespace kengine::impl {
 	struct ComponentMetadata {

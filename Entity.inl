@@ -1,6 +1,10 @@
 #include "Entity.hpp"
-#include "impl/Component.hpp"
+
+// kengine helpers
 #include "helpers/assertHelper.hpp"
+
+// impl
+#include "impl/Component.hpp"
 
 namespace kengine {
 	template<typename T>

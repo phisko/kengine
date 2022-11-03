@@ -1,6 +1,9 @@
 #pragma once
 
+// stl
 #include <vector>
+
+// putils
 #include "Color.hpp"
 #include "Point.hpp"
 

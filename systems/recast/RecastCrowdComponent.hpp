@@ -1,6 +1,9 @@
 #pragma once
 
+// recast
 #include <DetourCrowd.h>
+
+// impl
 #include "UniquePtr.hpp"
 
 namespace kengine {

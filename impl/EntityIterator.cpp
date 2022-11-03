@@ -1,5 +1,9 @@
 #include "EntityIterator.hpp"
+
+// kengine
 #include "Entity.hpp"
+
+// kengine impl
 #include "Mutex.hpp"
 
 namespace kengine::impl {

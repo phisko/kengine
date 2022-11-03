@@ -1,6 +1,10 @@
 #include "tests/KengineTest.hpp"
-#include "impl/Component.hpp"
+
+// putils
 #include "scoped_setter.hpp"
+
+// kengine impl
+#include "impl/Component.hpp"
 
 struct Component : KengineTest {};
 

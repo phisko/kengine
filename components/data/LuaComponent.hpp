@@ -10,9 +10,12 @@
 # define KENGINE_MAX_LUA_SCRIPTS 8
 #endif
 
+// reflection
+#include "reflection.hpp"
+
+// putils
 #include "string.hpp"
 #include "vector.hpp"
-#include "reflection.hpp"
 
 namespace kengine {
     struct LuaComponent {
