@@ -2,7 +2,7 @@
 
 `Function Component` that lets users query the ID of the `Entity` seen in a given pixel.
 
-This `function Component` is typically attached to graphics systems (such as the [OpenGLSystem](../../systems/opengl/OpenGLSystem.md)), as they are the ones able to implement it according to their rendering technique.
+This `function Component` is typically attached to graphics systems, as they are the ones able to implement it according to their rendering technique.
 
 ## Prototype
 

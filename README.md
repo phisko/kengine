@@ -142,7 +142,7 @@ Removes any unused [Archetypes](impl/Archetype.md) to speed up future iteration 
 
 ## Reflection
 
-Many parts of the engine (such as the scripting systems or the OpenGL system) make use of `putils`' [reflection API](https://github.com/phisko/reflection). Most of the components in the following samples are thus defined as reflectible.
+Many parts of the engine (such as the scripting systems or the ImGui `Entity` editor) make use of `putils`' [reflection API](https://github.com/phisko/reflection). Most of the components in the following samples are thus defined as reflectible.
 
 ## Components
 
@@ -249,7 +249,7 @@ These are pre-built, extensible and pluggable elements that can be used to boots
 * [HighlightComponent](components/data/HighlightComponent.md): indicates that an `Entity` should be highlighted
 * [LightComponent](components/data/LightComponent.md): lets `Entities` be used as in-game light sources (directional lights, point lights or spot lights)
 * [GodRaysComponent](components/data/GodRaysComponent.md): indicates that a "light entity" should generate volumetric lighting (also known as "Almighty God Rays")
-* [ShaderComponent](components/data/ShaderComponent.md): lets `Entities` be used to introduce new OpenGL shaders
+* [ShaderComponent](components/data/ShaderComponent.md): lets `Entities` be used to introduce new shaders
 * [PolyVoxComponent](components/data/PolyVoxComponent.md): lets `Entities` be used to generate voxel-based models, drawn by the [PolyVoxSystem](systems/polyvox/PolyVoxSystem.md)
 * [SkyBoxComponent](components/data/SkyBoxComponent.md): lets `Entities` be used to draw a skybox
 * [SpriteComponent](components/data/SpriteComponent.md): indicates that an `Entity`'s `GraphicsComponent` describes a 2D or 3D sprite

@@ -1,6 +1,6 @@
 # [ModelDataComponent](ModelDataComponent.hpp)
 
-Contains the vertices and indices for a model. These are used by graphics systems (such as the [OpenGLSystem](../../systems/opengl/OpenGLSystem.md)) to load the model onto the GPU. Other systems may also want to access these elements (such as the [RecastSystem](../../systems/recast/RecastSystem.md), which uses them to generate the navmesh).
+Contains the vertices and indices for a model. These are used by graphics systems to load the model onto the GPU. Other systems may also want to access these elements (such as the [RecastSystem](../../systems/recast/RecastSystem.md), which uses them to generate the navmesh).
 
 ## Specs
 
@@ -36,7 +36,7 @@ Represents a model, made up of several meshes, each with their set of vertices a
 putils::function<void(), KENGINE_MODEL_LOADER_FUNCTION_SIZE> free = nullptr;
 ```
 
-Called to release the model data once it has been loaded into the OpenGL context.
+Called to release the model data.
 
 The maximum size for the `free` functor defaults to 64 and can be adjusted by defining the `KENGINE_MODEL_LOADER_FUNCTION_SIZE` macro.
 

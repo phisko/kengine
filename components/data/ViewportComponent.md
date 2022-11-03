@@ -6,7 +6,7 @@
 
 * [Reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
 * Serializable (POD)
-* Processed by graphics systems [OpenGLSystem](../../systems/opengl/OpenGLSystem.md)
+* Processed by graphics systems
 
 ## Members
 
@@ -49,4 +49,4 @@ using RenderTexture = void *;
 RenderTexture renderTexture = INVALID_RENDER_TEXTURE;
 ```
 
-ID for a texture to which the camera is rendered (in addition to being displayed on-screen). The type of this field depends on the graphics systems (for instance, it's a `GLuint` for the [OpenGLSystem](../../systems/opengl/OpenGLSystem.md)).
+ID for a texture to which the camera is rendered (in addition to being displayed on-screen). The type of this field depends on the graphics systems.

@@ -13,7 +13,7 @@ Debug information can be:
 
 * [Reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
 * Serializable
-* Processed by graphics systems (such as the [OpenGLSystem](../../systems/opengl/OpenGLSystem.md))
+* Processed by graphics systems
 
 ## Members
 

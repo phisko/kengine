@@ -2,13 +2,13 @@
 
 `Component` that lets `Entities` be used as operating system windows.
 
-"Window `Entities`" are automatically created by graphics systems (such as the [OpenGLSystem](../../systems/opengl/OpenGLSystem.md)) if no user-created "window `Entity`" is available.
+"Window `Entities`" are automatically created by graphics systems if no user-created "window `Entity`" is available.
 
 ## Specs
 
 * [Reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
 * Serializable (POD)
-* Processed by graphics systems (such as the [OpenGLSystem](../../systems/opengl/OpenGLSystem.md))
+* Processed by graphics systems
 
 ## Members
 

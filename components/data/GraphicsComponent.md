@@ -6,7 +6,7 @@
 
 * [Reflectible](https://github.com/phisko/putils/blob/master/reflection.md)
 * Serializable (POD), although the [model](#model) attribute will be invalidated
-* Processed by graphics systems (such as the [OpenGLSystem](../../systems/opengl/OpenGLSystem.md))
+* Processed by graphics systems
 
 ## Members
 

@@ -4,7 +4,7 @@
 
 ## Usage
 
-Graphics systems (such as the [OpenGLSystem](../../systems/opengl/OpenGLSystem.md)) sometimes offer an [adjustable](AdjustableComponent.md) that lets users scale ImGui elements to their liking. There are of course other potential use cases.
+Graphics systems sometimes offer an [adjustable](AdjustableComponent.md) that lets users scale ImGui elements to their liking. There are of course other potential use cases.
 
 ## Members
 
