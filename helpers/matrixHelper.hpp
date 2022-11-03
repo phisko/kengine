@@ -23,9 +23,6 @@ namespace kengine {
 		putils::Point3f convertToReferencial(const putils::Point3f & pos, const glm::mat4 & conversionMatrix) noexcept;
 
 		glm::mat4 getModelMatrix(const TransformComponent & transform, const TransformComponent * modelTransform = nullptr) noexcept;
-
-		glm::mat4 getProjMatrix(const CameraComponent & cam, const ViewportComponent & viewport, float nearPlane, float farPlane) noexcept;
-		glm::mat4 getViewMatrix(const CameraComponent & cam, const ViewportComponent & viewport) noexcept;
 	}
 }
 

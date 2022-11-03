@@ -82,20 +82,6 @@ namespace kengine::matrixHelper {
 
 		return model;
 	}
-
-	glm::mat4 getProjMatrix(const CameraComponent & cam, const ViewportComponent & viewport, float nearPlane, float farPlane) noexcept {
-		return glm::perspective(
-			cam.frustum.size.y,
-			(float)viewport.resolution.x / (float)viewport.resolution.y,
-			nearPlane, farPlane
-		);
-	}
-
-	glm::mat4 getViewMatrix(const CameraComponent & cam, const ViewportComponent & viewport) noexcept {
-		const auto facings = cameraHelper::getFacings(cam);
-		const auto camPos = toVec(cam.frustum.position);
-		return glm::lookAt(camPos, camPos + toVec(facings.front), toVec(facings.up));
-	}
 }
 
 #endif
