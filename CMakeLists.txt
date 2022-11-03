@@ -73,6 +73,10 @@ set(PUTILS_IMGUI ON)
 option(PUTILS_PLUGIN_MANAGER "Build PluginManager" OFF)
 set(PUTILS_PLUGIN_MANAGER ON)
 
+option(KENGINE_PROFILING OFF)
+option(PUTILS_PROFILING OFF)
+set(PUTILS_PROFILING ${KENGINE_PROFILING})
+
 add_subdirectory(putils)
 
 # Library
@@ -95,6 +99,10 @@ endif()
 
 add_library(kengine STATIC ${src_files})
 target_link_libraries(kengine PUBLIC putils)
+
+if (KENGINE_PROFILING)
+    target_compile_definitions(kengine PUBLIC KENGINE_PROFILING)
+endif()
 
 if (KENGINE_GLM)
     target_compile_definitions(kengine PUBLIC KENGINE_GLM)
