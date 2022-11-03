@@ -392,6 +392,7 @@ These are helper functions to factorize typical manipulations of `Components`.
 * [mainLoop](helpers/mainLoop.md)
 * [matrixHelper](helpers/matrixHelper.md)
 * [pluginHelper](helpers/pluginHelper.md): provides an `initPlugin` function to be called from DLLs
+* [profilingHelper](helpers/profilingHelper.md)
 * [pythonHelper](helpers/pythonHelper.md)
 * [registerTypeHelper](helpers/registerTypeHelper.md)
 * [scriptLanguageHelper](helpers/scriptLanguageHelper.md): helpers to easily implement new scripting languages
