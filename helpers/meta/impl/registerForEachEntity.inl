@@ -1,6 +1,9 @@
 #include "registerEditImGui.hpp"
 
+// kengine meta
 #include "meta/ForEachEntity.hpp"
+
+// kengine helpers
 #include "helpers/registerMetaComponentImplementation.hpp"
 
 namespace kengine {

@@ -4,6 +4,19 @@
 // stl
 #include <fstream>
 
+// magic_enum
+#include <magic_enum.hpp>
+
+// imgui
+#include <imgui.h>
+
+// putils
+#include "vector.hpp"
+#include "to_string.hpp"
+#include "visit.hpp"
+#include "IniFile.hpp"
+#include "static_assert.hpp"
+
 // kengine data
 #include "data/AdjustableComponent.hpp"
 #include "data/ImGuiToolComponent.hpp"
@@ -16,15 +29,6 @@
 
 // kengine helpers
 #include "helpers/logHelper.hpp"
-
-// putils
-#include <magic_enum.hpp>
-#include "imgui.h"
-#include "vector.hpp"
-#include "to_string.hpp"
-#include "visit.hpp"
-#include "IniFile.hpp"
-#include "static_assert.hpp"
 
 #ifndef KENGINE_DEFAULT_ADJUSTABLE_SAVE_PATH
 # define KENGINE_DEFAULT_ADJUSTABLE_SAVE_PATH "."

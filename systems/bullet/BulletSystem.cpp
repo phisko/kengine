@@ -1,14 +1,27 @@
+#include "BulletSystem.hpp"
+#include "kengine.hpp"
+
+// stl
 #include <map>
 #include <memory>
 
+// glm
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/euler_angles.hpp>
 
-#include "BulletSystem.hpp"
-#include "kengine.hpp"
+// bullet
+#include <btBulletDynamicsCommon.h>
+#include <BulletCollision/CollisionDispatch/btGhostObject.h>
 
+// termcolor
+#include <termcolor/termcolor.hpp>
+
+// magic_enum
+#include <magic_enum.hpp>
+
+// kengine data
 #include "data/AdjustableComponent.hpp"
 #include "data/DebugGraphicsComponent.hpp"
 #include "data/GraphicsComponent.hpp"
@@ -20,20 +33,16 @@
 #include "data/SkeletonComponent.hpp"
 #include "data/TransformComponent.hpp"
 
+// kengine functions
 #include "functions/Execute.hpp"
 #include "functions/OnCollision.hpp"
 #include "functions/QueryPosition.hpp"
 
+// kengine helpers
 #include "helpers/matrixHelper.hpp"
 #include "helpers/skeletonHelper.hpp"
 #include "helpers/assertHelper.hpp"
 #include "helpers/logHelper.hpp"
-
-#include <termcolor/termcolor.hpp>
-#include <magic_enum.hpp>
-
-#include "btBulletDynamicsCommon.h"
-#include "BulletCollision/CollisionDispatch/btGhostObject.h"
 
 namespace putils {
 	inline bool operator<(const Point3f & lhs, const Point3f & rhs) noexcept {

@@ -1,9 +1,11 @@
 #pragma once
 
-#include "UniquePtr.hpp"
-
+// recast
 #include <DetourNavMesh.h>
 #include <DetourNavMeshQuery.h>
+
+// impl
+#include "UniquePtr.hpp"
 
 namespace kengine {
 	using NavMeshPtr = UniquePtr<dtNavMesh, dtFreeNavMesh>;

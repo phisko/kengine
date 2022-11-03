@@ -1,15 +1,19 @@
 #include "registerMatchString.hpp"
 
-// kengine
-#include "meta/MatchString.hpp"
-#include "helpers/registerMetaComponentImplementation.hpp"
+// sol
+#ifdef KENGINE_LUA
+# include <sol/sol.hpp>
+#endif
 
 // putils
 #include "to_string.hpp"
-#ifdef KENGINE_LUA
-# include "sol/sol.hpp"
-#endif
 #include "reflection_helpers/imgui_helper.hpp"
+
+// kengine meta
+#include "meta/MatchString.hpp"
+
+// kengine helpers
+#include "helpers/registerMetaComponentImplementation.hpp"
 
 namespace kengine {
 	namespace impl {

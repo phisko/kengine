@@ -1,8 +1,13 @@
 #pragma once
 
+// putils
 #include "Rect.hpp"
-#include "impl/ID.hpp"
+
+// kengine data
 #include "OnScreenComponent.hpp"
+
+// kengine impl
+#include "impl/ID.hpp"
 
 namespace kengine {
 	struct ViewportComponent : OnScreenComponent {

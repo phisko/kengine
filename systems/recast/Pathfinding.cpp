@@ -2,22 +2,26 @@
 # define KENGINE_RECAST_MAX_AGENTS 1024
 #endif
 
+// putils
+#include "lengthof.hpp"
+#include "on_scope_exit.hpp"
+
+// kengine data
 #include "data/PathfindingComponent.hpp"
 #include "data/PhysicsComponent.hpp"
 #include "data/TransformComponent.hpp"
 #include "data/NavMeshComponent.hpp"
 
+// kengine helpers
 #include "helpers/instanceHelper.hpp"
 #include "helpers/matrixHelper.hpp"
 #include "helpers/logHelper.hpp"
 
+// impl
 #include "Common.hpp"
 #include "RecastAgentComponent.hpp"
 #include "RecastCrowdComponent.hpp"
 #include "RecastNavMeshComponent.hpp"
-
-#include "lengthof.hpp"
-#include "on_scope_exit.hpp"
 
 namespace kengine::recast {
 	void doPathfinding(float deltaTime) noexcept {

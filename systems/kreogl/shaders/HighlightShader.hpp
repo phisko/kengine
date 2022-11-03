@@ -1,8 +1,10 @@
 #pragma once
 
+// kreogl
 #include "kreogl/impl/shaders/Shader.hpp"
 #include "kreogl/impl/shaders/Singleton.hpp"
 
+// impl
 #include "HighlightGLSL.hpp"
 
 namespace kengine {

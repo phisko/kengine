@@ -1,13 +1,17 @@
 #pragma once
 
-#include "reflection.hpp"
-
 #ifndef KENGINE_FONT_PATH_MAX_LENGTH
 # define KENGINE_FONT_PATH_MAX_LENGTH 128
 #endif
 
+// reflection
+#include "reflection.hpp"
+
+// putils
 #include "string.hpp"
 #include "Color.hpp"
+
+// kengine data
 #include "OnScreenComponent.hpp"
 
 namespace kengine {

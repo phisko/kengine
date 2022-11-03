@@ -1,5 +1,7 @@
-#include <algorithm>
 #include "Archetype.hpp"
+
+// stl
+#include <algorithm>
 
 namespace kengine::impl {
 	Archetype::Archetype(ComponentMask mask, EntityID firstEntity) noexcept

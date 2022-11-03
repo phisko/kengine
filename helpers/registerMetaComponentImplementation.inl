@@ -1,8 +1,12 @@
 #include "registerMetaComponentImplementation.hpp"
-#include "helpers/typeHelper.hpp"
-#include "helpers/logHelper.hpp"
+
+// meta
 #include "meta/for_each.hpp"
 #include "meta/fwd.hpp"
+
+// kengine helpers
+#include "helpers/typeHelper.hpp"
+#include "helpers/logHelper.hpp"
 
 namespace kengine {
 	template<typename Meta, typename ... Comps, typename Func>

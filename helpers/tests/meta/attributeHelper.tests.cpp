@@ -1,8 +1,12 @@
 #include "tests/KengineTest.hpp"
+
+// kengine data
+#include "data/TransformComponent.hpp"
+
+// kengine helpers
 #include "helpers/meta/attributeHelper.hpp"
 #include "helpers/registerTypeHelper.hpp"
 #include "helpers/typeHelper.hpp"
-#include "data/TransformComponent.hpp"
 
 struct attributeHelper : KengineTest {};
 

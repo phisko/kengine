@@ -1,10 +1,12 @@
 #include "ModelCreatorSystem.hpp"
 #include "kengine.hpp"
 
+// kengine data
 #include "data/GraphicsComponent.hpp"
 #include "data/InstanceComponent.hpp"
 #include "data/ModelComponent.hpp"
 
+// kengine helpers
 #include "helpers/logHelper.hpp"
 
 namespace kengine {

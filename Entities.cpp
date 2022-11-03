@@ -1,5 +1,9 @@
 #include "Entities.hpp"
+
+// kengine functions
 #include "functions/OnEntityRemoved.hpp"
+
+// kengine impl
 #include "impl/ComponentMask.hpp"
 #include "impl/ID.hpp"
 

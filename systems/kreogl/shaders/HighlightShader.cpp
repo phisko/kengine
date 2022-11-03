@@ -1,14 +1,14 @@
 #include "HighlightShader.hpp"
-
-// kengine
 #include "kengine.hpp"
-#include "data/HighlightComponent.hpp"
 
 // kreogl
 #include "kreogl/Camera.hpp"
 #include "kreogl/impl/RAII/ScopedGLFeature.hpp"
 #include "kreogl/impl/shaders/helpers/Quad/QuadGLSL.hpp"
 #include "kreogl/impl/shapes/Quad.hpp"
+
+// kengine data
+#include "data/HighlightComponent.hpp"
 
 kengine::HighlightShader::HighlightShader() noexcept {
 	init("HighlightShader");

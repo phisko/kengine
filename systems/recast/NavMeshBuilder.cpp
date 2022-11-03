@@ -1,26 +1,32 @@
+#include "kengine.hpp"
+
+// stl
 #include <filesystem>
 #include <fstream>
 
+// recast
 #include <Recast.h>
 #include <DetourNavMeshBuilder.h>
 
-#include "kengine.hpp"
+// putils
+#include "lengthof.hpp"
+#include "on_scope_exit.hpp"
+#include "with.hpp"
 
+// kengine data
 #include "data/ModelComponent.hpp"
 #include "data/ModelDataComponent.hpp"
 #include "data/NavMeshComponent.hpp"
 #include "data/TransformComponent.hpp"
 
+// kengine helpers
 #include "helpers/assertHelper.hpp"
 #include "helpers/matrixHelper.hpp"
 #include "helpers/logHelper.hpp"
 
+// impl
 #include "Common.hpp"
 #include "RecastNavMeshComponent.hpp"
-
-#include "lengthof.hpp"
-#include "on_scope_exit.hpp"
-#include "with.hpp"
 
 namespace Flags {
 	enum {

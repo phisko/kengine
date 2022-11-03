@@ -1,10 +1,19 @@
 #include "LogImGuiSystem.hpp"
+#include "kengine.hpp"
 
 // stl
 #include <mutex>
 #include <list>
 
-#include "kengine.hpp"
+// magic_enum
+#include <magic_enum.hpp>
+
+// imgui
+#include <imgui.h>
+
+// putils
+#include "thread_name.hpp"
+#include "lengthof.hpp"
 
 // kengine data
 #include "data/AdjustableComponent.hpp"
@@ -17,12 +26,6 @@
 
 // kengine helpers
 #include "helpers/logHelper.hpp"
-
-// putils
-#include <magic_enum.hpp>
-#include "thread_name.hpp"
-#include "lengthof.hpp"
-#include "imgui.h"
 
 namespace detail {
     struct LogEvent {

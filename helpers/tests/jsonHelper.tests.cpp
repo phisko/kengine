@@ -1,8 +1,12 @@
 #include "tests/KengineTest.hpp"
-#include "helpers/jsonHelper.hpp"
-#include "helpers/registerTypeHelper.hpp"
+
+// kengine data
 #include "data/NameComponent.hpp"
 #include "data/TransformComponent.hpp"
+
+// kengine helpers
+#include "helpers/jsonHelper.hpp"
+#include "helpers/registerTypeHelper.hpp"
 
 struct jsonHelper : KengineTest {
     jsonHelper() noexcept {

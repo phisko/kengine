@@ -1,8 +1,12 @@
 #ifdef KENGINE_GLM
 
 #include "tests/KengineTest.hpp"
-#include "helpers/matrixHelper.hpp"
+
+// kengine data
 #include "data/TransformComponent.hpp"
+
+// kengine helpers
+#include "helpers/matrixHelper.hpp"
 
 struct matrixHelper : KengineTest {};
 

@@ -1,6 +1,10 @@
 #include "Component.hpp"
-#include "ComponentMask.hpp"
+
+// kengine helpers
 #include "helpers/assertHelper.hpp"
+
+// kengine impl
+#include "ComponentMask.hpp"
 
 namespace kengine::impl {
 	static void updateHasComponent(EntityID entity, ComponentID component, bool newHasComponent) noexcept {

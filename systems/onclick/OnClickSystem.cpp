@@ -1,9 +1,14 @@
 #include "OnClickSystem.hpp"
 #include "kengine.hpp"
 
+// kengine data
 #include "data/InputComponent.hpp"
+
+// kengine functions
 #include "functions/GetEntityInPixel.hpp"
 #include "functions/OnClick.hpp"
+
+// kengine helpers
 #include "helpers/logHelper.hpp"
 
 namespace kengine::onclick {

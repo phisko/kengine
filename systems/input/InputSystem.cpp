@@ -1,8 +1,14 @@
 #include "InputSystem.hpp"
 #include "kengine.hpp"
+
+// kengine data
 #include "data/InputComponent.hpp"
 #include "data/InputBufferComponent.hpp"
+
+// kengine functions
 #include "functions/Execute.hpp"
+
+// kengine helpers
 #include "helpers/logHelper.hpp"
 
 namespace kengine::input {

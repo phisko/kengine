@@ -1,16 +1,21 @@
 #include "ImGuiEntityEditorSystem.hpp"
 #include "kengine.hpp"
 
+// imgui
+#include <imgui.h>
+
+// kengine data
 #include "data/ImGuiToolComponent.hpp"
 #include "data/InstanceComponent.hpp"
 #include "data/SelectedComponent.hpp"
 #include "data/NameComponent.hpp"
 
+// kengine functions
 #include "functions/Execute.hpp"
 
+// kengine helpers
 #include "helpers/logHelper.hpp"
 #include "helpers/imguiHelper.hpp"
-#include "imgui.h"
 
 namespace kengine {
 	EntityCreator * ImGuiEntityEditorSystem() noexcept {

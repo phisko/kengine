@@ -1,12 +1,13 @@
-// kengine helpers
 #include "typeHelper.hpp"
-#include "logHelper.hpp"
 
-// functions
+// reflection
+#include "reflection.hpp"
+
+// kengine functions
 #include "functions/OnTerminate.hpp"
 
-// putils
-#include "reflection.hpp"
+// kengine helpers
+#include "helpers/logHelper.hpp"
 
 namespace kengine::typeHelper {
     namespace impl {

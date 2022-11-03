@@ -1,7 +1,10 @@
-#include <algorithm>
-
 #include "GlobalState.hpp"
 #include "kengine.hpp"
+
+// stl
+#include <algorithm>
+
+// kengine helpers
 #include "helpers/assertHelper.hpp"
 
 namespace kengine::impl {

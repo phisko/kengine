@@ -1,16 +1,20 @@
 #include "RecastSystem.hpp"
 #include "Common.hpp"
 
+// kengine data
 #include "data/AdjustableComponent.hpp"
 #include "data/ShaderComponent.hpp"
 
-#include "RecastAgentComponent.hpp"
-#include "RecastCrowdComponent.hpp"
-
+// kengine functions
 #include "functions/Execute.hpp"
 #include "functions/OnEntityRemoved.hpp"
 
+// kengine helpers
 #include "helpers/logHelper.hpp"
+
+// impl
+#include "RecastAgentComponent.hpp"
+#include "RecastCrowdComponent.hpp"
 
 namespace kengine {
 	namespace recast {

@@ -1,7 +1,10 @@
 #pragma once
 
-#include "functions/Log.hpp"
+// putils
 #include "string.hpp"
+
+// kengine functions
+#include "functions/Log.hpp"
 
 namespace kengine::logHelper {
     void log(LogSeverity severity, const char * category, const char * message) noexcept;

@@ -1,6 +1,6 @@
-#include <gtest/gtest.h>
 #include "tests/KengineTest.hpp"
 
+// kengine helpers
 #include "helpers/commandLineHelper.hpp"
 
 struct commandLineHelper : KengineTest {};

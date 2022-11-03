@@ -1,8 +1,13 @@
 #include "registerEditImGui.hpp"
 
-#include "meta/EditImGui.hpp"
-#include "helpers/registerMetaComponentImplementation.hpp"
+// putils
 #include "reflection_helpers/imgui_helper.hpp"
+
+// kengine meta
+#include "meta/EditImGui.hpp"
+
+// kengine helpers
+#include "helpers/registerMetaComponentImplementation.hpp"
 
 namespace kengine {
 	template<typename ... Comps>

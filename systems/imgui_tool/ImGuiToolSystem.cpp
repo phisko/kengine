@@ -1,18 +1,26 @@
-#include <fstream>
-
 #include "ImGuiToolSystem.hpp"
 #include "kengine.hpp"
 
-#include "helpers/sortHelper.hpp"
-#include "helpers/logHelper.hpp"
+// stl
+#include <fstream>
 
-#include "functions/OnTerminate.hpp"
-#include "functions/Execute.hpp"
+// imgui
+#include <imgui.h>
+
+// putils
+#include "to_string.hpp"
+
+// kengine data
 #include "data/ImGuiToolComponent.hpp"
 #include "data/NameComponent.hpp"
-#include "imgui.h"
 
-#include "to_string.hpp"
+// kengine functions
+#include "functions/OnTerminate.hpp"
+#include "functions/Execute.hpp"
+
+// kengine helpers
+#include "helpers/sortHelper.hpp"
+#include "helpers/logHelper.hpp"
 
 #ifndef KENGINE_IMGUI_TOOLS_SAVE_FILE
 # define KENGINE_IMGUI_TOOLS_SAVE_FILE "tools.cnf"

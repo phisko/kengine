@@ -8,10 +8,15 @@
 # define KENGINE_NAVMESH_FUNC_SIZE 64
 #endif
 
+// reflection
 #include "reflection.hpp"
+
+// putils
 #include "angle.hpp"
 #include "Point.hpp"
 #include "vector.hpp"
+
+// kengine functions
 #include "BaseFunction.hpp"
 
 namespace kengine {

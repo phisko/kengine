@@ -1,8 +1,13 @@
 #include "registerDisplayImGui.hpp"
 
-#include "meta/DisplayImGui.hpp"
-#include "helpers/registerMetaComponentImplementation.hpp"
+// putils
 #include "reflection_helpers/imgui_helper.hpp"
+
+// kengine meta
+#include "meta/DisplayImGui.hpp"
+
+// kengine helpers
+#include "helpers/registerMetaComponentImplementation.hpp"
 
 namespace kengine {
 	template<typename ... Comps>

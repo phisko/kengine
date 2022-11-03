@@ -4,9 +4,12 @@
 # define KENGINE_INPUT_FUNCTION_SIZE 64
 #endif
 
-#include "impl/ID.hpp"
+// putils
 #include "function.hpp"
 #include "Point.hpp"
+
+// kengine impl
+#include "impl/ID.hpp"
 
 namespace kengine {
     struct InputComponent {

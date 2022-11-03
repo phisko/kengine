@@ -1,8 +1,13 @@
 #include "pythonHelper.hpp"
 
-#include "data/PythonStateComponent.hpp"
+// putils
 #include "python/python_helper.hpp"
-#include "logHelper.hpp"
+
+// kengine data
+#include "data/PythonStateComponent.hpp"
+
+// kengine helpers
+#include "helpers/logHelper.hpp"
 
 namespace kengine::pythonHelper {
 	namespace impl {

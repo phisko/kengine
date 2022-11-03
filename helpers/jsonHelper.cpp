@@ -1,10 +1,14 @@
 #include "jsonHelper.hpp"
 
+// kengine data
 #include "data/NameComponent.hpp"
+
+// kengine meta
 #include "meta/Has.hpp"
 #include "meta/LoadFromJSON.hpp"
 #include "meta/SaveToJSON.hpp"
 
+// kengine helpers
 #include "helpers/sortHelper.hpp"
 
 namespace kengine::jsonHelper {

@@ -1,8 +1,14 @@
 #include "CollisionSystem.hpp"
 #include "kengine.hpp"
 
-#include "functions/OnCollision.hpp"
+// kengine data
 #include "data/CollisionComponent.hpp"
+
+// kengine functions
+#include "functions/OnCollision.hpp"
+
+// kengine helpers
+#include "helpers/logHelper.hpp"
 
 namespace kengine::collision {
 	struct impl {

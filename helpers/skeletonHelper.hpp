@@ -2,7 +2,10 @@
 
 #ifdef KENGINE_GLM
 
+// glm
 #include <glm/glm.hpp>
+
+// kengine data
 #include "data/SkeletonComponent.hpp"
 #include "data/ModelSkeletonComponent.hpp"
 

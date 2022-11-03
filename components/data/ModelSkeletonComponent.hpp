@@ -1,7 +1,10 @@
 #pragma once
 
+// stl
 #include <vector>
 #include <string>
+
+// reflection
 #include "reflection.hpp"
 
 #ifndef KENGINE_BONE_NAME_MAX_LENGTH

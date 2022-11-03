@@ -1,5 +1,6 @@
 #pragma once
 
+// kengine impl
 #include "ComponentMetadata.hpp"
 
 #ifndef KENGINE_COMPONENT_CHUNK_SIZE

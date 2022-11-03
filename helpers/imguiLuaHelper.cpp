@@ -1,8 +1,12 @@
 #ifdef KENGINE_LUA
 
-#include "imguiHelper.hpp"
 #include "kengine.hpp"
+
+// kengine data
 #include "data/LuaStateComponent.hpp"
+
+// kengine helpers
+#include "helpers/imguiHelper.hpp"
 #include "helpers/logHelper.hpp"
 
 extern lua_State * lState;

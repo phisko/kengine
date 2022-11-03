@@ -1,5 +1,4 @@
 #include "tests/KengineTest.hpp"
-#include "kengine.hpp"
 
 struct ComponentCollection : KengineTest {};
 

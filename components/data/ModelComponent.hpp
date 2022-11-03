@@ -4,8 +4,8 @@
 # define KENGINE_MODEL_STRING_MAX_LENGTH 128
 #endif
 
+// putils
 #include "string.hpp"
-#include "Rect.hpp"
 
 namespace kengine {
 	struct ModelComponent {

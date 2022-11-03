@@ -1,16 +1,29 @@
 #include "KreoglSystem.hpp"
-
 #include "kengine.hpp"
 
 // stl
 #include <algorithm>
 #include <filesystem>
 
-// GL
+// gl
 #include <GL/glew.h>
 #include <GL/gl.h>
 
-// data
+// imgui
+#include <imgui.h>
+#include <backends/imgui_impl_glfw.h>
+#include <backends/imgui_impl_opengl3.h>
+
+// kreogl
+#include "kreogl/Camera.hpp"
+#include "kreogl/Sprite.hpp"
+#include "kreogl/Text.hpp"
+#include "kreogl/Window.hpp"
+#include "kreogl/World.hpp"
+#include "kreogl/animation/AnimatedObject.hpp"
+#include "kreogl/loaders/assimp/AssImp.hpp"
+
+// kengine data
 #include "data/AdjustableComponent.hpp"
 #include "data/AnimationComponent.hpp"
 #include "data/AnimationFilesComponent.hpp"
@@ -36,31 +49,17 @@
 #include "data/ViewportComponent.hpp"
 #include "data/WindowComponent.hpp"
 
-// functions
+// kengine functions
 #include "functions/Execute.hpp"
 #include "functions/GetEntityInPixel.hpp"
 #include "functions/GetPositionInPixel.hpp"
 
-// helpers
+// kengine helpers
 #include "helpers/cameraHelper.hpp"
 #include "helpers/imguiHelper.hpp"
 #include "helpers/instanceHelper.hpp"
 #include "helpers/logHelper.hpp"
 #include "helpers/matrixHelper.hpp"
-
-// imgui
-#include "imgui.h"
-#include "backends/imgui_impl_glfw.h"
-#include "backends/imgui_impl_opengl3.h"
-
-// kreogl
-#include "kreogl/Camera.hpp"
-#include "kreogl/Sprite.hpp"
-#include "kreogl/Text.hpp"
-#include "kreogl/Window.hpp"
-#include "kreogl/World.hpp"
-#include "kreogl/animation/AnimatedObject.hpp"
-#include "kreogl/loaders/assimp/AssImp.hpp"
 
 // impl
 #include "KreoglAnimationFilesComponent.hpp"

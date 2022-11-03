@@ -2,7 +2,8 @@
 
 #ifdef KENGINE_PYTHON
 
-#include "scriptLanguageHelper.hpp"
+// kengine helpers
+#include "helpers/scriptLanguageHelper.hpp"
 
 namespace kengine::pythonHelper {
 	template<typename ... Types>

@@ -1,14 +1,14 @@
 #ifdef KENGINE_GLM
 
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
 #include "matrixHelper.hpp"
 
-#include "data/TransformComponent.hpp"
-#include "data/CameraComponent.hpp"
-#include "data/ViewportComponent.hpp"
+// glm
+#include <glm/gtc/matrix_transform.hpp>
 
+// kengine data
+#include "data/TransformComponent.hpp"
+
+// kengine helpers
 #include "helpers/cameraHelper.hpp"
 
 namespace kengine::matrixHelper {

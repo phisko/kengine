@@ -1,19 +1,24 @@
-#include <GLFW/glfw3.h>
-
 #include "GLFWSystem.hpp"
 #include "kengine.hpp"
 
+// glfw
+#include <GLFW/glfw3.h>
+
+// imgui
+#include <imgui.h>
+
+// kengine data
 #include "data/InputBufferComponent.hpp"
 #include "data/GLFWWindowComponent.hpp"
 #include "data/WindowComponent.hpp"
 
+// kengine functions
 #include "functions/OnTerminate.hpp"
 #include "functions/OnMouseCaptured.hpp"
 #include "functions/Execute.hpp"
 
+// kengine helpers
 #include "helpers/logHelper.hpp"
-
-#include "imgui.h"
 
 namespace kengine {
 	namespace Input {

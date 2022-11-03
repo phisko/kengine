@@ -1,6 +1,9 @@
 #include "registerCopy.hpp"
 
+// kengine meta
 #include "meta/Copy.hpp"
+
+// kengine helpers
 #include "helpers/registerMetaComponentImplementation.hpp"
 
 namespace kengine {

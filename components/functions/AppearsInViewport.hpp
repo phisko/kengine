@@ -1,7 +1,10 @@
 #pragma once
 
-#include "BaseFunction.hpp"
+// kengine
 #include "Entity.hpp"
+
+// kengine functions
+#include "BaseFunction.hpp"
 
 namespace kengine::functions {
 	struct AppearsInViewport : BaseFunction<

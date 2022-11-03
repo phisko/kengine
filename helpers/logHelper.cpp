@@ -1,11 +1,11 @@
 #include "logHelper.hpp"
-
-// kengine
 #include "kengine.hpp"
-#include "data/CommandLineComponent.hpp"
 
 // putils
 #include "command_line_arguments.hpp"
+
+// kengine data
+#include "data/CommandLineComponent.hpp"
 
 namespace {
     struct Options {

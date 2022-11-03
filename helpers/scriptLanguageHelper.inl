@@ -1,13 +1,13 @@
 #include "scriptLanguageHelper.hpp"
-
-// kengine
 #include "kengine.hpp"
-#include "helpers/logHelper.hpp"
 
 // putils
 #include "string.hpp"
 #include "with.hpp"
 #include "function.hpp"
+
+// kengine helpers
+#include "helpers/logHelper.hpp"
 
 namespace kengine::scriptLanguageHelper {
 	template<typename Func>

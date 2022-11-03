@@ -1,5 +1,7 @@
 #include "luaHelper.hpp"
-#include "logHelper.hpp"
+
+// kengine helpers
+#include "helpers/logHelper.hpp"
 
 namespace kengine::luaHelper {
 	namespace impl {

@@ -1,16 +1,26 @@
 #ifndef KENGINE_NDEBUG
 
-#include <unordered_set>
-
 #include "assertHelper.hpp"
 #include "kengine.hpp"
 
-#include "data/TimeModulatorComponent.hpp"
-#include "functions/Execute.hpp"
-#include "logHelper.hpp"
-#include "imgui.h"
+// stl
+#include <unordered_set>
+
+// imgui
+#include <imgui.h>
+
+// putils
 #include "string.hpp"
 #include "get_call_stack.hpp"
+
+// kengine data
+#include "data/TimeModulatorComponent.hpp"
+
+// kengine functions
+#include "functions/Execute.hpp"
+
+// kengine helpers
+#include "helpers/logHelper.hpp"
 
 namespace kengine::assertHelper {
 #ifdef KENGINE_IMGUI_ASSERT_HANDLER

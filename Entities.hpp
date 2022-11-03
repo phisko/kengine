@@ -1,6 +1,9 @@
 #pragma once
 
+// kengine
 #include "Entity.hpp"
+
+// kengine impl
 #include "impl/EntityIterator.hpp"
 #include "impl/ComponentCollection.hpp"
 

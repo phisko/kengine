@@ -1,7 +1,12 @@
 #pragma once
 
-#include <glm/glm.hpp>
+// stl
 #include <vector>
+
+// glm
+#include <glm/glm.hpp>
+
+// reflection
 #include "reflection.hpp"
 
 #ifndef KENGINE_SKELETON_MAX_BONES

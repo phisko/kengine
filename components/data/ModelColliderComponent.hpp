@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Rect.hpp"
 
 #ifndef KENGINE_BONE_NAME_MAX_LENGTH
 # define KENGINE_BONE_NAME_MAX_LENGTH 64
@@ -10,8 +9,11 @@
 # define KENGINE_MAX_MODEL_COLLIDERS 64
 #endif
 
+// putils
 #include "string.hpp"
 #include "vector.hpp"
+
+// kengine data
 #include "data/TransformComponent.hpp"
 
 namespace kengine {

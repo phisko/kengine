@@ -1,6 +1,8 @@
 #pragma once
 
 #include "kengine.hpp"
+
+// kengine meta
 #include "meta/Attributes.hpp"
 
 namespace kengine::meta::attributeHelper {

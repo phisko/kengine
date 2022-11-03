@@ -1,10 +1,16 @@
-#include <chrono>
-
 #include "mainLoop.hpp"
 #include "kengine.hpp"
 
+// stl
+#include <chrono>
+
+// kengine data
 #include "data/TimeModulatorComponent.hpp"
+
+// kengine functions
 #include "functions/Execute.hpp"
+
+// kengine helpers
 #include "helpers/logHelper.hpp"
 
 template<typename F>

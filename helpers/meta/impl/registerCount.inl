@@ -1,6 +1,9 @@
 #include "registerCount.hpp"
 
+// kengine meta
 #include "meta/Count.hpp"
+
+// kengine helpers
 #include "helpers/registerMetaComponentImplementation.hpp"
 
 namespace kengine {

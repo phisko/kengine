@@ -1,15 +1,22 @@
 #include "MagicaVoxelSystem.hpp"
+#include "kengine.hpp"
 
+// stl
 #include <filesystem>
 #include <unordered_map>
 #include <fstream>
 
+// polyvox
 #include <PolyVox/RawVolume.h>
 #include <PolyVox/CubicSurfaceExtractor.h>
 #include <PolyVox/VolumeResampler.h>
 
-#include "kengine.hpp"
+// putils
+#include "string.hpp"
+#include "file_extension.hpp"
+#include "MagicaVoxel.hpp"
 
+// kengine data
 #include "data/InstanceComponent.hpp"
 #include "data/ModelDataComponent.hpp"
 #include "data/ModelComponent.hpp"
@@ -18,15 +25,12 @@
 #include "data/PolyVoxComponent.hpp"
 #include "data/DefaultShadowComponent.hpp"
 
+// kengine functions
 #include "functions/OnEntityCreated.hpp"
 
+// kengine helpers
 #include "helpers/assertHelper.hpp"
 #include "helpers/instanceHelper.hpp"
-
-#include "string.hpp"
-#include "Export.hpp"
-#include "file_extension.hpp"
-#include "MagicaVoxel.hpp"
 #include "helpers/logHelper.hpp"
 
 namespace kengine {

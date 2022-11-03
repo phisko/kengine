@@ -1,17 +1,22 @@
 #include "PolyVoxSystem.hpp"
+#include "kengine.hpp"
 
+// polyvox
 #include <PolyVox/CubicSurfaceExtractor.h>
 
-#include "kengine.hpp"
+// meta
+#include "meta/type.hpp"
+
+// kengine data
 #include "data/ModelDataComponent.hpp"
 #include "data/PolyVoxComponent.hpp"
 #include "data/TransformComponent.hpp"
 
+// kengine functions
 #include "functions/Execute.hpp"
 
+// kengine helpers
 #include "helpers/logHelper.hpp"
-
-#include "meta/type.hpp"
 
 namespace kengine {
 	static auto buildMesh(PolyVox::RawVolume<PolyVoxComponent::VertexData> && volume) noexcept {
