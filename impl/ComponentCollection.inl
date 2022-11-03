@@ -4,6 +4,9 @@
 // stl
 #include <algorithm>
 
+// kengine helpers
+#include "helpers/profilingHelper.hpp"
+
 // kengine impl
 #include "Archetype.hpp"
 #include "GlobalState.hpp"
@@ -14,6 +17,8 @@
 namespace kengine::impl {
 	template<typename ... Comps>
 	TIterator TCollection::begin() const noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		ReadLock l(state->_archetypesMutex);
 
 		size_t archetypeIndex = 0;
@@ -42,6 +47,8 @@ namespace kengine::impl {
 
 	template<typename ... Comps>
 	size_t TCollection::size() const noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		ReadLock l(state->_archetypesMutex);
 
 		size_t ret = 0;
@@ -63,6 +70,8 @@ namespace kengine::impl {
 
 	template<typename ... Comps>
 	TIterator & TIterator::operator++() noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		++currentEntity;
 
 		ReadLock archetypesLock(state->_archetypesMutex);
@@ -118,6 +127,8 @@ namespace kengine::impl {
 
 	template<typename ... Comps>
 	std::tuple<Entity, Comps &...> TIterator::operator*() const noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		ReadLock l(state->_archetypesMutex);
 		const auto & archetype = state->_archetypes[currentType];
 

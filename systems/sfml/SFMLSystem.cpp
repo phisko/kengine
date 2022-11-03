@@ -37,6 +37,7 @@
 #include "helpers/cameraHelper.hpp"
 #include "helpers/instanceHelper.hpp"
 #include "helpers/logHelper.hpp"
+#include "helpers/profilingHelper.hpp"
 
 // impl
 #include "imgui-sfml/imgui-SFML.h"
@@ -73,6 +74,7 @@ namespace {
 
 	struct sfml {
 		static void init(Entity & e) noexcept {
+			KENGINE_PROFILING_SCOPE;
 			kengine_log(Log, "Init", "SFMLSystem");
 
 			e += functions::Execute{ execute };
@@ -90,6 +92,7 @@ namespace {
 		}
 
 		static void execute(float deltaTime) noexcept {
+			KENGINE_PROFILING_SCOPE;
 			kengine_log(Verbose, "Execute", "SFMLSystem");
 
 			const auto sfDeltaTime = g_deltaClock.restart();
@@ -113,6 +116,8 @@ namespace {
 		}
 
 		static bool updateWindowState(Entity & windowEntity, SFMLWindowComponent & sfWindowComp) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			const auto * windowComp = windowEntity.tryGet<WindowComponent>();
 			if (windowComp == nullptr) {
 				kengine_logf(Verbose, "Execute/SFMLSystem", "%zu: destroying window as WindowComponent was removed", windowEntity.id);
@@ -134,6 +139,8 @@ namespace {
 		}
 
 		static void processEvents(EntityID window, sf::RenderWindow & sfWindow, sf::Time deltaTime) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			sf::Event event;
 			while (sfWindow.pollEvent(event)) {
 				ImGui::SFML::ProcessEvent(sfWindow, event);
@@ -147,6 +154,8 @@ namespace {
 		}
 
 		static void processInput(EntityID window, const sf::Event & e) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			if (g_inputBuffer == nullptr)
 				return;
 
@@ -212,6 +221,8 @@ namespace {
 		}
 
 		static void render(const Entity & windowEntity, SFMLWindowComponent & sfWindow) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			sfWindow.window.clear();
 
 			struct ToBlit {
@@ -254,6 +265,8 @@ namespace {
 		}
 
 		static void renderToTexture(sf::RenderTexture & renderTexture) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			renderTexture.clear();
 
 			struct Drawables {
@@ -389,6 +402,8 @@ namespace {
 		}
 
 		static std::optional<sf::Sprite> createEntitySprite(const Entity & e, const TransformComponent & transform, const GraphicsComponent & graphics) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			const auto * texture = instanceHelper::tryGetModel<SFMLTextureComponent>(e);
 			if (texture == nullptr)
 				return std::nullopt;
@@ -404,6 +419,8 @@ namespace {
 		}
 
 		static sf::Sprite createRenderTextureSprite(const sf::RenderTexture & renderTexture, const sf::RenderWindow & window, const ViewportComponent & viewport) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			sf::Sprite renderTextureSprite(renderTexture.getTexture());
 
 			const auto screenSize = window.getSize();
@@ -417,6 +434,8 @@ namespace {
 		}
 
 		static void onEntityCreated(Entity & e) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			if (const auto * window = e.tryGet<WindowComponent>())
 				createWindow(e, *window);
 
@@ -425,6 +444,7 @@ namespace {
 		}
 
 		static void createWindow(Entity & e, const WindowComponent & windowComp) noexcept {
+			KENGINE_PROFILING_SCOPE;
 			kengine_logf(Log, "SFML", "Creating window '%s'", windowComp.name.c_str());
 
 			auto & sfWindow = e.attach<SFMLWindowComponent>();
@@ -446,6 +466,8 @@ namespace {
 		}
 
 		static void createTexture(Entity & e, const ModelComponent & model) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			sf::Texture texture;
 			if (texture.loadFromFile(model.file.c_str())) {
 				kengine_logf(Log, "SFML", "Loaded texture for '%s'", model.file.c_str());
@@ -454,6 +476,8 @@ namespace {
 		}
 
 		static void onEntityRemoved(Entity & e) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			if (const auto * sfWindow = e.tryGet<SFMLWindowComponent>()) {
 				kengine_log(Log, "SFML", "Shutting down ImGui for window");
 				ImGui::SFML::Shutdown(sfWindow->window);
@@ -461,6 +485,7 @@ namespace {
 		}
 
 		static void terminate() noexcept {
+			KENGINE_PROFILING_SCOPE;
 			kengine_log(Log, "Terminate/SFML", "Shutting down ImGui");
 			ImGui::SFML::Shutdown();
 		}
@@ -472,8 +497,7 @@ namespace {
 
 namespace kengine {
 	EntityCreator * SFMLSystem() noexcept {
-		return [](Entity & e) noexcept {
-			sfml::init(e);
-		};
+		KENGINE_PROFILING_SCOPE;
+		return sfml::init;
 	}
 }

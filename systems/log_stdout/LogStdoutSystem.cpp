@@ -22,41 +22,55 @@
 
 // kengine helpers
 #include "helpers/logHelper.hpp"
+#include "helpers/profilingHelper.hpp"
 
 namespace kengine {
-	EntityCreator * LogStdoutSystem() noexcept {
-		return [](Entity & e) noexcept {
-			auto & severityControl = e.attach<LogSeverityControl>();
-            severityControl.severity = logHelper::parseCommandLineSeverity();
+	namespace {
+		struct logStdoutImpl {
+			static inline const LogSeverity * severity = nullptr;
 
-			e += AdjustableComponent{
-				"Log", {
-					{ "Standard output", &severityControl.severity }
-				}
-			};
+			static void init(Entity & e) noexcept {
+				KENGINE_PROFILING_SCOPE;
 
-			e += functions::Log{
-				[&](const kengine::LogEvent & event) noexcept {
-					static std::mutex mutex;
-					if (event.severity < severityControl.severity)
-						return;
+				auto & severityControl = e.attach<LogSeverityControl>();
+				severityControl.severity = logHelper::parseCommandLineSeverity();
+				severity = &severityControl.severity;
 
-					const std::lock_guard lock(mutex);
+				e += AdjustableComponent{
+					"Log", {
+						{ "Standard output", &severityControl.severity }
+					}
+				};
 
-					if (event.severity == LogSeverity::Warning)
-						std::cout << termcolor::yellow;
-					else if (event.severity == LogSeverity::Error)
-						std::cout << termcolor::red;
+				e += functions::Log{ log };
+			}
 
-					const auto & threadName = putils::get_thread_name();
-					if (!threadName.empty())
-						std::cout << '{' << threadName << "}\t";
+			static void log(const LogEvent & event) noexcept {
+				KENGINE_PROFILING_SCOPE;
 
-					std::cout << magic_enum::enum_name<LogSeverity>(event.severity) << "\t[" << event.category << "]\t" << event.message << std::endl;
+				static std::mutex mutex;
+				if (event.severity < *severity)
+					return;
 
-					std::cout << termcolor::reset;
-				}
-			};
+				const std::lock_guard lock(mutex);
+
+				if (event.severity == LogSeverity::Warning)
+					std::cout << termcolor::yellow;
+				else if (event.severity == LogSeverity::Error)
+					std::cout << termcolor::red;
+
+				const auto & threadName = putils::get_thread_name();
+				if (!threadName.empty())
+					std::cout << '{' << threadName << "}\t";
+
+				std::cout << magic_enum::enum_name<LogSeverity>(event.severity) << "\t[" << event.category << "]\t" << event.message << std::endl;
+				std::cout << termcolor::reset;
+			}
 		};
+	}
+
+	EntityCreator * LogStdoutSystem() noexcept {
+		KENGINE_PROFILING_SCOPE;
+		return logStdoutImpl::init;
 	}
 }

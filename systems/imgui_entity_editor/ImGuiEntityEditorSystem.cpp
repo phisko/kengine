@@ -16,13 +16,17 @@
 // kengine helpers
 #include "helpers/logHelper.hpp"
 #include "helpers/imguiHelper.hpp"
+#include "helpers/profilingHelper.hpp"
 
 namespace kengine {
 	EntityCreator * ImGuiEntityEditorSystem() noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		static bool * enabled;
 
 		struct impl {
 			static void init(Entity & e) noexcept {
+				KENGINE_PROFILING_SCOPE;
 				kengine_log(Log, "Init", "ImGuiEntityEditorSystem");
 
 				e += NameComponent{ "Entity editor" };
@@ -34,6 +38,8 @@ namespace kengine {
 			}
 
 			static void execute(float deltaTime) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				if (!*enabled)
 					return;
 

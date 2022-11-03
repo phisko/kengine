@@ -4,6 +4,9 @@
 // stl
 #include <cassert>
 
+// kengine helpers
+#include "helpers/profilingHelper.hpp"
+
 // kengine impl
 #include "ComponentMask.hpp"
 #include "impl/GlobalState.hpp"
@@ -22,6 +25,8 @@ namespace kengine::impl {
 
 	template<typename Comp>
 	void Metadata<Comp>::reset(ID entity) noexcept {
+		KENGINE_PROFILING_SCOPE;
+
         const ReadLock r(_mutex);
         if (const auto it = _map.find(entity); it != _map.end())
             it->second.reset();
@@ -29,6 +34,8 @@ namespace kengine::impl {
 
     template<typename Comp>
     Comp & Component<Comp>::get(ID entity) noexcept {
+		KENGINE_PROFILING_SCOPE;
+
         if constexpr (std::is_empty<Comp>()) {
             static Comp ret;
             return ret;
@@ -43,6 +50,8 @@ namespace kengine::impl {
     template<typename Comp>
 	template<typename InitialValue>
 	Comp & Component<Comp>::set(ID entity, InitialValue && initialValue) noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		if constexpr (std::is_empty<Comp>() && std::is_trivially_destructible<Comp>()) {
 			static Comp ret;
 			return ret;
@@ -79,6 +88,8 @@ namespace kengine::impl {
 	template<typename Comp>
 	Metadata<Comp> & Component<Comp>::metadata() noexcept {
         static const auto init = [](Metadata<Comp> * & singleton) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			const auto typeIndex = putils::meta::type<Comp>::index;
 
 			{

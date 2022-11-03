@@ -8,14 +8,18 @@
 
 // kengine helpers
 #include "helpers/logHelper.hpp"
+#include "helpers/profilingHelper.hpp"
 #include "helpers/pythonHelper.hpp"
 
 namespace kengine {
 	EntityCreator * PythonSystem() noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		static py::module_ * module_ = nullptr;
 
 		struct impl {
 			static void init(Entity & e) noexcept {
+				KENGINE_PROFILING_SCOPE;
 				kengine_log(Log, "Init", "PythonSystem");
 
 				e += functions::Execute{ execute };
@@ -40,7 +44,9 @@ namespace kengine {
 			}
 
 			static void execute(float deltaTime) noexcept {
+				KENGINE_PROFILING_SCOPE;
 				kengine_log(Verbose, "Execute", "PythonSystem");
+
 				module_->attr("deltaTime") = deltaTime;
 
 				for (auto [e, comp] : entities.with<PythonComponent>()) {
@@ -59,8 +65,6 @@ namespace kengine {
 			}
 		};
 
-		return [](Entity & e) noexcept {
-			impl::init(e);
-		};
+		return impl::init;
 	}
 }

@@ -3,12 +3,16 @@
 // kengine functions
 #include "functions/OnEntityRemoved.hpp"
 
+// kengine helpers
+#include "helpers/profilingHelper.hpp"
+
 // kengine impl
 #include "impl/ComponentMask.hpp"
 #include "impl/ID.hpp"
 
 namespace kengine {
 	Entity Entities::get(EntityID id) noexcept {
+		KENGINE_PROFILING_SCOPE;
 		impl::ReadLock l(impl::state->_entitiesMutex);
 		return { id, impl::state->_entities[id].data.mask };
 	}
@@ -22,6 +26,8 @@ namespace kengine {
 	}
 
 	void Entities::remove(EntityID id) noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		auto e = get(id);
 
 		for (const auto & [_, func] : with<functions::OnEntityRemoved>())
@@ -78,6 +84,7 @@ namespace kengine {
 	}
 
 	void Entities::setActive(EntityID id, bool active) noexcept {
+		KENGINE_PROFILING_SCOPE;
 		impl::WriteLock l(impl::state->_entitiesMutex);
 		impl::state->_entities[id].data.active = active;
 		impl::state->_entities[id].data.shouldActivateAfterInit = active;
@@ -97,6 +104,7 @@ namespace kengine {
 	}
 
 	size_t Entities::size() const noexcept {
+		KENGINE_PROFILING_SCOPE;
 		impl::ReadLock l(impl::state->_entitiesMutex);
 		return std::count_if(impl::state->_entities.begin(), impl::state->_entities.end(), [](const auto & e) {
 			return e.data.mask != 0 && e.data.active;

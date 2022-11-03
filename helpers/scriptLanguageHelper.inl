@@ -8,6 +8,7 @@
 
 // kengine helpers
 #include "helpers/logHelper.hpp"
+#include "helpers/profilingHelper.hpp"
 
 namespace kengine::scriptLanguageHelper {
 	template<typename Func>
@@ -15,8 +16,10 @@ namespace kengine::scriptLanguageHelper {
 
 	template<typename Func, typename Func2>
 	void init(Func && registerFunction, Func2 && registerType) noexcept {
+		KENGINE_PROFILING_SCOPE;
+		kengine_log(Verbose, "scriptLanguageHelper::init", "Registering createEntity");
+
 		using CreateEntityFunc = function<void(Entity &)>;
-        kengine_log(Verbose, "scriptLanguageHelper::init", "Registering createEntity");
 		registerFunction("createEntity",
 			function<Entity(const CreateEntityFunc &)>(
 				[](const CreateEntityFunc & f) {
@@ -70,6 +73,8 @@ namespace kengine::scriptLanguageHelper {
 
 	template<typename T, typename Func, typename Func2>
 	void registerComponent(Func && registerEntityMember, Func2 && registerFunction) noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		static_assert(putils::reflection::has_class_name<T>());
 
 		const auto className = putils::reflection::get_class_name<T>();

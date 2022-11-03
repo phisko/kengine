@@ -4,9 +4,12 @@
 
 // kengine helpers
 #include "helpers/assertHelper.hpp"
+#include "helpers/profilingHelper.hpp"
 
 namespace kengine::skeletonHelper {
 	BoneIndexes getBoneIndex(const char * bone, const ModelSkeletonComponent & model) noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		BoneIndexes indexes;
 
 		indexes.meshIndex = 0;
@@ -25,6 +28,8 @@ namespace kengine::skeletonHelper {
 	}
 
 	glm::mat4 getBoneMatrix(const char * bone, const SkeletonComponent & skeleton, const ModelSkeletonComponent & model) noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		const auto indexes = getBoneIndex(bone, model);
 		if (indexes.meshIndex >= skeleton.meshes.size())
 			return glm::mat4(1.f);
@@ -34,6 +39,8 @@ namespace kengine::skeletonHelper {
 	}
 
 	void setBoneMatrix(const char * bone, const glm::mat4 & m, SkeletonComponent & skeleton, const ModelSkeletonComponent & model) noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		const auto indexes = getBoneIndex(bone, model);
 		if (indexes.meshIndex >= skeleton.meshes.size())
 			return;

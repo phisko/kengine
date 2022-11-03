@@ -9,19 +9,24 @@
 
 // kengine helpers
 #include "helpers/logHelper.hpp"
+#include "helpers/profilingHelper.hpp"
 
 namespace kengine::collision {
 	struct impl {
 		static void init(Entity & e) noexcept {
+			KENGINE_PROFILING_SCOPE;
 			e += functions::OnCollision{ onCollision };
 		}
 
 		static void onCollision(Entity & first, Entity & second) noexcept {
+			KENGINE_PROFILING_SCOPE;
+			kengine_logf(Verbose, "CollisionSystem", "Collision between %zu and %zu", first.id, second.id);
 			trigger(first, second);
 			trigger(second, first);
 		}
 
 		static void trigger(Entity & first, Entity & second) noexcept {
+			KENGINE_PROFILING_SCOPE;
 			const auto collision = first.tryGet<CollisionComponent>();
 			if (!collision || collision->onCollide == nullptr)
 				return;
@@ -32,6 +37,7 @@ namespace kengine::collision {
 
 namespace kengine {
 	EntityCreator * CollisionSystem() noexcept {
+		KENGINE_PROFILING_SCOPE;
 		return [](Entity & e) noexcept {
 			collision::impl::init(e);
 		};

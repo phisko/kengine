@@ -19,12 +19,15 @@
 
 // kengine helpers
 #include "helpers/logHelper.hpp"
+#include "helpers/profilingHelper.hpp"
 
 namespace kengine {
 	namespace Input {
 		static InputBufferComponent * g_buffer;
 
 		static void onKey(GLFWwindow * window, int key, int scancode, int action, int mods) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			if (g_buffer == nullptr || (ImGui::GetCurrentContext() != nullptr && ImGui::GetIO().WantCaptureKeyboard))
 				return;
 
@@ -39,6 +42,8 @@ namespace kengine {
 		static putils::Point2f lastPos{ FLT_MAX, FLT_MAX };
 
 		static void onClick(GLFWwindow * window, int button, int action, int mods) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			if (g_buffer == nullptr || (ImGui::GetCurrentContext() != nullptr && ImGui::GetIO().WantCaptureMouse))
 				return;
 
@@ -51,6 +56,8 @@ namespace kengine {
 		}
 
 		static void onMouseMove(GLFWwindow * window, double xpos, double ypos) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			if (lastPos.x == FLT_MAX) {
 				lastPos.x = (float)xpos;
 				lastPos.y = (float)ypos;
@@ -71,6 +78,8 @@ namespace kengine {
 		}
 
 		static void onScroll(GLFWwindow * window, double xoffset, double yoffset) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			if (g_buffer == nullptr || (ImGui::GetCurrentContext() != nullptr && ImGui::GetIO().WantCaptureMouse))
 				return;
 
@@ -80,9 +89,13 @@ namespace kengine {
 	}
 
 	EntityCreator * GLFWSystem() noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		struct impl {
 			static void init(Entity & e) noexcept {
+				KENGINE_PROFILING_SCOPE;
 				kengine_log(Log, "Init", "GLFWSystem");
+
 				e += functions::Execute{ execute };
 				e += functions::OnEntityCreated{ onEntityCreated };
 				e += functions::OnTerminate{ terminate };
@@ -103,11 +116,14 @@ namespace kengine {
 			}
 
 			static void terminate() noexcept {
+				KENGINE_PROFILING_SCOPE;
 				kengine_log(Log, "Terminate", "GLFWSystem");
 				glfwTerminate();
 			}
 
 			static void onMouseCaptured(EntityID window, bool captured) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				const auto inputMode = captured ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL;
 				const auto state = captured ? "captured" : "released";
 
@@ -133,6 +149,8 @@ namespace kengine {
 			}
 
 			static void onEntityCreated(Entity & e) noexcept {
+				KENGINE_PROFILING_SCOPE;
+
 				const auto window = e.tryGet<WindowComponent>();
 				if (!window)
 					return;
@@ -145,7 +163,9 @@ namespace kengine {
 			}
 
 			static void execute(float deltaTime) noexcept {
+				KENGINE_PROFILING_SCOPE;
 				kengine_log(Verbose, "Execute", "GLFWSystem");
+
 				glfwPollEvents();
 				for (const auto & [e, window, glfw] : entities.with<WindowComponent, GLFWWindowComponent>()) {
 					if (glfwWindowShouldClose(glfw.window.get())) {
@@ -163,6 +183,7 @@ namespace kengine {
 			}
 
 			static void createWindow(Entity & e, WindowComponent & window, const GLFWWindowInitComponent & initGlfw) noexcept {
+				KENGINE_PROFILING_SCOPE;
 				kengine_logf(Log, "GLFWSystem", "Initializing window for %zu", e.id);
 				auto & glfwComp = e.attach<GLFWWindowComponent>();
 

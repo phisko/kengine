@@ -21,6 +21,7 @@
 // kengine helpers
 #include "helpers/sortHelper.hpp"
 #include "helpers/logHelper.hpp"
+#include "helpers/profilingHelper.hpp"
 
 #ifndef KENGINE_IMGUI_TOOLS_SAVE_FILE
 # define KENGINE_IMGUI_TOOLS_SAVE_FILE "tools.cnf"
@@ -33,6 +34,7 @@
 namespace kengine::imgui_tool {
 	struct impl {
 		static void init(Entity & e) noexcept {
+			KENGINE_PROFILING_SCOPE;
 			kengine_log(Log, "Init", "ImGuiToolSystem");
 
 			e += functions::OnEntityCreated{ onEntityCreated };
@@ -47,6 +49,7 @@ namespace kengine::imgui_tool {
 		}
 
 		static void execute(float deltaTime) noexcept {
+			KENGINE_PROFILING_SCOPE;
 			kengine_log(Verbose, "Execute", "ImGuiToolSystem");
 
 			if (ImGui::BeginMainMenuBar()) {
@@ -75,6 +78,8 @@ namespace kengine::imgui_tool {
 		}
 
 		static void onEntityCreated(Entity & e) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			const auto name = e.tryGet<NameComponent>();
 			if (!name)
 				return;
@@ -88,6 +93,7 @@ namespace kengine::imgui_tool {
 		}
 
 		static void saveTools() noexcept {
+			KENGINE_PROFILING_SCOPE;
 			kengine_log(Log, "ImGuiToolSystem", "Saving to " KENGINE_IMGUI_TOOLS_SAVE_FILE);
 
 			std::ofstream f(KENGINE_IMGUI_TOOLS_SAVE_FILE);
@@ -103,6 +109,7 @@ namespace kengine::imgui_tool {
 
 		static inline struct {
 			void parse() noexcept {
+				KENGINE_PROFILING_SCOPE;
 				std::ifstream f(KENGINE_IMGUI_TOOLS_SAVE_FILE);
 				if (!f)
 					return;
@@ -111,11 +118,13 @@ namespace kengine::imgui_tool {
 			}
 
 			void addLine(const std::string & line) noexcept {
+				KENGINE_PROFILING_SCOPE;
 				const auto index = line.find(';');
 				_values[line.substr(0, index)] = putils::parse<bool>(line.substr(index + 1).c_str());
 			}
 
 			bool getValue(const char * name) const noexcept {
+				KENGINE_PROFILING_SCOPE;
 				const auto it = _values.find(name);
 				if (it == _values.end())
 					return false;
@@ -130,6 +139,7 @@ namespace kengine::imgui_tool {
 
 namespace kengine {
 	EntityCreator * ImGuiToolSystem() noexcept {
+		KENGINE_PROFILING_SCOPE;
 		return [](Entity & e) noexcept {
 			imgui_tool::impl::init(e);
 		};

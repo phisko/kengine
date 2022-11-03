@@ -10,17 +10,22 @@
 
 // kengine helpers
 #include "helpers/logHelper.hpp"
+#include "helpers/profilingHelper.hpp"
 
 namespace kengine::onclick {
 	struct impl {
 		static void init(Entity & e) noexcept {
+			KENGINE_PROFILING_SCOPE;
 			kengine_log(Log, "Init", "OnClickSystem");
+
 			InputComponent input;
 			input.onMouseButton = onMouseButton;
 			e += input;
 		}
 
 		static void onMouseButton(EntityID window, int button, const putils::Point2f & coords, bool pressed) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			if (!pressed)
 				return;
 
@@ -47,8 +52,7 @@ namespace kengine::onclick {
 
 namespace kengine {
 	EntityCreator * OnClickSystem() noexcept {
-		return [](Entity & e) noexcept {
-			onclick::impl::init(e);
-		};
+		KENGINE_PROFILING_SCOPE;
+		return onclick::impl::init;
 	}
 }

@@ -17,6 +17,7 @@
 
 // kengine helpers
 #include "helpers/logHelper.hpp"
+#include "helpers/profilingHelper.hpp"
 
 namespace kengine {
 	static auto buildMesh(PolyVox::RawVolume<PolyVoxComponent::VertexData> && volume) noexcept {
@@ -26,6 +27,8 @@ namespace kengine {
 	}
 
 	EntityCreator * PolyVoxSystem() noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		struct PolyVoxMeshContainerComponent {
 			using MeshType = decltype(buildMesh(PolyVox::RawVolume<PolyVoxComponent::VertexData>({ {0, 0, 0 }, {0, 0, 0} })));
 			MeshType mesh;
@@ -33,12 +36,15 @@ namespace kengine {
 
 		struct impl {
 			static void init(Entity & e) noexcept {
+				KENGINE_PROFILING_SCOPE;
 				kengine_log(Log, "Init", "PolyVoxSystem");
 				e += functions::Execute{ execute };
 			}
 
 			static void execute(float deltaTime) noexcept {
+				KENGINE_PROFILING_SCOPE;
 				kengine_log(Verbose, "Execute", "PolyVoxSystem");
+
 				for (auto [e, poly] : entities.with<PolyVoxComponent>()) {
 					if (!poly.changed)
 						continue;
@@ -69,6 +75,7 @@ namespace kengine {
 
 			static ModelDataComponent::FreeFunc FreePolyVoxMeshData(EntityID id) noexcept {
 				return [id]() noexcept {
+					KENGINE_PROFILING_SCOPE;
 					kengine_logf(Log, "PolyVoxSystem", "Releasing PolyVoxMeshContainer for %zu", id);
 					auto e = entities[id];
 					auto & mesh = e.attach<PolyVoxMeshContainerComponent>().mesh; // previous `attach` hasn't been processed yet, so `get` would assert
@@ -76,11 +83,8 @@ namespace kengine {
 					e.detach<PolyVoxMeshContainerComponent>();
 				};
 			}
-
 		};
 
-		return [](Entity & e) noexcept {
-			impl::init(e);
-		};
+		return impl::init;
 	}
 }

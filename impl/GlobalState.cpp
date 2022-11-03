@@ -6,6 +6,7 @@
 
 // kengine helpers
 #include "helpers/assertHelper.hpp"
+#include "helpers/profilingHelper.hpp"
 
 namespace kengine::impl {
 	GlobalState * state = nullptr;
@@ -15,6 +16,8 @@ namespace kengine::impl {
 	{}
 
 	Entity alloc() noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		{
 			ReadLock l(state->_freeListMutex);
 			if (state->_freeList == INVALID_ID) {

@@ -8,8 +8,13 @@
 #include "data/WindowComponent.hpp"
 #include "data/OnScreenComponent.hpp"
 
+// kengine helpers
+#include "helpers/profilingHelper.hpp"
+
 namespace kengine::cameraHelper {
 	ViewportInfo getViewportForPixel(EntityID windowID, const putils::Point2ui & pixel) noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		ViewportInfo ret;
 
 		const auto & window = entities[windowID].get<WindowComponent>();
@@ -44,6 +49,8 @@ namespace kengine::cameraHelper {
 	}
 
 	bool entityAppearsInViewport(const Entity & entity, const Entity & viewportEntity) noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		const auto wantsToAppear = [](const Entity & lhs, const Entity & rhs) noexcept {
 			if (const auto appearsInViewport = lhs.tryGet<functions::AppearsInViewport>())
 				if (!appearsInViewport->call(rhs))
@@ -56,6 +63,8 @@ namespace kengine::cameraHelper {
 
     template<size_t N>
     static putils::Rect<float, N> convertToScreenPercentageImpl(const putils::Rect<float, N> & rect, const putils::Point2f & screenSize, const OnScreenComponent & comp) noexcept {
+		KENGINE_PROFILING_SCOPE;
+
         switch (comp.coordinateType) {
             case OnScreenComponent::CoordinateType::Pixels: {
                 putils::Rect<float, N> ret = rect;
@@ -82,6 +91,8 @@ namespace kengine::cameraHelper {
     }
 
 	Facings getFacings(const CameraComponent & camera) noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		struct impl {
 			static Facings getFacings(const CameraComponent & camera) noexcept {
 				Facings ret;

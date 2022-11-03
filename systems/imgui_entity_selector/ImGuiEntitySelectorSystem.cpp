@@ -23,12 +23,14 @@
 #include "helpers/logHelper.hpp"
 #include "helpers/sortHelper.hpp"
 #include "helpers/imguiHelper.hpp"
+#include "helpers/profilingHelper.hpp"
 
 namespace kengine::imgui_entity_selector {
 	struct impl {
 		static inline bool * enabled;
 
 		static void init(Entity & e) noexcept {
+			KENGINE_PROFILING_SCOPE;
 			kengine_log(Log, "Init", "ImGuiEntitySelector");
 
 			e += NameComponent{ "Entity selector" };
@@ -40,6 +42,8 @@ namespace kengine::imgui_entity_selector {
 		}
 
 		static void execute(float deltaTime) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			if (!*enabled)
 				return;
 			kengine_log(Verbose, "Execute", "ImGuiEntitySelector");
@@ -64,6 +68,8 @@ namespace kengine::imgui_entity_selector {
 		}
 
 		static bool matches(const Entity & e, const char * str) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			putils::string<1024> displayText("[%d]", e.id);;
 			const auto name = e.tryGet<NameComponent>();
 			if (name) {
@@ -125,6 +131,7 @@ namespace kengine::imgui_entity_selector {
 
 namespace kengine {
 	EntityCreator * ImGuiEntitySelectorSystem() noexcept {
+		KENGINE_PROFILING_SCOPE;
 		return [](Entity & e) noexcept {
 			imgui_entity_selector::impl::init(e);
 		};

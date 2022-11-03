@@ -1,8 +1,10 @@
 
 #include "helpers/logHelper.hpp"
+#include "helpers/profilingHelper.hpp"
 
 namespace kengine::types{
 	void registerTypes() noexcept {
+		KENGINE_PROFILING_SCOPE;
 		kengine_log(Log, "Init", "Registering types");
 
 		extern void registerkengineAdjustableComponent() noexcept;

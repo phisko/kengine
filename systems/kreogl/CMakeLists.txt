@@ -1,6 +1,7 @@
 set(name kengine_kreogl)
 
 set(KREOGL_DEFAULT_SHADERS ON)
+set(KREOGL_PROFILING ${KENGINE_PROFILING})
 add_subdirectory(kreogl)
 
 set(imguiDir ${PROJECT_SOURCE_DIR}/putils/imgui/)

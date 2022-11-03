@@ -7,6 +7,9 @@
 // kengine data
 #include "data/CommandLineComponent.hpp"
 
+// kengine helpers
+#include "helpers/profilingHelper.hpp"
+
 namespace {
     struct Options {
         kengine::LogSeverity logLevel = kengine::LogSeverity::Log;
@@ -23,8 +26,9 @@ putils_reflection_info {
 #undef refltype
 
 namespace kengine::logHelper {
-
     LogSeverity parseCommandLineSeverity() noexcept {
+		KENGINE_PROFILING_SCOPE;
+
         static std::optional<LogSeverity> commandLineSeverity;
         if (commandLineSeverity != std::nullopt)
             return *commandLineSeverity;
@@ -39,6 +43,8 @@ namespace kengine::logHelper {
     }
 
     void log(LogSeverity severity, const char * category, const char * message) noexcept {
+		KENGINE_PROFILING_SCOPE;
+
         const kengine::LogEvent event{
             .severity = severity,
             .category = category,

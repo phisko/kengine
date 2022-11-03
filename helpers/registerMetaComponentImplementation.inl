@@ -7,6 +7,7 @@
 // kengine helpers
 #include "helpers/typeHelper.hpp"
 #include "helpers/logHelper.hpp"
+#include "helpers/profilingHelper.hpp"
 
 namespace kengine {
 	template<typename Meta, typename ... Comps, typename Func>
@@ -16,6 +17,8 @@ namespace kengine {
 
     template<typename Meta, template<typename T> typename Predicate, typename ... Comps, typename Func>
     void registerMetaComponentImplementationWithPredicate(Func && f) noexcept {
+		KENGINE_PROFILING_SCOPE;
+
         putils::for_each_type<Comps...>([&](auto t) noexcept {
             using Type = putils_wrapped_type(t);
             if constexpr (!Predicate<Type>()) {

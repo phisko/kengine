@@ -2,12 +2,15 @@
 
 // kengine helpers
 #include "helpers/assertHelper.hpp"
+#include "helpers/profilingHelper.hpp"
 
 // kengine impl
 #include "ComponentMask.hpp"
 
 namespace kengine::impl {
 	static void updateHasComponent(EntityID entity, ComponentID component, bool newHasComponent) noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		ComponentMask oldMask;
 		{
 			ReadLock l(state->_entitiesMutex);
@@ -47,10 +50,14 @@ namespace kengine::impl {
 	}
 
 	void addComponent(EntityID entity, ComponentID component) noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		updateHasComponent(entity, component, true);
 	}
 
 	void removeComponent(EntityID entity, ComponentID component) noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		updateHasComponent(entity, component, false);
 	}
 }

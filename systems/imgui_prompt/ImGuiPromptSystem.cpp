@@ -18,6 +18,7 @@
 
 // kengine helpers
 #include "helpers/logHelper.hpp"
+#include "helpers/profilingHelper.hpp"
 
 enum class Language {
 	Lua,
@@ -53,6 +54,7 @@ namespace kengine::imgui_prompt {
 		} history;
 
 		static void init(Entity & e) noexcept {
+			KENGINE_PROFILING_SCOPE;
 			kengine_log(Log, "Init", "ImGuiPromptSystem");
 
 			auto & tool = e.attach<ImGuiToolComponent>();
@@ -62,6 +64,8 @@ namespace kengine::imgui_prompt {
 		}
 
 		static void draw(float deltaTime) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			if (!*enabled)
 				return;
 
@@ -85,6 +89,8 @@ namespace kengine::imgui_prompt {
 
 		static inline bool shouldScrollDown = false;
 		static void drawHistory() noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			int tmp = maxLines;
 			if (ImGui::InputInt("Max history", &tmp, 0, 0, ImGuiInputTextFlags_EnterReturnsTrue))
 				maxLines = tmp;
@@ -112,6 +118,8 @@ namespace kengine::imgui_prompt {
 		}
 
 		static bool drawPrompt() noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			static bool first = true;
 			if (putils::reflection::imguiEnumCombo("##Language", selectedLanguage) || first) {
 				history.addLine(
@@ -135,6 +143,8 @@ namespace kengine::imgui_prompt {
 		}
 
 		static void eval() noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			switch (selectedLanguage) {
 			case Language::Lua:
 				evalLua();
@@ -149,6 +159,8 @@ namespace kengine::imgui_prompt {
 
 		static inline bool active = false;
 		static void evalLua() noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 #ifndef KENGINE_LUA
 			kengine_log(Error, "Execute/ImGuiPromptSystem", "Attempt to evaluate Lua script but KENGINE_LUA is not defined");
 			addLineToHistory(
@@ -180,7 +192,9 @@ namespace kengine::imgui_prompt {
 		}
 
 		static void setupOutputRedirect(sol::state & state) noexcept {
+			KENGINE_PROFILING_SCOPE;
 			kengine_log(Log, "Init/ImGuiPromptSystem", "Setting up output redirection for Lua");
+
 			static const luaL_Reg printlib[] = {
 				{ "print", [](lua_State * L) { return addToHistoryOrPrint(L, putils::NormalizedColor{}); } },
 				{ "error", [](lua_State * L) { return addToHistoryOrPrint(L, putils::NormalizedColor{ 1.f, 0.f, 0.f }); } },
@@ -193,6 +207,8 @@ namespace kengine::imgui_prompt {
 		}
 
 		static int addToHistoryOrPrint(lua_State * L, const putils::NormalizedColor & color) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			std::string line;
 
 			// Stolen from luaB_print
@@ -252,6 +268,8 @@ namespace kengine::imgui_prompt {
 		};
 #endif
 		static void evalPython() {
+			KENGINE_PROFILING_SCOPE;
+
 #ifndef KENGINE_PYTHON
 			kengine_log(Error, "Execute/ImGuiPromptSystem", "Attempt to evaluate Python script but KENGINE_PYTHON is not defined");
 			addLineToHistory(
@@ -284,6 +302,7 @@ namespace kengine::imgui_prompt {
 
 namespace kengine {
 	EntityCreator * ImGuiPromptSystem() noexcept {
+		KENGINE_PROFILING_SCOPE;
 		return [](Entity & e) noexcept {
 			imgui_prompt::impl::init(e);
 		};
