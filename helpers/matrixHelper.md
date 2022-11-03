@@ -37,12 +37,3 @@ glm::mat4 getModelMatrix(const TransformComponent & transform, const TransformCo
 ```
 
 Generates a model matrix for an `Entity`, applying any transformations it may have inherited from its `model`.
-
-### getProjMatrix, getViewMatrix
-
-```cpp
-glm::mat4 getProjMatrix(const CameraComponent & cam, const ViewportComponent & viewport, float nearPlane, float farPlane) noexcept;
-glm::mat4 getViewMatrix(const CameraComponent & cam, const ViewportComponent & viewport) noexcept;
-```
-
-Generates the required matrix.
