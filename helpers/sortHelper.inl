@@ -14,7 +14,7 @@
 #include "helpers/profilingHelper.hpp"
 
 namespace kengine::sortHelper {
-	namespace detail {
+	namespace impl {
 		template<typename PointerTuple, typename RefTuple>
 		void setImpl(PointerTuple & p, const RefTuple & r, std::index_sequence<>) noexcept {}
 
@@ -49,7 +49,7 @@ namespace kengine::sortHelper {
 				if (ret.full())
 					break;
 			ret.emplace_back();
-			detail::set(ret.back(), t, std::make_index_sequence<sizeof...(Comps)>());
+			impl::set(ret.back(), t, std::make_index_sequence<sizeof...(Comps)>());
 		}
 		std::sort(ret.begin(), ret.end(), FWD(pred));
 
