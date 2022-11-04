@@ -81,35 +81,35 @@ namespace kengine::scriptLanguageHelper {
         kengine_logf(Verbose, "scriptLanguageHelper::registerComponent", "Registering component '%s'", className);
 
         kengine_log(Verbose, "scriptLanguageHelper::registerComponent", "Registering get");
-		registerEntityMember(putils::string<128>("get%s", className),
+		registerEntityMember(putils::string<128>("get%s", className).c_str(),
 			function<T & (Entity)>(
 				[](Entity self) noexcept { return std::ref(self.get<T>()); }
 			)
 		);
 
         kengine_log(Verbose, "scriptLanguageHelper::registerComponent", "Registering tryGet");
-		registerEntityMember(putils::string<128>("tryGet%s", className),
+		registerEntityMember(putils::string<128>("tryGet%s", className).c_str(),
 			function<const T * (Entity)>(
 				[](Entity self) noexcept { return self.tryGet<T>(); }
 			)
 		);
 
         kengine_log(Verbose, "scriptLanguageHelper::registerComponent", "Registering has");
-		registerEntityMember(putils::string<128>("has%s", className),
+		registerEntityMember(putils::string<128>("has%s", className).c_str(),
 			function<bool(Entity)>(
 				[](Entity self) noexcept { return self.has<T>(); }
 			)
 		);
 
         kengine_log(Verbose, "scriptLanguageHelper::registerComponent", "Registering attach");
-		registerEntityMember(putils::string<128>("attach%s", className),
+		registerEntityMember(putils::string<128>("attach%s", className).c_str(),
 			function<T & (Entity)>(
 				[](Entity self) noexcept { return std::ref(self.attach<T>()); }
 			)
 		);
 
         kengine_log(Verbose, "scriptLanguageHelper::registerComponent", "Registering detach");
-		registerEntityMember(putils::string<128>("detach%s", className),
+		registerEntityMember(putils::string<128>("detach%s", className).c_str(),
 			function<void(Entity)>(
 				[](Entity self) noexcept { self.detach<T>(); }
 			)
@@ -117,7 +117,7 @@ namespace kengine::scriptLanguageHelper {
 
         kengine_log(Verbose, "scriptLanguageHelper::registerComponent", "Registering forEachEntityWith");
 		using ForEachEntityFunc = function<void(Entity, T &)>;
-		registerFunction(putils::string<128>("forEachEntityWith%s", className),
+		registerFunction(putils::string<128>("forEachEntityWith%s", className).c_str(),
 			function<void(const ForEachEntityFunc &)>(
 				[](const ForEachEntityFunc & f) {
 					for (auto [e, t] : entities.with<T>())

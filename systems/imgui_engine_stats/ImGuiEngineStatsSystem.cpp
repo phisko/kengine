@@ -154,7 +154,7 @@ namespace kengine {
 				for (const auto [e, name, has] : sortedEntities) {
 					const auto it = std::find(creating.components.begin(), creating.components.end(), e.id);
 					bool inCreating = it != creating.components.end();
-					if (ImGui::Checkbox(name->name, &inCreating)) {
+					if (ImGui::Checkbox(name->name.c_str(), &inCreating)) {
 						if (inCreating)
 							creating.components.push_back(e.id);
 						else

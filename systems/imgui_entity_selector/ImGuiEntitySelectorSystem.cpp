@@ -107,7 +107,7 @@ namespace kengine {
 			}
 
 			bool ret = false;
-			const auto openTreeNode = ImGui::TreeNode(displayText + "##" + e.id);
+			const auto openTreeNode = ImGui::TreeNode((displayText + "##" + e.id).c_str());
 			if (ImGui::BeginPopupContextItem()) {
 				if (ImGui::MenuItem("Select"))
 					ret = true;

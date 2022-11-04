@@ -208,7 +208,24 @@ namespace kengine {
 			return 0;
 		}
 
-#ifdef KENGINE_PYTHON
+		static void evalPython() {
+			KENGINE_PROFILING_SCOPE;
+
+#ifndef KENGINE_PYTHON
+			kengine_log(Error, "Execute/ImGuiPromptSystem", "Attempt to evaluate Python script but KENGINE_PYTHON is not defined");
+			addLineToHistory(
+				"Please compile with KENGINE_PYTHON",
+				false,
+				putils::NormalizedColor{ 1.f, 0.f, 0.f }
+			);
+#else
+			kengine_logf(Log, "Execute/ImGuiPromptSystem", "Evaluating Python script: '%s'", buff);
+
+#ifdef __GNUC__
+// Ignore "declared with greater visibility than the type of its field" warnings
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wattributes"
+#endif
 		// Stolen from https://github.com/pybind/pybind11/issues/1622
 		class PyStdErrOutStreamRedirect {
 			py::object _stdout;
@@ -240,19 +257,9 @@ namespace kengine {
 				sysm.attr("stderr") = _stderr;
 			}
 		};
+#ifdef __GNUC__
+#	pragma GCC diagnostic pop
 #endif
-		static void evalPython() {
-			KENGINE_PROFILING_SCOPE;
-
-#ifndef KENGINE_PYTHON
-			kengine_log(Error, "Execute/ImGuiPromptSystem", "Attempt to evaluate Python script but KENGINE_PYTHON is not defined");
-			addLineToHistory(
-				"Please compile with KENGINE_PYTHON",
-				false,
-				putils::NormalizedColor{ 1.f, 0.f, 0.f }
-			);
-#else
-			kengine_logf(Log, "Execute/ImGuiPromptSystem", "Evaluating Python script: '%s'", buff);
 
 			PyStdErrOutStreamRedirect redirect;
 			try {

@@ -74,7 +74,7 @@ namespace kengine {
 				if (first) {
 					for (size_t i = 0; i < putils::lengthof(names); ++i) {
 						names[i] = magic_enum::enum_names<E>()[i];
-						ret[i] = names[i];
+						ret[i] = names[i].c_str();
 					}
 					first = false;
 				}

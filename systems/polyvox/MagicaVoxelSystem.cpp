@@ -61,12 +61,12 @@ namespace kengine {
 			KENGINE_PROFILING_SCOPE;
 
 			auto & graphics = e.get<GraphicsComponent>();
-			const char * path = graphics.appearance;
+			const char * path = graphics.appearance.c_str();
 
 			const auto instance = e.tryGet<InstanceComponent>();
 			if (instance && instance->model != INVALID_ID) {
 				const auto & model = instanceHelper::getModel<ModelComponent>(*instance);
-				path = model.file;
+				path = model.file.c_str();
 			}
 
 			if (putils::file_extension(path) != "vox")
@@ -107,7 +107,7 @@ namespace kengine {
 			mesh = std::move(meshInfo.mesh);
 
 			auto modelData = generateModelData(e, mesh);
-			serialize(binaryFile, modelData, meshInfo.size);
+			serialize(binaryFile.c_str(), modelData, meshInfo.size);
 			e += std::move(modelData);
 
 			applyOffset(e, meshInfo.size);
@@ -185,8 +185,8 @@ namespace kengine {
 				else { // Was unserialized and we (violently) `new`-ed the data buffers
 					kengine_log(Log, "MagicaVoxelSystem/release", "Releasing binary data");
 					const auto & modelData = e.get<ModelDataComponent>();
-					delete[] modelData.meshes[0].vertices.data;
-					delete[] modelData.meshes[0].indices.data;
+					delete[] (const char *)modelData.meshes[0].vertices.data;
+					delete[] (const char *)modelData.meshes[0].indices.data;
 				}
 			};
 		}

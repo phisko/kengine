@@ -124,7 +124,7 @@ namespace kengine {
 			// TODO: depend on g_windowComponent->fullscreen
 			glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
-			glfwComp.window = glfwCreateWindow((int)window.size.x, (int)window.size.y, window.name, nullptr, nullptr);
+			glfwComp.window = glfwCreateWindow((int)window.size.x, (int)window.size.y, window.name.c_str(), nullptr, nullptr);
 			// Desired size may not have been available, update to actual size
 			int width, height;
 			glfwGetWindowSize(glfwComp.window.get(), &width, &height);

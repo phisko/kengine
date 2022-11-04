@@ -155,7 +155,7 @@ namespace kengine::recast {
 
 			params.userData = (void *)e.id;
 
-			const auto idx = crowd.crowd->addAgent(objectInfo.objectInNavMesh.position, &params);
+			const auto idx = crowd.crowd->addAgent(objectInfo.objectInNavMesh.position.raw, &params);
 			kengine_assert(idx >= 0);
 
 			e += RecastAgentComponent{ idx, crowdId };
@@ -255,8 +255,8 @@ namespace kengine::recast {
 			const auto & agent = e.get<RecastAgentComponent>();
 			const auto editableAgent = crowd.crowd->getEditableAgent(agent.index);
 			fillCrowdAgentParams(editableAgent->params, objectInfo);
-			memcpy(editableAgent->npos, objectInfo.objectInNavMesh.position, sizeof(float[3]));
-			memcpy(editableAgent->nvel, e.get<PhysicsComponent>().movement, sizeof(float[3]));
+			memcpy(editableAgent->npos, objectInfo.objectInNavMesh.position.raw, sizeof(float[3]));
+			memcpy(editableAgent->nvel, e.get<PhysicsComponent>().movement.raw, sizeof(float[3]));
 		}
 
 		static void updateDestination(Entity & e, const RecastNavMeshComponent & navMesh, const RecastCrowdComponent & crowd, const putils::Point3f & destinationInModel, const putils::Point3f & searchExtents) noexcept {
@@ -265,7 +265,7 @@ namespace kengine::recast {
 			static const dtQueryFilter filter;
 			dtPolyRef nearestPoly;
 			float nearestPt[3];
-			const auto status = navMesh.navMeshQuery->findNearestPoly(destinationInModel, searchExtents, &filter, &nearestPoly, nearestPt);
+			const auto status = navMesh.navMeshQuery->findNearestPoly(destinationInModel.raw, searchExtents.raw, &filter, &nearestPoly, nearestPt);
 			if (dtStatusFailed(status) || nearestPoly == 0)
 				return;
 

@@ -231,7 +231,7 @@ namespace kengine {
 			KENGINE_PROFILING_SCOPE;
 
 			ImGui::Columns(2);
-			ImGui::Text(name);
+			ImGui::Text("%s", name);
 			ImGui::NextColumn();
 
             switch (value.type) {
@@ -277,7 +277,7 @@ namespace kengine {
                         ImGui::OpenPopup("color picker popup");
 
                     if (ImGui::BeginPopup("color picker popup")) {
-                        ImGui::ColorPicker4(value.name, color);
+                        ImGui::ColorPicker4(value.name.c_str(), color);
                         ImGui::EndPopup();
                     }
                     if (s.ptr != nullptr)
