@@ -12,15 +12,13 @@
 #include "helpers/logHelper.hpp"
 #include "helpers/profilingHelper.hpp"
 
-namespace kengine::input {
-	struct impl {
-		static inline InputBufferComponent * buffer;
-
+namespace kengine {
+	struct InputSystem {
 		static void init(Entity & e) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(Log, "Init", "InputSystem");
 
-			buffer = &e.attach<InputBufferComponent>();
+			_buffer = &e.attach<InputBufferComponent>();
 			e += functions::Execute{ execute };
 		}
 
@@ -29,35 +27,32 @@ namespace kengine::input {
 			kengine_log(Verbose, "Execute", "InputSystem");
 
 			for (const auto & [e, comp] : entities.with<InputComponent>()) {
-				for (const auto & e : buffer->keys)
+				for (const auto & e : _buffer->keys)
 					if (comp.onKey != nullptr)
 						comp.onKey(e.window, e.key, e.pressed);
 
 				if (comp.onMouseButton != nullptr)
-					for (const auto & e : buffer->clicks)
+					for (const auto & e : _buffer->clicks)
 						comp.onMouseButton(e.window, e.button, e.pos, e.pressed);
 
 				if (comp.onMouseMove != nullptr)
-					for (const auto & e : buffer->moves)
+					for (const auto & e : _buffer->moves)
 						comp.onMouseMove(e.window, e.pos, e.rel);
 
 				if (comp.onScroll != nullptr)
-					for (const auto & e : buffer->scrolls)
+					for (const auto & e : _buffer->scrolls)
 						comp.onScroll(e.window, e.xoffset, e.yoffset, e.pos);
 			}
-			buffer->keys.clear();
-			buffer->clicks.clear();
-			buffer->moves.clear();
-			buffer->scrolls.clear();
+			_buffer->keys.clear();
+			_buffer->clicks.clear();
+			_buffer->moves.clear();
+			_buffer->scrolls.clear();
 		}
-	};
-}
 
-namespace kengine {
+		static inline InputBufferComponent * _buffer;
+	};
+
 	EntityCreator * InputSystem() noexcept {
-		KENGINE_PROFILING_SCOPE;
-		return [](Entity & e) noexcept {
-			input::impl::init(e);
-		};
+		return InputSystem::init;
 	}
 }

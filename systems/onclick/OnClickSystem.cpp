@@ -12,8 +12,8 @@
 #include "helpers/logHelper.hpp"
 #include "helpers/profilingHelper.hpp"
 
-namespace kengine::onclick {
-	struct impl {
+namespace kengine {
+	struct OnClickSystem {
 		static void init(Entity & e) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(Log, "Init", "OnClickSystem");
@@ -48,11 +48,8 @@ namespace kengine::onclick {
 			}
 		}
 	};
-}
 
-namespace kengine {
 	EntityCreator * OnClickSystem() noexcept {
-		KENGINE_PROFILING_SCOPE;
-		return onclick::impl::init;
+		return OnClickSystem::init;
 	}
 }

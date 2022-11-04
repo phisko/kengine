@@ -25,18 +25,16 @@
 #include "helpers/imguiHelper.hpp"
 #include "helpers/profilingHelper.hpp"
 
-namespace kengine::imgui_entity_selector {
-	struct impl {
-		static inline bool * enabled;
-
+namespace kengine {
+	struct ImGuiEntitySelectorSystem {
 		static void init(Entity & e) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(Log, "Init", "ImGuiEntitySelector");
+			kengine_log(Log, "Init", "ImGuiEntitySelectorSystem");
 
 			e += NameComponent{ "Entity selector" };
 			auto & tool = e.attach<ImGuiToolComponent>();
 			tool.enabled = true;
-			enabled = &tool.enabled;
+			_enabled = &tool.enabled;
 
 			e += functions::Execute{ execute };
 		}
@@ -44,11 +42,11 @@ namespace kengine::imgui_entity_selector {
 		static void execute(float deltaTime) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			if (!*enabled)
+			if (!*_enabled)
 				return;
 			kengine_log(Verbose, "Execute", "ImGuiEntitySelector");
 
-			if (ImGui::Begin("Entity selector", enabled)) {
+			if (ImGui::Begin("Entity selector", _enabled)) {
 				static char nameSearch[1024];
 				ImGui::InputText("Search", nameSearch, sizeof(nameSearch));
 
@@ -126,14 +124,11 @@ namespace kengine::imgui_entity_selector {
 
 			return ret;
 		}
-	};
-}
 
-namespace kengine {
+		static inline bool * _enabled;
+	};
+
 	EntityCreator * ImGuiEntitySelectorSystem() noexcept {
-		KENGINE_PROFILING_SCOPE;
-		return [](Entity & e) noexcept {
-			imgui_entity_selector::impl::init(e);
-		};
+		return ImGuiEntitySelectorSystem::init;
 	}
 }

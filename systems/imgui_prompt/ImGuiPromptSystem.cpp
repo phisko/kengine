@@ -25,34 +25,8 @@ enum class Language {
 	Python
 };
 
-namespace kengine::imgui_prompt {
-	struct impl {
-		static inline bool * enabled;
-
-		static inline Language selectedLanguage = Language::Lua;
-		static inline int maxLines = 128;
-		static inline char buff[1024];
-
-		static inline struct History {
-			struct Line {
-				std::string text;
-				bool separator = false;
-				putils::NormalizedColor color;
-			};
-
-			std::list<Line> lines;
-
-			template<typename S>
-			void addLine(S && s, bool separator = false, const putils::NormalizedColor & color = putils::NormalizedColor{}) noexcept {
-				lines.push_back({ FWD(s), separator, color });
-			}
-
-			template<typename S>
-			void addError(S && s, bool separator = false) noexcept {
-				addLine(FWD(s), separator, putils::NormalizedColor{ 1.f, 0.f, 0.f });
-			}
-		} history;
-
+namespace kengine {
+	struct ImGuiPromptSystem {
 		static void init(Entity & e) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(Log, "Init", "ImGuiPromptSystem");
@@ -60,10 +34,10 @@ namespace kengine::imgui_prompt {
 			auto & tool = e.attach<ImGuiToolComponent>();
 			enabled = &tool.enabled;
 			e += NameComponent{ "Prompt" };
-			e += functions::Execute{ draw };
+			e += functions::Execute{ execute };
 		}
 
-		static void draw(float deltaTime) noexcept {
+		static void execute(float deltaTime) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			if (!*enabled)
@@ -76,11 +50,11 @@ namespace kengine::imgui_prompt {
 				drawHistory();
 				ImGui::NextColumn();
 				if (drawPrompt()) {
-					history.addLine(buff, false, putils::NormalizedColor{ 0.f }); // cyan
+					_history.addLine(buff, false, putils::NormalizedColor{ 0.f }); // cyan
 					eval();
 					buff[0] = 0;
-					while (history.lines.size() > maxLines && !history.lines.empty())
-						history.lines.pop_front();
+					while (_history.lines.size() > maxLines && !_history.lines.empty())
+						_history.lines.pop_front();
 				}
 				ImGui::Columns();
 			}
@@ -96,7 +70,7 @@ namespace kengine::imgui_prompt {
 				maxLines = tmp;
 
 			ImGui::BeginChild("History");
-			for (const auto & line : history.lines) {
+			for (const auto & line : _history.lines) {
 				if (line.separator)
 					ImGui::Separator();
 
@@ -122,7 +96,7 @@ namespace kengine::imgui_prompt {
 
 			static bool first = true;
 			if (putils::reflection::imguiEnumCombo("##Language", selectedLanguage) || first) {
-				history.addLine(
+				_history.addLine(
 					std::string(magic_enum::enum_names<Language>()[(int)selectedLanguage]),
 					true,
 					putils::NormalizedColor{ 1.f, 1.f, 0.f }
@@ -184,7 +158,7 @@ namespace kengine::imgui_prompt {
 					state.state->script(buff);
 				}
 				catch (const std::exception & e) {
-					history.addError(e.what());
+					_history.addError(e.what());
 				}
 				active = false;
 			}
@@ -228,7 +202,7 @@ namespace kengine::imgui_prompt {
 			}
 
 			if (active)
-				history.addLine(std::move(line), false, color);
+				_history.addLine(std::move(line), false, color);
 			else
 				std::cout << line << std::endl;
 			return 0;
@@ -285,26 +259,47 @@ namespace kengine::imgui_prompt {
 				py::exec(buff);
 			}
 			catch (const std::exception & e) {
-				history.addError(e.what());
+				_history.addError(e.what());
 			}
 
 			auto output = redirect.stdoutString();
 			if (!output.empty())
-				history.addLine(std::move(output));
+				_history.addLine(std::move(output));
 
 			auto err = redirect.stderrString();
 			if (!err.empty())
-				history.addError(std::move(err));
+				_history.addError(std::move(err));
 #endif
 		}
-	};
-}
 
-namespace kengine {
+		static inline bool * enabled;
+
+		static inline Language selectedLanguage = Language::Lua;
+		static inline int maxLines = 128;
+		static inline char buff[1024];
+
+		static inline struct History {
+			struct Line {
+				std::string text;
+				bool separator = false;
+				putils::NormalizedColor color;
+			};
+
+			std::list<Line> lines;
+
+			template<typename S>
+			void addLine(S && s, bool separator = false, const putils::NormalizedColor & color = putils::NormalizedColor{}) noexcept {
+				lines.push_back({ FWD(s), separator, color });
+			}
+
+			template<typename S>
+			void addError(S && s, bool separator = false) noexcept {
+				addLine(FWD(s), separator, putils::NormalizedColor{ 1.f, 0.f, 0.f });
+			}
+		} _history;
+	};
+
 	EntityCreator * ImGuiPromptSystem() noexcept {
-		KENGINE_PROFILING_SCOPE;
-		return [](Entity & e) noexcept {
-			imgui_prompt::impl::init(e);
-		};
+		return ImGuiPromptSystem::init;
 	}
 }

@@ -11,8 +11,8 @@
 #include "helpers/logHelper.hpp"
 #include "helpers/profilingHelper.hpp"
 
-namespace kengine::collision {
-	struct impl {
+namespace kengine {
+	struct CollisionSystem {
 		static void init(Entity & e) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			e += functions::OnCollision{ onCollision };
@@ -33,13 +33,8 @@ namespace kengine::collision {
 			collision->onCollide(first, second);
 		}
 	};
-}
 
-namespace kengine {
 	EntityCreator * CollisionSystem() noexcept {
-		KENGINE_PROFILING_SCOPE;
-		return [](Entity & e) noexcept {
-			collision::impl::init(e);
-		};
+		return CollisionSystem::init;
 	}
 }

@@ -16,8 +16,8 @@
 #include "helpers/logHelper.hpp"
 #include "helpers/profilingHelper.hpp"
 
-namespace kengine::kinematic {
-	struct impl {
+namespace kengine {
+	struct KinematicSystem {
 		static void init(Entity & e) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(Log, "Init", "KinematicSystem");
@@ -42,13 +42,8 @@ namespace kengine::kinematic {
 			}
 		}
 	};
-}
 
-namespace kengine {
 	EntityCreator * KinematicSystem() noexcept {
-		KENGINE_PROFILING_SCOPE;
-		return [](Entity & e) noexcept {
-			kinematic::impl::init(e);
-		};
+		return KinematicSystem::init;
 	}
 }
