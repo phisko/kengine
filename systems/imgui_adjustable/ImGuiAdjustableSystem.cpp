@@ -51,10 +51,9 @@
 # define KENGINE_MAX_ADJUSTABLES 256
 #endif
 
-namespace kengine::imgui_adjustable {
-	struct impl {
+namespace kengine {
+	struct ImGuiAdjustableSystem {
 		using string = AdjustableComponent::string;
-		static inline putils::IniFile loadedFile;
 		using Sections = putils::vector<string, KENGINE_MAX_ADJUSTABLES_SECTIONS>;
 
 		static void init(Entity & e) noexcept {
@@ -310,8 +309,8 @@ namespace kengine::imgui_adjustable {
 
 			kengine_logf(Log, "Init/ImGuiAdjustableSystem", "Initializing section %s", comp.section.c_str());
 
-			const auto it = loadedFile.sections.find(comp.section.c_str());
-			if (it == loadedFile.sections.end()) {
+			const auto it = _loadedFile.sections.find(comp.section.c_str());
+			if (it == _loadedFile.sections.end()) {
 				kengine_log(Warning, "Init/ImGuiAdjustableSystem", "Section not found in INI file");
 				return;
 			}
@@ -371,7 +370,7 @@ namespace kengine::imgui_adjustable {
 			kengine_log(Log, "ImGuiAdjustableSystem", "Loading from " KENGINE_ADJUSTABLE_SAVE_FILE);
 
             std::ifstream f(KENGINE_ADJUSTABLE_SAVE_FILE);
-            f >> loadedFile;
+            f >> _loadedFile;
 			for (auto [e, comp] : entities.with<AdjustableComponent>())
 				initAdjustable(comp);
 		}
@@ -422,14 +421,11 @@ namespace kengine::imgui_adjustable {
 
 			f << ini;
 		}
-	};
-}
 
-namespace kengine {
+		static inline putils::IniFile _loadedFile;
+	};
+
 	EntityCreator * ImGuiAdjustableSystem() noexcept {
-		KENGINE_PROFILING_SCOPE;
-		return [](Entity & e) noexcept {
-			imgui_adjustable::impl::init(e);
-		};
+		return ImGuiAdjustableSystem::init;
 	}
 }

@@ -31,8 +31,8 @@
 # define KENGINE_IMGUI_MAX_TOOLS 0 // no limit by default
 #endif
 
-namespace kengine::imgui_tool {
-	struct impl {
+namespace kengine {
+	struct ImGuiToolSystem {
 		static void init(Entity & e) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(Log, "Init", "ImGuiToolSystem");
@@ -41,10 +41,10 @@ namespace kengine::imgui_tool {
 			e += functions::OnTerminate{ saveTools };
 			e += functions::Execute{ execute };
 
-			confFile.parse();
+			_confFile.parse();
 			for (const auto & [e, name, tool] : entities.with<NameComponent, ImGuiToolComponent>()) {
 				kengine_logf(Log, "Init/ImGuiToolSystem", "Initializing %s", name.name.c_str());
-				tool.enabled = confFile.getValue(name.name);
+				tool.enabled = _confFile.getValue(name.name);
 			}
 		}
 
@@ -89,7 +89,7 @@ namespace kengine::imgui_tool {
 				return;
 
 			kengine_logf(Log, "Init/ImGuiToolSystem", "Initializing %s", name->name.c_str());
-			tool->enabled = confFile.getValue(name->name);
+			tool->enabled = _confFile.getValue(name->name);
 		}
 
 		static void saveTools() noexcept {
@@ -133,15 +133,10 @@ namespace kengine::imgui_tool {
 
 		private:
 			std::unordered_map<std::string, bool> _values;
-		} confFile;
+		} _confFile;
 	};
-}
 
-namespace kengine {
 	EntityCreator * ImGuiToolSystem() noexcept {
-		KENGINE_PROFILING_SCOPE;
-		return [](Entity & e) noexcept {
-			imgui_tool::impl::init(e);
-		};
+		return ImGuiToolSystem::init;
 	}
 }

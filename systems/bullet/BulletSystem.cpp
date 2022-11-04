@@ -59,14 +59,14 @@ namespace putils {
 
 #include "data/NameComponent.hpp"
 
-namespace kengine::bullet {
+namespace kengine {
     static struct {
         bool enableDebug = false;
         bool editorMode = false;
         float gravity = 1.f;
     } adjustables;
 
-    struct impl {
+    struct BulletSystem {
 		static inline btDefaultCollisionConfiguration collisionConfiguration;
 		static inline btCollisionDispatcher dispatcher{ &collisionConfiguration };
 		static inline btDbvtBroadphase overlappingPairCache;
@@ -462,13 +462,8 @@ namespace kengine::bullet {
 		static inline Drawer * drawer = nullptr;
 #endif
 	};
-}
 
-namespace kengine {
 	EntityCreator * BulletSystem() noexcept {
-		KENGINE_PROFILING_SCOPE;
-		return [](Entity & e) noexcept {
-			bullet::impl::init(e);
-		};
+		return BulletSystem::init;
 	}
 }
