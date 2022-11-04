@@ -63,7 +63,7 @@ namespace kengine::recast {
 			threadPool().runTask([&, id = e.id]() noexcept {
 				const auto cleanup = putils::onScopeExit([&] { --jobsLeft; });
 				kengine_assert(navMesh.vertsPerPoly <= DT_VERTS_PER_POLYGON);
-				createRecastMesh(model.file, kengine::entities[id], navMesh, modelData);
+				createRecastMesh(model.file.c_str(), kengine::entities[id], navMesh, modelData);
 			});
 		}
 
@@ -86,7 +86,7 @@ namespace kengine::recast {
 
 			const putils::string<4096> binaryFile("%s.nav", file);
 			bool mustSave = false;
-			data = loadBinaryFile(binaryFile, navMesh);
+			data = loadBinaryFile(binaryFile.c_str(), navMesh);
 			if (data.data == nullptr) {
 				kengine_logf(Verbose, "Execute/RecastSystem/createRecastMesh", "Found no binary file for %s, creating nav mesh data", file);
 				data = createNavMeshData(navMesh, modelData, modelData.meshes[navMesh.concernedMesh]);
@@ -111,7 +111,7 @@ namespace kengine::recast {
 			}
 
 			if (mustSave)
-				saveBinaryFile(binaryFile, data, navMesh);
+				saveBinaryFile(binaryFile.c_str(), data, navMesh);
 
 			e += functions::GetPath{ getPath(e.tryGet<TransformComponent>(), navMesh, recast) };
 		}
@@ -514,7 +514,7 @@ namespace kengine::recast {
 
 				dtPolyRef startRef;
 				float startPt[3];
-				auto status = recast.navMeshQuery->findNearestPoly(start, extents, &filter, &startRef, startPt);
+				auto status = recast.navMeshQuery->findNearestPoly(start.raw, extents, &filter, &startRef, startPt);
 				if (dtStatusFailed(status) || startRef == 0) {
 					kengine_log(Error, "RecastSystem/getPath", "Failed to find nearest poly to start");
 					return ret;
@@ -522,7 +522,7 @@ namespace kengine::recast {
 
 				dtPolyRef endRef;
 				float endPt[3];
-				status = recast.navMeshQuery->findNearestPoly(end, extents, &filter, &endRef, endPt);
+				status = recast.navMeshQuery->findNearestPoly(end.raw, extents, &filter, &endRef, endPt);
 				if (dtStatusFailed(status) || endRef == 0) {
 					kengine_log(Error, "RecastSystem/getPath", "Failed to find nearest poly to end");
 					return ret;

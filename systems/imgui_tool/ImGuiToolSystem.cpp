@@ -44,7 +44,7 @@ namespace kengine {
 			_confFile.parse();
 			for (const auto & [e, name, tool] : entities.with<NameComponent, ImGuiToolComponent>()) {
 				kengine_logf(Log, "Init/ImGuiToolSystem", "Initializing %s", name.name.c_str());
-				tool.enabled = _confFile.getValue(name.name);
+				tool.enabled = _confFile.getValue(name.name.c_str());
 			}
 		}
 
@@ -63,7 +63,7 @@ namespace kengine {
 
 					const auto sorted = sortHelper::getNameSortedEntities<KENGINE_IMGUI_MAX_TOOLS, ImGuiToolComponent>();
 					for (auto & [e, name, tool] : sorted)
-						if (ImGui::MenuItem(name->name)) {
+						if (ImGui::MenuItem(name->name.c_str())) {
 							tool->enabled = !tool->enabled;
 							kengine_logf(Log, "ImGuiToolSystem", "Turned %s %s", tool->enabled ? "on" : "off", name->name.c_str());
 							mustSave = true;
@@ -89,7 +89,7 @@ namespace kengine {
 				return;
 
 			kengine_logf(Log, "Init/ImGuiToolSystem", "Initializing %s", name->name.c_str());
-			tool->enabled = _confFile.getValue(name->name);
+			tool->enabled = _confFile.getValue(name->name.c_str());
 		}
 
 		static void saveTools() noexcept {

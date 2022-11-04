@@ -8,6 +8,12 @@
 // kengine
 #include "Entity.hpp"
 
+#ifdef __GNUC__
+// Ignore "declared with greater visibility than the type of its field" warnings
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wattributes"
+#endif
+
 namespace kengine {
 	struct PythonStateComponent {
 		struct Data {
@@ -19,6 +25,10 @@ namespace kengine {
 		std::unique_ptr<Data> data = nullptr;
 	};
 }
+
+#ifdef __GNU_C__
+#	pragma GCC diagnostic pop
+#endif
 
 #define refltype kengine::PythonStateComponent
 putils_reflection_info{

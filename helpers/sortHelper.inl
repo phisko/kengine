@@ -67,7 +67,7 @@ namespace kengine::sortHelper {
 
 		return getSortedEntities<MaxCount, NameComponent, Comps...>(
 			[](const auto & lhs, const auto & rhs) noexcept {
-				return strcmp(std::get<1>(lhs)->name, std::get<1>(rhs)->name) < 0;
+				return strcmp(std::get<1>(lhs)->name.c_str(), std::get<1>(rhs)->name.c_str()) < 0;
 			}
 		);
 	}

@@ -46,10 +46,22 @@ namespace kengine {
 			using Path = putils::vector<putils::Point3f, KENGINE_NAVMESH_MAX_PATH_LENGTH, PathName>;
 		}
 
+#ifdef __GNUC__
+// Ignore "'...' has a base '...' whose type uses the anonymous namespace" warnings
+// Haven't found any type here that uses the anonymous namespace, not sure where this is coming from
+#	pragma GCC diagnostic push
+#	pragma GCC diagnostic ignored "-Wsubobject-linkage"
+#endif
+
 		struct GetPath : BaseFunction<
 			GetPathImpl::Path (const Entity & environment, const putils::Point3f & start, const putils::Point3f & end)
 			// `environment` is the entity instantiating the `model Entity` this component is attached to
 		> {};
+
+#ifdef __GNU_C__
+#	pragma GCC diagnostic pop
+#endif
+
 	}
 }
 

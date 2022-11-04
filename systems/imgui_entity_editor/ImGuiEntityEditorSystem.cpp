@@ -51,7 +51,7 @@ namespace kengine {
 					putils::string<64>("%s##[%d]", name->name.c_str(), selected.id) :
 					putils::string<64>("[%d] Entity editor", selected.id);
 
-				if (ImGui::Begin(windowTitle, &open, ImGuiWindowFlags_NoSavedSettings))
+				if (ImGui::Begin(windowTitle.c_str(), &open, ImGuiWindowFlags_NoSavedSettings))
 					imguiHelper::editEntityAndModel(selected);
 				ImGui::End();
 

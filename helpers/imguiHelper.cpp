@@ -30,7 +30,7 @@ namespace kengine::imguiHelper {
 
 		for (const auto & [_, name, has, display] : types)
 			if (has->call(e))
-				if (ImGui::TreeNode(name->name)) {
+				if (ImGui::TreeNode(name->name.c_str())) {
 					display->call(e);
 					ImGui::TreePop();
 				}
@@ -70,7 +70,7 @@ namespace kengine::imguiHelper {
 
 			for (const auto & [_, name, has, add] : types)
 				if (!has->call(e))
-					if (ImGui::MenuItem(name->name))
+					if (ImGui::MenuItem(name->name.c_str()))
 						add->call(e);
 
 			ImGui::EndPopup();
@@ -83,7 +83,7 @@ namespace kengine::imguiHelper {
 		for (const auto & [_, name, has, edit] : types) {
 			if (!has->call(e))
 				continue;
-			const auto treeNodeOpen = ImGui::TreeNode(name->name + "##edit");
+			const auto treeNodeOpen = ImGui::TreeNode((name->name + "##edit").c_str());
 
 			const auto detachFrom = _.tryGet<meta::DetachFrom>();
 			if (detachFrom) {

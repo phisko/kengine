@@ -108,7 +108,7 @@ namespace kengine {
 
 			bool changed = false;
 			for (const auto & [severity, name] : magic_enum::enum_entries<LogSeverity>())
-				if (ImGui::Checkbox(putils::string<32>(name), &_filters.severities[(int)severity]))
+				if (ImGui::Checkbox(putils::string<32>(name).c_str(), &_filters.severities[(int)severity]))
 					changed = true;
 
 			if (ImGui::InputText("Category", _filters.categorySearch, putils::lengthof(_filters.categorySearch)))

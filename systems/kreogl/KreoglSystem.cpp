@@ -197,9 +197,9 @@ namespace kengine {
 
 			for (auto [modelEntity, model, noKreoglModel, noKreoglImageTexture] : entities.with<ModelComponent, no<KreoglModelComponent>, no<kreogl::ImageTexture>>()) {
 				kengine_logf(Verbose, "Execute/KreoglSystem", "Creating Kreogl model for %zu (%s)", modelEntity.id, model.file.c_str());
-				if (kreogl::ImageTexture::isSupportedFormat(model.file))
-					modelEntity += kreogl::ImageTexture(model.file);
-				else if (kreogl::AssImp::isSupportedFileFormat(model.file))
+				if (kreogl::ImageTexture::isSupportedFormat(model.file.c_str()))
+					modelEntity += kreogl::ImageTexture(model.file.c_str());
+				else if (kreogl::AssImp::isSupportedFileFormat(model.file.c_str()))
 					createModelWithAssImp(modelEntity, model);
 			}
 		}
@@ -207,10 +207,10 @@ namespace kengine {
 		static void createModelWithAssImp(Entity & modelEntity, const ModelComponent & model) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			auto animatedModel = kreogl::AssImp::loadAnimatedModel(model.file);
+			auto animatedModel = kreogl::AssImp::loadAnimatedModel(model.file.c_str());
 			if (animatedModel) {
 				// Sync properties from loaded model to kengine components
-				addAnimationsToModelAnimationComponent(modelEntity.attach<ModelAnimationComponent>(), model.file, animatedModel->animations);
+				addAnimationsToModelAnimationComponent(modelEntity.attach<ModelAnimationComponent>(), model.file.c_str(), animatedModel->animations);
 				if (animatedModel->skeleton) {
 					auto & modelSkeleton = modelEntity.attach<ModelSkeletonComponent>();
 					for (const auto & mesh : animatedModel->skeleton->meshes)
@@ -331,7 +331,7 @@ namespace kengine {
 				lightEntity += kreogl::SpotLight{};
 
 			for (auto [skyboxEntity, skyBox, noKreoglSkybox] : entities.with<SkyBoxComponent, no<kreogl::SkyboxTexture>>())
-				skyboxEntity += kreogl::SkyboxTexture(skyBox.left, skyBox.right, skyBox.top, skyBox.bottom, skyBox.front, skyBox.back);
+				skyboxEntity += kreogl::SkyboxTexture(skyBox.left.c_str(), skyBox.right.c_str(), skyBox.top.c_str(), skyBox.bottom.c_str(), skyBox.front.c_str(), skyBox.back.c_str());
 
 			for (auto [debugEntity, debugGraphics, noKreoglDebugGraphics] : entities.with<DebugGraphicsComponent, no<KreoglDebugGraphicsComponent>>())
 				debugEntity += KreoglDebugGraphicsComponent{};
