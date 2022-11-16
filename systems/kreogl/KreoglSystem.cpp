@@ -853,7 +853,7 @@ namespace kengine {
 
 			const auto viewportInfo = cameraHelper::getViewportForPixel(windowID, pixel);
 			if (viewportInfo.camera == INVALID_ID) {
-				kengine_log(Warning, "KreoglSystem", "Found no viewport containing pixel");
+				kengine_logf(Warning, "KreoglSystem", "Found no viewport containing pixel { %d, %d }", pixel.x, pixel.y);
 				return std::nullopt;
 			}
 
