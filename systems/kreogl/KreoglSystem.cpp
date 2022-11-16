@@ -3,6 +3,7 @@
 
 // stl
 #include <algorithm>
+#include <atomic>
 #include <filesystem>
 
 // gl
@@ -340,28 +341,36 @@ namespace kengine {
 		static void tickAnimations(float deltaTime) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
+			std::atomic<size_t> jobsLeft = 0;
 			for (auto [entity, kreoglObject, animation] : entities.with<kreogl::AnimatedObject, AnimationComponent>()) {
 				if (!kreoglObject.animation)
 					continue;
 
-				kreoglObject.tickAnimation(deltaTime);
+				++jobsLeft;
+				threadPool().runTask([&, id = entity.id]() noexcept {
+					kreoglObject.tickAnimation(deltaTime);
 
-				// Sync properties from kreoglObject to kengine components
-				animation.currentTime = kreoglObject.animation->currentTime;
+					// Sync properties from kreoglObject to kengine components
+					animation.currentTime = kreoglObject.animation->currentTime;
 
-				auto & skeleton = entity.get<SkeletonComponent>();
-				const auto nbMeshes = kreoglObject.skeleton.meshes.size();
-				skeleton.meshes.resize(nbMeshes);
-				for (size_t i = 0; i < nbMeshes; ++i) {
-					const auto & kreoglMesh = kreoglObject.skeleton.meshes[i];
-					auto & mesh = skeleton.meshes[i];
+					auto & skeleton = kengine::entities[id].get<SkeletonComponent>();
+					const auto nbMeshes = kreoglObject.skeleton.meshes.size();
+					skeleton.meshes.resize(nbMeshes);
+					for (size_t i = 0; i < nbMeshes; ++i) {
+						const auto & kreoglMesh = kreoglObject.skeleton.meshes[i];
+						auto & mesh = skeleton.meshes[i];
 
-					kengine_assert(kreoglMesh.boneMatsBoneSpace.size() < putils::lengthof(mesh.boneMatsBoneSpace));
-					std::ranges::copy(kreoglMesh.boneMatsBoneSpace, mesh.boneMatsBoneSpace);
-					kengine_assert(kreoglMesh.boneMatsMeshSpace.size() < putils::lengthof(mesh.boneMatsMeshSpace));
-					std::ranges::copy(kreoglMesh.boneMatsMeshSpace, mesh.boneMatsMeshSpace);
-				}
+						kengine_assert(kreoglMesh.boneMatsBoneSpace.size() < putils::lengthof(mesh.boneMatsBoneSpace));
+						std::ranges::copy(kreoglMesh.boneMatsBoneSpace, mesh.boneMatsBoneSpace);
+						kengine_assert(kreoglMesh.boneMatsMeshSpace.size() < putils::lengthof(mesh.boneMatsMeshSpace));
+						std::ranges::copy(kreoglMesh.boneMatsMeshSpace, mesh.boneMatsMeshSpace);
+					}
+
+					--jobsLeft;
+				});
 			}
+
+			while (jobsLeft > 0);
 		}
 
 		static void draw() noexcept {
