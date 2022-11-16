@@ -8,7 +8,7 @@
 #include "impl/ComponentCollection.hpp"
 
 namespace kengine {
-	class Entities {
+	class KENGINE_CORE_EXPORT Entities {
 	public:
 		template<typename Func> // Func: EntityCreator
 		Entity create(Func && postCreate) noexcept;

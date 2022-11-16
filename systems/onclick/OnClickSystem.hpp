@@ -4,5 +4,5 @@
 #include "EntityCreator.hpp"
 
 namespace kengine {
-	EntityCreator * OnClickSystem() noexcept;
+	KENGINE_ONCLICK_EXPORT EntityCreator * OnClickSystem() noexcept;
 }

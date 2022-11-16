@@ -4,5 +4,5 @@
 #include "EntityCreator.hpp"
 
 namespace kengine {
-	EntityCreator * CollisionSystem() noexcept;
+	KENGINE_COLLISION_EXPORT EntityCreator * CollisionSystem() noexcept;
 }

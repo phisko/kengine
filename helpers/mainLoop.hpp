@@ -1,9 +1,9 @@
 #pragma once
 
 namespace kengine::mainLoop {
-	void run() noexcept;
+	KENGINE_CORE_EXPORT void run() noexcept;
 
 	namespace timeModulated {
-		void run() noexcept;
+		KENGINE_CORE_EXPORT void run() noexcept;
 	}
 }

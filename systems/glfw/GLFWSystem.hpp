@@ -4,5 +4,5 @@
 #include "EntityCreator.hpp"
 
 namespace kengine {
-	EntityCreator * GLFWSystem() noexcept;
+	KENGINE_GLFW_EXPORT EntityCreator * GLFWSystem() noexcept;
 }

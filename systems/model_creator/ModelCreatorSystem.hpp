@@ -4,5 +4,5 @@
 #include "EntityCreator.hpp"
 
 namespace kengine {
-	EntityCreator * ModelCreatorSystem() noexcept;
+	KENGINE_MODEL_CREATOR_EXPORT EntityCreator * ModelCreatorSystem() noexcept;
 }

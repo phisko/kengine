@@ -1,5 +1,6 @@
 set(name kengine_lua)
 
 file(GLOB src *.cpp *.hpp)
-add_library(${name} STATIC ${src})
-target_link_libraries(${name} PRIVATE kengine)
+add_library(${name} ${src})
+target_link_libraries(${name} PRIVATE kengine_core)
+putils_export_symbols(${name})

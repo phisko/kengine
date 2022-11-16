@@ -4,5 +4,5 @@
 #include "EntityCreator.hpp"
 
 namespace kengine {
-	EntityCreator * RecastSystem() noexcept;
+	KENGINE_RECAST_EXPORT EntityCreator * RecastSystem() noexcept;
 }

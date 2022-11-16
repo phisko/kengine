@@ -21,8 +21,8 @@ namespace kengine::impl {
 		static Metadata<Comp> & metadata() noexcept;
 	};
 
-	void addComponent(EntityID entity, ComponentID component) noexcept;
-	void removeComponent(EntityID entity, ComponentID component) noexcept;
+	KENGINE_CORE_EXPORT void addComponent(EntityID entity, ComponentID component) noexcept;
+	KENGINE_CORE_EXPORT void removeComponent(EntityID entity, ComponentID component) noexcept;
 }
 
 #include "Component.inl"

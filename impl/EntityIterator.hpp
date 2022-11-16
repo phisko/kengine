@@ -8,7 +8,7 @@ namespace kengine {
 }
 
 namespace kengine::impl {
-	struct EntityIterator {
+	struct KENGINE_CORE_EXPORT EntityIterator {
 		using iterator_category = std::forward_iterator_tag;
 		using value_type = Entity;
 		using reference = value_type &;

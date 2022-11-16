@@ -4,5 +4,5 @@
 #include "EntityCreator.hpp"
 
 namespace kengine {
-    EntityCreator * KreoglSystem() noexcept;
+    KENGINE_KREOGL_EXPORT EntityCreator * KreoglSystem() noexcept;
 }

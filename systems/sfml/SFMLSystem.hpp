@@ -4,5 +4,5 @@
 #include "EntityCreator.hpp"
 
 namespace kengine {
-	EntityCreator * SFMLSystem() noexcept;
+	KENGINE_SFML_EXPORT EntityCreator * SFMLSystem() noexcept;
 }

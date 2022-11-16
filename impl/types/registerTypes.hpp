@@ -2,5 +2,5 @@
 #pragma once
 
 namespace kengine::types{
-	void registerTypes() noexcept;
+	KENGINE_CORE_EXPORT void registerTypes() noexcept;
 }

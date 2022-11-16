@@ -4,5 +4,5 @@
 #include "EntityCreator.hpp"
 
 namespace kengine {
-	EntityCreator * PythonSystem() noexcept;
+	KENGINE_PYTHON_EXPORT EntityCreator * PythonSystem() noexcept;
 }

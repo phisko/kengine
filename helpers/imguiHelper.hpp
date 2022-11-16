@@ -3,9 +3,9 @@
 #include "kengine.hpp"
 
 namespace kengine::imguiHelper {
-	void displayEntity(const Entity & e) noexcept;
-	void displayEntityAndModel(const Entity & e) noexcept;
-	void editEntity(Entity & e) noexcept;
-	void editEntityAndModel(Entity & e) noexcept;
-	float getScale() noexcept;
+	KENGINE_CORE_EXPORT void displayEntity(const Entity & e) noexcept;
+	KENGINE_CORE_EXPORT void displayEntityAndModel(const Entity & e) noexcept;
+	KENGINE_CORE_EXPORT void editEntity(Entity & e) noexcept;
+	KENGINE_CORE_EXPORT void editEntityAndModel(Entity & e) noexcept;
+	KENGINE_CORE_EXPORT float getScale() noexcept;
 }

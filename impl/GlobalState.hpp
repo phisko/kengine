@@ -18,7 +18,7 @@ namespace kengine {
 }
 
 namespace kengine::impl {
-	struct GlobalState {
+	struct KENGINE_CORE_EXPORT GlobalState {
 		GlobalState(size_t threads) noexcept;
 
 		putils::ThreadPool threadPool;
@@ -28,7 +28,7 @@ namespace kengine::impl {
 		Impl
 		*/
 
-		union EntityMetadata {
+		union KENGINE_CORE_EXPORT EntityMetadata {
 			struct {
 				bool active;
 				ComponentMask mask;
@@ -49,6 +49,6 @@ namespace kengine::impl {
 		Mutex _componentsMutex;
 	};
 
-	Entity alloc() noexcept;
-	extern GlobalState * state;
+	KENGINE_CORE_EXPORT Entity alloc() noexcept;
+	KENGINE_CORE_EXPORT extern GlobalState * state;
 }

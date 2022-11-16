@@ -4,5 +4,5 @@
 #include "EntityCreator.hpp"
 
 namespace kengine {
-	EntityCreator * ImGuiToolSystem() noexcept;
+	KENGINE_IMGUI_TOOL_EXPORT EntityCreator * ImGuiToolSystem() noexcept;
 }
