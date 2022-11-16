@@ -311,7 +311,7 @@ namespace kengine {
 
 			const auto it = _loadedFile.sections.find(comp.section.c_str());
 			if (it == _loadedFile.sections.end()) {
-				kengine_log(Warning, "Init/ImGuiAdjustableSystem", "Section not found in INI file");
+				kengine_logf(Warning, "Init/ImGuiAdjustableSystem", "Section '%s' not found in INI file", comp.section.c_str());
 				return;
 			}
 			const auto & section = it->second;
