@@ -1,5 +1,6 @@
 #ifdef KENGINE_LUA
 
+#include "imguiLuaHelper.hpp"
 #include "kengine.hpp"
 
 // kengine data
