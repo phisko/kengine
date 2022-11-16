@@ -12,6 +12,7 @@
 
 // putils
 #include "function.hpp"
+#include "default_constructors.hpp"
 
 namespace detail {
 	putils_nested_type_detector(DataType);
@@ -19,6 +20,8 @@ namespace detail {
 
 namespace kengine {
 	struct ModelDataComponent {
+		PUTILS_MOVE_ONLY(ModelDataComponent);
+
 		struct Mesh {
 			struct Buffer {
 				size_t nbElements;
@@ -73,9 +76,5 @@ namespace kengine {
 
 			vertexSize = sizeof(VertexType);
 		}
-
-		ModelDataComponent() = default;
-		ModelDataComponent(ModelDataComponent &&) = default;
-		ModelDataComponent & operator=(ModelDataComponent &&) = default;
 	};
 }
