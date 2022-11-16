@@ -21,7 +21,6 @@ kengine::HighlightShader::HighlightShader() noexcept {
 	useWithoutUniformCheck();
 
 	_glsl.gposition = (int)kreogl::GBuffer::Texture::Position;
-	_glsl.gnormal = (int)kreogl::GBuffer::Texture::Normal;
 	_glsl.guserData = (int)kreogl::GBuffer::Texture::UserData;
 }
 
@@ -35,7 +34,6 @@ void kengine::HighlightShader::addSourceFiles() noexcept {
 std::vector<kreogl::UniformBase *> kengine::HighlightShader::getUniforms() noexcept {
 	return {
 		&_glsl.gposition,
-		&_glsl.gnormal,
 		&_glsl.guserData,
 		&_glsl.viewPos,
 		&_glsl.screenSize,
