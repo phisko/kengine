@@ -150,7 +150,8 @@ putils_reflection_info {
 		putils_reflection_type(refltype::BoolStorage),
 		putils_reflection_type(refltype::FloatStorage),
 		putils_reflection_type(refltype::IntStorage),
-		putils_reflection_type(refltype::ColorStorage)
+		putils_reflection_type(refltype::ColorStorage),
+		putils_reflection_type(putils::NormalizedColor)
 	);
 };
 #undef refltype
