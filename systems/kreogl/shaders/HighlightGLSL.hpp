@@ -7,7 +7,6 @@ struct HighlightGLSL {
 	static const char * frag;
 
 	kreogl::Uniform<int> gposition{ "gposition" };
-	kreogl::Uniform<int> gnormal{ "gnormal" };
 	kreogl::Uniform<int> guserData{ "guserData" };
 
 	kreogl::Uniform<glm::vec3> viewPos{ "viewPos" };
