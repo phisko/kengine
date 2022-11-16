@@ -62,6 +62,9 @@ putils_reflection_info{
 		putils_reflection_attribute(shadowMapMaxBias),
         putils_reflection_attribute(shadowMapMinBias)
 	);
+	putils_reflection_used_types(
+		putils_reflection_type(putils::NormalizedColor)
+	);
 };
 #undef refltype
 
@@ -79,7 +82,8 @@ putils_reflection_info{
 		putils_reflection_type(kengine::LightComponent)
 	);
 	putils_reflection_used_types(
-		putils_reflection_type(refltype::vector)
+		putils_reflection_type(refltype::vector),
+		putils_reflection_type(putils::Vector3f)
 	);
 };
 #undef refltype
@@ -109,6 +113,9 @@ putils_reflection_info{
 	);
 	putils_reflection_parents(
 		putils_reflection_type(kengine::PointLightComponent)
+	);
+	putils_reflection_used_types(
+		putils_reflection_type(putils::Vector3f)
 	);
 };
 #undef refltype

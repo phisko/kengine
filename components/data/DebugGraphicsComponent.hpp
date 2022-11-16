@@ -77,6 +77,10 @@ putils_reflection_info{
 		putils_reflection_attribute(type),
 		putils_reflection_attribute(referenceSpace)
 	);
+	putils_reflection_used_types(
+		putils_reflection_type(putils::Point3f),
+		putils_reflection_type(putils::NormalizedColor)
+	);
 };
 #undef refltype
 
