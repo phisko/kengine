@@ -55,7 +55,7 @@ namespace kengine {
 
 			kengine_log(Verbose, "Execute", "ImGuiEngineStatsSystem");
 
-			if (ImGui::Begin("Engine stats")) {
+			if (ImGui::Begin("Engine stats", _enabled)) {
 				const auto entityCount = std::count_if(
 					kengine::impl::state->_entities.begin(), kengine::impl::state->_entities.end(),
 					[](const kengine::impl::GlobalState::EntityMetadata & e) {
