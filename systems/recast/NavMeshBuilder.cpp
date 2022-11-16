@@ -246,11 +246,11 @@ namespace kengine::recast {
 		static std::optional<std::ptrdiff_t> getVertexPositionOffset(const ModelDataComponent & modelData) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			static const char * potentialNames[] = { "pos", "position" };
+			static const std::string_view potentialNames[] = { "pos", "position" };
 
 			for (const auto name : potentialNames)
 				for (const auto & attribute : modelData.vertexAttributes)
-					if (strcmp(attribute.name, name) == 0)
+					if (attribute.name == name)
 						return attribute.offset;
 
 			kengine_assert_failed("[Recast] Could not find vertex position");
