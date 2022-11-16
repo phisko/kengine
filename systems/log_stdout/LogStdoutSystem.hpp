@@ -4,5 +4,5 @@
 #include "EntityCreator.hpp"
 
 namespace kengine {
-	EntityCreator * LogStdoutSystem() noexcept;
+	KENGINE_LOG_STDOUT_EXPORT EntityCreator * LogStdoutSystem() noexcept;
 }

@@ -54,6 +54,8 @@ parser.add_argument('--registrations', help = 'registrations to use, as JSON fil
 parser.add_argument('--namespace', help = 'namespace in which the functions will be generated', required = True)
 parser.add_argument('--output', default = '', help = 'output directory', required = True)
 parser.add_argument('--force', action = 'store_true', help = 'overwrite existing files (only use if a component has changed headers)')
+parser.add_argument('--export-macro', help = 'DLL export macro', default = '')
+parser.add_argument('--export-header', help = 'header defining DLL export macro')
 
 #
 # Parsing
@@ -173,6 +175,7 @@ for type in all_types:
 main_file = os.path.join(args.output, 'registerTypes')
 
 main_file_cpp = '''
+#include "registerTypes.hpp"
 #include "helpers/logHelper.hpp"
 #include "helpers/profilingHelper.hpp"
 
@@ -197,7 +200,9 @@ open(main_file + '.cpp', 'w').write(main_file_cpp)
 open(main_file + '.hpp', 'w').write('''
 #pragma once
 
+''' + (f'#include <{args.export_header}>' if args.export_header else '') + '''
+
 namespace ''' + args.namespace + '''{
-	void registerTypes() noexcept;
+	''' + args.export_macro + ''' void registerTypes() noexcept;
 }
 ''')

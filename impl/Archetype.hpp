@@ -9,7 +9,7 @@
 #include "ID.hpp"
 
 namespace kengine::impl {
-	struct Archetype {
+	struct KENGINE_CORE_EXPORT Archetype {
 		ComponentMask mask;
 		std::vector<ID> entities;
 		bool sorted = true;

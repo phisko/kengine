@@ -3,7 +3,7 @@
 #ifdef KENGINE_LUA
 
 namespace kengine::imguiLuaHelper {
-	void initBindings() noexcept;
+	KENGINE_CORE_EXPORT void initBindings() noexcept;
 }
 
 #endif

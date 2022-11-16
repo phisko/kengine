@@ -9,5 +9,7 @@ file(GLOB src
 	*.cpp *.hpp
 	shaders/*.cpp shaders/*.hpp
 	${imguiDir}/backends/imgui_impl_glfw.cpp ${imguiDir}/backends/imgui_impl_opengl3.cpp)
-add_library(${name} STATIC ${src})
+add_library(${name} ${src})
 target_link_libraries(${name} PRIVATE kengine kreogl)
+putils_export_symbols(${name})
+putils_export_symbols(${name} EXPORT_MACRO_NAME IMGUI_IMPL_API EXPORT_FILE_NAME imgui_impl_api.h)

@@ -12,6 +12,7 @@
 # define kengine_assert_failed(...) (void)0
 # define kengine_debug_break (void)0
 #else
+
 // stl
 # include <string>
 
@@ -48,10 +49,10 @@
 
 namespace kengine {
 	namespace assertHelper {
-        extern std::function<bool(const char * file, int line, const std::string & expr)> assertHandler;
+        KENGINE_CORE_EXPORT extern std::function<bool(const char * file, int line, const std::string & expr)> assertHandler;
 
-		bool assertFailed(const char * file, int line, const std::string & expr) noexcept;
-		bool isDebuggerPresent() noexcept;
+		KENGINE_CORE_EXPORT bool assertFailed(const char * file, int line, const std::string & expr) noexcept;
+		KENGINE_CORE_EXPORT bool isDebuggerPresent() noexcept;
     }
 }
 #endif

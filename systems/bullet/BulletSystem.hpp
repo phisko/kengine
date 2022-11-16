@@ -4,5 +4,5 @@
 #include "EntityCreator.hpp"
 
 namespace kengine {
-	EntityCreator * BulletSystem() noexcept;
+	KENGINE_BULLET_EXPORT EntityCreator * BulletSystem() noexcept;
 }

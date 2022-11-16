@@ -4,5 +4,5 @@
 #include "EntityCreator.hpp"
 
 namespace kengine {
-	EntityCreator * MagicaVoxelSystem() noexcept;
+	KENGINE_POLYVOX_EXPORT EntityCreator * MagicaVoxelSystem() noexcept;
 }

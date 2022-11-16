@@ -4,5 +4,5 @@
 #include "EntityCreator.hpp"
 
 namespace kengine {
-	EntityCreator * PolyVoxSystem() noexcept;
+	KENGINE_POLYVOX_EXPORT EntityCreator * PolyVoxSystem() noexcept;
 }

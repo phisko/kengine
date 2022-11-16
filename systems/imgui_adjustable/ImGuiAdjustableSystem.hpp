@@ -4,5 +4,5 @@
 #include "EntityCreator.hpp"
 
 namespace kengine {
-	EntityCreator * ImGuiAdjustableSystem() noexcept;
+	KENGINE_IMGUI_ADJUSTABLE_EXPORT EntityCreator * ImGuiAdjustableSystem() noexcept;
 }

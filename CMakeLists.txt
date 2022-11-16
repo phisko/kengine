@@ -81,6 +81,8 @@ add_subdirectory(putils)
 
 # Library
 
+add_library(kengine INTERFACE)
+
 putils_src_files(src_files
 	.
 	impl
@@ -97,34 +99,33 @@ if (KENGINE_TYPE_REGISTRATION)
     set(src_files ${src_files} ${type_files})
 endif()
 
-add_library(kengine STATIC ${src_files})
-target_link_libraries(kengine PUBLIC putils)
+add_library(kengine_core ${src_files})
+target_link_libraries(kengine_core PUBLIC putils)
+
+# Export the symbols if we're built as a DLL
+putils_export_symbols(kengine_core)
 
 if (KENGINE_PROFILING)
-    target_compile_definitions(kengine PUBLIC KENGINE_PROFILING)
+    target_compile_definitions(kengine_core PUBLIC KENGINE_PROFILING)
 endif()
 
 if (KENGINE_GLM)
-    target_compile_definitions(kengine PUBLIC KENGINE_GLM)
-    putils_conan_download_and_link_packages(kengine PUBLIC glm/0.9.9.8)
+    target_compile_definitions(kengine_core PUBLIC KENGINE_GLM)
+    putils_conan_download_and_link_packages(kengine_core PUBLIC glm/0.9.9.8)
 endif()
 
 option(KENGINE_NDEBUG "Disable debug" OFF)
 if (KENGINE_NDEBUG)
-    target_compile_definitions(kengine PUBLIC KENGINE_NDEBUG)
+    target_compile_definitions(kengine_core PUBLIC KENGINE_NDEBUG)
 endif()
 
-target_include_directories(kengine PUBLIC . components)
-
-if (MSVC)
-    if (NOT KENGINE_NDEBUG)
-        target_link_libraries(kengine PUBLIC Dbghelp)
-    endif()
-endif()
+target_include_directories(kengine_core PUBLIC . components)
 
 if (KENGINE_TYPE_REGISTRATION)
-    target_compile_definitions(kengine PUBLIC KENGINE_TYPE_REGISTRATION)
+    target_compile_definitions(kengine_core PUBLIC KENGINE_TYPE_REGISTRATION)
 endif()
+
+target_link_libraries(kengine INTERFACE kengine_core)
 
 # Add systems
 
@@ -134,9 +135,12 @@ foreach(i RANGE ${system_count})
     list(GET system_libs ${i} sys_lib)
 
     if (${sys_option})
-        target_compile_definitions(kengine PUBLIC ${sys_option})
+        # Add definition to core, so that helpers which depend on a library get compiled
+        # TODO: move those helpers into the associated systems and only add the definitions to them
+        target_compile_definitions(kengine_core PUBLIC ${sys_option})
+
         add_subdirectory(${sys_dir})
-        target_link_libraries(kengine PUBLIC ${sys_lib})
+        target_link_libraries(kengine INTERFACE ${sys_lib})
     endif()
 endforeach()
 
@@ -154,5 +158,5 @@ if (KENGINE_TESTS)
             impl/tests/*.tests.cpp)
 
     putils_add_test_executable(${test_exe_name} ${test_src})
-    target_link_libraries(${test_exe_name} PRIVATE kengine)
+    target_link_libraries(${test_exe_name} PRIVATE kengine_core)
 endif()

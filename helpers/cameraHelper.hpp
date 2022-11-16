@@ -21,11 +21,11 @@ namespace kengine::cameraHelper {
 		putils::Point2f pixel = { -1.f, -1.f };
 		putils::Point2f viewportPercent = { -1.f, -1.f }; // [0,1]
 	};
-	ViewportInfo getViewportForPixel(EntityID windowID, const putils::Point2ui & pixel) noexcept; 
+	KENGINE_CORE_EXPORT ViewportInfo getViewportForPixel(EntityID windowID, const putils::Point2ui & pixel) noexcept;
 
-	bool entityAppearsInViewport(const Entity & entity, const Entity & viewportEntity) noexcept;
-    putils::Rect3f convertToScreenPercentage(const putils::Rect3f & rect, const putils::Point2f & screenSize, const OnScreenComponent & comp) noexcept;
-    putils::Rect2f convertToScreenPercentage(const putils::Rect2f & rect, const putils::Point2f & screenSize, const OnScreenComponent & comp) noexcept;
+	KENGINE_CORE_EXPORT bool entityAppearsInViewport(const Entity & entity, const Entity & viewportEntity) noexcept;
+    KENGINE_CORE_EXPORT putils::Rect3f convertToScreenPercentage(const putils::Rect3f & rect, const putils::Point2f & screenSize, const OnScreenComponent & comp) noexcept;
+    KENGINE_CORE_EXPORT putils::Rect2f convertToScreenPercentage(const putils::Rect2f & rect, const putils::Point2f & screenSize, const OnScreenComponent & comp) noexcept;
 
 	struct Facings {
 		putils::Vector3f front;
@@ -33,5 +33,5 @@ namespace kengine::cameraHelper {
 		putils::Vector3f up;
 	};
 
-	Facings getFacings(const CameraComponent & camera) noexcept;
+	KENGINE_CORE_EXPORT Facings getFacings(const CameraComponent & camera) noexcept;
 }

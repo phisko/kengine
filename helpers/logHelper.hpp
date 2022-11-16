@@ -7,9 +7,9 @@
 #include "functions/Log.hpp"
 
 namespace kengine::logHelper {
-    void log(LogSeverity severity, const char * category, const char * message) noexcept;
+    KENGINE_CORE_EXPORT void log(LogSeverity severity, const char * category, const char * message) noexcept;
 
-    LogSeverity parseCommandLineSeverity() noexcept;
+    KENGINE_CORE_EXPORT LogSeverity parseCommandLineSeverity() noexcept;
 }
 
 #define kengine_log(severity, category, message) kengine::logHelper::log(kengine::LogSeverity::severity, category, message)

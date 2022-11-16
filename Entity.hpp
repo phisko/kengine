@@ -8,7 +8,7 @@
 #include "impl/ComponentMask.hpp"
 
 namespace kengine {
-	class Entity {
+	class KENGINE_CORE_EXPORT Entity {
 	public:
 		EntityID id;
 		impl::ComponentMask componentMask = 0;

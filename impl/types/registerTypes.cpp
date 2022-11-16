@@ -1,4 +1,5 @@
 
+#include "registerTypes.hpp"
 #include "helpers/logHelper.hpp"
 #include "helpers/profilingHelper.hpp"
 

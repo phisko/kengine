@@ -4,5 +4,5 @@
 #include "EntityCreator.hpp"
 
 namespace kengine {
-	EntityCreator * LuaSystem() noexcept;
+	KENGINE_LUA_EXPORT EntityCreator * LuaSystem() noexcept;
 }

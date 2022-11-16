@@ -9,7 +9,7 @@
 #include "ComponentSettings.hpp"
 
 namespace kengine::impl {
-	struct ComponentMetadata {
+	struct KENGINE_CORE_EXPORT ComponentMetadata {
 		ID id = INVALID_ID;
 		putils::meta::type_index type;
 		virtual void reset(ID id) noexcept = 0;
