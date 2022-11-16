@@ -37,7 +37,7 @@ namespace kengine::assertHelper {
 
     bool assertFailed(const char * file, int line, const std::string & expr) noexcept {
 		KENGINE_PROFILING_SCOPE;
-        kengine_logf(Error, "Assert", "%s:%d %s", file, line, expr.c_str());
+        kengine_logf(Error, "Assert", "%s:%d %s\nCallstack:\n%s", file, line, expr.c_str(), putils::getCallStack().c_str());
 
         if (assertHandler)
             return assertHandler(file, line, expr);
