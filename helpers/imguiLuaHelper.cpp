@@ -3,6 +3,9 @@
 #include "imguiLuaHelper.hpp"
 #include "kengine.hpp"
 
+// putils
+#include "imgui_lua_bindings/imgui_lua_bindings.hpp"
+
 // kengine data
 #include "data/LuaStateComponent.hpp"
 
@@ -10,9 +13,6 @@
 #include "helpers/imguiHelper.hpp"
 #include "helpers/logHelper.hpp"
 #include "helpers/profilingHelper.hpp"
-
-extern lua_State * lState;
-extern void LoadImguiBindings();
 
 namespace kengine::imguiLuaHelper {
 	void initBindings() noexcept {
