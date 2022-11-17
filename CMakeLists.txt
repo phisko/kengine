@@ -67,9 +67,6 @@ endforeach()
 
 # putils
 
-option(PUTILS_IMGUI "Build ImGui" OFF)
-set(PUTILS_IMGUI ON)
-
 option(PUTILS_PLUGIN_MANAGER "Build PluginManager" OFF)
 set(PUTILS_PLUGIN_MANAGER ON)
 

@@ -15,9 +15,6 @@
 #include <btBulletDynamicsCommon.h>
 #include <BulletCollision/CollisionDispatch/btGhostObject.h>
 
-// termcolor
-#include <termcolor/termcolor.hpp>
-
 // magic_enum
 #include <magic_enum.hpp>
 
@@ -450,7 +447,7 @@ namespace kengine {
 
 			void draw3dText(const btVector3 & location, const char * textString) override {}
 
-			void reportErrorWarning(const char * warningString) override { std::cerr << termcolor::red << "[Bullet] " << warningString << termcolor::reset; }
+			void reportErrorWarning(const char * warningString) override { std::cerr << "[Bullet] " << warningString; }
 
 			void setDebugMode(int debugMode) override {}
 			int getDebugMode() const override { return DBG_DrawWireframe; }
