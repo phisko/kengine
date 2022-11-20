@@ -13,7 +13,6 @@
 
 // putils
 #include "string.hpp"
-#include "file_extension.hpp"
 #include "MagicaVoxel.hpp"
 
 // kengine data
@@ -69,7 +68,7 @@ namespace kengine {
 				path = model.file.c_str();
 			}
 
-			if (putils::file_extension(path) != "vox")
+			if (std::filesystem::path(path).extension() != ".vox")
 				return;
 
 			kengine_logf(Verbose, "MagicaVoxelSystem", "Marking %zu as a PolyVox object", e.id);
@@ -90,7 +89,7 @@ namespace kengine {
 			KENGINE_PROFILING_SCOPE;
 
 			const auto & f = e.get<ModelComponent>().file.c_str();
-			if (putils::file_extension(f) != "vox")
+			if (std::filesystem::path(f).extension() != ".vox")
 				return;
 
 			kengine_logf(Log, "MagicaVoxelSystem", "Loading model %zu for %s", e.id, f);
