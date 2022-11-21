@@ -65,6 +65,13 @@ foreach(i RANGE ${system_count})
     endforeach()
 endforeach()
 
+if (NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
+    # These must be set before processing putils, as conan DLLs need to be copied next to executables
+    list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/putils/reflection/meta/cmake_helpers/CMakeModules)
+    include(putils_set_output_directories)
+    putils_set_output_directories(bin lib lib)
+endif()
+
 # putils
 
 option(PUTILS_PLUGIN_MANAGER "Build PluginManager" OFF)
