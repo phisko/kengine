@@ -22,7 +22,6 @@
 #include "data/TransformComponent.hpp"
 #include "data/GraphicsComponent.hpp"
 #include "data/PolyVoxComponent.hpp"
-#include "data/DefaultShadowComponent.hpp"
 
 // kengine functions
 #include "functions/OnEntityCreated.hpp"
@@ -52,28 +51,6 @@ namespace kengine {
 
 			if (e.has<ModelComponent>())
 				loadModel(e);
-			else if (e.has<GraphicsComponent>())
-				initObject(e);
-		}
-
-		static void initObject(Entity & e) noexcept {
-			KENGINE_PROFILING_SCOPE;
-
-			auto & graphics = e.get<GraphicsComponent>();
-			const char * path = graphics.appearance.c_str();
-
-			const auto instance = e.tryGet<InstanceComponent>();
-			if (instance && instance->model != INVALID_ID) {
-				const auto & model = instanceHelper::getModel<ModelComponent>(*instance);
-				path = model.file.c_str();
-			}
-
-			if (std::filesystem::path(path).extension() != ".vox")
-				return;
-
-			kengine_logf(Verbose, "MagicaVoxelSystem", "Marking %zu as a PolyVox object", e.id);
-			e += PolyVoxObjectComponent{};
-			e += DefaultShadowComponent{};
 		}
 
 		using MeshType = decltype(buildMesh(PolyVox::RawVolume<PolyVoxComponent::VertexData>{ {} }));
