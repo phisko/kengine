@@ -1,5 +1,11 @@
 #pragma once
 
+// entt
+#include <entt/entity/registry.hpp>
+
+// putils
+#include "to_string.hpp"
+
 // kengine
 #include "Entities.hpp"
 
@@ -26,4 +32,12 @@ namespace kengine {
 	KENGINE_CORE_EXPORT void initPlugin(void * state) noexcept;
 
 	KENGINE_CORE_EXPORT void cleanupArchetypes() noexcept;
+}
+
+namespace putils {
+	template<>
+	KENGINE_CORE_EXPORT std::string toString(const entt::entity & entity) noexcept;
+
+	template<>
+	KENGINE_CORE_EXPORT entt::entity parse(std::string_view str) noexcept;
 }

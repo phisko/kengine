@@ -58,3 +58,17 @@ namespace kengine {
 		});
 	}
 }
+
+namespace putils {
+	template<>
+	std::string toString(const entt::entity & entity) noexcept {
+		const auto nonEnumValue = static_cast<std::underlying_type_t<entt::entity>>(entity);
+		return toString(nonEnumValue);
+	}
+
+	template<>
+	entt::entity parse(std::string_view str) noexcept {
+		const auto nonEnumValue = parse<std::underlying_type_t<entt::entity>>(str);
+		return static_cast<entt::entity>(nonEnumValue);
+	}
+}
