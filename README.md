@@ -295,6 +295,7 @@ In all following descriptions, the "parent" `Component` refers to the `Component
 * [Has](components/meta/Has.md): returns whether an `Entity` has the parent `Component`
 * [LoadFromJSON](components/meta/LoadFromJSON.md): initializes the parent `Component` attached to an `Entity` from a [nlohmann::json](https://github.com/nlohmann/json) object
 * [MatchString](components/meta/MatchString.md): returns whether the parent `Component` attached to an `Entity` matches a given string
+* [Move](components/meta/Move.md): moves the parent `Component` from one `Entity` to another
 * [SaveToJSON](components/meta/SaveToJSON.md): serializes the parent `Component` into a JSON object
 * [Size](components/meta/Size.md): contains the size of the parent `Component`
 

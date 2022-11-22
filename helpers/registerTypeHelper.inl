@@ -23,6 +23,7 @@
 #include "helpers/meta/impl/registerHas.hpp"
 #include "helpers/meta/impl/registerLoadFromJSON.hpp"
 #include "helpers/meta/impl/registerMatchString.hpp"
+#include "helpers/meta/impl/registerMove.hpp"
 #include "helpers/meta/impl/registerSaveToJSON.hpp"
 
 namespace kengine {
@@ -110,6 +111,7 @@ namespace kengine {
 		registerHas<Comps...>();
 		registerLoadFromJSON<Comps...>();
 		registerMatchString<Comps...>();
+		registerMove<Comps...>();
 		registerSaveToJSON<Comps...>();
 	}
 
