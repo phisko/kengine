@@ -8,10 +8,6 @@
 #include <PolyVox/RawVolume.h>
 
 namespace kengine {
-	struct PolyVoxObjectComponent {
-		// Indicates that this entity's model should be processed by PolyVoxShader
-	};
-
 	struct PolyVoxComponent {
 		struct VertexData {
 			float color[3] = { 0.f, 0.f, 0.f };
