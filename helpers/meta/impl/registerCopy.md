@@ -1,8 +1,8 @@
-# [registerHas](registerHas.hpp)
+# [registerCopy](registerCopy.hpp)
 
 ```cpp
 template<typename ... Comps>
-void registerHas() noexcept;
+void registerCopy() noexcept;
 ```
 
-Registers a standard implementation of the [Has](../../components/meta/Has.md) `meta Component` for each type in `Comps`.
+Registers a standard implementation of the [Copy](../../components/meta/Copy.md) `meta Component` for each type in `Comps`.
