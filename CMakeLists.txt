@@ -109,6 +109,15 @@ target_link_libraries(kengine_core PUBLIC putils)
 # Export the symbols if we're built as a DLL
 putils_export_symbols(kengine_core)
 
+set(customFindPackageNames entt:EnTT)
+set(customLibraryNames entt:EnTT)
+putils_conan_download_and_link_packages_with_names(
+    kengine_core PUBLIC
+    "${customFindPackageNames}"
+    "${customLibraryNames}"
+    entt/3.11.0
+)
+
 if (KENGINE_PROFILING)
     target_compile_definitions(kengine_core PUBLIC KENGINE_PROFILING)
 endif()
