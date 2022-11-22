@@ -105,8 +105,7 @@ endif()
 
 add_library(kengine_core ${src_files})
 target_link_libraries(kengine_core PUBLIC putils)
-
-# Export the symbols if we're built as a DLL
+target_include_directories(kengine_core PUBLIC . components)
 putils_export_symbols(kengine_core)
 
 set(customFindPackageNames entt:EnTT)
@@ -131,8 +130,6 @@ option(KENGINE_NDEBUG "Disable debug" OFF)
 if (KENGINE_NDEBUG)
     target_compile_definitions(kengine_core PUBLIC KENGINE_NDEBUG)
 endif()
-
-target_include_directories(kengine_core PUBLIC . components)
 
 if (KENGINE_TYPE_REGISTRATION)
     target_compile_definitions(kengine_core PUBLIC KENGINE_TYPE_REGISTRATION)
