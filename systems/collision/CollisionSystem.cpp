@@ -1,5 +1,7 @@
 #include "CollisionSystem.hpp"
-#include "kengine.hpp"
+
+// entt
+#include <entt/entity/registry.hpp>
 
 // kengine data
 #include "data/CollisionComponent.hpp"
@@ -13,28 +15,34 @@
 
 namespace kengine {
 	struct CollisionSystem {
-		static void init(Entity & e) noexcept {
+		static void init(entt::registry & r) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			e += functions::OnCollision{ onCollision };
+
+			_r = &r;
+
+			const auto e = r.create();
+			r.emplace<functions::OnCollision>(e, onCollision);
 		}
 
-		static void onCollision(Entity & first, Entity & second) noexcept {
+		static void onCollision(entt::entity first, entt::entity second) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(Verbose, "CollisionSystem", "Collision between %zu and %zu", first.id, second.id);
+			kengine_logf(*_r, Verbose, "CollisionSystem", "Collision between %zu and %zu", first, second);
 			trigger(first, second);
 			trigger(second, first);
 		}
 
-		static void trigger(Entity & first, Entity & second) noexcept {
+		static void trigger(entt::entity first, entt::entity second) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			const auto collision = first.tryGet<CollisionComponent>();
+			const auto collision = _r->try_get<CollisionComponent>(first);
 			if (!collision || collision->onCollide == nullptr)
 				return;
 			collision->onCollide(first, second);
 		}
+
+		static inline entt::registry * _r;
 	};
 
-	EntityCreator * CollisionSystem() noexcept {
-		return CollisionSystem::init;
+	void CollisionSystem(entt::registry & r) noexcept {
+		CollisionSystem::init(r);
 	}
 }

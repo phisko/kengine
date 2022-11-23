@@ -1,8 +1,11 @@
 #include "ImGuiEngineStatsSystem.hpp"
-#include "kengine.hpp"
 
 // stl
 #include <fstream>
+
+// entt
+#include <entt/entity/handle.hpp>
+#include <entt/entity/registry.hpp>
 
 // nlohmann
 #include <nlohmann/json.hpp>
@@ -22,12 +25,10 @@
 #include "meta/Has.hpp"
 
 // kengine helpers
-#include "helpers/sortHelper.hpp"
+#include "helpers/assertHelper.hpp"
 #include "helpers/logHelper.hpp"
 #include "helpers/profilingHelper.hpp"
-
-// kengine impl
-#include "impl/GlobalState.hpp"
+#include "helpers/sortHelper.hpp"
 
 #ifndef KENGINE_STATS_TRACKED_COLLECTIONS_SAVE_FILE
 # define KENGINE_STATS_TRACKED_COLLECTIONS_SAVE_FILE "trackedEntityCollections.json"
@@ -35,16 +36,18 @@
 
 namespace kengine {
 	struct ImGuiEngineStatsSystem {
-		static void init(Entity & e) noexcept {
+		static void init(entt::registry & r) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(Log, "Init", "ImGuiEngineStatsSystem");
+			kengine_log(r, Log, "Init", "ImGuiEngineStatsSystem");
 
-			e += NameComponent{ "Engine stats" };
-			auto & tool = e.attach<ImGuiToolComponent>();
-			tool.enabled = true;
+			_r = &r;
+
+			const auto e = r.create();
+			r.emplace<functions::Execute>(e, execute);
+
+			r.emplace<NameComponent>(e, "Engine stats");
+			auto & tool = r.emplace<ImGuiToolComponent>(e, true);
 			_enabled = &tool.enabled;
-
-			e += functions::Execute{ execute };
 		}
 
 		static void execute(float deltaTime) noexcept {
@@ -53,20 +56,13 @@ namespace kengine {
 			if (!*_enabled)
 				return;
 
-			kengine_log(Verbose, "Execute", "ImGuiEngineStatsSystem");
+			kengine_log(*_r, Verbose, "Execute", "ImGuiEngineStatsSystem");
 
 			if (ImGui::Begin("Engine stats", _enabled)) {
-				const auto entityCount = std::count_if(
-					kengine::impl::state->_entities.begin(), kengine::impl::state->_entities.end(),
-					[](const kengine::impl::GlobalState::EntityMetadata & e) {
-						return e.data.active && e.data.mask != 0;
-					}
-				);
-
-				ImGui::Text("Entities: %zu", entityCount);
-				ImGui::Text("\tEntity pool size: %zu", kengine::impl::state->_entities.size());
-				ImGui::Text("Archetypes: %zu", kengine::impl::state->_archetypes.size());
-				ImGui::Text("Component types: %zu", kengine::impl::state->_components.size());
+				ImGui::Text("Entities: %zu", _r->alive());
+				ImGui::Text("\tEntity pool size: %zu", _r->size());
+				const auto componentCount = std::ranges::count_if(_r->storage(), [](auto &&) { return true; });
+				ImGui::Text("Component types: %zu", componentCount);
 				displayTrackedCombinations();
 			}
 			ImGui::End();
@@ -74,7 +70,7 @@ namespace kengine {
 
 		struct Collection {
 			std::string name;
-			std::vector<EntityID> components;
+			std::vector<entt::entity> components;
 			std::vector<std::string> missingComponents;
 		};
 
@@ -85,7 +81,7 @@ namespace kengine {
 
 			const auto newCollection = displayCombinationCreator();
 			if (newCollection) {
-				kengine_logf(Log, "ImGuiEngineStatsSystem", "New tracked collection: %s", newCollection->name.c_str());
+				kengine_logf(*_r, Log, "ImGuiEngineStatsSystem", "New tracked collection: %s", newCollection->name.c_str());
 				tracked.push_back(*newCollection);
 				saveTrackedCollections(tracked);
 			}
@@ -140,7 +136,7 @@ namespace kengine {
 						for (const auto id : ret.components) {
 							if (!first)
 								ret.name += " + ";
-							ret.name += entities[id].get<NameComponent>().name;
+							ret.name += _r->get<NameComponent>(id).name;
 							first = false;
 						}
 
@@ -149,14 +145,14 @@ namespace kengine {
 					}
 				}
 
-				const auto sortedEntities = sortHelper::getNameSortedEntities<meta::Has>();
+				const auto sortedEntities = sortHelper::getNameSortedEntities<meta::Has>(*_r);
 
 				for (const auto [e, name, has] : sortedEntities) {
-					const auto it = std::find(creating.components.begin(), creating.components.end(), e.id);
+					const auto it = std::ranges::find(creating.components, e);
 					bool inCreating = it != creating.components.end();
 					if (ImGui::Checkbox(name->name.c_str(), &inCreating)) {
 						if (inCreating)
-							creating.components.push_back(e.id);
+							creating.components.push_back(e);
 						else
 							creating.components.erase(it);
 					}
@@ -171,20 +167,19 @@ namespace kengine {
 			KENGINE_PROFILING_SCOPE;
 
 			if (collection.components.size() == 1) {
-				const auto comp = entities[collection.components[0]];
-				const auto count = comp.tryGet<meta::Count>();
+				const auto comp = collection.components[0];
+				const auto count = _r->try_get<meta::Count>(comp);
 				if (count)
 					return count->call();
 			}
 
 			size_t ret = 0;
-			for (const auto & e : entities) {
+			_r->each([&](entt::entity e) {
 				bool good = true;
 
-				for (const auto id : collection.components) {
-					const auto comp = entities[id];
-					const auto & has = comp.get<meta::Has>();
-					if (!has(e)) {
+				for (const auto comp : collection.components) {
+					const auto & has = _r->get<meta::Has>(comp);
+					if (!has({ *_r, e })) {
 						good = false;
 						break;
 					}
@@ -192,18 +187,18 @@ namespace kengine {
 
 				if (good)
 					++ret;
-			}
+			});
 
 			return ret;
 		}
 
 		static void saveTrackedCollections(const std::vector<Collection> & collections) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(Log, "ImGuiEngineStatsSystem", "Saving tracked collections to " KENGINE_STATS_TRACKED_COLLECTIONS_SAVE_FILE);
+			kengine_log(*_r, Log, "ImGuiEngineStatsSystem", "Saving tracked collections to " KENGINE_STATS_TRACKED_COLLECTIONS_SAVE_FILE);
 
 			std::ofstream f(KENGINE_STATS_TRACKED_COLLECTIONS_SAVE_FILE);
 			if (!f) {
-				kengine_assert_failed("Failed to open '", KENGINE_STATS_TRACKED_COLLECTIONS_SAVE_FILE, "' for writing");
+				kengine_assert_failed(*_r, "Failed to open '", KENGINE_STATS_TRACKED_COLLECTIONS_SAVE_FILE, "' for writing");
 				return;
 			}
 
@@ -211,8 +206,8 @@ namespace kengine {
 
 			for (const auto & collection : collections) {
 				nlohmann::json collectionJSON;
-				for (const auto id : collection.components) {
-					const auto & name = entities[id].get<NameComponent>();
+				for (const auto comp : collection.components) {
+					const auto & name = _r->get<NameComponent>(comp);
 					collectionJSON.push_back(name.name.c_str());
 				}
 				fileJSON.push_back(collectionJSON);
@@ -223,7 +218,7 @@ namespace kengine {
 
 		static std::vector<Collection> loadTrackedCollections() noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(Log, "ImGuiEngineStatsSystem", "Loading tracked collections from " KENGINE_STATS_TRACKED_COLLECTIONS_SAVE_FILE);
+			kengine_log(*_r, Log, "ImGuiEngineStatsSystem", "Loading tracked collections from " KENGINE_STATS_TRACKED_COLLECTIONS_SAVE_FILE);
 
 			std::vector<Collection> ret;
 
@@ -243,15 +238,15 @@ namespace kengine {
 					collection.name += nameJSON;
 
 					bool found = false;
-					for (const auto & [e, name, has] : entities.with<NameComponent, meta::Has>())
+					for (const auto & [e, name, has] : _r->view<NameComponent, meta::Has>().each())
 						if (name.name.c_str() == nameJSON) {
-							collection.components.push_back(e.id);
+							collection.components.push_back(e);
 							found = true;
 							break;
 						}
 
 					if (!found) {
-						kengine_logf(Log, "ImGuiEngineStatsSystem/loadTrackedCollections", "Missing component Entity for %s", std::string(nameJSON).c_str());
+						kengine_logf(*_r, Log, "ImGuiEngineStatsSystem/loadTrackedCollections", "Missing component Entity for %s", std::string(nameJSON).c_str());
 						collection.missingComponents.push_back(nameJSON);
 					}
 				}
@@ -267,10 +262,10 @@ namespace kengine {
 
 			for (size_t i = 0; i < collection.missingComponents.size(); ++i) {
 				const auto & compName = collection.missingComponents[i];
-				for (const auto & [e, name] : entities.with<NameComponent>())
+				for (const auto & [e, name] : _r->view<NameComponent>().each())
 					if (compName == name.name) {
-						kengine_logf(Log, "ImGuiEngineStatsSystem", "Found component Entity for %s", compName.c_str());
-						collection.components.push_back(e.id);
+						kengine_logf(*_r, Log, "ImGuiEngineStatsSystem", "Found component Entity for %s", compName.c_str());
+						collection.components.push_back(e);
 						collection.missingComponents.erase(collection.missingComponents.begin() + i);
 						--i;
 						break;
@@ -279,9 +274,10 @@ namespace kengine {
 		}
 
 		static inline bool * _enabled;
+		static inline entt::registry * _r;
 	};
 
-	EntityCreator * ImGuiEngineStatsSystem() noexcept {
-		return ImGuiEngineStatsSystem::init;
+	void ImGuiEngineStatsSystem(entt::registry & r) noexcept {
+		ImGuiEngineStatsSystem::init(r);
 	}
 }

@@ -1,14 +1,20 @@
-#include "tests/KengineTest.hpp"
+// entt
+#include <entt/entity/registry.hpp>
+
+// gtest
+#include <gtest/gtest.h>
 
 // kengine helpers
 #include "helpers/sortHelper.hpp"
 
-struct sortHelper : KengineTest {
+struct sortHelper : ::testing::Test {
     struct EntityData {
         std::string s;
         int i = 0;
         kengine::NameComponent name;
     };
+
+	entt::registry r;
 
     const std::vector<EntityData> data {
         { .s = "hello", .i = 1, .name = { "B" } },
@@ -22,18 +28,17 @@ struct sortHelper : KengineTest {
     }();
 
     sortHelper() {
-        for (const auto & d : data) {
-            kengine::entities += [&](kengine::Entity & e) {
-                e += d.s;
-                e += d.i;
-                e += d.name;
-            };
-        }
+		for (const auto & d : data) {
+			const auto e = r.create();
+			r.emplace<std::string>(e, d.s);
+			r.emplace<int>(e, d.i);
+			r.emplace<kengine::NameComponent>(e, d.name);
+		}
     }
 };
 
 TEST_F(sortHelper, getSortedEntities_StdVector) {
-    const auto vec = kengine::sortHelper::getSortedEntities<int, std::string>([](const auto & lhs, const auto & rhs) {
+    const auto vec = kengine::sortHelper::getSortedEntities<const int, const std::string>(r, [](const auto & lhs, const auto & rhs) {
         return *std::get<1>(lhs) < *std::get<1>(rhs);
     });
 
@@ -49,7 +54,7 @@ TEST_F(sortHelper, getSortedEntities_StdVector) {
 }
 
 TEST_F(sortHelper, getSortedEntities_PutilsVector) {
-    const auto vec = kengine::sortHelper::getSortedEntities<3, int, std::string>([](const auto & lhs, const auto & rhs) {
+    const auto vec = kengine::sortHelper::getSortedEntities<3, const int, const std::string>(r, [](const auto & lhs, const auto & rhs) {
         return *std::get<1>(lhs) < *std::get<1>(rhs);
     });
 
@@ -65,7 +70,7 @@ TEST_F(sortHelper, getSortedEntities_PutilsVector) {
 }
 
 TEST_F(sortHelper, getNameSortedEntities_StdVector) {
-    const auto vec = kengine::sortHelper::getNameSortedEntities<int, std::string>();
+    const auto vec = kengine::sortHelper::getNameSortedEntities<const int, const std::string>(r);
 
     static_assert(putils::is_specialization<putils_typeof(vec), std::vector>());
     EXPECT_EQ(vec.size(), data.size());
@@ -80,7 +85,7 @@ TEST_F(sortHelper, getNameSortedEntities_StdVector) {
 }
 
 TEST_F(sortHelper, getNameSortedEntities_PutilsVector) {
-    const auto vec = kengine::sortHelper::getNameSortedEntities<3, int, std::string>();
+    const auto vec = kengine::sortHelper::getNameSortedEntities<3, const int, const std::string>(r);
 
     static_assert(putils::is_vector<putils_typeof(vec)>());
     EXPECT_EQ(vec.size(), data.size());

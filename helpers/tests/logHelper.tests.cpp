@@ -1,11 +1,15 @@
-#include "tests/KengineTest.hpp"
+// entt
+#include <entt/entity/registry.hpp>
+
+// gtest
+#include <gtest/gtest.h>
 
 // kengine helpers
 #include "helpers/logHelper.hpp"
 
-struct logHelper : KengineTest {};
+TEST(logHelper, logHelper) {
+	entt::registry r;
 
-TEST_F(logHelper, logHelper) {
     struct Event {
         kengine::LogSeverity severity;
         std::string category;
@@ -13,20 +17,19 @@ TEST_F(logHelper, logHelper) {
     };
     std::vector<Event> output;
 
-    kengine::entities += [&](kengine::Entity & e) {
-        e += kengine::functions::Log{
-            [&](const kengine::LogEvent & log) {
-                output.push_back({
-                    .severity = log.severity,
-                    .category = log.category,
-                    .message = log.message
-                });
-            }
-        };
-    };
+	const auto e = r.create();
+	r.emplace<kengine::functions::Log>(
+		e, [&](const kengine::LogEvent & log) {
+			output.push_back({
+                .severity = log.severity,
+                .category = log.category,
+                .message = log.message
+            });
+		}
+	);
 
-    kengine_log(Verbose, "Category", "Message");
-    kengine_logf(Warning, "OtherCategory", "%s", "OtherMessage");
+    kengine_log(r, Verbose, "Category", "Message");
+    kengine_logf(r, Warning, "OtherCategory", "%s", "OtherMessage");
 
     EXPECT_EQ(output.size(), 2);
 

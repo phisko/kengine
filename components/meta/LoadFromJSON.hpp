@@ -6,14 +6,10 @@
 // kengine functions
 #include "BaseFunction.hpp"
 
-namespace kengine {
-	class Entity;
-
-	namespace meta {
-		struct LoadFromJSON : functions::BaseFunction<
-			void(const nlohmann::json &, Entity &)
-		> {};
-	}
+namespace kengine::meta {
+	struct LoadFromJSON : functions::BaseFunction<
+		void(const nlohmann::json &, entt::handle)
+	> {};
 }
 
 #define refltype kengine::meta::LoadFromJSON

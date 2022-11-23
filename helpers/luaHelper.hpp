@@ -2,6 +2,9 @@
 
 #ifdef KENGINE_LUA
 
+// entt
+#include <entt/entity/fwd.hpp>
+
 // putils
 #include "lua_helper.hpp"
 
@@ -13,13 +16,13 @@
 
 namespace kengine::luaHelper {
 	template<typename ... Types>
-	void registerTypes() noexcept;
+	void registerTypes(const entt::registry & r) noexcept;
 
 	template<typename ... Comps>
-	void registerComponents() noexcept;
+	void registerComponents(entt::registry & r) noexcept;
 
 	template<typename Func>
-	void registerFunction(const char * name, Func && func) noexcept;
+	void registerFunction(const entt::registry & r, const char * name, Func && func) noexcept;
 }
 
 #include "luaHelper.inl"

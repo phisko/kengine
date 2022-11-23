@@ -1,4 +1,8 @@
-#include "tests/KengineTest.hpp"
+// entt
+#include <entt/entity/handle.hpp>
+
+// gtest
+#include <gtest/gtest.h>
 
 // kengine data
 #include "data/NameComponent.hpp"
@@ -8,9 +12,11 @@
 #include "helpers/jsonHelper.hpp"
 #include "helpers/registerTypeHelper.hpp"
 
-struct jsonHelper : KengineTest {
+struct jsonHelper : ::testing::Test {
+	entt::registry r;
+
     jsonHelper() noexcept {
-        kengine::registerComponents<kengine::NameComponent, kengine::TransformComponent>();
+        kengine::registerComponents<kengine::NameComponent, kengine::TransformComponent>(r);
         json["NameComponent"]["name"] = expectedName;
         auto &transform = json["TransformComponent"];
         auto &boundingBox = transform["boundingBox"];
@@ -30,31 +36,15 @@ struct jsonHelper : KengineTest {
     nlohmann::json json;
 };
 
-TEST_F(jsonHelper, createEntity) {
-    const auto e = kengine::jsonHelper::createEntity(json);
-
-    EXPECT_TRUE(e.has<kengine::NameComponent>());
-    EXPECT_EQ(e.get<kengine::NameComponent>().name, "hello");
-
-    EXPECT_TRUE(e.has<kengine::TransformComponent>());
-    const auto & transform = e.get<kengine::TransformComponent>();
-    const auto & boundingBox = transform.boundingBox;
-    const auto & pos = boundingBox.position;
-    EXPECT_EQ(pos, expectedPos);
-    const auto & size = boundingBox.size;
-    EXPECT_EQ(size, expectedSize);
-}
-
 TEST_F(jsonHelper, loadEntity) {
-    const auto e = kengine::entities += [this](kengine::Entity & e) {
-        kengine::jsonHelper::loadEntity(json, e);
-    };
+	const auto e = r.create();
+	kengine::jsonHelper::loadEntity(json, { r, e });
 
-    EXPECT_TRUE(e.has<kengine::NameComponent>());
-    EXPECT_EQ(e.get<kengine::NameComponent>().name, "hello");
+    EXPECT_TRUE(r.all_of<kengine::NameComponent>(e));
+    EXPECT_EQ(r.get<kengine::NameComponent>(e).name, "hello");
 
-    EXPECT_TRUE(e.has<kengine::TransformComponent>());
-    const auto & transform = e.get<kengine::TransformComponent>();
+    EXPECT_TRUE(r.all_of<kengine::TransformComponent>(e));
+    const auto & transform = r.get<kengine::TransformComponent>(e);
     const auto & boundingBox = transform.boundingBox;
     const auto & pos = boundingBox.position;
     EXPECT_EQ(pos, expectedPos);
@@ -63,17 +53,16 @@ TEST_F(jsonHelper, loadEntity) {
 }
 
 TEST_F(jsonHelper, saveEntity) {
-    const auto e = kengine::entities += [this](kengine::Entity & e) {
-        e += kengine::NameComponent{ expectedName };
-        e += kengine::TransformComponent{
-            .boundingBox = {
-                .position = expectedPos,
-                .size = expectedSize
-            }
-        };
-    };
+	const auto e = r.create();
+	r.emplace<kengine::NameComponent>(e, expectedName);
+	r.emplace<kengine::TransformComponent>(e) = {
+		.boundingBox = {
+			.position = expectedPos,
+			.size = expectedSize
+		}
+	};
 
-    const auto json = kengine::jsonHelper::saveEntity(e);
+    const auto json = kengine::jsonHelper::saveEntity({ r, e });
 
     EXPECT_EQ(json["NameComponent"]["name"], expectedName);
 

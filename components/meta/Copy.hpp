@@ -3,11 +3,9 @@
 // kengine functions
 #include "BaseFunction.hpp"
 
-namespace kengine { class Entity; }
-
 namespace kengine::meta {
     struct Copy : functions::BaseFunction<
-        void(const Entity & src, Entity & dst)
+        void(entt::const_handle src, entt::handle dest)
     > {};
 }
 

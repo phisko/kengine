@@ -1,7 +1,6 @@
 #ifndef KENGINE_NDEBUG
 
 #include "assertHelper.hpp"
-#include "kengine.hpp"
 
 // stl
 #include <unordered_set>
@@ -28,19 +27,19 @@ namespace kengine::assertHelper {
     static bool imguiAssertHandler(const char * file, int line, const std::string & expr) noexcept;
 #endif
 
-    std::function<bool(const char * file, int line, const std::string & expr)> assertHandler =
+    std::function<bool(const entt::registry & r, const char * file, int line, const std::string & expr)> assertHandler =
 #ifdef KENGINE_IMGUI_ASSERT_HANDLER
         imguiAssertHandler;
 #else
         nullptr;
 #endif
 
-    bool assertFailed(const char * file, int line, const std::string & expr) noexcept {
+    bool assertFailed(const entt::registry & r, const char * file, int line, const std::string & expr) noexcept {
 		KENGINE_PROFILING_SCOPE;
-        kengine_logf(Error, "Assert", "%s:%d %s\nCallstack:\n%s", file, line, expr.c_str(), putils::getCallStack().c_str());
+        kengine_logf(r, Error, "Assert", "%s:%d %s\nCallstack:\n%s", file, line, expr.c_str(), putils::getCallStack().c_str());
 
         if (assertHandler)
-            return assertHandler(file, line, expr);
+            return assertHandler(r, file, line, expr);
         return true;
     }
 
@@ -54,7 +53,7 @@ namespace kengine::assertHelper {
 	}
 
 #ifdef KENGINE_IMGUI_ASSERT_HANDLER
-    static bool imguiAssertHandler(const char * file, int line, const std::string & expr) noexcept {
+    static bool imguiAssertHandler(entt::registry & r, const char * file, int line, const std::string & expr) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
         using File = std::unordered_set<int>; // Set of ignored lines

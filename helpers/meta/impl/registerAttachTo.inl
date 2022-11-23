@@ -1,5 +1,8 @@
 #include "registerAttachTo.hpp"
 
+// entt
+#include <entt/entity/handle.hpp>
+
 // kengine meta
 #include "meta/AttachTo.hpp"
 
@@ -9,12 +12,12 @@
 
 namespace kengine {
 	template<typename ... Comps>
-	void registerAttachTo() noexcept {
+	void registerAttachTo(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		registerMetaComponentImplementation<meta::AttachTo, Comps...>(
-			[](const auto t, Entity & e) noexcept {
+			r, [](const auto t, entt::handle e) noexcept {
 				using Type = putils_wrapped_type(t);
-				e.attach<Type>();
+				e.emplace_or_replace<Type>();
 			}
 		);
 	}

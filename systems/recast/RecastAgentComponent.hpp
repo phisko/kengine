@@ -1,11 +1,11 @@
 #pragma once
 
-// kengine
-#include "Entity.hpp"
+// entt
+#include <entt/entity/entity.hpp>
 
 namespace kengine {
 	struct RecastAgentComponent {
 		int index = 0;
-		EntityID crowd = INVALID_ID;
+		entt::entity crowd = entt::null;
 	};
 }

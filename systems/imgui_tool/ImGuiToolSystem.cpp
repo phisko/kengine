@@ -1,8 +1,10 @@
 #include "ImGuiToolSystem.hpp"
-#include "kengine.hpp"
 
 // stl
 #include <fstream>
+
+// entt
+#include <entt/entity/registry.hpp>
 
 // imgui
 #include <imgui.h>
@@ -19,9 +21,10 @@
 #include "functions/Execute.hpp"
 
 // kengine helpers
-#include "helpers/sortHelper.hpp"
+#include "helpers/assertHelper.hpp"
 #include "helpers/logHelper.hpp"
 #include "helpers/profilingHelper.hpp"
+#include "helpers/sortHelper.hpp"
 
 #ifndef KENGINE_IMGUI_TOOLS_SAVE_FILE
 # define KENGINE_IMGUI_TOOLS_SAVE_FILE "tools.cnf"
@@ -33,39 +36,43 @@
 
 namespace kengine {
 	struct ImGuiToolSystem {
-		static void init(Entity & e) noexcept {
+		static void init(entt::registry & r) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(Log, "Init", "ImGuiToolSystem");
+			kengine_log(r, Log, "Init", "ImGuiToolSystem");
 
-			e += functions::OnEntityCreated{ onEntityCreated };
-			e += functions::OnTerminate{ saveTools };
-			e += functions::Execute{ execute };
+			_r = &r;
+
+			r.on_construct<ImGuiToolComponent>().connect<onConstructImGuiTool>();
+
+			const auto e = r.create();
+			r.emplace<functions::OnTerminate>(e, saveTools);
+			r.emplace<functions::Execute>(e, execute);
 
 			_confFile.parse();
-			for (const auto & [e, name, tool] : entities.with<NameComponent, ImGuiToolComponent>()) {
-				kengine_logf(Log, "Init/ImGuiToolSystem", "Initializing %s", name.name.c_str());
+			for (const auto & [toolEntity, name, tool] : r.view<NameComponent, ImGuiToolComponent>().each()) {
+				kengine_logf(r, Log, "Init/ImGuiToolSystem", "Initializing %s", name.name.c_str());
 				tool.enabled = _confFile.getValue(name.name.c_str());
 			}
 		}
 
 		static void execute(float deltaTime) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(Verbose, "Execute", "ImGuiToolSystem");
+			kengine_log(*_r, Verbose, "Execute", "ImGuiToolSystem");
 
 			if (ImGui::BeginMainMenuBar()) {
 				bool mustSave = false;
 				if (ImGui::BeginMenu("Tools")) {
 					if (ImGui::MenuItem("Disable all")) {
-						kengine_log(Log, "ImGuiToolSystem", "Disabling all tools");
-						for (auto [e, tool] : entities.with<ImGuiToolComponent>())
+						kengine_log(*_r, Log, "ImGuiToolSystem", "Disabling all tools");
+						for (auto [e, tool] : _r->view<ImGuiToolComponent>().each())
 							tool.enabled = false;
 					}
 
-					const auto sorted = sortHelper::getNameSortedEntities<KENGINE_IMGUI_MAX_TOOLS, ImGuiToolComponent>();
+					const auto sorted = sortHelper::getNameSortedEntities<KENGINE_IMGUI_MAX_TOOLS, ImGuiToolComponent>(*_r);
 					for (auto & [e, name, tool] : sorted)
 						if (ImGui::MenuItem(name->name.c_str())) {
 							tool->enabled = !tool->enabled;
-							kengine_logf(Log, "ImGuiToolSystem", "Turned %s %s", tool->enabled ? "on" : "off", name->name.c_str());
+							kengine_logf(*_r, Log, "ImGuiToolSystem", "Turned %s %s", tool->enabled ? "on" : "off", name->name.c_str());
 							mustSave = true;
 						}
 					ImGui::EndMenu();
@@ -77,31 +84,30 @@ namespace kengine {
 			ImGui::EndMainMenuBar();
 		}
 
-		static void onEntityCreated(Entity & e) noexcept {
+		static void onConstructImGuiTool(entt::registry & r, entt::entity e) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			const auto name = e.tryGet<NameComponent>();
-			if (!name)
+			const auto name = r.try_get<NameComponent>(e);
+			if (!name) {
+				kengine_assert_failed(r, "Entity ", int(e), " has a ImGuiToolComponent but no NameComponent");
 				return;
+			}
 
-			const auto tool = e.tryGet<ImGuiToolComponent>();
-			if (!tool)
-				return;
-
-			kengine_logf(Log, "Init/ImGuiToolSystem", "Initializing %s", name->name.c_str());
-			tool->enabled = _confFile.getValue(name->name.c_str());
+			auto & tool = r.get<ImGuiToolComponent>(e);
+			kengine_logf(r, Log, "Init/ImGuiToolSystem", "Initializing %s", name->name.c_str());
+			tool.enabled = _confFile.getValue(name->name.c_str());
 		}
 
 		static void saveTools() noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(Log, "ImGuiToolSystem", "Saving to " KENGINE_IMGUI_TOOLS_SAVE_FILE);
+			kengine_log(*_r, Log, "ImGuiToolSystem", "Saving to " KENGINE_IMGUI_TOOLS_SAVE_FILE);
 
 			std::ofstream f(KENGINE_IMGUI_TOOLS_SAVE_FILE);
 			if (!f) {
-				kengine_assert_failed("Failed to open '", KENGINE_IMGUI_TOOLS_SAVE_FILE, "' with write permission");
+				kengine_assert_failed(*_r, "Failed to open '", KENGINE_IMGUI_TOOLS_SAVE_FILE, "' with write permission");
 				return;
 			}
-			const auto sorted = sortHelper::getNameSortedEntities<KENGINE_IMGUI_MAX_TOOLS, ImGuiToolComponent>();
+			const auto sorted = sortHelper::getNameSortedEntities<KENGINE_IMGUI_MAX_TOOLS, ImGuiToolComponent>(*_r);
 			for (const auto & [e, name, tool] : sorted)
 				f << name->name << ';' << std::boolalpha << tool->enabled << std::noboolalpha << std::endl;
 			f.flush();
@@ -134,9 +140,11 @@ namespace kengine {
 		private:
 			std::unordered_map<std::string, bool> _values;
 		} _confFile;
+
+		static inline entt::registry * _r;
 	};
 
-	EntityCreator * ImGuiToolSystem() noexcept {
-		return ImGuiToolSystem::init;
+	void ImGuiToolSystem(entt::registry & r) noexcept {
+		ImGuiToolSystem::init(r);
 	}
 }

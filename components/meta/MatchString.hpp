@@ -3,14 +3,10 @@
 // kengine functions
 #include "BaseFunction.hpp"
 
-namespace kengine {
-	class Entity;
-
-	namespace meta {
-		struct MatchString : functions::BaseFunction<
-			bool(const Entity &, const char *)
-		> {};
-	}
+namespace kengine::meta {
+	struct MatchString : functions::BaseFunction<
+		bool(entt::const_handle, const char *)
+	> {};
 }
 
 #define refltype kengine::meta::MatchString

@@ -1,5 +1,8 @@
 #include "registerHas.hpp"
 
+// entt
+#include <entt/entity/handle.hpp>
+
 // kengine meta
 #include "meta/Has.hpp"
 
@@ -9,12 +12,12 @@
 
 namespace kengine {
 	template<typename ... Comps>
-	void registerHas() noexcept {
+	void registerHas(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		registerMetaComponentImplementation<meta::Has, Comps...>(
-			[](const auto t, const Entity & e) noexcept {
+			r, [](const auto t, entt::const_handle e) noexcept {
 				using T = putils_wrapped_type(t);
-				return e.has<T>();
+				return e.all_of<T>();
 			}
 		);
 	}

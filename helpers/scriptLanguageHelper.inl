@@ -1,5 +1,11 @@
 #include "scriptLanguageHelper.hpp"
-#include "kengine.hpp"
+
+// entt
+#include <entt/entity/handle.hpp>
+#include <entt/entity/registry.hpp>
+
+// reflection
+#include "reflection.hpp"
 
 // putils
 #include "string.hpp"
@@ -7,122 +13,136 @@
 #include "function.hpp"
 
 // kengine helpers
+#include "helpers/isRunning.hpp"
 #include "helpers/logHelper.hpp"
 #include "helpers/profilingHelper.hpp"
+
+// Reflection API for entt::handle
+// We use entt::handle as entt::entity is a scalar and doesn't play well with scripting languages
+#define refltype entt::handle
+putils_reflection_info {
+	putils_reflection_class_name;
+};
+#undef refltype
 
 namespace kengine::scriptLanguageHelper {
 	template<typename Func>
 	using function = std::function<Func>;
 
 	template<typename Func, typename Func2>
-	void init(Func && registerFunction, Func2 && registerType) noexcept {
+	void init(entt::registry & r, Func && registerFunction, Func2 && registerType) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_log(Verbose, "scriptLanguageHelper::init", "Registering createEntity");
+		kengine_log(r, Verbose, "scriptLanguageHelper::init", "Registering createEntity");
 
-		using CreateEntityFunc = function<void(Entity &)>;
 		registerFunction("createEntity",
-			function<Entity(const CreateEntityFunc &)>(
-				[](const CreateEntityFunc & f) {
-					return entities.create(FWD(f));
-				}
+			function<entt::handle()>(
+				[&] { return entt::handle{ r, r.create() }; }
 			)
 		);
 
-        kengine_log(Verbose, "scriptLanguageHelper::init", "Registering removeEntity");
-		registerFunction("removeEntity",
-			function<void(Entity)>(
-				[](Entity go) { entities -= go; }
+        kengine_log(r, Verbose, "scriptLanguageHelper::init", "Registering destroyEntity");
+		registerFunction("destroyEntity",
+			function<void(entt::handle)>(
+				[](entt::handle e) { e.destroy(); }
 			)
 		);
 
-        kengine_log(Verbose, "scriptLanguageHelper::init", "Registering removeEntityById");
-		registerFunction("removeEntityById",
-			function<void(EntityID id)>(
-				[](EntityID id) { entities -= id; }
-			)
-		);
-
-        kengine_log(Verbose, "scriptLanguageHelper::init", "Registering getEntity");
-		registerFunction("getEntity",
-			function<Entity(EntityID id)>(
-				[](EntityID id) { return entities[id]; }
-			)
-		);
-
-        kengine_log(Verbose, "scriptLanguageHelper::init", "Registering forEachEntity");
-		using ForEachEntityFunc = function<void(Entity)>;
+        kengine_log(r, Verbose, "scriptLanguageHelper::init", "Registering forEachEntity");
+		using ForEachEntityCallback = std::function<void(entt::handle)>;
 		registerFunction("forEachEntity",
-			function<void(const ForEachEntityFunc &)>(
-				[](const ForEachEntityFunc & f) {
-					for (auto e : entities)
-						f(e);
+			function<void(const ForEachEntityCallback &)>(
+				[&](const ForEachEntityCallback & f) {
+					r.each([&](entt::entity e) {
+						f({ r, e });
+					});
 				}
 			)
 		);
 
-        kengine_log(Verbose, "scriptLanguageHelper::init", "Registering stopRunning");
+        kengine_log(r, Verbose, "scriptLanguageHelper::init", "Registering stopRunning");
 		registerFunction("stopRunning",
 			function<void()>(
-				[] { stopRunning(); }
+				[&] { stopRunning(r); }
 			)
 		);
 
-        kengine_log(Verbose, "scriptLanguageHelper::init", "Registering Entity type");
-		registerType(putils::meta::type<Entity>{});
+        kengine_log(r, Verbose, "scriptLanguageHelper::init", "Registering Entity type");
+		registerType(putils::meta::type<entt::handle>{});
 	}
 
 	template<typename T, typename Func, typename Func2>
-	void registerComponent(Func && registerEntityMember, Func2 && registerFunction) noexcept {
+	void registerComponent(entt::registry & r, Func && registerEntityMember, Func2 && registerFunction) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
 		static_assert(putils::reflection::has_class_name<T>());
 
 		const auto className = putils::reflection::get_class_name<T>();
-        kengine_logf(Verbose, "scriptLanguageHelper::registerComponent", "Registering component '%s'", className);
+        kengine_logf(r, Verbose, "scriptLanguageHelper::registerComponent", "Registering component '%s'", className);
 
-        kengine_log(Verbose, "scriptLanguageHelper::registerComponent", "Registering get");
-		registerEntityMember(putils::string<128>("get%s", className).c_str(),
-			function<T & (Entity)>(
-				[](Entity self) noexcept { return std::ref(self.get<T>()); }
-			)
-		);
+		if constexpr (!std::is_empty<T>()) {
+			kengine_log(r, Verbose, "scriptLanguageHelper::registerComponent", "Registering get");
+			registerEntityMember(putils::string<128>("get%s", className).c_str(),
+				 function<T &(entt::handle)>(
+					 [](entt::handle self) noexcept { return std::ref(self.get<T>()); }
+				 )
+			);
 
-        kengine_log(Verbose, "scriptLanguageHelper::registerComponent", "Registering tryGet");
-		registerEntityMember(putils::string<128>("tryGet%s", className).c_str(),
-			function<const T * (Entity)>(
-				[](Entity self) noexcept { return self.tryGet<T>(); }
-			)
-		);
+			kengine_log(r, Verbose, "scriptLanguageHelper::registerComponent", "Registering tryGet");
+			registerEntityMember(putils::string<128>("tryGet%s", className).c_str(),
+				 function<const T *(entt::handle)>(
+					 [](entt::handle self) noexcept { return self.try_get<T>(); }
+				 )
+			);
 
-        kengine_log(Verbose, "scriptLanguageHelper::registerComponent", "Registering has");
+			kengine_log(r, Verbose, "scriptLanguageHelper::registerComponent", "Registering emplace");
+			registerEntityMember(putils::string<128>("emplace%s", className).c_str(),
+				 function<T & (entt::handle)>(
+					 [](entt::handle self) noexcept { return std::ref(self.get_or_emplace<T>()); }
+				 )
+			);
+
+			kengine_log(r, Verbose, "scriptLanguageHelper::registerComponent", "Registering forEachEntityWith");
+			using ForEachEntityFunc = function<void(entt::handle, T &)>;
+			registerFunction(putils::string<128>("forEachEntityWith%s", className).c_str(),
+				function<void(const ForEachEntityFunc &)>(
+					[&](const ForEachEntityFunc & f) {
+						for (const auto & [e, comp] : r.view<T>().each())
+							f({ r, e }, comp);
+					}
+				)
+			);
+		}
+		else {
+			kengine_log(r, Verbose, "scriptLanguageHelper::registerComponent", "Registering emplace");
+			registerEntityMember(putils::string<128>("emplace%s", className).c_str(),
+				 function<void(entt::handle)>(
+					 [](entt::handle self) noexcept { self.emplace<T>(); }
+				 )
+			);
+
+			kengine_log(r, Verbose, "scriptLanguageHelper::registerComponent", "Registering forEachEntityWith");
+			using ForEachEntityFunc = function<void(entt::handle)>;
+			registerFunction(putils::string<128>("forEachEntityWith%s", className).c_str(),
+				function<void(const ForEachEntityFunc &)>(
+					[&](const ForEachEntityFunc & f) {
+						for (const auto & [e] : r.view<T>().each())
+							f({ r, e });
+					}
+				)
+			);
+		}
+
+        kengine_log(r, Verbose, "scriptLanguageHelper::registerComponent", "Registering has");
 		registerEntityMember(putils::string<128>("has%s", className).c_str(),
-			function<bool(Entity)>(
-				[](Entity self) noexcept { return self.has<T>(); }
+			function<bool(entt::handle)>(
+				[](entt::handle self) noexcept { return self.all_of<T>(); }
 			)
 		);
 
-        kengine_log(Verbose, "scriptLanguageHelper::registerComponent", "Registering attach");
-		registerEntityMember(putils::string<128>("attach%s", className).c_str(),
-			function<T & (Entity)>(
-				[](Entity self) noexcept { return std::ref(self.attach<T>()); }
-			)
-		);
-
-        kengine_log(Verbose, "scriptLanguageHelper::registerComponent", "Registering detach");
-		registerEntityMember(putils::string<128>("detach%s", className).c_str(),
-			function<void(Entity)>(
-				[](Entity self) noexcept { self.detach<T>(); }
-			)
-		);
-
-        kengine_log(Verbose, "scriptLanguageHelper::registerComponent", "Registering forEachEntityWith");
-		using ForEachEntityFunc = function<void(Entity, T &)>;
-		registerFunction(putils::string<128>("forEachEntityWith%s", className).c_str(),
-			function<void(const ForEachEntityFunc &)>(
-				[](const ForEachEntityFunc & f) {
-					for (auto [e, t] : entities.with<T>())
-						f(e, t);
-				}
+        kengine_log(r, Verbose, "scriptLanguageHelper::registerComponent", "Registering remove");
+		registerEntityMember(putils::string<128>("remove%s", className).c_str(),
+			function<void(entt::handle)>(
+				[](entt::handle self) noexcept { self.remove<T>(); }
 			)
 		);
 	}

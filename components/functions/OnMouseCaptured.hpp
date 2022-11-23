@@ -3,12 +3,9 @@
 // kengine functions
 #include "BaseFunction.hpp"
 
-// kengine
-#include "Entity.hpp"
-
 namespace kengine::functions {
     struct OnMouseCaptured : BaseFunction<
-        void(EntityID window, bool captured)
+        void(entt::entity window, bool captured)
     > {};
 }
 

@@ -1,8 +1,11 @@
 #pragma once
 
+// entt
+#include <entt/entity/fwd.hpp>
+
 namespace kengine {
 	template<typename ... Comps>
-	void registerHas() noexcept;
+	void registerHas(entt::registry & r) noexcept;
 }
 
 #include "registerHas.inl"

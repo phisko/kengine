@@ -3,14 +3,10 @@
 // kengine functions
 #include "BaseFunction.hpp"
 
-namespace kengine {
-	class Entity;
-
-	namespace meta {
-		struct EditImGui : functions::BaseFunction<
-			void(kengine::Entity &)
-		> {};
-	}
+namespace kengine::meta {
+	struct EditImGui : functions::BaseFunction<
+		void(entt::handle)
+	> {};
 }
 
 #define refltype kengine::meta::EditImGui

@@ -1,17 +1,17 @@
 #pragma once
 
+// entt
+#include <entt/entity/fwd.hpp>
+
 // reflection
 #include "reflection.hpp"
 
 // putils
 #include "Point.hpp"
 
-// kengine
-#include "Entity.hpp"
-
 namespace kengine {
 	struct PathfindingComponent {
-		EntityID environment = INVALID_ID; // Entity in which we are navigating. Should have a model with a NavMeshComponent
+		entt::entity environment = entt::null; // Entity in which we are navigating. Should have a model with a NavMeshComponent
 		putils::Point3f destination;
 		float searchDistance = 2.f;
 		float maxSpeed = 1.f;

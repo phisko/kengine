@@ -1,9 +1,11 @@
 #include "LogFileSystem.hpp"
-#include "kengine.hpp"
 
 // stl
 #include <fstream>
 #include <mutex>
+
+// entt
+#include <entt/entity/registry.hpp>
 
 // magic_enum
 #include <magic_enum.hpp>
@@ -18,6 +20,7 @@
 #include "functions/Log.hpp"
 
 // kengine helpers
+#include "helpers/assertHelper.hpp"
 #include "helpers/commandLineHelper.hpp"
 #include "helpers/logHelper.hpp"
 #include "helpers/profilingHelper.hpp"
@@ -28,27 +31,29 @@
 
 namespace kengine {
 	struct LogFileSystem {
-		static void init(Entity & e) noexcept {
-			const auto options = kengine::parseCommandLine<Options>();
+		static void init(entt::registry & r) noexcept {
+			const auto options = kengine::parseCommandLine<Options>(r);
 			const char * fileName = options.logFile ? options.logFile->c_str() : KENGINE_LOG_FILE_LOCATION;
 
 			_file.open(fileName);
 			if (!_file) {
-				kengine_assert_failed("LogFileSystem couldn't open output file '%s'", fileName);
+				kengine_assert_failed(r, "LogFileSystem couldn't open output file '%s'", fileName);
 				return;
 			}
 
-			auto & severityControl = e.attach<LogSeverityControl>();
-			severityControl.severity = logHelper::parseCommandLineSeverity();
+			const auto e = r.create();
+
+			auto & severityControl = r.emplace<LogSeverityControl>(e);
+			severityControl.severity = logHelper::parseCommandLineSeverity(r);
 			_severity = &severityControl.severity;
 
-			e += AdjustableComponent{
+			r.emplace<AdjustableComponent>(e) = {
 				"Log", {
 					{ "File", _severity }
 				}
 			};
 
-			e += functions::Log{ log };
+			r.emplace<functions::Log>(e, log);
 		}
 
 		static void log(const LogEvent & event) noexcept {
@@ -77,8 +82,8 @@ namespace kengine {
 		};
 	};
 
-	EntityCreator * LogFileSystem() noexcept {
-		return LogFileSystem::init;
+	void LogFileSystem(entt::registry & r) noexcept {
+		LogFileSystem::init(r);
 	}
 }
 

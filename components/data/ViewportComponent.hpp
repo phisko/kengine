@@ -1,13 +1,13 @@
 #pragma once
 
+// entt
+#include <entt/entity/fwd.hpp>
+
 // putils
 #include "Rect.hpp"
 
 // kengine data
 #include "OnScreenComponent.hpp"
-
-// kengine impl
-#include "impl/ID.hpp"
 
 namespace kengine {
 	struct ViewportComponent : OnScreenComponent {
@@ -17,7 +17,7 @@ namespace kengine {
 		putils::Rect2f boundingBox = { { 0.f, 0.f }, { 1.f, 1.f } };
 		putils::Point2i resolution = { 1280, 720 };
 		float zOrder = 1.f;
-		EntityID window = INVALID_ID;
+		entt::entity window = entt::null;
 		RenderTexture renderTexture = INVALID_RENDER_TEXTURE;
 
 		ViewportComponent() noexcept {

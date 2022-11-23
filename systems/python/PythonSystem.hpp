@@ -1,8 +1,8 @@
 #pragma once
 
-// kengine
-#include "EntityCreator.hpp"
+// entt
+#include <entt/entity/fwd.hpp>
 
 namespace kengine {
-	KENGINE_PYTHON_EXPORT EntityCreator * PythonSystem() noexcept;
+	KENGINE_PYTHON_EXPORT void PythonSystem(entt::registry & r) noexcept;
 }

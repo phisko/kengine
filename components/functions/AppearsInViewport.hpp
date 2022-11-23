@@ -1,14 +1,11 @@
 #pragma once
 
-// kengine
-#include "Entity.hpp"
-
 // kengine functions
 #include "BaseFunction.hpp"
 
 namespace kengine::functions {
 	struct AppearsInViewport : BaseFunction<
-		bool(const Entity & entity)
+		bool(entt::entity entity)
 	> {};
 }
 

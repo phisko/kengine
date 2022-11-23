@@ -1,7 +1,9 @@
 #ifdef KENGINE_LUA
 
 #include "imguiLuaHelper.hpp"
-#include "kengine.hpp"
+
+// entt
+#include <entt/entity/registry.hpp>
 
 // putils
 #include "imgui_lua_bindings/imgui_lua_bindings.hpp"
@@ -15,11 +17,11 @@
 #include "helpers/profilingHelper.hpp"
 
 namespace kengine::imguiLuaHelper {
-	void initBindings() noexcept {
+	void initBindings(const entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
-		for (const auto & [e, state] : entities.with<LuaStateComponent>()) {
-			kengine_logf(Log, "InitImguiLuaBindings", "Initializing bindings for state Entity %zu", e.id);
+		for (const auto & [e, state] : r.view<LuaStateComponent>().each()) {
+			kengine_logf(r, Log, "InitImguiLuaBindings", "Initializing bindings for state Entity %zu", e);
 			lState = *state.state;
 			LoadImguiBindings();
 		}

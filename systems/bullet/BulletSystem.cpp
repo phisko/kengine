@@ -1,9 +1,12 @@
 #include "BulletSystem.hpp"
-#include "kengine.hpp"
 
 // stl
 #include <map>
 #include <memory>
+
+// entt
+#include <entt/entity/handle.hpp>
+#include <entt/entity/registry.hpp>
 
 // glm
 #include <glm/glm.hpp>
@@ -21,7 +24,6 @@
 // kengine data
 #include "data/AdjustableComponent.hpp"
 #include "data/DebugGraphicsComponent.hpp"
-#include "data/GraphicsComponent.hpp"
 #include "data/InstanceComponent.hpp"
 #include "data/KinematicComponent.hpp"
 #include "data/ModelColliderComponent.hpp"
@@ -104,14 +106,17 @@ namespace kengine {
 			BulletPhysicsComponent & operator=(BulletPhysicsComponent &&) noexcept = default;
 		};
 
-		static void init(Entity & e) noexcept {
+		static void init(entt::registry & r) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, Log, "Init", "BulletSystem");
 
-			kengine_log(Log, "Init", "BulletSystem");
-			e += functions::Execute{ execute };
-			e += functions::QueryPosition{ queryPosition };
+			_r = &r;
 
-			e += AdjustableComponent{
+			const auto e = r.create();
+			r.emplace<functions::Execute>(e, execute);
+			r.emplace<functions::QueryPosition>(e, queryPosition);
+
+			r.emplace<AdjustableComponent>(e) = {
 				"Physics", {
 					{ "Gravity", &adjustables.gravity }
 #ifndef KENGINE_NDEBUG
@@ -124,45 +129,22 @@ namespace kengine {
 #ifndef KENGINE_NDEBUG
 			drawer = new Drawer();
 #endif
+
+			r.on_construct<PhysicsComponent>().connect<addOrUpdateBulletComponent>();
+			r.on_construct<TransformComponent>().connect<addOrUpdateBulletComponent>();
+			r.on_construct<InstanceComponent>().connect<addOrUpdateBulletComponent>();
+
+			r.on_construct<ModelColliderComponent>().connect<updateAllInstances>();
+			r.on_update<ModelColliderComponent>().connect<updateAllInstances>();
 		}
 
 		static void execute(float deltaTime) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(Verbose, "Execute", "BulletSystem");
+			kengine_log(*_r, Verbose, "Execute", "BulletSystem");
 
-			for (auto [e, instance, transform, physics, comp] : entities.with<InstanceComponent, TransformComponent, PhysicsComponent, BulletPhysicsComponent>()) {
-				const auto model = entities[instance.model];
-				if (!model.has<ModelColliderComponent>())
-					continue;
-#ifndef KENGINE_NDEBUG
-				if (adjustables.editorMode) {
-					kengine_logf(Verbose, "Execute/BulletSystem", "Re-adding BulletComponent to %zu for editor mode", e.id);
-					e.detach<BulletPhysicsComponent>();
-					addBulletComponent(e, transform, physics, model);
-				}
-				else
-#endif
-				updateBulletComponent(e, comp, transform, physics, model);
-			}
-
-			for (auto [e, instance, transform, physics, noComp] : entities.with<InstanceComponent, TransformComponent, PhysicsComponent, no<BulletPhysicsComponent>>()) {
-				const auto name = e.tryGet<NameComponent>();
-				const auto model = entities[instance.model];
-				if (!model.has<ModelColliderComponent>())
-					continue;
-
-				if (model.has<ModelSkeletonComponent>() && !e.has<SkeletonComponent>()) {
-					kengine_logf(Verbose, "Execute/BulletSystem", "Not adding BulletComponent to %zu because it doesn't have a skeleton yet, while its model does", e.id);
-					continue;
-				}
-
-				kengine_logf(Verbose, "Execute/BulletSystem", "Adding BulletComponent to %zu", e.id);
-				addBulletComponent(e, transform, physics, model);
-			}
-
-			for (auto [e, bullet, noPhys] : entities.with<BulletPhysicsComponent, no<PhysicsComponent>>()) {
-				kengine_logf(Verbose, "Execute/BulletSystem", "Removing BulletComponent from %zu", e.id);
-				e.detach<BulletPhysicsComponent>();
+			for (auto [e, bullet] : _r->view<BulletPhysicsComponent>(entt::exclude<PhysicsComponent>).each()) {
+				kengine_logf(*_r, Verbose, "Execute/BulletSystem", "Removing BulletComponent from %zu", e);
+				_r->remove<BulletPhysicsComponent>(e);
 			}
 
 			dynamicsWorld.setGravity({ 0.f, -adjustables.gravity, 0.f });
@@ -190,18 +172,51 @@ namespace kengine {
 			return ret;
 		}
 
-		static void addBulletComponent(Entity & e, TransformComponent & transform, PhysicsComponent & physics, const Entity & modelEntity) noexcept {
+		static void addOrUpdateBulletComponent(entt::registry & r, entt::entity e) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			auto & comp = e.attach<BulletPhysicsComponent>();
+			if (!r.all_of<TransformComponent, PhysicsComponent, InstanceComponent>(e))
+				return;
+
+			const auto & instance = r.get<InstanceComponent>(e);
+
+			if (!r.all_of<ModelColliderComponent>(instance.model))
+				return;
+
+			if (r.all_of<ModelSkeletonComponent>(instance.model) && !r.all_of<SkeletonComponent>(e)) {
+				kengine_logf(r, Verbose, "Execute/BulletSystem", "Not adding BulletComponent to %zu because it doesn't have a skeleton yet, while its model does", e);
+				return;
+			}
+
+			kengine_logf(r, Verbose, "BulletSystem", "Adding BulletComponent to %zu", e);
+
+			auto & transform = r.get<TransformComponent>(e);
+			auto & physics = r.get<PhysicsComponent>(e);
+
+			r.remove<BulletPhysicsComponent>(e);
+			addBulletComponent(e, transform, physics, instance.model);
+		}
+
+		static void updateAllInstances(entt::registry & r, entt::entity modelEntity) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			for (const auto & [instanceEntity, instance] : r.view<InstanceComponent>().each())
+				if (instance.model == modelEntity)
+					addOrUpdateBulletComponent(r, instanceEntity);
+		}
+
+		static void addBulletComponent(entt::entity e, TransformComponent & transform, PhysicsComponent & physics, entt::entity modelEntity) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			auto & comp = _r->emplace<BulletPhysicsComponent>(e);
 			comp.motionState.transform = &transform;
 
-			const auto name = e.tryGet<NameComponent>();
-			const auto & modelCollider = modelEntity.get<ModelColliderComponent>();
+			const auto name = _r->try_get<NameComponent>(e);
+			const auto & modelCollider = _r->get<ModelColliderComponent>(modelEntity);
 
-			const auto skeleton = e.tryGet<SkeletonComponent>();
-			const auto modelSkeleton = modelEntity.tryGet<ModelSkeletonComponent>();
-			const auto modelTransform = modelEntity.tryGet<TransformComponent>();
+			const auto skeleton = _r->try_get<SkeletonComponent>(e);
+			const auto modelSkeleton = _r->try_get<ModelSkeletonComponent>(modelEntity);
+			const auto modelTransform = _r->try_get<TransformComponent>(modelEntity);
 
 			for (const auto & collider : modelCollider.colliders)
 				addShape(comp, collider, transform, skeleton, modelSkeleton, modelTransform);
@@ -213,7 +228,7 @@ namespace kengine {
 
 			btRigidBody::btRigidBodyConstructionInfo rbInfo(physics.mass, &comp.motionState, &comp.shape, localInertia);
 			comp.body = btRigidBody(rbInfo);
-			comp.body.setUserIndex((int)e.id);
+			comp.body.setUserIndex(int(e));
 
 			updateBulletComponent(e, comp, transform, physics, modelEntity, true);
 			dynamicsWorld.addRigidBody(&comp.body);
@@ -259,10 +274,10 @@ namespace kengine {
 			comp.shape.addChildShape(helpers::toBullet(transform, collider, skeleton, modelSkeleton, modelTransform), shape);
 		}
 
-		static void updateBulletComponent(Entity & e, BulletPhysicsComponent & comp, const TransformComponent & transform, PhysicsComponent & physics, const Entity & modelEntity, bool first = false) noexcept {
+		static void updateBulletComponent(entt::entity e, BulletPhysicsComponent & comp, const TransformComponent & transform, PhysicsComponent & physics, entt::entity modelEntity, bool first = false) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			const bool kinematic = e.has<KinematicComponent>();
+			const bool kinematic = _r->all_of<KinematicComponent>(e);
 
 			if (physics.changed || first) {
 				// comp.body->clearForces();
@@ -298,13 +313,13 @@ namespace kengine {
 
 			physics.changed = false;
 
-			const auto skeleton = e.tryGet<SkeletonComponent>();
-			const auto modelSkeleton = modelEntity.tryGet<ModelSkeletonComponent>();
+			const auto skeleton = _r->try_get<SkeletonComponent>(e);
+			const auto modelSkeleton = _r->try_get<ModelSkeletonComponent>(modelEntity);
 
 			if (skeleton && modelSkeleton) {
-				const auto modelTransform = modelEntity.tryGet<TransformComponent>();
+				const auto modelTransform = _r->try_get<TransformComponent>(modelEntity);
 				int i = 0;
-				for (const auto & collider : modelEntity.get<ModelColliderComponent>().colliders) {
+				for (const auto & collider : _r->get<ModelColliderComponent>(modelEntity).colliders) {
 					comp.shape.updateChildTransform(i, helpers::toBullet(transform, collider, skeleton, modelSkeleton, modelTransform));
 					++i;
 				}
@@ -317,25 +332,23 @@ namespace kengine {
 			const auto numManifolds = dispatcher.getNumManifolds();
 			if (numManifolds <= 0)
 				return;
-			kengine_log(Verbose, "Execute/BulletSystem", "Detecting collisions");
-			for (const auto & [_, onCollision] : entities.with<functions::OnCollision>())
+			kengine_log(*_r, Verbose, "Execute/BulletSystem", "Detecting collisions");
+			for (const auto & [callbackEntity, onCollision] : _r->view<functions::OnCollision>().each())
 				for (int i = 0; i < numManifolds; ++i) {
 					const auto contactManifold = dispatcher.getManifoldByIndexInternal(i);
 					const auto objectA = (btCollisionObject *)(contactManifold->getBody0());
 					const auto objectB = (btCollisionObject *)(contactManifold->getBody1());
 
-					const auto id1 = objectA->getUserIndex();
-					const auto id2 = objectB->getUserIndex();
-					auto e1 = entities[id1];
-					auto e2 = entities[id2];
-					kengine_logf(Verbose, "Execute/BulletSystem/detectCollisions", "Found collision between %zu & %zu", id1, id2);
+					const auto e1 = entt::entity(objectA->getUserIndex());
+					const auto e2 = entt::entity(objectB->getUserIndex());
+					kengine_logf(*_r, Verbose, "Execute/BulletSystem/detectCollisions", "Found collision between %zu & %zu", e1, e2);
 					onCollision(e1, e2);
 				}
 		}
 
 		static void queryPosition(const putils::Point3f & pos, float radius, const EntityIteratorFunc & func) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(Verbose, "BulletSystem", "Querying radius %f around position { %f, %f, %f }", radius, pos.x, pos.y, pos.z);
+			kengine_logf(*_r, Verbose, "BulletSystem", "Querying radius %f around position { %f, %f, %f }", radius, pos.x, pos.y, pos.z);
 
 			btSphereShape sphere(radius);
 			btPairCachingGhostObject ghost;
@@ -350,11 +363,10 @@ namespace kengine {
 				Callback(btPairCachingGhostObject & ghost, const EntityIteratorFunc & func) noexcept : ghost(ghost), func(func) {}
 
 				btScalar addSingleResult(btManifoldPoint & cp, const btCollisionObjectWrapper * colObj0Wrap, int partId0, int index0, const btCollisionObjectWrapper * colObj1Wrap, int partId1, int index1) final {
-					kengine_assert(colObj1Wrap->m_collisionObject == &ghost);
-					const auto id = colObj0Wrap->m_collisionObject->getUserIndex();
-					kengine_logf(Verbose, "BulletSystem/queryPosition", "Found %zu", id);
-					auto e = entities[id];
-					func(e);
+					kengine_assert(*_r, colObj1Wrap->m_collisionObject == &ghost);
+					const auto e = entt::entity(colObj0Wrap->m_collisionObject->getUserIndex());
+					kengine_logf(*_r, Verbose, "BulletSystem/queryPosition", "Found %zu", e);
+					func({ *_r, e });
 					return 1.f;
 				}
 
@@ -392,8 +404,8 @@ namespace kengine {
 				if (!collider.boneName.empty()) {
 					// Also apply model transform to re-align bones
 					mat *= matrixHelper::getModelMatrix({}, modelTransform);
-					kengine_assert(skeleton != nullptr && modelSkeleton != nullptr);
-					mat *= skeletonHelper::getBoneMatrix(collider.boneName.c_str(), *skeleton, *modelSkeleton);
+					kengine_assert(*_r, skeleton != nullptr && modelSkeleton != nullptr);
+					mat *= skeletonHelper::getBoneMatrix(*_r, collider.boneName.c_str(), *skeleton, *modelSkeleton);
 				}
 
 				mat = glm::translate(mat, toVec(collider.transform.boundingBox.position));
@@ -413,11 +425,9 @@ namespace kengine {
 		public:
 			Drawer() noexcept {
 				KENGINE_PROFILING_SCOPE;
-				entities += [this](Entity & e) noexcept {
-					e += TransformComponent{};
-					e += DebugGraphicsComponent{};
-					_debugEntity = e.id;
-				};
+				_debugEntity = _r->create();
+				_r->emplace<TransformComponent>(_debugEntity);
+				_r->emplace<DebugGraphicsComponent>(_debugEntity);
 			}
 
 			void cleanup() noexcept {
@@ -427,7 +437,7 @@ namespace kengine {
 			}
 
 		private:
-			DebugGraphicsComponent & getDebugComponent() noexcept { return entities[_debugEntity].get<DebugGraphicsComponent>(); }
+			DebugGraphicsComponent & getDebugComponent() noexcept { return _r->get<DebugGraphicsComponent>(_debugEntity); }
 
 			void drawLine(const btVector3 & from, const btVector3 & to, const btVector3 & color) noexcept override {
 				KENGINE_PROFILING_SCOPE;
@@ -453,14 +463,16 @@ namespace kengine {
 			int getDebugMode() const override { return DBG_DrawWireframe; }
 
 		private:
-			EntityID _debugEntity;
+			entt::entity _debugEntity;
 		};
 
 		static inline Drawer * drawer = nullptr;
 #endif
+
+		static inline entt::registry * _r;
 	};
 
-	EntityCreator * BulletSystem() noexcept {
-		return BulletSystem::init;
+	void BulletSystem(entt::registry & r) noexcept {
+		BulletSystem::init(r);
 	}
 }

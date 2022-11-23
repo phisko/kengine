@@ -1,8 +1,8 @@
 #pragma once
 
-// kengine
-#include "EntityCreator.hpp"
+// entt
+#include <entt/entity/fwd.hpp>
 
 namespace kengine {
-	KENGINE_COLLISION_EXPORT EntityCreator * CollisionSystem() noexcept;
+	KENGINE_COLLISION_EXPORT void CollisionSystem(entt::registry & r) noexcept;
 }

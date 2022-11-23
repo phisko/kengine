@@ -3,11 +3,9 @@
 // kengine functions
 #include "BaseFunction.hpp"
 
-namespace kengine { class Entity; }
-
 namespace kengine::meta {
     struct DetachFrom : functions::BaseFunction<
-        void(Entity &)
+        void(entt::handle)
     > {};
 }
 

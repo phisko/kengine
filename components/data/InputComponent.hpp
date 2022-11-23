@@ -4,22 +4,23 @@
 # define KENGINE_INPUT_FUNCTION_SIZE 64
 #endif
 
+// entt
+#include <entt/entity/fwd.hpp>
+
 // putils
 #include "function.hpp"
 #include "Point.hpp"
 
-// kengine impl
-#include "impl/ID.hpp"
-
 namespace kengine {
     struct InputComponent {
 		template<typename T>
-		using function = putils::function<T, KENGINE_INPUT_FUNCTION_SIZE>;
+		// using function = putils::function<T, KENGINE_INPUT_FUNCTION_SIZE>;
+		using function = std::function<T>;
 
-        function<void(EntityID window, int keycode, bool pressed)> onKey = nullptr;
-        function<void(EntityID window, const putils::Point2f & screenCoordinates, const putils::Point2f & relativeMovement)> onMouseMove = nullptr;
-        function<void(EntityID window, int button, const putils::Point2f & screenCoordinates, bool pressed)> onMouseButton = nullptr;
-        function<void(EntityID window, float xoffset, float yoffset, const putils::Point2f & screenCoordinates)> onScroll = nullptr;
+        function<void(entt::handle window, int keycode, bool pressed)> onKey = nullptr;
+        function<void(entt::handle window, const putils::Point2f & screenCoordinates, const putils::Point2f & relativeMovement)> onMouseMove = nullptr;
+        function<void(entt::handle window, int button, const putils::Point2f & screenCoordinates, bool pressed)> onMouseButton = nullptr;
+        function<void(entt::handle window, float xoffset, float yoffset, const putils::Point2f & screenCoordinates)> onScroll = nullptr;
 	};
 }
 

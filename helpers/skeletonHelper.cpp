@@ -2,12 +2,15 @@
 
 #include "skeletonHelper.hpp"
 
+// entt
+#include <entt/entity/registry.hpp>
+
 // kengine helpers
 #include "helpers/assertHelper.hpp"
 #include "helpers/profilingHelper.hpp"
 
 namespace kengine::skeletonHelper {
-	BoneIndexes getBoneIndex(const char * bone, const ModelSkeletonComponent & model) noexcept {
+	BoneIndexes getBoneIndex(const entt::registry & r, const char * bone, const ModelSkeletonComponent & model) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
 		BoneIndexes indexes;
@@ -23,14 +26,14 @@ namespace kengine::skeletonHelper {
 			++indexes.meshIndex;
 		}
 
-		kengine_assert_failed("'", bone, "' bone not found");
+		kengine_assert_failed(r, "'", bone, "' bone not found");
 		return indexes;
 	}
 
-	glm::mat4 getBoneMatrix(const char * bone, const SkeletonComponent & skeleton, const ModelSkeletonComponent & model) noexcept {
+	glm::mat4 getBoneMatrix(const entt::registry & r, const char * bone, const SkeletonComponent & skeleton, const ModelSkeletonComponent & model) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
-		const auto indexes = getBoneIndex(bone, model);
+		const auto indexes = getBoneIndex(r, bone, model);
 		if (indexes.meshIndex >= skeleton.meshes.size())
 			return glm::mat4(1.f);
 
@@ -38,10 +41,10 @@ namespace kengine::skeletonHelper {
 		return mesh.boneMatsMeshSpace[indexes.boneIndex];
 	}
 
-	void setBoneMatrix(const char * bone, const glm::mat4 & m, SkeletonComponent & skeleton, const ModelSkeletonComponent & model) noexcept {
+	void setBoneMatrix(const entt::registry & r, const char * bone, const glm::mat4 & m, SkeletonComponent & skeleton, const ModelSkeletonComponent & model) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
-		const auto indexes = getBoneIndex(bone, model);
+		const auto indexes = getBoneIndex(r, bone, model);
 		if (indexes.meshIndex >= skeleton.meshes.size())
 			return;
 

@@ -19,7 +19,6 @@ namespace kengine {
 		string name;
 		putils::Point2ui size = { 1280, 720 };
 		bool fullscreen = false;
-		bool shutdownOnClose = true;
 		string assignedSystem;
 	};
 }
@@ -31,7 +30,6 @@ putils_reflection_info{
 		putils_reflection_attribute(name),
 		putils_reflection_attribute(size),
 		putils_reflection_attribute(fullscreen),
-		putils_reflection_attribute(shutdownOnClose),
 		putils_reflection_attribute(assignedSystem)
 	);
 	putils_reflection_used_types(

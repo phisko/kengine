@@ -3,6 +3,9 @@
 // stl
 #include <span>
 
+// entt
+#include <entt/entity/registry.hpp>
+
 // kengine data
 #include "data/CommandLineComponent.hpp"
 
@@ -10,12 +13,11 @@
 #include "helpers/profilingHelper.hpp"
 
 namespace kengine {
-	void createCommandLineEntity(int argc, const char ** argv) noexcept {
+	void createCommandLineEntity(entt::registry & r, int argc, const char ** argv) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		entities += [&](Entity & e) noexcept {
-			auto & commandLine = e.attach<CommandLineComponent>();
-			for (const char * argument : std::span(argv, argc))
-				commandLine.arguments.emplace_back(argument);
-		};
+		const auto e = r.create();
+		auto & commandLine = r.emplace<CommandLineComponent>(e);
+		for (const char * argument : std::span(argv, argc))
+			commandLine.arguments.emplace_back(argument);
 	}
 }

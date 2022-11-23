@@ -8,6 +8,9 @@
 # define KENGINE_NAVMESH_FUNC_SIZE 64
 #endif
 
+// entt
+#include <entt/entity/fwd.hpp>
+
 // reflection
 #include "reflection.hpp"
 
@@ -20,8 +23,6 @@
 #include "BaseFunction.hpp"
 
 namespace kengine {
-	class Entity;
-
 	struct NavMeshComponent {
 		size_t concernedMesh = 0; // Index into ModelDataComponent::meshes, pointing to the mesh for which to generate the navmesh
 		float cellSize = .25f;
@@ -54,7 +55,7 @@ namespace kengine {
 #endif
 
 		struct GetPath : BaseFunction<
-			GetPathImpl::Path (const Entity & environment, const putils::Point3f & start, const putils::Point3f & end)
+			GetPathImpl::Path (entt::handle environment, const putils::Point3f & start, const putils::Point3f & end)
 			// `environment` is the entity instantiating the `model Entity` this component is attached to
 		> {};
 

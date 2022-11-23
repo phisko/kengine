@@ -3,11 +3,9 @@
 // kengine functions
 #include "BaseFunction.hpp"
 
-namespace kengine { class Entity; }
-
 namespace kengine::functions {
     struct OnCollision : BaseFunction<
-        void(Entity & first, Entity & second)
+        void(entt::entity first, entt::entity second)
     > {};
 }
 

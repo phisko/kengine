@@ -1,14 +1,14 @@
 #pragma once
 
+// entt
+#include <entt/entity/fwd.hpp>
+
 // reflection
 #include "reflection.hpp"
 
-// kengine
-#include "Entity.hpp"
-
 namespace kengine {
 	struct InstanceComponent {
-		EntityID model = INVALID_ID;
+		entt::entity model = entt::null;
 	};
 }
 

@@ -1,8 +1,8 @@
 #pragma once
 
-// kengine
-#include "EntityCreator.hpp"
+// entt
+#include <entt/entity/fwd.hpp>
 
 namespace kengine {
-	KENGINE_POLYVOX_EXPORT EntityCreator * MagicaVoxelSystem() noexcept;
+	KENGINE_POLYVOX_EXPORT void MagicaVoxelSystem(entt::registry & r) noexcept;
 }
