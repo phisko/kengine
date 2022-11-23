@@ -1,5 +1,9 @@
 #include "registerEditImGui.hpp"
 
+// entt
+#include <entt/entity/handle.hpp>
+#include <entt/entity/registry.hpp>
+
 // kengine meta
 #include "meta/ForEachEntity.hpp"
 
@@ -9,26 +13,28 @@
 
 namespace kengine {
 	template<typename ... Comps>
-	void registerForEachEntity() noexcept {
+	void registerForEachEntity(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
 		registerMetaComponentImplementation<meta::ForEachEntity, Comps...>(
-			[](const auto t, auto && func) noexcept {
+			r, [&](const auto t, auto && func) noexcept {
 				KENGINE_PROFILING_SCOPE;
 
 				using Type = putils_wrapped_type(t);
-				for (auto [e, comp] : entities.with<Type>())
-					func(e);
+				for (const auto e : r.view<Type>())
+					func({ r, e });
 			}
 		);
 
 		registerMetaComponentImplementation<meta::ForEachEntityWithout, Comps...>(
-			[](const auto t, auto && func) noexcept {
+			r, [&](const auto t, auto && func) noexcept {
 				KENGINE_PROFILING_SCOPE;
 
 				using Type = putils_wrapped_type(t);
-				for (auto [e, notComp] : entities.with<no<Type>>())
-					func(e);
+				r.each([&](entt::entity e) {
+					if (!r.all_of<Type>(e))
+						func({ r, e });
+				});
 			}
 		);
 	}

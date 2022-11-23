@@ -2,18 +2,21 @@
 
 #ifdef KENGINE_PYTHON
 
+// entt
+#include <entt/entity/fwd.hpp>
+
 // kengine helpers
 #include "helpers/scriptLanguageHelper.hpp"
 
 namespace kengine::pythonHelper {
 	template<typename ... Types>
-	void registerTypes() noexcept;
+	void registerTypes(const entt::registry & r) noexcept;
 
 	template<typename ... Comps>
-	void registerComponents() noexcept;
+	void registerComponents(entt::registry & r) noexcept;
 
 	template<typename Ret, typename ...Args>
-	void registerFunction(const char * name, const scriptLanguageHelper::function<Ret(Args...)> & func) noexcept;
+	void registerFunction(const entt::registry & r, const char * name, const scriptLanguageHelper::function<Ret(Args...)> & func) noexcept;
 }
 
 #include "pythonHelper.inl"

@@ -1,6 +1,7 @@
 #ifdef KENGINE_GLM
 
-#include "tests/KengineTest.hpp"
+// gtest
+#include <gtest/gtest.h>
 
 // kengine data
 #include "data/TransformComponent.hpp"
@@ -8,15 +9,13 @@
 // kengine helpers
 #include "helpers/matrixHelper.hpp"
 
-struct matrixHelper : KengineTest {};
-
-TEST_F(matrixHelper, toVec) {
+TEST(matrixHelper, toVec) {
     const auto vec = kengine::matrixHelper::toVec(putils::Point3f{ 42.f, -42.f, 0.f });
     const glm::vec3 expected = { 42.f, -42.f, 0.f };
     EXPECT_EQ(vec, expected);
 }
 
-TEST_F(matrixHelper, getPosition) {
+TEST(matrixHelper, getPosition) {
     glm::mat4 mat{ 1.f };
     mat = glm::translate(mat, { 42.f, -42.f, 0.f });
     const auto pos = kengine::matrixHelper::getPosition(mat);
@@ -24,7 +23,7 @@ TEST_F(matrixHelper, getPosition) {
     EXPECT_EQ(pos, expected);
 }
 
-TEST_F(matrixHelper, getScale) {
+TEST(matrixHelper, getScale) {
     glm::mat4 mat{ 1.f };
     mat = glm::scale(mat, { 42.f, -42.f, 1.f });
     const auto scale = kengine::matrixHelper::getScale(mat);
@@ -32,7 +31,7 @@ TEST_F(matrixHelper, getScale) {
     EXPECT_EQ(scale, expected);
 }
 
-TEST_F(matrixHelper, getRotation) {
+TEST(matrixHelper, getRotation) {
     glm::mat4 mat{ 1.f };
     mat = glm::rotate(mat, .5f, { 0.f, 1.f, 0.f });
     const auto rotation = kengine::matrixHelper::getRotation(mat);
@@ -40,7 +39,7 @@ TEST_F(matrixHelper, getRotation) {
     EXPECT_EQ(rotation, expected);
 }
 
-TEST_F(matrixHelper, convertToReferencial) {
+TEST(matrixHelper, convertToReferencial) {
     glm::mat4 mat{ 1.f };
     mat = glm::translate(mat, { -1.f, 0.f, 0.f });
     const auto pos = kengine::matrixHelper::convertToReferencial({ 0.f, 0.f, 0.f }, mat);
@@ -48,7 +47,7 @@ TEST_F(matrixHelper, convertToReferencial) {
     EXPECT_EQ(pos, expected);
 }
 
-TEST_F(matrixHelper, getModelMatrix) {
+TEST(matrixHelper, getModelMatrix) {
     const putils::Point3f expectedPos{ 42.f, -42.f, 0.f };
     const putils::Vector3f expectedScale{ 42.f, 42.f, 1.f };
 

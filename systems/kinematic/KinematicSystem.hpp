@@ -1,8 +1,8 @@
 #pragma once
 
-// kengine
-#include "EntityCreator.hpp"
+// entt
+#include <entt/entity/fwd.hpp>
 
 namespace kengine {
-	KENGINE_KINEMATIC_EXPORT EntityCreator * KinematicSystem() noexcept;
+	KENGINE_KINEMATIC_EXPORT void KinematicSystem(entt::registry & r) noexcept;
 }

@@ -1,8 +1,8 @@
 #pragma once
 
-// kengine
-#include "EntityCreator.hpp"
+// entt
+#include <entt/entity/fwd.hpp>
 
 namespace kengine {
-	KENGINE_SFML_EXPORT EntityCreator * SFMLSystem() noexcept;
+	KENGINE_SFML_EXPORT void SFMLSystem(entt::registry & r) noexcept;
 }

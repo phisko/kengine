@@ -1,8 +1,8 @@
 #pragma once
 
-// kengine
-#include "EntityCreator.hpp"
+// entt
+#include <entt/entity/fwd.hpp>
 
 namespace kengine {
-	KENGINE_GLFW_EXPORT EntityCreator * GLFWSystem() noexcept;
+	KENGINE_GLFW_EXPORT void GLFWSystem(entt::registry & r) noexcept;
 }

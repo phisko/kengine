@@ -1,6 +1,8 @@
 #pragma once
 
-#include "kengine.hpp"
+// entt
+#include <entt/entity/entity.hpp>
+#include <entt/entity/fwd.hpp>
 
 // putils
 #include "Rect.hpp"
@@ -17,13 +19,13 @@ namespace kengine {
 
 namespace kengine::cameraHelper {
 	struct ViewportInfo {
-		EntityID camera = INVALID_ID;
+		entt::entity camera = entt::null;
 		putils::Point2f pixel = { -1.f, -1.f };
 		putils::Point2f viewportPercent = { -1.f, -1.f }; // [0,1]
 	};
-	KENGINE_CORE_EXPORT ViewportInfo getViewportForPixel(EntityID windowID, const putils::Point2ui & pixel) noexcept;
+	KENGINE_CORE_EXPORT ViewportInfo getViewportForPixel(entt::handle windowEntity, const putils::Point2ui & pixel) noexcept;
 
-	KENGINE_CORE_EXPORT bool entityAppearsInViewport(const Entity & entity, const Entity & viewportEntity) noexcept;
+	KENGINE_CORE_EXPORT bool entityAppearsInViewport(const entt::registry & r, entt::entity entity, entt::entity viewportEntity) noexcept;
     KENGINE_CORE_EXPORT putils::Rect3f convertToScreenPercentage(const putils::Rect3f & rect, const putils::Point2f & screenSize, const OnScreenComponent & comp) noexcept;
     KENGINE_CORE_EXPORT putils::Rect2f convertToScreenPercentage(const putils::Rect2f & rect, const putils::Point2f & screenSize, const OnScreenComponent & comp) noexcept;
 

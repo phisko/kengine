@@ -1,8 +1,16 @@
 #include "LogVisualStudioSystem.hpp"
-#include "kengine.hpp"
+
+#ifdef _WIN32
 
 // stl
 #include <mutex>
+
+// windows
+#include <windows.h>
+#include <debugapi.h>
+
+// entt
+#include <entt/entity/registry.hpp>
 
 // magic_enum
 #include <magic_enum.hpp>
@@ -22,21 +30,22 @@
 
 namespace kengine {
 	struct LogVisualStudioSystem {
-		static void init(Entity & e) noexcept {
+		static void init(entt::registry & r) noexcept {
 #ifdef _WIN32
 			KENGINE_PROFILING_SCOPE;
 
-			auto & severityControl = e.attach<LogSeverityControl>();
-			severityControl.severity = logHelper::parseCommandLineSeverity();
+			const auto e = r.create();
+			auto & severityControl = r.emplace<LogSeverityControl>(e);
+			severityControl.severity = logHelper::parseCommandLineSeverity(r);
 			_severity = &severityControl.severity;
 
-			e += AdjustableComponent{
+			r.emplace<AdjustableComponent>(e) = {
 				"Log", {
 					{ "Visual Studio Console", _severity }
 				}
 			};
 
-			e += functions::Log{ log };
+			r.emplace<functions::Log>(e, log);
 #endif
 		}
 
@@ -68,7 +77,9 @@ namespace kengine {
 		static inline const LogSeverity * _severity = nullptr;
 	};
 
-	EntityCreator * LogVisualStudioSystem() noexcept {
-		return LogVisualStudioSystem::init;
+	void LogVisualStudioSystem(entt::registry & r) noexcept {
+		LogVisualStudioSystem::init(r);
 	}
 }
+
+#endif

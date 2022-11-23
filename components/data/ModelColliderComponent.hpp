@@ -60,8 +60,7 @@ putils_reflection_info {
 		putils_reflection_attribute(transform)
 	);
 	putils_reflection_used_types(
-		putils_reflection_type(refltype::string),
-		putils_reflection_type(kengine::TransformComponent)
+		putils_reflection_type(refltype::string)
 	);
 };
 #undef refltype

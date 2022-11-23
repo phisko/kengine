@@ -1,9 +1,11 @@
 #include "LogStdoutSystem.hpp"
-#include "kengine.hpp"
 
 // stl
 #include <iostream>
 #include <mutex>
+
+// entt
+#include <entt/entity/registry.hpp>
 
 // magic_enum
 #include <magic_enum.hpp>
@@ -26,20 +28,21 @@
 
 namespace kengine {
 	struct LogStdoutSystem {
-		static void init(Entity & e) noexcept {
+		static void init(entt::registry & r) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			auto & severityControl = e.attach<LogSeverityControl>();
-			severityControl.severity = logHelper::parseCommandLineSeverity();
+			const auto e = r.create();
+			auto & severityControl = r.emplace<LogSeverityControl>(e);
+			severityControl.severity = logHelper::parseCommandLineSeverity(r);
 			_severity = &severityControl.severity;
 
-			e += AdjustableComponent{
+			r.emplace<AdjustableComponent>(e) = {
 				"Log", {
 					{ "Standard output", _severity }
 				}
 			};
 
-			e += functions::Log{ log };
+			r.emplace<functions::Log>(e, log);
 		}
 
 		static void log(const LogEvent & event) noexcept {
@@ -67,7 +70,7 @@ namespace kengine {
 		static inline const LogSeverity * _severity = nullptr;
 	};
 
-	EntityCreator * LogStdoutSystem() noexcept {
-		return LogStdoutSystem::init;
+	void LogStdoutSystem(entt::registry & r) noexcept {
+		LogStdoutSystem::init(r);
 	}
 }

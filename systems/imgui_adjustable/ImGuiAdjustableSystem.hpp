@@ -1,8 +1,8 @@
 #pragma once
 
-// kengine
-#include "EntityCreator.hpp"
+// entt
+#include <entt/entity/fwd.hpp>
 
 namespace kengine {
-	KENGINE_IMGUI_ADJUSTABLE_EXPORT EntityCreator * ImGuiAdjustableSystem() noexcept;
+	KENGINE_IMGUI_ADJUSTABLE_EXPORT void ImGuiAdjustableSystem(entt::registry & r) noexcept;
 }

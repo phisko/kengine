@@ -1,5 +1,8 @@
 #include "registerCount.hpp"
 
+// entt
+#include <entt/entity/registry.hpp>
+
 // kengine meta
 #include "meta/Count.hpp"
 
@@ -9,12 +12,12 @@
 
 namespace kengine {
 	template<typename ... Comps>
-	void registerCount() noexcept {
+	void registerCount(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		registerMetaComponentImplementation<meta::Count, Comps...>(
-			[](const auto t) noexcept {
+			r, [&](const auto t) noexcept {
 				using Type = putils_wrapped_type(t);
-				return entities.with<Type>().size();
+				return r.view<Type>().size();
 			}
 		);
 	}

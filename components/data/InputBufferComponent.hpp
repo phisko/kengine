@@ -7,23 +7,23 @@
 // stl
 #include <vector>
 
+// entt
+#include <entt/entity/fwd.hpp>
+
 // putils
 #include "Point.hpp"
-
-// kengine
-#include "Entity.hpp"
 
 namespace kengine {
 	struct InputBufferComponent {
 		struct KeyEvent {
-			EntityID window;
+			entt::entity window;
 			int key;
 			bool pressed;
 		};
 		std::vector<KeyEvent> keys;
 
 		struct ClickEvent {
-			EntityID window;
+			entt::entity window;
 			putils::Point2f pos;
 			int button;
 			bool pressed;
@@ -31,14 +31,14 @@ namespace kengine {
 		std::vector<ClickEvent> clicks;
 
 		struct MouseMoveEvent {
-			EntityID window;
+			entt::entity window;
 			putils::Point2f pos;
 			putils::Point2f rel;
 		};
 		std::vector<MouseMoveEvent> moves;
 
 		struct MouseScrollEvent {
-			EntityID window;
+			entt::entity window;
 			float xoffset;
 			float yoffset;
 			putils::Point2f pos;

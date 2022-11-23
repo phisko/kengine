@@ -1,8 +1,8 @@
 #pragma once
 
-// kengine
-#include "EntityCreator.hpp"
+// entt
+#include <entt/entity/fwd.hpp>
 
 namespace kengine {
-	KENGINE_LOG_FILE_EXPORT EntityCreator * LogFileSystem() noexcept;
+	KENGINE_LOG_FILE_EXPORT void LogFileSystem(entt::registry & r) noexcept;
 }

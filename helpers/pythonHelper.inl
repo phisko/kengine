@@ -1,5 +1,8 @@
 #include "pythonHelper.hpp"
 
+// entt
+#include <entt/entity/registry.hpp>
+
 // putils
 #include "python/python_helper.hpp"
 
@@ -13,7 +16,7 @@
 namespace kengine::pythonHelper {
 	namespace impl {
 		template<typename Ret, typename ...Args>
-		void registerEntityMember(py::class_<Entity> & entity, const char * name, const scriptLanguageHelper::function<Ret(Args...)> & func) noexcept {
+		void registerEntityMember(py::class_<entt::handle> & entity, const char * name, const scriptLanguageHelper::function<Ret(Args...)> & func) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			if constexpr (std::is_reference_v<Ret>)
@@ -36,12 +39,12 @@ namespace kengine::pythonHelper {
 		void registerTypeWithState(PythonStateComponent::Data & state) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			if constexpr (std::is_same<T, Entity>()) {
-				state.entity = new py::class_<Entity>(state.module_, putils::reflection::get_class_name<Entity>(), py::dynamic_attr());
-				putils::reflection::for_each_attribute<Entity>([&](const auto & attr) noexcept {
+			if constexpr (std::is_same<T, entt::handle>()) {
+				state.entity = new py::class_<entt::handle>(state.module_, putils::reflection::get_class_name<entt::handle>(), py::dynamic_attr());
+				putils::reflection::for_each_attribute<entt::handle>([&](const auto & attr) noexcept {
 					state.entity->def_readwrite(attr.name, attr.ptr);
 				});
-				putils::reflection::for_each_method<Entity>([&](const auto & attr) noexcept {
+				putils::reflection::for_each_method<entt::handle>([&](const auto & attr) noexcept {
 					state.entity->def(attr.name, attr.ptr);
 				});
 			}
@@ -50,11 +53,12 @@ namespace kengine::pythonHelper {
 		}
 
 		template<typename T>
-		void registerComponentWithState(PythonStateComponent::Data & state) noexcept {
+		void registerComponentWithState(entt::registry & r, PythonStateComponent::Data & state) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			registerTypeWithState<T>(state);
 			scriptLanguageHelper::registerComponent<T>(
+				r,
 				[&](auto && ... args) noexcept {
 					registerEntityMember(*state.entity, FWD(args)...);
 				},
@@ -66,37 +70,37 @@ namespace kengine::pythonHelper {
 	}
 
 	template<typename ...Types>
-	void registerTypes() noexcept {
+	void registerTypes(const entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
-		putils::for_each_type<Types...>([](auto && t) noexcept {
+		putils::for_each_type<Types...>([&](auto && t) noexcept {
 			using T = putils_wrapped_type(t);
 
-			kengine_logf(Log, "Python/registerTypes", "Registering %s", putils::reflection::get_class_name<T>());
-			for (const auto & [e, comp] : entities.with<PythonStateComponent>())
+			kengine_logf(r, Log, "Python/registerTypes", "Registering %s", putils::reflection::get_class_name<T>());
+			for (const auto & [e, comp] : r.view<PythonStateComponent>().each())
 				impl::registerTypeWithState<T>(*comp.data);
 		});
 	}
 
 	template<typename ... Comps>
-	void registerComponents() noexcept {
+	void registerComponents(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
 		putils::for_each_type<Comps...>([&](auto && t) noexcept {
 			using T = putils_wrapped_type(t);
 
-			kengine_logf(Log, "Python/registerComponents", "Registering %s", putils::reflection::get_class_name<T>());
-			for (const auto & [e, comp] : entities.with<PythonStateComponent>())
-				impl::registerComponentWithState<T>(*comp.data);
+			kengine_logf(r, Log, "Python/registerComponents", "Registering %s", putils::reflection::get_class_name<T>());
+			for (const auto & [e, comp] : r.view<PythonStateComponent>().each())
+				impl::registerComponentWithState<T>(r, *comp.data);
 		});
 	}
 
 	template<typename Ret, typename ...Args>
-	void registerFunction(const char * name, const scriptLanguageHelper::function<Ret(Args...)> & func) noexcept {
+	void registerFunction(const entt::registry & r, const char * name, const scriptLanguageHelper::function<Ret(Args...)> & func) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_logf(Log, "Python/registerFunction", "Registering %s", name);
+		kengine_logf(r, Log, "Python/registerFunction", "Registering %s", name);
 
-		for (const auto & [e, comp] : entities.with<PythonStateComponent>())
+		for (const auto & [e, comp] : r.view<PythonStateComponent>().each())
 			impl::registerFunctionWithState(*comp.data, name, func);
 	}
 }

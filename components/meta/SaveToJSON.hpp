@@ -7,11 +7,9 @@
 #include "BaseFunction.hpp"
 
 namespace kengine {
-	class Entity;
-
 	namespace meta {
 		struct SaveToJSON : functions::BaseFunction<
-			nlohmann::json(const Entity &)
+			nlohmann::json(entt::const_handle)
 		> {};
 	}
 }

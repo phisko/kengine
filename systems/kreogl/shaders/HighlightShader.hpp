@@ -1,5 +1,8 @@
 #pragma once
 
+// entt
+#include <entt/entity/fwd.hpp>
+
 // kreogl
 #include "kreogl/impl/shaders/Shader.hpp"
 #include "kreogl/impl/shaders/Singleton.hpp"
@@ -8,9 +11,9 @@
 #include "HighlightGLSL.hpp"
 
 namespace kengine {
-	class HighlightShader : public kreogl::Shader, public kreogl::Singleton<HighlightShader> {
+	class HighlightShader : public kreogl::Shader {
 	public:
-		HighlightShader() noexcept;
+		HighlightShader(const entt::registry & r) noexcept;
 
 	private:
 		void draw(const kreogl::DrawParams & params) noexcept override;
@@ -19,5 +22,6 @@ namespace kengine {
 
 	private:
 		HighlightGLSL _glsl;
+		const entt::registry & _r;
 	};
 }

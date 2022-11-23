@@ -1,8 +1,8 @@
 #pragma once
 
-// kengine
-#include "EntityCreator.hpp"
+// entt
+#include <entt/entity/fwd.hpp>
 
 namespace kengine {
-    KENGINE_KREOGL_EXPORT EntityCreator * KreoglSystem() noexcept;
+    KENGINE_KREOGL_EXPORT void KreoglSystem(entt::registry & r) noexcept;
 }

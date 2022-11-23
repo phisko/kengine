@@ -1,5 +1,7 @@
 #include "ImGuiPromptSystem.hpp"
-#include "kengine.hpp"
+
+// entt
+#include <entt/entity/registry.hpp>
 
 // imgui
 #include <imgui.h>
@@ -27,14 +29,18 @@ enum class Language {
 
 namespace kengine {
 	struct ImGuiPromptSystem {
-		static void init(Entity & e) noexcept {
+		static void init(entt::registry & r) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(Log, "Init", "ImGuiPromptSystem");
+			kengine_log(r, Log, "Init", "ImGuiPromptSystem");
 
-			auto & tool = e.attach<ImGuiToolComponent>();
+			_r = &r;
+
+			const auto e = r.create();
+			r.emplace<functions::Execute>(e, execute);
+
+			r.emplace<NameComponent>(e, "Prompt");
+			auto & tool = r.emplace<ImGuiToolComponent>(e);
 			enabled = &tool.enabled;
-			e += NameComponent{ "Prompt" };
-			e += functions::Execute{ execute };
 		}
 
 		static void execute(float deltaTime) noexcept {
@@ -43,7 +49,7 @@ namespace kengine {
 			if (!*enabled)
 				return;
 
-			kengine_log(Verbose, "Execute", "ImGuiPromptSystem");
+			kengine_log(*_r, Verbose, "Execute", "ImGuiPromptSystem");
 
 			if (ImGui::Begin("Prompt", enabled)) {
 				ImGui::Columns(2);
@@ -145,9 +151,9 @@ namespace kengine {
 #else
 			static bool first = true;
 
-			kengine_logf(Log, "Execute/ImGuiPromptSystem", "Evaluating Lua script: '%s'", buff);
+			kengine_logf(*_r, Log, "Execute/ImGuiPromptSystem", "Evaluating Lua script: '%s'", buff);
 
-			for (const auto & [e, state] : entities.with<kengine::LuaStateComponent>()) {
+			for (const auto & [e, state] : _r->view<kengine::LuaStateComponent>().each()) {
 				if (first) {
 					setupOutputRedirect(*state.state);
 					first = false;
@@ -167,7 +173,7 @@ namespace kengine {
 
 		static void setupOutputRedirect(sol::state & state) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(Log, "Init/ImGuiPromptSystem", "Setting up output redirection for Lua");
+			kengine_log(*_r, Log, "Init/ImGuiPromptSystem", "Setting up output redirection for Lua");
 
 			static const luaL_Reg printlib[] = {
 				{ "print", [](lua_State * L) { return addToHistoryOrPrint(L, putils::NormalizedColor{}); } },
@@ -219,7 +225,7 @@ namespace kengine {
 				putils::NormalizedColor{ 1.f, 0.f, 0.f }
 			);
 #else
-			kengine_logf(Log, "Execute/ImGuiPromptSystem", "Evaluating Python script: '%s'", buff);
+			kengine_logf(*_r, Log, "Execute/ImGuiPromptSystem", "Evaluating Python script: '%s'", buff);
 
 #ifdef __GNUC__
 // Ignore "declared with greater visibility than the type of its field" warnings
@@ -304,9 +310,11 @@ namespace kengine {
 				addLine(FWD(s), separator, putils::NormalizedColor{ 1.f, 0.f, 0.f });
 			}
 		} _history;
+
+		static inline entt::registry * _r;
 	};
 
-	EntityCreator * ImGuiPromptSystem() noexcept {
-		return ImGuiPromptSystem::init;
+	void ImGuiPromptSystem(entt::registry & r) noexcept {
+		ImGuiPromptSystem::init(r);
 	}
 }

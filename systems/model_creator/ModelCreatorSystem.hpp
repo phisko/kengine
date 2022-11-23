@@ -1,8 +1,8 @@
 #pragma once
 
-// kengine
-#include "EntityCreator.hpp"
+// entt
+#include <entt/entity/fwd.hpp>
 
 namespace kengine {
-	KENGINE_MODEL_CREATOR_EXPORT EntityCreator * ModelCreatorSystem() noexcept;
+	KENGINE_MODEL_CREATOR_EXPORT void ModelCreatorSystem(entt::registry & r) noexcept;
 }

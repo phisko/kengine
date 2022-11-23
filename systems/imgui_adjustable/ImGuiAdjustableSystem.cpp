@@ -1,8 +1,10 @@
 #include "ImGuiAdjustableSystem.hpp"
-#include "kengine.hpp"
 
 // stl
 #include <fstream>
+
+// entt
+#include <entt/entity/registry.hpp>
 
 // magic_enum
 #include <magic_enum.hpp>
@@ -25,9 +27,9 @@
 // kengine functions
 #include "functions/Execute.hpp"
 #include "functions/OnTerminate.hpp"
-#include "functions/OnEntityCreated.hpp"
 
 // kengine helpers
+#include "helpers/assertHelper.hpp"
 #include "helpers/logHelper.hpp"
 #include "helpers/profilingHelper.hpp"
 
@@ -56,23 +58,30 @@ namespace kengine {
 		using string = AdjustableComponent::string;
 		using Sections = putils::vector<string, KENGINE_MAX_ADJUSTABLES_SECTIONS>;
 
-		static void init(Entity & e) noexcept {
+		static void init(entt::registry & r) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			load();
-			e += functions::OnTerminate{ save };
-			e += functions::OnEntityCreated{ onEntityCreated };
+			_r = &r;
 
-			e += NameComponent{ "Adjustables" };
-			auto & tool = e.attach<ImGuiToolComponent>();
+			load();
+
+			r.on_construct<AdjustableComponent>().connect<[](entt::registry & r, entt::entity e) noexcept {
+				initAdjustable(r.get<AdjustableComponent>(e));
+			}>();
+
+			const auto e = r.create();
+			r.emplace<functions::OnTerminate>(e, save);
+
+			r.emplace<NameComponent>(e, "Adjustables");
+			auto & tool = r.emplace<ImGuiToolComponent>(e);
 			tool.enabled = true;
 
-			e += functions::Execute{ [&](float deltaTime) noexcept {
+			r.emplace<functions::Execute>(e, [&](float deltaTime) noexcept {
 				if (!tool.enabled)
 					return;
-				kengine_log(Verbose, "Execute", "ImGuiAdjustableSystem");
+				kengine_log(r, Verbose, "Execute", "ImGuiAdjustableSystem");
 				drawImGui(tool.enabled);
-			} };
+			});
 		}
 
 		static void drawImGui(bool & enabled) noexcept {
@@ -131,7 +140,7 @@ namespace kengine {
 
 			putils::vector<AdjustableComponent *, KENGINE_MAX_ADJUSTABLES> comps;
 
-			for (const auto & [e, comp] : entities.with<AdjustableComponent>()) {
+			for (const auto & [e, comp] : _r->view<AdjustableComponent>().each()) {
 				if (comp.section.find(nameSearch) != std::string::npos) {
 					comps.emplace_back(&comp);
 					continue;
@@ -286,7 +295,7 @@ namespace kengine {
                 }
                 default: {
                     static_assert(magic_enum::enum_count<AdjustableComponent::Value::Type>() == 5); // + 1 for Invalid
-                    kengine_assert_failed("Unknown AdjustableComponent::Value type");
+                    kengine_assert_failed(*_r, "Unknown AdjustableComponent::Value type");
                     break;
                 }
             }
@@ -294,35 +303,25 @@ namespace kengine {
 			ImGui::Columns();
 		}
 
-		static void onEntityCreated(Entity & e) noexcept {
-			KENGINE_PROFILING_SCOPE;
-
-			const auto adjustable = e.tryGet<AdjustableComponent>();
-			if (!adjustable)
-				return;
-
-			initAdjustable(*adjustable);
-		}
-
 		static void initAdjustable(AdjustableComponent & comp) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			kengine_logf(Log, "Init/ImGuiAdjustableSystem", "Initializing section %s", comp.section.c_str());
+			kengine_logf(*_r, Log, "Init/ImGuiAdjustableSystem", "Initializing section %s", comp.section.c_str());
 
 			const auto it = _loadedFile.sections.find(comp.section.c_str());
 			if (it == _loadedFile.sections.end()) {
-				kengine_logf(Warning, "Init/ImGuiAdjustableSystem", "Section '%s' not found in INI file", comp.section.c_str());
+				kengine_logf(*_r, Warning, "Init/ImGuiAdjustableSystem", "Section '%s' not found in INI file", comp.section.c_str());
 				return;
 			}
 			const auto & section = it->second;
 			for (auto & value : comp.values) {
 				const auto it = section.values.find(value.name.c_str());
 				if (it != section.values.end()) {
-					kengine_logf(Log, "Init/ImGuiAdjustableSystem", "Initializing %s", value.name.c_str());
+					kengine_logf(*_r, Log, "Init/ImGuiAdjustableSystem", "Initializing %s", value.name.c_str());
 					setValue(value, it->second.c_str());
 				}
 				else
-					kengine_logf(Log, "Init/ImGuiAdjustableSystem", "Value not found in INI for %s", value.name.c_str());
+					kengine_logf(*_r, Log, "Init/ImGuiAdjustableSystem", "Value not found in INI for %s", value.name.c_str());
 			}
 		}
 
@@ -359,7 +358,7 @@ namespace kengine {
                 }
                 default: {
                     static_assert(magic_enum::enum_count<AdjustableComponent::Value::Type>() == 5); // + 1 for Invalid
-                    kengine_assert_failed("Unknown AdjustableComponent::Value type");
+                    kengine_assert_failed(*_r, "Unknown AdjustableComponent::Value type");
                     break;
                 }
             }
@@ -367,27 +366,27 @@ namespace kengine {
 
 		static void load() noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(Log, "ImGuiAdjustableSystem", "Loading from " KENGINE_ADJUSTABLE_SAVE_FILE);
+			kengine_log(*_r, Log, "ImGuiAdjustableSystem", "Loading from " KENGINE_ADJUSTABLE_SAVE_FILE);
 
             std::ifstream f(KENGINE_ADJUSTABLE_SAVE_FILE);
             f >> _loadedFile;
-			for (auto [e, comp] : entities.with<AdjustableComponent>())
+			for (auto [e, comp] : _r->view<AdjustableComponent>().each())
 				initAdjustable(comp);
 		}
 
 		static void save() noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(Log, "ImGuiAdjustableSystem", "Saving to " KENGINE_ADJUSTABLE_SAVE_FILE);
+			kengine_log(*_r, Log, "ImGuiAdjustableSystem", "Saving to " KENGINE_ADJUSTABLE_SAVE_FILE);
 
 			std::ofstream f(KENGINE_ADJUSTABLE_SAVE_FILE, std::ofstream::trunc);
 			if (!f) {
-				kengine_assert_failed("Failed to open '", KENGINE_ADJUSTABLE_SAVE_FILE, "' with write permissions");
+				kengine_assert_failed(*_r, "Failed to open '", KENGINE_ADJUSTABLE_SAVE_FILE, "' with write permissions");
 				return;
 			}
 
 			putils::IniFile ini;
 
-			for (const auto & [e, comp] : entities.with<AdjustableComponent>()) {
+			for (const auto & [e, comp] : _r->view<AdjustableComponent>().each()) {
 				auto & section = ini.sections[comp.section.c_str()];
 
 				for (const auto & value : comp.values) {
@@ -412,7 +411,7 @@ namespace kengine {
                         }
                         default: {
                             static_assert(magic_enum::enum_count<AdjustableComponent::Value::Type>() == 5); // + 1 for Invalid
-                            kengine_assert_failed("Unknown AdjustableComponent::Value type");
+                            kengine_assert_failed(*_r, "Unknown AdjustableComponent::Value type");
                             break;
                         }
                     }
@@ -423,9 +422,10 @@ namespace kengine {
 		}
 
 		static inline putils::IniFile _loadedFile;
+		static inline entt::registry * _r;
 	};
 
-	EntityCreator * ImGuiAdjustableSystem() noexcept {
-		return ImGuiAdjustableSystem::init;
+	void ImGuiAdjustableSystem(entt::registry & r) noexcept {
+		ImGuiAdjustableSystem::init(r);
 	}
 }

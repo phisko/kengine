@@ -1,5 +1,8 @@
 #include "registerCopy.hpp"
 
+// entt
+#include <entt/entity/handle.hpp>
+
 // kengine meta
 #include "meta/Copy.hpp"
 
@@ -9,12 +12,17 @@
 
 namespace kengine {
 	template<typename ... Comps>
-	void registerCopy() noexcept {
+	void registerCopy(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		registerMetaComponentImplementationWithPredicate<meta::Copy, std::is_copy_constructible, Comps...>(
-			[](const auto t, const Entity & src, Entity & dst) noexcept {
+			r, [](const auto t, entt::const_handle src, entt::handle dst) noexcept {
 				using T = putils_wrapped_type(t);
-                dst += src.get<T>();
+				if constexpr (!std::is_empty<T>()) {
+					const auto & srcComponent = src.get<T>();
+					dst.emplace_or_replace<T>(srcComponent);
+				}
+				else
+					dst.emplace<T>();
 			}
 		);
 	}

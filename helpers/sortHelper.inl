@@ -1,5 +1,4 @@
 #include "sortHelper.hpp"
-#include "kengine.hpp"
 
 // meta
 #include "meta/fwd.hpp"
@@ -31,11 +30,11 @@ namespace kengine::sortHelper {
 		}
 	}
 
-	template<size_t MaxCount, typename ... Comps, typename Pred>
-	auto getSortedEntities(Pred && pred) noexcept {
+	template<size_t MaxCount, typename ... Comps, typename Registry, typename Pred>
+	auto getSortedEntities(Registry && r, Pred && pred) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
-		using Type = std::tuple<Entity, Comps *...>;
+		using Type = std::tuple<entt::entity, Comps *...>;
 
 		using Ret = std::conditional_t<
 			MaxCount == 0,
@@ -44,7 +43,7 @@ namespace kengine::sortHelper {
 		>;
 		Ret ret;
 
-		for (const auto & t : entities.with<Comps...>()) {
+		for (const auto & t : FWD(r).template view<Comps...>().each()) {
 			if constexpr (putils::is_vector<Ret>::value)
 				if (ret.full())
 					break;
@@ -56,24 +55,24 @@ namespace kengine::sortHelper {
 		return ret;
 	}
 
-	template<typename ... Comps, typename Pred>
-	auto getSortedEntities(Pred && pred) noexcept {
-		return getSortedEntities<0, Comps...>(FWD(pred));
+	template<typename ... Comps, typename Registry, typename Pred>
+	auto getSortedEntities(Registry && r, Pred && pred) noexcept {
+		return getSortedEntities<0, Comps...>(FWD(r), FWD(pred));
 	}
 
-	template<size_t MaxCount, typename ... Comps>
-	auto getNameSortedEntities() noexcept {
+	template<size_t MaxCount, typename ... Comps, typename Registry>
+	auto getNameSortedEntities(Registry && r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
-		return getSortedEntities<MaxCount, NameComponent, Comps...>(
-			[](const auto & lhs, const auto & rhs) noexcept {
+		return getSortedEntities<MaxCount, const NameComponent, Comps...>(
+			FWD(r), [](const auto & lhs, const auto & rhs) noexcept {
 				return strcmp(std::get<1>(lhs)->name.c_str(), std::get<1>(rhs)->name.c_str()) < 0;
 			}
 		);
 	}
 
-	template<typename ... Comps>
-	auto getNameSortedEntities() noexcept {
-		return getNameSortedEntities<0, Comps...>();
+	template<typename ... Comps, typename Registry>
+	auto getNameSortedEntities(Registry && r) noexcept {
+		return getNameSortedEntities<0, Comps...>(FWD(r));
 	}
 }

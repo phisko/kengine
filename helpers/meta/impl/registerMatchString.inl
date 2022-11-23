@@ -1,5 +1,8 @@
 #include "registerMatchString.hpp"
 
+// entt
+#include <entt/entity/handle.hpp>
+
 // sol
 #ifdef KENGINE_LUA
 # include <sol/sol.hpp>
@@ -73,28 +76,32 @@ namespace kengine {
 	}
 
 	template<typename ... Comps>
-	void registerMatchString() noexcept {
+	void registerMatchString(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
 		registerMetaComponentImplementation<meta::MatchString, Comps...>(
-			[](const auto t, const Entity & e, const char * str) noexcept {
+			r, [](const auto t, entt::const_handle e, const char * str) noexcept {
 				KENGINE_PROFILING_SCOPE;
 
 				using Comp = putils_wrapped_type(t);
-				const auto comp = e.tryGet<Comp>();
-				if (!comp)
+
+				if constexpr (std::is_empty<Comp>())
 					return false;
+				else {
+					const auto comp = e.try_get<Comp>();
+					if (!comp)
+						return false;
 
-				if (strstr(putils::reflection::get_class_name<Comp>(), str))
-					return true;
+					if (strstr(putils::reflection::get_class_name<Comp>(), str))
+						return true;
 
-				bool matches = false;
-				putils::reflection::for_each_attribute(*comp, [&](const auto & attr) noexcept {
-					if (impl::matchAttribute(attr.member, str))
-						matches = true;
-					}
-				);
-				return matches;
+					bool matches = false;
+					putils::reflection::for_each_attribute(*comp, [&](const auto & attr) noexcept {
+						if (impl::matchAttribute(attr.member, str))
+							matches = true;
+					});
+					return matches;
+				}
 			}
 		);
 	}

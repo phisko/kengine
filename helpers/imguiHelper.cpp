@@ -1,5 +1,8 @@
 #include "imguiHelper.hpp"
-#include "kengine.hpp"
+
+// entt
+#include <entt/entity/handle.hpp>
+#include <entt/entity/registry.hpp>
 
 // imgui
 #include <imgui.h>
@@ -21,12 +24,10 @@
 #include "helpers/profilingHelper.hpp"
 
 namespace kengine::imguiHelper {
-	void displayEntity(const Entity & e) noexcept {
+	void displayEntity(entt::const_handle e) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
-		const auto types = sortHelper::getNameSortedEntities<KENGINE_COMPONENT_COUNT,
-			meta::Has, meta::DisplayImGui
-		>();
+		const auto types = sortHelper::getNameSortedEntities<const meta::Has, const meta::DisplayImGui>(*e.registry());
 
 		for (const auto & [_, name, has, display] : types)
 			if (has->call(e))
@@ -36,11 +37,11 @@ namespace kengine::imguiHelper {
 				}
 	}
 
-	void displayEntityAndModel(const Entity & e) noexcept {
+	void displayEntityAndModel(entt::const_handle e) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
-		const auto instance = e.tryGet<InstanceComponent>();
-		if (!instance || instance->model == INVALID_ID) {
+		const auto instance = e.try_get<InstanceComponent>();
+		if (!instance || instance->model == entt::null) {
 			displayEntity(e);
 			return;
 		}
@@ -52,7 +53,7 @@ namespace kengine::imguiHelper {
 			}
 
 			if (ImGui::BeginTabItem("Model")) {
-				displayEntity(entities[instance->model]);
+				displayEntity({ *e.registry(), instance->model });
 				ImGui::EndTabItem();
 			}
 
@@ -60,13 +61,13 @@ namespace kengine::imguiHelper {
 		}
 	}
 
-	void editEntity(Entity & e) noexcept {
+	void editEntity(entt::handle e) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
+		const auto & r = *e.registry();
+
 		if (ImGui::BeginPopupContextWindow()) {
-			const auto types = sortHelper::getNameSortedEntities<KENGINE_COMPONENT_COUNT,
-				meta::Has, meta::AttachTo
-			>();
+			const auto types = sortHelper::getNameSortedEntities<const meta::Has, const meta::AttachTo>(r);
 
 			for (const auto & [_, name, has, add] : types)
 				if (!has->call(e))
@@ -76,16 +77,14 @@ namespace kengine::imguiHelper {
 			ImGui::EndPopup();
 		}
 
-		const auto types = sortHelper::getNameSortedEntities<KENGINE_COMPONENT_COUNT,
-			meta::Has, meta::EditImGui
-		>();
+		const auto types = sortHelper::getNameSortedEntities<const meta::Has, const meta::EditImGui>(r);
 
-		for (const auto & [_, name, has, edit] : types) {
+		for (const auto & [typeEntity, name, has, edit] : types) {
 			if (!has->call(e))
 				continue;
 			const auto treeNodeOpen = ImGui::TreeNode((name->name + "##edit").c_str());
 
-			const auto detachFrom = _.tryGet<meta::DetachFrom>();
+			const auto detachFrom = r.try_get<meta::DetachFrom>(typeEntity);
 			if (detachFrom) {
 				if (ImGui::BeginPopupContextItem()) {
 					if (ImGui::MenuItem("Remove"))
@@ -100,11 +99,11 @@ namespace kengine::imguiHelper {
 		}
 	}
 
-	void editEntityAndModel(Entity & e) noexcept {
+	void editEntityAndModel(entt::handle e) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
-		const auto instance = e.tryGet<InstanceComponent>();
-		if (!instance || instance->model == INVALID_ID) {
+		const auto instance = e.try_get<InstanceComponent>();
+		if (!instance || instance->model == entt::null) {
 			editEntity(e);
 			return;
 		}
@@ -118,8 +117,7 @@ namespace kengine::imguiHelper {
 			}
 
 			if (ImGui::BeginTabItem("Model")) {
-				auto model = entities[instance->model];
-				editEntity(model);
+				editEntity({ *e.registry(), instance->model });
 				ImGui::EndTabItem();
 			}
 
@@ -129,11 +127,11 @@ namespace kengine::imguiHelper {
 		}
 	}
 
-	float getScale() noexcept {
+	float getScale(const entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
 		float scale = 1.f;
-		for (const auto & [e, comp] : entities.with<ImGuiScaleComponent>())
+		for (const auto & [e, comp] : r.view<ImGuiScaleComponent>().each())
 			scale *= comp.scale;
 		return scale;
 	}

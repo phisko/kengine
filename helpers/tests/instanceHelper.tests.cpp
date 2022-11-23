@@ -1,21 +1,25 @@
-#include "tests/KengineTest.hpp"
+// entt
+#include <entt/entity/handle.hpp>
+#include <entt/entity/registry.hpp>
+
+// gtest
+#include <gtest/gtest.h>
 
 // kengine helpers
 #include "helpers/instanceHelper.hpp"
 
-struct instanceHelper : KengineTest{
+struct instanceHelper : ::testing::Test {
     instanceHelper() noexcept {
-        model = kengine::entities += [](kengine::Entity & e) {
-            e += std::string("hello");
-        };
+		model = { r, r.create() };
+		model.emplace<std::string>("hello");
 
-        instance = kengine::entities += [&](kengine::Entity & e) {
-            e += kengine::InstanceComponent{ .model = model.id };
-        };
+        instance = { r, r.create() };
+		instance.emplace<kengine::InstanceComponent>(model);
     }
 
-    kengine::Entity model;
-    kengine::Entity instance;
+	entt::registry r;
+    entt::handle model;
+    entt::handle instance;
 };
 
 TEST_F(instanceHelper, modelHas_Entity) {
@@ -25,8 +29,8 @@ TEST_F(instanceHelper, modelHas_Entity) {
 
 TEST_F(instanceHelper, modelHas_Component) {
     const auto & comp = instance.get<kengine::InstanceComponent>();
-    EXPECT_TRUE(kengine::instanceHelper::modelHas<std::string>(comp));
-    EXPECT_FALSE(kengine::instanceHelper::modelHas<int>(comp));
+    EXPECT_TRUE(kengine::instanceHelper::modelHas<std::string>(r, comp));
+    EXPECT_FALSE(kengine::instanceHelper::modelHas<int>(r, comp));
 }
 
 TEST_F(instanceHelper, getModel_Entity) {
@@ -34,17 +38,21 @@ TEST_F(instanceHelper, getModel_Entity) {
 }
 
 TEST_F(instanceHelper, getModel_Entity_missing) {
+#ifndef NDEBUG // entt might not assert in release
 	EXPECT_DEATH(kengine::instanceHelper::getModel<int>(instance), ".*");
+#endif
 }
 
 TEST_F(instanceHelper, getModel_Component) {
     const auto & comp = instance.get<kengine::InstanceComponent>();
-    EXPECT_EQ(kengine::instanceHelper::getModel<std::string>(comp), "hello");
+    EXPECT_EQ(kengine::instanceHelper::getModel<std::string>(r, comp), "hello");
 }
 
 TEST_F(instanceHelper, getModel_Component_missing) {
+#ifndef NDEBUG // entt might not assert in release
 	const auto & comp = instance.get<kengine::InstanceComponent>();
-	EXPECT_DEATH(kengine::instanceHelper::getModel<int>(comp), ".*");
+	EXPECT_DEATH(kengine::instanceHelper::getModel<int>(r, comp), ".*");
+#endif
 }
 
 TEST_F(instanceHelper, tryGetModel_Entity) {
@@ -54,6 +62,6 @@ TEST_F(instanceHelper, tryGetModel_Entity) {
 
 TEST_F(instanceHelper, tryGetModel_Component) {
     const auto & comp = instance.get<kengine::InstanceComponent>();
-    EXPECT_EQ(kengine::instanceHelper::tryGetModel<int>(comp), nullptr);
-    EXPECT_EQ(*kengine::instanceHelper::tryGetModel<std::string>(comp), "hello");
+    EXPECT_EQ(kengine::instanceHelper::tryGetModel<int>(r, comp), nullptr);
+    EXPECT_EQ(*kengine::instanceHelper::tryGetModel<std::string>(r, comp), "hello");
 }

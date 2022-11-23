@@ -1,5 +1,7 @@
 #include "HighlightShader.hpp"
-#include "kengine.hpp"
+
+// entt
+#include <entt/entity/registry.hpp>
 
 // kreogl
 #include "kreogl/Camera.hpp"
@@ -13,7 +15,9 @@
 // kengine helpers
 #include "helpers/profilingHelper.hpp"
 
-kengine::HighlightShader::HighlightShader() noexcept {
+kengine::HighlightShader::HighlightShader(const entt::registry & r) noexcept
+	: _r(r)
+{
 	KENGINE_PROFILING_SCOPE;
 
 	init("HighlightShader");
@@ -55,9 +59,9 @@ void kengine::HighlightShader::draw(const kreogl::DrawParams & params) noexcept 
 	_glsl.viewPos = params.camera.getPosition();
 	_glsl.screenSize = params.camera.getViewport().getResolution();
 
-	for (const auto & [entity, highlight] : entities.with<HighlightComponent>()) {
+	for (const auto & [entity, highlight] : _r.view<HighlightComponent>().each()) {
 		uniformChecker.shouldCheck = true;
-		_glsl.entityID = float(entity.id);
+		_glsl.entityID = float(entity);
 		_glsl.highlightColor = { highlight.color.r, highlight.color.g, highlight.color.b, highlight.color.a };
 		_glsl.intensity = highlight.intensity * 2.f - 1.f; // convert from [0,1] to [-1,1]
 		kreogl::shapes::drawQuad();

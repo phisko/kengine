@@ -1,5 +1,8 @@
 #pragma once
 
+// entt
+#include <entt/entity/registry.hpp>
+
 // kengine data
 #include "data/NameComponent.hpp"
 
@@ -28,103 +31,106 @@
 
 namespace kengine {
 	namespace impl {
-		template<typename T>
-		void registerWithLanguage(void (*func)(), const char * name) noexcept {
+		template<typename T, typename Registry, typename Callback>
+		void registerWithLanguage(Registry && r, Callback && func, const char * name) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			try {
-				func();
+				func(FWD(r));
 			}
 			catch (const std::exception & e) {
-				kengine_assert_failed("[", name, "] Error registering [", putils::reflection::get_class_name<T>() , "]: ", e.what());
+				kengine_assert_failed(r, "[", name, "] Error registering [", putils::reflection::get_class_name<T>() , "]: ", e.what());
 			}
 		}
 
+		template<typename T>
+		struct Registered{}; // Tag to mark already registered types
+
 		template<typename ...Types, typename Func>
-		void registerTypes(Func && registerWithLanguages) noexcept {
+		void registerTypes(entt::registry & r, Func && registerWithLanguages) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			putils::for_each_type<Types...>([&](auto && t) noexcept {
-				static bool registered = false;
-                entities += [&](Entity & e) {
-                    e += functions::OnTerminate{ [&] { registered = false; }};
-                };
-				if (registered)
+				using T = putils_wrapped_type(t);
+
+				// Avoid double registration
+				if (!r.view<Registered<T>>().empty())
 					return;
-				registered = true;
+				const auto e = r.create();
+				r.emplace<Registered<T>>(e);
 
 				registerWithLanguages(t);
 
-				using T = putils_wrapped_type(t);
-				putils::reflection::for_each_used_type<T>([](const auto & type) noexcept {
+				putils::reflection::for_each_used_type<T>([&](const auto & type) noexcept {
 					using Used = putils_wrapped_type(type.type);
-					kengine::registerTypes<Used>();
+					kengine::registerTypes<Used>(r);
 				});
 			});
 		}
 	}
 
 	template<typename ...Types>
-	void registerTypes() noexcept {
+	void registerTypes(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
-		impl::registerTypes<Types...>([](auto && t) noexcept {
+		impl::registerTypes<Types...>(r, [&](auto && t) noexcept {
 			using T = putils_wrapped_type(t);
 #ifdef KENGINE_PYTHON
-			impl::registerWithLanguage<T>(pythonHelper::registerTypes<T>, "Python");
+			impl::registerWithLanguage<T>(r, pythonHelper::registerTypes<T>, "Python");
 #endif
 
 #ifdef KENGINE_LUA
-			impl::registerWithLanguage<T>(luaHelper::registerTypes<T>, "Lua");
+			impl::registerWithLanguage<T>(r, luaHelper::registerTypes<T>, "Lua");
 #endif
 		});
 	}
 
 	template<typename ... Comps>
-	void registerComponents() noexcept {
+	void registerComponents(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
-		impl::registerTypes<Comps...>([](auto && t) noexcept {
+		impl::registerTypes<Comps...>(r, [&](auto && t) noexcept {
 			using T = putils_wrapped_type(t);
-			auto e = typeHelper::getTypeEntity<T>();
-			e += NameComponent{ putils::reflection::get_class_name<T>() };
-			e += meta::Size{ sizeof(T) };
+
+			const auto e = typeHelper::getTypeEntity<T>(r);
+			r.emplace<NameComponent>(e, putils::reflection::get_class_name<T>());
+			r.emplace<meta::Size>(e, sizeof(T));
 
 #ifdef KENGINE_PYTHON
-			impl::registerWithLanguage<T>(pythonHelper::registerComponents<T>, "Python");
+			impl::registerWithLanguage<T>(r, pythonHelper::registerComponents<T>, "Python");
 #endif
 
 #ifdef KENGINE_LUA
-			impl::registerWithLanguage<T>(luaHelper::registerComponents<T>, "Lua");
+			impl::registerWithLanguage<T>(r, luaHelper::registerComponents<T>, "Lua");
 #endif
 		});
 
-		registerAttachTo<Comps...>();
-		registerAttributes<Comps...>();
-		registerCopy<Comps...>();
-		registerCount<Comps...>();
-		registerDetachFrom<Comps...>();
-		registerDisplayImGui<Comps...>();
-		registerEditImGui<Comps...>();
-		registerForEachEntity<Comps...>();
-		registerGet<Comps...>();
-		registerHas<Comps...>();
-		registerLoadFromJSON<Comps...>();
-		registerMatchString<Comps...>();
-		registerMove<Comps...>();
-		registerSaveToJSON<Comps...>();
+		registerAttachTo<Comps...>(r);
+		registerAttributes<Comps...>(r);
+		registerCopy<Comps...>(r);
+		registerCount<Comps...>(r);
+		registerDetachFrom<Comps...>(r);
+		registerDisplayImGui<Comps...>(r);
+		registerEditImGui<Comps...>(r);
+		registerForEachEntity<Comps...>(r);
+		registerGet<Comps...>(r);
+		registerHas<Comps...>(r);
+		registerLoadFromJSON<Comps...>(r);
+		registerMatchString<Comps...>(r);
+		registerMove<Comps...>(r);
+		registerSaveToJSON<Comps...>(r);
 	}
 
 	template<typename F>
-	void registerFunction(const char * name, F && func) noexcept {
+	void registerFunction(const entt::registry & r, const char * name, F && func) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
 #ifdef KENGINE_PYTHON
-		pythonHelper::registerFunction(name, func);
+		pythonHelper::registerFunction(r, name, func);
 #endif
 
 #ifdef KENGINE_LUA
-		luaHelper::registerFunction(name, func);
+		luaHelper::registerFunction(r, name, func);
 #endif
 	}
 }

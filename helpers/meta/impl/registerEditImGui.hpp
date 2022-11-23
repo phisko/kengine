@@ -1,8 +1,11 @@
 #pragma once
 
+// entt
+#include <entt/entity/fwd.hpp>
+
 namespace kengine {
 	template<typename ... Comps>
-	void registerEditImGui() noexcept;
+	void registerEditImGui(entt::registry & r) noexcept;
 }
 
 #include "registerEditImGui.inl"

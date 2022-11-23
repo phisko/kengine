@@ -1,10 +1,11 @@
 #pragma once
 
-#include "kengine.hpp"
+// entt
+#include <entt/entity/fwd.hpp>
 
 namespace kengine::typeHelper {
     template <typename T>
-    Entity getTypeEntity() noexcept;
+    entt::entity getTypeEntity(entt::registry & r) noexcept;
 }
 
 #include "typeHelper.inl"

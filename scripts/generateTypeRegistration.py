@@ -118,11 +118,16 @@ def generate_registration(type):
 
 	open(out_path, 'w').write(generate_registration_headers(type) +
 '''#include "''' + type['json_type']['header'] + '''"
+
+// entt
+#include <entt/entity/fwd.hpp>
+
+// kengine helpers
 #include "helpers/logHelper.hpp"
 #include "helpers/profilingHelper.hpp"
 
 namespace ''' + args.namespace + '''{
-	void ''' + type['function_name'] + '''() noexcept {''' + generate_conditional_registration(type) + '''	}
+	void ''' + type['function_name'] + '''(entt::registry & r) noexcept {''' + generate_conditional_registration(type) + '''	}
 }''')
 
 def generate_registration_headers(type):
@@ -140,11 +145,11 @@ def generate_conditional_registration(type):
 #ifdef ''' + type['json_type']['condition']
 	ret += '''
 		KENGINE_PROFILING_SCOPE;
-		kengine_log(Log, "Init/registerTypes", "Registering \'''' + type['json_type']['type'] + '''\'");
+		kengine_log(r, Log, "Init/registerTypes", "Registering \'''' + type['json_type']['type'] + '''\'");
 		''' + generate_registration_implementation(type)
 	if 'condition' in type['json_type']:
 		ret += '''#else
-		kengine_log(Log, "Init/registerTypes", "Not registering \'''' + type['json_type']['type'] + '''\' because \'''' + type['json_type']['condition'] + '''\' is not defined");
+		kengine_log(r, Log, "Init/registerTypes", "Not registering \'''' + type['json_type']['type'] + '''\' because \'''' + type['json_type']['condition'] + '''\' is not defined");
 #endif
 '''
 	return ret
@@ -154,7 +159,7 @@ def generate_registration_implementation(type):
 	for registration in all_registrations:
 		if type['is_component'] != registration['is_component']:
 			continue
-		ret += registration['registration'] + '<' + type['json_type']['type'] + '>();\n'
+		ret += registration['registration'] + '<' + type['json_type']['type'] + '>(r);\n'
 	return ret
 
 #
@@ -176,19 +181,21 @@ main_file = os.path.join(args.output, 'registerTypes')
 
 main_file_cpp = '''
 #include "registerTypes.hpp"
+
+// kengine helpers
 #include "helpers/logHelper.hpp"
 #include "helpers/profilingHelper.hpp"
 
 namespace ''' + args.namespace + '''{
-	void registerTypes() noexcept {
+	void registerTypes(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_log(Log, "Init", "Registering types");
+		kengine_log(r, Log, "Init", "Registering types");
 '''
 
 for type in all_types:
 	main_file_cpp += '''
-		extern void ''' + type['function_name'] + '''() noexcept;
-		''' + type['function_name'] + '''();
+		extern void ''' + type['function_name'] + '''(entt::registry &) noexcept;
+		''' + type['function_name'] + '''(r);
 '''
 
 main_file_cpp += '''
@@ -202,7 +209,10 @@ open(main_file + '.hpp', 'w').write('''
 
 ''' + (f'#include <{args.export_header}>' if args.export_header else '') + '''
 
+// entt
+#include <entt/entity/fwd.hpp>
+
 namespace ''' + args.namespace + '''{
-	''' + args.export_macro + ''' void registerTypes() noexcept;
+	''' + args.export_macro + ''' void registerTypes(entt::registry & r) noexcept;
 }
 ''')

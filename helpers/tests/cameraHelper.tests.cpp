@@ -1,4 +1,9 @@
-#include "tests/KengineTest.hpp"
+// entt
+#include <entt/entity/handle.hpp>
+#include <entt/entity/registry.hpp>
+
+// gtest
+#include <gtest/gtest.h>
 
 // kengine data
 #include "data/WindowComponent.hpp"
@@ -7,33 +12,30 @@
 // kengine helpers
 #include "helpers/cameraHelper.hpp"
 
-struct cameraHelper : KengineTest {};
-
 struct Params {
     kengine::ViewportComponent viewportComponent;
     putils::Point2ui pixel;
 };
 
 struct Result {
-    kengine::EntityID window;
+    entt::entity window;
     kengine::cameraHelper::ViewportInfo info;
 };
 
 static Result getViewportForPixel(const Params & params) noexcept {
-    kengine::EntityID id;
-    kengine::entities += [&](kengine::Entity & e) {
-        id = e.id;
+	entt::registry r;
 
-        e += kengine::WindowComponent{};
-        auto & viewport = e.attach<kengine::ViewportComponent>();
-        viewport = params.viewportComponent;
-        viewport.window = id;
-    };
+	const auto e = r.create();
+	r.emplace<kengine::WindowComponent>(e);
 
-    return { id, kengine::cameraHelper::getViewportForPixel(id, params.pixel) };
+	auto & viewport = r.emplace<kengine::ViewportComponent>(e);
+	viewport = params.viewportComponent;
+	viewport.window = e;
+
+    return { e, kengine::cameraHelper::getViewportForPixel({ r, e }, params.pixel) };
 }
 
-TEST_F(cameraHelper, getViewportForPixelZero) {
+TEST(cameraHelper, getViewportForPixelZero) {
     const auto result = getViewportForPixel({
         .pixel = { 0, 0 }
     });
@@ -44,18 +46,18 @@ TEST_F(cameraHelper, getViewportForPixelZero) {
     EXPECT_EQ(result.info.viewportPercent.y, 0.f);
 }
 
-TEST_F(cameraHelper, getViewportForPixelOutside) {
+TEST(cameraHelper, getViewportForPixelOutside) {
     const auto result = getViewportForPixel({
         .pixel = { 1280, 720 }
     });
-    EXPECT_EQ(result.info.camera, kengine::INVALID_ID);
+    EXPECT_EQ(result.info.camera, entt::entity(entt::null));
     EXPECT_EQ(result.info.pixel.x, -1.f);
     EXPECT_EQ(result.info.pixel.y, -1.f);
     EXPECT_EQ(result.info.viewportPercent.x, -1.f);
     EXPECT_EQ(result.info.viewportPercent.y, -1.f);
 }
 
-TEST_F(cameraHelper, getViewportForPixelInside) {
+TEST(cameraHelper, getViewportForPixelInside) {
     const auto result = getViewportForPixel({
         .pixel = { 640, 360 }
     });
@@ -66,7 +68,7 @@ TEST_F(cameraHelper, getViewportForPixelInside) {
     EXPECT_EQ(result.info.viewportPercent.y, .5f);
 }
 
-TEST_F(cameraHelper, getViewportForPixelHalfSizeZero) {
+TEST(cameraHelper, getViewportForPixelHalfSizeZero) {
     kengine::ViewportComponent viewport;
     viewport.boundingBox.size = { .5f, .5f };
     const auto result = getViewportForPixel({
@@ -80,21 +82,21 @@ TEST_F(cameraHelper, getViewportForPixelHalfSizeZero) {
     EXPECT_EQ(result.info.viewportPercent.y, .0f);
 }
 
-TEST_F(cameraHelper, getViewportForPixelHalfSizeOutside) {
+TEST(cameraHelper, getViewportForPixelHalfSizeOutside) {
     kengine::ViewportComponent viewport;
     viewport.boundingBox.size = { .5f, .5f };
     const auto result = getViewportForPixel({
         .viewportComponent = viewport,
         .pixel = { 640, 360 }
     });
-    EXPECT_EQ(result.info.camera, kengine::INVALID_ID);
+    EXPECT_EQ(result.info.camera, entt::entity(entt::null));
     EXPECT_EQ(result.info.pixel.x, -1.f);
     EXPECT_EQ(result.info.pixel.y, -1.f);
     EXPECT_EQ(result.info.viewportPercent.x, -1.f);
     EXPECT_EQ(result.info.viewportPercent.y, -1.f);
 }
 
-TEST_F(cameraHelper, getViewportForPixelHalfSizeInside) {
+TEST(cameraHelper, getViewportForPixelHalfSizeInside) {
     kengine::ViewportComponent viewport;
     viewport.boundingBox.size = { .5f, .5f };
     const auto result = getViewportForPixel({
@@ -108,7 +110,7 @@ TEST_F(cameraHelper, getViewportForPixelHalfSizeInside) {
     EXPECT_EQ(result.info.viewportPercent.y, .5f);
 }
 
-TEST_F(cameraHelper, getViewportForPixelOffsetZero) {
+TEST(cameraHelper, getViewportForPixelOffsetZero) {
     kengine::ViewportComponent viewport;
     viewport.boundingBox.position = { .5f, .5f };
     const auto result = getViewportForPixel({
@@ -122,21 +124,21 @@ TEST_F(cameraHelper, getViewportForPixelOffsetZero) {
     EXPECT_EQ(result.info.viewportPercent.y, 0.f);
 }
 
-TEST_F(cameraHelper, getViewportForPixelOffsetOutside) {
+TEST(cameraHelper, getViewportForPixelOffsetOutside) {
     kengine::ViewportComponent viewport;
     viewport.boundingBox.position = { .5f, .5f };
     const auto result = getViewportForPixel({
         .viewportComponent = viewport,
         .pixel = { 0, 0 }
     });
-    EXPECT_EQ(result.info.camera, kengine::INVALID_ID);
+    EXPECT_EQ(result.info.camera, entt::entity(entt::null));
     EXPECT_EQ(result.info.pixel.x, -1.f);
     EXPECT_EQ(result.info.pixel.y, -1.f);
     EXPECT_EQ(result.info.viewportPercent.x, -1.f);
     EXPECT_EQ(result.info.viewportPercent.y, -1.f);
 }
 
-TEST_F(cameraHelper, getViewportForPixelOffsetInside) {
+TEST(cameraHelper, getViewportForPixelOffsetInside) {
     kengine::ViewportComponent viewport;
     viewport.boundingBox.position = { .5f, .5f };
     const auto result = getViewportForPixel({
@@ -150,14 +152,14 @@ TEST_F(cameraHelper, getViewportForPixelOffsetInside) {
     EXPECT_EQ(result.info.viewportPercent.y, .25f);
 }
 
-TEST_F(cameraHelper, convertToScreenPercentage_Percentage) {
+TEST(cameraHelper, convertToScreenPercentage_Percentage) {
     kengine::OnScreenComponent comp;
     comp.coordinateType = kengine::OnScreenComponent::CoordinateType::ScreenPercentage;
     const putils::Rect2f rect{ { .25f, .25f }, { .5f, .5f } };
     EXPECT_EQ(kengine::cameraHelper::convertToScreenPercentage(rect, { 1280, 720 }, comp), rect);
 }
 
-TEST_F(cameraHelper, convertToScreenPercentage_Pixels) {
+TEST(cameraHelper, convertToScreenPercentage_Pixels) {
     kengine::OnScreenComponent comp;
     comp.coordinateType = kengine::OnScreenComponent::CoordinateType::Pixels;
 
@@ -171,7 +173,7 @@ TEST_F(cameraHelper, convertToScreenPercentage_Pixels) {
     EXPECT_EQ(screenPercentage.size, expectedSize);
 }
 
-TEST_F(cameraHelper, getFacings_Default) {
+TEST(cameraHelper, getFacings_Default) {
     const kengine::CameraComponent camera;
     const auto facings = kengine::cameraHelper::getFacings(camera);
 

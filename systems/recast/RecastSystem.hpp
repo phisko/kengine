@@ -1,8 +1,8 @@
 #pragma once
 
-// kengine
-#include "EntityCreator.hpp"
+// entt
+#include <entt/entity/fwd.hpp>
 
 namespace kengine {
-	KENGINE_RECAST_EXPORT EntityCreator * RecastSystem() noexcept;
+	KENGINE_RECAST_EXPORT void RecastSystem(entt::registry & r) noexcept;
 }

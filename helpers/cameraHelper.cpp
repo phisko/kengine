@@ -1,5 +1,9 @@
 #include "cameraHelper.hpp"
 
+// entt
+#include <entt/entity/handle.hpp>
+#include <entt/entity/registry.hpp>
+
 // magic_enum
 #include <magic_enum.hpp>
 
@@ -12,16 +16,16 @@
 #include "helpers/profilingHelper.hpp"
 
 namespace kengine::cameraHelper {
-	ViewportInfo getViewportForPixel(EntityID windowID, const putils::Point2ui & pixel) noexcept {
+	ViewportInfo getViewportForPixel(entt::handle windowEntity, const putils::Point2ui & pixel) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
 		ViewportInfo ret;
 
-		const auto & window = entities[windowID].get<WindowComponent>();
+		const auto & window = windowEntity.get<WindowComponent>();
 
 		float highestZ = -std::numeric_limits<float>::max();
-		for (const auto & [e, viewport] : entities.with<ViewportComponent>()) {
-			if (viewport.window != windowID)
+		for (const auto & [e, viewport] : windowEntity.registry()->view<ViewportComponent>().each()) {
+			if (viewport.window != windowEntity)
 				continue;
 			if (highestZ != -std::numeric_limits<float>::max() && highestZ >= viewport.zOrder)
 				continue;
@@ -40,7 +44,7 @@ namespace kengine::cameraHelper {
 
 			highestZ = viewport.zOrder;
 
-			ret.camera = e.id;
+			ret.camera = e;
 			ret.pixel = putils::Point2f(pixel) / window.size;
 			ret.viewportPercent = (ret.pixel - putils::Point2f(box.position)) / putils::Point2f(box.size);
 		}
@@ -48,11 +52,11 @@ namespace kengine::cameraHelper {
 		return ret;
 	}
 
-	bool entityAppearsInViewport(const Entity & entity, const Entity & viewportEntity) noexcept {
+	bool entityAppearsInViewport(const entt::registry & r, entt::entity entity, entt::entity viewportEntity) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
-		const auto wantsToAppear = [](const Entity & lhs, const Entity & rhs) noexcept {
-			if (const auto appearsInViewport = lhs.tryGet<functions::AppearsInViewport>())
+		const auto wantsToAppear = [&](entt::entity lhs, entt::entity rhs) noexcept {
+			if (const auto appearsInViewport = r.try_get<functions::AppearsInViewport>(lhs))
 				if (!appearsInViewport->call(rhs))
 					return false;
 			return true;

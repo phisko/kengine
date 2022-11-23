@@ -1,13 +1,15 @@
 #ifdef KENGINE_GLM
 
-#include "tests/KengineTest.hpp"
+// entt
+#include <entt/entity/registry.hpp>
+
+// gtest
+#include <gtest/gtest.h>
 
 // kengine helpers
 #include "helpers/skeletonHelper.hpp"
 
-struct skeletonHelper : KengineTest {};
-
-TEST_F(skeletonHelper, getBoneIndex) {
+TEST(skeletonHelper, getBoneIndex) {
     const kengine::ModelSkeletonComponent comp {
         .meshes = {
             { { "0.0", "0.1" } },
@@ -15,24 +17,26 @@ TEST_F(skeletonHelper, getBoneIndex) {
         }
     };
 
-    auto index = kengine::skeletonHelper::getBoneIndex("0.0", comp);
+	const entt::registry r;
+
+    auto index = kengine::skeletonHelper::getBoneIndex(r, "0.0", comp);
     EXPECT_EQ(index.meshIndex, 0);
     EXPECT_EQ(index.boneIndex, 0);
 
-    index = kengine::skeletonHelper::getBoneIndex("0.1", comp);
+    index = kengine::skeletonHelper::getBoneIndex(r, "0.1", comp);
     EXPECT_EQ(index.meshIndex, 0);
     EXPECT_EQ(index.boneIndex, 1);
 
-    index = kengine::skeletonHelper::getBoneIndex("1.0", comp);
+    index = kengine::skeletonHelper::getBoneIndex(r, "1.0", comp);
     EXPECT_EQ(index.meshIndex, 1);
     EXPECT_EQ(index.boneIndex, 0);
 
-    index = kengine::skeletonHelper::getBoneIndex("1.1", comp);
+    index = kengine::skeletonHelper::getBoneIndex(r, "1.1", comp);
     EXPECT_EQ(index.meshIndex, 1);
     EXPECT_EQ(index.boneIndex, 1);
 }
 
-TEST_F(skeletonHelper, getBoneMatrix) {
+TEST(skeletonHelper, getBoneMatrix) {
     const glm::mat4 expected{ .5f };
     const auto boneName = "bone";
 
@@ -48,11 +52,12 @@ TEST_F(skeletonHelper, getBoneMatrix) {
         }
     };
 
-    const auto mat = kengine::skeletonHelper::getBoneMatrix(boneName, comp, model);
+	const entt::registry r;
+    const auto mat = kengine::skeletonHelper::getBoneMatrix(r, boneName, comp, model);
     EXPECT_EQ(mat, expected);
 }
 
-TEST_F(skeletonHelper, setBoneMatrix) {
+TEST(skeletonHelper, setBoneMatrix) {
     const glm::mat4 expected{ .5f };
     const auto boneName = "bone";
 
@@ -68,9 +73,10 @@ TEST_F(skeletonHelper, setBoneMatrix) {
         }
     };
 
-    kengine::skeletonHelper::setBoneMatrix(boneName, expected, comp, model);
+	const entt::registry r;
+    kengine::skeletonHelper::setBoneMatrix(r, boneName, expected, comp, model);
 
-    const auto mat = kengine::skeletonHelper::getBoneMatrix(boneName, comp, model);
+    const auto mat = kengine::skeletonHelper::getBoneMatrix(r, boneName, comp, model);
     EXPECT_EQ(mat, expected);
 }
 

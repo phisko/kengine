@@ -3,11 +3,13 @@
 // kengine functions
 #include "BaseFunction.hpp"
 
-namespace kengine { class Entity; }
-
 namespace kengine::meta {
     struct Get : functions::BaseFunction<
-        void * (const Entity &)
+        void * (entt::handle)
+	>{};
+
+	struct GetConst : functions::BaseFunction<
+		const void * (entt::const_handle)
 	>{};
 }
 

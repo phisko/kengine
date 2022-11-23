@@ -8,13 +8,14 @@
 #include <string>
 #include <vector>
 
+// entt
+#include <entt/entity/fwd.hpp>
+
 // putils
 #include "Point.hpp"
 #include "function.hpp"
 
 namespace kengine {
-	class Entity;
-
 	struct ModelAnimationComponent {
 		struct Anim {
 			std::string name;
@@ -24,7 +25,8 @@ namespace kengine {
 
 		std::vector<Anim> animations; // Filled by animation system with what's read in `files` (or the model file itself)
 
-		using ExtractedMotionGetter = putils::function<putils::Point3f(const Entity & e, size_t anim, float time), KENGINE_ANIMATION_EXTRACTED_MOTION_FUNC_SIZE>;
+		// using ExtractedMotionGetter = putils::function<putils::Point3f(entt::entity e, size_t anim, float time), KENGINE_ANIMATION_EXTRACTED_MOTION_FUNC_SIZE>;
+		using ExtractedMotionGetter = std::function<putils::Point3f(entt::entity e, size_t anim, float time)>;
 
 		ExtractedMotionGetter getAnimationMovementUntilTime;
 		ExtractedMotionGetter getAnimationRotationUntilTime;

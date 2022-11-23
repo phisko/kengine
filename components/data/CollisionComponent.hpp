@@ -4,6 +4,9 @@
 # define KENGINE_COLLISION_FUNCTION_SIZE 64
 #endif
 
+// entt
+#include <entt/entity/fwd.hpp>
+
 // reflection
 #include "reflection.hpp"
 
@@ -11,10 +14,8 @@
 #include "function.hpp"
 
 namespace kengine {
-	class Entity;
-
 	struct CollisionComponent {
-		using function = putils::function<void(Entity &, Entity &), KENGINE_COLLISION_FUNCTION_SIZE>;
+		using function = putils::function<void(entt::entity, entt::entity), KENGINE_COLLISION_FUNCTION_SIZE>;
 		function onCollide = nullptr;
 	};
 }

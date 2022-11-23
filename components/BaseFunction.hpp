@@ -1,5 +1,8 @@
 #pragma once
 
+// entt
+#include <entt/entity/fwd.hpp>
+
 // reflection
 #include "reflection.hpp"
 
@@ -16,9 +19,9 @@
 
 namespace kengine {
 	// Helper type when a callback is needed as an iterator
-	class Entity;
-	using EntityIteratorSignature = void(Entity &);
-	using EntityIteratorFunc = putils::function<EntityIteratorSignature, KENGINE_ENTITY_ITERATOR_FUNC_SIZE>;
+	using EntityIteratorSignature = void(entt::handle);
+	// using EntityIteratorFunc = putils::function<EntityIteratorSignature, KENGINE_ENTITY_ITERATOR_FUNC_SIZE>;
+	using EntityIteratorFunc = std::function<EntityIteratorSignature>;
 
 	namespace functions {
 		template<typename>
@@ -27,7 +30,8 @@ namespace kengine {
 		template<typename Ret, typename ... Args>
 		struct BaseFunction<Ret(Args...)> {
 			using Base = BaseFunction<Ret(Args...)>;
-			using Callable = putils::function<Ret(Args...), KENGINE_FUNCTION_MAX_SIZE>;
+			// using Callable = putils::function<Ret(Args...), KENGINE_FUNCTION_MAX_SIZE>;
+			using Callable = std::function<Ret(Args...)>;
 
 			Callable func = nullptr;
 

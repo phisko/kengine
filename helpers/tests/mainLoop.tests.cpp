@@ -1,42 +1,52 @@
-#include "tests/KengineTest.hpp"
+// entt
+#include <entt/entity/registry.hpp>
+
+// gtest
+#include <gtest/gtest.h>
+
+// kengine data
+#include "data/KeepAlive.hpp"
 
 // kengine functions
 #include "functions/Execute.hpp"
 
 // kengine helpers
+#include "helpers/isRunning.hpp"
 #include "helpers/mainLoop.hpp"
 
-struct mainLoop : KengineTest {};
+TEST(mainLoop, run) {
+	entt::registry r;
 
-TEST_F(mainLoop, run) {
     size_t calls = 0;
 
-    kengine::entities += [&](kengine::Entity & e) {
-        e += kengine::functions::Execute{
-            [&](float deltaTime) {
-                ++calls;
-                kengine::stopRunning();
-            }
-        };
-    };
+	const auto e = r.create();
+	r.emplace<kengine::KeepAlive>(e);
+	r.emplace<kengine::functions::Execute>(
+		e, [&](float deltaTime) {
+			++calls;
+			kengine::stopRunning(r);
+		}
+	);
 
-    kengine::mainLoop::run();
+    kengine::mainLoop::run(r);
     EXPECT_EQ(calls, 1);
 }
 
-TEST_F(mainLoop, timeModulated) {
+TEST(mainLoop, timeModulated) {
+	entt::registry r;
+
     size_t calls = 0;
 
-    kengine::entities += [&](kengine::Entity & e) {
-        e += kengine::functions::Execute{
-            [&](float deltaTime) {
-                ++calls;
-                EXPECT_NEAR(deltaTime, 0.f, .001f);
-                kengine::stopRunning();
-            }
-        };
-    };
+	const auto e = r.create();
+	r.emplace<kengine::KeepAlive>(e);
+	r.emplace<kengine::functions::Execute>(
+		e, [&](float deltaTime) {
+			++calls;
+			EXPECT_NEAR(deltaTime, 0.f, .001f);
+			kengine::stopRunning(r);
+		}
+	);
 
-    kengine::mainLoop::timeModulated::run();
+    kengine::mainLoop::timeModulated::run(r);
     EXPECT_EQ(calls, 1);
 }

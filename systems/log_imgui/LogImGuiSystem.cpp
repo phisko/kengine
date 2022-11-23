@@ -1,9 +1,11 @@
 #include "LogImGuiSystem.hpp"
-#include "kengine.hpp"
 
 // stl
 #include <mutex>
 #include <list>
+
+// entt
+#include <entt/entity/registry.hpp>
 
 // magic_enum
 #include <magic_enum.hpp>
@@ -45,24 +47,27 @@ namespace kengine {
 			std::string message;
 		};
 
-		static void init(Entity & e) noexcept {
+		static void init(entt::registry & r) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(Log, "Init", "LogImGuiSystem");
+			kengine_log(r, Log, "Init", "LogImGuiSystem");
+
+			_r = &r;
 
 			std::fill(std::begin(_filters.severities), std::end(_filters.severities), true);
 
-			const auto severity = logHelper::parseCommandLineSeverity();
+			const auto severity = logHelper::parseCommandLineSeverity(r);
 			for (int i = 0; i < (int)severity; ++i)
 				_filters.severities[i] = false;
 
-			auto & tool = e.attach<ImGuiToolComponent>();
+			const auto e = r.create();
+			r.emplace<functions::Log>(e, log);
+			r.emplace<functions::Execute>(e, execute);
+
+			r.emplace<NameComponent>(e, "Log");
+			auto & tool = r.emplace<ImGuiToolComponent>(e);
 			_enabled = &tool.enabled;
-			e += NameComponent{ "Log" };
 
-			e += functions::Log{ log };
-			e += functions::Execute{ execute };
-
-			e += AdjustableComponent{
+			r.emplace<AdjustableComponent>(e) = {
 				"Log", {
 					{ "ImGui max events", &_maxEvents }
 				}
@@ -94,7 +99,7 @@ namespace kengine {
 			if (!*_enabled)
 				return;
 
-			kengine_log(Verbose, "Execute", "LogImGuiSystem");
+			kengine_log(*_r, Verbose, "Execute", "LogImGuiSystem");
 
 			if (ImGui::Begin("Log", _enabled)) {
 				drawFilters();
@@ -123,7 +128,7 @@ namespace kengine {
 
 		static void updateFilteredEvents() noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(Verbose, "Execute/LogImGuiSystem", "Updating filters");
+			kengine_log(*_r, Verbose, "Execute/LogImGuiSystem", "Updating filters");
 
 			const std::lock_guard lock(_mutex);
 			_filteredEvents.clear();
@@ -175,13 +180,15 @@ namespace kengine {
 
 		static inline bool * _enabled;
 
+		static inline const entt::registry * _r;
+
 		static inline std::mutex _mutex;
 		static inline int _maxEvents = 4096;
 		static inline std::list<LogEvent> _events;
 		static inline std::vector<LogEvent> _filteredEvents;
 	};
 
-	EntityCreator * LogImGuiSystem() noexcept {
-		return LogImGuiSystem::init;
+	void LogImGuiSystem(entt::registry & r) noexcept {
+		LogImGuiSystem::init(r);
 	}
 }

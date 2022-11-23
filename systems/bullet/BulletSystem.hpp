@@ -1,8 +1,8 @@
 #pragma once
 
-// kengine
-#include "EntityCreator.hpp"
+// entt
+#include <entt/entity/fwd.hpp>
 
 namespace kengine {
-	KENGINE_BULLET_EXPORT EntityCreator * BulletSystem() noexcept;
+	KENGINE_BULLET_EXPORT void BulletSystem(entt::registry & r) noexcept;
 }

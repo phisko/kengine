@@ -2,6 +2,14 @@
 # define KENGINE_RECAST_MAX_AGENTS 1024
 #endif
 
+// stl
+#include <algorithm>
+#include <execution>
+
+// entt
+#include <entt/entity/handle.hpp>
+#include <entt/entity/registry.hpp>
+
 // putils
 #include "lengthof.hpp"
 #include "on_scope_exit.hpp"
@@ -26,69 +34,66 @@
 
 namespace kengine::recast {
 	struct doPathfinding {
-		static void run(float deltaTime) noexcept {
+		static void run(entt::registry & r, float deltaTime) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			if (g_adjustables.editorMode)
-				recreateCrowds();
-			removeOldAgents();
-			moveChangedAgents();
-			createNewAgents();
-			updateCrowds(deltaTime);
+				recreateCrowds(r);
+			removeOldAgents(r);
+			moveChangedAgents(r);
+			createNewAgents(r);
+			updateCrowds(r, deltaTime);
 		}
 
-		static void recreateCrowds() noexcept {
+		static void recreateCrowds(entt::registry & r) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(Verbose, "Execute/RecastSystem", "Recreating crowds for editor mode");
+			kengine_log(r, Verbose, "Execute/RecastSystem", "Recreating crowds for editor mode");
 
-			for (auto [e, agent, transform, pathfinding] : entities.with<RecastAgentComponent, TransformComponent, PathfindingComponent>()) {
-				auto environment = entities[agent.crowd];
-				const auto navMesh = instanceHelper::tryGetModel<NavMeshComponent>(environment);
+			for (auto [e, agent, transform, pathfinding] : r.view<RecastAgentComponent, TransformComponent, PathfindingComponent>().each()) {
+				const auto navMesh = instanceHelper::tryGetModel<NavMeshComponent>({ r, agent.crowd });
 				if (!navMesh)
 					continue;
 
 				struct NavMeshComponentBackup : NavMeshComponent {};
-				const auto backup = environment.tryGet<NavMeshComponentBackup>();
+				const auto backup = r.try_get<NavMeshComponentBackup>(agent.crowd);
 				if (backup)
 					if (std::memcmp(navMesh, backup, sizeof(*navMesh)) == 0)
 						continue;
 
-				environment += NavMeshComponentBackup{ *navMesh };
+				r.emplace<NavMeshComponentBackup>(agent.crowd, *navMesh);
 
-				auto & crowd = attachCrowdComponent(environment);
-				const auto objectInfo = getObjectInfo(getEnvironmentInfo(environment), transform, pathfinding);
-				attachAgentComponent(e, objectInfo, crowd, environment.id);
+				auto & crowd = attachCrowdComponent({ r, agent.crowd });
+				const auto objectInfo = getObjectInfo(getEnvironmentInfo({ r, agent.crowd }), transform, pathfinding);
+				attachAgentComponent({ r, e }, objectInfo, crowd, agent.crowd);
 			}
 		}
 
-		static void removeOldAgents() noexcept {
+		static void removeOldAgents(entt::registry & r) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			for (auto [e, agent, noPathfinding] : entities.with<RecastAgentComponent, no<PathfindingComponent>>()) {
-				kengine_logf(Verbose, "Execute/RecastSystem", "Removing agent %zu from crowd %zu", e.id, agent.crowd);
-				auto environment = entities[agent.crowd];
-				auto & crowd = environment.get<RecastCrowdComponent>();
+			for (auto [e, agent] : r.view<RecastAgentComponent>(entt::exclude<PathfindingComponent>).each()) {
+				kengine_logf(r, Verbose, "Execute/RecastSystem", "Removing agent %zu from crowd %zu", e, agent.crowd);
+				auto & crowd = r.get<RecastCrowdComponent>(agent.crowd);
 				crowd.crowd->removeAgent(agent.index);
-				e.detach<RecastAgentComponent>();
+				r.remove<RecastAgentComponent>(e);
 			}
 		}
 
-		static void createNewAgents() noexcept {
+		static void createNewAgents(entt::registry & r) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			for (auto [e, pathfinding, transform, noRecast] : entities.with<PathfindingComponent, TransformComponent, no<RecastAgentComponent>>()) {
-				if (pathfinding.environment == INVALID_ID)
+			for (auto [e, pathfinding, transform] : r.view<PathfindingComponent, TransformComponent>(entt::exclude<RecastAgentComponent>).each()) {
+				if (pathfinding.environment == entt::null)
 					continue;
 
-				auto environment = entities[pathfinding.environment];
-				kengine_logf(Verbose, "Execute/RecastSystem", "Adding agent %zu to crowd %zu", e.id, environment.id);
+				kengine_logf(r, Verbose, "Execute/RecastSystem", "Adding agent %zu to crowd %zu", e, pathfinding.environment);
 
-				auto crowd = environment.tryGet<RecastCrowdComponent>();
+				auto crowd = r.try_get<RecastCrowdComponent>(pathfinding.environment);
 				if (!crowd)
-					crowd = &attachCrowdComponent(environment);
+					crowd = &attachCrowdComponent({ r, pathfinding.environment });
 
-				const auto objectInfo = getObjectInfo(getEnvironmentInfo(environment), transform, pathfinding);
-				attachAgentComponent(e, objectInfo, *crowd, environment.id);
+				const auto objectInfo = getObjectInfo(getEnvironmentInfo({ r, pathfinding.environment }), transform, pathfinding);
+				attachAgentComponent({ r, e }, objectInfo, *crowd, pathfinding.environment);
 			}
 		}
 
@@ -97,7 +102,7 @@ namespace kengine::recast {
 			glm::mat4 modelToWorld;
 			glm::mat4 worldToModel;
 		};
-		static EnvironmentInfo getEnvironmentInfo(const Entity & environment) noexcept {
+		static EnvironmentInfo getEnvironmentInfo(entt::handle environment) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			EnvironmentInfo ret;
@@ -129,10 +134,10 @@ namespace kengine::recast {
 			return ret;
 		}
 
-		static RecastCrowdComponent & attachCrowdComponent(Entity & e) noexcept {
+		static RecastCrowdComponent & attachCrowdComponent(entt::handle e) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			auto & crowd = e.attach<RecastCrowdComponent>();
+			auto & crowd = e.emplace<RecastCrowdComponent>();
 			crowd.crowd.reset(dtAllocCrowd());
 
 			const auto & navMesh = instanceHelper::getModel<RecastNavMeshComponent>(e);
@@ -141,7 +146,7 @@ namespace kengine::recast {
 			return crowd;
 		}
 
-		static void attachAgentComponent(Entity & e, const ObjectInfo & objectInfo, const RecastCrowdComponent & crowd, EntityID crowdId) noexcept {
+		static void attachAgentComponent(entt::handle e, const ObjectInfo & objectInfo, const RecastCrowdComponent & crowd, entt::entity crowdId) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			dtCrowdAgentParams params;
@@ -153,12 +158,12 @@ namespace kengine::recast {
 			params.obstacleAvoidanceType = 0; // Default params, might want to change?
 			params.queryFilterType = 0; // Default query type, might want to change?
 
-			params.userData = (void *)e.id;
+			params.userData = (void *)e.entity();
 
 			const auto idx = crowd.crowd->addAgent(objectInfo.objectInNavMesh.position.raw, &params);
-			kengine_assert(idx >= 0);
+			kengine_assert(*e.registry(), idx >= 0);
 
-			e += RecastAgentComponent{ idx, crowdId };
+			e.emplace<RecastAgentComponent>(idx, crowdId);
 		}
 
 		static void fillCrowdAgentParams(dtCrowdAgentParams & params, const ObjectInfo & objectInfo) noexcept {
@@ -173,62 +178,65 @@ namespace kengine::recast {
 			params.pathOptimizationRange = params.collisionQueryRange * g_adjustables.pathOptimizationRange;
 		}
 
-		static void moveChangedAgents() noexcept {
+		static void moveChangedAgents(entt::registry & r) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			for (auto [e, pathfinding, agent] : entities.with<PathfindingComponent, RecastAgentComponent>()) {
+			for (auto [e, pathfinding, agent] : r.view<PathfindingComponent, RecastAgentComponent>().each()) {
 				if (pathfinding.environment == agent.crowd)
 					continue;
 
-				auto oldEnvironment = entities[agent.crowd];
-				const auto oldCrowd = oldEnvironment.tryGet<RecastCrowdComponent>();
+				const auto oldCrowd = r.try_get<RecastCrowdComponent>(agent.crowd);
 				if (oldCrowd)
 					oldCrowd->crowd->removeAgent(agent.index);
 
-				auto newEnvironment = entities[pathfinding.environment];
-				auto newCrowd = newEnvironment.tryGet<RecastCrowdComponent>();
+				auto newCrowd = r.try_get<RecastCrowdComponent>(pathfinding.environment);
 				if (!newCrowd)
-					newCrowd = &attachCrowdComponent(newEnvironment);
+					newCrowd = &attachCrowdComponent({ r, pathfinding.environment });
 
-				const auto objectInfo = getObjectInfo(getEnvironmentInfo(newEnvironment), e.get<TransformComponent>(), pathfinding);
-				attachAgentComponent(e, objectInfo, *newCrowd, newEnvironment.id);
+				const auto objectInfo = getObjectInfo(getEnvironmentInfo({ r, pathfinding.environment }), r.get<TransformComponent>(e), pathfinding);
+				attachAgentComponent({ r, e }, objectInfo, *newCrowd, pathfinding.environment);
 			}
 		}
 
-		static void updateCrowds(float deltaTime) noexcept {
+		static void updateCrowds(entt::registry & r, float deltaTime) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			std::atomic<size_t> jobsLeft = 0;
+			const auto view = r.view<RecastCrowdComponent>();
+			std::for_each(std::execution::par_unseq, view.begin(), view.end(), [&](entt::entity environment) noexcept {
+				const auto & [crowd] = view.get(environment);
+				updateCrowd(deltaTime, { r, environment }, crowd);
+			});
+		}
 
-			for (const auto & [environment, crowd, environmentTransform] : entities.with<RecastCrowdComponent, TransformComponent>()) {
-				++jobsLeft;
-				threadPool().runTask([&, environment]() noexcept {
-					const auto cleanup = putils::onScopeExit([&] { --jobsLeft; });
-					const auto & navMesh = instanceHelper::getModel<RecastNavMeshComponent>(environment);
-					const auto environmentInfo = getEnvironmentInfo(environment);
+		static void updateCrowd(float deltaTime, entt::handle environment, const RecastCrowdComponent & crowd) noexcept {
+			KENGINE_PROFILING_SCOPE;
 
-					static dtCrowdAgent * activeAgents[KENGINE_RECAST_MAX_AGENTS];
-					const auto nbAgents = crowd.crowd->getActiveAgents(activeAgents, (int)putils::lengthof(activeAgents));
+			const auto & navMesh = instanceHelper::getModel<RecastNavMeshComponent>(environment);
+			const auto environmentInfo = getEnvironmentInfo(environment);
 
-					// Overwrite agent with user-updated components
-					for (int i = 0; i < nbAgents; ++i) {
-						const auto agent = activeAgents[i];
-						auto e = entities[(EntityID)agent->params.userData];
-						writeToAgent(e, e.get<TransformComponent>(), e.get<PathfindingComponent>(), environmentInfo, navMesh, crowd);
-					}
+			static dtCrowdAgent * activeAgents[KENGINE_RECAST_MAX_AGENTS];
 
-					crowd.crowd->update(deltaTime, nullptr);
+			const auto nbAgents = crowd.crowd->getActiveAgents(activeAgents, (int)putils::lengthof(activeAgents));
 
-					// Update user components with agent info
-					for (int i = 0; i < nbAgents; ++i) {
-						const auto agent = activeAgents[i];
-						auto e = entities[(EntityID)agent->params.userData];
-						readFromAgent(e.get<TransformComponent>(), e.get<PhysicsComponent>(), *agent, environmentInfo);
-					}
-				});
+			auto & r = *environment.registry();
+
+			// Overwrite agent with user-updated components
+			for (int i = 0; i < nbAgents; ++i) {
+				const auto agent = activeAgents[i];
+				const auto e = entt::entity(intptr_t(agent->params.userData));
+				const auto & [transform, pathfinding] = r.get<TransformComponent, PathfindingComponent>(e);
+				writeToAgent({ r, e }, transform, pathfinding, environmentInfo, navMesh, crowd);
 			}
 
-			while (jobsLeft > 0);
+			crowd.crowd->update(deltaTime, nullptr);
+
+			// Update user components with agent info
+			for (int i = 0; i < nbAgents; ++i) {
+				const auto agent = activeAgents[i];
+				const auto e = entt::entity(intptr_t(agent->params.userData));
+				const auto & [transform, physics] = r.get<TransformComponent, PhysicsComponent>(e);
+				readFromAgent(transform, physics, *agent, environmentInfo);
+			}
 		}
 
 		static void readFromAgent(TransformComponent & transform, PhysicsComponent & physics, const dtCrowdAgent & agent, const EnvironmentInfo & environmentInfo) noexcept {
@@ -238,7 +246,7 @@ namespace kengine::recast {
 			transform.boundingBox.position = matrixHelper::convertToReferencial(agent.npos, environmentInfo.modelToWorld);
 		}
 
-		static void writeToAgent(Entity & e, const TransformComponent & transform, const PathfindingComponent & pathfinding, const EnvironmentInfo & environmentInfo, const RecastNavMeshComponent & navMesh, const RecastCrowdComponent & crowd) noexcept {
+		static void writeToAgent(entt::handle e, const TransformComponent & transform, const PathfindingComponent & pathfinding, const EnvironmentInfo & environmentInfo, const RecastNavMeshComponent & navMesh, const RecastCrowdComponent & crowd) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			const auto objectInfo = getObjectInfo(environmentInfo, transform, pathfinding);
@@ -249,7 +257,7 @@ namespace kengine::recast {
 			updateDestination(e, navMesh, crowd, destinationInModel, searchExtents);
 		}
 
-		static void updateAgentComponent(Entity & e, const ObjectInfo & objectInfo, const RecastCrowdComponent & crowd) noexcept {
+		static void updateAgentComponent(entt::handle e, const ObjectInfo & objectInfo, const RecastCrowdComponent & crowd) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			const auto & agent = e.get<RecastAgentComponent>();
@@ -259,7 +267,7 @@ namespace kengine::recast {
 			memcpy(editableAgent->nvel, e.get<PhysicsComponent>().movement.raw, sizeof(float[3]));
 		}
 
-		static void updateDestination(Entity & e, const RecastNavMeshComponent & navMesh, const RecastCrowdComponent & crowd, const putils::Point3f & destinationInModel, const putils::Point3f & searchExtents) noexcept {
+		static void updateDestination(entt::handle e, const RecastNavMeshComponent & navMesh, const RecastCrowdComponent & crowd, const putils::Point3f & destinationInModel, const putils::Point3f & searchExtents) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			static const dtQueryFilter filter;
@@ -271,11 +279,11 @@ namespace kengine::recast {
 
 			const auto & agent = e.get<RecastAgentComponent>();
 			if (!crowd.crowd->requestMoveTarget(agent.index, nearestPoly, nearestPt))
-				kengine_assert_failed("[Recast] Failed to request move");
+				kengine_assert_failed(*e.registry(), "[Recast] Failed to request move");
 		}
 	};
 
-	void doPathfinding(float deltaTime) noexcept {
-		doPathfinding::run(deltaTime);
+	void doPathfinding(entt::registry & r, float deltaTime) noexcept {
+		doPathfinding::run(r, deltaTime);
 	}
 }

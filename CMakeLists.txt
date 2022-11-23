@@ -99,7 +99,7 @@ putils_src_files(src_files
 
 option(KENGINE_TYPE_REGISTRATION "Automatically register kengine types" OFF)
 if (KENGINE_TYPE_REGISTRATION)
-    file(GLOB type_files impl/types/*.cpp impl/types/*.hpp)
+    file(GLOB type_files types/*.cpp types/*.hpp)
     set(src_files ${src_files} ${type_files})
 endif()
 
@@ -163,7 +163,6 @@ if (KENGINE_TESTS)
     enable_testing()
     set(test_exe_name kengine_tests)
     file(GLOB test_src
-            tests/*.tests.cpp
             helpers/tests/*.tests.cpp
             impl/tests/*.tests.cpp)
 

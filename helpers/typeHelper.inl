@@ -1,5 +1,8 @@
 #include "typeHelper.hpp"
 
+// entt
+#include <entt/entity/registry.hpp>
+
 // reflection
 #include "reflection.hpp"
 
@@ -18,29 +21,26 @@ namespace kengine::typeHelper {
     }
 
     template <typename T>
-    Entity getTypeEntity() noexcept {
+    entt::entity getTypeEntity(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
-        static const auto init = [](EntityID & toReset) noexcept {
-            for (const auto [e, comp] : entities.with<impl::TypeEntityTag>())
+        static const auto init = [&](entt::entity & toReset) noexcept {
+            for (const auto [e, comp] : r.view<impl::TypeEntityTag>().each())
                 if (comp.type == putils::meta::type<T>::index)
-                    return e.id;
+                    return e;
 
             if (putils::reflection::has_class_name<T>())
-                kengine_log(Log, "Init/TypeEntity", putils::reflection::get_class_name<T>());
+                kengine_log(r, Log, "Init/TypeEntity", putils::reflection::get_class_name<T>());
 
-            const auto newTypeEntity = entities.create([&](Entity & e) {
-                e += impl::TypeEntityTag{ putils::meta::type<T>::index };
-                e += functions::OnTerminate{ [&] { toReset = INVALID_ID; }};
-            });
-
-            return newTypeEntity.id;
+			const auto entity = r.create();
+			r.emplace<impl::TypeEntityTag>(entity, putils::meta::type<T>::index);
+			r.emplace<functions::OnTerminate>(entity, [&] { toReset = entt::null; });
+            return entity;
         };
 
-        static EntityID ret = init(ret);
-        if (ret == INVALID_ID)
-            ret = init(ret);
-
-        return entities[ret];
+        static entt::entity ret = entt::null;
+		if (ret == entt::null)
+			ret = init(ret);
+		return ret;
     }
 }

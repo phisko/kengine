@@ -1,10 +1,13 @@
 #pragma once
 
+// stl
+#include <memory>
+
 // sfml
 #include <SFML/Graphics/RenderWindow.hpp>
 
 namespace kengine {
     struct SFMLWindowComponent {
-        sf::RenderWindow window;
+        std::unique_ptr<sf::RenderWindow> window;
     };
 }

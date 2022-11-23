@@ -1,28 +1,26 @@
 #pragma once
 
-#include "kengine.hpp"
+// entt
+#include <entt/entity/fwd.hpp>
 
 // kengine data
 #include "data/InstanceComponent.hpp"
 
-// kengine helpers
-#include "helpers/assertHelper.hpp"
-
 namespace kengine::instanceHelper {
 	template<typename Comp>
-	bool modelHas(const Entity & instance) noexcept;
+	bool modelHas(entt::const_handle instance) noexcept;
 	template<typename Comp>
-	bool modelHas(const InstanceComponent & instance) noexcept;
+	bool modelHas(const entt::registry & r, const InstanceComponent & instance) noexcept;
 
 	template<typename Comp>
-	const Comp & getModel(const Entity & instance) noexcept;
+	const Comp & getModel(entt::const_handle instance) noexcept;
 	template<typename Comp>
-	const Comp & getModel(const InstanceComponent & instance) noexcept;
+	const Comp & getModel(const entt::registry & r, const InstanceComponent & instance) noexcept;
 
 	template<typename Comp>
-	const Comp * tryGetModel(const Entity & instance) noexcept;
+	const Comp * tryGetModel(entt::const_handle instance) noexcept;
 	template<typename Comp>
-	const Comp * tryGetModel(const InstanceComponent & instance) noexcept;
+	const Comp * tryGetModel(const entt::registry & r, const InstanceComponent & instance) noexcept;
 }
 
 #include "instanceHelper.inl"

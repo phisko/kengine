@@ -35,14 +35,6 @@ putils::Point2ui size = { 1280, 720 };
 bool fullscreen = false;
 ```
 
-### shutdownOnClose
-
-```cpp
-bool shutdownOnClose = true;
-```
-
-Indicates whether the application should shut down when users close the window.
-
 ### assignedSystem
 
 ```cpp

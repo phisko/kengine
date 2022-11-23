@@ -1,5 +1,7 @@
 #include "logHelper.hpp"
-#include "kengine.hpp"
+
+// entt
+#include <entt/entity/registry.hpp>
 
 // putils
 #include "command_line_arguments.hpp"
@@ -26,7 +28,7 @@ putils_reflection_info {
 #undef refltype
 
 namespace kengine::logHelper {
-    LogSeverity parseCommandLineSeverity() noexcept {
+    LogSeverity parseCommandLineSeverity(const entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
         static std::optional<LogSeverity> commandLineSeverity;
@@ -34,7 +36,7 @@ namespace kengine::logHelper {
             return *commandLineSeverity;
 
         LogSeverity result = LogSeverity::Log;
-        for (const auto & [e, commandLine] : entities.with<CommandLineComponent>()) {
+        for (const auto & [e, commandLine] : r.view<CommandLineComponent>().each()) {
             const auto options = putils::parseArguments<Options>(commandLine.arguments);
             result = options.logLevel;
         }
@@ -42,7 +44,7 @@ namespace kengine::logHelper {
         return *commandLineSeverity;
     }
 
-    void log(LogSeverity severity, const char * category, const char * message) noexcept {
+    void log(const entt::registry & r, LogSeverity severity, const char * category, const char * message) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
         const kengine::LogEvent event{
@@ -51,7 +53,7 @@ namespace kengine::logHelper {
             .message = message
         };
 
-        for (const auto & [e, log] : entities.with<functions::Log>())
+        for (const auto & [e, log] : r.view<functions::Log>().each())
             log(event);
     }
 }
