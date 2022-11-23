@@ -5,6 +5,9 @@
 // sol
 #include <sol/sol.hpp>
 
+// reflection
+#include "reflection.hpp"
+
 namespace kengine {
 	struct LuaStateComponent {
 		sol::state * state = nullptr;

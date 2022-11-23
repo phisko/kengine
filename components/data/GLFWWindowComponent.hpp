@@ -3,6 +3,9 @@
 // glfw
 #include <GLFW/glfw3.h>
 
+// reflection
+#include "reflection.hpp"
+
 // putils
 #include "RAII.hpp"
 
