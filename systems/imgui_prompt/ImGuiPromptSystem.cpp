@@ -1,12 +1,14 @@
 #include "ImGuiPromptSystem.hpp"
 
 // entt
+#include <entt/entity/handle.hpp>
 #include <entt/entity/registry.hpp>
 
 // imgui
 #include <imgui.h>
 
 // putils
+#include "forward_to.hpp"
 #include "reflection_helpers/imgui_helper.hpp"
 
 // kengine data
@@ -19,56 +21,63 @@
 #include "functions/Execute.hpp"
 
 // kengine helpers
+#include "helpers/assertHelper.hpp"
 #include "helpers/logHelper.hpp"
 #include "helpers/profilingHelper.hpp"
 
-enum class Language {
-	Lua,
-	Python
-};
-
 namespace kengine {
 	struct ImGuiPromptSystem {
-		static void init(entt::registry & r) noexcept {
+		entt::registry & r;
+		bool * enabled;
+
+		enum class Language {
+			Lua,
+			Python
+		};
+
+		Language selectedLanguage = Language::Lua;
+		int maxLines = 128;
+		char buff[1024];
+
+		ImGuiPromptSystem(entt::handle e) noexcept
+			: r(*e.registry())
+		{
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, Log, "Init", "ImGuiPromptSystem");
 
-			_r = &r;
+			e.emplace<functions::Execute>(putils_forward_to_this(execute));
 
-			const auto e = r.create();
-			r.emplace<functions::Execute>(e, execute);
-
-			r.emplace<NameComponent>(e, "Prompt");
-			auto & tool = r.emplace<ImGuiToolComponent>(e);
+			e.emplace<NameComponent>("Prompt");
+			auto & tool = e.emplace<ImGuiToolComponent>();
 			enabled = &tool.enabled;
 		}
 
-		static void execute(float deltaTime) noexcept {
+		void execute(float deltaTime) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			if (!*enabled)
 				return;
 
-			kengine_log(*_r, Verbose, "Execute", "ImGuiPromptSystem");
+			kengine_log(r, Verbose, "Execute", "ImGuiPromptSystem");
 
 			if (ImGui::Begin("Prompt", enabled)) {
 				ImGui::Columns(2);
 				drawHistory();
 				ImGui::NextColumn();
 				if (drawPrompt()) {
-					_history.addLine(buff, false, putils::NormalizedColor{ 0.f }); // cyan
+					history.addLine(buff, false, putils::NormalizedColor{ 0.f }); // cyan
 					eval();
 					buff[0] = 0;
-					while (_history.lines.size() > maxLines && !_history.lines.empty())
-						_history.lines.pop_front();
+					while (history.lines.size() > maxLines && !history.lines.empty())
+						history.lines.pop_front();
 				}
 				ImGui::Columns();
 			}
 			ImGui::End();
 		}
 
-		static inline bool shouldScrollDown = false;
-		static void drawHistory() noexcept {
+		bool shouldScrollDown = false;
+		void drawHistory() noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			int tmp = maxLines;
@@ -76,7 +85,7 @@ namespace kengine {
 				maxLines = tmp;
 
 			ImGui::BeginChild("History");
-			for (const auto & line : _history.lines) {
+			for (const auto & line : history.lines) {
 				if (line.separator)
 					ImGui::Separator();
 
@@ -97,18 +106,18 @@ namespace kengine {
 			ImGui::EndChild();
 		}
 
-		static bool drawPrompt() noexcept {
+		bool firstDrawPrompt = true;
+		bool drawPrompt() noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			static bool first = true;
-			if (putils::reflection::imguiEnumCombo("##Language", selectedLanguage) || first) {
-				_history.addLine(
+			if (putils::reflection::imguiEnumCombo("##Language", selectedLanguage) || firstDrawPrompt) {
+				history.addLine(
 					std::string(magic_enum::enum_names<Language>()[(int)selectedLanguage]),
 					true,
 					putils::NormalizedColor{ 1.f, 1.f, 0.f }
 				);
 				shouldScrollDown = true;
-				first = false;
+				firstDrawPrompt = false;
 			}
 
 			const bool ret = ImGui::InputTextMultiline("##Prompt", buff, putils::lengthof(buff), { -1.f, -1.f }, ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_AllowTabInput);
@@ -122,7 +131,7 @@ namespace kengine {
 			return ret;
 		}
 
-		static void eval() noexcept {
+		void eval() noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			switch (selectedLanguage) {
@@ -137,8 +146,9 @@ namespace kengine {
 			}
 		}
 
-		static inline bool active = false;
-		static void evalLua() noexcept {
+		bool active = false;
+		bool firstEvalLua = true;
+		void evalLua() noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 #ifndef KENGINE_LUA
@@ -149,14 +159,12 @@ namespace kengine {
 				putils::NormalizedColor{ 1.f, 0.f, 0.f }
 			);
 #else
-			static bool first = true;
+			kengine_logf(r, Log, "Execute/ImGuiPromptSystem", "Evaluating Lua script: '%s'", buff);
 
-			kengine_logf(*_r, Log, "Execute/ImGuiPromptSystem", "Evaluating Lua script: '%s'", buff);
-
-			for (const auto & [e, state] : _r->view<kengine::LuaStateComponent>().each()) {
-				if (first) {
+			for (const auto & [e, state] : r.view<kengine::LuaStateComponent>().each()) {
+				if (firstEvalLua) {
 					setupOutputRedirect(*state.state);
-					first = false;
+					firstEvalLua = false;
 				}
 
 				active = true;
@@ -164,20 +172,25 @@ namespace kengine {
 					state.state->script(buff);
 				}
 				catch (const std::exception & e) {
-					_history.addError(e.what());
+					history.addError(e.what());
 				}
 				active = false;
 			}
 #endif
 		}
 
-		static void setupOutputRedirect(sol::state & state) noexcept {
+#ifdef KENGINE_LUA
+		void setupOutputRedirect(sol::state & state) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(*_r, Log, "Init/ImGuiPromptSystem", "Setting up output redirection for Lua");
+			kengine_log(r, Log, "Init/ImGuiPromptSystem", "Setting up output redirection for Lua");
 
-			static const luaL_Reg printlib[] = {
-				{ "print", [](lua_State * L) { return addToHistoryOrPrint(L, putils::NormalizedColor{}); } },
-				{ "error", [](lua_State * L) { return addToHistoryOrPrint(L, putils::NormalizedColor{ 1.f, 0.f, 0.f }); } },
+			static ImGuiPromptSystem * g_this = nullptr;
+			kengine_assert_with_message(r, !g_this, "ImGuiPromptSystem doesn't support existing in multiple registries currently. Fix this!");
+			g_this = this;
+
+			const luaL_Reg printlib[3] = {
+				{ "print", [](lua_State * L) { return g_this->addToHistoryOrPrint(L, putils::NormalizedColor{}); } },
+				{ "error", [](lua_State * L) { return g_this->addToHistoryOrPrint(L, putils::NormalizedColor{ 1.f, 0.f, 0.f }); } },
 				{ nullptr, nullptr }
 			};
 
@@ -186,7 +199,7 @@ namespace kengine {
 			lua_pop(state, 1);
 		}
 
-		static int addToHistoryOrPrint(lua_State * L, const putils::NormalizedColor & color) noexcept {
+		int addToHistoryOrPrint(lua_State * L, const putils::NormalizedColor & color) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			std::string line;
@@ -208,13 +221,14 @@ namespace kengine {
 			}
 
 			if (active)
-				_history.addLine(std::move(line), false, color);
+				history.addLine(std::move(line), false, color);
 			else
 				std::cout << line << std::endl;
 			return 0;
 		}
+#endif
 
-		static void evalPython() {
+		void evalPython() {
 			KENGINE_PROFILING_SCOPE;
 
 #ifndef KENGINE_PYTHON
@@ -225,7 +239,7 @@ namespace kengine {
 				putils::NormalizedColor{ 1.f, 0.f, 0.f }
 			);
 #else
-			kengine_logf(*_r, Log, "Execute/ImGuiPromptSystem", "Evaluating Python script: '%s'", buff);
+			kengine_logf(r, Log, "Execute/ImGuiPromptSystem", "Evaluating Python script: '%s'", buff);
 
 #ifdef __GNUC__
 // Ignore "declared with greater visibility than the type of its field" warnings
@@ -272,26 +286,20 @@ namespace kengine {
 				py::exec(buff);
 			}
 			catch (const std::exception & e) {
-				_history.addError(e.what());
+				history.addError(e.what());
 			}
 
 			auto output = redirect.stdoutString();
 			if (!output.empty())
-				_history.addLine(std::move(output));
+				history.addLine(std::move(output));
 
 			auto err = redirect.stderrString();
 			if (!err.empty())
-				_history.addError(std::move(err));
+				history.addError(std::move(err));
 #endif
 		}
 
-		static inline bool * enabled;
-
-		static inline Language selectedLanguage = Language::Lua;
-		static inline int maxLines = 128;
-		static inline char buff[1024];
-
-		static inline struct History {
+		struct {
 			struct Line {
 				std::string text;
 				bool separator = false;
@@ -309,12 +317,11 @@ namespace kengine {
 			void addError(S && s, bool separator = false) noexcept {
 				addLine(FWD(s), separator, putils::NormalizedColor{ 1.f, 0.f, 0.f });
 			}
-		} _history;
-
-		static inline entt::registry * _r;
+		} history;
 	};
 
-	void ImGuiPromptSystem(entt::registry & r) noexcept {
-		ImGuiPromptSystem::init(r);
+	void addImGuiPromptSystem(entt::registry & r) noexcept {
+		const entt::handle e{ r, r.create() };
+		e.emplace<ImGuiPromptSystem>(e);
 	}
 }

@@ -8,6 +8,7 @@
 #include <imgui.h>
 
 // putils
+#include "forward_to.hpp"
 #include "string.hpp"
 #include "to_string.hpp"
 
@@ -32,40 +33,42 @@
 
 namespace kengine {
 	struct ImGuiEntitySelectorSystem {
-		static void init(entt::registry & r) noexcept {
+		entt::registry & r;
+		bool * enabled;
+
+		ImGuiEntitySelectorSystem(entt::handle e) noexcept
+			: r(*e.registry())
+		{
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, Log, "Init", "ImGuiEntitySelectorSystem");
 
-			_r = &r;
+			e.emplace<functions::Execute>(putils_forward_to_this(execute));
 
-			const auto e = r.create();
-			r.emplace<functions::Execute>(e, execute);
-
-			r.emplace<NameComponent>(e, "Entity selector");
-			auto & tool = r.emplace<ImGuiToolComponent>(e, true);
-			_enabled = &tool.enabled;
+			e.emplace<NameComponent>("Entity selector");
+			auto & tool = e.emplace<ImGuiToolComponent>(true);
+			enabled = &tool.enabled;
 		}
 
-		static void execute(float deltaTime) noexcept {
+		char nameSearch[1024];
+		void execute(float deltaTime) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			if (!*_enabled)
+			if (!*enabled)
 				return;
-			kengine_log(*_r, Verbose, "Execute", "ImGuiEntitySelector");
+			kengine_log(r, Verbose, "Execute", "ImGuiEntitySelector");
 
-			if (ImGui::Begin("Entity selector", _enabled)) {
-				static char nameSearch[1024];
+			if (ImGui::Begin("Entity selector", enabled)) {
 				ImGui::InputText("Search", nameSearch, sizeof(nameSearch));
 
 				ImGui::Separator();
 
 				ImGui::BeginChild("child");
-				_r->each([&](entt::entity e) {
+				r.each([&](entt::entity e) {
 					if (matches(e, nameSearch)) {
-						if (_r->all_of<SelectedComponent>(e))
-							_r->erase<SelectedComponent>(e);
+						if (r.all_of<SelectedComponent>(e))
+							r.erase<SelectedComponent>(e);
 						else
-							_r->emplace<SelectedComponent>(e);
+							r.emplace<SelectedComponent>(e);
 					}
 				});
 				ImGui::EndChild();
@@ -73,11 +76,11 @@ namespace kengine {
 			ImGui::End();
 		}
 
-		static bool matches(entt::entity e, const char * str) noexcept {
+		bool matches(entt::entity e, const char * str) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			putils::string<1024> displayText("[%d]", e);;
-			const auto name = _r->try_get<NameComponent>(e);
+			const auto name = r.try_get<NameComponent>(e);
 			if (name) {
 				displayText += " ";
 				displayText += name->name;
@@ -92,10 +95,10 @@ namespace kengine {
 					matches = true;
 					displayText += "ID";
 				} else {
-					const auto types = sortHelper::getNameSortedEntities<const meta::Has, const meta::MatchString>(*_r);
+					const auto types = sortHelper::getNameSortedEntities<const meta::Has, const meta::MatchString>(r);
 
 					for (const auto & [_, type, has, matchFunc]: types) {
-						if (!has->call({*_r, e}) || !matchFunc->call({ *_r, e }, str))
+						if (!has->call({r, e}) || !matchFunc->call({ r, e }, str))
 							continue;
 
 						if (displayText.size() + type->name.size() + 2 < decltype(displayText)::max_size) {
@@ -117,24 +120,22 @@ namespace kengine {
 				if (ImGui::MenuItem("Select"))
 					ret = true;
 				if (ImGui::MenuItem("Remove")) {
-					_r->destroy(e);
+					r.destroy(e);
 					return false;
 				}
 				ImGui::EndPopup();
 			}
 			if (openTreeNode) {
-				imguiHelper::displayEntity({ *_r, e });
+				imguiHelper::displayEntity({ r, e });
 				ImGui::TreePop();
 			}
 
 			return ret;
 		}
-
-		static inline bool * _enabled;
-		static inline entt::registry * _r;
 	};
 
-	void ImGuiEntitySelectorSystem(entt::registry & r) noexcept {
-		ImGuiEntitySelectorSystem::init(r);
+	void addImGuiEntitySelectorSystem(entt::registry & r) noexcept {
+		const entt::handle e{ r, r.create() };
+		e.emplace<ImGuiEntitySelectorSystem>(e);
 	}
 }

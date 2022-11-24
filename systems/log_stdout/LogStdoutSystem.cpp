@@ -5,6 +5,7 @@
 #include <mutex>
 
 // entt
+#include <entt/entity/handle.hpp>
 #include <entt/entity/registry.hpp>
 
 // magic_enum
@@ -14,6 +15,7 @@
 #include <termcolor/termcolor.hpp>
 
 // putils
+#include "forward_to.hpp"
 #include "thread_name.hpp"
 
 // kengine data
@@ -28,28 +30,29 @@
 
 namespace kengine {
 	struct LogStdoutSystem {
-		static void init(entt::registry & r) noexcept {
+		std::mutex mutex;
+		LogSeverity * severity = nullptr;
+
+		LogStdoutSystem(entt::handle e) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			const auto e = r.create();
-			auto & severityControl = r.emplace<LogSeverityControl>(e);
-			severityControl.severity = logHelper::parseCommandLineSeverity(r);
-			_severity = &severityControl.severity;
+			auto & severityControl = e.emplace<LogSeverityControl>();
+			severityControl.severity = logHelper::parseCommandLineSeverity(*e.registry());
+			severity = &severityControl.severity;
 
-			r.emplace<AdjustableComponent>(e) = {
+			e.emplace<AdjustableComponent>() = {
 				"Log", {
-					{ "Standard output", _severity }
+					{ "Standard output", severity }
 				}
 			};
 
-			r.emplace<functions::Log>(e, log);
+			e.emplace<functions::Log>(putils_forward_to_this(log));
 		}
 
-		static void log(const LogEvent & event) noexcept {
+		void log(const LogEvent & event) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			static std::mutex mutex;
-			if (event.severity < *_severity)
+			if (event.severity < *severity)
 				return;
 
 			const std::lock_guard lock(mutex);
@@ -66,11 +69,10 @@ namespace kengine {
 			std::cout << magic_enum::enum_name<LogSeverity>(event.severity) << "\t[" << event.category << "]\t" << event.message << std::endl;
 			std::cout << termcolor::reset;
 		}
-
-		static inline const LogSeverity * _severity = nullptr;
 	};
 
-	void LogStdoutSystem(entt::registry & r) noexcept {
-		LogStdoutSystem::init(r);
+	void addLogStdoutSystem(entt::registry & r) noexcept {
+		const entt::handle e{ r, r.create() };
+		e.emplace<LogStdoutSystem>(e);
 	}
 }

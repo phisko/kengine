@@ -17,12 +17,11 @@
 
 namespace kengine {
 	struct OnClickSystem {
-		static void init(entt::registry & r) noexcept {
+		OnClickSystem(entt::handle e) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, Log, "Init", "OnClickSystem");
+			kengine_log(*e.registry(), Log, "Init", "OnClickSystem");
 
-			const auto e = r.create();
-			r.emplace<InputComponent>(e).onMouseButton = onMouseButton;
+			e.emplace<InputComponent>().onMouseButton = onMouseButton;
 		}
 
 		static void onMouseButton(entt::handle window, int button, const putils::Point2f & coords, bool pressed) noexcept {
@@ -50,7 +49,8 @@ namespace kengine {
 		}
 	};
 
-	void OnClickSystem(entt::registry & r) noexcept {
-		OnClickSystem::init(r);
+	void addOnClickSystem(entt::registry & r) noexcept {
+		const entt::handle e{ r, r.create() };
+		e.emplace<OnClickSystem>(e);
 	}
 }

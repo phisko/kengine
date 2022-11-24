@@ -10,12 +10,14 @@
 #include <debugapi.h>
 
 // entt
+#include <entt/entity/handle.hpp>
 #include <entt/entity/registry.hpp>
 
 // magic_enum
 #include <magic_enum.hpp>
 
 // putils
+#include "forward_to.hpp"
 #include "thread_name.hpp"
 
 // kengine data
@@ -30,30 +32,29 @@
 
 namespace kengine {
 	struct LogVisualStudioSystem {
-		static void init(entt::registry & r) noexcept {
-#ifdef _WIN32
+		const LogSeverity * severity = nullptr;
+		std::mutex mutex;
+
+		LogVisualStudioSystem(entt::handle e) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			const auto e = r.create();
-			auto & severityControl = r.emplace<LogSeverityControl>(e);
-			severityControl.severity = logHelper::parseCommandLineSeverity(r);
-			_severity = &severityControl.severity;
+			auto & severityControl = e.emplace<LogSeverityControl>();
+			severityControl.severity = logHelper::parseCommandLineSeverity(*e.registry());
+			severity = &severityControl.severity;
 
-			r.emplace<AdjustableComponent>(e) = {
+			e.emplace<AdjustableComponent>() = {
 				"Log", {
-					{ "Visual Studio Console", _severity }
+					{ "Visual Studio Console", severity }
 				}
 			};
 
-			r.emplace<functions::Log>(e, log);
-#endif
+			e.emplace<functions::Log>(putils_forward_to_this(log));
 		}
 
-#ifdef _WIN32
-		static void log(const LogEvent & event) noexcept {
+		void log(const LogEvent & event) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			if (event.severity < *_severity)
+			if (event.severity < *severity)
 				return;
 
 			putils::string<4096> s;
@@ -68,17 +69,14 @@ namespace kengine {
 			s += event.message;
 			s += '\n';
 
-			static std::mutex mutex;
 			const std::lock_guard lock(mutex);
 			OutputDebugStringA(s.str().c_str());
 		}
-#endif
-
-		static inline const LogSeverity * _severity = nullptr;
 	};
 
-	void LogVisualStudioSystem(entt::registry & r) noexcept {
-		LogVisualStudioSystem::init(r);
+	void addLogVisualStudioSystem(entt::registry & r) noexcept {
+		const entt::handle e{ r, r.create() };
+		e.emplace<LogVisualStudioSystem>(e);
 	}
 }
 

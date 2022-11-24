@@ -4,5 +4,5 @@
 #include <entt/entity/fwd.hpp>
 
 namespace kengine {
-	KENGINE_INPUT_EXPORT void InputSystem(entt::registry & r) noexcept;
+	KENGINE_INPUT_EXPORT void addInputSystem(entt::registry & r) noexcept;
 }

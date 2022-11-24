@@ -1,6 +1,7 @@
 #include "SFMLSystem.hpp"
 
 // entt
+#include <entt/entity/handle.hpp>
 #include <entt/entity/registry.hpp>
 
 // imgui
@@ -15,6 +16,7 @@
 #include <SFML/Window/Event.hpp>
 
 // putils
+#include "forward_to.hpp"
 #include "vector.hpp"
 
 // kengine data
@@ -75,52 +77,53 @@ namespace {
 	}
 
 	struct SFMLSystem {
-		static void init(entt::registry & r) noexcept {
+		entt::registry & r;
+
+		sf::Clock deltaClock;
+		InputBufferComponent * inputBuffer = nullptr;
+
+		SFMLSystem(entt::handle e) noexcept
+			: r(*e.registry())
+		{
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, Log, "Init", "SFMLSystem");
 
-			const auto e = r.create();
-			r.on_construct<WindowComponent>().connect<[](entt::registry & r, entt::entity e) noexcept {
-				createWindow(e, r.get<WindowComponent>(e));
-			}>();
+			e.emplace<functions::Execute>(putils_forward_to_this(execute));
+			e.emplace<functions::OnTerminate>(putils_forward_to_this(terminate));
 
-			r.on_construct<ModelComponent>().connect<[](entt::registry & r, entt::entity e) noexcept {
-				createTexture(e, r.get<ModelComponent>(e));
-			}>();
+			auto & scale = e.emplace<ImGuiScaleComponent>();
 
-			r.on_destroy<SFMLWindowComponent>().connect<[](entt::registry & r, entt::entity e) noexcept {
-				kengine_log(r, Log, "SFML", "Shutting down ImGui for window");
-				const auto & sfWindow = r.get<SFMLWindowComponent>(e);
-				ImGui::SFML::Shutdown(*sfWindow.window);
-			}>();
-
-			r.emplace<functions::Execute>(e, execute);
-			r.emplace<functions::OnTerminate>(e, terminate);
-
-			auto & scale = r.emplace<ImGuiScaleComponent>(e);
-
-			r.emplace<AdjustableComponent>(e) = {
+			e.emplace<AdjustableComponent>() = {
 				"ImGui", {
 					{ "scale", &scale.scale }
 				}
 			};
+
+			r.on_construct<WindowComponent>().connect<&SFMLSystem::createWindow>(this);
+			r.on_construct<ModelComponent>().connect<createTexture>();
 		}
 
-		static void execute(float deltaTime) noexcept {
+		~SFMLSystem() noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(*_r, Verbose, "Execute", "SFMLSystem");
+			r.on_construct<WindowComponent>().disconnect<&SFMLSystem::createWindow>(this);
+			r.on_construct<ModelComponent>().disconnect<createTexture>();
+		}
 
-			const auto sfDeltaTime = g_deltaClock.restart();
+		void execute(float deltaTime) noexcept {
+			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, Verbose, "Execute", "SFMLSystem");
 
-			if (g_inputBuffer == nullptr) {
-				for (const auto & [e, inputBuffer] : _r->view<InputBufferComponent>().each()) {
-					g_inputBuffer = &inputBuffer;
+			const auto sfDeltaTime = deltaClock.restart();
+
+			if (inputBuffer == nullptr) {
+				for (const auto & [e, buffer] : r.view<InputBufferComponent>().each()) {
+					inputBuffer = &buffer;
 					break;
 				}
 			}
 
-			for (auto [window, sfWindow] : _r->view<SFMLWindowComponent>().each()) {
-				kengine_logf(*_r, Verbose, "Execute/SFMLSystem", "Processing window %zu", window);
+			for (auto [window, sfWindow] : r.view<SFMLWindowComponent>().each()) {
+				kengine_logf(r, Verbose, "Execute/SFMLSystem", "Processing window %zu", window);
 				if (!updateWindowState(window, sfWindow))
 					continue;
 				// We process events after rendering, even though it's not the expected order, because
@@ -130,19 +133,19 @@ namespace {
 			}
 		}
 
-		static bool updateWindowState(entt::entity windowEntity, SFMLWindowComponent & sfWindowComp) noexcept {
+		bool updateWindowState(entt::entity windowEntity, SFMLWindowComponent & sfWindowComp) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			const auto * windowComp = _r->try_get<WindowComponent>(windowEntity);
+			const auto * windowComp = r.try_get<WindowComponent>(windowEntity);
 			if (windowComp == nullptr) {
-				kengine_logf(*_r, Verbose, "Execute/SFMLSystem", "%zu: destroying window as WindowComponent was removed", windowEntity);
-				_r->remove<SFMLWindowComponent>(windowEntity);
+				kengine_logf(r, Verbose, "Execute/SFMLSystem", "%zu: destroying window as WindowComponent was removed", windowEntity);
+				r.remove<SFMLWindowComponent>(windowEntity);
 				return false;
 			}
 
 			if (!sfWindowComp.window->isOpen()) {
-				kengine_logf(*_r, Verbose, "Execute/SFMLSystem", "%zu: window was closed", windowEntity);
-				_r->destroy(windowEntity);
+				kengine_logf(r, Verbose, "Execute/SFMLSystem", "%zu: window was closed", windowEntity);
+				r.destroy(windowEntity);
 				return false;
 			}
 
@@ -150,7 +153,7 @@ namespace {
 			return true;
 		}
 
-		static void processEvents(entt::entity window, sf::RenderWindow & sfWindow, sf::Time deltaTime) noexcept {
+		void processEvents(entt::entity window, sf::RenderWindow & sfWindow, sf::Time deltaTime) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			sf::Event event;
@@ -165,10 +168,11 @@ namespace {
 			ImGui::SFML::Update(sfWindow, deltaTime);
 		}
 
-		static void processInput(entt::entity window, const sf::Event & e) noexcept {
+		putils::Point2f previousMousePos{ 0.f, 0.f };
+		void processInput(entt::entity window, const sf::Event & e) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			if (g_inputBuffer == nullptr)
+			if (inputBuffer == nullptr)
 				return;
 
 			switch (e.type) {
@@ -177,7 +181,7 @@ namespace {
 					if (ImGui::GetIO().WantCaptureKeyboard)
 						break;
 
-					g_inputBuffer->keys.push_back(InputBufferComponent::KeyEvent{
+					inputBuffer->keys.push_back(InputBufferComponent::KeyEvent{
 						.window = window,
 						.key = e.key.code,
 						.pressed = e.type == sf::Event::KeyPressed
@@ -188,13 +192,11 @@ namespace {
 					if (ImGui::GetIO().WantCaptureMouse)
 						break;
 
-					static putils::Point2f previousPos{ 0.f, 0.f };
-
 					const putils::Point2f pos{ (float)e.mouseMove.x, (float)e.mouseMove.y };
-					const putils::Point2f rel = pos - previousPos;
-					previousPos = pos;
+					const putils::Point2f rel = pos - previousMousePos;
+					previousMousePos = pos;
 
-					g_inputBuffer->moves.push_back(InputBufferComponent::MouseMoveEvent{
+					inputBuffer->moves.push_back(InputBufferComponent::MouseMoveEvent{
 						.window = window,
 						.pos = pos,
 						.rel = rel
@@ -206,7 +208,7 @@ namespace {
 					if (ImGui::GetIO().WantCaptureMouse)
 						break;
 
-					g_inputBuffer->clicks.push_back(InputBufferComponent::ClickEvent{
+					inputBuffer->clicks.push_back(InputBufferComponent::ClickEvent{
 						.window = window,
 						.pos = { (float)e.mouseButton.x, (float)e.mouseButton.y },
 						.button = e.mouseButton.button,
@@ -218,7 +220,7 @@ namespace {
 					if (ImGui::GetIO().WantCaptureMouse)
 						return;
 
-					g_inputBuffer->scrolls.push_back(InputBufferComponent::MouseScrollEvent{
+					inputBuffer->scrolls.push_back(InputBufferComponent::MouseScrollEvent{
 						.window = window,
 						.xoffset = 0,
 						.yoffset = e.mouseWheelScroll.delta,
@@ -232,7 +234,7 @@ namespace {
 			}
 		}
 
-		static void render(entt::entity windowEntity, SFMLWindowComponent & sfWindow) noexcept {
+		void render(entt::entity windowEntity, SFMLWindowComponent & sfWindow) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			sfWindow.window->clear();
@@ -243,9 +245,9 @@ namespace {
 			};
 			putils::vector<ToBlit, KENGINE_MAX_VIEWPORTS> toBlit;
 
-			for (auto [e, cam, viewport] : _r->view<CameraComponent, ViewportComponent>().each()) {
+			for (auto [e, cam, viewport] : r.view<CameraComponent, ViewportComponent>().each()) {
 				if (viewport.window == entt::null) {
-					kengine_logf(*_r, Log, "SFMLSystem", "Setting target window for ViewportComponent in %zu", e);
+					kengine_logf(r, Log, "SFMLSystem", "Setting target window for ViewportComponent in %zu", e);
 					viewport.window = windowEntity;
 				}
 				else if (viewport.window != windowEntity)
@@ -276,7 +278,7 @@ namespace {
 			sfWindow.window->display();
 		}
 
-		static void renderToTexture(sf::RenderTexture & renderTexture) noexcept {
+		void renderToTexture(sf::RenderTexture & renderTexture) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			renderTexture.clear();
@@ -306,7 +308,7 @@ namespace {
 				std::vector<Element> orderedElements;
 			} drawables;
 
-			for (const auto & [e, transform, graphics] : _r->view<TransformComponent, GraphicsComponent>().each()) {
+			for (const auto & [e, transform, graphics] : r.view<TransformComponent, GraphicsComponent>().each()) {
 				auto sprite = createEntitySprite(e, transform, graphics);
 				if (sprite != std::nullopt) {
 					drawables.sprites.emplace_back(std::move(*sprite));
@@ -317,7 +319,7 @@ namespace {
 				}
 			}
 
-			for (const auto & [e, transform, debug] : _r->view<TransformComponent, DebugGraphicsComponent>().each()) {
+			for (const auto & [e, transform, debug] : r.view<TransformComponent, DebugGraphicsComponent>().each()) {
 				for (const auto & element : debug.elements) {
 					const sf::Color color(convertColor(element.color));
 
@@ -370,7 +372,7 @@ namespace {
 						}
 						default:
 							static_assert(magic_enum::enum_count<ElementType>() == 3);
-							kengine_assert_failed(*_r, "Unknown type");
+							kengine_assert_failed(r, "Unknown type");
 							break;
 					}
 				}
@@ -405,7 +407,7 @@ namespace {
 						break;
 					}
 					default:
-						kengine_assert_failed(*_r, "Unknown type");
+						kengine_assert_failed(r, "Unknown type");
 						break;
 				}
 			}
@@ -413,10 +415,10 @@ namespace {
 			renderTexture.display();
 		}
 
-		static std::optional<sf::Sprite> createEntitySprite(entt::entity e, const TransformComponent & transform, const GraphicsComponent & graphics) noexcept {
+		std::optional<sf::Sprite> createEntitySprite(entt::entity e, const TransformComponent & transform, const GraphicsComponent & graphics) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			const auto * texture = instanceHelper::tryGetModel<SFMLTextureComponent>({ *_r, e });
+			const auto * texture = instanceHelper::tryGetModel<SFMLTextureComponent>({ r, e });
 			if (texture == nullptr)
 				return std::nullopt;
 
@@ -430,7 +432,7 @@ namespace {
 			return sprite;
 		}
 
-		static sf::Sprite createRenderTextureSprite(const sf::RenderTexture & renderTexture, const sf::RenderWindow & window, const ViewportComponent & viewport) noexcept {
+		sf::Sprite createRenderTextureSprite(const sf::RenderTexture & renderTexture, const sf::RenderWindow & window, const ViewportComponent & viewport) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			sf::Sprite renderTextureSprite(renderTexture.getTexture());
@@ -445,11 +447,14 @@ namespace {
 			return renderTextureSprite;
 		}
 
-		static void createWindow(entt::entity e, const WindowComponent & windowComp) noexcept {
+		void createWindow(entt::registry & r, entt::entity e) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(*_r, Log, "SFML", "Creating window '%s'", windowComp.name.c_str());
 
-			auto & sfWindow = _r->emplace<SFMLWindowComponent>(e, std::make_unique<sf::RenderWindow>(
+			const auto & windowComp = r.get<WindowComponent>(e);
+			kengine_logf(r, Log, "SFML", "Creating window '%s'", windowComp.name.c_str());
+
+
+			auto & sfWindow = r.emplace<SFMLWindowComponent>(e, std::make_unique<sf::RenderWindow>(
 				sf::VideoMode{ windowComp.size.x, windowComp.size.y },
 				windowComp.name.c_str(),
 				windowComp.fullscreen ? sf::Style::Fullscreen : sf::Style::Default
@@ -457,42 +462,38 @@ namespace {
 
 			ImGui::SFML::Init(*sfWindow.window);
 
-			_r->emplace<ImGuiContextComponent>(e, ImGui::GetCurrentContext());
+			r.emplace<ImGuiContextComponent>(e, ImGui::GetCurrentContext());
 #if 0
 			auto & io = ImGui::GetIO();
 			io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 			io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 			io.ConfigViewportsNoTaskBarIcon = true;
 #endif
-			ImGui::SFML::Update(*sfWindow.window, g_deltaClock.restart());
+			ImGui::SFML::Update(*sfWindow.window, deltaClock.restart());
 		}
 
-		static void createTexture(entt::entity e, const ModelComponent & model) noexcept {
+		static void createTexture(entt::registry & r, entt::entity e) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
+			const auto & model = r.get<ModelComponent>(e);
 			sf::Texture texture;
 			if (texture.loadFromFile(model.file.c_str())) {
-				kengine_logf(*_r, Log, "SFML", "Loaded texture for '%s'", model.file.c_str());
-				_r->emplace<SFMLTextureComponent>(e, std::move(texture));
+				kengine_logf(r, Log, "SFML", "Loaded texture for '%s'", model.file.c_str());
+				r.emplace<SFMLTextureComponent>(e, std::move(texture));
 			}
 		}
 
-		static void terminate() noexcept {
+		void terminate() noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(*_r, Log, "Terminate/SFML", "Shutting down ImGui");
+			kengine_log(r, Log, "Terminate/SFML", "Shutting down ImGui");
 			ImGui::SFML::Shutdown();
 		}
-
-		static inline entt::registry * _r;
-
-		static inline sf::Clock g_deltaClock;
-		static inline InputBufferComponent * g_inputBuffer = nullptr;
 	};
 }
 
 namespace kengine {
-	void SFMLSystem(entt::registry & r) noexcept {
-		KENGINE_PROFILING_SCOPE;
-		SFMLSystem::init(r);
+	void addSFMLSystem(entt::registry & r) noexcept {
+		const entt::handle e{ r, r.create() };
+		e.emplace<SFMLSystem>(e);
 	}
 }

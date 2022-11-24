@@ -4,5 +4,5 @@
 #include <entt/entity/fwd.hpp>
 
 namespace kengine {
-	KENGINE_POLYVOX_EXPORT void MagicaVoxelSystem(entt::registry & r) noexcept;
+	KENGINE_POLYVOX_EXPORT void addMagicaVoxelSystem(entt::registry & r) noexcept;
 }

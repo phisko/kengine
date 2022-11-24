@@ -32,18 +32,8 @@
 #include "RecastNavMeshComponent.hpp"
 
 namespace kengine::recast {
-	struct buildNavMeshes {
-		static void init(entt::registry & r) noexcept {
-			KENGINE_PROFILING_SCOPE;
-
-			r.on_construct<ModelComponent>().connect<buildRecastComponent>();
-			r.on_construct<ModelDataComponent>().connect<buildRecastComponent>();
-			r.on_construct<NavMeshComponent>().connect<buildRecastComponent>();
-
-			r.on_update<NavMeshComponent>().connect<buildRecastComponent>();
-		}
-
-		static void buildRecastComponent(entt::registry & r, entt::entity e) noexcept {
+	struct buildRecastComponent {
+		static void run(entt::registry & r, entt::entity e) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			const auto model = r.try_get<ModelComponent>(e);
@@ -550,7 +540,7 @@ namespace kengine::recast {
 		};
 	};
 
-	void setupNavMeshBuilder(entt::registry & r) noexcept {
-		buildNavMeshes::init(r);
+	void buildRecastComponent(entt::registry & r, entt::entity e) noexcept {
+		buildRecastComponent::run(r, e);
 	}
 }

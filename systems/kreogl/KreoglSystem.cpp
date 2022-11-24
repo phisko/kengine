@@ -7,6 +7,7 @@
 #include <filesystem>
 
 // entt
+#include <entt/entity/handle.hpp>
 #include <entt/entity/registry.hpp>
 
 // gl
@@ -17,6 +18,9 @@
 #include <imgui.h>
 #include <bindings/imgui_impl_glfw.h>
 #include <bindings/imgui_impl_opengl3.h>
+
+// putils
+#include "forward_to.hpp"
 
 // kreogl
 #include "kreogl/Camera.hpp"
@@ -77,58 +81,59 @@
 
 namespace kengine {
 	struct KreoglSystem {
-		static void init(entt::registry & r) noexcept {
+		entt::registry & r;
+
+		KreoglSystem(entt::handle e) noexcept
+			: r(*e.registry())
+		{
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, Log, "Init", "KreoglSystem");
 
-			_r = &r;
+			e.emplace<functions::Execute>(putils_forward_to_this(execute));
+			e.emplace<functions::OnTerminate>(putils_forward_to_this(terminate));
 
-			const auto e = r.create();
-			r.emplace<functions::Execute>(e, execute);
-			r.emplace<functions::OnTerminate>(e, terminate);
-
-			auto & scale = r.emplace<ImGuiScaleComponent>(e);
-			r.emplace<AdjustableComponent>(e) = {
+			auto & scale = e.emplace<ImGuiScaleComponent>();
+			e.emplace<AdjustableComponent>() = {
 				"ImGui", {
 					{ "Scale", &scale.scale }
 				}
 			};
 
-			r.emplace<functions::GetEntityInPixel>(e, getEntityInPixel);
-			r.emplace<functions::GetPositionInPixel>(e, getPositionInPixel);
+			e.emplace<functions::GetEntityInPixel>(putils_forward_to_this(getEntityInPixel));
+			e.emplace<functions::GetPositionInPixel>(putils_forward_to_this(getPositionInPixel));
 
 			initWindow();
 		}
 
-		static void initWindow() noexcept {
+		void initWindow() noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			entt::entity windowEntity = entt::null;
 
 			// Find potential existing window
-			for (const auto & [e, w] : _r->view<WindowComponent>().each()) {
+			for (const auto & [e, w] : r.view<WindowComponent>().each()) {
 				if (!w.assignedSystem.empty())
 					continue;
-				kengine_logf(*_r, Log, "Init/KreoglSystem", "Found existing window: %zu", e);
+				kengine_logf(r, Log, "Init/KreoglSystem", "Found existing window: %zu", e);
 				windowEntity = e;
 				break;
 			}
 
 			// If none found, create one
 			if (windowEntity == entt::null) {
-				const auto e = _r->create();
-				kengine_logf(*_r, Log, "Init/KreoglSystem", "Created default window: %zu", e);
-				_r->emplace<KeepAlive>(e);
-				auto & windowComp = _r->emplace<WindowComponent>(e);
+				const auto e = r.create();
+				kengine_logf(r, Log, "Init/KreoglSystem", "Created default window: %zu", e);
+				r.emplace<KeepAlive>(e);
+				auto & windowComp = r.emplace<WindowComponent>(e);
 				windowComp.name = "Kengine";
 				windowEntity = e;
 			}
 
 			// Ask the GLFW system to initialize the window
-			_r->get<WindowComponent>(windowEntity).assignedSystem = "Kreogl";
-			_r->emplace<GLFWWindowInitComponent>(windowEntity) = {
-				.setHints = []() noexcept {
-					kengine_log(*_r, Log, "Init/KreoglSystem", "Setting window hints");
+			r.get<WindowComponent>(windowEntity).assignedSystem = "Kreogl";
+			r.emplace<GLFWWindowInitComponent>(windowEntity) = {
+				.setHints = [this]() noexcept {
+					kengine_log(r, Log, "Init/KreoglSystem", "Setting window hints");
 					glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 					glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 					glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -137,29 +142,29 @@ namespace kengine {
 					glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 #endif
 				},
-				.onWindowCreated = [windowEntity]() noexcept {
-					kengine_log(*_r, Log, "Init/KreoglSystem", "GLFW window created");
-					kengine_log(*_r, Log, "Init/KreoglSystem", "Creating kreogl window");
-					const auto & glfwWindow = _r->get<GLFWWindowComponent>(windowEntity);
-					auto & kreoglWindow = _r->emplace<kreogl::Window>(windowEntity, *glfwWindow.window.get());
+				.onWindowCreated = [this, windowEntity]() noexcept {
+					kengine_log(r, Log, "Init/KreoglSystem", "GLFW window created");
+					kengine_log(r, Log, "Init/KreoglSystem", "Creating kreogl window");
+					const auto & glfwWindow = r.get<GLFWWindowComponent>(windowEntity);
+					auto & kreoglWindow = r.emplace<kreogl::Window>(windowEntity, *glfwWindow.window.get());
 					kreoglWindow.removeCamera(kreoglWindow.getDefaultCamera());
 					initImGui(windowEntity);
 				}
 			};
 		}
 
-		static void initImGui(entt::entity windowEntity) noexcept {
+		void initImGui(entt::entity windowEntity) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(*_r, Log, "Init/KreoglSystem", "Initializing ImGui");
+			kengine_log(r, Log, "Init/KreoglSystem", "Initializing ImGui");
 
-			_r->emplace<ImGuiContextComponent>(windowEntity, ImGui::CreateContext());
+			r.emplace<ImGuiContextComponent>(windowEntity, ImGui::CreateContext());
 
 			auto & io = ImGui::GetIO();
 			io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 			io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 			io.ConfigViewportsNoTaskBarIcon = true;
 
-			const auto & glfwComp = _r->get<GLFWWindowComponent>(windowEntity);
+			const auto & glfwComp = r.get<GLFWWindowComponent>(windowEntity);
 			ImGui_ImplGlfw_InitForOpenGL(glfwComp.window.get(), true);
 			ImGui_ImplOpenGL3_Init();
 
@@ -168,12 +173,12 @@ namespace kengine {
 			ImGui::NewFrame();
 		}
 
-		static void terminate() noexcept {
+		void terminate() noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(*_r, Log, "Terminate", "KreoglSystem");
+			kengine_log(r, Log, "Terminate", "KreoglSystem");
 
 			// Clear these now, or their dtors will fail since the OpenGL state won't exist anymore
-			_r->clear<
+			r.clear<
 			    KreoglAnimationFilesComponent,
 				KreoglModelComponent,
 				kreogl::AnimatedObject,
@@ -187,9 +192,9 @@ namespace kengine {
 			>();
 		}
 
-		static void execute(float deltaTime) noexcept {
+		void execute(float deltaTime) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(*_r, Verbose, "Execute", "KreoglSystem");
+			kengine_log(r, Verbose, "Execute", "KreoglSystem");
 
 			createMissingModels();
 			createMissingObjects();
@@ -200,56 +205,56 @@ namespace kengine {
 			endImGuiFrame();
 		}
 
-		static void updateImGuiScale() noexcept {
+		float lastScale = 1.f;
+		void updateImGuiScale() noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			static float lastScale = 1.f;
-			const auto scale = imguiHelper::getScale(*_r);
+			const auto scale = imguiHelper::getScale(r);
 			ImGui::GetIO().FontGlobalScale = scale;
 			ImGui::GetStyle().ScaleAllSizes(scale / lastScale);
 			lastScale = scale;
 		}
 
-		static void createMissingModels() noexcept {
+		void createMissingModels() noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			createModelsFromDisk();
 			createModelsFromModelData();
 		}
 
-		static void createModelsFromDisk() noexcept {
+		void createModelsFromDisk() noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			for (auto [modelEntity, model] : _r->view<ModelComponent>(entt::exclude<KreoglModelComponent, kreogl::ImageTexture>).each()) {
-				kengine_logf(*_r, Verbose, "Execute/KreoglSystem", "Creating Kreogl model for %zu (%s)", modelEntity, model.file.c_str());
+			for (auto [modelEntity, model] : r.view<ModelComponent>(entt::exclude<KreoglModelComponent, kreogl::ImageTexture>).each()) {
+				kengine_logf(r, Verbose, "Execute/KreoglSystem", "Creating Kreogl model for %zu (%s)", modelEntity, model.file.c_str());
 				if (kreogl::ImageTexture::isSupportedFormat(model.file.c_str()))
-					_r->emplace<kreogl::ImageTexture>(modelEntity, model.file.c_str());
+					r.emplace<kreogl::ImageTexture>(modelEntity, model.file.c_str());
 				else if (kreogl::AssImp::isSupportedFileFormat(model.file.c_str()))
 					createModelWithAssImp(modelEntity, model);
 			}
 		}
 
-		static void createModelWithAssImp(entt::entity modelEntity, const ModelComponent & model) noexcept {
+		void createModelWithAssImp(entt::entity modelEntity, const ModelComponent & model) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			auto animatedModel = kreogl::AssImp::loadAnimatedModel(model.file.c_str());
 			if (animatedModel) {
 				// Sync properties from loaded model to kengine components
-				addAnimationsToModelAnimationComponent(_r->get_or_emplace<ModelAnimationComponent>(modelEntity), model.file.c_str(), animatedModel->animations);
+				addAnimationsToModelAnimationComponent(r.get_or_emplace<ModelAnimationComponent>(modelEntity), model.file.c_str(), animatedModel->animations);
 				if (animatedModel->skeleton) {
-					auto & modelSkeleton = _r->emplace<ModelSkeletonComponent>(modelEntity);
+					auto & modelSkeleton = r.emplace<ModelSkeletonComponent>(modelEntity);
 					for (const auto & mesh : animatedModel->skeleton->meshes)
 						modelSkeleton.meshes.push_back(ModelSkeletonComponent::Mesh{
 							.boneNames = mesh.boneNames
 						});
 				}
 			}
-			_r->emplace<KreoglModelComponent>(modelEntity, std::move(animatedModel));
+			r.emplace<KreoglModelComponent>(modelEntity, std::move(animatedModel));
 
 			// Load animations from external files
-			if (const auto animationFiles = _r->try_get<AnimationFilesComponent>(modelEntity)) {
-				auto & modelAnimation = _r->get<ModelAnimationComponent>(modelEntity);
-				auto & kreoglAnimationFiles = _r->emplace<KreoglAnimationFilesComponent>(modelEntity);
+			if (const auto animationFiles = r.try_get<AnimationFilesComponent>(modelEntity)) {
+				auto & modelAnimation = r.get<ModelAnimationComponent>(modelEntity);
+				auto & kreoglAnimationFiles = r.emplace<KreoglAnimationFilesComponent>(modelEntity);
 				for (const auto & file : animationFiles->files) {
 					auto kreoglAnimationFile = kreogl::AssImp::loadAnimationFile(file.c_str());
 					addAnimationsToModelAnimationComponent(modelAnimation, file.c_str(), kreoglAnimationFile->animations);
@@ -258,7 +263,7 @@ namespace kengine {
 			}
 		}
 
-		static void addAnimationsToModelAnimationComponent(ModelAnimationComponent & modelAnimation, const char * file, const std::vector<std::unique_ptr<kreogl::AnimationModel>> & animations) noexcept {
+		void addAnimationsToModelAnimationComponent(ModelAnimationComponent & modelAnimation, const char * file, const std::vector<std::unique_ptr<kreogl::AnimationModel>> & animations) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			for (const auto & animation : animations) {
@@ -273,10 +278,10 @@ namespace kengine {
 			}
 		}
 
-		static void createModelsFromModelData() noexcept {
+		void createModelsFromModelData() noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			for (auto [modelEntity, modelData] : _r->view<ModelDataComponent>(entt::exclude<KreoglModelComponent>).each()) {
+			for (auto [modelEntity, modelData] : r.view<ModelDataComponent>(entt::exclude<KreoglModelComponent>).each()) {
 				kreogl::ModelData kreoglModelData;
 
 				for (const auto & meshData : modelData.meshes) {
@@ -313,66 +318,66 @@ namespace kengine {
 
 				// We assume custom-built meshes are voxels, might need a better alternative to this
 				const auto & vertexSpecification = kreogl::VertexSpecification::positionColor;
-				_r->emplace<KreoglModelComponent>(modelEntity, std::make_unique<kreogl::AnimatedModel>(vertexSpecification, kreoglModelData));
+				r.emplace<KreoglModelComponent>(modelEntity, std::make_unique<kreogl::AnimatedModel>(vertexSpecification, kreoglModelData));
 			}
 		}
 
-		static void createMissingObjects() noexcept {
+		void createMissingObjects() noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			for (auto [entity, instance] : _r->view<InstanceComponent>(entt::exclude<kreogl::AnimatedObject, kreogl::Sprite2D, kreogl::Sprite3D>).each()) {
+			for (auto [entity, instance] : r.view<InstanceComponent>(entt::exclude<kreogl::AnimatedObject, kreogl::Sprite2D, kreogl::Sprite3D>).each()) {
 				if (instance.model == entt::null)
 					continue;
 
 				const auto modelEntity = instance.model;
 
-				if (const auto kreoglModel = _r->try_get<KreoglModelComponent>(modelEntity)) {
-					_r->emplace<kreogl::AnimatedObject>(entity).model = kreoglModel->model.get();
-					if (_r->all_of<ModelSkeletonComponent>(modelEntity))
-						_r->emplace<SkeletonComponent>(entity);
+				if (const auto kreoglModel = r.try_get<KreoglModelComponent>(modelEntity)) {
+					r.emplace<kreogl::AnimatedObject>(entity).model = kreoglModel->model.get();
+					if (r.all_of<ModelSkeletonComponent>(modelEntity))
+						r.emplace<SkeletonComponent>(entity);
 				}
 
-				if (const auto kreoglTexture = _r->try_get<kreogl::ImageTexture>(modelEntity)) {
-					if (_r->all_of<SpriteComponent2D>(entity))
-						_r->emplace<kreogl::Sprite2D>(entity).texture = kreoglTexture;
-					if (_r->all_of<SpriteComponent3D>(entity))
-						_r->emplace<kreogl::Sprite3D>(entity).texture = kreoglTexture;
+				if (const auto kreoglTexture = r.try_get<kreogl::ImageTexture>(modelEntity)) {
+					if (r.all_of<SpriteComponent2D>(entity))
+						r.emplace<kreogl::Sprite2D>(entity).texture = kreoglTexture;
+					if (r.all_of<SpriteComponent3D>(entity))
+						r.emplace<kreogl::Sprite3D>(entity).texture = kreoglTexture;
 				}
 			}
 
-			for (auto [text2DEntity, text2D] : _r->view<TextComponent2D>(entt::exclude<kreogl::Text2D>).each())
-				_r->emplace<kreogl::Text2D>(text2DEntity);
+			for (auto [text2DEntity, text2D] : r.view<TextComponent2D>(entt::exclude<kreogl::Text2D>).each())
+				r.emplace<kreogl::Text2D>(text2DEntity);
 
-			for (auto [text3DEntity, text3D] : _r->view<TextComponent3D>(entt::exclude<kreogl::Text3D>).each())
-				_r->emplace<kreogl::Text3D>(text3DEntity);
+			for (auto [text3DEntity, text3D] : r.view<TextComponent3D>(entt::exclude<kreogl::Text3D>).each())
+				r.emplace<kreogl::Text3D>(text3DEntity);
 
-			for (auto [lightEntity, dirLight] : _r->view<DirLightComponent>(entt::exclude<kreogl::DirectionalLight>).each())
-				_r->emplace<kreogl::DirectionalLight>(lightEntity);
+			for (auto [lightEntity, dirLight] : r.view<DirLightComponent>(entt::exclude<kreogl::DirectionalLight>).each())
+				r.emplace<kreogl::DirectionalLight>(lightEntity);
 
-			for (auto [lightEntity, dirLight] : _r->view<PointLightComponent>(entt::exclude<kreogl::PointLight>).each())
-				_r->emplace<kreogl::PointLight>(lightEntity);
+			for (auto [lightEntity, dirLight] : r.view<PointLightComponent>(entt::exclude<kreogl::PointLight>).each())
+				r.emplace<kreogl::PointLight>(lightEntity);
 
-			for (auto [lightEntity, dirLight] : _r->view<SpotLightComponent>(entt::exclude<kreogl::SpotLight>).each())
-				_r->emplace<kreogl::SpotLight>(lightEntity);
+			for (auto [lightEntity, dirLight] : r.view<SpotLightComponent>(entt::exclude<kreogl::SpotLight>).each())
+				r.emplace<kreogl::SpotLight>(lightEntity);
 
-			for (auto [skyboxEntity, skyBox] : _r->view<SkyBoxComponent>(entt::exclude<kreogl::SkyboxTexture>).each())
-				_r->emplace<kreogl::SkyboxTexture>(skyboxEntity, skyBox.left.c_str(), skyBox.right.c_str(), skyBox.top.c_str(), skyBox.bottom.c_str(), skyBox.front.c_str(), skyBox.back.c_str());
+			for (auto [skyboxEntity, skyBox] : r.view<SkyBoxComponent>(entt::exclude<kreogl::SkyboxTexture>).each())
+				r.emplace<kreogl::SkyboxTexture>(skyboxEntity, skyBox.left.c_str(), skyBox.right.c_str(), skyBox.top.c_str(), skyBox.bottom.c_str(), skyBox.front.c_str(), skyBox.back.c_str());
 
-			for (auto [debugEntity, debugGraphics] : _r->view<DebugGraphicsComponent>(entt::exclude<KreoglDebugGraphicsComponent>).each())
-				_r->emplace<KreoglDebugGraphicsComponent>(debugEntity);
+			for (auto [debugEntity, debugGraphics] : r.view<DebugGraphicsComponent>(entt::exclude<KreoglDebugGraphicsComponent>).each())
+				r.emplace<KreoglDebugGraphicsComponent>(debugEntity);
 		}
 
-		static void tickAnimations(float deltaTime) noexcept {
+		void tickAnimations(float deltaTime) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			const auto view = _r->view<kreogl::AnimatedObject, AnimationComponent>();
+			const auto view = r.view<kreogl::AnimatedObject, AnimationComponent>();
 			std::for_each(std::execution::par_unseq, view.begin(), view.end(), [&](entt::entity entity) noexcept {
 				const auto & [kreoglObject, animation] = view.get(entity);
 				tickObjectAnimation(deltaTime, entity, kreoglObject, animation);
 			});
 		}
 
-		static void tickObjectAnimation(float deltaTime, entt::entity entity, kreogl::AnimatedObject & kreoglObject, AnimationComponent & animation) noexcept {
+		void tickObjectAnimation(float deltaTime, entt::entity entity, kreogl::AnimatedObject & kreoglObject, AnimationComponent & animation) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			if (!kreoglObject.animation)
 				return;
@@ -382,53 +387,53 @@ namespace kengine {
 			// Sync properties from kreoglObject to kengine components
 			animation.currentTime = kreoglObject.animation->currentTime;
 
-			auto & skeleton = _r->get<SkeletonComponent>(entity);
+			auto & skeleton = r.get<SkeletonComponent>(entity);
 			const auto nbMeshes = kreoglObject.skeleton.meshes.size();
 			skeleton.meshes.resize(nbMeshes);
 			for (size_t i = 0; i < nbMeshes; ++i) {
 				const auto & kreoglMesh = kreoglObject.skeleton.meshes[i];
 				auto & mesh = skeleton.meshes[i];
 
-				kengine_assert(*_r, kreoglMesh.boneMatsBoneSpace.size() < putils::lengthof(mesh.boneMatsBoneSpace));
+				kengine_assert(r, kreoglMesh.boneMatsBoneSpace.size() < putils::lengthof(mesh.boneMatsBoneSpace));
 				std::ranges::copy(kreoglMesh.boneMatsBoneSpace, mesh.boneMatsBoneSpace);
-				kengine_assert(*_r, kreoglMesh.boneMatsMeshSpace.size() < putils::lengthof(mesh.boneMatsMeshSpace));
+				kengine_assert(r, kreoglMesh.boneMatsMeshSpace.size() < putils::lengthof(mesh.boneMatsMeshSpace));
 				std::ranges::copy(kreoglMesh.boneMatsMeshSpace, mesh.boneMatsMeshSpace);
 			}
 		}
 
-		static void draw() noexcept {
+		void draw() noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			ImGui::Render();
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-			for (const auto & [windowEntity, kreoglWindow] : _r->view<kreogl::Window>().each()) {
+			for (const auto & [windowEntity, kreoglWindow] : r.view<kreogl::Window>().each()) {
 				kreoglWindow.prepareForDraw();
 				drawToCameras(windowEntity, kreoglWindow);
 				kreoglWindow.display();
 			}
 		}
 
-		static void drawToCameras(entt::entity windowEntity, kreogl::Window & kreoglWindow) noexcept {
+		void drawToCameras(entt::entity windowEntity, kreogl::Window & kreoglWindow) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			for (auto [cameraEntity, camera, viewport] : _r->view<CameraComponent, ViewportComponent>().each()) {
+			for (auto [cameraEntity, camera, viewport] : r.view<CameraComponent, ViewportComponent>().each()) {
 				if (viewport.window != entt::null && viewport.window != windowEntity)
 					continue;
 
 				if (viewport.window == entt::null) {
-					kengine_logf(*_r, Log, "KreoglSystem", "Setting target window for ViewportComponent in %zu", cameraEntity);
+					kengine_logf(r, Log, "KreoglSystem", "Setting target window for ViewportComponent in %zu", cameraEntity);
 					viewport.window = windowEntity;
 					createKreoglCamera(cameraEntity, viewport);
 				}
 
-				auto & kreoglCamera = _r->get<kreogl::Camera>(cameraEntity);
+				auto & kreoglCamera = r.get<kreogl::Camera>(cameraEntity);
 				syncCameraProperties(kreoglCamera, camera, viewport);
 				drawToCamera(kreoglWindow, cameraEntity, kreoglCamera);
 			}
 		}
 
-		static void createKreoglCamera(entt::entity cameraEntity, ViewportComponent & viewport) noexcept {
+		void createKreoglCamera(entt::entity cameraEntity, ViewportComponent & viewport) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			const kreogl::Camera::ConstructionParams params{
@@ -436,11 +441,11 @@ namespace kengine {
 					.resolution = toglm(viewport.resolution)
 				}
 			};
-			auto & kreoglCamera = _r->emplace<kreogl::Camera>(cameraEntity, params);
+			auto & kreoglCamera = r.emplace<kreogl::Camera>(cameraEntity, params);
 			viewport.renderTexture = ViewportComponent::RenderTexture(kreoglCamera.getViewport().getRenderTexture());
 		}
 
-		static void syncCameraProperties(kreogl::Camera & kreoglCamera, const CameraComponent & camera, const ViewportComponent & viewport) noexcept {
+		void syncCameraProperties(kreogl::Camera & kreoglCamera, const CameraComponent & camera, const ViewportComponent & viewport) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			kreoglCamera.setPosition(toglm(camera.frustum.position));
@@ -458,28 +463,42 @@ namespace kengine {
 			kreoglViewport.setZOrder(viewport.zOrder);
 		}
 
-		static void drawToCamera(kreogl::Window & kreoglWindow, entt::entity cameraEntity, const kreogl::Camera & kreoglCamera) noexcept {
+		// Lazy-init these as OpenGL context doesn't exist upon construction, so can't init the shader
+		std::optional<HighlightShader> highlightShader;
+		std::optional<kreogl::ShaderPipeline> shaderPipeline;
+
+		void drawToCamera(kreogl::Window & kreoglWindow, entt::entity cameraEntity, const kreogl::Camera & kreoglCamera) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			kreogl::World kreoglWorld;
 			syncEverything(kreoglWorld, cameraEntity);
-			kreoglWindow.drawWorldToCamera(kreoglWorld, kreoglCamera, getShaderPipeline());
+
+			if (!shaderPipeline) {
+				highlightShader = HighlightShader{ r };
+				shaderPipeline = [this] {
+					auto ret = kreogl::ShaderPipeline::getDefaultShaders();
+					ret.addShader(kreogl::ShaderStep::PostProcess, *highlightShader);
+					return ret;
+				}();
+			}
+
+			kreoglWindow.drawWorldToCamera(kreoglWorld, kreoglCamera, *shaderPipeline);
 		}
 
 
-		static void syncEverything(kreogl::World & kreoglWorld, entt::entity cameraEntity) noexcept {
+		void syncEverything(kreogl::World & kreoglWorld, entt::entity cameraEntity) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			syncAllObjects(kreoglWorld, cameraEntity);
 			syncAllLights(kreoglWorld, cameraEntity);
 		}
 
-		static void syncCommonProperties(auto & kreoglObject, entt::entity entity, const InstanceComponent * instance, const TransformComponent & transform, const auto & coloredComponent, kreogl::World & kreoglWorld) noexcept {
+		void syncCommonProperties(auto & kreoglObject, entt::entity entity, const InstanceComponent * instance, const TransformComponent & transform, const auto & coloredComponent, kreogl::World & kreoglWorld) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			const TransformComponent * modelTransform = nullptr;
 			if (instance)
-				modelTransform = instanceHelper::tryGetModel<TransformComponent>(*_r, *instance);
+				modelTransform = instanceHelper::tryGetModel<TransformComponent>(r, *instance);
 			kreoglObject.transform = matrixHelper::getModelMatrix(transform, modelTransform);
 			kreoglObject.color = toglm(coloredComponent.color);
 			kreoglObject.userData[0] = float(entity);
@@ -487,45 +506,45 @@ namespace kengine {
 			kreoglWorld.add(kreoglObject);
 		};
 
-		static void syncAllObjects(kreogl::World & kreoglWorld, entt::entity cameraEntity) noexcept {
+		void syncAllObjects(kreogl::World & kreoglWorld, entt::entity cameraEntity) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			for (const auto & [entity, instance, transform, graphics, kreoglObject] : _r->view<InstanceComponent, TransformComponent, GraphicsComponent, kreogl::AnimatedObject>().each()) {
-				if (!cameraHelper::entityAppearsInViewport(*_r, entity, cameraEntity))
+			for (const auto & [entity, instance, transform, graphics, kreoglObject] : r.view<InstanceComponent, TransformComponent, GraphicsComponent, kreogl::AnimatedObject>().each()) {
+				if (!cameraHelper::entityAppearsInViewport(r, entity, cameraEntity))
 					continue;
 				syncCommonProperties(kreoglObject, entity, &instance, transform, graphics, kreoglWorld);
 				syncAnimationProperties(kreoglObject, entity, instance);
-				kreoglObject.castShadows = !_r->all_of<NoShadowComponent>(entity);
+				kreoglObject.castShadows = !r.all_of<NoShadowComponent>(entity);
 			}
 
 			syncSprite2DProperties(kreoglWorld, cameraEntity);
-			for (const auto & [spriteEntity, instance, transform, graphics, kreoglSprite3D] : _r->view<InstanceComponent, TransformComponent, GraphicsComponent, SpriteComponent3D, kreogl::Sprite3D>().each()) {
-				if (!cameraHelper::entityAppearsInViewport(*_r, spriteEntity, cameraEntity))
+			for (const auto & [spriteEntity, instance, transform, graphics, kreoglSprite3D] : r.view<InstanceComponent, TransformComponent, GraphicsComponent, SpriteComponent3D, kreogl::Sprite3D>().each()) {
+				if (!cameraHelper::entityAppearsInViewport(r, spriteEntity, cameraEntity))
 					continue;
 				syncCommonProperties(kreoglSprite3D, spriteEntity, &instance, transform, graphics, kreoglWorld);
 			}
 
 			syncText2DProperties(kreoglWorld, cameraEntity);
-			for (const auto & [textEntity, transform, text3D, kreoglText3D] : _r->view<TransformComponent, TextComponent3D, kreogl::Text3D>().each()) {
-				if (!cameraHelper::entityAppearsInViewport(*_r, textEntity, cameraEntity))
+			for (const auto & [textEntity, transform, text3D, kreoglText3D] : r.view<TransformComponent, TextComponent3D, kreogl::Text3D>().each()) {
+				if (!cameraHelper::entityAppearsInViewport(r, textEntity, cameraEntity))
 					continue;
 				syncTextProperties(kreoglText3D, textEntity, transform, text3D, kreoglWorld);
 			}
 
 			syncDebugGraphicsProperties(kreoglWorld, cameraEntity);
 
-			for (const auto & [skyboxEntity, skyBox, kreoglSkybox] : _r->view<SkyBoxComponent, kreogl::SkyboxTexture>().each()) {
-				if (!cameraHelper::entityAppearsInViewport(*_r, skyboxEntity, cameraEntity))
+			for (const auto & [skyboxEntity, skyBox, kreoglSkybox] : r.view<SkyBoxComponent, kreogl::SkyboxTexture>().each()) {
+				if (!cameraHelper::entityAppearsInViewport(r, skyboxEntity, cameraEntity))
 					continue;
 				kreoglWorld.skybox.color = toglm(skyBox.color);
 				kreoglWorld.skybox.texture = &kreoglSkybox;
 			}
 		}
 
-		static void syncAnimationProperties(kreogl::AnimatedObject & kreoglObject, entt::entity entity, const InstanceComponent & instance) noexcept {
+		void syncAnimationProperties(kreogl::AnimatedObject & kreoglObject, entt::entity entity, const InstanceComponent & instance) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			const auto animation = _r->try_get<AnimationComponent>(entity);
+			const auto animation = r.try_get<AnimationComponent>(entity);
 			if (!animation)
 				return;
 
@@ -552,14 +571,14 @@ namespace kengine {
 			}
 		}
 
-		static const kreogl::AnimationModel * findAnimationModel(const InstanceComponent & instance, size_t animationIndex) {
+		const kreogl::AnimationModel * findAnimationModel(const InstanceComponent & instance, size_t animationIndex) {
 			KENGINE_PROFILING_SCOPE;
 
-			const auto & kreoglModel = instanceHelper::getModel<KreoglModelComponent>(*_r, instance);
+			const auto & kreoglModel = instanceHelper::getModel<KreoglModelComponent>(r, instance);
 			if (animationIndex < kreoglModel.model->animations.size())
 				return kreoglModel.model->animations[animationIndex].get();
 
-			const auto kreoglModelAnimationFiles = instanceHelper::tryGetModel<KreoglAnimationFilesComponent>(*_r, instance);
+			const auto kreoglModelAnimationFiles = instanceHelper::tryGetModel<KreoglAnimationFilesComponent>(r, instance);
 			if (!kreoglModelAnimationFiles)
 				return nullptr;
 
@@ -574,31 +593,31 @@ namespace kengine {
 			return nullptr;
 		}
 
-		static void syncSprite2DProperties(kreogl::World & kreoglWorld, entt::entity cameraEntity) noexcept {
+		void syncSprite2DProperties(kreogl::World & kreoglWorld, entt::entity cameraEntity) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			for (const auto & [spriteEntity, instance, transform, graphics, sprite2D, kreoglSprite2D] : _r->view<InstanceComponent, TransformComponent, GraphicsComponent, SpriteComponent2D, kreogl::Sprite2D>().each()) {
-				if (!cameraHelper::entityAppearsInViewport(*_r, spriteEntity, cameraEntity))
+			for (const auto & [spriteEntity, instance, transform, graphics, sprite2D, kreoglSprite2D] : r.view<InstanceComponent, TransformComponent, GraphicsComponent, SpriteComponent2D, kreogl::Sprite2D>().each()) {
+				if (!cameraHelper::entityAppearsInViewport(r, spriteEntity, cameraEntity))
 					continue;
 
 				syncCommonProperties(kreoglSprite2D, spriteEntity, &instance, transform, graphics, kreoglWorld);
 
-				const auto & viewport = _r->get<ViewportComponent>(cameraEntity);
+				const auto & viewport = r.get<ViewportComponent>(cameraEntity);
 				const auto & box = cameraHelper::convertToScreenPercentage(transform.boundingBox, viewport.resolution, sprite2D);
 				kreoglSprite2D.transform = getOnScreenMatrix(transform, box.position, box.size, sprite2D);
 			}
 		}
 
-		static void syncText2DProperties(kreogl::World & kreoglWorld, entt::entity cameraEntity) noexcept {
+		void syncText2DProperties(kreogl::World & kreoglWorld, entt::entity cameraEntity) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			for (const auto & [textEntity, transform, text2D, kreoglText2D] : _r->view<TransformComponent, TextComponent2D, kreogl::Text2D>().each()) {
-				if (!cameraHelper::entityAppearsInViewport(*_r, textEntity, cameraEntity))
+			for (const auto & [textEntity, transform, text2D, kreoglText2D] : r.view<TransformComponent, TextComponent2D, kreogl::Text2D>().each()) {
+				if (!cameraHelper::entityAppearsInViewport(r, textEntity, cameraEntity))
 					continue;
 
 				syncTextProperties(kreoglText2D, textEntity, transform, text2D, kreoglWorld);
 
-				const auto & viewport = _r->get<ViewportComponent>(cameraEntity);
+				const auto & viewport = r.get<ViewportComponent>(cameraEntity);
 				const auto & box = cameraHelper::convertToScreenPercentage(transform.boundingBox, viewport.resolution, text2D);
 				auto scale = transform.boundingBox.size.y;
 				switch (text2D.coordinateType) {
@@ -614,11 +633,11 @@ namespace kengine {
 			}
 		}
 
-		static void syncDebugGraphicsProperties(kreogl::World & kreoglWorld, entt::entity cameraEntity) noexcept {
+		void syncDebugGraphicsProperties(kreogl::World & kreoglWorld, entt::entity cameraEntity) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			for (const auto & [debugEntity, transform, debugGraphics, kreoglDebugGraphics] : _r->view<TransformComponent, DebugGraphicsComponent, KreoglDebugGraphicsComponent>().each()) {
-				if (!cameraHelper::entityAppearsInViewport(*_r, debugEntity, cameraEntity))
+			for (const auto & [debugEntity, transform, debugGraphics, kreoglDebugGraphics] : r.view<TransformComponent, DebugGraphicsComponent, KreoglDebugGraphicsComponent>().each()) {
+				if (!cameraHelper::entityAppearsInViewport(r, debugEntity, cameraEntity))
 					continue;
 
 				kreoglDebugGraphics.elements.resize(debugGraphics.elements.size());
@@ -645,7 +664,7 @@ namespace kengine {
 							break;
 						default:
 							static_assert(magic_enum::enum_count<DebugGraphicsComponent::Type>() == 3); // Exhaustive switch
-							kengine_assert_failed(*_r, "Non-exhaustive switch");
+							kengine_assert_failed(r, "Non-exhaustive switch");
 							break;
 					}
 
@@ -654,7 +673,7 @@ namespace kengine {
 			}
 		}
 
-		static void applyDebugGraphicsTransform(glm::mat4 & matrix, const TransformComponent & transform, const glm::vec3 & pos, const glm::vec3 & size, DebugGraphicsComponent::ReferenceSpace referenceSpace) noexcept {
+		void applyDebugGraphicsTransform(glm::mat4 & matrix, const TransformComponent & transform, const glm::vec3 & pos, const glm::vec3 & size, DebugGraphicsComponent::ReferenceSpace referenceSpace) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			matrix = glm::translate(matrix, pos);
@@ -669,7 +688,7 @@ namespace kengine {
 				matrix = glm::scale(matrix, toglm(transform.boundingBox.size));
 		}
 
-		static glm::mat4 getOnScreenMatrix(const TransformComponent & transform, const putils::Point3f & position, const putils::Point3f & size, const OnScreenComponent & onScreen) noexcept {
+		glm::mat4 getOnScreenMatrix(const TransformComponent & transform, const putils::Point3f & position, const putils::Point3f & size, const OnScreenComponent & onScreen) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			glm::mat4 model{ 1.f };
@@ -685,7 +704,7 @@ namespace kengine {
 			return model;
 		}
 
-		static void syncTextProperties(auto & kreoglText, entt::entity textEntity, const TransformComponent & transform, const TextComponent & text, kreogl::World & kreoglWorld) noexcept {
+		void syncTextProperties(auto & kreoglText, entt::entity textEntity, const TransformComponent & transform, const TextComponent & text, kreogl::World & kreoglWorld) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			syncCommonProperties(kreoglText, textEntity, nullptr, transform, text, kreoglWorld);
@@ -704,12 +723,12 @@ namespace kengine {
 					break;
 				default:
 					static_assert(magic_enum::enum_count<TextComponent::Alignment>() == 3); // Exhaustive switch
-					kengine_assert_failed(*_r, "Non-exhaustive switch");
+					kengine_assert_failed(r, "Non-exhaustive switch");
 					break;
 			}
 		}
 
-		static void syncAllLights(kreogl::World & kreoglWorld, entt::entity cameraEntity) noexcept {
+		void syncAllLights(kreogl::World & kreoglWorld, entt::entity cameraEntity) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			syncAllDirLights(kreoglWorld, cameraEntity);
@@ -717,11 +736,11 @@ namespace kengine {
 			syncAllSpotLights(kreoglWorld, cameraEntity);
 		}
 
-		static void syncAllDirLights(kreogl::World & kreoglWorld, entt::entity cameraEntity) noexcept {
+		void syncAllDirLights(kreogl::World & kreoglWorld, entt::entity cameraEntity) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			for (const auto & [lightEntity, dirLight, kreoglDirLight] : _r->view<DirLightComponent, kreogl::DirectionalLight>().each()) {
-				if (!cameraHelper::entityAppearsInViewport(*_r, lightEntity, cameraEntity))
+			for (const auto & [lightEntity, dirLight, kreoglDirLight] : r.view<DirLightComponent, kreogl::DirectionalLight>().each()) {
+				if (!cameraHelper::entityAppearsInViewport(r, lightEntity, cameraEntity))
 					continue;
 
 				syncLightProperties(lightEntity, kreoglDirLight, dirLight, kreoglWorld);
@@ -737,21 +756,21 @@ namespace kengine {
 			}
 		}
 
-		static void syncAllPointLights(kreogl::World & kreoglWorld, entt::entity cameraEntity) noexcept {
+		void syncAllPointLights(kreogl::World & kreoglWorld, entt::entity cameraEntity) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			for (const auto & [lightEntity, transform, pointLight, kreoglPointLight] : _r->view<TransformComponent, PointLightComponent, kreogl::PointLight>().each()) {
-				if (!cameraHelper::entityAppearsInViewport(*_r, lightEntity, cameraEntity))
+			for (const auto & [lightEntity, transform, pointLight, kreoglPointLight] : r.view<TransformComponent, PointLightComponent, kreogl::PointLight>().each()) {
+				if (!cameraHelper::entityAppearsInViewport(r, lightEntity, cameraEntity))
 					continue;
 				syncPointLightProperties(lightEntity, transform, kreoglPointLight, pointLight, kreoglWorld);
 			}
 		}
 
-		static void syncAllSpotLights(kreogl::World & kreoglWorld, entt::entity cameraEntity) noexcept {
+		void syncAllSpotLights(kreogl::World & kreoglWorld, entt::entity cameraEntity) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			for (const auto & [lightEntity, transform, spotLight, kreoglSpotLight] : _r->view<TransformComponent, SpotLightComponent, kreogl::SpotLight>().each()) {
-				if (!cameraHelper::entityAppearsInViewport(*_r, lightEntity, cameraEntity))
+			for (const auto & [lightEntity, transform, spotLight, kreoglSpotLight] : r.view<TransformComponent, SpotLightComponent, kreogl::SpotLight>().each()) {
+				if (!cameraHelper::entityAppearsInViewport(r, lightEntity, cameraEntity))
 					continue;
 
 				syncPointLightProperties(lightEntity, transform, kreoglSpotLight, spotLight, kreoglWorld);
@@ -762,7 +781,7 @@ namespace kengine {
 			}
 		}
 
-		static void syncLightProperties(entt::entity lightEntity, auto & kreoglLight, const LightComponent & light, kreogl::World & kreoglWorld) noexcept {
+		void syncLightProperties(entt::entity lightEntity, auto & kreoglLight, const LightComponent & light, kreogl::World & kreoglWorld) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			kreoglLight.color = toglm(light.color);
@@ -774,7 +793,7 @@ namespace kengine {
 			kreoglLight.shadowMapMaxBias = light.shadowMapMaxBias;
 			kreoglLight.shadowMapMinBias = light.shadowMapMinBias;
 
-			if (const auto godRays = _r->try_get<GodRaysComponent>(lightEntity)) {
+			if (const auto godRays = r.try_get<GodRaysComponent>(lightEntity)) {
 				if (!kreoglLight.volumetricLighting)
 					kreoglLight.volumetricLighting.emplace();
 				kreoglLight.volumetricLighting->defaultStepLength = godRays->defaultStepLength;
@@ -788,7 +807,7 @@ namespace kengine {
 			kreoglWorld.add(kreoglLight);
 		}
 
-		static void syncPointLightProperties(entt::entity lightEntity, const TransformComponent & transform, kreogl::PointLight & kreoglLight, const PointLightComponent & light, kreogl::World & kreoglWorld) noexcept {
+		void syncPointLightProperties(entt::entity lightEntity, const TransformComponent & transform, kreogl::PointLight & kreoglLight, const PointLightComponent & light, kreogl::World & kreoglWorld) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			syncLightProperties(lightEntity, kreoglLight, light, kreoglWorld);
@@ -800,7 +819,7 @@ namespace kengine {
 			kreoglLight.attenuationQuadratic = light.attenuationQuadratic;
 		}
 
-		static void endImGuiFrame() noexcept {
+		void endImGuiFrame() noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
@@ -812,25 +831,13 @@ namespace kengine {
 
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
-			if (!_r->view<GLFWWindowComponent>().empty())
+			if (!r.view<GLFWWindowComponent>().empty())
 				ImGui::NewFrame();
 		}
 
-		static const kreogl::ShaderPipeline & getShaderPipeline() noexcept {
+		entt::entity getEntityInPixel(entt::entity windowID, const putils::Point2ui & pixel) noexcept {
 			KENGINE_PROFILING_SCOPE;
-
-			static const auto shaderPipeline = [] {
-				auto ret = kreogl::ShaderPipeline::getDefaultShaders();
-				static HighlightShader highlight(*_r);
-				ret.addShader(kreogl::ShaderStep::PostProcess, highlight);
-				return ret;
-			}();
-			return shaderPipeline;
-		}
-
-		static entt::entity getEntityInPixel(entt::entity windowID, const putils::Point2ui & pixel) noexcept {
-			KENGINE_PROFILING_SCOPE;
-			kengine_logf(*_r, Verbose, "KreoglSystem", "Getting entity in { %zu, %zu } of %zu", pixel.x, pixel.y, windowID);
+			kengine_logf(r, Verbose, "KreoglSystem", "Getting entity in { %zu, %zu } of %zu", pixel.x, pixel.y, windowID);
 
 			const auto entityIDInPixel = readFromGBuffer(windowID, pixel, kreogl::GBuffer::Texture::UserData);
 			if (!entityIDInPixel)
@@ -838,17 +845,17 @@ namespace kengine {
 
 			const auto ret = entt::entity(entityIDInPixel->r);
 			if (ret == entt::entity(entt::id_type(0))) {
-				kengine_log(*_r, Verbose, "OpenGLSystem/getEntityInPixel", "Found no Entity");
+				kengine_log(r, Verbose, "OpenGLSystem/getEntityInPixel", "Found no Entity");
 				return entt::null;
 			}
 
-			kengine_logf(*_r, Verbose, "OpenGLSystem/getEntityInPixel", "Found %zu", ret);
+			kengine_logf(r, Verbose, "OpenGLSystem/getEntityInPixel", "Found %zu", ret);
 			return ret;
 		}
 
-		static std::optional<putils::Point3f> getPositionInPixel(entt::entity window, const putils::Point2ui & pixel) noexcept {
+		std::optional<putils::Point3f> getPositionInPixel(entt::entity window, const putils::Point2ui & pixel) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(*_r, Verbose, "KreoglSystem", "Getting position in { %zu, %zu } of %zu", pixel.x, pixel.y, window);
+			kengine_logf(r, Verbose, "KreoglSystem", "Getting position in { %zu, %zu } of %zu", pixel.x, pixel.y, window);
 
 			// Check that an entity was drawn in the pixel, otherwise position buffer is invalid
 			if (getEntityInPixel(window, pixel) == entt::null)
@@ -858,42 +865,42 @@ namespace kengine {
 			if (!positionInPixel)
 				return std::nullopt;
 
-			kengine_logf(*_r, Verbose, "KreoglSystem/getPositionInPixel", "Found { %f, %f, %f }", positionInPixel->x, positionInPixel->y, positionInPixel->y);
+			kengine_logf(r, Verbose, "KreoglSystem/getPositionInPixel", "Found { %f, %f, %f }", positionInPixel->x, positionInPixel->y, positionInPixel->y);
 			return &positionInPixel->x;
 		}
 
-		static std::optional<glm::vec4> readFromGBuffer(entt::entity window, const putils::Point2ui & pixel, kreogl::GBuffer::Texture texture) noexcept {
+		std::optional<glm::vec4> readFromGBuffer(entt::entity window, const putils::Point2ui & pixel, kreogl::GBuffer::Texture texture) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			static constexpr auto GBUFFER_TEXTURE_COMPONENTS = 4;
 
 			if (window == entt::null) {
-				for (const auto & [windowEntity, kreoglWindow] : _r->view<kreogl::Window>().each()) {
+				for (const auto & [windowEntity, kreoglWindow] : r.view<kreogl::Window>().each()) {
 					window = windowEntity;
 					break;
 				}
 
 				if (window == entt::null) {
-					kengine_log(*_r, Warning, "KreoglSystem", "No existing Kreogl window");
+					kengine_log(r, Warning, "KreoglSystem", "No existing Kreogl window");
 					return std::nullopt;
 				}
 			}
 
-			if (!_r->all_of<kreogl::Window>(window)) {
-				kengine_logf(*_r, Warning, "KreoglSystem", "%zu does not have a Kreogl window", window);
+			if (!r.all_of<kreogl::Window>(window)) {
+				kengine_logf(r, Warning, "KreoglSystem", "%zu does not have a Kreogl window", window);
 				return std::nullopt;
 			}
 
-			const auto viewportInfo = cameraHelper::getViewportForPixel({ *_r, window }, pixel);
+			const auto viewportInfo = cameraHelper::getViewportForPixel({ r, window }, pixel);
 			if (viewportInfo.camera == entt::null) {
-				kengine_logf(*_r, Warning, "KreoglSystem", "Found no viewport containing pixel { %d, %d }", pixel.x, pixel.y);
+				kengine_logf(r, Warning, "KreoglSystem", "Found no viewport containing pixel { %d, %d }", pixel.x, pixel.y);
 				return std::nullopt;
 			}
 
 			const auto cameraEntity = viewportInfo.camera;
-			const auto kreoglCamera = _r->try_get<kreogl::Camera>(cameraEntity);
+			const auto kreoglCamera = r.try_get<kreogl::Camera>(cameraEntity);
 			if (!kreoglCamera) {
-				kengine_logf(*_r, Warning, "KreoglSystem", "Viewport %zu does not have a kreogl::Camera", cameraEntity);
+				kengine_logf(r, Warning, "KreoglSystem", "Viewport %zu does not have a kreogl::Camera", cameraEntity);
 				return std::nullopt;
 			}
 
@@ -903,17 +910,16 @@ namespace kengine {
 
 			const auto pixelInGBuffer = glm::vec2(gBufferSize) * toglm(viewportInfo.viewportPercent);
 			if (pixelInGBuffer.x >= float(gBufferSize.x) || pixelInGBuffer.y > float(gBufferSize.y) || pixelInGBuffer.y == 0) {
-				kengine_logf(*_r, Warning, "OpenGLSystem/getEntityInPixel", "Pixel is out of %zu's GBuffer's bounds", cameraEntity);
+				kengine_logf(r, Warning, "OpenGLSystem/getEntityInPixel", "Pixel is out of %zu's GBuffer's bounds", cameraEntity);
 				return std::nullopt;
 			}
 
 			return gBuffer.readPixel(texture, pixelInGBuffer);
 		}
-
-		static inline entt::registry * _r;
 	};
 
-	void KreoglSystem(entt::registry & r) noexcept {
-		KreoglSystem::init(r);
+	void addKreoglSystem(entt::registry & r) noexcept {
+		const entt::handle e{ r, r.create() };
+		e.emplace<KreoglSystem>(e);
 	}
 }

@@ -5,6 +5,7 @@
 #include <list>
 
 // entt
+#include <entt/entity/handle.hpp>
 #include <entt/entity/registry.hpp>
 
 // magic_enum
@@ -14,8 +15,9 @@
 #include <imgui.h>
 
 // putils
-#include "thread_name.hpp"
+#include "forward_to.hpp"
 #include "lengthof.hpp"
+#include "thread_name.hpp"
 
 // kengine data
 #include "data/AdjustableComponent.hpp"
@@ -31,53 +33,58 @@
 #include "helpers/profilingHelper.hpp"
 
 namespace kengine {
-	namespace {
-		static struct {
-			bool severities[magic_enum::enum_count<kengine::LogSeverity>()];
-			char categorySearch[4096] = "";
-			char threadSearch[4096] = "";
-		} _filters;
-	}
-
 	struct LogImGuiSystem {
-		struct LogEvent {
+		const entt::registry & r;
+		bool * enabled;
+
+		struct InternalLogEvent {
 			kengine::LogSeverity severity;
 			std::string thread;
 			std::string category;
 			std::string message;
 		};
 
-		static void init(entt::registry & r) noexcept {
+		std::mutex mutex;
+		int maxEvents = 4096;
+		std::list<InternalLogEvent> events;
+		std::vector<InternalLogEvent> filteredEvents;
+
+		struct {
+			bool severities[magic_enum::enum_count<kengine::LogSeverity>()];
+			char categorySearch[4096] = "";
+			char threadSearch[4096] = "";
+		} filters;
+
+		LogImGuiSystem(entt::handle e) noexcept
+			: r(*e.registry())
+		{
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, Log, "Init", "LogImGuiSystem");
 
-			_r = &r;
-
-			std::fill(std::begin(_filters.severities), std::end(_filters.severities), true);
+			std::fill(std::begin(filters.severities), std::end(filters.severities), true);
 
 			const auto severity = logHelper::parseCommandLineSeverity(r);
 			for (int i = 0; i < (int)severity; ++i)
-				_filters.severities[i] = false;
+				filters.severities[i] = false;
 
-			const auto e = r.create();
-			r.emplace<functions::Log>(e, log);
-			r.emplace<functions::Execute>(e, execute);
+			e.emplace<functions::Log>(putils_forward_to_this(log));
+			e.emplace<functions::Execute>(putils_forward_to_this(execute));
 
-			r.emplace<NameComponent>(e, "Log");
-			auto & tool = r.emplace<ImGuiToolComponent>(e);
-			_enabled = &tool.enabled;
+			e.emplace<NameComponent>("Log");
+			auto & tool = e.emplace<ImGuiToolComponent>();
+			enabled = &tool.enabled;
 
-			r.emplace<AdjustableComponent>(e) = {
+			e.emplace<AdjustableComponent>() = {
 				"Log", {
-					{ "ImGui max events", &_maxEvents }
+					{ "ImGui max events", &maxEvents }
 				}
 			};
 		}
 
-		static void log(const kengine::LogEvent & event) noexcept {
+		void log(const kengine::LogEvent & event) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			LogEvent e{
+			InternalLogEvent e{
 				 event.severity,
 				 putils::get_thread_name(),
 				 event.category,
@@ -85,74 +92,74 @@ namespace kengine {
 			};
 
 			if (matchesFilters(e)) {
-				const std::lock_guard lock(_mutex);
-				_filteredEvents.push_back(e);
-				_events.emplace_back(std::move(e));
-				if (_events.size() >= _maxEvents)
-					_events.pop_front();
+				const std::lock_guard lock(mutex);
+				filteredEvents.push_back(e);
+				events.emplace_back(std::move(e));
+				if (events.size() >= maxEvents)
+					events.pop_front();
 			}
 		}
 
-		static void execute(float) noexcept {
+		void execute(float) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			if (!*_enabled)
+			if (!*enabled)
 				return;
 
-			kengine_log(*_r, Verbose, "Execute", "LogImGuiSystem");
+			kengine_log(r, Verbose, "Execute", "LogImGuiSystem");
 
-			if (ImGui::Begin("Log", _enabled)) {
+			if (ImGui::Begin("Log", enabled)) {
 				drawFilters();
 				drawFilteredEvents();
 			}
 			ImGui::End();
 		}
 
-		static void drawFilters() noexcept {
+		void drawFilters() noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			bool changed = false;
 			for (const auto & [severity, name] : magic_enum::enum_entries<LogSeverity>())
-				if (ImGui::Checkbox(putils::string<32>(name).c_str(), &_filters.severities[(int)severity]))
+				if (ImGui::Checkbox(putils::string<32>(name).c_str(), &filters.severities[(int)severity]))
 					changed = true;
 
-			if (ImGui::InputText("Category", _filters.categorySearch, putils::lengthof(_filters.categorySearch)))
+			if (ImGui::InputText("Category", filters.categorySearch, putils::lengthof(filters.categorySearch)))
 				changed = true;
 
-			if (ImGui::InputText("Thread", _filters.threadSearch, putils::lengthof(_filters.threadSearch)))
+			if (ImGui::InputText("Thread", filters.threadSearch, putils::lengthof(filters.threadSearch)))
 				changed = true;
 
 			if (changed)
 				updateFilteredEvents();
 		}
 
-		static void updateFilteredEvents() noexcept {
+		void updateFilteredEvents() noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(*_r, Verbose, "Execute/LogImGuiSystem", "Updating filters");
+			kengine_log(r, Verbose, "Execute/LogImGuiSystem", "Updating filters");
 
-			const std::lock_guard lock(_mutex);
-			_filteredEvents.clear();
-			for (const auto & event : _events)
+			const std::lock_guard lock(mutex);
+			filteredEvents.clear();
+			for (const auto & event : events)
 				if (matchesFilters(event))
-					_filteredEvents.push_back(event);
+					filteredEvents.push_back(event);
 		}
 
-		static bool matchesFilters(const LogEvent & e) noexcept {
+		bool matchesFilters(const InternalLogEvent & e) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			if (!_filters.severities[(int)e.severity])
+			if (!filters.severities[(int)e.severity])
 				return false;
 
-			if (!e.category.empty() && e.category.find(_filters.categorySearch) == std::string::npos)
+			if (!e.category.empty() && e.category.find(filters.categorySearch) == std::string::npos)
 				return false;
 
-			if (!e.thread.empty() && e.thread.find(_filters.threadSearch) == std::string::npos)
+			if (!e.thread.empty() && e.thread.find(filters.threadSearch) == std::string::npos)
 				return false;
 
 			return true;
 		}
 
-		static void drawFilteredEvents() noexcept {
+		void drawFilteredEvents() noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			if (ImGui::BeginTable("##logEvents", 4)) {
@@ -162,8 +169,8 @@ namespace kengine {
 				ImGui::TableSetupColumn("Message");
 				ImGui::TableHeadersRow();
 
-				std::lock_guard lockGuard(_mutex);
-				for (const auto& event : _filteredEvents) {
+				std::lock_guard lockGuard(mutex);
+				for (const auto& event : filteredEvents) {
 					ImGui::TableNextColumn();
 					ImGui::Text("%s", putils::string<1024>(magic_enum::enum_name(event.severity)).c_str());
 					ImGui::TableNextColumn();
@@ -177,18 +184,10 @@ namespace kengine {
 				ImGui::EndTable();
 			}
 		}
-
-		static inline bool * _enabled;
-
-		static inline const entt::registry * _r;
-
-		static inline std::mutex _mutex;
-		static inline int _maxEvents = 4096;
-		static inline std::list<LogEvent> _events;
-		static inline std::vector<LogEvent> _filteredEvents;
 	};
 
-	void LogImGuiSystem(entt::registry & r) noexcept {
-		LogImGuiSystem::init(r);
+	void addLogImGuiSystem(entt::registry & r) noexcept {
+		const entt::handle e{ r, r.create() };
+		e.emplace<LogImGuiSystem>(e);
 	}
 }

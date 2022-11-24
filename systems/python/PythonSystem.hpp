@@ -4,5 +4,5 @@
 #include <entt/entity/fwd.hpp>
 
 namespace kengine {
-	KENGINE_PYTHON_EXPORT void PythonSystem(entt::registry & r) noexcept;
+	KENGINE_PYTHON_EXPORT void addPythonSystem(entt::registry & r) noexcept;
 }

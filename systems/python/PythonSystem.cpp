@@ -4,6 +4,9 @@
 #include <entt/entity/handle.hpp>
 #include <entt/entity/registry.hpp>
 
+// putils
+#include "forward_to.hpp"
+
 // kengine data
 #include "data/PythonComponent.hpp"
 
@@ -18,22 +21,24 @@
 
 namespace kengine {
 	struct PythonSystem {
-		static void init(entt::registry & r) noexcept {
+		entt::registry & r;
+		py::module_ * module_;
+
+		PythonSystem(entt::handle e) noexcept
+			: r(*e.registry())
+		{
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, Log, "Init", "PythonSystem");
 
-			_r = &r;
-
-			const auto e = r.create();
-			r.emplace<functions::Execute>(e, execute);
+			e.emplace<functions::Execute>(putils_forward_to_this(execute));
 
 			kengine_log(r, Log, "Init/Python", "Creating PythonStateComponent");
 			auto state = new PythonStateComponent::Data;
-			r.emplace<PythonStateComponent>(e, state);
+			e.emplace<PythonStateComponent>(state);
 
 			kengine_log(r, Log, "Init/Python", "Registering scriptLanguageHelper functions");
 			py::globals()["kengine"] = state->module_;
-			_module = &state->module_;
+			module_ = &state->module_;
 			scriptLanguageHelper::init(
 				r,
 				[&](auto && ... args) noexcept {
@@ -46,32 +51,30 @@ namespace kengine {
 			);
 		}
 
-		static void execute(float deltaTime) noexcept {
+		void execute(float deltaTime) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(*_r, Verbose, "Execute", "PythonSystem");
+			kengine_log(r, Verbose, "Execute", "PythonSystem");
 
-			_module->attr("deltaTime") = deltaTime;
+			module_->attr("deltaTime") = deltaTime;
 
-			for (auto [e, comp] : _r->view<PythonComponent>().each()) {
-				_module->attr("self") = entt::handle{ *_r, e };
+			for (auto [e, comp] : r.view<PythonComponent>().each()) {
+				module_->attr("self") = entt::handle{ r, e };
 
 				for (const auto & s : comp.scripts) {
-					kengine_logf(*_r, Verbose, "Execute/PythonSystem", "%zu: %s", e, s.c_str());
+					kengine_logf(r, Verbose, "Execute/PythonSystem", "%zu: %s", e, s.c_str());
 					try {
 						py::eval_file(s.c_str(), py::globals());
 					}
 					catch (const std::exception & e) {
-						kengine_assert_failed(*_r, e.what());
+						kengine_assert_failed(r, e.what());
 					}
 				}
 			}
 		}
-
-		static inline entt::registry * _r = nullptr;
-		static inline py::module_ * _module = nullptr;
 	};
 
-	void PythonSystem(entt::registry & r) noexcept {
-		PythonSystem::init(r);
+	void addPythonSystem(entt::registry & r) noexcept {
+		const entt::handle e{ r, r.create() };
+		e.emplace<PythonSystem>(e);
 	}
 }

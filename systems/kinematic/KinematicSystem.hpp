@@ -4,5 +4,5 @@
 #include <entt/entity/fwd.hpp>
 
 namespace kengine {
-	KENGINE_KINEMATIC_EXPORT void KinematicSystem(entt::registry & r) noexcept;
+	KENGINE_KINEMATIC_EXPORT void addKinematicSystem(entt::registry & r) noexcept;
 }
