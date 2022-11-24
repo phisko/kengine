@@ -1,10 +1,12 @@
 #include "KinematicSystem.hpp"
 
 // entt
+#include <entt/entity/handle.hpp>
 #include <entt/entity/registry.hpp>
 
 // putils
 #include "angle.hpp"
+#include "forward_to.hpp"
 
 // kengine data
 #include "data/KinematicComponent.hpp"
@@ -20,21 +22,22 @@
 
 namespace kengine {
 	struct KinematicSystem {
-		static void init(entt::registry & r) noexcept {
+		entt::registry & r;
+
+		KinematicSystem(entt::handle e) noexcept
+			: r(*e.registry())
+		{
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, Log, "Init", "KinematicSystem");
 
-			_r = &r;
-
-			const auto e = r.create();
-			r.emplace<functions::Execute>(e, execute);
+			e.emplace<functions::Execute>(putils_forward_to_this(execute));
 		}
 
-		static void execute(float deltaTime) noexcept {
+		void execute(float deltaTime) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(*_r, Verbose, "Execute", "KinematicSystem");
+			kengine_log(r, Verbose, "Execute", "KinematicSystem");
 
-			for (const auto & [e, transform, physics] : _r->view<TransformComponent, PhysicsComponent, KinematicComponent>().each()) {
+			for (const auto & [e, transform, physics] : r.view<TransformComponent, PhysicsComponent, KinematicComponent>().each()) {
 				transform.boundingBox.position += physics.movement * deltaTime;
 
 				const auto applyRotation = [deltaTime](float & transformMember, float physicsMember) noexcept {
@@ -47,11 +50,10 @@ namespace kengine {
 				applyRotation(transform.roll, physics.roll);
 			}
 		}
-
-		static inline entt::registry * _r;
 	};
 
-	void KinematicSystem(entt::registry & r) noexcept {
-		KinematicSystem::init(r);
+	void addKinematicSystem(entt::registry & r) noexcept {
+		const entt::handle e{ r, r.create() };
+		e.emplace<KinematicSystem>(e);
 	}
 }

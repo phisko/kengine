@@ -4,5 +4,5 @@
 #include <entt/entity/fwd.hpp>
 
 namespace kengine {
-	KENGINE_LOG_FILE_EXPORT void LogFileSystem(entt::registry & r) noexcept;
+	KENGINE_LOG_FILE_EXPORT void addLogFileSystem(entt::registry & r) noexcept;
 }

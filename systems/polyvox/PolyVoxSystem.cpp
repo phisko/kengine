@@ -1,6 +1,7 @@
 #include "PolyVoxSystem.hpp"
 
 // entt
+#include <entt/entity/handle.hpp>
 #include <entt/entity/registry.hpp>
 
 // polyvox
@@ -8,6 +9,9 @@
 
 // meta
 #include "meta/type.hpp"
+
+// putils
+#include "forward_to.hpp"
 
 // kengine data
 #include "data/ModelDataComponent.hpp"
@@ -29,33 +33,34 @@ namespace kengine {
 	}
 
 	struct PolyVoxSystem {
-		static void init(entt::registry & r) noexcept {
+		entt::registry & r;
+
+		PolyVoxSystem(entt::handle e) noexcept
+			: r(*e.registry())
+		{
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, Log, "Init", "PolyVoxSystem");
 
-			_r = &r;
-
-			const auto e = r.create();
-			r.emplace<functions::Execute>(e, execute);
+			e.emplace<functions::Execute>(putils_forward_to_this(execute));
 		}
 
-		static void execute(float deltaTime) noexcept {
+		void execute(float deltaTime) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(*_r, Verbose, "Execute", "PolyVoxSystem");
+			kengine_log(r, Verbose, "Execute", "PolyVoxSystem");
 
-			for (auto [e, poly] : _r->view<PolyVoxComponent>().each()) {
+			for (auto [e, poly] : r.view<PolyVoxComponent>().each()) {
 				if (!poly.changed)
 					continue;
-				kengine_logf(*_r, Verbose, "Execute/PolyVoxSystem", "Rebuilding mesh for %zu", e);
+				kengine_logf(r, Verbose, "Execute/PolyVoxSystem", "Rebuilding mesh for %zu", e);
 				poly.changed = false;
 
 				ModelDataComponent modelData;
 
-				auto & mesh = _r->emplace<PolyVoxMeshContainerComponent>(e).mesh;
+				auto & mesh = r.emplace<PolyVoxMeshContainerComponent>(e).mesh;
 				mesh = buildMesh(std::move(poly.volume));
 
 				const auto & centre = poly.volume.getEnclosingRegion().getCentre();
-				auto & model = _r->get_or_emplace<TransformComponent>(e);
+				auto & model = r.get_or_emplace<TransformComponent>(e);
 				model.boundingBox.position = { (float)centre.getX(), (float)centre.getY(), (float)centre.getZ() };
 
 				ModelDataComponent::Mesh meshData;
@@ -67,17 +72,17 @@ namespace kengine {
 				modelData.free = FreePolyVoxMeshData(e);
 				modelData.init<PolyVoxMeshContainerComponent::MeshType::VertexType>();
 
-				_r->emplace<ModelDataComponent>(e, std::move(modelData));
+				r.emplace<ModelDataComponent>(e, std::move(modelData));
 			}
 		}
 
-		static ModelDataComponent::FreeFunc FreePolyVoxMeshData(entt::entity e) noexcept {
-			return [e]() noexcept {
+		ModelDataComponent::FreeFunc FreePolyVoxMeshData(entt::entity e) noexcept {
+			return [this, e]() noexcept {
 				KENGINE_PROFILING_SCOPE;
-				kengine_logf(*_r, Log, "PolyVoxSystem", "Releasing PolyVoxMeshContainer for %zu", e);
-				auto & mesh = _r->get_or_emplace<PolyVoxMeshContainerComponent>(e).mesh; // previous `attach` hasn't been processed yet, so `get` would assert
+				kengine_logf(r, Log, "PolyVoxSystem", "Releasing PolyVoxMeshContainer for %zu", e);
+				auto & mesh = r.get_or_emplace<PolyVoxMeshContainerComponent>(e).mesh; // previous `attach` hasn't been processed yet, so `get` would assert
 				mesh.clear();
-				_r->remove<PolyVoxMeshContainerComponent>(e);
+				r.remove<PolyVoxMeshContainerComponent>(e);
 			};
 		}
 
@@ -85,11 +90,10 @@ namespace kengine {
 			using MeshType = decltype(buildMesh(PolyVox::RawVolume<PolyVoxComponent::VertexData>({ {0, 0, 0 }, {0, 0, 0} })));
 			MeshType mesh;
 		};
-
-		static inline entt::registry * _r;
 	};
 
-	void PolyVoxSystem(entt::registry & r) noexcept {
-		PolyVoxSystem::init(r);
+	void addPolyVoxSystem(entt::registry & r) noexcept {
+		const entt::handle e{ r, r.create() };
+		e.emplace<PolyVoxSystem>(e);
 	}
 }

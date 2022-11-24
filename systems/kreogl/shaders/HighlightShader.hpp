@@ -3,6 +3,9 @@
 // entt
 #include <entt/entity/fwd.hpp>
 
+// putils
+#include "default_constructors.hpp"
+
 // kreogl
 #include "kreogl/impl/shaders/Shader.hpp"
 #include "kreogl/impl/shaders/Singleton.hpp"
@@ -13,6 +16,8 @@
 namespace kengine {
 	class HighlightShader : public kreogl::Shader {
 	public:
+		PUTILS_MOVE_ONLY(HighlightShader);
+
 		HighlightShader(const entt::registry & r) noexcept;
 
 	private:
@@ -22,6 +27,6 @@ namespace kengine {
 
 	private:
 		HighlightGLSL _glsl;
-		const entt::registry & _r;
+		const entt::registry * _r = nullptr;
 	};
 }

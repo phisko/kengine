@@ -4,5 +4,5 @@
 #include <entt/entity/fwd.hpp>
 
 namespace kengine {
-    KENGINE_KREOGL_EXPORT void KreoglSystem(entt::registry & r) noexcept;
+    KENGINE_KREOGL_EXPORT void addKreoglSystem(entt::registry & r) noexcept;
 }

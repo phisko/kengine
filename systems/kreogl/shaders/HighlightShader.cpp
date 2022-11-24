@@ -16,7 +16,7 @@
 #include "helpers/profilingHelper.hpp"
 
 kengine::HighlightShader::HighlightShader(const entt::registry & r) noexcept
-	: _r(r)
+	: _r(&r)
 {
 	KENGINE_PROFILING_SCOPE;
 
@@ -59,7 +59,7 @@ void kengine::HighlightShader::draw(const kreogl::DrawParams & params) noexcept 
 	_glsl.viewPos = params.camera.getPosition();
 	_glsl.screenSize = params.camera.getViewport().getResolution();
 
-	for (const auto & [entity, highlight] : _r.view<HighlightComponent>().each()) {
+	for (const auto & [entity, highlight] : _r->view<HighlightComponent>().each()) {
 		uniformChecker.shouldCheck = true;
 		_glsl.entityID = float(entity);
 		_glsl.highlightColor = { highlight.color.r, highlight.color.g, highlight.color.b, highlight.color.a };

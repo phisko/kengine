@@ -1,6 +1,7 @@
 #include "ModelCreatorSystem.hpp"
 
 // entt
+#include <entt/entity/handle.hpp>
 #include <entt/entity/registry.hpp>
 
 // kengine data
@@ -14,10 +15,19 @@
 
 namespace kengine {
 	struct ModelCreatorSystem {
-		static void init(entt::registry & r) noexcept {
+		entt::registry & r;
+
+		ModelCreatorSystem(entt::handle e) noexcept
+			: r(*e.registry())
+		{
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, Log, "Init", "ModelCreatorSystem");
 			r.on_construct<GraphicsComponent>().connect<findOrCreateModel>();
+		}
+
+		~ModelCreatorSystem() noexcept {
+			KENGINE_PROFILING_SCOPE;
+			r.on_construct<GraphicsComponent>().disconnect<findOrCreateModel>();
 		}
 
 		static void findOrCreateModel(entt::registry & r, entt::entity e) noexcept {
@@ -45,7 +55,8 @@ namespace kengine {
 		}
 	};
 
-	void ModelCreatorSystem(entt::registry & r) noexcept {
-		ModelCreatorSystem::init(r);
+	void addModelCreatorSystem(entt::registry & r) noexcept {
+		const entt::handle e{ r, r.create() };
+		e.emplace<ModelCreatorSystem>(e);
 	}
 }

@@ -4,5 +4,5 @@
 #include <entt/entity/fwd.hpp>
 
 namespace kengine {
-	KENGINE_LOG_IMGUI_EXPORT void LogImGuiSystem(entt::registry & r) noexcept;
+	KENGINE_LOG_IMGUI_EXPORT void addLogImGuiSystem(entt::registry & r) noexcept;
 }

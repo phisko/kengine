@@ -4,12 +4,14 @@
 #include <fstream>
 
 // entt
+#include <entt/entity/handle.hpp>
 #include <entt/entity/registry.hpp>
 
 // imgui
 #include <imgui.h>
 
 // putils
+#include "forward_to.hpp"
 #include "to_string.hpp"
 
 // kengine data
@@ -36,43 +38,49 @@
 
 namespace kengine {
 	struct ImGuiToolSystem {
-		static void init(entt::registry & r) noexcept {
+		entt::registry & r;
+
+		ImGuiToolSystem(entt::handle e) noexcept
+			: r(*e.registry())
+		{
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, Log, "Init", "ImGuiToolSystem");
 
-			_r = &r;
-
-			r.on_construct<ImGuiToolComponent>().connect<onConstructImGuiTool>();
-
-			const auto e = r.create();
-			r.emplace<functions::OnTerminate>(e, saveTools);
-			r.emplace<functions::Execute>(e, execute);
-
-			_confFile.parse();
+			confFile.parse();
 			for (const auto & [toolEntity, name, tool] : r.view<NameComponent, ImGuiToolComponent>().each()) {
 				kengine_logf(r, Log, "Init/ImGuiToolSystem", "Initializing %s", name.name.c_str());
-				tool.enabled = _confFile.getValue(name.name.c_str());
+				tool.enabled = confFile.getValue(name.name.c_str());
 			}
+
+			e.emplace<functions::OnTerminate>(putils_forward_to_this(saveTools));
+			e.emplace<functions::Execute>(putils_forward_to_this(execute));
+
+			r.on_construct<ImGuiToolComponent>().connect<&ImGuiToolSystem::onConstructImGuiTool>(this);
 		}
 
-		static void execute(float deltaTime) noexcept {
+		~ImGuiToolSystem() noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(*_r, Verbose, "Execute", "ImGuiToolSystem");
+			r.on_construct<ImGuiToolComponent>().disconnect<&ImGuiToolSystem::onConstructImGuiTool>(this);
+		}
+
+		void execute(float deltaTime) noexcept {
+			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, Verbose, "Execute", "ImGuiToolSystem");
 
 			if (ImGui::BeginMainMenuBar()) {
 				bool mustSave = false;
 				if (ImGui::BeginMenu("Tools")) {
 					if (ImGui::MenuItem("Disable all")) {
-						kengine_log(*_r, Log, "ImGuiToolSystem", "Disabling all tools");
-						for (auto [e, tool] : _r->view<ImGuiToolComponent>().each())
+						kengine_log(r, Log, "ImGuiToolSystem", "Disabling all tools");
+						for (auto [e, tool] : r.view<ImGuiToolComponent>().each())
 							tool.enabled = false;
 					}
 
-					const auto sorted = sortHelper::getNameSortedEntities<KENGINE_IMGUI_MAX_TOOLS, ImGuiToolComponent>(*_r);
+					const auto sorted = sortHelper::getNameSortedEntities<KENGINE_IMGUI_MAX_TOOLS, ImGuiToolComponent>(r);
 					for (auto & [e, name, tool] : sorted)
 						if (ImGui::MenuItem(name->name.c_str())) {
 							tool->enabled = !tool->enabled;
-							kengine_logf(*_r, Log, "ImGuiToolSystem", "Turned %s %s", tool->enabled ? "on" : "off", name->name.c_str());
+							kengine_logf(r, Log, "ImGuiToolSystem", "Turned %s %s", tool->enabled ? "on" : "off", name->name.c_str());
 							mustSave = true;
 						}
 					ImGui::EndMenu();
@@ -84,7 +92,7 @@ namespace kengine {
 			ImGui::EndMainMenuBar();
 		}
 
-		static void onConstructImGuiTool(entt::registry & r, entt::entity e) noexcept {
+		void onConstructImGuiTool(entt::registry & r, entt::entity e) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			const auto name = r.try_get<NameComponent>(e);
@@ -95,25 +103,25 @@ namespace kengine {
 
 			auto & tool = r.get<ImGuiToolComponent>(e);
 			kengine_logf(r, Log, "Init/ImGuiToolSystem", "Initializing %s", name->name.c_str());
-			tool.enabled = _confFile.getValue(name->name.c_str());
+			tool.enabled = confFile.getValue(name->name.c_str());
 		}
 
-		static void saveTools() noexcept {
+		void saveTools() noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(*_r, Log, "ImGuiToolSystem", "Saving to " KENGINE_IMGUI_TOOLS_SAVE_FILE);
+			kengine_log(r, Log, "ImGuiToolSystem", "Saving to " KENGINE_IMGUI_TOOLS_SAVE_FILE);
 
 			std::ofstream f(KENGINE_IMGUI_TOOLS_SAVE_FILE);
 			if (!f) {
-				kengine_assert_failed(*_r, "Failed to open '", KENGINE_IMGUI_TOOLS_SAVE_FILE, "' with write permission");
+				kengine_assert_failed(r, "Failed to open '", KENGINE_IMGUI_TOOLS_SAVE_FILE, "' with write permission");
 				return;
 			}
-			const auto sorted = sortHelper::getNameSortedEntities<KENGINE_IMGUI_MAX_TOOLS, ImGuiToolComponent>(*_r);
+			const auto sorted = sortHelper::getNameSortedEntities<KENGINE_IMGUI_MAX_TOOLS, ImGuiToolComponent>(r);
 			for (const auto & [e, name, tool] : sorted)
 				f << name->name << ';' << std::boolalpha << tool->enabled << std::noboolalpha << std::endl;
 			f.flush();
 		}
 
-		static inline struct {
+		struct {
 			void parse() noexcept {
 				KENGINE_PROFILING_SCOPE;
 				std::ifstream f(KENGINE_IMGUI_TOOLS_SAVE_FILE);
@@ -139,12 +147,11 @@ namespace kengine {
 
 		private:
 			std::unordered_map<std::string, bool> _values;
-		} _confFile;
-
-		static inline entt::registry * _r;
+		} confFile;
 	};
 
-	void ImGuiToolSystem(entt::registry & r) noexcept {
-		ImGuiToolSystem::init(r);
+	void addImGuiToolSystem(entt::registry & r) noexcept {
+		const entt::handle e{ r, r.create() };
+		e.emplace<ImGuiToolSystem>(e);
 	}
 }

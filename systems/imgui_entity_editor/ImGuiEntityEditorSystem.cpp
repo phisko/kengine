@@ -7,6 +7,9 @@
 // imgui
 #include <imgui.h>
 
+// putils
+#include "forward_to.hpp"
+
 // kengine data
 #include "data/ImGuiToolComponent.hpp"
 #include "data/InstanceComponent.hpp"
@@ -23,53 +26,53 @@
 
 namespace kengine {
 	struct ImGuiEntityEditorSystem {
-		static void init(entt::registry & r) noexcept {
+		entt::registry & r;
+		bool * enabled;
+
+		ImGuiEntityEditorSystem(entt::handle e) noexcept
+			: r(*e.registry())
+		{
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, Log, "Init", "ImGuiEntityEditorSystem");
 
-			_r = &r;
+			e.emplace<functions::Execute>(putils_forward_to_this(execute));
 
-			const auto e = r.create();
-			r.emplace<functions::Execute>(e, execute);
-
-			r.emplace<NameComponent>(e, "Entity editor");
-			auto & tool = r.emplace<ImGuiToolComponent>(e, true);
-			_enabled = &tool.enabled;
+			e.emplace<NameComponent>("Entity editor");
+			auto & tool = e.emplace<ImGuiToolComponent>(true);
+			enabled = &tool.enabled;
 		}
 
-		static void execute(float deltaTime) noexcept {
+		void execute(float deltaTime) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			if (!*_enabled)
+			if (!*enabled)
 				return;
 
-			kengine_log(*_r, Verbose, "Execute", "ImGuiEntityEditorSystem");
-			const auto scale = imguiHelper::getScale(*_r);
-			for (auto [selected] : _r->view<SelectedComponent>().each()) {
+			kengine_log(r, Verbose, "Execute", "ImGuiEntityEditorSystem");
+			const auto scale = imguiHelper::getScale(r);
+			for (auto [selected] : r.view<SelectedComponent>().each()) {
 				bool open = true;
 
 				ImGui::SetNextWindowSize({ 200.f * scale, 200.f * scale }, ImGuiCond_FirstUseEver);
 
-				const auto name = _r->try_get<NameComponent>(selected);
+				const auto name = r.try_get<NameComponent>(selected);
 				const auto windowTitle =
 					name ?
 					putils::string<64>("%s##[%d]", name->name.c_str(), selected) :
 					putils::string<64>("[%d] Entity editor", selected);
 
 				if (ImGui::Begin(windowTitle.c_str(), &open, ImGuiWindowFlags_NoSavedSettings))
-					imguiHelper::editEntityAndModel({ *_r, selected });
+					imguiHelper::editEntityAndModel({ r, selected });
 				ImGui::End();
 
 				if (!open)
-					_r->remove<SelectedComponent>(selected);
+					r.remove<SelectedComponent>(selected);
 			}
 		}
-
-		static inline bool * _enabled;
-		static inline entt::registry * _r;
 	};
 
-	void ImGuiEntityEditorSystem(entt::registry & r) noexcept {
-		ImGuiEntityEditorSystem::init(r);
+	void addImGuiEntityEditorSystem(entt::registry & r) noexcept {
+		const entt::handle e{ r, r.create() };
+		e.emplace<ImGuiEntityEditorSystem>(e);
 	}
 }

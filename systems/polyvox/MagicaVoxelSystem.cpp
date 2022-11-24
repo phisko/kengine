@@ -39,15 +39,20 @@ namespace kengine {
 	}
 
 	struct MagicaVoxelSystem {
-		static void init(entt::registry & r) noexcept {
+		entt::registry & r;
+
+		MagicaVoxelSystem(entt::handle e) noexcept
+			: r(*e.registry())
+		{
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, Log, "Init", "MagicaVoxelSystem");
 
-			_r = &r;
+			r.on_construct<ModelComponent>().connect<&MagicaVoxelSystem::loadModel>(this);
+		}
 
-			r.on_construct<ModelComponent>().connect<[](entt::registry & r, entt::entity e) noexcept {
-				loadModel(e);
-			}>();
+		~MagicaVoxelSystem() noexcept {
+			KENGINE_PROFILING_SCOPE;
+			r.on_construct<ModelComponent>().disconnect<&MagicaVoxelSystem::loadModel>(this);
 		}
 
 		using MeshType = decltype(buildMesh(PolyVox::RawVolume<PolyVoxComponent::VertexData>{ {} }));
@@ -59,34 +64,34 @@ namespace kengine {
 			MagicaVoxel::ChunkContent::Size size;
 		};
 
-		static void loadModel(entt::entity e) noexcept {
+		void loadModel(entt::registry & r, entt::entity e) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			const auto & f = _r->get<ModelComponent>(e).file.c_str();
+			const auto & f = r.get<ModelComponent>(e).file.c_str();
 			if (std::filesystem::path(f).extension() != ".vox")
 				return;
 
-			kengine_logf(*_r, Log, "MagicaVoxelSystem", "Loading model %zu for %s", e);
+			kengine_logf(r, Log, "MagicaVoxelSystem", "Loading model %zu for %s", e);
 			const putils::string<256> binaryFile("%s.bin", f);
 
 			if (std::filesystem::exists(binaryFile.c_str())) {
-				kengine_log(*_r, Log, "MagicaVoxelSystem/loadModel", "Binary file exists, loading it");
+				kengine_log(r, Log, "MagicaVoxelSystem/loadModel", "Binary file exists, loading it");
 				loadBinaryModel(e, binaryFile.c_str());
 				return;
 			}
 
 			auto meshInfo = loadVoxModel(f);
-			auto & mesh = _r->emplace<MagicaVoxelModelComponent>(e).mesh;
+			auto & mesh = r.emplace<MagicaVoxelModelComponent>(e).mesh;
 			mesh = std::move(meshInfo.mesh);
 
 			auto modelData = generateModelData(e, mesh);
 			serialize(binaryFile.c_str(), modelData, meshInfo.size);
-			_r->emplace<ModelDataComponent>(e, std::move(modelData));
+			r.emplace<ModelDataComponent>(e, std::move(modelData));
 
 			applyOffset(e, meshInfo.size);
 		}
 
-		static void loadBinaryModel(entt::entity e, const char * binaryFile) noexcept {
+		void loadBinaryModel(entt::entity e, const char * binaryFile) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			MagicaVoxel::ChunkContent::Size size;
@@ -96,25 +101,25 @@ namespace kengine {
 			unserialize(binaryFile, modelData.meshes.back(), size);
 			modelData.free = release(e);
 			modelData.init<MeshType::VertexType>();
-			_r->emplace<ModelDataComponent>(e, std::move(modelData));
+			r.emplace<ModelDataComponent>(e, std::move(modelData));
 
-			if (_r->all_of<TransformComponent>(e)) {
-				kengine_logf(*_r, Log, "MagicaVoxelSystem/loadModel", "%zu already has a TransformComponent. Mesh offset will not be applied", e);
+			if (r.all_of<TransformComponent>(e)) {
+				kengine_logf(r, Log, "MagicaVoxelSystem/loadModel", "%zu already has a TransformComponent. Mesh offset will not be applied", e);
 				return;
 			}
-			kengine_log(*_r, Log, "MagicaVoxelSystem/loadModel", "Applying mesh offset");
+			kengine_log(r, Log, "MagicaVoxelSystem/loadModel", "Applying mesh offset");
 
-			auto & box = _r->emplace<TransformComponent>(e).boundingBox;
+			auto & box = r.emplace<TransformComponent>(e).boundingBox;
 			box.position.x -= size.x / 2.f * box.size.x;
 			box.position.z -= size.y / 2.f * box.size.z;
 		}
 
-		static void unserialize(const char * f, ModelDataComponent::Mesh & meshData, MagicaVoxel::ChunkContent::Size & size) noexcept {
+		void unserialize(const char * f, ModelDataComponent::Mesh & meshData, MagicaVoxel::ChunkContent::Size & size) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			std::ifstream file(f, std::ofstream::binary);
 			if (!file) {
-				kengine_assert_failed(*_r, "[MagicaVoxel] Failed to load '", f, "'");
+				kengine_assert_failed(r, "[MagicaVoxel] Failed to load '", f, "'");
 				return;
 			}
 
@@ -143,29 +148,30 @@ namespace kengine {
 			parse(size);
 		}
 
-		static ModelDataComponent::FreeFunc release(entt::entity e) noexcept {
+		ModelDataComponent::FreeFunc release(entt::entity e) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			return [e] {
-				const auto model = _r->try_get<MagicaVoxelModelComponent>(e);
+			return [this, e] {
+				const auto model = r.try_get<MagicaVoxelModelComponent>(e);
 				if (model) {
 					model->mesh.clear();
-					_r->remove<MagicaVoxelModelComponent>(e);
+					r.remove<MagicaVoxelModelComponent>(e);
 				}
-				else { // Was unserialized and we (violently) `new`-ed the data buffers
-					const auto & modelData = _r->get<ModelDataComponent>(e);
-					delete[] (const char *)modelData.meshes[0].vertices.data;
-					delete[] (const char *)modelData.meshes[0].indices.data;
+				else { // Was unserialized and we simply `new`-ed the data buffers
+					if (const auto modelData = r.try_get<ModelDataComponent>(e)) {
+						delete[] (const char *)modelData->meshes[0].vertices.data;
+						delete[] (const char *)modelData->meshes[0].indices.data;
+					}
 				}
 			};
 		}
 
-		static MeshInfo loadVoxModel(const char * f) noexcept {
+		MeshInfo loadVoxModel(const char * f) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			std::ifstream stream(f, std::ios::binary);
 			if (!stream) {
-				kengine_assert_failed(*_r, "[MagicaVoxel] Failed to load '", f, "'");
+				kengine_assert_failed(r, "[MagicaVoxel] Failed to load '", f, "'");
 				return MeshInfo{};
 			}
 
@@ -174,18 +180,18 @@ namespace kengine {
 			MagicaVoxel::ChunkHeader main;
 			readFromStream(main, stream);
 			if (!idMatches(main.id, "MAIN")) {
-				kengine_assert_failed(*_r, "[MagicaVoxel] Expected 'MAIN' chunk header in '", f, "'");
+				kengine_assert_failed(r, "[MagicaVoxel] Expected 'MAIN' chunk header in '", f, "'");
 				return MeshInfo{};
 			}
 
 			MagicaVoxel::ChunkHeader first;
 			readFromStream(first, stream);
 			if (!idMatches(first.id, "SIZE")) {
-				kengine_assert_failed(*_r, "[MagicaVoxel] Expected 'SIZE' chunk header in '", f, "'");
+				kengine_assert_failed(r, "[MagicaVoxel] Expected 'SIZE' chunk header in '", f, "'");
 				return MeshInfo{};
 			}
-			kengine_assert(*_r, first.childrenBytes == 0);
-			kengine_assert(*_r, first.contentBytes == sizeof(MagicaVoxel::ChunkContent::Size));
+			kengine_assert(r, first.childrenBytes == 0);
+			kengine_assert(r, first.contentBytes == sizeof(MagicaVoxel::ChunkContent::Size));
 
 			MagicaVoxel::ChunkContent::Size size;
 			readFromStream(size, stream);
@@ -195,7 +201,7 @@ namespace kengine {
 			MagicaVoxel::ChunkHeader voxelsHeader;
 			readFromStream(voxelsHeader, stream);
 			if (!idMatches(voxelsHeader.id, "XYZI")) {
-				kengine_assert_failed(*_r, "[MagicaVoxel] Expected 'XYZI' chunk header in '", f, "'");
+				kengine_assert_failed(r, "[MagicaVoxel] Expected 'XYZI' chunk header in '", f, "'");
 				return MeshInfo{};
 			}
 
@@ -203,7 +209,7 @@ namespace kengine {
 
 			MagicaVoxel::ChunkContent::XYZI xyzi;
 			readFromStream(xyzi, stream);
-			kengine_assert(*_r, voxelsHeader.contentBytes == sizeof(xyzi) + xyzi.numVoxels * sizeof(int));
+			kengine_assert(r, voxelsHeader.contentBytes == sizeof(xyzi) + xyzi.numVoxels * sizeof(int));
 
 			for (int i = 0; i < xyzi.numVoxels; ++i) {
 				MagicaVoxel::ChunkContent::XYZI::Voxel voxel;
@@ -217,20 +223,20 @@ namespace kengine {
 			return { buildMesh(std::move(volume)), size };
 		}
 
-		static bool idMatches(const char * s1, const char * s2) noexcept {
+		bool idMatches(const char * s1, const char * s2) noexcept {
 			return strncmp(s1, s2, 4) == 0;
 		}
 
-		static void checkHeader(std::istream & s) noexcept {
+		void checkHeader(std::istream & s) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			MagicaVoxel::FileHeader header;
 			readFromStream(header, s);
-			kengine_assert(*_r, idMatches(header.id, "VOX "));
-			kengine_assert(*_r, header.versionNumber == 150);
+			kengine_assert(r, idMatches(header.id, "VOX "));
+			kengine_assert(r, header.versionNumber == 150);
 		}
 
-		static ModelDataComponent generateModelData(entt::entity e, const MeshType & mesh) noexcept {
+		ModelDataComponent generateModelData(entt::entity e, const MeshType & mesh) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			ModelDataComponent modelData;
@@ -246,26 +252,26 @@ namespace kengine {
 			return modelData;
 		}
 
-		static void applyOffset(entt::entity e, const MagicaVoxel::ChunkContent::Size & size) noexcept {
+		void applyOffset(entt::entity e, const MagicaVoxel::ChunkContent::Size & size) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			if (_r->all_of<TransformComponent>(e)) {
-				kengine_logf(*_r, Log, "MagicaVoxelSystem/loadModel", "%zu already has a TransformComponent. Mesh offset will not be applied", e);
+			if (r.all_of<TransformComponent>(e)) {
+				kengine_logf(r, Log, "MagicaVoxelSystem/loadModel", "%zu already has a TransformComponent. Mesh offset will not be applied", e);
 				return;
 			}
-			kengine_log(*_r, Log, "MagicaVoxelSystem/loadModel", "Applying mesh offset");
+			kengine_log(r, Log, "MagicaVoxelSystem/loadModel", "Applying mesh offset");
 
-			auto & box = _r->get_or_emplace<TransformComponent>(e).boundingBox;
+			auto & box = r.get_or_emplace<TransformComponent>(e).boundingBox;
 			box.position.x -= size.x / 2.f * box.size.x;
 			box.position.z -= size.y / 2.f * box.size.z;
 		}
 
-		static void serialize(const char * f, const ModelDataComponent & modelData, const MagicaVoxel::ChunkContent::Size & size) noexcept {
+		void serialize(const char * f, const ModelDataComponent & modelData, const MagicaVoxel::ChunkContent::Size & size) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			std::ofstream file(f, std::ofstream::binary | std::ofstream::trunc);
 			if (!file) {
-				kengine_assert_failed(*_r, "[MagicaVoxel] Failed to serialize to '", f, "'");
+				kengine_assert_failed(r, "[MagicaVoxel] Failed to serialize to '", f, "'");
 				return;
 			}
 
@@ -295,15 +301,14 @@ namespace kengine {
 		}
 
 		template<typename T>
-		static void readFromStream(T & header, std::istream & s) noexcept {
+		void readFromStream(T & header, std::istream & s) noexcept {
 			s.read((char *)&header, sizeof(header));
-			kengine_assert(*_r, s.gcount() == sizeof(header));
+			kengine_assert(r, s.gcount() == sizeof(header));
 		}
-
-		static inline entt::registry * _r;
 	};
 
-	void MagicaVoxelSystem(entt::registry & r) noexcept {
-		MagicaVoxelSystem::init(r);
+	void addMagicaVoxelSystem(entt::registry & r) noexcept {
+		const entt::handle e{ r, r.create() };
+		e.emplace<MagicaVoxelSystem>(e);
 	}
 }

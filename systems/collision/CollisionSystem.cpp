@@ -1,7 +1,11 @@
 #include "CollisionSystem.hpp"
 
 // entt
+#include <entt/entity/handle.hpp>
 #include <entt/entity/registry.hpp>
+
+// putils
+#include "forward_to.hpp"
 
 // kengine data
 #include "data/CollisionComponent.hpp"
@@ -15,34 +19,33 @@
 
 namespace kengine {
 	struct CollisionSystem {
-		static void init(entt::registry & r) noexcept {
+		entt::registry & r;
+
+		CollisionSystem(entt::handle e) noexcept
+			: r(*e.registry())
+		{
 			KENGINE_PROFILING_SCOPE;
-
-			_r = &r;
-
-			const auto e = r.create();
-			r.emplace<functions::OnCollision>(e, onCollision);
+			e.emplace<functions::OnCollision>(putils_forward_to_this(onCollision));
 		}
 
-		static void onCollision(entt::entity first, entt::entity second) noexcept {
+		void onCollision(entt::entity first, entt::entity second) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(*_r, Verbose, "CollisionSystem", "Collision between %zu and %zu", first, second);
+			kengine_logf(r, Verbose, "CollisionSystem", "Collision between %zu and %zu", first, second);
 			trigger(first, second);
 			trigger(second, first);
 		}
 
-		static void trigger(entt::entity first, entt::entity second) noexcept {
+		void trigger(entt::entity first, entt::entity second) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			const auto collision = _r->try_get<CollisionComponent>(first);
+			const auto collision = r.try_get<CollisionComponent>(first);
 			if (!collision || collision->onCollide == nullptr)
 				return;
 			collision->onCollide(first, second);
 		}
-
-		static inline entt::registry * _r;
 	};
 
-	void CollisionSystem(entt::registry & r) noexcept {
-		CollisionSystem::init(r);
+	void addCollisionSystem(entt::registry & r) noexcept {
+		const entt::handle e{ r, r.create() };
+		e.emplace<CollisionSystem>(e);
 	}
 }

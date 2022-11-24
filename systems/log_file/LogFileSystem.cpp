@@ -5,12 +5,14 @@
 #include <mutex>
 
 // entt
+#include <entt/entity/handle.hpp>
 #include <entt/entity/registry.hpp>
 
 // magic_enum
 #include <magic_enum.hpp>
 
 // putils
+#include "forward_to.hpp"
 #include "thread_name.hpp"
 
 // kengine data
@@ -31,50 +33,52 @@
 
 namespace kengine {
 	struct LogFileSystem {
-		static void init(entt::registry & r) noexcept {
+		std::ofstream file;
+		std::mutex mutex;
+		const LogSeverity * severity = nullptr;
+
+		LogFileSystem(entt::handle e) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			const auto & r = *e.registry();
+
 			const auto options = kengine::parseCommandLine<Options>(r);
 			const char * fileName = options.logFile ? options.logFile->c_str() : KENGINE_LOG_FILE_LOCATION;
 
-			_file.open(fileName);
-			if (!_file) {
+			file.open(fileName);
+			if (!file) {
 				kengine_assert_failed(r, "LogFileSystem couldn't open output file '%s'", fileName);
 				return;
 			}
 
-			const auto e = r.create();
-
-			auto & severityControl = r.emplace<LogSeverityControl>(e);
+			auto & severityControl = e.emplace<LogSeverityControl>();
 			severityControl.severity = logHelper::parseCommandLineSeverity(r);
-			_severity = &severityControl.severity;
+			severity = &severityControl.severity;
 
-			r.emplace<AdjustableComponent>(e) = {
+			e.emplace<AdjustableComponent>() = {
 				"Log", {
-					{ "File", _severity }
+					{ "File", severity }
 				}
 			};
 
-			r.emplace<functions::Log>(e, log);
+			e.emplace<functions::Log>(putils_forward_to_this(log));
 		}
 
-		static void log(const LogEvent & event) noexcept {
+		void log(const LogEvent & event) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			static std::mutex mutex;
-			if (event.severity < *_severity)
+			if (event.severity < *severity)
 				return;
 
 			const std::lock_guard lock(mutex);
 
 			const auto & threadName = putils::get_thread_name();
 			if (!threadName.empty())
-				_file << '{' << threadName << "}\t";
+				file << '{' << threadName << "}\t";
 
-			_file << magic_enum::enum_name<LogSeverity>(event.severity) << "\t[" << event.category << "]\t"
+			file << magic_enum::enum_name<LogSeverity>(event.severity) << "\t[" << event.category << "]\t"
 				 << event.message << std::endl;
 		}
-
-		static inline std::ofstream _file;
-		static inline const LogSeverity * _severity = nullptr;
 
 		// Command-line arguments
 		struct Options {
@@ -82,8 +86,9 @@ namespace kengine {
 		};
 	};
 
-	void LogFileSystem(entt::registry & r) noexcept {
-		LogFileSystem::init(r);
+	void addLogFileSystem(entt::registry & r) noexcept {
+		const entt::handle e{ r, r.create() };
+		e.emplace<LogFileSystem>(e);
 	}
 }
 
