@@ -1,0 +1,900 @@
+#include "kreogl.hpp"
+
+// stl
+#include <algorithm>
+#include <atomic>
+#include <execution>
+#include <filesystem>
+
+// entt
+#include <entt/entity/handle.hpp>
+#include <entt/entity/registry.hpp>
+
+// gl
+#include <GL/glew.h>
+#include <GL/gl.h>
+
+// imgui
+#include <imgui.h>
+#include <bindings/imgui_impl_glfw.h>
+#include <bindings/imgui_impl_opengl3.h>
+
+// putils
+#include "putils/forward_to.hpp"
+
+// kreogl
+#include "kreogl/window.hpp"
+#include "kreogl/world.hpp"
+#include "kreogl/animation/animated_object.hpp"
+#include "kreogl/loaders/assimp/assimp.hpp"
+
+// kengine data
+#include "kengine/data/adjustable.hpp"
+#include "kengine/data/animation.hpp"
+#include "kengine/data/animation_files.hpp"
+#include "kengine/data/camera.hpp"
+#include "kengine/data/debug_graphics.hpp"
+#include "kengine/data/glfw_window.hpp"
+#include "kengine/data/god_rays.hpp"
+#include "kengine/data/graphics.hpp"
+#include "kengine/data/imgui_context.hpp"
+#include "kengine/data/imgui_scale.hpp"
+#include "kengine/data/instance.hpp"
+#include "kengine/data/keep_alive.hpp"
+#include "kengine/data/light.hpp"
+#include "kengine/data/model.hpp"
+#include "kengine/data/model_animation.hpp"
+#include "kengine/data/model_data.hpp"
+#include "kengine/data/model_skeleton.hpp"
+#include "kengine/data/no_shadow.hpp"
+#include "kengine/data/skeleton.hpp"
+#include "kengine/data/sky_box.hpp"
+#include "kengine/data/sprite.hpp"
+#include "kengine/data/text.hpp"
+#include "kengine/data/transform.hpp"
+#include "kengine/data/viewport.hpp"
+#include "kengine/data/window.hpp"
+
+// kengine functions
+#include "kengine/functions/execute.hpp"
+#include "kengine/functions/get_entity_in_pixel.hpp"
+#include "kengine/functions/get_position_in_pixel.hpp"
+
+// kengine helpers
+#include "kengine/helpers/camera_helper.hpp"
+#include "kengine/helpers/imgui_helper.hpp"
+#include "kengine/helpers/instance_helper.hpp"
+#include "kengine/helpers/log_helper.hpp"
+#include "kengine/helpers/matrix_helper.hpp"
+#include "kengine/helpers/profiling_helper.hpp"
+
+// impl
+#include "kreogl_animation_files.hpp"
+#include "kreogl_debug_graphics.hpp"
+#include "kreogl_model.hpp"
+#include "shaders/highlight_shader.hpp"
+#include "putils_to_glm.hpp"
+
+namespace kengine::systems {
+	struct kreogl {
+		entt::registry & r;
+
+		kreogl(entt::handle e) noexcept
+			: r(*e.registry())
+		{
+			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, log, "Init", "systems/kreogl");
+
+			e.emplace<functions::execute>(putils_forward_to_this(execute));
+
+			auto & scale = e.emplace<data::imgui_scale>();
+			e.emplace<data::adjustable>() = {
+				"ImGui", {
+					{ "Scale", &scale.scale }
+				}
+			};
+
+			e.emplace<functions::get_entity_in_pixel>(putils_forward_to_this(get_entity_in_pixel));
+			e.emplace<functions::get_position_in_pixel>(putils_forward_to_this(get_position_in_pixel));
+
+			init_window();
+		}
+
+		void init_window() noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			entt::entity window_entity = entt::null;
+
+			// Find potential existing window
+			for (const auto & [e, w] : r.view<data::window>().each()) {
+				if (!w.assigned_system.empty())
+					continue;
+				kengine_logf(r, log, "Init/systems/kreogl", "Found existing window: %zu", e);
+				window_entity = e;
+				break;
+			}
+
+			// If none found, create one
+			if (window_entity == entt::null) {
+				const auto e = r.create();
+				kengine_logf(r, log, "Init/systems/kreogl", "Created default window: %zu", e);
+				r.emplace<data::keep_alive>(e);
+				auto & window_comp = r.emplace<data::window>(e);
+				window_comp.name = "Kengine";
+				window_entity = e;
+			}
+
+			// Ask the GLFW system to initialize the window
+			r.get<data::window>(window_entity).assigned_system = "Kreogl";
+			r.emplace<data::glfw_window_init>(window_entity) = {
+				.set_hints = [this]() noexcept {
+					kengine_log(r, log, "Init/systems/kreogl", "Setting window hints");
+					glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+					glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+					glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+					glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+#ifndef KENGINE_NDEBUG
+					glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+#endif
+				},
+				.on_window_created = [this, window_entity]() noexcept {
+					kengine_log(r, log, "Init/systems/kreogl", "GLFW window created");
+					kengine_log(r, log, "Init/systems/kreogl", "Creating kreogl window");
+					const auto & glfw_window = r.get<data::glfw_window>(window_entity);
+					auto & kreogl_window = r.emplace<::kreogl::window>(window_entity, *glfw_window.window.get());
+					kreogl_window.remove_camera(kreogl_window.get_default_camera());
+					init_imgui(window_entity);
+				}
+			};
+		}
+
+		void init_imgui(entt::entity window_entity) noexcept {
+			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, log, "Init/systems/kreogl", "Initializing ImGui");
+
+			r.emplace<data::imgui_context>(window_entity, ImGui::CreateContext());
+
+			auto & io = ImGui::GetIO();
+			io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+			io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+			io.ConfigViewportsNoTaskBarIcon = true;
+
+			const auto & glfw_comp = r.get<data::glfw_window>(window_entity);
+			ImGui_ImplGlfw_InitForOpenGL(glfw_comp.window.get(), true);
+			ImGui_ImplOpenGL3_Init();
+
+			ImGui_ImplOpenGL3_NewFrame();
+			ImGui_ImplGlfw_NewFrame();
+			ImGui::NewFrame();
+		}
+
+		void execute(float delta_time) noexcept {
+			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, verbose, "execute", "kreogl");
+
+			create_missing_models();
+			create_missing_objects();
+			tick_animations(delta_time);
+
+			update_imgui_scale();
+			draw();
+			end_imgui_frame();
+		}
+
+		float last_scale = 1.f;
+		void update_imgui_scale() noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			const auto scale = imgui_helper::get_scale(r);
+			ImGui::GetIO().FontGlobalScale = scale;
+			ImGui::GetStyle().ScaleAllSizes(scale / last_scale);
+			last_scale = scale;
+		}
+
+		void create_missing_models() noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			create_models_from_disk();
+			create_models_from_model_data();
+		}
+
+		void create_models_from_disk() noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			for (auto [model_entity, model] : r.view<data::model>(entt::exclude<data::kreogl_model, ::kreogl::image_texture>).each()) {
+				kengine_logf(r, verbose, "execute/kreogl", "Creating Kreogl model for %zu (%s)", model_entity, model.file.c_str());
+				if (::kreogl::image_texture::is_supported_format(model.file.c_str()))
+					r.emplace<::kreogl::image_texture>(model_entity, model.file.c_str());
+				else if (::kreogl::assimp::is_supported_file_format(model.file.c_str()))
+					create_model_with_assimp(model_entity, model);
+			}
+		}
+
+		void create_model_with_assimp(entt::entity model_entity, const data::model & model) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			auto animated_model = ::kreogl::assimp::load_animated_model(model.file.c_str());
+			if (animated_model) {
+				// Sync properties from loaded model to kengine components
+				add_animations_to_model_animation_component(r.get_or_emplace<data::model_animation>(model_entity), model.file.c_str(), animated_model->animations);
+				if (animated_model->skeleton) {
+					auto & model_skeleton = r.emplace<data::model_skeleton>(model_entity);
+					for (const auto & mesh : animated_model->skeleton->meshes)
+						model_skeleton.meshes.push_back(data::model_skeleton::mesh{
+							.bone_names = mesh.bone_names
+						});
+				}
+			}
+			r.emplace<data::kreogl_model>(model_entity, std::move(animated_model));
+
+			// Load animations from external files
+			if (const auto animation_files = r.try_get<data::animation_files>(model_entity)) {
+				auto & model_animation = r.get<data::model_animation>(model_entity);
+				auto & kreogl_animation_files = r.emplace<data::kreogl_animation_files>(model_entity);
+				for (const auto & file : animation_files->files) {
+					auto kreogl_animation_file = ::kreogl::assimp::load_animation_file(file.c_str());
+					add_animations_to_model_animation_component(model_animation, file.c_str(), kreogl_animation_file->animations);
+					kreogl_animation_files.files.push_back(std::move(kreogl_animation_file));
+				}
+			}
+		}
+
+		void add_animations_to_model_animation_component(data::model_animation & model_animation, const char * file, const std::vector<std::unique_ptr<::kreogl::animation_model>> & animations) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			for (const auto & animation : animations) {
+				std::string name = file;
+				name += '/';
+				name += animation->name;
+				model_animation.animations.push_back(data::model_animation::anim{
+					.name = name,
+					.total_time = animation->total_time,
+					.ticks_per_second = animation->ticks_per_second
+				});
+			}
+		}
+
+		void create_models_from_model_data() noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			for (auto [model_entity, model_data] : r.view<data::model_data>(entt::exclude<data::kreogl_model>).each()) {
+				::kreogl::model_data kreogl_model_data;
+
+				for (const auto & mesh_data : model_data.meshes) {
+					static const std::unordered_map<putils::meta::type_index, GLenum> types = {
+						{ putils::meta::type<char>::index, GL_BYTE },
+						{ putils::meta::type<unsigned char>::index, GL_UNSIGNED_BYTE },
+						{ putils::meta::type<short>::index, GL_SHORT },
+						{ putils::meta::type<unsigned short>::index, GL_UNSIGNED_SHORT },
+						{ putils::meta::type<int>::index, GL_INT },
+						{ putils::meta::type<unsigned int>::index, GL_UNSIGNED_INT },
+						{ putils::meta::type<float>::index, GL_FLOAT },
+						{ putils::meta::type<double>::index, GL_DOUBLE }
+					};
+
+					kreogl_model_data.meshes.push_back(::kreogl::mesh_data{
+						.vertices = {
+							.nb_elements = mesh_data.vertices.nb_elements,
+							.element_size = mesh_data.vertices.element_size,
+							.data = mesh_data.vertices.data
+						},
+						.indices = {
+							.nb_elements = mesh_data.indices.nb_elements,
+							.element_size = mesh_data.indices.element_size,
+							.data = mesh_data.indices.data
+						},
+						.index_type = types.at(mesh_data.index_type)
+					});
+				}
+
+				for (const auto & vertex_attribute : model_data.vertex_attributes)
+					kreogl_model_data.vertex_attribute_offsets.push_back(vertex_attribute.offset);
+
+				kreogl_model_data.vertex_size = model_data.vertex_size;
+
+				// We assume custom-built meshes are voxels, might need a better alternative to this
+				const auto & vertex_specification = ::kreogl::vertex_specification::position_color;
+				r.emplace<data::kreogl_model>(model_entity, std::make_unique<::kreogl::animated_model>(vertex_specification, kreogl_model_data));
+			}
+		}
+
+		void create_missing_objects() noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			for (auto [entity, instance] : r.view<data::instance>(entt::exclude<::kreogl::animated_object, ::kreogl::sprite_2d, ::kreogl::sprite_3d>).each()) {
+				if (instance.model == entt::null)
+					continue;
+
+				const auto model_entity = instance.model;
+
+				if (const auto kreogl_model = r.try_get<data::kreogl_model>(model_entity)) {
+					r.emplace<::kreogl::animated_object>(entity).model = kreogl_model->model.get();
+					if (r.all_of<data::model_skeleton>(model_entity))
+						r.emplace<data::skeleton>(entity);
+				}
+
+				if (const auto kreogl_texture = r.try_get<::kreogl::image_texture>(model_entity)) {
+					if (r.all_of<data::sprite_2d>(entity))
+						r.emplace<::kreogl::sprite_2d>(entity).texture = kreogl_texture;
+					if (r.all_of<data::sprite_3d>(entity))
+						r.emplace<::kreogl::sprite_3d>(entity).texture = kreogl_texture;
+				}
+			}
+
+			for (auto [text_2d_entity, text_2d] : r.view<data::text_2d>(entt::exclude<::kreogl::text_2d>).each())
+				r.emplace<::kreogl::text_2d>(text_2d_entity);
+
+			for (auto [text_3d_entity, text_3d] : r.view<data::text_3d>(entt::exclude<::kreogl::text_3d>).each())
+				r.emplace<::kreogl::text_3d>(text_3d_entity);
+
+			for (auto [light_entity, light] : r.view<data::dir_light>(entt::exclude<::kreogl::directional_light>).each())
+				r.emplace<::kreogl::directional_light>(light_entity);
+
+			for (auto [light_entity, light] : r.view<data::point_light>(entt::exclude<::kreogl::point_light>).each())
+				r.emplace<::kreogl::point_light>(light_entity);
+
+			for (auto [light_entity, light] : r.view<data::spot_light>(entt::exclude<::kreogl::spot_light>).each())
+				r.emplace<::kreogl::spot_light>(light_entity);
+
+			for (auto [sky_box_entity, sky_box] : r.view<data::sky_box>(entt::exclude<::kreogl::skybox_texture>).each())
+				r.emplace<::kreogl::skybox_texture>(sky_box_entity, sky_box.left.c_str(), sky_box.right.c_str(), sky_box.top.c_str(), sky_box.bottom.c_str(), sky_box.front.c_str(), sky_box.back.c_str());
+
+			for (auto [debug_entity, debug_graphics] : r.view<data::debug_graphics>(entt::exclude<data::kreogl_debug_graphics>).each())
+				r.emplace<data::kreogl_debug_graphics>(debug_entity);
+		}
+
+		void tick_animations(float delta_time) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			const auto view = r.view<::kreogl::animated_object, data::animation>();
+			std::for_each(std::execution::par_unseq, view.begin(), view.end(), [&](entt::entity entity) noexcept {
+				const auto & [kreogl_object, animation] = view.get(entity);
+				tick_object_animation(delta_time, entity, kreogl_object, animation);
+			});
+		}
+
+		void tick_object_animation(float delta_time, entt::entity entity, ::kreogl::animated_object & kreogl_object, data::animation & animation) noexcept {
+			KENGINE_PROFILING_SCOPE;
+			if (!kreogl_object.animation)
+				return;
+
+			kreogl_object.tick_animation(delta_time);
+
+			// Sync properties from kreogl_object to kengine components
+			animation.current_time = kreogl_object.animation->current_time;
+
+			auto & skeleton = r.get<data::skeleton>(entity);
+			const auto nb_meshes = kreogl_object.skeleton.meshes.size();
+			skeleton.meshes.resize(nb_meshes);
+			for (size_t i = 0; i < nb_meshes; ++i) {
+				const auto & kreogl_mesh = kreogl_object.skeleton.meshes[i];
+				auto & mesh = skeleton.meshes[i];
+
+				kengine_assert(r, kreogl_mesh.bone_mats_bone_space.size() < putils::lengthof(mesh.bone_mats_bone_space));
+				std::ranges::copy(kreogl_mesh.bone_mats_bone_space, mesh.bone_mats_bone_space);
+				kengine_assert(r, kreogl_mesh.bone_mats_mesh_space.size() < putils::lengthof(mesh.bone_mats_mesh_space));
+				std::ranges::copy(kreogl_mesh.bone_mats_mesh_space, mesh.bone_mats_mesh_space);
+			}
+		}
+
+		void draw() noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			ImGui::Render();
+
+			for (const auto & [window_entity, kreogl_window] : r.view<::kreogl::window>().each()) {
+				kreogl_window.prepare_for_draw();
+				draw_to_cameras(window_entity, kreogl_window);
+				ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+				kreogl_window.display();
+			}
+		}
+
+		void draw_to_cameras(entt::entity window_entity, ::kreogl::window & kreogl_window) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			for (auto [camera_entity, camera, viewport] : r.view<data::camera, data::viewport>().each()) {
+				if (viewport.window != entt::null && viewport.window != window_entity)
+					continue;
+
+				if (viewport.window == entt::null) {
+					kengine_logf(r, log, "systems/kreogl", "Setting target window for data::viewport in %zu", camera_entity);
+					viewport.window = window_entity;
+					create_kreogl_camera(camera_entity, viewport);
+				}
+
+				auto & kreogl_camera = r.get<::kreogl::camera>(camera_entity);
+				sync_camera_properties(kreogl_camera, camera, viewport);
+				draw_to_camera(kreogl_window, camera_entity, kreogl_camera);
+			}
+		}
+
+		void create_kreogl_camera(entt::entity camera_entity, data::viewport & viewport) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			const ::kreogl::camera::construction_params params{
+				.viewport = {
+					.resolution = toglm(viewport.resolution)
+				}
+			};
+			auto & kreogl_camera = r.emplace<::kreogl::camera>(camera_entity, params);
+			viewport.texture = data::viewport::render_texture(kreogl_camera.get_viewport().get_render_texture());
+		}
+
+		void sync_camera_properties(::kreogl::camera & kreogl_camera, const data::camera & camera, const data::viewport & viewport) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			kreogl_camera.set_position(toglm(camera.frustum.position));
+
+			const auto facings = camera_helper::get_facings(camera);
+			kreogl_camera.set_direction(toglm(facings.front));
+			kreogl_camera.set_fov(camera.frustum.size.y);
+			kreogl_camera.set_near_plane(camera.near_plane);
+			kreogl_camera.set_far_plane(camera.far_plane);
+
+			auto & kreogl_viewport = kreogl_camera.get_viewport_writable();
+			kreogl_viewport.set_on_screen_position(toglm(viewport.bounding_box.position));
+			kreogl_viewport.set_on_screen_size(toglm(viewport.bounding_box.size));
+			kreogl_viewport.set_resolution(toglm(viewport.resolution));
+			kreogl_viewport.set_z_order(viewport.z_order);
+		}
+
+		// Lazy-init these as OpenGL context doesn't exist upon construction, so can't init the shader
+		std::optional<kengine::highlight_shader> highlight_shader;
+		std::optional<::kreogl::shader_pipeline> shader_pipeline;
+
+		void draw_to_camera(::kreogl::window & kreogl_window, entt::entity camera_entity, const ::kreogl::camera & kreogl_camera) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			::kreogl::world kreogl_world;
+			sync_everything(kreogl_world, camera_entity);
+
+			if (!shader_pipeline) {
+				highlight_shader = kengine::highlight_shader{ r };
+				shader_pipeline = [this] {
+					auto ret = ::kreogl::shader_pipeline::get_default_shaders();
+					ret.add_shader(::kreogl::shader_step::post_process, *highlight_shader);
+					return ret;
+				}();
+			}
+
+			kreogl_window.draw_world_to_camera(kreogl_world, kreogl_camera, *shader_pipeline);
+		}
+
+
+		void sync_everything(::kreogl::world & kreogl_world, entt::entity camera_entity) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			sync_all_objects(kreogl_world, camera_entity);
+			sync_all_lights(kreogl_world, camera_entity);
+		}
+
+		void sync_common_properties(auto & kreogl_object, entt::entity entity, const data::instance * instance, const data::transform & transform, const auto & colored_component, ::kreogl::world & kreogl_world) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			const data::transform * model_transform = nullptr;
+			if (instance)
+				model_transform = instance_helper::try_get_model<data::transform>(r, *instance);
+			kreogl_object.transform = matrix_helper::get_model_matrix(transform, model_transform);
+			kreogl_object.color = toglm(colored_component.color);
+			kreogl_object.user_data[0] = float(entity);
+
+			kreogl_world.add(kreogl_object);
+		};
+
+		void sync_all_objects(::kreogl::world & kreogl_world, entt::entity camera_entity) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			for (const auto & [entity, instance, transform, graphics, kreogl_object] : r.view<data::instance, data::transform, data::graphics, ::kreogl::animated_object>().each()) {
+				if (!camera_helper::entity_appears_in_viewport(r, entity, camera_entity))
+					continue;
+				sync_common_properties(kreogl_object, entity, &instance, transform, graphics, kreogl_world);
+				sync_animation_properties(kreogl_object, entity, instance);
+				kreogl_object.cast_shadows = !r.all_of<data::no_shadow>(entity);
+			}
+
+			sync_sprite_2d_properties(kreogl_world, camera_entity);
+			for (const auto & [sprite_entity, instance, transform, graphics, kreogl_sprite_3d] : r.view<data::instance, data::transform, data::graphics, data::sprite_3d, ::kreogl::sprite_3d>().each()) {
+				if (!camera_helper::entity_appears_in_viewport(r, sprite_entity, camera_entity))
+					continue;
+				sync_common_properties(kreogl_sprite_3d, sprite_entity, &instance, transform, graphics, kreogl_world);
+			}
+
+			sync_text_2d_properties(kreogl_world, camera_entity);
+			for (const auto & [text_entity, transform, text_3d, kreogl_text_3d] : r.view<data::transform, data::text_3d, ::kreogl::text_3d>().each()) {
+				if (!camera_helper::entity_appears_in_viewport(r, text_entity, camera_entity))
+					continue;
+				sync_text_properties(kreogl_text_3d, text_entity, transform, text_3d, kreogl_world);
+			}
+
+			sync_debug_graphics_properties(kreogl_world, camera_entity);
+
+			for (const auto & [sky_box_entity, sky_box, kreogl_skybox] : r.view<data::sky_box, ::kreogl::skybox_texture>().each()) {
+				if (!camera_helper::entity_appears_in_viewport(r, sky_box_entity, camera_entity))
+					continue;
+				kreogl_world.skybox.color = toglm(sky_box.color);
+				kreogl_world.skybox.texture = &kreogl_skybox;
+			}
+		}
+
+		void sync_animation_properties(::kreogl::animated_object & kreogl_object, entt::entity entity, const data::instance & instance) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			const auto animation = r.try_get<data::animation>(entity);
+			if (!animation)
+				return;
+
+			const auto animation_model = find_animation_model(instance, animation->current_anim);
+			if (!animation_model)
+				kreogl_object.animation.reset();
+			else {
+				kreogl_object.animation = ::kreogl::animation{
+					.model = animation_model,
+					.current_time = animation->current_time,
+					.speed = animation->speed,
+					.loop = animation->loop
+				};
+
+				static const std::unordered_map<data::animation::mover_behavior, ::kreogl::animation::mover_behavior> mover_behaviors = {
+					{ data::animation::mover_behavior::update_transform_component, ::kreogl::animation::mover_behavior::update_transform },
+					{ data::animation::mover_behavior::update_bones, ::kreogl::animation::mover_behavior::update_bones },
+					{ data::animation::mover_behavior::none, ::kreogl::animation::mover_behavior::none }
+				};
+
+				kreogl_object.animation->position_mover_behavior = mover_behaviors.at(animation->position_mover_behavior);
+				kreogl_object.animation->rotation_mover_behavior = mover_behaviors.at(animation->rotation_mover_behavior);
+				kreogl_object.animation->scale_mover_behavior = mover_behaviors.at(animation->scale_mover_behavior);
+			}
+		}
+
+		const ::kreogl::animation_model * find_animation_model(const data::instance & instance, size_t animation_index) {
+			KENGINE_PROFILING_SCOPE;
+
+			const auto & kreogl_model = instance_helper::get_model<data::kreogl_model>(r, instance);
+			if (animation_index < kreogl_model.model->animations.size())
+				return kreogl_model.model->animations[animation_index].get();
+
+			const auto kreogl_model_animation_files = instance_helper::try_get_model<data::kreogl_animation_files>(r, instance);
+			if (!kreogl_model_animation_files)
+				return nullptr;
+
+			size_t skipped_animations = kreogl_model.model->animations.size();
+			for (const auto & file : kreogl_model_animation_files->files) {
+				const auto index_in_file = animation_index - skipped_animations;
+				if (index_in_file < file->animations.size())
+					return file->animations[index_in_file].get();
+				skipped_animations += file->animations.size();
+			}
+
+			return nullptr;
+		}
+
+		void sync_sprite_2d_properties(::kreogl::world & kreogl_world, entt::entity camera_entity) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			for (const auto & [sprite_entity, instance, transform, graphics, sprite_2d, kreogl_sprite_2d] : r.view<data::instance, data::transform, data::graphics, data::sprite_2d, ::kreogl::sprite_2d>().each()) {
+				if (!camera_helper::entity_appears_in_viewport(r, sprite_entity, camera_entity))
+					continue;
+
+				sync_common_properties(kreogl_sprite_2d, sprite_entity, &instance, transform, graphics, kreogl_world);
+
+				const auto & viewport = r.get<data::viewport>(camera_entity);
+				const auto & box = camera_helper::convert_to_screen_percentage(transform.bounding_box, viewport.resolution, sprite_2d);
+				kreogl_sprite_2d.transform = get_on_screen_matrix(transform, box.position, box.size, sprite_2d);
+			}
+		}
+
+		void sync_text_2d_properties(::kreogl::world & kreogl_world, entt::entity camera_entity) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			for (const auto & [text_entity, transform, text_2d, kreogl_text_2d] : r.view<data::transform, data::text_2d, ::kreogl::text_2d>().each()) {
+				if (!camera_helper::entity_appears_in_viewport(r, text_entity, camera_entity))
+					continue;
+
+				sync_text_properties(kreogl_text_2d, text_entity, transform, text_2d, kreogl_world);
+
+				const auto & viewport = r.get<data::viewport>(camera_entity);
+				const auto & box = camera_helper::convert_to_screen_percentage(transform.bounding_box, viewport.resolution, text_2d);
+				auto scale = transform.bounding_box.size.y;
+				switch (text_2d.coordinates) {
+					case data::text_2d::coordinate_type::pixels:
+						scale /= viewport.resolution.y;
+						break;
+					case data::text_2d::coordinate_type::screen_percentage:
+					default:
+						static_assert(magic_enum::enum_count<data::text_2d::coordinate_type>() == 2);
+						break;
+				}
+				kreogl_text_2d.transform = get_on_screen_matrix(transform, box.position, { scale, scale, scale }, text_2d);
+			}
+		}
+
+		void sync_debug_graphics_properties(::kreogl::world & kreogl_world, entt::entity camera_entity) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			for (const auto & [debug_entity, transform, debug_graphics, kreogl_debug_graphics] : r.view<data::transform, data::debug_graphics, data::kreogl_debug_graphics>().each()) {
+				if (!camera_helper::entity_appears_in_viewport(r, debug_entity, camera_entity))
+					continue;
+
+				kreogl_debug_graphics.elements.resize(debug_graphics.elements.size());
+				for (size_t i = 0; i < debug_graphics.elements.size(); ++i) {
+					const auto & element = debug_graphics.elements[i];
+					auto & kreogl_element = kreogl_debug_graphics.elements[i];
+					kreogl_element.color = toglm(element.color);
+					kreogl_element.user_data[0] = float(debug_entity);
+
+					kreogl_element.transform = glm::mat4{ 1.f };
+					switch (element.type) {
+						case data::debug_graphics::element_type::line:
+							kreogl_element.type = ::kreogl::debug_element::type::line;
+							kreogl_element.line_start = toglm(element.pos);
+							kreogl_element.line_end = toglm(element.line.end);
+							break;
+						case data::debug_graphics::element_type::box:
+							kreogl_element.type = ::kreogl::debug_element::type::box;
+							apply_debug_graphics_transform(kreogl_element.transform, transform, toglm(element.pos), toglm(element.box.size), element.relative_to);
+							break;
+						case data::debug_graphics::element_type::sphere:
+							kreogl_element.type = ::kreogl::debug_element::type::sphere;
+							apply_debug_graphics_transform(kreogl_element.transform, transform, toglm(element.pos), glm::vec3(element.sphere.radius), element.relative_to);
+							break;
+						default:
+							static_assert(magic_enum::enum_count<data::debug_graphics::element_type>() == 3); // Exhaustive switch
+							kengine_assert_failed(r, "Non-exhaustive switch");
+							break;
+					}
+
+					kreogl_world.add(kreogl_element);
+				}
+			}
+		}
+
+		void apply_debug_graphics_transform(glm::mat4 & matrix, const data::transform & transform, const glm::vec3 & pos, const glm::vec3 & size, data::debug_graphics::reference_space reference_space) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			matrix = glm::translate(matrix, pos);
+			if (reference_space == data::debug_graphics::reference_space::object) {
+				matrix = glm::translate(matrix, toglm(transform.bounding_box.position));
+				matrix = glm::rotate(matrix, transform.yaw, {0.f, 1.f, 0.f});
+				matrix = glm::rotate(matrix, transform.pitch, {1.f, 0.f, 0.f});
+				matrix = glm::rotate(matrix, transform.roll, {0.f, 0.f, 1.f});
+			}
+			matrix = glm::scale(matrix, size);
+			if (reference_space == data::debug_graphics::reference_space::object)
+				matrix = glm::scale(matrix, toglm(transform.bounding_box.size));
+		}
+
+		glm::mat4 get_on_screen_matrix(const data::transform & transform, const putils::point3f & position, const putils::point3f & size, const data::on_screen & onScreen) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			glm::mat4 model{ 1.f };
+			// convert NDC to [0,1]
+			model = glm::translate(model, { -1.f, -1.f, 0.f });
+			const auto centre = 2.f * glm::vec3{ position.x, 1.f - position.y, position.z };
+
+			model = glm::translate(model, centre);
+			model = glm::scale(model, toglm(size));
+			model = glm::rotate(model, transform.yaw, { 0.f, 1.f, 0.f });
+			model = glm::rotate(model, transform.pitch, { 1.f, 0.f, 0.f });
+			model = glm::rotate(model, transform.roll, { 0.f, 0.f, 1.f });
+			return model;
+		}
+
+		void sync_text_properties(auto & kreogl_text, entt::entity text_entity, const data::transform & transform, const data::text & text, ::kreogl::world & kreogl_world) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			sync_common_properties(kreogl_text, text_entity, nullptr, transform, text, kreogl_world);
+			kreogl_text.font = text.font;
+			kreogl_text.value = text.value;
+			kreogl_text.font_size = text.font_size;
+			switch (text.alignment) {
+				case data::text::alignment_type::left:
+					kreogl_text.alignment = ::kreogl::text::alignment_type::left;
+					break;
+				case data::text::alignment_type::right:
+					kreogl_text.alignment = ::kreogl::text::alignment_type::right;
+					break;
+				case data::text::alignment_type::center:
+					kreogl_text.alignment = ::kreogl::text::alignment_type::center;
+					break;
+				default:
+					static_assert(magic_enum::enum_count<data::text::alignment_type>() == 3); // Exhaustive switch
+					kengine_assert_failed(r, "Non-exhaustive switch");
+					break;
+			}
+		}
+
+		void sync_all_lights(::kreogl::world & kreogl_world, entt::entity camera_entity) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			sync_all_dir_lights(kreogl_world, camera_entity);
+			sync_all_point_lights(kreogl_world, camera_entity);
+			sync_all_spot_lights(kreogl_world, camera_entity);
+		}
+
+		void sync_all_dir_lights(::kreogl::world & kreogl_world, entt::entity camera_entity) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			for (const auto & [light_entity, dir_light, kreogl_dir_light] : r.view<data::dir_light, ::kreogl::directional_light>().each()) {
+				if (!camera_helper::entity_appears_in_viewport(r, light_entity, camera_entity))
+					continue;
+
+				sync_light_properties(light_entity, kreogl_dir_light, dir_light, kreogl_world);
+
+				kreogl_dir_light.direction = toglm(dir_light.direction);
+				kreogl_dir_light.light_sphere_distance = dir_light.light_sphere_distance;
+				kreogl_dir_light.ambient_strength = dir_light.ambient_strength;
+
+				kreogl_dir_light.cascade_ends.clear();
+				for (const auto cascade_end : dir_light.cascade_ends)
+					kreogl_dir_light.cascade_ends.push_back(cascade_end);
+				kreogl_dir_light.shadow_caster_max_distance = dir_light.shadow_caster_max_distance;
+			}
+		}
+
+		void sync_all_point_lights(::kreogl::world & kreogl_world, entt::entity camera_entity) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			for (const auto & [light_entity, transform, point_light, kreogl_point_light] : r.view<data::transform, data::point_light, ::kreogl::point_light>().each()) {
+				if (!camera_helper::entity_appears_in_viewport(r, light_entity, camera_entity))
+					continue;
+				sync_point_light_properties(light_entity, transform, kreogl_point_light, point_light, kreogl_world);
+			}
+		}
+
+		void sync_all_spot_lights(::kreogl::world & kreogl_world, entt::entity camera_entity) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			for (const auto & [light_entity, transform, spot_light, kreogl_spot_light] : r.view<data::transform, data::spot_light, ::kreogl::spot_light>().each()) {
+				if (!camera_helper::entity_appears_in_viewport(r, light_entity, camera_entity))
+					continue;
+
+				sync_point_light_properties(light_entity, transform, kreogl_spot_light, spot_light, kreogl_world);
+
+				kreogl_spot_light.direction = toglm(spot_light.direction);
+				kreogl_spot_light.cut_off = spot_light.cut_off;
+				kreogl_spot_light.outer_cut_off = spot_light.outer_cut_off;
+			}
+		}
+
+		void sync_light_properties(entt::entity light_entity, auto & kreogl_light, const data::light & light, ::kreogl::world & kreogl_world) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			kreogl_light.color = toglm(light.color);
+			kreogl_light.diffuse_strength = light.diffuse_strength;
+			kreogl_light.specular_strength = light.specular_strength;
+			kreogl_light.cast_shadows = light.cast_shadows;
+			kreogl_light.shadow_pcf_samples = light.shadow_pcf_samples;
+			kreogl_light.shadow_map_size = light.shadow_map_size;
+			kreogl_light.shadow_map_max_bias = light.shadow_map_max_bias;
+			kreogl_light.shadow_map_min_bias = light.shadow_map_min_bias;
+
+			if (const auto god_rays = r.try_get<data::god_rays>(light_entity)) {
+				if (!kreogl_light.volumetric_lighting)
+					kreogl_light.volumetric_lighting.emplace();
+				kreogl_light.volumetric_lighting->default_step_length = god_rays->default_step_length;
+				kreogl_light.volumetric_lighting->intensity = god_rays->intensity;
+				kreogl_light.volumetric_lighting->nb_steps = god_rays->nb_steps;
+				kreogl_light.volumetric_lighting->scattering = god_rays->scattering;
+			}
+			else
+				kreogl_light.volumetric_lighting.reset();
+
+			kreogl_world.add(kreogl_light);
+		}
+
+		void sync_point_light_properties(entt::entity light_entity, const data::transform & transform, ::kreogl::point_light & kreogl_light, const data::point_light & light, ::kreogl::world & kreogl_world) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			sync_light_properties(light_entity, kreogl_light, light, kreogl_world);
+
+			kreogl_light.position = toglm(transform.bounding_box.position);
+			kreogl_light.attenuation_constant = light.attenuation_constant;
+			kreogl_light.attenuation_linear = light.attenuation_linear;
+			kreogl_light.attenuation_quadratic = light.attenuation_quadratic;
+		}
+
+		void end_imgui_frame() noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+				GLFWwindow * backup_current_context = glfwGetCurrentContext();
+				ImGui::UpdatePlatformWindows();
+				ImGui::RenderPlatformWindowsDefault();
+				glfwMakeContextCurrent(backup_current_context);
+			}
+
+			ImGui_ImplOpenGL3_NewFrame();
+			ImGui_ImplGlfw_NewFrame();
+			if (!r.view<data::glfw_window>().empty())
+				ImGui::NewFrame();
+		}
+
+		entt::entity get_entity_in_pixel(entt::entity window_id, const putils::point2ui & pixel) noexcept {
+			KENGINE_PROFILING_SCOPE;
+			kengine_logf(r, verbose, "systems/kreogl", "Getting entity in { %zu, %zu } of %zu", pixel.x, pixel.y, window_id);
+
+			const auto entity_id_in_pixel = read_from_gbuffer(window_id, pixel, ::kreogl::gbuffer::texture::user_data);
+			if (!entity_id_in_pixel)
+				return entt::null;
+
+			const auto ret = entt::entity(entity_id_in_pixel->r);
+			if (ret == entt::entity(entt::id_type(0))) {
+				kengine_log(r, verbose, "OpenGLSystem/get_entity_in_pixel", "Found no Entity");
+				return entt::null;
+			}
+
+			kengine_logf(r, verbose, "OpenGLSystem/get_entity_in_pixel", "Found %zu", ret);
+			return ret;
+		}
+
+		std::optional<putils::point3f> get_position_in_pixel(entt::entity window, const putils::point2ui & pixel) noexcept {
+			KENGINE_PROFILING_SCOPE;
+			kengine_logf(r, verbose, "systems/kreogl", "Getting position in { %zu, %zu } of %zu", pixel.x, pixel.y, window);
+
+			// Check that an entity was drawn in the pixel, otherwise position buffer is invalid
+			if (get_entity_in_pixel(window, pixel) == entt::null)
+				return std::nullopt;
+
+			const auto position_in_pixel = read_from_gbuffer(window, pixel, ::kreogl::gbuffer::texture::position);
+			if (!position_in_pixel)
+				return std::nullopt;
+
+			kengine_logf(r, verbose, "systems/kreogl/get_position_in_pixel", "Found { %f, %f, %f }", position_in_pixel->x, position_in_pixel->y, position_in_pixel->y);
+			return &position_in_pixel->x;
+		}
+
+		std::optional<glm::vec4> read_from_gbuffer(entt::entity window, const putils::point2ui & pixel, ::kreogl::gbuffer::texture texture) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			static constexpr auto GBUFFER_TEXTURE_COMPONENTS = 4;
+
+			if (window == entt::null) {
+				for (const auto & [window_entity, kreogl_window] : r.view<::kreogl::window>().each()) {
+					window = window_entity;
+					break;
+				}
+
+				if (window == entt::null) {
+					kengine_log(r, warning, "systems/kreogl", "No existing Kreogl window");
+					return std::nullopt;
+				}
+			}
+
+			if (!r.all_of<::kreogl::window>(window)) {
+				kengine_logf(r, warning, "systems/kreogl", "%zu does not have a Kreogl window", window);
+				return std::nullopt;
+			}
+
+			const auto viewport_info = camera_helper::get_viewport_for_pixel({ r, window }, pixel);
+			if (viewport_info.camera == entt::null) {
+				kengine_logf(r, warning, "systems/kreogl", "Found no viewport containing pixel { %d, %d }", pixel.x, pixel.y);
+				return std::nullopt;
+			}
+
+			const auto camera_entity = viewport_info.camera;
+			const auto kreogl_camera = r.try_get<::kreogl::camera>(camera_entity);
+			if (!kreogl_camera) {
+				kengine_logf(r, warning, "systems/kreogl", "Viewport %zu does not have a kreogl::camera", camera_entity);
+				return std::nullopt;
+			}
+
+			const auto & viewport = kreogl_camera->get_viewport();
+			const auto & gbuffer = viewport.get_gbuffer();
+			const auto gbuffer_size = viewport.get_resolution();
+
+			const auto pixel_in_gbuffer = glm::vec2(gbuffer_size) * toglm(viewport_info.viewport_percent);
+			if (pixel_in_gbuffer.x >= float(gbuffer_size.x) || pixel_in_gbuffer.y > float(gbuffer_size.y) || pixel_in_gbuffer.y == 0) {
+				kengine_logf(r, warning, "OpenGLSystem/get_entity_in_pixel", "Pixel is out of %zu's gbuffer's bounds", camera_entity);
+				return std::nullopt;
+			}
+
+			return gbuffer.read_pixel(texture, pixel_in_gbuffer);
+		}
+	};
+
+	void add_kreogl(entt::registry & r) noexcept {
+		const entt::handle e{ r, r.create() };
+		e.emplace<kreogl>(e);
+	}
+}
