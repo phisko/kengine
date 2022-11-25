@@ -24,5 +24,8 @@ putils_reflection_info{
 		putils_reflection_attribute(pitch),
 		putils_reflection_attribute(roll)
 	);
+	putils_reflection_used_types(
+		putils_reflection_type(putils::Rect3f)
+	);
 };
 #undef refltype
