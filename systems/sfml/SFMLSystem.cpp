@@ -34,7 +34,6 @@
 
 // kengine functions
 #include "functions/Execute.hpp"
-#include "functions/OnTerminate.hpp"
 
 // kengine helpers
 #include "helpers/cameraHelper.hpp"
@@ -90,7 +89,6 @@ namespace {
 			kengine_log(r, Log, "Init", "SFMLSystem");
 
 			e.emplace<functions::Execute>(putils_forward_to_this(execute));
-			e.emplace<functions::OnTerminate>(putils_forward_to_this(terminate));
 
 			auto & scale = e.emplace<ImGuiScaleComponent>();
 
@@ -102,6 +100,12 @@ namespace {
 
 			connections.emplace_back(r.on_construct<WindowComponent>().connect<&SFMLSystem::createWindow>(this));
 			connections.emplace_back(r.on_construct<ModelComponent>().connect<createTexture>());
+		}
+
+		~SFMLSystem() noexcept {
+			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, Log, "Terminate/SFML", "Shutting down ImGui");
+			ImGui::SFML::Shutdown();
 		}
 
 		void execute(float deltaTime) noexcept {
@@ -476,12 +480,6 @@ namespace {
 				kengine_logf(r, Log, "SFML", "Loaded texture for '%s'", model.file.c_str());
 				r.emplace<SFMLTextureComponent>(e, std::move(texture));
 			}
-		}
-
-		void terminate() noexcept {
-			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, Log, "Terminate/SFML", "Shutting down ImGui");
-			ImGui::SFML::Shutdown();
 		}
 	};
 }

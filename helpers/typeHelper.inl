@@ -6,8 +6,8 @@
 // reflection
 #include "reflection.hpp"
 
-// kengine functions
-#include "functions/OnTerminate.hpp"
+// putils
+#include "on_scope_exit.hpp"
 
 // kengine helpers
 #include "helpers/logHelper.hpp"
@@ -34,7 +34,10 @@ namespace kengine::typeHelper {
 
 			const auto entity = r.create();
 			r.emplace<impl::TypeEntityTag>(entity, putils::meta::type<T>::index);
-			r.emplace<functions::OnTerminate>(entity, [&] { toReset = entt::null; });
+
+			// Reset the static variable to entt::null when the type entity is destroyed
+			const auto resetTypeEntity = [&] { toReset = entt::null; };
+			r.emplace<putils::OnScopeExit<decltype(resetTypeEntity)>>(entity, resetTypeEntity);
             return entity;
         };
 

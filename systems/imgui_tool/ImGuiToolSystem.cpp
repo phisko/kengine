@@ -19,7 +19,6 @@
 #include "data/NameComponent.hpp"
 
 // kengine functions
-#include "functions/OnTerminate.hpp"
 #include "functions/Execute.hpp"
 
 // kengine helpers
@@ -53,10 +52,14 @@ namespace kengine {
 				tool.enabled = confFile.getValue(name.name.c_str());
 			}
 
-			e.emplace<functions::OnTerminate>(putils_forward_to_this(saveTools));
 			e.emplace<functions::Execute>(putils_forward_to_this(execute));
 
 			connection = r.on_construct<ImGuiToolComponent>().connect<&ImGuiToolSystem::onConstructImGuiTool>(this);
+		}
+
+		~ImGuiToolSystem() noexcept {
+			KENGINE_PROFILING_SCOPE;
+			saveTools();
 		}
 
 		void execute(float deltaTime) noexcept {
