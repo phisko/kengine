@@ -63,6 +63,8 @@ namespace kengine {
     struct BulletSystem {
 		entt::registry & r;
 
+		putils::vector<entt::scoped_connection, 5> connections;
+
 		btDefaultCollisionConfiguration collisionConfiguration;
 		btCollisionDispatcher dispatcher{ &collisionConfiguration };
 		btDbvtBroadphase overlappingPairCache;
@@ -130,23 +132,12 @@ namespace kengine {
 				}
 			};
 
-			r.on_construct<PhysicsComponent>().connect<&BulletSystem::addOrUpdateBulletComponent>(this);
-			r.on_construct<TransformComponent>().connect<&BulletSystem::addOrUpdateBulletComponent>(this);
-			r.on_construct<InstanceComponent>().connect<&BulletSystem::addOrUpdateBulletComponent>(this);
+			connections.emplace_back(r.on_construct<PhysicsComponent>().connect<&BulletSystem::addOrUpdateBulletComponent>(this));
+			connections.emplace_back(r.on_construct<TransformComponent>().connect<&BulletSystem::addOrUpdateBulletComponent>(this));
+			connections.emplace_back(r.on_construct<InstanceComponent>().connect<&BulletSystem::addOrUpdateBulletComponent>(this));
 
-			r.on_construct<ModelColliderComponent>().connect<&BulletSystem::updateAllInstances>(this);
-			r.on_update<ModelColliderComponent>().connect<&BulletSystem::updateAllInstances>(this);
-		}
-
-		~BulletSystem() noexcept {
-			KENGINE_PROFILING_SCOPE;
-
-			r.on_construct<PhysicsComponent>().disconnect<&BulletSystem::addOrUpdateBulletComponent>(this);
-			r.on_construct<TransformComponent>().disconnect<&BulletSystem::addOrUpdateBulletComponent>(this);
-			r.on_construct<InstanceComponent>().disconnect<&BulletSystem::addOrUpdateBulletComponent>(this);
-
-			r.on_construct<ModelColliderComponent>().disconnect<&BulletSystem::updateAllInstances>(this);
-			r.on_update<ModelColliderComponent>().disconnect<&BulletSystem::updateAllInstances>(this);
+			connections.emplace_back(r.on_construct<ModelColliderComponent>().connect<&BulletSystem::updateAllInstances>(this));
+			connections.emplace_back(r.on_update<ModelColliderComponent>().connect<&BulletSystem::updateAllInstances>(this));
 		}
 
 		void execute(float deltaTime) noexcept {

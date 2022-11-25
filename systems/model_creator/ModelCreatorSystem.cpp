@@ -16,18 +16,14 @@
 namespace kengine {
 	struct ModelCreatorSystem {
 		entt::registry & r;
+		entt::scoped_connection connection;
 
 		ModelCreatorSystem(entt::handle e) noexcept
 			: r(*e.registry())
 		{
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, Log, "Init", "ModelCreatorSystem");
-			r.on_construct<GraphicsComponent>().connect<findOrCreateModel>();
-		}
-
-		~ModelCreatorSystem() noexcept {
-			KENGINE_PROFILING_SCOPE;
-			r.on_construct<GraphicsComponent>().disconnect<findOrCreateModel>();
+			connection = r.on_construct<GraphicsComponent>().connect<findOrCreateModel>();
 		}
 
 		static void findOrCreateModel(entt::registry & r, entt::entity e) noexcept {

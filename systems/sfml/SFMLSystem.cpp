@@ -78,6 +78,7 @@ namespace {
 
 	struct SFMLSystem {
 		entt::registry & r;
+		putils::vector<entt::scoped_connection, 2> connections;
 
 		sf::Clock deltaClock;
 		InputBufferComponent * inputBuffer = nullptr;
@@ -99,14 +100,8 @@ namespace {
 				}
 			};
 
-			r.on_construct<WindowComponent>().connect<&SFMLSystem::createWindow>(this);
-			r.on_construct<ModelComponent>().connect<createTexture>();
-		}
-
-		~SFMLSystem() noexcept {
-			KENGINE_PROFILING_SCOPE;
-			r.on_construct<WindowComponent>().disconnect<&SFMLSystem::createWindow>(this);
-			r.on_construct<ModelComponent>().disconnect<createTexture>();
+			connections.emplace_back(r.on_construct<WindowComponent>().connect<&SFMLSystem::createWindow>(this));
+			connections.emplace_back(r.on_construct<ModelComponent>().connect<createTexture>());
 		}
 
 		void execute(float deltaTime) noexcept {
