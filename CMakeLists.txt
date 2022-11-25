@@ -12,34 +12,34 @@ endif()
 
 macro(add_system)
     list(APPEND system_options ${ARGV0})
-    list(APPEND system_dirs ${ARGV1})
+    list(APPEND system_dirs kengine/systems/${ARGV1})
     list(APPEND system_libs ${ARGV2})
     list(APPEND system_dependent_options ${ARGV3})
 endmacro()
 
-add_system(KENGINE_BULLET systems/bullet kengine_bullet KENGINE_GLM)
-add_system(KENGINE_COLLISION systems/collision kengine_collision KENGINE_NO_DEPENDENCY)
-add_system(KENGINE_GLFW systems/glfw kengine_glfw KENGINE_NO_DEPENDENCY)
-add_system(KENGINE_IMGUI_ADJUSTABLE systems/imgui_adjustable kengine_imgui_adjustable KENGINE_NO_DEPENDENCY)
-add_system(KENGINE_IMGUI_ENGINE_STATS systems/imgui_engine_stats kengine_imgui_engine_stats KENGINE_NO_DEPENDENCY)
-add_system(KENGINE_IMGUI_ENTITY_EDITOR systems/imgui_entity_editor kengine_imgui_entity_editor KENGINE_NO_DEPENDENCY)
-add_system(KENGINE_IMGUI_ENTITY_SELECTOR systems/imgui_entity_selector kengine_imgui_entity_selector KENGINE_NO_DEPENDENCY)
-add_system(KENGINE_IMGUI_PROMPT systems/imgui_prompt kengine_imgui_prompt KENGINE_NO_DEPENDENCY)
-add_system(KENGINE_IMGUI_TOOL systems/imgui_tool kengine_imgui_tool KENGINE_NO_DEPENDENCY)
-add_system(KENGINE_INPUT systems/input kengine_input KENGINE_NO_DEPENDENCY)
-add_system(KENGINE_KINEMATIC systems/kinematic kengine_kinematic KENGINE_NO_DEPENDENCY)
-add_system(KENGINE_KREOGL systems/kreogl kengine_kreogl KENGINE_NO_DEPENDENCY)
-add_system(KENGINE_LOG_FILE systems/log_file kengine_log_file KENGINE_NO_DEPENDENCY)
-add_system(KENGINE_LOG_IMGUI systems/log_imgui kengine_log_imgui KENGINE_NO_DEPENDENCY)
-add_system(KENGINE_LOG_STDOUT systems/log_stdout kengine_log_stdout KENGINE_NO_DEPENDENCY)
-add_system(KENGINE_LOG_VISUAL_STUDIO systems/log_visual_studio kengine_log_visual_studio KENGINE_NO_DEPENDENCY)
-add_system(KENGINE_LUA systems/lua kengine_lua PUTILS_LUA)
-add_system(KENGINE_MODEL_CREATOR systems/model_creator kengine_model_creator KENGINE_NO_DEPENDENCY)
-add_system(KENGINE_ONCLICK systems/onclick kengine_onclick KENGINE_NO_DEPENDENCY)
-add_system(KENGINE_POLYVOX systems/polyvox kengine_polyvox KENGINE_NO_DEPENDENCY)
-add_system(KENGINE_PYTHON systems/python kengine_python PUTILS_PYTHON)
-add_system(KENGINE_RECAST systems/recast kengine_recast KENGINE_GLM)
-add_system(KENGINE_SFML systems/sfml kengine_sfml PUTILS_PSE)
+add_system(KENGINE_BULLET bullet kengine_bullet KENGINE_GLM)
+add_system(KENGINE_COLLISION collision kengine_collision KENGINE_NO_DEPENDENCY)
+add_system(KENGINE_GLFW glfw kengine_glfw KENGINE_NO_DEPENDENCY)
+add_system(KENGINE_IMGUI_ADJUSTABLE imgui_adjustable kengine_imgui_adjustable KENGINE_NO_DEPENDENCY)
+add_system(KENGINE_IMGUI_ENGINE_STATS imgui_engine_stats kengine_imgui_engine_stats KENGINE_NO_DEPENDENCY)
+add_system(KENGINE_IMGUI_ENTITY_EDITOR imgui_entity_editor kengine_imgui_entity_editor KENGINE_NO_DEPENDENCY)
+add_system(KENGINE_IMGUI_ENTITY_SELECTOR imgui_entity_selector kengine_imgui_entity_selector KENGINE_NO_DEPENDENCY)
+add_system(KENGINE_IMGUI_PROMPT imgui_prompt kengine_imgui_prompt KENGINE_NO_DEPENDENCY)
+add_system(KENGINE_IMGUI_TOOL imgui_tool kengine_imgui_tool KENGINE_NO_DEPENDENCY)
+add_system(KENGINE_INPUT input kengine_input KENGINE_NO_DEPENDENCY)
+add_system(KENGINE_KINEMATIC kinematic kengine_kinematic KENGINE_NO_DEPENDENCY)
+add_system(KENGINE_KREOGL kreogl kengine_kreogl KENGINE_NO_DEPENDENCY)
+add_system(KENGINE_LOG_FILE log_file kengine_log_file KENGINE_NO_DEPENDENCY)
+add_system(KENGINE_LOG_IMGUI log_imgui kengine_log_imgui KENGINE_NO_DEPENDENCY)
+add_system(KENGINE_LOG_STDOUT log_stdout kengine_log_stdout KENGINE_NO_DEPENDENCY)
+add_system(KENGINE_LOG_VISUAL_STUDIO log_visual_studio kengine_log_visual_studio KENGINE_NO_DEPENDENCY)
+add_system(KENGINE_LUA lua kengine_lua PUTILS_LUA)
+add_system(KENGINE_MODEL_CREATOR model_creator kengine_model_creator KENGINE_NO_DEPENDENCY)
+add_system(KENGINE_ONCLICK on_click kengine_onclick KENGINE_NO_DEPENDENCY)
+add_system(KENGINE_POLYVOX polyvox kengine_polyvox KENGINE_NO_DEPENDENCY)
+add_system(KENGINE_PYTHON python kengine_python PUTILS_PYTHON)
+add_system(KENGINE_RECAST recast kengine_recast KENGINE_GLM)
+add_system(KENGINE_SFML sfml kengine_sfml PUTILS_PSE)
 
 list(LENGTH system_options system_count)
 math(EXPR system_count "${system_count} - 1")
@@ -88,24 +88,22 @@ add_subdirectory(putils)
 add_library(kengine INTERFACE)
 
 putils_src_files(src_files
-	.
-	impl
-	components/data
-	components/functions
-	components/meta
-	helpers
-	helpers/meta
+	kengine/components/data
+	kengine/components/functions
+	kengine/components/meta
+	kengine/helpers
+	kengine/helpers/meta
 )
 
 option(KENGINE_TYPE_REGISTRATION "Automatically register kengine types" OFF)
 if (KENGINE_TYPE_REGISTRATION)
-    file(GLOB type_files types/*.cpp types/*.hpp)
+    file(GLOB type_files kengine/types/*.cpp kengine/types/*.hpp)
     set(src_files ${src_files} ${type_files})
 endif()
 
 add_library(kengine_core ${src_files})
 target_link_libraries(kengine_core PUBLIC putils)
-target_include_directories(kengine_core PUBLIC . components)
+target_include_directories(kengine_core PUBLIC .)
 putils_export_symbols(kengine_core)
 
 set(customFindPackageNames entt:EnTT)
@@ -162,9 +160,7 @@ option(KENGINE_TESTS "Build kengine tests" OFF)
 if (KENGINE_TESTS)
     enable_testing()
     set(test_exe_name kengine_tests)
-    file(GLOB test_src
-            helpers/tests/*.tests.cpp
-            impl/tests/*.tests.cpp)
+    file(GLOB test_src kengine/helpers/tests/*.tests.cpp)
 
     putils_add_test_executable(${test_exe_name} ${test_src})
     target_link_libraries(${test_exe_name} PRIVATE kengine_core)

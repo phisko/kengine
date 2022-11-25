@@ -1,230 +1,230 @@
 {
 	"components": [
 		{
-			"type": "kengine::AdjustableComponent",
-			"header": "data/AdjustableComponent.hpp"
+			"type": "kengine::data::adjustable",
+			"header": "kengine/data/adjustable.hpp"
 		},
 		{
-			"type": "kengine::AnimationComponent",
-			"header": "data/AnimationComponent.hpp"
+			"type": "kengine::data::animation",
+			"header": "kengine/data/animation.hpp"
 		},
 		{
-			"type": "kengine::AnimationFilesComponent",
-			"header": "data/AnimationFilesComponent.hpp"
+			"type": "kengine::data::animation_files",
+			"header": "kengine/data/animation_files.hpp"
 		},
 		{
-			"type": "kengine::ModelAnimationComponent",
-			"header": "data/ModelAnimationComponent.hpp"
+			"type": "kengine::data::model_animation",
+			"header": "kengine/data/model_animation.hpp"
 		},
 		{
-			"type": "kengine::functions::AppearsInViewport",
-			"header": "functions/AppearsInViewport.hpp"
+			"type": "kengine::functions::appears_in_viewport",
+			"header": "kengine/functions/appears_in_viewport.hpp"
 		},
 		{
-			"type": "kengine::CameraComponent",
-			"header": "data/CameraComponent.hpp"
+			"type": "kengine::data::camera",
+			"header": "kengine/data/camera.hpp"
 		},
 		{
-			"type": "kengine::CommandLineComponent",
-			"header": "data/CommandLineComponent.hpp"
+			"type": "kengine::data::command_line",
+			"header": "kengine/data/command_line.hpp"
 		},
 		{
-			"type": "kengine::ViewportComponent",
-			"header": "data/ViewportComponent.hpp"
+			"type": "kengine::data::viewport",
+			"header": "kengine/data/viewport.hpp"
 		},
 		{
-			"type": "kengine::WindowComponent",
-			"header": "data/WindowComponent.hpp"
+			"type": "kengine::data::window",
+			"header": "kengine/data/window.hpp"
 		},
 		{
-			"type": "kengine::DebugGraphicsComponent",
-			"header": "data/DebugGraphicsComponent.hpp"
+			"type": "kengine::data::debug_graphics",
+			"header": "kengine/data/debug_graphics.hpp"
 		},
 		{
-			"type": "kengine::functions::Execute",
-			"header": "functions/Execute.hpp"
+			"type": "kengine::functions::execute",
+			"header": "kengine/functions/execute.hpp"
 		},
 		{
-			"type": "kengine::GodRaysComponent",
-			"header": "data/GodRaysComponent.hpp"
+			"type": "kengine::data::god_rays",
+			"header": "kengine/data/god_rays.hpp"
 		},
 		{
-			"type": "kengine::GraphicsComponent",
-			"header": "data/GraphicsComponent.hpp"
+			"type": "kengine::data::graphics",
+			"header": "kengine/data/graphics.hpp"
 		},
 		{
-			"type": "kengine::HighlightComponent",
-			"header": "data/HighlightComponent.hpp"
+			"type": "kengine::data::highlight",
+			"header": "kengine/data/highlight.hpp"
 		},
 		{
-			"type": "kengine::ImGuiToolComponent",
-			"header": "data/ImGuiToolComponent.hpp"
+			"type": "kengine::data::imgui_tool",
+			"header": "kengine/data/imgui_tool.hpp"
 		},
 		{
-			"type": "kengine::InputComponent",
-			"header": "data/InputComponent.hpp"
+			"type": "kengine::data::input",
+			"header": "kengine/data/input.hpp"
 		},
 		{
-			"type": "kengine::InstanceComponent",
-			"header": "data/InstanceComponent.hpp"
+			"type": "kengine::data::instance",
+			"header": "kengine/data/instance.hpp"
 		},
 		{
-			"type": "kengine::DirLightComponent",
-			"header": "data/LightComponent.hpp"
+			"type": "kengine::data::dir_light",
+			"header": "kengine/data/light.hpp"
 		},
 		{
-			"type": "kengine::PointLightComponent",
-			"header": "data/LightComponent.hpp"
+			"type": "kengine::data::point_light",
+			"header": "kengine/data/light.hpp"
 		},
 		{
-			"type": "kengine::SpotLightComponent",
-			"header": "data/LightComponent.hpp"
+			"type": "kengine::data::spot_light",
+			"header": "kengine/data/light.hpp"
 		},
 		{
-			"type": "kengine::LuaComponent",
-			"header": "data/LuaComponent.hpp",
+			"type": "kengine::data::lua",
+			"header": "kengine/data/lua.hpp",
 			"condition": "KENGINE_LUA"
 		},
 		{
-			"type": "kengine::LuaTableComponent",
-			"header": "data/LuaTableComponent.hpp",
+			"type": "kengine::data::lua_table",
+			"header": "kengine/data/lua_table.hpp",
 			"condition": "KENGINE_LUA"
 		},
 		{
-			"type": "kengine::ModelColliderComponent",
-			"header": "data/ModelColliderComponent.hpp"
+			"type": "kengine::data::model_collider",
+			"header": "kengine/data/model_collider.hpp"
 		},
 		{
-			"type": "kengine::ModelComponent",
-			"header": "data/ModelComponent.hpp"
+			"type": "kengine::data::model",
+			"header": "kengine/data/model.hpp"
 		},
 		{
-			"type": "kengine::NameComponent",
-			"header": "data/NameComponent.hpp"
+			"type": "kengine::data::name",
+			"header": "kengine/data/name.hpp"
 		},
 
 		{
-			"type": "kengine::NavMeshComponent",
-			"header": "data/NavMeshComponent.hpp"
+			"type": "kengine::data::nav_mesh",
+			"header": "kengine/data/nav_mesh.hpp"
 		},
 		{
-			"type": "kengine::functions::OnClick",
-			"header": "functions/OnClick.hpp"
+			"type": "kengine::functions::on_click",
+			"header": "kengine/functions/on_click.hpp"
 		},
 		{
-			"type": "kengine::PathfindingComponent",
-			"header": "data/PathfindingComponent.hpp"
+			"type": "kengine::data::pathfinding",
+			"header": "kengine/data/pathfinding.hpp"
 		},
 		{
-			"type": "kengine::PhysicsComponent",
-			"header": "data/PhysicsComponent.hpp"
+			"type": "kengine::data::physics",
+			"header": "kengine/data/physics.hpp"
 		},
 		{
-			"type": "kengine::PythonComponent",
-			"header": "data/PythonComponent.hpp",
+			"type": "kengine::data::python",
+			"header": "kengine/data/python.hpp",
 			"condition": "KENGINE_PYTHON"
 		},
 		{
-			"type": "kengine::SelectedComponent",
-			"header": "data/SelectedComponent.hpp"
+			"type": "kengine::data::selected",
+			"header": "kengine/data/selected.hpp"
 		},
 		{
-			"type": "kengine::ModelSkeletonComponent",
-			"header": "data/ModelSkeletonComponent.hpp"
+			"type": "kengine::data::model_skeleton",
+			"header": "kengine/data/model_skeleton.hpp"
 		},
 		{
-			"type": "kengine::SkyBoxComponent",
-			"header": "data/SkyBoxComponent.hpp"
+			"type": "kengine::data::sky_box",
+			"header": "kengine/data/sky_box.hpp"
 		},
 		{
-			"type": "kengine::SpriteComponent2D",
-			"header": "data/SpriteComponent.hpp"
+			"type": "kengine::data::sprite_2d",
+			"header": "kengine/data/sprite.hpp"
 		},
 		{
-			"type": "kengine::SpriteComponent3D",
-			"header": "data/SpriteComponent.hpp"
+			"type": "kengine::data::sprite_3d",
+			"header": "kengine/data/sprite.hpp"
 		},
 		{
-			"type": "kengine::TextComponent2D",
-			"header": "data/TextComponent.hpp"
+			"type": "kengine::data::text_2d",
+			"header": "kengine/data/Text.hpp"
 		},
 		{
-			"type": "kengine::TextComponent3D",
-			"header": "data/TextComponent.hpp"
+			"type": "kengine::data::text_3d",
+			"header": "kengine/data/Text.hpp"
 		},
 		{
-			"type": "kengine::TimeModulatorComponent",
-			"header": "data/TimeModulatorComponent.hpp"
+			"type": "kengine::data::time_modulator",
+			"header": "kengine/data/time_modulator.hpp"
 		},
 		{
-			"type": "kengine::TransformComponent",
-			"header": "data/TransformComponent.hpp"
+			"type": "kengine::data::transform",
+			"header": "kengine/data/transform.hpp"
 		},
 		{
-			"type": "kengine::meta::AttachTo",
-			"header": "meta/AttachTo.hpp"
+			"type": "kengine::meta::attach_to",
+			"header": "kengine/meta/attach_to.hpp"
 		},
 		{
-			"type": "kengine::meta::Attributes",
-			"header": "meta/Attributes.hpp"
+			"type": "kengine::meta::attributes",
+			"header": "kengine/meta/attributes.hpp"
 		},
 		{
-			"type": "kengine::meta::Copy",
-			"header": "meta/Copy.hpp"
+			"type": "kengine::meta::copy",
+			"header": "kengine/meta/copy.hpp"
 		},
 		{
-			"type": "kengine::meta::Count",
-			"header": "meta/Count.hpp"
+			"type": "kengine::meta::count",
+			"header": "kengine/meta/count.hpp"
 		},
 		{
-			"type": "kengine::meta::DetachFrom",
-			"header": "meta/DetachFrom.hpp"
+			"type": "kengine::meta::detach_from",
+			"header": "kengine/meta/detach_from.hpp"
 		},
 		{
-			"type": "kengine::meta::DisplayImGui",
-			"header": "meta/DisplayImGui.hpp"
+			"type": "kengine::meta::display_imgui",
+			"header": "kengine/meta/display_imgui.hpp"
 		},
 		{
-			"type": "kengine::meta::EditImGui",
-			"header": "meta/EditImGui.hpp"
+			"type": "kengine::meta::edit_imgui",
+			"header": "kengine/meta/edit_imgui.hpp"
 		},
 		{
-			"type": "kengine::meta::ForEachEntity",
-			"header": "meta/ForEachEntity.hpp"
+			"type": "kengine::meta::for_each_entity",
+			"header": "kengine/meta/for_each_entity.hpp"
 		},
 		{
-			"type": "kengine::meta::ForEachEntityWithout",
-			"header": "meta/ForEachEntity.hpp"
+			"type": "kengine::meta::for_each_entity_without",
+			"header": "kengine/meta/for_each_entity.hpp"
 		},
 		{
-			"type": "kengine::meta::Get",
-			"header": "meta/Get.hpp"
+			"type": "kengine::meta::get",
+			"header": "kengine/meta/get.hpp"
 		},
 		{
-			"type": "kengine::meta::Has",
-			"header": "meta/Has.hpp"
+			"type": "kengine::meta::has",
+			"header": "kengine/meta/has.hpp"
 		},
 		{
-			"type": "kengine::meta::LoadFromJSON",
-			"header": "meta/LoadFromJSON.hpp"
+			"type": "kengine::meta::load_from_json",
+			"header": "kengine/meta/load_from_json.hpp"
 		},
 		{
-			"type": "kengine::meta::MatchString",
-			"header": "meta/MatchString.hpp"
+			"type": "kengine::meta::match_string",
+			"header": "kengine/meta/match_string.hpp"
 		},
 		{
-			"type": "kengine::meta::SaveToJSON",
-			"header": "meta/SaveToJSON.hpp"
+			"type": "kengine::meta::save_to_json",
+			"header": "kengine/meta/save_to_json.hpp"
 		},
 		{
-			"type": "kengine::meta::Size",
-			"header": "meta/Size.hpp"
+			"type": "kengine::meta::size",
+			"header": "kengine/meta/size.hpp"
 		}
 	],
 	"types": [
 		{
-			"type": "putils::Point2f",
-			"header": "Point.hpp"
+			"type": "putils::point2f",
+			"header": "putils/point.hpp"
 		}
 	]
 }

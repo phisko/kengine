@@ -1,14 +1,14 @@
 {
 	"components": [
 		{
-			"registration": "kengine::registerComponents",
-			"header": "helpers/registerTypeHelper.hpp"
+			"registration": "kengine::register_components",
+			"header": "kengine/helpers/register_type_helper.hpp"
 		}
 	],
 	"types": [
 		{
-			"registration": "kengine::registerTypes",
-			"header": "helpers/registerTypeHelper.hpp"
+			"registration": "kengine::register_types",
+			"header": "kengine/helpers/register_type_helper.hpp"
 		}
 	]
 }

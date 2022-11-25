@@ -2,5 +2,5 @@
 	path = putils
 	url = https://github.com/phisko/putils
 [submodule "systems/kreogl/kreogl"]
-	path = systems/kreogl/kreogl
+	path = kengine/systems/kreogl/kreogl
 	url = https://github.com/phisko/kreogl
