@@ -142,7 +142,7 @@ namespace kengine {
 				comp.size = {(unsigned int) width, (unsigned int) height};
 			});
 
-#define forward_to_input(function) [](auto ... args) noexcept { g_this->input.function(args...); }
+#define forward_to_input(function) [](auto ... args) { g_this->input.function(args...); }
 			glfwSetMouseButtonCallback(glfwComp.window.get(), forward_to_input(onClick));
 			glfwSetCursorPosCallback(glfwComp.window.get(), forward_to_input(onMouseMove));
 			glfwSetScrollCallback(glfwComp.window.get(), forward_to_input(onScroll));

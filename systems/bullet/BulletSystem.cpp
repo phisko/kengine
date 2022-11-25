@@ -67,10 +67,10 @@ namespace kengine {
 
 		btDefaultCollisionConfiguration collisionConfiguration;
 		btCollisionDispatcher dispatcher{ &collisionConfiguration };
-		btDbvtBroadphase overlappingPairCache;
+		std::unique_ptr<btDbvtBroadphase> overlappingPairCache = std::make_unique<btDbvtBroadphase>(); // Had to make this a ptr for gcc, otherwise failed to instantiate std::is_constructible
 		btSequentialImpulseConstraintSolver solver;
 
-		btDiscreteDynamicsWorld dynamicsWorld{ &dispatcher, &overlappingPairCache, &solver, &collisionConfiguration };
+		btDiscreteDynamicsWorld dynamicsWorld{ &dispatcher, overlappingPairCache.get(), &solver, &collisionConfiguration };
 
 		struct {
 			bool enableDebug = false;
