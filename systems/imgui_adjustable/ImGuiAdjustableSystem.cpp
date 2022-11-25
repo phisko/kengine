@@ -28,7 +28,6 @@
 
 // kengine functions
 #include "functions/Execute.hpp"
-#include "functions/OnTerminate.hpp"
 
 // kengine helpers
 #include "helpers/assertHelper.hpp"
@@ -70,7 +69,6 @@ namespace kengine {
 
 			load();
 
-			e.emplace<functions::OnTerminate>(putils_forward_to_this(save));
 			e.emplace<functions::Execute>(putils_forward_to_this(execute));
 
 			e.emplace<NameComponent>("Adjustables");
@@ -79,6 +77,11 @@ namespace kengine {
 			enabled = &tool.enabled;
 
 			connection = r.on_construct<AdjustableComponent>().connect<&ImGuiAdjustableSystem::initAdjustable>(this);
+		}
+
+		~ImGuiAdjustableSystem() noexcept {
+			KENGINE_PROFILING_SCOPE;
+			save();
 		}
 
 		char nameSearch[1024] = "";

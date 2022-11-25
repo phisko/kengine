@@ -11,7 +11,6 @@
 
 // kengine functions
 #include "functions/Execute.hpp"
-#include "functions/OnTerminate.hpp"
 
 // kengine helpers
 #include "helpers/isRunning.hpp"
@@ -33,13 +32,6 @@ namespace kengine::mainLoop {
 		}
 	}
 
-	static void terminate(const entt::registry & r) noexcept {
-		KENGINE_PROFILING_SCOPE;
-		kengine_logf(r, Log, "MainLoop", "Calling OnTerminate");
-		for (const auto & [e, func] : r.view<functions::OnTerminate>().each())
-			func();
-	}
-
 	template<typename F>
 	static void run(entt::registry & r, F && getTimeFactor) noexcept {
 		kengine_log(r, Log, "MainLoop", "Starting");
@@ -55,8 +47,7 @@ namespace kengine::mainLoop {
 			KENGINE_PROFILING_FRAME;
 		}
 
-		kengine_logf(r, Log, "MainLoop", "Stopping due to no more KeepAlive components remaining");
-		terminate(r);
+		kengine_log(r, Log, "MainLoop", "Stopping due to no more KeepAlive components remaining");
 	}
 
 	void run(entt::registry & r) noexcept {

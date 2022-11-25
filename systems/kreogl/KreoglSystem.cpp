@@ -62,7 +62,6 @@
 #include "functions/Execute.hpp"
 #include "functions/GetEntityInPixel.hpp"
 #include "functions/GetPositionInPixel.hpp"
-#include "functions/OnTerminate.hpp"
 
 // kengine helpers
 #include "helpers/cameraHelper.hpp"
@@ -90,7 +89,6 @@ namespace kengine {
 			kengine_log(r, Log, "Init", "KreoglSystem");
 
 			e.emplace<functions::Execute>(putils_forward_to_this(execute));
-			e.emplace<functions::OnTerminate>(putils_forward_to_this(terminate));
 
 			auto & scale = e.emplace<ImGuiScaleComponent>();
 			e.emplace<AdjustableComponent>() = {
@@ -171,25 +169,6 @@ namespace kengine {
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
-		}
-
-		void terminate() noexcept {
-			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, Log, "Terminate", "KreoglSystem");
-
-			// Clear these now, or their dtors will fail since the OpenGL state won't exist anymore
-			r.clear<
-			    KreoglAnimationFilesComponent,
-				KreoglModelComponent,
-				kreogl::AnimatedObject,
-				kreogl::Camera,
-				kreogl::ImageTexture,
-				kreogl::DirectionalLight, kreogl::PointLight, kreogl::SpotLight,
-				kreogl::SkyboxTexture,
-				kreogl::Sprite2D, kreogl::Sprite3D,
-				kreogl::Text2D, kreogl::Text3D,
-				kreogl::Window
-			>();
 		}
 
 		void execute(float deltaTime) noexcept {

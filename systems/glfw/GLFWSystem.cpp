@@ -19,7 +19,6 @@
 #include "data/WindowComponent.hpp"
 
 // kengine functions
-#include "functions/OnTerminate.hpp"
 #include "functions/OnMouseCaptured.hpp"
 #include "functions/Execute.hpp"
 
@@ -39,7 +38,6 @@ namespace kengine {
 			kengine_log(r, Log, "Init", "GLFWSystem");
 
 			e.emplace<functions::Execute>(putils_forward_to_this(execute));
-			e.emplace<functions::OnTerminate>(putils_forward_to_this(terminate));
 			e.emplace<functions::OnMouseCaptured>(putils_forward_to_this(onMouseCaptured));
 
 			for (const auto & [bufferEntity, buffer] : r.view<InputBufferComponent>().each()) {
@@ -62,7 +60,7 @@ namespace kengine {
 			}
 		}
 
-		void terminate() noexcept {
+		~GLFWSystem() noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, Log, "Terminate", "GLFWSystem");
 			r.clear<GLFWWindowComponent>(); // Need to clear these before glfwTerminate is called
