@@ -39,6 +39,7 @@
 namespace kengine {
 	struct ImGuiToolSystem {
 		entt::registry & r;
+		entt::scoped_connection connection;
 
 		ImGuiToolSystem(entt::handle e) noexcept
 			: r(*e.registry())
@@ -55,12 +56,7 @@ namespace kengine {
 			e.emplace<functions::OnTerminate>(putils_forward_to_this(saveTools));
 			e.emplace<functions::Execute>(putils_forward_to_this(execute));
 
-			r.on_construct<ImGuiToolComponent>().connect<&ImGuiToolSystem::onConstructImGuiTool>(this);
-		}
-
-		~ImGuiToolSystem() noexcept {
-			KENGINE_PROFILING_SCOPE;
-			r.on_construct<ImGuiToolComponent>().disconnect<&ImGuiToolSystem::onConstructImGuiTool>(this);
+			connection = r.on_construct<ImGuiToolComponent>().connect<&ImGuiToolSystem::onConstructImGuiTool>(this);
 		}
 
 		void execute(float deltaTime) noexcept {

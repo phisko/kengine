@@ -36,6 +36,7 @@ namespace kengine {
 
 	struct RecastSystem {
 		entt::registry & r;
+		putils::vector<entt::scoped_connection, 5> connections;
 
 		RecastSystem(entt::handle e) noexcept
 			: r(*e.registry())
@@ -52,25 +53,11 @@ namespace kengine {
 				}
 			};
 
-			r.on_destroy<RecastAgentComponent>().connect<removeAgentFromCrowds>();
-
-			r.on_construct<ModelComponent>().connect<recast::buildRecastComponent>();
-			r.on_construct<ModelDataComponent>().connect<recast::buildRecastComponent>();
-			r.on_construct<NavMeshComponent>().connect<recast::buildRecastComponent>();
-
-			r.on_update<NavMeshComponent>().connect<recast::buildRecastComponent>();
-		}
-
-		~RecastSystem() noexcept {
-			KENGINE_PROFILING_SCOPE;
-
-			r.on_destroy<RecastAgentComponent>().disconnect<removeAgentFromCrowds>();
-
-			r.on_construct<ModelComponent>().disconnect<recast::buildRecastComponent>();
-			r.on_construct<ModelDataComponent>().disconnect<recast::buildRecastComponent>();
-			r.on_construct<NavMeshComponent>().disconnect<recast::buildRecastComponent>();
-
-			r.on_update<NavMeshComponent>().disconnect<recast::buildRecastComponent>();
+			connections.emplace_back(r.on_destroy<RecastAgentComponent>().connect<removeAgentFromCrowds>());
+			connections.emplace_back(r.on_construct<ModelComponent>().connect<recast::buildRecastComponent>());
+			connections.emplace_back(r.on_construct<ModelDataComponent>().connect<recast::buildRecastComponent>());
+			connections.emplace_back(r.on_construct<NavMeshComponent>().connect<recast::buildRecastComponent>());
+			connections.emplace_back(r.on_update<NavMeshComponent>().connect<recast::buildRecastComponent>());
 		}
 
 		static void removeAgentFromCrowds(entt::registry & r, entt::entity e) noexcept {

@@ -57,9 +57,11 @@
 
 namespace kengine {
 	struct ImGuiAdjustableSystem {
-		putils::IniFile loadedFile;
 		entt::registry & r;
+		entt::scoped_connection connection;
+
 		bool * enabled;
+		putils::IniFile loadedFile;
 
 		ImGuiAdjustableSystem(entt::handle e) noexcept
 			: r(*e.registry())
@@ -76,12 +78,7 @@ namespace kengine {
 			tool.enabled = true;
 			enabled = &tool.enabled;
 
-			r.on_construct<AdjustableComponent>().connect<&ImGuiAdjustableSystem::initAdjustable>(this);
-		}
-
-		~ImGuiAdjustableSystem() noexcept {
-			KENGINE_PROFILING_SCOPE;
-			r.on_construct<AdjustableComponent>().disconnect<&ImGuiAdjustableSystem::initAdjustable>(this);
+			connection = r.on_construct<AdjustableComponent>().connect<&ImGuiAdjustableSystem::initAdjustable>(this);
 		}
 
 		char nameSearch[1024] = "";

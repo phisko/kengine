@@ -40,6 +40,7 @@ namespace kengine {
 
 	struct MagicaVoxelSystem {
 		entt::registry & r;
+		entt::scoped_connection connection;
 
 		MagicaVoxelSystem(entt::handle e) noexcept
 			: r(*e.registry())
@@ -47,12 +48,7 @@ namespace kengine {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, Log, "Init", "MagicaVoxelSystem");
 
-			r.on_construct<ModelComponent>().connect<&MagicaVoxelSystem::loadModel>(this);
-		}
-
-		~MagicaVoxelSystem() noexcept {
-			KENGINE_PROFILING_SCOPE;
-			r.on_construct<ModelComponent>().disconnect<&MagicaVoxelSystem::loadModel>(this);
+			connection = r.on_construct<ModelComponent>().connect<&MagicaVoxelSystem::loadModel>(this);
 		}
 
 		using MeshType = decltype(buildMesh(PolyVox::RawVolume<PolyVoxComponent::VertexData>{ {} }));
