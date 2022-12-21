@@ -43,7 +43,7 @@ Many parts of the engine (such as the scripting systems or the ImGui entity edit
 
 The engine is organized in [components](#components), [systems](#systems) and [helpers](#helpers) .
 
-Note that `systems` aren't objects of a specific class. Systems are simply functions that create an `entity` with an [execute](kengine/functions/execute.md) component (or anything else they need to do their work). The `entity` then lives in the `registry` with the rest of the game state. This lets users introspect `systems` or add behavior to them just like any other `entity`.
+Note that `systems` aren't objects of a specific class. Systems are simply functions that create an entity with an [execute](kengine/functions/execute.md) component (or anything else they need to do their work). The entity then lives in the `registry` with the rest of the game state. This lets users introspect systems or add behavior to them just like any other entity.
 
 ## Component categories
 
@@ -61,14 +61,14 @@ Data components hold data about their entity.
 Data components are what first comes to mind when thinking of a component, such as a [transform](kengine/data/transform.md) or a [name](kengine/data/name.md).
 
 Data components can sometimes hold functions:
-* [input](kengine/data/input.md) lets an `entity` hold callbacks to be called whenever an input event occurs
-* [collision](kengine/data/collision.md) lets an `entity` be notified when it collides with another
+* [input](kengine/data/input.md) lets an entity hold callbacks to be called whenever an input event occurs
+* [collision](kengine/data/collision.md) lets an entity be notified when it collides with another
 
 ### Function components
 
 Function components hold functions to query, alter, or notify their entity.
 
-Function components are simply holders for functors that can be attached as components to `entities`. This mechanic can be used to:
+Function components are simply holders for functors that can be attached as components to entities. This mechanic can be used to:
 * attach behaviors to entities: [execute](kengine/functions/execute.md) is called by the main loop each frame
 * register callbacks for system-wide events: [on_click](kengine/functions/on_click.md) is called whenever the user clicks the window
 * provide new functionality that is implemented in a specific system: [query_position](kengine/functions/query_position.md) can only be implemented in a physics system
@@ -97,7 +97,7 @@ The engine uses "type entities" to hold information about the various components
 
 Meta components are attached to these "type entities", and hold a generic function's implementation for that specific type. Because they hold functions, they are very similar to function components.
 
-An example makes this clearer: [edit_imgui](kengine/meta/edit_imgui.md) is a meta component that, when called, will draw its "parent component"'s properties using [ImGui](https://github.com/ocornut/imgui/) for the given `entity`. The following code will display a window to edit `e`'s [name](kengine/data/name.md) component.
+An example makes this clearer: [edit_imgui](kengine/meta/edit_imgui.md) is a meta component that, when called, will draw its "parent component"'s properties using [ImGui](https://github.com/ocornut/imgui/) for the given entity. The following code will display a window to edit `e`'s [name](kengine/data/name.md) component.
 
 ```cpp
 // r is a registry with the "type entity" for `name` already setup

@@ -17,7 +17,7 @@ Represents a single mesh in the model.
 
 `bone_mats_bone_space` holds the matrices for each bone in "bone space", i.e. relative to the bone's identity matrix.
 
-`bone_mats_mesh_space` holds the matrices for each bone in "mesh space", i.e. relative to the `Entity`'s position.
+`bone_mats_mesh_space` holds the matrices for each bone in "mesh space", i.e. relative to the entity's position.
 
 ### meshes
 
