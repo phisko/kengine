@@ -1,5 +1,5 @@
 #include "kengine/helpers/register_type_helper.hpp"
-#include "kengine/data/Text.hpp"
+#include "kengine/data/text.hpp"
 
 // entt
 #include <entt/entity/fwd.hpp>

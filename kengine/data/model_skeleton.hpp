@@ -7,14 +7,6 @@
 // reflection
 #include "putils/reflection.hpp"
 
-#ifndef KENGINE_BONE_NAME_MAX_LENGTH
-# define KENGINE_BONE_NAME_MAX_LENGTH 64
-#endif
-
-#ifndef KENGINE_SKELETON_MAX_BONES
-# define KENGINE_SKELETON_MAX_BONES 100
-#endif
-
 namespace kengine::data {
 	struct model_skeleton {
 		struct mesh {
