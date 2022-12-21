@@ -28,7 +28,7 @@
 #include "kengine/helpers/profiling_helper.hpp"
 
 // impl
-#include "Common.hpp"
+#include "common.hpp"
 #include "recast_nav_mesh.hpp"
 
 namespace kengine::systems::recast_impl {
