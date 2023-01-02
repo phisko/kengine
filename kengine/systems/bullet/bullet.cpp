@@ -49,18 +49,24 @@
 
 namespace putils {
 	inline bool operator<(const point3f & lhs, const point3f & rhs) noexcept {
-		if (lhs.x < rhs.x) return true;
-		if (lhs.x > rhs.x) return false;
-		if (lhs.y < rhs.y) return true;
-		if (lhs.y > rhs.y) return false;
-		if (lhs.z < rhs.z) return true;
-		if (lhs.z > rhs.z) return false;
+		if (lhs.x < rhs.x)
+			return true;
+		if (lhs.x > rhs.x)
+			return false;
+		if (lhs.y < rhs.y)
+			return true;
+		if (lhs.y > rhs.y)
+			return false;
+		if (lhs.z < rhs.z)
+			return true;
+		if (lhs.z > rhs.z)
+			return false;
 		return false;
 	}
 }
 
 namespace kengine::systems {
-    struct bullet {
+	struct bullet {
 		entt::registry & r;
 
 		putils::vector<entt::scoped_connection, 5> connections;
@@ -114,8 +120,7 @@ namespace kengine::systems {
 		};
 
 		bullet(entt::handle e) noexcept
-			: r(*e.registry())
-		{
+			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, log, "Init", "systems/bullet");
 
@@ -123,13 +128,13 @@ namespace kengine::systems {
 			e.emplace<functions::query_position>(putils_forward_to_this(query_position));
 
 			e.emplace<data::adjustable>() = {
-				"Physics", {
-					{ "Gravity", &adjustables.gravity }
+				"Physics", { { "Gravity", &adjustables.gravity }
 #ifndef KENGINE_NDEBUG
-					, {"Debug", &adjustables.enable_debug }
-					, {"Editor mode (reload colliders each frame)", &adjustables.editor_mode }
+							 ,
+							 { "Debug", &adjustables.enable_debug },
+							 { "Editor mode (reload colliders each frame)", &adjustables.editor_mode }
 #endif
-				}
+						   }
 			};
 
 			connections.emplace_back(r.on_construct<data::physics>().connect<&bullet::add_or_update_bullet_data>(this));
@@ -223,7 +228,8 @@ namespace kengine::systems {
 			for (const auto & collider : model_collider.colliders)
 				add_shape(comp, collider, transform, skeleton, model_skeleton, model_transform);
 
-			btVector3 local_inertia{ 0.f, 0.f, 0.f }; {
+			btVector3 local_inertia{ 0.f, 0.f, 0.f };
+			{
 				if (physics.mass != 0.f)
 					comp.shape.calculateLocalInertia(physics.mass, local_inertia);
 			}
@@ -241,36 +247,37 @@ namespace kengine::systems {
 
 			const auto size = collider.transform.bounding_box.size * transform.bounding_box.size;
 
-			btCollisionShape * shape = nullptr; {
+			btCollisionShape * shape = nullptr;
+			{
 				switch (collider.shape) {
-				case data::model_collider::collider::box: {
-					static collision_shape_map shapes;
-					shape = get_collision_shape(shapes, size, [&] { return new btBoxShape({ size.x / 2.f, size.y / 2.f, size.z / 2.f }); });
-					break;
-				}
-				case data::model_collider::collider::capsule: {
-					static collision_shape_map shapes;
-					shape = get_collision_shape(shapes, size, [&] { return new btCapsuleShape(std::min(size.x, size.z) / 2.f, size.y); });
-					break;
-				}
-				case data::model_collider::collider::cone: {
-					static collision_shape_map shapes;
-					shape = get_collision_shape(shapes, size, [&] { return new btConeShape(std::min(size.x, size.z) / 2.f, size.y); });
-					break;
-				}
-				case data::model_collider::collider::cylinder: {
-					static collision_shape_map shapes;
-					shape = get_collision_shape(shapes, size, [&] { return new btCylinderShape({ size.x / 2.f, size.y / 2.f, size.z / 2.f }); });
-					break;
-				}
-				case data::model_collider::collider::sphere: {
-					static collision_shape_map shapes;
-					shape = get_collision_shape(shapes, size, [&] { return new btSphereShape(std::min(std::min(size.x, size.y), size.y) / 2.f); });
-					break;
-				}
-				default:
-					static_assert(magic_enum::enum_count<data::model_collider::collider::shape_type>() == 5);
-					return;
+					case data::model_collider::collider::box: {
+						static collision_shape_map shapes;
+						shape = get_collision_shape(shapes, size, [&] { return new btBoxShape({ size.x / 2.f, size.y / 2.f, size.z / 2.f }); });
+						break;
+					}
+					case data::model_collider::collider::capsule: {
+						static collision_shape_map shapes;
+						shape = get_collision_shape(shapes, size, [&] { return new btCapsuleShape(std::min(size.x, size.z) / 2.f, size.y); });
+						break;
+					}
+					case data::model_collider::collider::cone: {
+						static collision_shape_map shapes;
+						shape = get_collision_shape(shapes, size, [&] { return new btConeShape(std::min(size.x, size.z) / 2.f, size.y); });
+						break;
+					}
+					case data::model_collider::collider::cylinder: {
+						static collision_shape_map shapes;
+						shape = get_collision_shape(shapes, size, [&] { return new btCylinderShape({ size.x / 2.f, size.y / 2.f, size.z / 2.f }); });
+						break;
+					}
+					case data::model_collider::collider::sphere: {
+						static collision_shape_map shapes;
+						shape = get_collision_shape(shapes, size, [&] { return new btSphereShape(std::min(std::min(size.x, size.y), size.y) / 2.f); });
+						break;
+					}
+					default:
+						static_assert(magic_enum::enum_count<data::model_collider::collider::shape_type>() == 5);
+						return;
 				}
 			}
 			comp.shape.addChildShape(to_bullet(transform, collider, skeleton, model_skeleton, model_transform), shape);
@@ -363,8 +370,7 @@ namespace kengine::systems {
 
 			struct callback : btCollisionWorld::ContactResultCallback {
 				callback(entt::registry & r, btPairCachingGhostObject & ghost, const entity_iterator_func & func) noexcept
-					: r(r), ghost(ghost), func(func)
-				{}
+					: r(r), ghost(ghost), func(func) {}
 
 				btScalar addSingleResult(btManifoldPoint & cp, const btCollisionObjectWrapper * colObj0Wrap, int partId0, int index0, const btCollisionObjectWrapper * colObj1Wrap, int partId1, int index1) final {
 					kengine_assert(r, colObj1Wrap->m_collisionObject == &ghost);
@@ -427,8 +433,7 @@ namespace kengine::systems {
 		struct drawer : public btIDebugDraw {
 		public:
 			drawer(systems::bullet & system) noexcept
-				: system(system)
-			{
+				: system(system) {
 				KENGINE_PROFILING_SCOPE;
 				debug_entity = system.r.create();
 				system.r.emplace<data::transform>(debug_entity);
@@ -447,7 +452,8 @@ namespace kengine::systems {
 			void drawLine(const btVector3 & from, const btVector3 & to, const btVector3 & color) noexcept override {
 				KENGINE_PROFILING_SCOPE;
 
-				data::debug_graphics::element debug_element; {
+				data::debug_graphics::element debug_element;
+				{
 					debug_element.type = data::debug_graphics::element_type::line;
 					debug_element.line.end = system.to_putils(from);
 					debug_element.pos = system.to_putils(to);
@@ -475,7 +481,6 @@ namespace kengine::systems {
 		drawer drawer{ *this };
 #endif
 	};
-
 
 	void add_bullet(entt::registry & r) noexcept {
 		const entt::handle e{ r, r.create() };

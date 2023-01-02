@@ -24,7 +24,7 @@ namespace putils::reflection::detail::json {
 }
 
 namespace kengine {
-	template<typename ... Comps>
+	template<typename... Comps>
 	void register_load_from_json(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		register_meta_component_implementation<meta::load_from_json, Comps...>(
@@ -48,4 +48,3 @@ namespace kengine {
 		);
 	}
 }
-

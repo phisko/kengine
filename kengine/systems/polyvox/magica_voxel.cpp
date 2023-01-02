@@ -43,8 +43,7 @@ namespace kengine::systems {
 		entt::scoped_connection connection;
 
 		magica_voxel(entt::handle e) noexcept
-			: r(*e.registry())
-		{
+			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, log, "Init", "systems/magica_voxel");
 
@@ -192,7 +191,10 @@ namespace kengine::systems {
 			putils::magica_voxel::chunk_content::size size;
 			read_from_stream(size, stream);
 
-			PolyVox::RawVolume<data::polyvox::vertex_data> volume(PolyVox::Region{ { 0, 0, 0, }, { size.x, size.z, size.y } });
+			PolyVox::RawVolume<data::polyvox::vertex_data> volume(PolyVox::Region{
+				{ 0, 0, 0 },
+				{ size.x, size.z, size.y },
+			});
 
 			putils::magica_voxel::chunk_header voxels_header;
 			read_from_stream(voxels_header, stream);

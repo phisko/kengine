@@ -1,5 +1,5 @@
-﻿AccessModifierOffset: 0
-AlignAfterOpenBracket: DontAlign
+﻿AccessModifierOffset: -4
+AlignAfterOpenBracket: BlockIndent
 AlignConsecutiveMacros: false
 AlignConsecutiveAssignments: false
 AlignConsecutiveDeclarations: false
@@ -20,6 +20,9 @@ AlwaysBreakBeforeMultilineStrings: false
 AlwaysBreakTemplateDeclarations: 'Yes'
 BinPackArguments: true
 BinPackParameters: true
+BraceWrapping:
+  BeforeElse: true
+  BeforeCatch: true
 BreakAfterJavaFieldAnnotations: true
 BreakBeforeBinaryOperators: None
 BreakBeforeBraces: Custom
@@ -34,7 +37,7 @@ ExperimentalAutoDetectBinPacking: false
 FixNamespaceComments: false
 IncludeBlocks: Preserve
 IndentCaseLabels: true
-IndentPPDirectives: AfterHash
+IndentPPDirectives: None
 IndentWidth: '4'
 IndentWrappedFunctionNames: true
 KeepEmptyLinesAtTheStartOfBlocks: false
@@ -43,6 +46,7 @@ MaxEmptyLinesToKeep: '1'
 NamespaceIndentation: All
 PointerAlignment: Middle
 ReflowComments: false
+RequiresClausePosition: OwnLine
 SortIncludes: false
 SortUsingDeclarations: true
 SpaceAfterCStyleCast: false

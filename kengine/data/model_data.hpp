@@ -1,7 +1,7 @@
 #pragma once
 
 #ifndef KENGINE_MODEL_LOADER_FUNCTION_SIZE
-# define KENGINE_MODEL_LOADER_FUNCTION_SIZE 64
+#define KENGINE_MODEL_LOADER_FUNCTION_SIZE 64
 #endif
 
 // reflection

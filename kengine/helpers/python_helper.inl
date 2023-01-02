@@ -15,7 +15,7 @@
 
 namespace kengine::python_helper {
 	namespace impl {
-		template<typename Ret, typename ...Args>
+		template<typename Ret, typename... Args>
 		void register_entity_member(py::class_<entt::handle> & entity, const char * name, const script_language_helper::function<Ret(Args...)> & func) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
@@ -25,7 +25,7 @@ namespace kengine::python_helper {
 				entity.def(name, func);
 		}
 
-		template<typename Ret, typename ...Args>
+		template<typename Ret, typename... Args>
 		void register_function_with_state(data::python_state & state, const char * name, const script_language_helper::function<Ret(Args...)> & func) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
@@ -59,17 +59,17 @@ namespace kengine::python_helper {
 			register_type_with_state<T>(state);
 			script_language_helper::register_component<T>(
 				r,
-				[&](auto && ... args) noexcept {
+				[&](auto &&... args) noexcept {
 					register_entity_member(*state.entity, FWD(args)...);
 				},
-				[&](auto && ... args) noexcept {
+				[&](auto &&... args) noexcept {
 					register_function_with_state(state, FWD(args)...);
 				}
 			);
 		}
 	}
 
-	template<typename ...Types>
+	template<typename... Types>
 	void register_types(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
@@ -82,7 +82,7 @@ namespace kengine::python_helper {
 		});
 	}
 
-	template<typename ... Comps>
+	template<typename... Comps>
 	void register_components(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
@@ -95,7 +95,7 @@ namespace kengine::python_helper {
 		});
 	}
 
-	template<typename Ret, typename ...Args>
+	template<typename Ret, typename... Args>
 	void register_function(const entt::registry & r, const char * name, const script_language_helper::function<Ret(Args...)> & func) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		kengine_logf(r, log, "python/register_function", "Registering %s", name);

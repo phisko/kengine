@@ -48,7 +48,7 @@
 #include "sfml_texture.hpp"
 
 #ifndef KENGINE_MAX_VIEWPORTS
-# define KENGINE_MAX_VIEWPORTS 8
+#define KENGINE_MAX_VIEWPORTS 8
 #endif
 
 namespace kengine::systems {
@@ -81,8 +81,7 @@ namespace kengine::systems {
 		data::input_buffer * input_buffer = nullptr;
 
 		sfml(entt::handle e) noexcept
-			: r(*e.registry())
-		{
+			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, log, "Init", "systems/sfml");
 
@@ -91,8 +90,9 @@ namespace kengine::systems {
 			auto & scale = e.emplace<data::imgui_scale>();
 
 			e.emplace<data::adjustable>() = {
-				"ImGui", {
-					{ "scale", &scale.scale }
+				"ImGui",
+				{
+					{ "scale", &scale.scale },
 				}
 			};
 
@@ -181,7 +181,7 @@ namespace kengine::systems {
 					input_buffer->keys.push_back(data::input_buffer::key_event{
 						.window = window,
 						.key = e.key.code,
-						.pressed = e.type == sf::Event::KeyPressed
+						.pressed = e.type == sf::Event::KeyPressed,
 					});
 					break;
 				}
@@ -196,7 +196,7 @@ namespace kengine::systems {
 					input_buffer->moves.push_back(data::input_buffer::mouse_move_event{
 						.window = window,
 						.pos = pos,
-						.rel = rel
+						.rel = rel,
 					});
 					break;
 				}
@@ -209,7 +209,7 @@ namespace kengine::systems {
 						.window = window,
 						.pos = { (float)e.mouseButton.x, (float)e.mouseButton.y },
 						.button = e.mouseButton.button,
-						.pressed = e.type == sf::Event::MouseButtonPressed
+						.pressed = e.type == sf::Event::MouseButtonPressed,
 					});
 					break;
 				}
@@ -221,7 +221,7 @@ namespace kengine::systems {
 						.window = window,
 						.xoffset = 0,
 						.yoffset = e.mouseWheelScroll.delta,
-						.pos = { (float)e.mouseWheelScroll.x, (float)e.mouseWheelScroll.y }
+						.pos = { (float)e.mouseWheelScroll.x, (float)e.mouseWheelScroll.y },
 					});
 					break;
 				}
@@ -312,7 +312,8 @@ namespace kengine::systems {
 					drawables.ordered_elements.push_back({
 						.type = drawables::element::sprite,
 						.index = drawables.sprites.size() - 1,
-						.height = transform.bounding_box.position.y });
+						.height = transform.bounding_box.position.y,
+					});
 				}
 			}
 
@@ -338,7 +339,8 @@ namespace kengine::systems {
 							drawables.ordered_elements.push_back({
 								.type = drawables::element::line,
 								.index = drawables.lines.size() - 1,
-								.height = height });
+								.height = height,
+							});
 							break;
 						}
 						case element_type::sphere: {
@@ -350,7 +352,8 @@ namespace kengine::systems {
 							drawables.ordered_elements.push_back({
 								.type = drawables::element::circle,
 								.index = drawables.circles.size() - 1,
-								.height = height });
+								.height = height,
+							});
 							break;
 						}
 						case element_type::box: {
@@ -364,7 +367,8 @@ namespace kengine::systems {
 							drawables.ordered_elements.push_back({
 								.type = drawables::element::rectangle,
 								.index = drawables.rectangles.size() - 1,
-								.height = height });
+								.height = height,
+							});
 							break;
 						}
 						default:
@@ -450,12 +454,14 @@ namespace kengine::systems {
 			const auto & window_comp = r.get<data::window>(e);
 			kengine_logf(r, log, "SFML", "Creating window '%s'", window_comp.name.c_str());
 
-
-			auto & sf_window = r.emplace<data::sfml_window>(e, std::make_unique<sf::RenderWindow>(
-				sf::VideoMode{ window_comp.size.x, window_comp.size.y },
-				window_comp.name.c_str(),
-				window_comp.fullscreen ? sf::Style::Fullscreen : sf::Style::Default
-			));
+			auto & sf_window = r.emplace<data::sfml_window>(
+				e,
+				std::make_unique<sf::RenderWindow>(
+					sf::VideoMode{ window_comp.size.x, window_comp.size.y },
+					window_comp.name.c_str(),
+					window_comp.fullscreen ? sf::Style::Fullscreen : sf::Style::Default
+				)
+			);
 
 			ImGui::SFML::Init(*sf_window.window);
 

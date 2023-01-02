@@ -4,7 +4,7 @@
 #include <entt/entity/fwd.hpp>
 
 namespace kengine {
-	template<typename ... Comps>
+	template<typename... Comps>
 	void register_save_to_json(entt::registry & r) noexcept;
 }
 

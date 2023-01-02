@@ -34,7 +34,7 @@
 #include "kengine/helpers/sort_helper.hpp"
 
 #ifndef KENGINE_STATS_TRACKED_COLLECTIONS_SAVE_FILE
-# define KENGINE_STATS_TRACKED_COLLECTIONS_SAVE_FILE "trackedEntityCollections.json"
+#define KENGINE_STATS_TRACKED_COLLECTIONS_SAVE_FILE "trackedEntityCollections.json"
 #endif
 
 namespace kengine::systems {
@@ -43,8 +43,7 @@ namespace kengine::systems {
 		bool * enabled = nullptr;
 
 		imgui_engine_stats(entt::handle e) noexcept
-			: r(*e.registry())
-		{
+			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, log, "Init", "systems/imgui_engine_stats");
 
@@ -128,7 +127,6 @@ namespace kengine::systems {
 				ImGui::OpenPopup("Create collection");
 
 			if (ImGui::BeginPopup("Create collection")) {
-
 				if (ImGui::Button("Track", { -1.f, 0.f })) {
 					ImGui::CloseCurrentPopup();
 					if (!creating.components.empty()) {

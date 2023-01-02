@@ -51,7 +51,7 @@ namespace kengine::main_loop {
 	}
 
 	void run(entt::registry & r) noexcept {
-		run(r, [](auto && ...) noexcept { return 1.f; });
+		run(r, [](auto &&...) noexcept { return 1.f; });
 	}
 
 	namespace time_modulated {

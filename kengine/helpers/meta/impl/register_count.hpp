@@ -4,7 +4,7 @@
 #include <entt/entity/fwd.hpp>
 
 namespace kengine {
-	template<typename ... Comps>
+	template<typename... Comps>
 	void register_count(const entt::registry & r) noexcept;
 }
 

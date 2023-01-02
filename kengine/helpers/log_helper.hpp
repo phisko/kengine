@@ -10,8 +10,8 @@
 #include "kengine/functions/log.hpp"
 
 namespace kengine::log_helper {
-    KENGINE_CORE_EXPORT void log(const entt::registry & r, log_severity severity, const char * category, const char * message) noexcept;
-    KENGINE_CORE_EXPORT log_severity parse_command_line_severity(const entt::registry & r) noexcept;
+	KENGINE_CORE_EXPORT void log(const entt::registry & r, log_severity severity, const char * category, const char * message) noexcept;
+	KENGINE_CORE_EXPORT log_severity parse_command_line_severity(const entt::registry & r) noexcept;
 }
 
 #define kengine_log(registry, severity, category, message) kengine::log_helper::log(registry, kengine::log_severity::severity, category, message)

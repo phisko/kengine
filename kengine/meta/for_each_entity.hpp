@@ -5,13 +5,11 @@
 
 namespace kengine {
 	namespace meta {
-		struct for_each_entity : functions::base_function<
-			void(const entity_iterator_func & func)
-		> {};
+		using for_each_entity_signature = void(const entity_iterator_func & func);
+		struct for_each_entity : functions::base_function<for_each_entity_signature> {};
 
-		struct for_each_entity_without : functions::base_function<
-			void(const entity_iterator_func & func)
-		> {};
+		using for_each_entity_without_signature = void(const entity_iterator_func & func);
+		struct for_each_entity_without : functions::base_function<for_each_entity_without_signature> {};
 	}
 }
 

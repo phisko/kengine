@@ -28,9 +28,7 @@ namespace kengine::json_helper {
 
 		nlohmann::json ret;
 
-		const auto types = sort_helper::get_name_sorted_entities<
-			const meta::has, const meta::save_to_json
-		>(*e.registry());
+		const auto types = sort_helper::get_name_sorted_entities<const meta::has, const meta::save_to_json>(*e.registry());
 
 		for (const auto & [_, name, has, save] : types) {
 			if (!has->call(e))

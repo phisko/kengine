@@ -174,23 +174,29 @@ namespace kengine::systems::recast_impl {
 
 			dtNavMeshCreateParams params;
 			memset(&params, 0, sizeof(params));
-			{ putils_with(*poly_mesh) {
-				params.verts = _.verts;
-				params.vertCount = _.nverts;
-				params.polys = _.polys;
-				params.polyAreas = _.areas;
-				params.polyFlags = _.flags;
-				params.polyCount = _.npolys;
-				params.nvp = _.nvp;
-			} }
+			{
+				putils_with(*poly_mesh);
+				{
+					params.verts = _.verts;
+					params.vertCount = _.nverts;
+					params.polys = _.polys;
+					params.polyAreas = _.areas;
+					params.polyFlags = _.flags;
+					params.polyCount = _.npolys;
+					params.nvp = _.nvp;
+				}
+			}
 
-			{ putils_with(*poly_mesh_detail) {
-				params.detailMeshes = _.meshes;
-				params.detailVerts = _.verts;
-				params.detailVertsCount = _.nverts;
-				params.detailTris = _.tris;
-				params.detailTriCount = _.ntris;
-			} }
+			{
+				putils_with(*poly_mesh_detail);
+				{
+					params.detailMeshes = _.meshes;
+					params.detailVerts = _.verts;
+					params.detailVertsCount = _.nverts;
+					params.detailTris = _.tris;
+					params.detailTriCount = _.ntris;
+				}
+			}
 
 			params.walkableHeight = (float)cfg.walkableHeight;
 			params.walkableClimb = (float)cfg.walkableClimb;
@@ -252,46 +258,49 @@ namespace kengine::systems::recast_impl {
 			rcConfig cfg;
 			memset(&cfg, 0, sizeof(cfg));
 
-			{ putils_with(nav_mesh) {
-				cfg.cs = _.cell_size;
-				kengine_assert(r, cfg.cs > 0);
+			{
+				putils_with(nav_mesh);
+				{
+					cfg.cs = _.cell_size;
+					kengine_assert(r, cfg.cs > 0);
 
-				cfg.ch = _.cell_height;
-				kengine_assert(r, cfg.ch > 0);
+					cfg.ch = _.cell_height;
+					kengine_assert(r, cfg.ch > 0);
 
-				cfg.walkableSlopeAngle = putils::to_degrees(_.walkable_slope);
-				kengine_assert(r, cfg.walkableSlopeAngle > 0.f && cfg.walkableSlopeAngle <= 90.f);
+					cfg.walkableSlopeAngle = putils::to_degrees(_.walkable_slope);
+					kengine_assert(r, cfg.walkableSlopeAngle > 0.f && cfg.walkableSlopeAngle <= 90.f);
 
-				cfg.walkableHeight = (int)ceilf(_.character_height / _.cell_height);
-				kengine_assert(r, cfg.walkableHeight >= 3);
+					cfg.walkableHeight = (int)ceilf(_.character_height / _.cell_height);
+					kengine_assert(r, cfg.walkableHeight >= 3);
 
-				cfg.walkableClimb = (int)floorf(_.character_climb / _.cell_height);
-				kengine_assert(r, cfg.walkableClimb >= 0);
+					cfg.walkableClimb = (int)floorf(_.character_climb / _.cell_height);
+					kengine_assert(r, cfg.walkableClimb >= 0);
 
-				cfg.walkableRadius = (int)ceilf(_.character_radius / _.cell_size);
-				kengine_assert(r, cfg.walkableRadius >= 0);
+					cfg.walkableRadius = (int)ceilf(_.character_radius / _.cell_size);
+					kengine_assert(r, cfg.walkableRadius >= 0);
 
-				cfg.maxEdgeLen = (int)(_.max_edge_length / _.cell_size);
-				kengine_assert(r, cfg.maxEdgeLen >= 0);
+					cfg.maxEdgeLen = (int)(_.max_edge_length / _.cell_size);
+					kengine_assert(r, cfg.maxEdgeLen >= 0);
 
-				cfg.maxSimplificationError = _.max_simplification_error;
-				kengine_assert(r, cfg.maxSimplificationError >= 0);
+					cfg.maxSimplificationError = _.max_simplification_error;
+					kengine_assert(r, cfg.maxSimplificationError >= 0);
 
-				cfg.minRegionArea = (int)rcSqr(_.min_region_area);
-				kengine_assert(r, cfg.minRegionArea >= 0);
+					cfg.minRegionArea = (int)rcSqr(_.min_region_area);
+					kengine_assert(r, cfg.minRegionArea >= 0);
 
-				cfg.mergeRegionArea = (int)rcSqr(_.merge_region_area);
-				kengine_assert(r, cfg.mergeRegionArea >= 0);
+					cfg.mergeRegionArea = (int)rcSqr(_.merge_region_area);
+					kengine_assert(r, cfg.mergeRegionArea >= 0);
 
-				cfg.maxVertsPerPoly = _.verts_per_poly;
-				kengine_assert(r, cfg.maxVertsPerPoly >= 3);
+					cfg.maxVertsPerPoly = _.verts_per_poly;
+					kengine_assert(r, cfg.maxVertsPerPoly >= 3);
 
-				cfg.detailSampleDist = _.detail_sample_dist;
-				kengine_assert(r, cfg.detailSampleDist == 0.f || cfg.detailSampleDist >= .9f);
+					cfg.detailSampleDist = _.detail_sample_dist;
+					kengine_assert(r, cfg.detailSampleDist == 0.f || cfg.detailSampleDist >= .9f);
 
-				cfg.detailSampleMaxError = _.detail_sample_max_error;
-				kengine_assert(r, cfg.detailSampleMaxError >= 0.f);
-			} }
+					cfg.detailSampleMaxError = _.detail_sample_max_error;
+					kengine_assert(r, cfg.detailSampleMaxError >= 0.f);
+				}
+			}
 
 			rcCalcBounds(vertices, (int)mesh_data.vertices.nb_elements, cfg.bmin, cfg.bmax);
 			rcCalcGridSize(cfg.bmin, cfg.bmax, cfg.cs, &cfg.width, &cfg.height);
@@ -328,10 +337,12 @@ namespace kengine::systems::recast_impl {
 					indices[i] = (int)unsigned_indices[i];
 			}
 
-			rcMarkWalkableTriangles(&ctx, cfg.walkableSlopeAngle,
+			rcMarkWalkableTriangles(
+				&ctx, cfg.walkableSlopeAngle,
 				vertices, (int)mesh_data.vertices.nb_elements,
 				indices, (int)nb_triangles,
-				triangle_areas);
+				triangle_areas
+			);
 
 			if (!rcRasterizeTriangles(&ctx, vertices, (int)mesh_data.vertices.nb_elements, indices, triangle_areas, (int)nb_triangles, *height_field, cfg.walkableClimb)) {
 				kengine_assert_failed(r, "[Recast] Failed to rasterize triangles");
@@ -478,8 +489,10 @@ namespace kengine::systems::recast_impl {
 
 			return [&, model_transform](entt::handle environment, const putils::point3f & start_world_space, const putils::point3f & end_world_space) {
 				KENGINE_PROFILING_SCOPE;
-				kengine_logf(*environment.registry(), verbose, "RecastSystem", "Getting path in %zu from { %f, %f, %f } to { %f, %f, %f }",
-					environment, start_world_space.x, start_world_space.y, start_world_space.z, end_world_space.x, end_world_space.y, end_world_space.z);
+				kengine_logf(
+					*environment.registry(), verbose, "RecastSystem", "Getting path in %zu from { %f, %f, %f } to { %f, %f, %f }",
+					environment, start_world_space.x, start_world_space.y, start_world_space.z, end_world_space.x, end_world_space.y, end_world_space.z
+				);
 				static const dtQueryFilter filter;
 
 				const auto model_to_world = matrix_helper::get_model_matrix(environment.get<data::transform>(), model_transform);

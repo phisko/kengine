@@ -1,16 +1,16 @@
 #pragma once
 
 #ifdef _MSC_VER
-# define kengine_assume(x) __assume(x)
+#define kengine_assume(x) __assume(x)
 #else
-# define kengine_assume(x) (void)0
+#define kengine_assume(x) (void)0
 #endif
 
 #ifdef KENGINE_NDEBUG
-# define kengine_assert(x) (void)0
-# define kengine_assert_with_message(x, ...) (void)0
-# define kengine_assert_failed(...) (void)0
-# define kengine_debug_break (void)0
+#define kengine_assert(x) (void)0
+#define kengine_assert_with_message(x, ...) (void)0
+#define kengine_assert_failed(...) (void)0
+#define kengine_debug_break (void)0
 #else
 
 // stl
@@ -19,11 +19,11 @@
 
 // windows
 #ifdef WIN32
-# include "windows.h"
-# include "dbghelp.h"
-# define kengine_debug_break DebugBreak()
+#include "windows.h"
+#include "dbghelp.h"
+#define kengine_debug_break DebugBreak()
 #else
-# define kengine_debug_break __builtin_trap()
+#define kengine_debug_break __builtin_trap()
 #endif
 
 // entt
@@ -33,14 +33,14 @@
 #include "putils/concatenate.hpp"
 
 #define kengine_assert_failed(r, ...) \
-	do {\
+	do { \
 		const bool shouldBreak = kengine::assert_helper::assert_failed(r, __FILE__, __LINE__, putils::concatenate(__VA_ARGS__)); \
 		if (shouldBreak && kengine::assert_helper::is_debugger_present()) \
 			kengine_debug_break; \
-	} while(false)
+	} while (false)
 
 #define kengine_assert_with_message(r, x, ...) \
-	do {\
+	do { \
 		if (!!(x)) \
 			(void)0; \
 		else \
@@ -53,10 +53,10 @@
 
 namespace kengine {
 	namespace assert_helper {
-        KENGINE_CORE_EXPORT extern std::function<bool(const entt::registry & r, const char * file, int line, const std::string & expr)> assert_handler;
+		KENGINE_CORE_EXPORT extern std::function<bool(const entt::registry & r, const char * file, int line, const std::string & expr)> assert_handler;
 
 		KENGINE_CORE_EXPORT bool assert_failed(const entt::registry & r, const char * file, int line, const std::string & expr) noexcept;
 		KENGINE_CORE_EXPORT bool is_debugger_present() noexcept;
-    }
+	}
 }
 #endif

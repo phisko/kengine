@@ -4,7 +4,7 @@
 #include <SFML/Graphics/Texture.hpp>
 
 namespace kengine::data {
-    struct sfml_texture {
-        sf::Texture texture;
-    };
+	struct sfml_texture {
+		sf::Texture texture;
+	};
 }

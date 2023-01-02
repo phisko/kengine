@@ -125,7 +125,7 @@ def generate_registration(type):
 #include "kengine/helpers/log_helper.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
 
-namespace ''' + args.namespace + '''{
+namespace ''' + args.namespace + ''' {
 	void ''' + type['function_name'] + '''(entt::registry & r) noexcept {''' + generate_conditional_registration(type) + '''	}
 }''')
 
@@ -185,7 +185,7 @@ main_file_cpp = '''
 #include "kengine/helpers/log_helper.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
 
-namespace ''' + args.namespace + '''{
+namespace ''' + args.namespace + ''' {
 	void register_types(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		kengine_log(r, log, "Init", "Registering types");
@@ -194,8 +194,7 @@ namespace ''' + args.namespace + '''{
 for type in all_types:
 	main_file_cpp += '''
 		extern void ''' + type['function_name'] + '''(entt::registry &) noexcept;
-		''' + type['function_name'] + '''(r);
-'''
+		''' + type['function_name'] + '(r);'
 
 main_file_cpp += '''
 	}
@@ -205,13 +204,11 @@ main_file_cpp += '''
 open(main_file + '.cpp', 'w').write(main_file_cpp)
 open(main_file + '.hpp', 'w').write('''
 #pragma once
-
 ''' + (f'#include <{args.export_header}>' if args.export_header else '') + '''
-
 // entt
 #include <entt/entity/fwd.hpp>
 
-namespace ''' + args.namespace + '''{
+namespace ''' + args.namespace + ''' {
 	''' + args.export_macro + ''' void register_types(entt::registry & r) noexcept;
 }
 ''')

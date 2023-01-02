@@ -30,8 +30,7 @@ namespace kengine::systems {
 		bool * enabled;
 
 		imgui_entity_editor(entt::handle e) noexcept
-			: r(*e.registry())
-		{
+			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, log, "Init", "systems/imgui_entity_editor");
 

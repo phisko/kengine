@@ -19,8 +19,7 @@ namespace kengine::systems {
 		entt::scoped_connection connection;
 
 		model_creator(entt::handle e) noexcept
-			: r(*e.registry())
-		{
+			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, log, "Init", "systems/model_creator");
 			connection = r.on_construct<data::graphics>().connect<find_or_create_model>();

@@ -8,16 +8,16 @@
 #include "kengine/helpers/command_line_helper.hpp"
 
 namespace {
-    struct options {
-        std::optional<std::string> s;
-    };
+	struct options {
+		std::optional<std::string> s;
+	};
 }
 
 #define refltype options
-putils_reflection_info {
-    putils_reflection_attributes(
-        putils_reflection_attribute(s)
-    )
+putils_reflection_info{
+	putils_reflection_attributes(
+		putils_reflection_attribute(s)
+	)
 };
 #undef refltype
 
@@ -41,11 +41,14 @@ TEST(command_line_helper, parse_command_line) {
 	entt::registry r;
 
 	const auto e = r.create();
-	r.emplace<kengine::data::command_line>(e, kengine::data::command_line{
-		.arguments = {"--s=hello"}
-	});
+	r.emplace<kengine::data::command_line>(
+		e,
+		kengine::data::command_line{
+			.arguments = { "--s=hello" },
+		}
+	);
 
-    const auto args = kengine::parse_command_line<options>(r);
-    EXPECT_NE(args.s, std::nullopt);
-    EXPECT_EQ(*args.s, "hello");
+	const auto args = kengine::parse_command_line<options>(r);
+	EXPECT_NE(args.s, std::nullopt);
+	EXPECT_EQ(*args.s, "hello");
 }

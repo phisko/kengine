@@ -37,8 +37,7 @@ namespace kengine::systems {
 		bool * enabled;
 
 		imgui_entity_selector(entt::handle e) noexcept
-			: r(*e.registry())
-		{
+			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, log, "Init", "systems/imgui_entity_selector");
 
@@ -79,13 +78,12 @@ namespace kengine::systems {
 		bool matches(entt::entity e, const char * str) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			putils::string<1024> display_text("[%d]", e);;
+			putils::string<1024> display_text("[%d]", e);
 			const auto name = r.try_get<data::name>(e);
 			if (name) {
 				display_text += " ";
 				display_text += name->name;
 			}
-
 
 			if (strlen(str) != 0) {
 				display_text += " -- ";
@@ -94,11 +92,12 @@ namespace kengine::systems {
 				if (str[0] >= '0' && str[0] <= '9' && putils::parse<entt::entity>(str) == e) {
 					matches = true;
 					display_text += "ID";
-				} else {
+				}
+				else {
 					const auto types = sort_helper::get_name_sorted_entities<const meta::has, const meta::match_string>(r);
 
-					for (const auto & [_, type, has, match_func]: types) {
-						if (!has->call({r, e}) || !match_func->call({ r, e }, str))
+					for (const auto & [_, type, has, match_func] : types) {
+						if (!has->call({ r, e }) || !match_func->call({ r, e }, str))
 							continue;
 
 						if (display_text.size() + type->name.size() + 2 < decltype(display_text)::max_size) {

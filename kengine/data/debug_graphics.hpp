@@ -51,7 +51,7 @@ namespace kengine::data {
 }
 
 #define refltype kengine::data::debug_graphics
-putils_reflection_info{
+putils_reflection_info {
 	putils_reflection_class_name;
 	putils_reflection_attributes(
 		putils_reflection_attribute(elements)
@@ -66,7 +66,7 @@ putils_reflection_info{
 #undef refltype
 
 #define refltype kengine::data::debug_graphics::element
-putils_reflection_info{
+putils_reflection_info {
 	putils_reflection_custom_class_name(debug_graphics_element);
 	putils_reflection_attributes(
 		putils_reflection_attribute(pos),
@@ -85,7 +85,7 @@ putils_reflection_info{
 #undef refltype
 
 #define refltype kengine::data::debug_graphics::box_element
-putils_reflection_info{
+putils_reflection_info {
 	putils_reflection_custom_class_name(debug_graphics_box);
 	putils_reflection_attributes(
 		putils_reflection_attribute(size)
@@ -94,7 +94,7 @@ putils_reflection_info{
 #undef refltype
 
 #define refltype kengine::data::debug_graphics::sphere_element
-putils_reflection_info{
+putils_reflection_info {
 	putils_reflection_custom_class_name(debug_graphics_sphere);
 	putils_reflection_attributes(
 		putils_reflection_attribute(radius)
@@ -103,7 +103,7 @@ putils_reflection_info{
 #undef refltype
 
 #define refltype kengine::data::debug_graphics::line_element
-putils_reflection_info{
+putils_reflection_info {
 	putils_reflection_custom_class_name(debug_graphics_line);
 	putils_reflection_attributes(
 		putils_reflection_attribute(end),

@@ -11,8 +11,8 @@
 
 #ifdef __GNUC__
 // Ignore "declared with greater visibility than the type of its field" warnings
-#	pragma GCC diagnostic push
-#	pragma GCC diagnostic ignored "-Wattributes"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wattributes"
 #endif
 
 namespace kengine::data {
@@ -26,11 +26,11 @@ namespace kengine::data {
 }
 
 #ifdef __GNU_C__
-#	pragma GCC diagnostic pop
+#pragma GCC diagnostic pop
 #endif
 
 #define refltype kengine::data::python_state
-putils_reflection_info{
+putils_reflection_info {
 	putils_reflection_class_name;
 };
 #undef refltype

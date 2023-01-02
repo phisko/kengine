@@ -1,7 +1,7 @@
 #pragma once
 
 #ifndef KENGINE_ADJUSTABLE_NAME_MAX_LENGTH
-# define KENGINE_ADJUSTABLE_NAME_MAX_LENGTH 64
+#define KENGINE_ADJUSTABLE_NAME_MAX_LENGTH 64
 #endif
 
 // stl
@@ -34,8 +34,8 @@ namespace kengine::data {
 		};
 
 		struct value {
-			template<typename T, const char * Name, typename = std::enable_if_t < !std::is_pointer<T>{} >>
-				struct storage {
+			template<typename T, const char * Name>
+			struct storage {
 				storage() noexcept = default;
 				explicit storage(T * ptr) noexcept : ptr(ptr), value(*ptr) {}
 				explicit storage(T value) noexcept : value(value) {}
@@ -106,15 +106,15 @@ namespace kengine::data {
 			string name;
 
 			union {
-                storage_for_bool bool_storage;
-                storage_for_float float_storage;
-                storage_for_int int_storage;
-                storage_for_color color_storage;
-            };
+				storage_for_bool bool_storage;
+				storage_for_float float_storage;
+				storage_for_int int_storage;
+				storage_for_color color_storage;
+			};
 
-            value_type type = value_type::Invalid;
+			value_type type = value_type::Invalid;
 
-			using enum_name_func = const char ** ();
+			using enum_name_func = const char **();
 			enum_name_func * get_enum_names = nullptr;
 			size_t enum_count = 0;
 		};
@@ -141,10 +141,10 @@ putils_reflection_info {
 	putils_reflection_attributes(
 		putils_reflection_attribute(name),
 		putils_reflection_attribute(bool_storage),
-        putils_reflection_attribute(float_storage),
-        putils_reflection_attribute(int_storage),
-        putils_reflection_attribute(color_storage),
-        putils_reflection_attribute(type)
+		putils_reflection_attribute(float_storage),
+		putils_reflection_attribute(int_storage),
+		putils_reflection_attribute(color_storage),
+		putils_reflection_attribute(type)
 	);
 	putils_reflection_used_types(
 		putils_reflection_type(refltype::storage_for_bool),
@@ -156,8 +156,8 @@ putils_reflection_info {
 };
 #undef refltype
 
-template<typename T, const char * Name, typename E>
-#define refltype kengine::data::adjustable::value::storage<T, Name, E>
+template<typename T, const char * Name>
+#define refltype kengine::data::adjustable::value::storage<T, Name>
 putils_reflection_info_template {
 	static constexpr auto class_name = Name;
 	putils_reflection_attributes(
@@ -165,4 +165,3 @@ putils_reflection_info_template {
 	);
 };
 #undef refltype
-

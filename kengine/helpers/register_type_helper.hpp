@@ -4,10 +4,10 @@
 #include <entt/entity/fwd.hpp>
 
 namespace kengine {
-	template<typename ... Comps>
+	template<typename... Comps>
 	void register_components(entt::registry & r) noexcept;
 
-	template<typename ...Types>
+	template<typename... Types>
 	void register_types(entt::registry & r) noexcept;
 
 	template<typename F>

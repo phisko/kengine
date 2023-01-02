@@ -11,7 +11,7 @@
 #include "kengine/helpers/profiling_helper.hpp"
 
 namespace kengine {
-	template<typename ... Comps>
+	template<typename... Comps>
 	void register_get(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		register_meta_component_implementation<meta::get, Comps...>(

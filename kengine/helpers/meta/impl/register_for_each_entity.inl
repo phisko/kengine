@@ -12,7 +12,7 @@
 #include "kengine/helpers/profiling_helper.hpp"
 
 namespace kengine {
-	template<typename ... Comps>
+	template<typename... Comps>
 	void register_for_each_entity(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
@@ -39,4 +39,3 @@ namespace kengine {
 		);
 	}
 }
-

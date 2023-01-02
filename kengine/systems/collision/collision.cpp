@@ -22,8 +22,7 @@ namespace kengine::systems {
 		entt::registry & r;
 
 		collision(entt::handle e) noexcept
-			: r(*e.registry())
-		{
+			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
 			e.emplace<functions::on_collision>(putils_forward_to_this(on_collision));
 		}

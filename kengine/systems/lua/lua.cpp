@@ -25,8 +25,7 @@ namespace kengine::systems {
 		sol::state * state;
 
 		lua(entt::handle e) noexcept
-			: r(*e.registry())
-		{
+			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, log, "Init", "systems/lua");
 
@@ -42,7 +41,7 @@ namespace kengine::systems {
 			kengine_log(r, log, "Init/systems/lua", "Registering script_language_helper functions");
 			script_language_helper::init(
 				r,
-				[&](auto && ... args) noexcept {
+				[&](auto &&... args) noexcept {
 					lua_helper::impl::register_function_with_state(*state, FWD(args)...);
 				},
 				[&](auto type) noexcept {

@@ -3,11 +3,11 @@
 #ifdef KENGINE_LUA
 
 #ifndef KENGINE_MAX_LUA_SCRIPT_PATH
-# define KENGINE_MAX_LUA_SCRIPT_PATH 64
+#define KENGINE_MAX_LUA_SCRIPT_PATH 64
 #endif
 
 #ifndef KENGINE_MAX_LUA_SCRIPTS
-# define KENGINE_MAX_LUA_SCRIPTS 8
+#define KENGINE_MAX_LUA_SCRIPTS 8
 #endif
 
 // reflection
@@ -18,13 +18,13 @@
 #include "putils/vector.hpp"
 
 namespace kengine::data {
-    struct lua {
+	struct lua {
 		static constexpr char string_name[] = "lua_string";
 		using script = putils::string<KENGINE_MAX_LUA_SCRIPT_PATH, string_name>;
 		static constexpr char vector_name[] = "lua_vector";
 		using script_vector = putils::vector<script, KENGINE_MAX_LUA_SCRIPTS>;
 
-        script_vector scripts;
+		script_vector scripts;
 	};
 }
 

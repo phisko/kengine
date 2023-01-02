@@ -28,11 +28,11 @@
 #include "kengine/helpers/sort_helper.hpp"
 
 #ifndef KENGINE_IMGUI_TOOLS_SAVE_FILE
-# define KENGINE_IMGUI_TOOLS_SAVE_FILE "tools.cnf"
+#define KENGINE_IMGUI_TOOLS_SAVE_FILE "tools.cnf"
 #endif
 
 #ifndef KENGINE_IMGUI_MAX_TOOLS
-# define KENGINE_IMGUI_MAX_TOOLS 0 // no limit by default
+#define KENGINE_IMGUI_MAX_TOOLS 0 // no limit by default
 #endif
 
 namespace kengine::systems {
@@ -41,8 +41,7 @@ namespace kengine::systems {
 		entt::scoped_connection connection;
 
 		imgui_tool(entt::handle e) noexcept
-			: r(*e.registry())
-		{
+			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, log, "Init", "systems/imgui_tool");
 

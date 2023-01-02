@@ -23,7 +23,7 @@ namespace putils::reflection {
 }
 
 namespace kengine {
-	template<typename ... Comps>
+	template<typename... Comps>
 	void register_display_imgui(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		register_meta_component_implementation<meta::display_imgui, Comps...>(
@@ -46,4 +46,3 @@ namespace kengine {
 		);
 	}
 }
-
