@@ -1,7 +1,7 @@
 #pragma once
 
 #ifndef KENGINE_SKYBOX_TEXTURE_PATH_MAX_NAME
-# define KENGINE_SKYBOX_TEXTURE_PATH_MAX_NAME 128
+#define KENGINE_SKYBOX_TEXTURE_PATH_MAX_NAME 128
 #endif
 
 // putils
@@ -25,7 +25,7 @@ namespace kengine::data {
 }
 
 #define refltype kengine::data::sky_box
-putils_reflection_info{
+putils_reflection_info {
 	putils_reflection_class_name;
 	putils_reflection_attributes(
 		putils_reflection_attribute(right),

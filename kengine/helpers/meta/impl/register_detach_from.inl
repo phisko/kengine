@@ -11,7 +11,7 @@
 #include "kengine/helpers/profiling_helper.hpp"
 
 namespace kengine {
-	template<typename ... Comps>
+	template<typename... Comps>
 	void register_detach_from(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		register_meta_component_implementation<meta::detach_from, Comps...>(
@@ -22,4 +22,3 @@ namespace kengine {
 		);
 	}
 }
-

@@ -8,9 +8,8 @@
 
 namespace kengine {
 	namespace meta {
-		struct save_to_json : functions::base_function<
-			nlohmann::json(entt::const_handle)
-		> {};
+		using save_to_json_signature = nlohmann::json(entt::const_handle);
+		struct save_to_json : functions::base_function<save_to_json_signature> {};
 	}
 }
 

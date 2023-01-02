@@ -48,18 +48,9 @@ namespace kengine::matrix_helper {
 		{ // object
 			model = glm::translate(model, to_vec(transform.bounding_box.position));
 
-			model = glm::rotate(model,
-				transform.yaw,
-				{ 0.f, 1.f, 0.f }
-			);
-			model = glm::rotate(model,
-				transform.pitch,
-				{ 1.f, 0.f, 0.f }
-			);
-			model = glm::rotate(model,
-				transform.roll,
-				{ 0.f, 0.f, 1.f }
-			);
+			model = glm::rotate(model, transform.yaw, { 0.f, 1.f, 0.f });
+			model = glm::rotate(model, transform.pitch, { 1.f, 0.f, 0.f });
+			model = glm::rotate(model, transform.roll, { 0.f, 0.f, 1.f });
 
 			model = glm::scale(model, to_vec(transform.bounding_box.size));
 		}
@@ -67,18 +58,9 @@ namespace kengine::matrix_helper {
 		if (model_transform != nullptr) { // Model
 			model = glm::scale(model, to_vec(model_transform->bounding_box.size));
 
-			model = glm::rotate(model,
-				model_transform->yaw,
-				{ 0.f, 1.f, 0.f }
-			);
-			model = glm::rotate(model,
-				model_transform->pitch,
-				{ 1.f, 0.f, 0.f }
-			);
-			model = glm::rotate(model,
-				model_transform->roll,
-				{ 0.f, 0.f, 1.f }
-			);
+			model = glm::rotate(model, model_transform->yaw, { 0.f, 1.f, 0.f });
+			model = glm::rotate(model, model_transform->pitch, { 1.f, 0.f, 0.f });
+			model = glm::rotate(model, model_transform->roll, { 0.f, 0.f, 1.f });
 
 			model = glm::translate(model, to_vec(model_transform->bounding_box.position)); // Re-center
 		}

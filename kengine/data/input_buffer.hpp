@@ -1,7 +1,7 @@
 #pragma once
 
 #ifndef KENGINE_INPUT_MAX_BUFFERED_EVENTS
-# define KENGINE_INPUT_MAX_BUFFERED_EVENTS 128
+#define KENGINE_INPUT_MAX_BUFFERED_EVENTS 128
 #endif
 
 // stl
@@ -48,7 +48,7 @@ namespace kengine::data {
 }
 
 #define refltype kengine::data::input_buffer
-putils_reflection_info{
+putils_reflection_info {
 	putils_reflection_class_name;
 };
 #undef refltype

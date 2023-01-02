@@ -4,9 +4,8 @@
 #include "kengine/base_function.hpp"
 
 namespace kengine::meta {
-	struct match_string : functions::base_function<
-		bool(entt::const_handle, const char *)
-	> {};
+	using match_string_signature = bool(entt::const_handle, const char *);
+	struct match_string : functions::base_function<match_string_signature> {};
 }
 
 #define refltype kengine::meta::match_string

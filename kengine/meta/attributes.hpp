@@ -4,9 +4,9 @@
 #include "putils/reflection_helpers/type_attributes.hpp"
 
 namespace kengine::meta {
-    struct attributes {
-    	const putils::reflection::runtime::type_attributes * type_attributes;
-    };
+	struct attributes {
+		const putils::reflection::runtime::type_attributes * type_attributes;
+	};
 }
 
 #define refltype kengine::meta::attributes

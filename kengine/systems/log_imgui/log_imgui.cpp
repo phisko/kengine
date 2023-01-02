@@ -56,8 +56,7 @@ namespace kengine::systems {
 		} filters;
 
 		log_imgui(entt::handle e) noexcept
-			: r(*e.registry())
-		{
+			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, log, "Init", "systems/log_imgui");
 
@@ -75,8 +74,9 @@ namespace kengine::systems {
 			enabled = &tool.enabled;
 
 			e.emplace<data::adjustable>() = {
-				"log", {
-					{ "ImGui max events", &max_events }
+				"log",
+				{
+					{ "ImGui max events", &max_events },
 				}
 			};
 		}
@@ -85,10 +85,10 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 
 			internal_log_event e{
-				 event.severity,
-				 putils::get_thread_name(),
-				 event.category,
-				 event.message
+				event.severity,
+				putils::get_thread_name(),
+				event.category,
+				event.message
 			};
 
 			if (matches_filters(e)) {
@@ -170,7 +170,7 @@ namespace kengine::systems {
 				ImGui::TableHeadersRow();
 
 				const std::lock_guard lock_guard(mutex);
-				for (const auto& event : filtered_events) {
+				for (const auto & event : filtered_events) {
 					ImGui::TableNextColumn();
 					ImGui::Text("%s", putils::string<1024>(magic_enum::enum_name(event.severity)).c_str());
 					ImGui::TableNextColumn();

@@ -24,7 +24,7 @@ namespace putils::reflection {
 }
 
 namespace kengine {
-	template<typename ... Comps>
+	template<typename... Comps>
 	void register_edit_imgui(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		register_meta_component_implementation<meta::edit_imgui, Comps...>(
@@ -47,4 +47,3 @@ namespace kengine {
 		);
 	}
 }
-

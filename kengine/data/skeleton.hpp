@@ -10,7 +10,7 @@
 #include "putils/reflection.hpp"
 
 #ifndef KENGINE_SKELETON_MAX_BONES
-# define KENGINE_SKELETON_MAX_BONES 100
+#define KENGINE_SKELETON_MAX_BONES 100
 #endif
 
 namespace kengine::data {

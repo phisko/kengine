@@ -36,8 +36,7 @@ namespace kengine::systems {
 		entt::registry & r;
 
 		polyvox(entt::handle e) noexcept
-			: r(*e.registry())
-		{
+			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, log, "Init", "systems/polyvox");
 
@@ -87,7 +86,7 @@ namespace kengine::systems {
 		}
 
 		struct mesh_container {
-			using mesh_type = decltype(build_mesh(PolyVox::RawVolume<data::polyvox::vertex_data>({ {0, 0, 0 }, {0, 0, 0} })));
+			using mesh_type = decltype(build_mesh(PolyVox::RawVolume<data::polyvox::vertex_data>({ { 0, 0, 0 }, { 0, 0, 0 } })));
 			mesh_type mesh;
 		};
 	};

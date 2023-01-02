@@ -4,7 +4,7 @@
 #include <entt/entity/fwd.hpp>
 
 #ifndef KENGINE_SCRIPT_SYSTEM_MAX_FUNCTION_SIZE
-# define KENGINE_SCRIPT_SYSTEM_MAX_FUNCTION_SIZE 64
+#define KENGINE_SCRIPT_SYSTEM_MAX_FUNCTION_SIZE 64
 #endif
 
 namespace kengine::script_language_helper {

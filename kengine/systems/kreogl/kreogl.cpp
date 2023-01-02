@@ -80,8 +80,7 @@ namespace kengine::systems {
 		entt::registry & r;
 
 		kreogl(entt::handle e) noexcept
-			: r(*e.registry())
-		{
+			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, log, "Init", "systems/kreogl");
 
@@ -89,8 +88,9 @@ namespace kengine::systems {
 
 			auto & scale = e.emplace<data::imgui_scale>();
 			e.emplace<data::adjustable>() = {
-				"ImGui", {
-					{ "Scale", &scale.scale }
+				"ImGui",
+				{
+					{ "Scale", &scale.scale },
 				}
 			};
 
@@ -144,7 +144,9 @@ namespace kengine::systems {
 					auto & kreogl_window = r.emplace<::kreogl::window>(window_entity, *glfw_window.window.get());
 					kreogl_window.remove_camera(kreogl_window.get_default_camera());
 					init_imgui(window_entity);
+					// clang-format off
 				}
+				// clang-format on
 			};
 		}
 
@@ -221,7 +223,7 @@ namespace kengine::systems {
 					auto & model_skeleton = r.emplace<data::model_skeleton>(model_entity);
 					for (const auto & mesh : animated_model->skeleton->meshes)
 						model_skeleton.meshes.push_back(data::model_skeleton::mesh{
-							.bone_names = mesh.bone_names
+							.bone_names = mesh.bone_names,
 						});
 				}
 			}
@@ -249,7 +251,7 @@ namespace kengine::systems {
 				model_animation.animations.push_back(data::model_animation::anim{
 					.name = name,
 					.total_time = animation->total_time,
-					.ticks_per_second = animation->ticks_per_second
+					.ticks_per_second = animation->ticks_per_second,
 				});
 			}
 		}
@@ -276,14 +278,14 @@ namespace kengine::systems {
 						.vertices = {
 							.nb_elements = mesh_data.vertices.nb_elements,
 							.element_size = mesh_data.vertices.element_size,
-							.data = mesh_data.vertices.data
+							.data = mesh_data.vertices.data,
 						},
 						.indices = {
 							.nb_elements = mesh_data.indices.nb_elements,
 							.element_size = mesh_data.indices.element_size,
-							.data = mesh_data.indices.data
+							.data = mesh_data.indices.data,
 						},
-						.index_type = types.at(mesh_data.index_type)
+						.index_type = types.at(mesh_data.index_type),
 					});
 				}
 
@@ -414,7 +416,7 @@ namespace kengine::systems {
 
 			const ::kreogl::camera::construction_params params{
 				.viewport = {
-					.resolution = toglm(viewport.resolution)
+					.resolution = toglm(viewport.resolution),
 				}
 			};
 			auto & kreogl_camera = r.emplace<::kreogl::camera>(camera_entity, params);
@@ -460,7 +462,6 @@ namespace kengine::systems {
 
 			kreogl_window.draw_world_to_camera(kreogl_world, kreogl_camera, *shader_pipeline);
 		}
-
 
 		void sync_everything(::kreogl::world & kreogl_world, entt::entity camera_entity) noexcept {
 			KENGINE_PROFILING_SCOPE;
@@ -655,9 +656,9 @@ namespace kengine::systems {
 			matrix = glm::translate(matrix, pos);
 			if (reference_space == data::debug_graphics::reference_space::object) {
 				matrix = glm::translate(matrix, toglm(transform.bounding_box.position));
-				matrix = glm::rotate(matrix, transform.yaw, {0.f, 1.f, 0.f});
-				matrix = glm::rotate(matrix, transform.pitch, {1.f, 0.f, 0.f});
-				matrix = glm::rotate(matrix, transform.roll, {0.f, 0.f, 1.f});
+				matrix = glm::rotate(matrix, transform.yaw, { 0.f, 1.f, 0.f });
+				matrix = glm::rotate(matrix, transform.pitch, { 1.f, 0.f, 0.f });
+				matrix = glm::rotate(matrix, transform.roll, { 0.f, 0.f, 1.f });
 			}
 			matrix = glm::scale(matrix, size);
 			if (reference_space == data::debug_graphics::reference_space::object)

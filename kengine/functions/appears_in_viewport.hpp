@@ -4,13 +4,12 @@
 #include "kengine/base_function.hpp"
 
 namespace kengine::functions {
-	struct appears_in_viewport : base_function<
-		bool(entt::entity entity)
-	> {};
+	using appears_in_viewport_signature = bool(entt::entity entity);
+	struct appears_in_viewport : base_function<appears_in_viewport_signature> {};
 }
 
 #define refltype kengine::functions::appears_in_viewport
-putils_reflection_info{
+putils_reflection_info {
 	putils_reflection_class_name;
 	putils_reflection_parents(
 		putils_reflection_type(refltype::base)

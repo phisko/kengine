@@ -5,7 +5,7 @@
 
 // sol
 #ifdef KENGINE_LUA
-# include <sol/sol.hpp>
+#include <sol/sol.hpp>
 #endif
 
 // putils
@@ -33,11 +33,10 @@ namespace kengine {
 
 			else if constexpr (std::ranges::range<Member>
 #ifdef KENGINE_LUA
-							   && !std::is_same<sol::object, Member>()
-							   && !std::is_base_of<sol::object, Member>()
+							   && !std::is_same<sol::object, Member>() && !std::is_base_of<sol::object, Member>()
 #endif
-				) {
-				for (const auto & val: member)
+			) {
+				for (const auto & val : member)
 					if (match_attribute(val, str))
 						return true;
 				return false;
@@ -71,7 +70,7 @@ namespace kengine {
 		}
 	}
 
-	template<typename ... Comps>
+	template<typename... Comps>
 	void register_match_string(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
@@ -102,4 +101,3 @@ namespace kengine {
 		);
 	}
 }
-

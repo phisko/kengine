@@ -25,8 +25,7 @@ namespace kengine::systems {
 		entt::registry & r;
 
 		kinematic(entt::handle e) noexcept
-			: r(*e.registry())
-		{
+			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, log, "Init", "systems/kinematic");
 

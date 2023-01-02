@@ -16,8 +16,7 @@
 #include "kengine/helpers/profiling_helper.hpp"
 
 kengine::highlight_shader::highlight_shader(const entt::registry & r) noexcept
-	: _r(&r)
-{
+	: _r(&r) {
 	KENGINE_PROFILING_SCOPE;
 
 	init("highlight_shader");

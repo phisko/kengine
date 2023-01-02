@@ -17,7 +17,7 @@
 TEST(main_loop, run) {
 	entt::registry r;
 
-    size_t calls = 0;
+	size_t calls = 0;
 
 	const auto e = r.create();
 	r.emplace<kengine::data::keep_alive>(e);
@@ -28,14 +28,14 @@ TEST(main_loop, run) {
 		}
 	);
 
-    kengine::main_loop::run(r);
-    EXPECT_EQ(calls, 1);
+	kengine::main_loop::run(r);
+	EXPECT_EQ(calls, 1);
 }
 
 TEST(main_loop, time_modulated) {
 	entt::registry r;
 
-    size_t calls = 0;
+	size_t calls = 0;
 
 	const auto e = r.create();
 	r.emplace<kengine::data::keep_alive>(e);
@@ -47,6 +47,6 @@ TEST(main_loop, time_modulated) {
 		}
 	);
 
-    kengine::main_loop::time_modulated::run(r);
-    EXPECT_EQ(calls, 1);
+	kengine::main_loop::time_modulated::run(r);
+	EXPECT_EQ(calls, 1);
 }

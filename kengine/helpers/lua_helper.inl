@@ -37,17 +37,17 @@ namespace kengine::lua_helper {
 			register_type_with_state<T>(state);
 			script_language_helper::register_component<T>(
 				r,
-				[&](auto && ... args) noexcept {
+				[&](auto &&... args) noexcept {
 					register_entity_member(state, FWD(args)...);
 				},
-				[&](auto && ... args) noexcept {
+				[&](auto &&... args) noexcept {
 					register_function_with_state(state, FWD(args)...);
 				}
 			);
 		}
 	}
 
-	template<typename ...Types>
+	template<typename... Types>
 	void register_types(const entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
@@ -59,7 +59,7 @@ namespace kengine::lua_helper {
 		});
 	}
 
-	template<typename ... Comps>
+	template<typename... Comps>
 	void register_components(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 

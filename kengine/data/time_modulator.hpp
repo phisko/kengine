@@ -4,8 +4,8 @@
 #include "putils/reflection.hpp"
 
 namespace kengine::data {
-    struct time_modulator {
-        float factor = 1.f;
+	struct time_modulator {
+		float factor = 1.f;
 	};
 }
 

@@ -4,9 +4,8 @@
 #include "kengine/base_function.hpp"
 
 namespace kengine::meta {
-	struct edit_imgui : functions::base_function<
-		void(entt::handle)
-	> {};
+	using edit_imgui_signature = void(entt::handle);
+	struct edit_imgui : functions::base_function<edit_imgui_signature> {};
 }
 
 #define refltype kengine::meta::edit_imgui

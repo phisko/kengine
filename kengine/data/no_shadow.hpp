@@ -8,7 +8,7 @@ namespace kengine::data {
 }
 
 #define refltype kengine::data::no_shadow
-putils_reflection_info{
+putils_reflection_info {
 	putils_reflection_class_name;
 };
 #undef refltype

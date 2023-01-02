@@ -11,7 +11,7 @@
 
 namespace kengine::data {
 	struct glfw_window {
-		static inline void free_window(GLFWwindow * (&window)) {
+		static inline void free_window(GLFWwindow *(&window)) {
 			if (window)
 				glfwDestroyWindow(window);
 		}
@@ -26,7 +26,7 @@ namespace kengine::data {
 }
 
 #define refltype kengine::data::glfw_window
-putils_reflection_info{
+putils_reflection_info {
 	putils_reflection_class_name;
 };
 #undef refltype

@@ -1,7 +1,7 @@
 #pragma once
 
 #ifndef KENGINE_FONT_PATH_MAX_LENGTH
-# define KENGINE_FONT_PATH_MAX_LENGTH 128
+#define KENGINE_FONT_PATH_MAX_LENGTH 128
 #endif
 
 // reflection
@@ -40,7 +40,7 @@ namespace kengine::data {
 }
 
 #define refltype kengine::data::text
-putils_reflection_info{
+putils_reflection_info {
 	putils_reflection_attributes(
 		putils_reflection_attribute(font),
 		putils_reflection_attribute(value),
@@ -56,7 +56,7 @@ putils_reflection_info{
 #undef refltype
 
 #define refltype kengine::data::text_2d
-putils_reflection_info{
+putils_reflection_info {
 	putils_reflection_class_name;
 	putils_reflection_parents(
 		putils_reflection_type(kengine::data::text),

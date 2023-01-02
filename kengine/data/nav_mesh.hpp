@@ -1,11 +1,11 @@
 #pragma once
 
 #ifndef KENGINE_NAVMESH_MAX_PATH_LENGTH
-# define KENGINE_NAVMESH_MAX_PATH_LENGTH 128
+#define KENGINE_NAVMESH_MAX_PATH_LENGTH 128
 #endif
 
 #ifndef KENGINE_NAVMESH_FUNC_SIZE
-# define KENGINE_NAVMESH_FUNC_SIZE 64
+#define KENGINE_NAVMESH_FUNC_SIZE 64
 #endif
 
 // entt
@@ -51,17 +51,16 @@ namespace kengine::functions {
 #ifdef __GNUC__
 // Ignore "'...' has a base '...' whose type uses the anonymous namespace" warnings
 // Haven't found any type here that uses the anonymous namespace, not sure where this is coming from
-#	pragma GCC diagnostic push
-#	pragma GCC diagnostic ignored "-Wsubobject-linkage"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsubobject-linkage"
 #endif
 
-		struct get_path : base_function<
-			get_path_impl::path (entt::handle environment, const putils::point3f & start, const putils::point3f & end)
-			// `environment` is the entity instantiating the `model Entity` this component is attached to
-		> {};
+	// `environment` is the entity instantiating the `model Entity` this component is attached to
+	using get_path_signature = get_path_impl::path(entt::handle environment, const putils::point3f & start, const putils::point3f & end);
+	struct get_path : base_function<get_path_signature> {};
 
 #ifdef __GNU_C__
-#	pragma GCC diagnostic pop
+#pragma GCC diagnostic pop
 #endif
 }
 
@@ -89,7 +88,7 @@ putils_reflection_info {
 #undef refltype
 
 #define refltype kengine::functions::get_path
-putils_reflection_info{
+putils_reflection_info {
 	putils_reflection_class_name;
 	putils_reflection_parents(
 		putils_reflection_type(refltype::base)

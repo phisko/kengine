@@ -40,8 +40,7 @@ namespace kengine::systems {
 		char buff[1024];
 
 		imgui_prompt(entt::handle e) noexcept
-			: r(*e.registry())
-		{
+			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, log, "Init", "systems/imgui_prompt");
 
@@ -135,14 +134,14 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 
 			switch (selected_language) {
-			case language::lua:
-				eval_lua();
-				break;
-			case language::python:
-				eval_python();
-				break;
-			default:
-				static_assert(magic_enum::enum_count<language>() == 2);
+				case language::lua:
+					eval_lua();
+					break;
+				case language::python:
+					eval_python();
+					break;
+				default:
+					static_assert(magic_enum::enum_count<language>() == 2);
 			}
 		}
 
@@ -208,16 +207,16 @@ namespace kengine::systems {
 			const int nargs = lua_gettop(L);
 			lua_getglobal(L, "to_string");
 			for (int i = 1; i <= nargs; i++) {
-				lua_pushvalue(L, -1);  /* function to be called */
-				lua_pushvalue(L, i);   /* value to print */
+				lua_pushvalue(L, -1); /* function to be called */
+				lua_pushvalue(L, i); /* value to print */
 				lua_call(L, 1, 1);
-				const char * s = lua_tolstring(L, -1, nullptr);  /* get result */
+				const char * s = lua_tolstring(L, -1, nullptr); /* get result */
 				if (s == nullptr)
 					return luaL_error(L, "'to_string' must return a string to 'print'");
 				if (i > 1)
 					line += '\t';
 				line += s;
-				lua_pop(L, 1);  /* pop result */
+				lua_pop(L, 1); /* pop result */
 			}
 
 			if (active)
@@ -243,42 +242,43 @@ namespace kengine::systems {
 
 #ifdef __GNUC__
 // Ignore "declared with greater visibility than the type of its field" warnings
-#	pragma GCC diagnostic push
-#	pragma GCC diagnostic ignored "-Wattributes"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wattributes"
 #endif
-		// Stolen from https://github.com/pybind/pybind11/issues/1622
-		class PyStdErrOutStreamRedirect {
-			py::object _stdout;
-			py::object _stderr;
-			py::object _stdout_buffer;
-			py::object _stderr_buffer;
-		public:
-			PyStdErrOutStreamRedirect() {
-				auto sysm = py::module_::import("sys");
-				_stdout = sysm.attr("stdout");
-				_stderr = sysm.attr("stderr");
-				auto stringio = py::module_::import("io").attr("StringIO");
-				_stdout_buffer = stringio();  // Other filelike object can be used here as well, such as objects created by pybind11
-				_stderr_buffer = stringio();
-				sysm.attr("stdout") = _stdout_buffer;
-				sysm.attr("stderr") = _stderr_buffer;
-			}
-			std::string stdoutString() {
-				_stdout_buffer.attr("seek")(0);
-				return py::str(_stdout_buffer.attr("read")());
-			}
-			std::string stderrString() {
-				_stderr_buffer.attr("seek")(0);
-				return py::str(_stderr_buffer.attr("read")());
-			}
-			~PyStdErrOutStreamRedirect() {
-				auto sysm = py::module_::import("sys");
-				sysm.attr("stdout") = _stdout;
-				sysm.attr("stderr") = _stderr;
-			}
-		};
+			// Stolen from https://github.com/pybind/pybind11/issues/1622
+			class PyStdErrOutStreamRedirect {
+				py::object _stdout;
+				py::object _stderr;
+				py::object _stdout_buffer;
+				py::object _stderr_buffer;
+
+			public:
+				PyStdErrOutStreamRedirect() {
+					auto sysm = py::module_::import("sys");
+					_stdout = sysm.attr("stdout");
+					_stderr = sysm.attr("stderr");
+					auto stringio = py::module_::import("io").attr("StringIO");
+					_stdout_buffer = stringio(); // Other filelike object can be used here as well, such as objects created by pybind11
+					_stderr_buffer = stringio();
+					sysm.attr("stdout") = _stdout_buffer;
+					sysm.attr("stderr") = _stderr_buffer;
+				}
+				std::string stdoutString() {
+					_stdout_buffer.attr("seek")(0);
+					return py::str(_stdout_buffer.attr("read")());
+				}
+				std::string stderrString() {
+					_stderr_buffer.attr("seek")(0);
+					return py::str(_stderr_buffer.attr("read")());
+				}
+				~PyStdErrOutStreamRedirect() {
+					auto sysm = py::module_::import("sys");
+					sysm.attr("stdout") = _stdout;
+					sysm.attr("stderr") = _stderr;
+				}
+			};
 #ifdef __GNUC__
-#	pragma GCC diagnostic pop
+#pragma GCC diagnostic pop
 #endif
 
 			PyStdErrOutStreamRedirect redirect;

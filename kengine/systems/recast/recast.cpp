@@ -38,17 +38,17 @@ namespace kengine::systems {
 		putils::vector<entt::scoped_connection, 5> connections;
 
 		recast(entt::handle e) noexcept
-			: r(*e.registry())
-		{
+			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, log, "Init", "systems/recast");
 
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 
 			e.emplace<data::adjustable>() = {
-				"Recast", {
-					{"Path optimization range", &recast_impl::g_adjustables.path_optimization_range},
-					{"Editor mode (rebuild navmesh each frame)", &recast_impl::g_adjustables.editor_mode}
+				"Recast",
+				{
+					{ "Path optimization range", &recast_impl::g_adjustables.path_optimization_range },
+					{ "Editor mode (rebuild navmesh each frame)", &recast_impl::g_adjustables.editor_mode },
 				}
 			};
 

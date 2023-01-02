@@ -28,7 +28,7 @@
 #include "kengine/helpers/profiling_helper.hpp"
 
 #ifndef KENGINE_LOG_FILE_LOCATION
-# define KENGINE_LOG_FILE_LOCATION "kengine.log"
+#define KENGINE_LOG_FILE_LOCATION "kengine.log"
 #endif
 
 namespace kengine::systems {
@@ -56,8 +56,9 @@ namespace kengine::systems {
 			severity = &severity_control.severity;
 
 			e.emplace<data::adjustable>() = {
-				"log", {
-					{ "File", severity }
+				"log",
+				{
+					{ "File", severity },
 				}
 			};
 
@@ -94,7 +95,7 @@ namespace kengine::systems {
 
 #define refltype kengine::systems::log_file::options
 putils_reflection_info {
-	putils_reflection_custom_class_name(log file)
+	putils_reflection_custom_class_name(log file);
 	putils_reflection_attributes(
 		putils_reflection_attribute(log_file)
 	)

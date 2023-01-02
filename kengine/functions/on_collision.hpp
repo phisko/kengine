@@ -4,9 +4,8 @@
 #include "kengine/base_function.hpp"
 
 namespace kengine::functions {
-    struct on_collision : base_function<
-        void(entt::entity first, entt::entity second)
-    > {};
+	using on_collision_signature = void(entt::entity first, entt::entity second);
+	struct on_collision : base_function<on_collision_signature> {};
 }
 
 #define refltype kengine::functions::on_collision

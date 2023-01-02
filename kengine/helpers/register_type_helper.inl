@@ -39,14 +39,14 @@ namespace kengine {
 				func(FWD(r));
 			}
 			catch (const std::exception & e) {
-				kengine_assert_failed(r, "[", name, "] Error registering [", putils::reflection::get_class_name<T>() , "]: ", e.what());
+				kengine_assert_failed(r, "[", name, "] Error registering [", putils::reflection::get_class_name<T>(), "]: ", e.what());
 			}
 		}
 
 		template<typename T>
-		struct registered{}; // Tag to mark already registered types
+		struct registered {}; // Tag to mark already registered types
 
-		template<typename ...Types, typename Func>
+		template<typename... Types, typename Func>
 		void register_types(entt::registry & r, Func && register_with_languages) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
@@ -69,7 +69,7 @@ namespace kengine {
 		}
 	}
 
-	template<typename ...Types>
+	template<typename... Types>
 	void register_types(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
@@ -85,7 +85,7 @@ namespace kengine {
 		});
 	}
 
-	template<typename ... Comps>
+	template<typename... Comps>
 	void register_components(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 

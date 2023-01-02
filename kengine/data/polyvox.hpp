@@ -1,7 +1,7 @@
 #pragma once
 
 #ifndef KENGINE_POLYVOX_CHUNK_SIDE
-# define KENGINE_POLYVOX_CHUNK_SIDE 16
+#define KENGINE_POLYVOX_CHUNK_SIDE 16
 #endif
 
 // polyvox
@@ -50,7 +50,7 @@ namespace kengine::data {
 }
 
 #define refltype kengine::data::polyvox::vertex_data
-putils_reflection_info{
+putils_reflection_info {
 	putils_reflection_attributes(
 		putils_reflection_attribute(color)
 	);

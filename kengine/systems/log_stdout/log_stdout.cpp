@@ -41,8 +41,9 @@ namespace kengine::systems {
 			severity = &severity_control.severity;
 
 			e.emplace<data::adjustable>() = {
-				"log", {
-					{ "Standard output", severity }
+				"log",
+				{
+					{ "Standard output", severity },
 				}
 			};
 

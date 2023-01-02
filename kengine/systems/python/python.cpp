@@ -25,8 +25,7 @@ namespace kengine::systems {
 		py::module_ * module_;
 
 		python(entt::handle e) noexcept
-			: r(*e.registry())
-		{
+			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, log, "Init", "systems/python");
 
@@ -40,7 +39,7 @@ namespace kengine::systems {
 			module_ = &state.module_;
 			script_language_helper::init(
 				r,
-				[&](auto && ... args) noexcept {
+				[&](auto &&... args) noexcept {
 					python_helper::impl::register_function_with_state(state, FWD(args)...);
 				},
 				[&](auto type) noexcept {

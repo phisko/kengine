@@ -32,8 +32,7 @@ namespace kengine::systems {
 		entt::registry & r;
 
 		glfw(entt::handle e) noexcept
-			: r(*e.registry())
-		{
+			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, log, "Init", "systems/glfw");
 
@@ -142,7 +141,7 @@ namespace kengine::systems {
 				comp.size = { (unsigned int)width, (unsigned int)height };
 			});
 
-#define forward_to_input(function) [](auto ... args) { g_this->input.function(args...); }
+#define forward_to_input(function) [](auto... args) { g_this->input.function(args...); }
 			glfwSetMouseButtonCallback(glfw_comp.window.get(), forward_to_input(on_click));
 			glfwSetCursorPosCallback(glfw_comp.window.get(), forward_to_input(on_mouse_move));
 			glfwSetScrollCallback(glfw_comp.window.get(), forward_to_input(on_scroll));

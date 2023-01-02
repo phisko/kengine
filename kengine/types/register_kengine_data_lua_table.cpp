@@ -8,7 +8,7 @@
 #include "kengine/helpers/log_helper.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
 
-namespace kengine::types{
+namespace kengine::types {
 	void register_kengine_data_lua_table(entt::registry & r) noexcept {
 #ifdef KENGINE_LUA
 		KENGINE_PROFILING_SCOPE;

@@ -12,10 +12,10 @@
 #include "kengine/data/lua_state.hpp"
 
 namespace kengine::lua_helper {
-	template<typename ... Types>
+	template<typename... Types>
 	void register_types(const entt::registry & r) noexcept;
 
-	template<typename ... Comps>
+	template<typename... Comps>
 	void register_components(entt::registry & r) noexcept;
 
 	template<typename Func>

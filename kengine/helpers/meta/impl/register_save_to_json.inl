@@ -23,7 +23,7 @@ namespace putils::reflection::detail::json {
 }
 
 namespace kengine {
-	template<typename ... Comps>
+	template<typename... Comps>
 	void register_save_to_json(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
@@ -45,4 +45,3 @@ namespace kengine {
 		);
 	}
 }
-

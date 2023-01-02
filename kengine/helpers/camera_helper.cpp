@@ -64,34 +64,34 @@ namespace kengine::camera_helper {
 		return wants_to_appear(entity, viewport_entity) && wants_to_appear(viewport_entity, entity);
 	}
 
-    template<size_t N>
-    static putils::rect<float, N> convert_to_screen_percentage_impl(const putils::rect<float, N> & rect, const putils::point2f & screen_size, const data::on_screen & comp) noexcept {
+	template<size_t N>
+	static putils::rect<float, N> convert_to_screen_percentage_impl(const putils::rect<float, N> & rect, const putils::point2f & screen_size, const data::on_screen & comp) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
-        switch (comp.coordinates) {
-            case data::on_screen::coordinate_type::pixels: {
-                putils::rect<float, N> ret = rect;
-                ret.position.x /= screen_size.x;
-                ret.position.y /= screen_size.y;
-                ret.size.x /= screen_size.x;
-                ret.size.y /= screen_size.y;
-                return ret;
-            }
-            case data::on_screen::coordinate_type::screen_percentage:
-                return rect;
-            default:
-                static_assert(magic_enum::enum_count<data::on_screen::coordinate_type>() == 2);
-                return rect;
-        }
-    }
-
-	putils::rect3f convert_to_screen_percentage(const putils::rect3f & rect, const putils::point2f & screen_size, const data::on_screen & comp) noexcept {
-        return convert_to_screen_percentage_impl(rect, screen_size, comp);
+		switch (comp.coordinates) {
+			case data::on_screen::coordinate_type::pixels: {
+				putils::rect<float, N> ret = rect;
+				ret.position.x /= screen_size.x;
+				ret.position.y /= screen_size.y;
+				ret.size.x /= screen_size.x;
+				ret.size.y /= screen_size.y;
+				return ret;
+			}
+			case data::on_screen::coordinate_type::screen_percentage:
+				return rect;
+			default:
+				static_assert(magic_enum::enum_count<data::on_screen::coordinate_type>() == 2);
+				return rect;
+		}
 	}
 
-    putils::rect2f convert_to_screen_percentage(const putils::rect2f & rect, const putils::point2f & screen_size, const data::on_screen & comp) noexcept {
-        return convert_to_screen_percentage_impl(rect, screen_size, comp);
-    }
+	putils::rect3f convert_to_screen_percentage(const putils::rect3f & rect, const putils::point2f & screen_size, const data::on_screen & comp) noexcept {
+		return convert_to_screen_percentage_impl(rect, screen_size, comp);
+	}
+
+	putils::rect2f convert_to_screen_percentage(const putils::rect2f & rect, const putils::point2f & screen_size, const data::on_screen & comp) noexcept {
+		return convert_to_screen_percentage_impl(rect, screen_size, comp);
+	}
 
 	facings get_facings(const data::camera & camera) noexcept {
 		KENGINE_PROFILING_SCOPE;
@@ -156,10 +156,18 @@ namespace kengine::camera_helper {
 				else
 					s = 2.0f / den;
 
-				xs = q[0] * s;   ys = q[1] * s;  zs = q[2] * s;
-				wx = q[3] * xs;  wy = q[3] * ys; wz = q[3] * zs;
-				xx = q[0] * xs;  xy = q[0] * ys; xz = q[0] * zs;
-				yy = q[1] * ys;  yz = q[1] * zs; zz = q[2] * zs;
+				xs = q[0] * s;
+				ys = q[1] * s;
+				zs = q[2] * s;
+				wx = q[3] * xs;
+				wy = q[3] * ys;
+				wz = q[3] * zs;
+				xx = q[0] * xs;
+				xy = q[0] * ys;
+				xz = q[0] * zs;
+				yy = q[1] * ys;
+				yz = q[1] * zs;
+				zz = q[2] * zs;
 
 				mat[0] = 1.0f - (yy + zz);
 				mat[3] = xy - wz;
