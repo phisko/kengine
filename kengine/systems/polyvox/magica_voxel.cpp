@@ -66,7 +66,7 @@ namespace kengine::systems {
 			if (std::filesystem::path(f).extension() != ".vox")
 				return;
 
-			kengine_logf(r, log, "systems/magica_voxel", "Loading model %zu for %s", e);
+			kengine_logf(r, log, "systems/magica_voxel", "Loading model %zu for %s", e, f);
 			const putils::string<256> binary_file("%s.bin", f);
 
 			if (std::filesystem::exists(binary_file.c_str())) {
