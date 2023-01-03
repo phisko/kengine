@@ -103,20 +103,19 @@ namespace kengine::systems {
 					r.destroy(e);
 			}
 
-			for (auto [e, window] : r.view<data::window>(entt::exclude<data::glfw_window>).each()) {
-				const auto init_glfw = r.try_get<data::glfw_window_init>(e);
+			for (auto [e, window, init_glfw] : r.view<data::window, data::glfw_window_init>().each()) {
 				create_window(e, window, init_glfw);
 				r.remove<data::glfw_window_init>(e);
 			}
 		}
 
-		void create_window(entt::entity e, data::window & window, const data::glfw_window_init * init_glfw) noexcept {
+		void create_window(entt::entity e, data::window & window, const data::glfw_window_init & init_glfw) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_logf(r, log, "systems/glfw", "Initializing window for %zu", e);
 			auto & glfw_comp = r.emplace<data::glfw_window>(e);
 
-			if (init_glfw && init_glfw->set_hints)
-				init_glfw->set_hints();
+			if (init_glfw.set_hints)
+				init_glfw.set_hints();
 
 			// TODO: depend on g_windowComponent->fullscreen
 			glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
@@ -148,8 +147,8 @@ namespace kengine::systems {
 			glfwSetKeyCallback(glfw_comp.window.get(), forward_to_input(on_key));
 #undef forward_to_input
 
-			if (init_glfw && init_glfw->on_window_created)
-				init_glfw->on_window_created();
+			if (init_glfw.on_window_created)
+				init_glfw.on_window_created();
 		}
 
 		struct {
