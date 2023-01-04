@@ -20,8 +20,7 @@
 namespace kengine {
 	// Helper type when a callback is needed as an iterator
 	using entity_iterator_signature = void(entt::handle);
-	// using entity_iterator_func = putils::function<entity_iterator_signature, KENGINE_ENTITY_ITERATOR_FUNC_SIZE>;
-	using entity_iterator_func = std::function<entity_iterator_signature>;
+	using entity_iterator_func = putils::function<entity_iterator_signature, KENGINE_ENTITY_ITERATOR_FUNC_SIZE>;
 
 	namespace functions {
 		template<typename>
@@ -30,8 +29,7 @@ namespace kengine {
 		template<typename Ret, typename... Args>
 		struct base_function<Ret(Args...)> {
 			using base = base_function<Ret(Args...)>;
-			// using callable = putils::function<Ret(Args...), KENGINE_FUNCTION_MAX_SIZE>;
-			using callable = std::function<Ret(Args...)>;
+			using callable = putils::function<Ret(Args...), KENGINE_FUNCTION_MAX_SIZE>;
 
 			callable func = nullptr;
 

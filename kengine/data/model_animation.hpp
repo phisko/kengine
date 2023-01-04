@@ -25,8 +25,7 @@ namespace kengine::data {
 
 		std::vector<anim> animations; // Filled by animation system with what's read in `files` (or the model file itself)
 
-		// using extracted_motion_getter = putils::function<putils::point3f(entt::entity e, size_t anim, float time), KENGINE_ANIMATION_EXTRACTED_MOTION_FUNC_SIZE>;
-		using extracted_motion_getter = std::function<putils::point3f(entt::entity e, size_t anim, float time)>;
+		using extracted_motion_getter = putils::function<putils::point3f(entt::entity e, size_t anim, float time), KENGINE_ANIMATION_EXTRACTED_MOTION_FUNC_SIZE>;
 
 		extracted_motion_getter get_animation_movement_until_time;
 		extracted_motion_getter get_animation_rotation_until_time;
