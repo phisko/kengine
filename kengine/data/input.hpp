@@ -14,8 +14,7 @@
 namespace kengine::data {
 	struct input {
 		template<typename T>
-		// using function = putils::function<T, KENGINE_INPUT_FUNCTION_SIZE>;
-		using function = std::function<T>;
+		using function = putils::function<T, KENGINE_INPUT_FUNCTION_SIZE>;
 
 		function<void(entt::handle window, int keycode, bool pressed)> on_key = nullptr;
 		function<void(entt::handle window, const putils::point2f & screen_coordinates, const putils::point2f & relative_movement)> on_mouse_move = nullptr;
