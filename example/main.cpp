@@ -83,5 +83,6 @@ int main(int, char **av) {
     // Start "game"
     kengine::main_loop::run(r);
 
+	r.clear(); // Explicitly clear so that component dtors are called before pools are invalidated
     return 0;
 }
