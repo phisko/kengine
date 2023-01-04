@@ -66,7 +66,9 @@ namespace kengine::script_language_helper {
 		register_function(
 			"stop_running",
 			function<void()>(
-				[&] { stop_running(r); }
+				[&] {
+					stop_running(r);
+				}
 			)
 		);
 
@@ -88,7 +90,9 @@ namespace kengine::script_language_helper {
 			register_entity_member(
 				putils::string<128>("get_%s", className).c_str(),
 				function<T &(entt::handle)>(
-					[](entt::handle self) noexcept { return std::ref(self.get<T>()); }
+					[](entt::handle self) noexcept {
+						return std::ref(self.get<T>());
+					}
 				)
 			);
 
@@ -96,7 +100,9 @@ namespace kengine::script_language_helper {
 			register_entity_member(
 				putils::string<128>("try_get_%s", className).c_str(),
 				function<const T *(entt::handle)>(
-					[](entt::handle self) noexcept { return self.try_get<T>(); }
+					[](entt::handle self) noexcept {
+						return self.try_get<T>();
+					}
 				)
 			);
 
@@ -104,7 +110,9 @@ namespace kengine::script_language_helper {
 			register_entity_member(
 				putils::string<128>("emplace_%s", className).c_str(),
 				function<T &(entt::handle)>(
-					[](entt::handle self) noexcept { return std::ref(self.get_or_emplace<T>()); }
+					[](entt::handle self) noexcept {
+						return std::ref(self.get_or_emplace<T>());
+					}
 				)
 			);
 
@@ -125,7 +133,9 @@ namespace kengine::script_language_helper {
 			register_entity_member(
 				putils::string<128>("emplace_%s", className).c_str(),
 				function<void(entt::handle)>(
-					[](entt::handle self) noexcept { self.emplace<T>(); }
+					[](entt::handle self) noexcept {
+						self.emplace<T>();
+					}
 				)
 			);
 
@@ -146,7 +156,9 @@ namespace kengine::script_language_helper {
 		register_entity_member(
 			putils::string<128>("has_%s", className).c_str(),
 			function<bool(entt::handle)>(
-				[](entt::handle self) noexcept { return self.all_of<T>(); }
+				[](entt::handle self) noexcept {
+					return self.all_of<T>();
+				}
 			)
 		);
 
@@ -154,7 +166,9 @@ namespace kengine::script_language_helper {
 		register_entity_member(
 			putils::string<128>("remove_%s", className).c_str(),
 			function<void(entt::handle)>(
-				[](entt::handle self) noexcept { self.remove<T>(); }
+				[](entt::handle self) noexcept {
+					self.remove<T>();
+				}
 			)
 		);
 	}
