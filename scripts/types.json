@@ -161,24 +161,12 @@
 			"header": "kengine/data/transform.hpp"
 		},
 		{
-			"type": "kengine::meta::attach_to",
-			"header": "kengine/meta/attach_to.hpp"
-		},
-		{
 			"type": "kengine::meta::attributes",
 			"header": "kengine/meta/attributes.hpp"
 		},
 		{
-			"type": "kengine::meta::copy",
-			"header": "kengine/meta/copy.hpp"
-		},
-		{
 			"type": "kengine::meta::count",
 			"header": "kengine/meta/count.hpp"
-		},
-		{
-			"type": "kengine::meta::detach_from",
-			"header": "kengine/meta/detach_from.hpp"
 		},
 		{
 			"type": "kengine::meta::display_imgui",
@@ -187,6 +175,14 @@
 		{
 			"type": "kengine::meta::edit_imgui",
 			"header": "kengine/meta/edit_imgui.hpp"
+		},
+		{
+			"type": "kengine::meta::emplace_or_replace",
+			"header": "kengine/meta/emplace_or_replace.hpp"
+		},
+		{
+			"type": "kengine::meta::emplace_or_replace_move",
+			"header": "kengine/meta/emplace_or_replace.hpp"
 		},
 		{
 			"type": "kengine::meta::for_each_entity",
@@ -211,6 +207,10 @@
 		{
 			"type": "kengine::meta::match_string",
 			"header": "kengine/meta/match_string.hpp"
+		},
+		{
+			"type": "kengine::meta::remove",
+			"header": "kengine/meta/remove.hpp"
 		},
 		{
 			"type": "kengine::meta::save_to_json",

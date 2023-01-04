@@ -5,7 +5,7 @@
 
 namespace kengine {
 	template<typename... Comps>
-	void register_copy(entt::registry & r) noexcept;
+	void register_emplace_or_replace(entt::registry & r) noexcept;
 }
 
-#include "register_copy.inl"
+#include "register_emplace_or_replace.inl"

@@ -13,10 +13,10 @@
 
 // kengine meta
 #include "kengine/meta/has.hpp"
-#include "kengine/meta/attach_to.hpp"
-#include "kengine/meta/detach_from.hpp"
 #include "kengine/meta/display_imgui.hpp"
 #include "kengine/meta/edit_imgui.hpp"
+#include "kengine/meta/emplace_or_replace.hpp"
+#include "kengine/meta/remove.hpp"
 
 // kengine helpers
 #include "kengine/helpers/type_helper.hpp"
@@ -67,12 +67,12 @@ namespace kengine::imgui_helper {
 		const auto & r = *e.registry();
 
 		if (ImGui::BeginPopupContextWindow()) {
-			const auto types = sort_helper::get_name_sorted_entities<const meta::has, const meta::attach_to>(r);
+			const auto types = sort_helper::get_name_sorted_entities<const meta::has, const meta::emplace_or_replace>(r);
 
-			for (const auto & [_, name, has, add] : types)
+			for (const auto & [_, name, has, emplace_or_replace] : types)
 				if (!has->call(e))
 					if (ImGui::MenuItem(name->name.c_str()))
-						add->call(e);
+						emplace_or_replace->call(e, nullptr);
 
 			ImGui::EndPopup();
 		}
@@ -84,11 +84,10 @@ namespace kengine::imgui_helper {
 				continue;
 			const auto tree_node_open = ImGui::TreeNode((name->name + "##edit").c_str());
 
-			const auto detach_from = r.try_get<meta::detach_from>(type_entity);
-			if (detach_from) {
+			if (const auto remove = r.try_get<meta::remove>(type_entity)) {
 				if (ImGui::BeginPopupContextItem()) {
 					if (ImGui::MenuItem("Remove"))
-						detach_from->call(e);
+						remove->call(e);
 					ImGui::EndPopup();
 				}
 			}
