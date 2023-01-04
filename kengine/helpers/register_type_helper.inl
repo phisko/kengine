@@ -14,19 +14,17 @@
 #include "kengine/helpers/lua_helper.hpp"
 #include "kengine/helpers/assert_helper.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
-#include "kengine/helpers/meta/impl/register_attach_to.hpp"
 #include "kengine/helpers/meta/impl/register_attributes.hpp"
-#include "kengine/helpers/meta/impl/register_copy.hpp"
 #include "kengine/helpers/meta/impl/register_count.hpp"
-#include "kengine/helpers/meta/impl/register_detach_from.hpp"
 #include "kengine/helpers/meta/impl/register_display_imgui.hpp"
 #include "kengine/helpers/meta/impl/register_edit_imgui.hpp"
+#include "kengine/helpers/meta/impl/register_emplace_or_replace.hpp"
 #include "kengine/helpers/meta/impl/register_for_each_entity.hpp"
 #include "kengine/helpers/meta/impl/register_get.hpp"
 #include "kengine/helpers/meta/impl/register_has.hpp"
 #include "kengine/helpers/meta/impl/register_load_from_json.hpp"
 #include "kengine/helpers/meta/impl/register_match_string.hpp"
-#include "kengine/helpers/meta/impl/register_move.hpp"
+#include "kengine/helpers/meta/impl/register_remove.hpp"
 #include "kengine/helpers/meta/impl/register_save_to_json.hpp"
 
 namespace kengine {
@@ -105,19 +103,17 @@ namespace kengine {
 #endif
 		});
 
-		register_attach_to<Comps...>(r);
 		register_attributes<Comps...>(r);
-		register_copy<Comps...>(r);
 		register_count<Comps...>(r);
-		register_detach_from<Comps...>(r);
 		register_display_imgui<Comps...>(r);
 		register_edit_imgui<Comps...>(r);
+		register_emplace_or_replace<Comps...>(r);
 		register_for_each_entity<Comps...>(r);
 		register_get<Comps...>(r);
 		register_has<Comps...>(r);
 		register_load_from_json<Comps...>(r);
 		register_match_string<Comps...>(r);
-		register_move<Comps...>(r);
+		register_remove<Comps...>(r);
 		register_save_to_json<Comps...>(r);
 	}
 

@@ -1,5 +1,5 @@
 #include "kengine/helpers/register_type_helper.hpp"
-#include "kengine/meta/attach_to.hpp"
+#include "kengine/meta/remove.hpp"
 
 // entt
 #include <entt/entity/fwd.hpp>
@@ -9,9 +9,9 @@
 #include "kengine/helpers/profiling_helper.hpp"
 
 namespace kengine::types {
-	void register_kengine_meta_attach_to(entt::registry & r) noexcept {
+	void register_kengine_meta_remove(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_log(r, log, "init/register_types", "Registering 'kengine::meta::attach_to'");
-		kengine::register_components<kengine::meta::attach_to>(r);
+		kengine_log(r, log, "init/register_types", "Registering 'kengine::meta::remove'");
+		kengine::register_components<kengine::meta::remove>(r);
 	}
 }

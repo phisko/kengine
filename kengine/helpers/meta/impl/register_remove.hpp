@@ -5,7 +5,7 @@
 
 namespace kengine {
 	template<typename... Comps>
-	void register_detach_from(entt::registry & r) noexcept;
+	void register_remove(entt::registry & r) noexcept;
 }
 
-#include "register_detach_from.inl"
+#include "register_remove.inl"

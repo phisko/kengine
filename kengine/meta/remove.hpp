@@ -4,11 +4,11 @@
 #include "kengine/base_function.hpp"
 
 namespace kengine::meta {
-	using detach_from_signature = void(entt::handle);
-	struct detach_from : functions::base_function<detach_from_signature> {};
+	using remove_signature = void(entt::handle);
+	struct remove : functions::base_function<remove_signature> {};
 }
 
-#define refltype kengine::meta::detach_from
+#define refltype kengine::meta::remove
 putils_reflection_info {
 	putils_reflection_class_name;
 	putils_reflection_parents(
