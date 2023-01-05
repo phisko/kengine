@@ -14,10 +14,5 @@ namespace kengine {
 }
 
 #define refltype kengine::meta::save_to_json
-putils_reflection_info {
-	putils_reflection_class_name;
-	putils_reflection_parents(
-		putils_reflection_type(refltype::base)
-	);
-};
+kengine_function_reflection_info;
 #undef refltype
