@@ -17,7 +17,11 @@ namespace kengine {
 		register_meta_component_implementation<meta::count, Comps...>(
 			r, [&](const auto t) noexcept {
 				using type = putils_wrapped_type(t);
-				return r.view<type>().size();
+				const auto view = r.view<type>();
+				if constexpr (requires { view.size(); }) // in-place-delete views don't have size()
+					return view.size();
+				else
+					return view.size_hint();
 			}
 		);
 	}
