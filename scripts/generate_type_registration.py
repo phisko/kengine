@@ -78,6 +78,8 @@ def process_type_file(input_file):
 	process_types('types', False)
 
 def process_type(type, is_component):
+	if 'enabled' in type and not type['enabled']:
+		return
 	clean_name = type['type'].replace('::', '_')
 	function_name = 'register_' + clean_name
 	all_types.append({ 'json_type': type, 'is_component': is_component, 'function_name': function_name, 'clean_name': clean_name })
