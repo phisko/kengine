@@ -12,19 +12,9 @@ namespace kengine::meta {
 }
 
 #define refltype kengine::meta::get
-putils_reflection_info {
-	putils_reflection_class_name;
-	putils_reflection_parents(
-		putils_reflection_type(refltype::base)
-	);
-};
+kengine_function_reflection_info;
 #undef refltype
 
 #define refltype kengine::meta::get_const
-putils_reflection_info {
-	putils_reflection_class_name;
-	putils_reflection_parents(
-		putils_reflection_type(refltype::base)
-	);
-};
+kengine_function_reflection_info;
 #undef refltype
