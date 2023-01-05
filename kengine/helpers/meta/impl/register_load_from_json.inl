@@ -27,7 +27,7 @@ namespace kengine {
 	template<typename... Comps>
 	void register_load_from_json(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		register_meta_component_implementation<meta::load_from_json, Comps...>(
+		register_meta_component_implementation_with_predicate<meta::load_from_json, std::is_move_assignable, Comps...>(
 			r, [](const auto t, const nlohmann::json & jsonEntity, entt::handle e) noexcept {
 				KENGINE_PROFILING_SCOPE;
 
