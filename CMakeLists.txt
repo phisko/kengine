@@ -160,7 +160,11 @@ option(KENGINE_TESTS "Build kengine tests" OFF)
 if (KENGINE_TESTS)
     enable_testing()
     set(test_exe_name kengine_tests)
-    file(GLOB test_src kengine/helpers/tests/*.tests.cpp)
+    file(
+        GLOB test_src
+        kengine/helpers/tests/*.tests.cpp
+        kengine/helpers/tests/meta/*.tests.cpp
+    )
 
     putils_add_test_executable(${test_exe_name} ${test_src})
     target_link_libraries(${test_exe_name} PRIVATE kengine_core)
