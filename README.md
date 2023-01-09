@@ -209,6 +209,7 @@ ImGui::End();
 * [on_collision](kengine/functions/on_collision.md): called whenever two entities collide
 * [on_mouse_captured](kengine/functions/on_mouse_captured.md): indicates whether the mouse should be captured by the window
 * [query_position](kengine/functions/query_position.md): returns a list of entities found within a certain distance of a position
+* [register_types](kengine/functions/register_types.md): registers types with the engine's reflection utilities
 
 ### [Meta components](kengine/meta/)
 
@@ -305,6 +306,7 @@ These are helper functions and macros to factorize typical manipulations of comp
 * [matrix_helper](kengine/helpers/matrix_helper.md): manipulate matrices
 * [profiling_helper](kengine/helpers/profiling_helper.md): instrument code
 * [python_helper](kengine/helpers/python_helper.md): register types and functions to Python
+* [register_all_types](kengine/helpers/register_all_types.md): register all known types with a `registry`
 * [register_meta_components](kengine/helpers/meta/register_meta_components.md): register all currently implemented meta components for a set of types
 * [register_with_script_languages](kengine/helpers/meta/register_with_script_languages.md): register a set of types with all currently implemented script languages
 * [register_everything](kengine/helpers/meta/register_everything.md): registers a set of types with all the engine's reflection facilities
