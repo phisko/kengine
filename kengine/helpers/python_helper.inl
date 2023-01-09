@@ -35,9 +35,13 @@ namespace kengine::python_helper {
 				state.module_.def(name, func);
 		}
 
-		template<typename T>
-		void register_type_with_state(data::python_state & state) noexcept {
+		template<bool IsComponent, typename T>
+		void register_type_with_state(entt::registry & r, data::python_state & state) noexcept {
 			KENGINE_PROFILING_SCOPE;
+
+			// avoid double registration
+			if (hasattr(state.module_, putils::reflection::get_class_name<T>()))
+				return;
 
 			if constexpr (std::is_same<T, entt::handle>()) {
 				state.entity = new py::class_<entt::handle>(state.module_, putils::reflection::get_class_name<entt::handle>(), py::dynamic_attr());
@@ -50,26 +54,22 @@ namespace kengine::python_helper {
 			}
 			else
 				putils::python::register_type<T>(state.module_);
-		}
 
-		template<typename T>
-		void register_component_with_state(entt::registry & r, data::python_state & state) noexcept {
-			KENGINE_PROFILING_SCOPE;
-
-			register_type_with_state<T>(state);
-			script_language_helper::register_component<T>(
-				r,
-				[&](auto &&... args) noexcept {
-					register_entity_member(*state.entity, FWD(args)...);
-				},
-				[&](auto &&... args) noexcept {
-					register_function_with_state(state, FWD(args)...);
-				}
-			);
+			if constexpr (IsComponent) {
+				script_language_helper::register_component<T>(
+					r,
+					[&](auto &&... args) noexcept {
+						register_entity_member(*state.entity, FWD(args)...);
+					},
+					[&](auto &&... args) noexcept {
+						register_function_with_state(state, FWD(args)...);
+					}
+				);
+			}
 		}
 	}
 
-	template<typename... Types>
+	template<bool IsComponent, typename... Types>
 	void register_types(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
@@ -78,20 +78,7 @@ namespace kengine::python_helper {
 
 			kengine_logf(r, log, "python/register_types", "Registering %s", putils::reflection::get_class_name<type>());
 			for (const auto & [e, comp] : r.view<data::python_state>().each())
-				impl::register_type_with_state<type>(comp);
-		});
-	}
-
-	template<typename... Comps>
-	void register_components(entt::registry & r) noexcept {
-		KENGINE_PROFILING_SCOPE;
-
-		putils::for_each_type<Comps...>([&](auto && t) noexcept {
-			using type = putils_wrapped_type(t);
-
-			kengine_logf(r, log, "python/register_components", "Registering %s", putils::reflection::get_class_name<type>());
-			for (const auto & [e, comp] : r.view<data::python_state>().each())
-				impl::register_component_with_state<type>(r, comp);
+				impl::register_type_with_state<IsComponent, type>(r, comp);
 		});
 	}
 

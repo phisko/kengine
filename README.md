@@ -305,7 +305,9 @@ These are helper functions and macros to factorize typical manipulations of comp
 * [matrix_helper](kengine/helpers/matrix_helper.md): manipulate matrices
 * [profiling_helper](kengine/helpers/profiling_helper.md): instrument code
 * [python_helper](kengine/helpers/python_helper.md): register types and functions to Python
-* [register_type_helper](kengine/helpers/register_type_helper.md): register types with the various systems
+* [register_meta_components](kengine/helpers/meta/register_meta_components.md): register all currently implemented meta components for a set of types
+* [register_with_script_languages](kengine/helpers/meta/register_with_script_languages.md): register a set of types with all currently implemented script languages
+* [register_everything](kengine/helpers/meta/register_everything.md): registers a set of types with all the engine's reflection facilities
 * [script_language_helper](kengine/helpers/script_language_helper.md): shared code when registering types and functions to scripting languages
 * [skeleton_helper](kengine/helpers/skeleton_helper.md): manipulate skeletons
 * [sort_helper](kengine/helpers/sort_helper.md): sort entities

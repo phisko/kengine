@@ -44,7 +44,7 @@ namespace kengine::systems {
 				},
 				[&](auto type) noexcept {
 					using T = putils_wrapped_type(type);
-					python_helper::impl::register_type_with_state<T>(state);
+					python_helper::impl::register_type_with_state<false, T>(r, state);
 				}
 			);
 		}

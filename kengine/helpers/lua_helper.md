@@ -9,20 +9,11 @@ These are defined in the `kengine::lua_helper` namespace.
 ### register_types
 
 ```cpp
-template<typename ... Types>
+template<bool IsComponent, typename... Types>
 void register_types(const entt::registry & r) noexcept;
 ```
 
-Registers [reflectible](https://github.com/phisko/reflection) types with the lua state.
-
-### register_components
-
-```cpp
-template<typename ... Comps>
-void register_components(const entt::registry & r) noexcept;
-```
-
-Registers a [reflectible](https://github.com/phisko/reflection) type with the lua state as a component (adding entity member functions).
+Registers [reflectible](https://github.com/phisko/reflection) types with the lua state. If `IsComponent` is `true`, functions are also registered to manipulate the types as components.
 
 ### register_function
 

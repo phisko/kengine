@@ -1,4 +1,4 @@
-#include "kengine/helpers/register_type_helper.hpp"
+#include "kengine/helpers/meta/register_everything.hpp"
 #include "kengine/data/sprite.hpp"
 
 // entt
@@ -12,6 +12,6 @@ namespace kengine::types {
 	void register_kengine_data_sprite_2d(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		kengine_log(r, log, "init/register_types", "Registering 'kengine::data::sprite_2d'");
-		kengine::register_components<kengine::data::sprite_2d>(r);
+		kengine::register_everything<true, kengine::data::sprite_2d>(r);
 	}
 }

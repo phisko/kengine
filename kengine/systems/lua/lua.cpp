@@ -46,7 +46,7 @@ namespace kengine::systems {
 				},
 				[&](auto type) noexcept {
 					using T = putils_wrapped_type(type);
-					lua_helper::impl::register_type_with_state<T>(*state);
+					lua_helper::impl::register_type_with_state<false, T>(r, *state);
 				}
 			);
 		}

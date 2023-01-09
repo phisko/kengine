@@ -24,50 +24,35 @@ namespace kengine::lua_helper {
 			state[name] = FWD(func);
 		}
 
-		template<typename T>
-		void register_type_with_state(sol::state & state) noexcept {
+		template<bool IsComponent, typename T>
+		void register_type_with_state(entt::registry & r, sol::state & state) noexcept {
 			KENGINE_PROFILING_SCOPE;
+
 			putils::lua::register_type<T>(state);
-		}
 
-		template<typename T>
-		void register_component_with_state(entt::registry & r, sol::state & state) noexcept {
-			KENGINE_PROFILING_SCOPE;
-
-			register_type_with_state<T>(state);
-			script_language_helper::register_component<T>(
-				r,
-				[&](auto &&... args) noexcept {
-					register_entity_member(state, FWD(args)...);
-				},
-				[&](auto &&... args) noexcept {
-					register_function_with_state(state, FWD(args)...);
-				}
-			);
+			if constexpr (IsComponent) {
+				script_language_helper::register_component<T>(
+					r,
+					[&](auto &&... args) noexcept {
+						register_entity_member(state, FWD(args)...);
+					},
+					[&](auto &&... args) noexcept {
+						register_function_with_state(state, FWD(args)...);
+					}
+				);
+			}
 		}
 	}
 
-	template<typename... Types>
-	void register_types(const entt::registry & r) noexcept {
+	template<bool IsComponent, typename... Types>
+	void register_types(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
 		putils::for_each_type<Types...>([&](auto && t) noexcept {
 			using type = putils_wrapped_type(t);
 			kengine_logf(r, log, "lua/register_types", "Registering %s", putils::reflection::get_class_name<type>());
 			for (const auto & [e, comp] : r.view<data::lua_state>().each())
-				impl::register_type_with_state<type>(*comp.state);
-		});
-	}
-
-	template<typename... Comps>
-	void register_components(entt::registry & r) noexcept {
-		KENGINE_PROFILING_SCOPE;
-
-		putils::for_each_type<Comps...>([&](auto && t) noexcept {
-			using type = putils_wrapped_type(t);
-			kengine_logf(r, log, "lua/register_components", "Registering %s", putils::reflection::get_class_name<type>());
-			for (const auto & [e, comp] : r.view<data::lua_state>().each())
-				impl::register_component_with_state<type>(r, *comp.state);
+				impl::register_type_with_state<IsComponent, type>(r, *comp.state);
 		});
 	}
 
