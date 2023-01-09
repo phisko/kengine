@@ -12,11 +12,8 @@
 #include "kengine/data/lua_state.hpp"
 
 namespace kengine::lua_helper {
-	template<typename... Types>
-	void register_types(const entt::registry & r) noexcept;
-
-	template<typename... Comps>
-	void register_components(entt::registry & r) noexcept;
+	template<bool IsComponent, typename... Types>
+	void register_types(entt::registry & r) noexcept;
 
 	template<typename Func>
 	void register_function(const entt::registry & r, const char * name, Func && func) noexcept;

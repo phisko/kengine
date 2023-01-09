@@ -13,36 +13,25 @@
 			"header": "kengine/data/animation_files.hpp"
 		},
 		{
-			"type": "kengine::data::model_animation",
-			"header": "kengine/data/model_animation.hpp"
-		},
-		{
-			"type": "kengine::functions::appears_in_viewport",
-			"header": "kengine/functions/appears_in_viewport.hpp"
-		},
-		{
 			"type": "kengine::data::camera",
 			"header": "kengine/data/camera.hpp"
+		},
+		{
+			"type": "kengine::data::collision",
+			"header": "kengine/data/collision.hpp"
 		},
 		{
 			"type": "kengine::data::command_line",
 			"header": "kengine/data/command_line.hpp"
 		},
 		{
-			"type": "kengine::data::viewport",
-			"header": "kengine/data/viewport.hpp"
-		},
-		{
-			"type": "kengine::data::window",
-			"header": "kengine/data/window.hpp"
-		},
-		{
 			"type": "kengine::data::debug_graphics",
 			"header": "kengine/data/debug_graphics.hpp"
 		},
 		{
-			"type": "kengine::functions::execute",
-			"header": "kengine/functions/execute.hpp"
+			"type": "kengine::data::glfw_window",
+			"header": "kengine/data/glfw_window.hpp",
+			"enabled": false
 		},
 		{
 			"type": "kengine::data::god_rays",
@@ -57,6 +46,14 @@
 			"header": "kengine/data/highlight.hpp"
 		},
 		{
+			"type": "kengine::data::imgui_context",
+			"header": "kengine/data/imgui_context.hpp"
+		},
+		{
+			"type": "kengine::data::imgui_scale",
+			"header": "kengine/data/imgui_scale.hpp"
+		},
+		{
 			"type": "kengine::data::imgui_tool",
 			"header": "kengine/data/imgui_tool.hpp"
 		},
@@ -65,8 +62,20 @@
 			"header": "kengine/data/input.hpp"
 		},
 		{
+			"type": "kengine::data::input_buffer",
+			"header": "kengine/data/input_buffer.hpp"
+		},
+		{
 			"type": "kengine::data::instance",
 			"header": "kengine/data/instance.hpp"
+		},
+		{
+			"type": "kengine::data::keep_alive",
+			"header": "kengine/data/keep_alive.hpp"
+		},
+		{
+			"type": "kengine::data::kinematic",
+			"header": "kengine/data/kinematic.hpp"
 		},
 		{
 			"type": "kengine::data::dir_light",
@@ -86,30 +95,50 @@
 			"condition": "KENGINE_LUA"
 		},
 		{
-			"type": "kengine::data::lua_table",
-			"header": "kengine/data/lua_table.hpp",
+			"type": "kengine::data::lua_state",
+			"header": "kengine/data/lua_state.hpp",
 			"condition": "KENGINE_LUA"
 		},
 		{
-			"type": "kengine::data::model_collider",
-			"header": "kengine/data/model_collider.hpp"
+			"type": "kengine::data::lua_table",
+			"header": "kengine/data/lua_table.hpp",
+			"condition": "KENGINE_LUA"
 		},
 		{
 			"type": "kengine::data::model",
 			"header": "kengine/data/model.hpp"
 		},
 		{
+			"type": "kengine::data::model_animation",
+			"header": "kengine/data/model_animation.hpp"
+		},
+		{
+			"type": "kengine::data::model_collider",
+			"header": "kengine/data/model_collider.hpp"
+		},
+		{
+			"type": "kengine::data::model_data",
+			"header": "kengine/data/model_data.hpp"
+		},
+		{
+			"type": "kengine::data::model_skeleton",
+			"header": "kengine/data/model_skeleton.hpp"
+		},
+		{
 			"type": "kengine::data::name",
 			"header": "kengine/data/name.hpp"
 		},
-
 		{
 			"type": "kengine::data::nav_mesh",
 			"header": "kengine/data/nav_mesh.hpp"
 		},
 		{
-			"type": "kengine::functions::on_click",
-			"header": "kengine/functions/on_click.hpp"
+			"type": "kengine::data::no_shadow",
+			"header": "kengine/data/no_shadow.hpp"
+		},
+		{
+			"type": "kengine::data::on_screen",
+			"header": "kengine/data/on_screen.hpp"
 		},
 		{
 			"type": "kengine::data::pathfinding",
@@ -120,8 +149,18 @@
 			"header": "kengine/data/physics.hpp"
 		},
 		{
+			"type": "kengine::data::polyvox",
+			"header": "kengine/data/polyvox.hpp",
+			"enabled": false
+		},
+		{
 			"type": "kengine::data::python",
 			"header": "kengine/data/python.hpp",
+			"condition": "KENGINE_PYTHON"
+		},
+		{
+			"type": "kengine::data::python_state",
+			"header": "kengine/data/python_state.hpp",
 			"condition": "KENGINE_PYTHON"
 		},
 		{
@@ -129,8 +168,9 @@
 			"header": "kengine/data/selected.hpp"
 		},
 		{
-			"type": "kengine::data::model_skeleton",
-			"header": "kengine/data/model_skeleton.hpp"
+			"type": "kengine::data::skeleton",
+			"header": "kengine/data/skeleton.hpp",
+			"condition": "KENGINE_GLM"
 		},
 		{
 			"type": "kengine::data::sky_box",
@@ -159,6 +199,54 @@
 		{
 			"type": "kengine::data::transform",
 			"header": "kengine/data/transform.hpp"
+		},
+		{
+			"type": "kengine::data::viewport",
+			"header": "kengine/data/viewport.hpp"
+		},
+		{
+			"type": "kengine::data::window",
+			"header": "kengine/data/window.hpp"
+		},
+		{
+			"type": "kengine::functions::appears_in_viewport",
+			"header": "kengine/functions/appears_in_viewport.hpp"
+		},
+		{
+			"type": "kengine::functions::execute",
+			"header": "kengine/functions/execute.hpp"
+		},
+		{
+			"type": "kengine::functions::get_entity_in_pixel",
+			"header": "kengine/functions/get_entity_in_pixel.hpp"
+		},
+		{
+			"type": "kengine::functions::get_position_in_pixel",
+			"header": "kengine/functions/get_position_in_pixel.hpp"
+		},
+		{
+			"type": "kengine::functions::log",
+			"header": "kengine/functions/log.hpp"
+		},
+		{
+			"type": "kengine::functions::on_click",
+			"header": "kengine/functions/on_click.hpp"
+		},
+		{
+			"type": "kengine::functions::on_collision",
+			"header": "kengine/functions/on_collision.hpp"
+		},
+		{
+			"type": "kengine::functions::on_mouse_captured",
+			"header": "kengine/functions/on_mouse_captured.hpp"
+		},
+		{
+			"type": "kengine::functions::query_position",
+			"header": "kengine/functions/query_position.hpp"
+		},
+		{
+			"type": "kengine::functions::register_types",
+			"header": "kengine/functions/register_types.hpp"
 		},
 		{
 			"type": "kengine::meta::attributes",
@@ -194,6 +282,10 @@
 		},
 		{
 			"type": "kengine::meta::get",
+			"header": "kengine/meta/get.hpp"
+		},
+		{
+			"type": "kengine::meta::get_const",
 			"header": "kengine/meta/get.hpp"
 		},
 		{

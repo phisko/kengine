@@ -1,4 +1,4 @@
-#include "kengine/helpers/register_type_helper.hpp"
+#include "kengine/helpers/meta/register_everything.hpp"
 #include "kengine/data/light.hpp"
 
 // entt
@@ -12,6 +12,6 @@ namespace kengine::types {
 	void register_kengine_data_spot_light(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		kengine_log(r, log, "init/register_types", "Registering 'kengine::data::spot_light'");
-		kengine::register_components<kengine::data::spot_light>(r);
+		kengine::register_everything<true, kengine::data::spot_light>(r);
 	}
 }

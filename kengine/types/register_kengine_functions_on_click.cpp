@@ -1,4 +1,4 @@
-#include "kengine/helpers/register_type_helper.hpp"
+#include "kengine/helpers/meta/register_everything.hpp"
 #include "kengine/functions/on_click.hpp"
 
 // entt
@@ -12,6 +12,6 @@ namespace kengine::types {
 	void register_kengine_functions_on_click(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		kengine_log(r, log, "init/register_types", "Registering 'kengine::functions::on_click'");
-		kengine::register_components<kengine::functions::on_click>(r);
+		kengine::register_everything<true, kengine::functions::on_click>(r);
 	}
 }

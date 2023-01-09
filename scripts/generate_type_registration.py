@@ -92,17 +92,11 @@ def process_registration_file(input_file):
 	json_file = open(input_file)
 	json_data = json.load(json_file)
 
-	def process_registrations(json_array_name, is_component):
-		if not json_array_name in json_data:
-			return
-		for p in json_data[json_array_name]:
-			process_registration(p['registration'], p['header'], is_component)
+	for p in json_data:
+		process_registration(p['registration'], p['header'])
 
-	process_registrations('components', True)
-	process_registrations('types', False)
-
-def process_registration(registration, header, is_component):
-	all_registrations.append({ 'registration': registration, 'header': header, 'is_component': is_component })
+def process_registration(registration, header):
+	all_registrations.append({ 'registration': registration, 'header': header })
 
 #
 # Generation
@@ -117,8 +111,15 @@ def generate_registration(type):
 
 	print('Generating registration for "' + type['json_type']['type'] + '" from header "' + type['json_type']['header'] + '" in "' + out_path + '"')
 
-	open(out_path, 'w').write(generate_registration_headers(type) +
-'''#include "''' + type['json_type']['header'] + '''"
+	content = generate_registration_headers(type)
+	if 'condition' in type['json_type']:
+		content += '\n#ifdef ' + type['json_type']['condition'] + '\n'
+	content += '#include "' + type['json_type']['header'] + '"'
+	if 'condition' in type['json_type']:
+		content += '''
+#endif'''
+
+	content += '''
 
 // entt
 #include <entt/entity/fwd.hpp>
@@ -129,13 +130,13 @@ def generate_registration(type):
 
 namespace ''' + args.namespace + ''' {
 	void ''' + type['function_name'] + '''(entt::registry & r) noexcept {''' + generate_conditional_registration(type) + '''	}
-}''')
+}'''
+
+	open(out_path, 'w').write(content)
 
 def generate_registration_headers(type):
 	ret = ''
 	for registration in all_registrations:
-		if type['is_component'] != registration['is_component']:
-			continue
 		ret += '#include "' + registration['header'] + '"\n'
 	return ret
 
@@ -158,9 +159,7 @@ def generate_conditional_registration(type):
 def generate_registration_implementation(type):
 	ret = ''
 	for registration in all_registrations:
-		if type['is_component'] != registration['is_component']:
-			continue
-		ret += registration['registration'] + '<' + type['json_type']['type'] + '>(r);\n'
+		ret += registration['registration'] + '<' + ('true' if type['is_component'] else 'false') + ', ' + type['json_type']['type'] + '>(r);\n'
 	return ret
 
 #

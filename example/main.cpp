@@ -70,15 +70,17 @@ int main(int, char **av) {
     r.emplace<kengine::data::lua>(e).scripts = { "unit.lua" };
 
 	// Register types to be used in lua
-    kengine::lua_helper::register_components<
-        kengine::data::transform,
-        kengine::data::lua
-    >(r);
+	kengine::lua_helper::register_types<
+		true, // components
+		kengine::data::transform,
+		kengine::data::lua
+	>(r);
 
-    kengine::lua_helper::register_types<
-        putils::rect3f,
-        putils::point3f
-    >(r);
+	kengine::lua_helper::register_types<
+		false, // non-components
+		putils::rect3f,
+		putils::point3f
+	>(r);
 
     // Start "game"
     kengine::main_loop::run(r);

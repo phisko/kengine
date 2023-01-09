@@ -1,4 +1,4 @@
-#include "kengine/helpers/register_type_helper.hpp"
+#include "kengine/helpers/meta/register_everything.hpp"
 #include "kengine/data/model_skeleton.hpp"
 
 // entt
@@ -12,6 +12,6 @@ namespace kengine::types {
 	void register_kengine_data_model_skeleton(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		kengine_log(r, log, "init/register_types", "Registering 'kengine::data::model_skeleton'");
-		kengine::register_components<kengine::data::model_skeleton>(r);
+		kengine::register_everything<true, kengine::data::model_skeleton>(r);
 	}
 }
