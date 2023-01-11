@@ -15,7 +15,6 @@
 
 // putils
 #include "putils/string.hpp"
-#include "putils/magica_voxel.hpp"
 
 // kengine data
 #include "kengine/data/instance.hpp"
@@ -30,6 +29,9 @@
 #include "kengine/helpers/instance_helper.hpp"
 #include "kengine/helpers/log_helper.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
+
+// local
+#include "magica_voxel_format.hpp"
 
 namespace kengine::systems {
 	static auto build_mesh(PolyVox::RawVolume<data::polyvox::vertex_data> && volume) noexcept {
@@ -56,7 +58,7 @@ namespace kengine::systems {
 		};
 		struct mesh_info {
 			mesh_type mesh;
-			putils::magica_voxel::chunk_content::size size;
+			magica_voxel_format::chunk_content::size size;
 		};
 
 		void load_model(entt::registry & r, entt::entity e) noexcept {
@@ -89,7 +91,7 @@ namespace kengine::systems {
 		void load_binary_model(entt::entity e, const char * binary_file) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			putils::magica_voxel::chunk_content::size size;
+			magica_voxel_format::chunk_content::size size;
 
 			data::model_data model_data;
 			model_data.meshes.push_back({});
@@ -109,7 +111,7 @@ namespace kengine::systems {
 			box.position.z -= size.y / 2.f * box.size.z;
 		}
 
-		void unserialize(const char * f, data::model_data::mesh & mesh_data, putils::magica_voxel::chunk_content::size & size) noexcept {
+		void unserialize(const char * f, data::model_data::mesh & mesh_data, magica_voxel_format::chunk_content::size & size) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			std::ifstream file(f, std::ofstream::binary);
@@ -172,23 +174,23 @@ namespace kengine::systems {
 
 			check_header(stream);
 
-			putils::magica_voxel::chunk_header main;
+			magica_voxel_format::chunk_header main;
 			read_from_stream(main, stream);
 			if (!id_matches(main.id, "MAIN")) {
 				kengine_assert_failed(r, "[magica_voxel] Expected 'MAIN' chunk header in '", f, "'");
 				return mesh_info{};
 			}
 
-			putils::magica_voxel::chunk_header first;
+			magica_voxel_format::chunk_header first;
 			read_from_stream(first, stream);
 			if (!id_matches(first.id, "SIZE")) {
 				kengine_assert_failed(r, "[magica_voxel] Expected 'SIZE' chunk header in '", f, "'");
 				return mesh_info{};
 			}
 			kengine_assert(r, first.children_bytes == 0);
-			kengine_assert(r, first.content_bytes == sizeof(putils::magica_voxel::chunk_content::size));
+			kengine_assert(r, first.content_bytes == sizeof(magica_voxel_format::chunk_content::size));
 
-			putils::magica_voxel::chunk_content::size size;
+			magica_voxel_format::chunk_content::size size;
 			read_from_stream(size, stream);
 
 			PolyVox::RawVolume<data::polyvox::vertex_data> volume(PolyVox::Region{
@@ -196,21 +198,21 @@ namespace kengine::systems {
 				{ size.x, size.z, size.y },
 			});
 
-			putils::magica_voxel::chunk_header voxels_header;
+			magica_voxel_format::chunk_header voxels_header;
 			read_from_stream(voxels_header, stream);
 			if (!id_matches(voxels_header.id, "XYZI")) {
 				kengine_assert_failed(r, "[magica_voxel] Expected 'XYZI' chunk header in '", f, "'");
 				return mesh_info{};
 			}
 
-			putils::magica_voxel::chunk_content::rgba rgba;
+			magica_voxel_format::chunk_content::rgba rgba;
 
-			putils::magica_voxel::chunk_content::xyzi xyzi;
+			magica_voxel_format::chunk_content::xyzi xyzi;
 			read_from_stream(xyzi, stream);
 			kengine_assert(r, voxels_header.content_bytes == sizeof(xyzi) + xyzi.num_voxels * sizeof(int));
 
 			for (int i = 0; i < xyzi.num_voxels; ++i) {
-				putils::magica_voxel::chunk_content::xyzi::voxel voxel;
+				magica_voxel_format::chunk_content::xyzi::voxel voxel;
 				read_from_stream(voxel, stream);
 
 				const auto & color = rgba.palette[voxel.color_index];
@@ -228,7 +230,7 @@ namespace kengine::systems {
 		void check_header(std::istream & s) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			putils::magica_voxel::file_header header;
+			magica_voxel_format::file_header header;
 			read_from_stream(header, s);
 			kengine_assert(r, id_matches(header.id, "VOX "));
 			kengine_assert(r, header.version_number == 150);
@@ -250,7 +252,7 @@ namespace kengine::systems {
 			return model_data;
 		}
 
-		void apply_offset(entt::entity e, const putils::magica_voxel::chunk_content::size & size) noexcept {
+		void apply_offset(entt::entity e, const magica_voxel_format::chunk_content::size & size) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			if (r.all_of<data::transform>(e)) {
@@ -264,7 +266,7 @@ namespace kengine::systems {
 			box.position.z -= size.y / 2.f * box.size.z;
 		}
 
-		void serialize(const char * f, const data::model_data & model_data, const putils::magica_voxel::chunk_content::size & size) noexcept {
+		void serialize(const char * f, const data::model_data & model_data, const magica_voxel_format::chunk_content::size & size) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			std::ofstream file(f, std::ofstream::binary | std::ofstream::trunc);
