@@ -9,6 +9,7 @@
 
 namespace kengine::data {
 	struct polyvox {
+		//! putils reflect all
 		struct vertex_data {
 			float color[3] = { 0.f, 0.f, 0.f };
 
@@ -49,10 +50,4 @@ namespace kengine::data {
 	};
 }
 
-#define refltype kengine::data::polyvox::vertex_data
-putils_reflection_info {
-	putils_reflection_attributes(
-		putils_reflection_attribute(color)
-	);
-};
-#undef refltype
+#include "polyvox.reflection.hpp"

@@ -1,0 +1,71 @@
+#pragma once
+
+#include "putils/reflection.hpp"
+
+#define refltype kengine::data::debug_graphics
+putils_reflection_info {
+	putils_reflection_class_name;
+	putils_reflection_attributes(
+		putils_reflection_attribute(elements)
+	);
+	putils_reflection_used_types(
+		putils_reflection_type(refltype::line_element),
+		putils_reflection_type(refltype::sphere_element),
+		putils_reflection_type(refltype::box_element),
+		putils_reflection_type(refltype::element)
+	);
+};
+#undef refltype
+
+#define refltype kengine::data::debug_graphics::line_element
+putils_reflection_info {
+	putils_reflection_custom_class_name(debug_graphics_line);
+	putils_reflection_attributes(
+		putils_reflection_attribute(end),
+		putils_reflection_attribute(thickness)
+	);
+	putils_reflection_used_types(
+		putils_reflection_type(putils::point3f)
+	);
+};
+#undef refltype
+
+#define refltype kengine::data::debug_graphics::sphere_element
+putils_reflection_info {
+	putils_reflection_custom_class_name(debug_graphics_sphere);
+	putils_reflection_attributes(
+		putils_reflection_attribute(radius)
+	);
+};
+#undef refltype
+
+#define refltype kengine::data::debug_graphics::box_element
+putils_reflection_info {
+	putils_reflection_custom_class_name(debug_graphics_box);
+	putils_reflection_attributes(
+		putils_reflection_attribute(size)
+	);
+	putils_reflection_used_types(
+		putils_reflection_type(putils::vec3f)
+	);
+};
+#undef refltype
+
+#define refltype kengine::data::debug_graphics::element
+putils_reflection_info {
+	putils_reflection_custom_class_name(debug_graphics_element);
+	putils_reflection_attributes(
+		putils_reflection_attribute(pos),
+		putils_reflection_attribute(color),
+		putils_reflection_attribute(relative_to),
+		putils_reflection_attribute(line),
+		putils_reflection_attribute(sphere),
+		putils_reflection_attribute(box),
+		putils_reflection_attribute(type)
+	);
+	putils_reflection_used_types(
+		putils_reflection_type(putils::point3f),
+		putils_reflection_type(putils::normalized_color)
+	);
+};
+#undef refltype

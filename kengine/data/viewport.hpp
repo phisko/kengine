@@ -1,7 +1,7 @@
 #pragma once
 
 // entt
-#include <entt/entity/fwd.hpp>
+#include <entt/entity/entity.hpp>
 
 // putils
 #include "putils/rect.hpp"
@@ -10,6 +10,9 @@
 #include "kengine/data/on_screen.hpp"
 
 namespace kengine::data {
+	//! putils reflect all
+	//! parents: [kengine::data::on_screen]
+	//! used_types: [putils::rect2f, putils::point2i]
 	struct viewport : on_screen {
 		using render_texture = std::intptr_t;
 		static constexpr auto INVALID_RENDER_TEXTURE = -1;
@@ -26,17 +29,4 @@ namespace kengine::data {
 	};
 }
 
-#define refltype kengine::data::viewport
-putils_reflection_info {
-	putils_reflection_class_name;
-	putils_reflection_attributes(
-		putils_reflection_attribute(window),
-		putils_reflection_attribute(bounding_box),
-		putils_reflection_attribute(resolution),
-		putils_reflection_attribute(z_order)
-	);
-	putils_reflection_parents(
-		putils_reflection_type(kengine::data::on_screen)
-	);
-};
-#undef refltype
+#include "viewport.reflection.hpp"

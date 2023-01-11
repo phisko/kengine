@@ -17,6 +17,8 @@
 #include "putils/lengthof.hpp"
 
 namespace kengine::data {
+	//! putils reflect all
+	//! used_types: [refltype::string, refltype::value]
 	struct adjustable {
 		static constexpr char string_name[] = "adjustable_string";
 		using string = putils::string<KENGINE_ADJUSTABLE_NAME_MAX_LENGTH, string_name>;
@@ -33,6 +35,17 @@ namespace kengine::data {
 			Invalid
 		};
 
+		/*!
+		 * putils reflect all
+		 * class_name: adjustable_value
+		 * used_types: [
+		 * 		refltype::storage_for_bool,
+		 * 		refltype::storage_for_float,
+		 * 		refltype::storage_for_int,
+		 * 		refltype::storage_for_color,
+		 * 		putils::normalized_color
+		 * ]
+		 */
 		struct value {
 			template<typename T, const char * Name>
 			struct storage {
@@ -115,46 +128,14 @@ namespace kengine::data {
 			value_type type = value_type::Invalid;
 
 			using enum_name_func = const char **();
+			//! putils reflect off
 			enum_name_func * get_enum_names = nullptr;
 			size_t enum_count = 0;
 		};
 	};
 }
 
-#define refltype kengine::data::adjustable
-putils_reflection_info {
-	putils_reflection_class_name;
-	putils_reflection_attributes(
-		putils_reflection_attribute(section),
-		putils_reflection_attribute(values)
-	);
-	putils_reflection_used_types(
-		putils_reflection_type(refltype::string),
-		putils_reflection_type(refltype::value)
-	);
-};
-#undef refltype
-
-#define refltype kengine::data::adjustable::value
-putils_reflection_info {
-	putils_reflection_custom_class_name(adjustable_value);
-	putils_reflection_attributes(
-		putils_reflection_attribute(name),
-		putils_reflection_attribute(bool_storage),
-		putils_reflection_attribute(float_storage),
-		putils_reflection_attribute(int_storage),
-		putils_reflection_attribute(color_storage),
-		putils_reflection_attribute(type)
-	);
-	putils_reflection_used_types(
-		putils_reflection_type(refltype::storage_for_bool),
-		putils_reflection_type(refltype::storage_for_float),
-		putils_reflection_type(refltype::storage_for_int),
-		putils_reflection_type(refltype::storage_for_color),
-		putils_reflection_type(putils::normalized_color)
-	);
-};
-#undef refltype
+#include "adjustable.reflection.hpp"
 
 template<typename T, const char * Name>
 #define refltype kengine::data::adjustable::value::storage<T, Name>

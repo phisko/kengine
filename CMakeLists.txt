@@ -67,8 +67,7 @@ endforeach()
 
 if (NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
     # These must be set before processing putils, as conan DLLs need to be copied next to executables
-    list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/putils/reflection/meta/cmake_helpers/CMakeModules)
-    include(putils_set_output_directories)
+    include(${CMAKE_CURRENT_LIST_DIR}/putils/reflection/meta/cmake_helpers/putils_set_output_directories.cmake)
     putils_set_output_directories(bin lib lib)
 endif()
 
@@ -88,9 +87,9 @@ add_subdirectory(putils)
 add_library(kengine INTERFACE)
 
 putils_src_files(src_files
-	kengine/components/data
-	kengine/components/functions
-	kengine/components/meta
+	kengine/data
+	kengine/functions
+	kengine/meta
 	kengine/helpers
 	kengine/helpers/meta
 )
@@ -151,6 +150,15 @@ foreach(i RANGE ${system_count})
         target_link_libraries(kengine INTERFACE ${sys_lib})
     endif()
 endforeach()
+
+# Generate reflection headers now that all system include paths are known
+option(KENGINE_GENERATE_REFLECTION OFF)
+if(KENGINE_GENERATE_REFLECTION)
+    putils_generate_reflection_headers(
+            TARGET kengine_core
+            SOURCES ${src_files}
+    )
+endif()
 
 #
 # Tests

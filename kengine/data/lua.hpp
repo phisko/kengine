@@ -10,14 +10,13 @@
 #define KENGINE_MAX_LUA_SCRIPTS 8
 #endif
 
-// reflection
-#include "putils/reflection.hpp"
-
 // putils
 #include "putils/string.hpp"
 #include "putils/vector.hpp"
 
 namespace kengine::data {
+	//! putils reflect all
+	//! used_types: [refltype::script, refltype::script_vector]
 	struct lua {
 		static constexpr char string_name[] = "lua_string";
 		using script = putils::string<KENGINE_MAX_LUA_SCRIPT_PATH, string_name>;
@@ -28,17 +27,6 @@ namespace kengine::data {
 	};
 }
 
-#define refltype kengine::data::lua
-putils_reflection_info {
-	putils_reflection_class_name;
-	putils_reflection_attributes(
-		putils_reflection_attribute(scripts)
-	);
-	putils_reflection_used_types(
-		putils_reflection_type(refltype::script),
-		putils_reflection_type(refltype::script_vector)
-	);
-};
-#undef refltype
+#include "lua.reflection.hpp"
 
 #endif

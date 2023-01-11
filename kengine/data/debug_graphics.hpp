@@ -8,16 +8,33 @@
 #include "putils/point.hpp"
 
 namespace kengine::data {
+	/*!
+	 * putils reflect all
+	 * used_types: [
+	 * 		refltype::line_element,
+	 * 		refltype::sphere_element,
+	 * 		refltype::box_element,
+	 * 		refltype::element
+	 * ]
+	 */
 	struct debug_graphics {
+		//! putils reflect all
+		//! class_name: debug_graphics_line
+		//! used_types: [putils::point3f]
 		struct line_element {
 			putils::point3f end{ 0.f, 0.f, 0.f };
 			float thickness = 1.f;
 		};
 
+		//! putils reflect all
+		//! class_name: debug_graphics_sphere
 		struct sphere_element {
 			float radius = .5f;
 		};
 
+		//! putils reflect all
+		//! class_name: debug_graphics_box
+		//! used_types: [putils::vec3f]
 		struct box_element {
 			putils::vec3f size = { 1.f, 1.f, 1.f };
 		};
@@ -33,6 +50,9 @@ namespace kengine::data {
 			object
 		};
 
+		//! putils reflect all
+		//! class_name: debug_graphics_element
+		//! used_types: [putils::point3f, putils::normalized_color]
 		struct element {
 			putils::point3f pos{ 0.f, 0.f, 0.f };
 			putils::normalized_color color;
@@ -50,64 +70,4 @@ namespace kengine::data {
 	};
 }
 
-#define refltype kengine::data::debug_graphics
-putils_reflection_info {
-	putils_reflection_class_name;
-	putils_reflection_attributes(
-		putils_reflection_attribute(elements)
-	);
-	putils_reflection_used_types(
-		putils_reflection_type(refltype::line_element),
-		putils_reflection_type(refltype::sphere_element),
-		putils_reflection_type(refltype::box_element),
-		putils_reflection_type(refltype::element)
-	);
-};
-#undef refltype
-
-#define refltype kengine::data::debug_graphics::element
-putils_reflection_info {
-	putils_reflection_custom_class_name(debug_graphics_element);
-	putils_reflection_attributes(
-		putils_reflection_attribute(pos),
-		putils_reflection_attribute(color),
-		putils_reflection_attribute(line),
-		putils_reflection_attribute(sphere),
-		putils_reflection_attribute(box),
-		putils_reflection_attribute(type),
-		putils_reflection_attribute(relative_to)
-	);
-	putils_reflection_used_types(
-		putils_reflection_type(putils::point3f),
-		putils_reflection_type(putils::normalized_color)
-	);
-};
-#undef refltype
-
-#define refltype kengine::data::debug_graphics::box_element
-putils_reflection_info {
-	putils_reflection_custom_class_name(debug_graphics_box);
-	putils_reflection_attributes(
-		putils_reflection_attribute(size)
-	);
-};
-#undef refltype
-
-#define refltype kengine::data::debug_graphics::sphere_element
-putils_reflection_info {
-	putils_reflection_custom_class_name(debug_graphics_sphere);
-	putils_reflection_attributes(
-		putils_reflection_attribute(radius)
-	);
-};
-#undef refltype
-
-#define refltype kengine::data::debug_graphics::line_element
-putils_reflection_info {
-	putils_reflection_custom_class_name(debug_graphics_line);
-	putils_reflection_attributes(
-		putils_reflection_attribute(end),
-		putils_reflection_attribute(thickness)
-	);
-};
-#undef refltype
+#include "debug_graphics.reflection.hpp"

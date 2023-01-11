@@ -4,11 +4,8 @@
 #include "putils/reflection.hpp"
 
 namespace kengine::data {
+	//! putils reflect all
 	struct selected {};
 }
 
-#define refltype kengine::data::selected
-putils_reflection_info {
-	putils_reflection_class_name;
-};
-#undef refltype
+#include "selected.reflection.hpp"

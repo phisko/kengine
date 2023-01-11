@@ -15,6 +15,8 @@
 #include "putils/vector.hpp"
 
 namespace kengine::data {
+	//! putils reflect all
+	//! used_types: [refltype::script, refltype::script_vector]
 	struct python {
 		static constexpr char string_name[] = "python_string";
 		using script = putils::string<KENGINE_MAX_PYTHON_SCRIPT_PATH, string_name>;
@@ -25,17 +27,6 @@ namespace kengine::data {
 	};
 }
 
-#define refltype kengine::data::python
-putils_reflection_info {
-	putils_reflection_class_name;
-	putils_reflection_attributes(
-		putils_reflection_attribute(scripts)
-	);
-	putils_reflection_used_types(
-		putils_reflection_type(refltype::script),
-		putils_reflection_type(refltype::script_vector)
-	);
-};
-#undef refltype
+#include "python.reflection.hpp"
 
 #endif
