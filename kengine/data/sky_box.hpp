@@ -9,6 +9,8 @@
 #include "putils/color.hpp"
 
 namespace kengine::data {
+	//! putils reflect all
+	//! used_types: [refltype::string, putils::normalized_color]
 	struct sky_box {
 		static constexpr char string_name[] = "sky_box_string";
 		using string = putils::string<KENGINE_SKYBOX_TEXTURE_PATH_MAX_NAME, string_name>;
@@ -24,21 +26,4 @@ namespace kengine::data {
 	};
 }
 
-#define refltype kengine::data::sky_box
-putils_reflection_info {
-	putils_reflection_class_name;
-	putils_reflection_attributes(
-		putils_reflection_attribute(right),
-		putils_reflection_attribute(left),
-		putils_reflection_attribute(top),
-		putils_reflection_attribute(bottom),
-		putils_reflection_attribute(front),
-		putils_reflection_attribute(back),
-		putils_reflection_attribute(color)
-	);
-	putils_reflection_used_types(
-		putils_reflection_type(refltype::string),
-		putils_reflection_type(putils::normalized_color)
-	);
-};
-#undef refltype
+#include "sky_box.reflection.hpp"

@@ -4,10 +4,14 @@
 #define KENGINE_NAME_COMPONENT_MAX_LENGTH 64
 #endif
 
+#include <vector>
+
 // putils
 #include "putils/string.hpp"
 
 namespace kengine::data {
+	//! putils reflect all
+	//! used_types: [refltype::string]
 	struct name {
 		static constexpr char string_name[] = "name_string";
 		using string = putils::string<KENGINE_NAME_COMPONENT_MAX_LENGTH, string_name>;
@@ -15,14 +19,4 @@ namespace kengine::data {
 	};
 }
 
-#define refltype kengine::data::name
-putils_reflection_info {
-	putils_reflection_class_name;
-	putils_reflection_attributes(
-		putils_reflection_attribute(name)
-	);
-	putils_reflection_used_types(
-		putils_reflection_type(refltype::string)
-	);
-};
-#undef refltype
+#include "name.reflection.hpp"

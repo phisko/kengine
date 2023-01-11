@@ -4,6 +4,8 @@
 #include "putils/point.hpp"
 
 namespace kengine::data {
+	//! putils reflect all
+	//! used_types: [putils::vec3f]
 	struct physics {
 		float mass = 1.f;
 
@@ -15,16 +17,4 @@ namespace kengine::data {
 	};
 }
 
-#define refltype kengine::data::physics
-putils_reflection_info {
-	putils_reflection_class_name;
-	putils_reflection_attributes(
-		putils_reflection_attribute(mass),
-		putils_reflection_attribute(movement),
-		putils_reflection_attribute(yaw),
-		putils_reflection_attribute(pitch),
-		putils_reflection_attribute(roll),
-		putils_reflection_attribute(changed)
-	);
-};
-#undef refltype
+#include "physics.reflection.hpp"

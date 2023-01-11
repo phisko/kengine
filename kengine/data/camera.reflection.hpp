@@ -1,0 +1,17 @@
+#pragma once
+
+#include "putils/reflection.hpp"
+
+#define refltype kengine::data::camera
+putils_reflection_info {
+	putils_reflection_class_name;
+	putils_reflection_attributes(
+		putils_reflection_attribute(frustum),
+		putils_reflection_attribute(pitch),
+		putils_reflection_attribute(yaw),
+		putils_reflection_attribute(roll),
+		putils_reflection_attribute(near_plane),
+		putils_reflection_attribute(far_plane)
+	);
+};
+#undef refltype

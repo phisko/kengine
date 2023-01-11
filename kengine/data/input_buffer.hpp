@@ -14,7 +14,10 @@
 #include "putils/point.hpp"
 
 namespace kengine::data {
+	//! putils reflect all
+	//! used_types: [refltype::key_event, refltype::click_event, refltype::mouse_move_event, refltype::mouse_scroll_event]
 	struct input_buffer {
+		//! putils reflect all
 		struct key_event {
 			entt::entity window;
 			int key;
@@ -22,6 +25,8 @@ namespace kengine::data {
 		};
 		std::vector<key_event> keys;
 
+		//! putils reflect all
+		//! used_types: [putils::point2f]
 		struct click_event {
 			entt::entity window;
 			putils::point2f pos;
@@ -30,6 +35,8 @@ namespace kengine::data {
 		};
 		std::vector<click_event> clicks;
 
+		//! putils reflect all
+		//! used_types: [putils::point2f]
 		struct mouse_move_event {
 			entt::entity window;
 			putils::point2f pos;
@@ -37,6 +44,8 @@ namespace kengine::data {
 		};
 		std::vector<mouse_move_event> moves;
 
+		//! putils reflect all
+		//! used_types: [putils::point2f]
 		struct mouse_scroll_event {
 			entt::entity window;
 			float xoffset;
@@ -47,75 +56,4 @@ namespace kengine::data {
 	};
 }
 
-#define refltype kengine::data::input_buffer
-putils_reflection_info {
-	putils_reflection_class_name;
-	putils_reflection_attributes(
-		putils_reflection_attribute(keys),
-		putils_reflection_attribute(clicks),
-		putils_reflection_attribute(moves),
-		putils_reflection_attribute(scrolls)
-	);
-	putils_reflection_used_types(
-		putils_reflection_type(refltype::key_event),
-		putils_reflection_type(refltype::click_event),
-		putils_reflection_type(refltype::mouse_move_event),
-		putils_reflection_type(refltype::mouse_scroll_event)
-	);
-};
-#undef refltype
-
-#define refltype kengine::data::input_buffer::key_event
-putils_reflection_info {
-	putils_reflection_class_name;
-	putils_reflection_attributes(
-		putils_reflection_attribute(window),
-		putils_reflection_attribute(key),
-		putils_reflection_attribute(pressed)
-	);
-};
-#undef refltype
-
-#define refltype kengine::data::input_buffer::click_event
-putils_reflection_info {
-	putils_reflection_class_name;
-	putils_reflection_attributes(
-		putils_reflection_attribute(window),
-		putils_reflection_attribute(pos),
-		putils_reflection_attribute(button),
-		putils_reflection_attribute(pressed)
-	);
-	putils_reflection_used_types(
-		putils_reflection_type(putils::point2f)
-	);
-};
-#undef refltype
-
-#define refltype kengine::data::input_buffer::mouse_move_event
-putils_reflection_info {
-	putils_reflection_class_name;
-	putils_reflection_attributes(
-		putils_reflection_attribute(window),
-		putils_reflection_attribute(pos),
-		putils_reflection_attribute(rel)
-	);
-	putils_reflection_used_types(
-		putils_reflection_type(putils::point2f)
-	);
-};
-#undef refltype
-
-#define refltype kengine::data::input_buffer::mouse_scroll_event
-putils_reflection_info {
-	putils_reflection_class_name;
-	putils_reflection_attributes(
-		putils_reflection_attribute(window),
-		putils_reflection_attribute(xoffset),
-		putils_reflection_attribute(yoffset),
-		putils_reflection_attribute(pos)
-	);
-	putils_reflection_used_types(
-		putils_reflection_type(putils::point2f)
-	);
-};
-#undef refltype
+#include "input_buffer.reflection.hpp"

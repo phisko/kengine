@@ -12,6 +12,8 @@
 #endif
 
 namespace kengine::data {
+	//! putils reflect all
+	//! used_types: [refltype::string, putils::point2ui]
 	struct window {
 		static constexpr char string_name[] = "window_string";
 		using string = putils::string<KENGINE_WINDOW_COMPONENT_NAME_MAX_LENGTH, string_name>;
@@ -23,17 +25,4 @@ namespace kengine::data {
 	};
 }
 
-#define refltype kengine::data::window
-putils_reflection_info {
-	putils_reflection_class_name;
-	putils_reflection_attributes(
-		putils_reflection_attribute(name),
-		putils_reflection_attribute(size),
-		putils_reflection_attribute(fullscreen),
-		putils_reflection_attribute(assigned_system)
-	);
-	putils_reflection_used_types(
-		putils_reflection_type(refltype::string)
-	);
-};
-#undef refltype
+#include "window.reflection.hpp"

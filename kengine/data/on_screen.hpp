@@ -4,6 +4,7 @@
 #include "putils/reflection.hpp"
 
 namespace kengine::data {
+	//! putils reflect all
 	struct on_screen {
 		enum class coordinate_type {
 			screen_percentage,
@@ -14,11 +15,4 @@ namespace kengine::data {
 	};
 }
 
-#define refltype kengine::data::on_screen
-putils_reflection_info {
-	putils_reflection_class_name;
-	putils_reflection_attributes(
-		putils_reflection_attribute(coordinates)
-	);
-};
-#undef refltype
+#include "on_screen.reflection.hpp"

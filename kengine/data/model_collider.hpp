@@ -16,7 +16,12 @@
 #include "kengine/data/transform.hpp"
 
 namespace kengine::data {
+	//! putils reflect all
+	//! used_types: [refltype::collider]
 	struct model_collider {
+		//! putils reflect all
+		//! class_name: model_collider_collider
+		//! used_types: [refltype::string]
 		struct collider {
 			static constexpr char string_name[] = "model_collider_string";
 			using string = putils::string<KENGINE_BONE_NAME_MAX_LENGTH, string_name>;
@@ -38,28 +43,4 @@ namespace kengine::data {
 	};
 }
 
-#define refltype kengine::data::model_collider
-putils_reflection_info {
-	putils_reflection_class_name;
-	putils_reflection_attributes(
-		putils_reflection_attribute(colliders)
-	);
-	putils_reflection_used_types(
-		putils_reflection_type(refltype::collider)
-	);
-};
-#undef refltype
-
-#define refltype kengine::data::model_collider::collider
-putils_reflection_info {
-	putils_reflection_custom_class_name(model_collider_collider);
-	putils_reflection_attributes(
-		putils_reflection_attribute(shape),
-		putils_reflection_attribute(bone_name),
-		putils_reflection_attribute(transform)
-	);
-	putils_reflection_used_types(
-		putils_reflection_type(refltype::string)
-	);
-};
-#undef refltype
+#include "model_collider.reflection.hpp"

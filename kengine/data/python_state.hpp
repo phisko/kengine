@@ -6,7 +6,6 @@
 #include <entt/entity/fwd.hpp>
 
 // putils
-#include "putils/default_constructors.hpp"
 #include "putils/python/python_helper.hpp"
 
 #ifdef __GNUC__
@@ -16,8 +15,9 @@
 #endif
 
 namespace kengine::data {
+	//! putils reflect none
 	struct python_state {
-		PUTILS_MOVE_ONLY(python_state);
+		python_state() noexcept = default;
 
 		py::scoped_interpreter guard;
 		py::module_ module_ = py::module_::create_extension_module("kengine", nullptr, new PyModuleDef);
@@ -29,10 +29,6 @@ namespace kengine::data {
 #pragma GCC diagnostic pop
 #endif
 
-#define refltype kengine::data::python_state
-putils_reflection_info {
-	putils_reflection_class_name;
-};
-#undef refltype
+#include "python_state.reflection.hpp"
 
 #endif

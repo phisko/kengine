@@ -1,14 +1,8 @@
 #pragma once
 
-// reflection
-#include "putils/reflection.hpp"
-
 namespace kengine::data {
+	//! putils reflect all
 	struct kinematic {};
 }
 
-#define refltype kengine::data::kinematic
-putils_reflection_info {
-	putils_reflection_class_name;
-};
-#undef refltype
+#include "kinematic.reflection.hpp"

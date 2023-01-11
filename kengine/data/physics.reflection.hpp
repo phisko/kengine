@@ -1,0 +1,20 @@
+#pragma once
+
+#include "putils/reflection.hpp"
+
+#define refltype kengine::data::physics
+putils_reflection_info {
+	putils_reflection_class_name;
+	putils_reflection_attributes(
+		putils_reflection_attribute(mass),
+		putils_reflection_attribute(movement),
+		putils_reflection_attribute(yaw),
+		putils_reflection_attribute(pitch),
+		putils_reflection_attribute(roll),
+		putils_reflection_attribute(changed)
+	);
+	putils_reflection_used_types(
+		putils_reflection_type(putils::vec3f)
+	);
+};
+#undef refltype

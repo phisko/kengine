@@ -1,0 +1,55 @@
+#pragma once
+
+#include "putils/reflection.hpp"
+
+#define refltype kengine::data::model_data
+putils_reflection_info {
+	putils_reflection_class_name;
+	putils_reflection_attributes(
+		putils_reflection_attribute(meshes),
+		putils_reflection_attribute(free),
+		putils_reflection_attribute(vertex_attributes),
+		putils_reflection_attribute(vertex_size)
+	);
+	putils_reflection_used_types(
+		putils_reflection_type(refltype::mesh),
+		putils_reflection_type(refltype::vertex_attribute)
+	);
+};
+#undef refltype
+
+#define refltype kengine::data::model_data::mesh
+putils_reflection_info {
+	putils_reflection_custom_class_name(model_data_mesh);
+	putils_reflection_attributes(
+		putils_reflection_attribute(vertices),
+		putils_reflection_attribute(indices),
+		putils_reflection_attribute(index_type)
+	);
+	putils_reflection_used_types(
+		putils_reflection_type(refltype::buffer)
+	);
+};
+#undef refltype
+
+#define refltype kengine::data::model_data::mesh::buffer
+putils_reflection_info {
+	putils_reflection_custom_class_name(model_data_mesh_buffer);
+	putils_reflection_attributes(
+		putils_reflection_attribute(nb_elements),
+		putils_reflection_attribute(element_size),
+		putils_reflection_attribute(data)
+	);
+};
+#undef refltype
+
+#define refltype kengine::data::model_data::vertex_attribute
+putils_reflection_info {
+	putils_reflection_custom_class_name(model_data_vertex_attribute);
+	putils_reflection_attributes(
+		putils_reflection_attribute(name),
+		putils_reflection_attribute(offset),
+		putils_reflection_attribute(type)
+	);
+};
+#undef refltype

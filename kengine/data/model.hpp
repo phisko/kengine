@@ -8,17 +8,13 @@
 #include "putils/string.hpp"
 
 namespace kengine::data {
+	//! putils reflect all
+	//! used_types: [refltype::string]
 	struct model {
 		static constexpr char string_name[] = "model_string";
-		putils::string<KENGINE_MODEL_STRING_MAX_LENGTH, string_name> file;
+		using string = putils::string<KENGINE_MODEL_STRING_MAX_LENGTH, string_name>;
+		string file;
 	};
 }
 
-#define refltype kengine::data::model
-putils_reflection_info {
-	putils_reflection_class_name;
-	putils_reflection_attributes(
-		putils_reflection_attribute(file)
-	)
-};
-#undef refltype
+#include "model.reflection.hpp"

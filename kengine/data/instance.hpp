@@ -1,22 +1,13 @@
 #pragma once
 
 // entt
-#include <entt/entity/fwd.hpp>
-
-// reflection
-#include "putils/reflection.hpp"
+#include <entt/entity/entity.hpp>
 
 namespace kengine::data {
+	//! putils reflect all
 	struct instance {
 		entt::entity model = entt::null;
 	};
 }
 
-#define refltype kengine::data::instance
-putils_reflection_info {
-	putils_reflection_class_name;
-	putils_reflection_attributes(
-		putils_reflection_attribute(model)
-	);
-};
-#undef refltype
+#include "instance.reflection.hpp"

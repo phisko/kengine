@@ -12,6 +12,8 @@
 #include "putils/point.hpp"
 
 namespace kengine::data {
+	//! putils reflect all
+	//! used_types: [putils::point2f]
 	struct input {
 		template<typename T>
 		using function = putils::function<T, KENGINE_INPUT_FUNCTION_SIZE>;
@@ -23,17 +25,4 @@ namespace kengine::data {
 	};
 }
 
-#define refltype kengine::data::input
-putils_reflection_info {
-	putils_reflection_class_name;
-	putils_reflection_attributes(
-		putils_reflection_attribute(on_key),
-		putils_reflection_attribute(on_mouse_move),
-		putils_reflection_attribute(on_mouse_button),
-		putils_reflection_attribute(on_scroll)
-	);
-	putils_reflection_used_types(
-		putils_reflection_type(putils::point2f)
-	);
-};
-#undef refltype
+#include "input.reflection.hpp"
