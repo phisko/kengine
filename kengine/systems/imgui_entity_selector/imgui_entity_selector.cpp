@@ -48,7 +48,7 @@ namespace kengine::systems {
 			enabled = &tool.enabled;
 		}
 
-		char name_search[1024];
+		char name_search[1024] = "";
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
