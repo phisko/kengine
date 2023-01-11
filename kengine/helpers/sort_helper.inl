@@ -1,5 +1,8 @@
 #include "sort_helper.hpp"
 
+// entt
+#include <entt/entity/entity.hpp>
+
 // meta
 #include "putils/meta/fwd.hpp"
 
