@@ -10,6 +10,7 @@
 #endif
 
 namespace kengine::data {
+	//! kengine registration off
 	//! putils reflect all
 	//! used_types: [putils::normalized_color]
 	struct light {
