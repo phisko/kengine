@@ -58,10 +58,10 @@ foreach(i RANGE ${system_count})
     endif()
 
     foreach(opt in ${sys_dependent_options})
-		if(${sys_option})
-			option(${opt} OFF)
-			set(${opt} ON)
-		endif()
+        if(${sys_option})
+            option(${opt} OFF)
+            set(${opt} ON)
+        endif()
     endforeach()
 endforeach()
 
@@ -102,10 +102,10 @@ putils_export_symbols(kengine_core)
 set(customFindPackageNames entt:EnTT)
 set(customLibraryNames entt:EnTT)
 putils_conan_download_and_link_packages_with_names(
-    kengine_core PUBLIC
-    "${customFindPackageNames}"
-    "${customLibraryNames}"
-    entt/3.11.0
+        kengine_core PUBLIC
+        "${customFindPackageNames}"
+        "${customLibraryNames}"
+        entt/3.11.0
 )
 
 if (KENGINE_PROFILING)
@@ -171,9 +171,9 @@ if (KENGINE_TESTS)
     enable_testing()
     set(test_exe_name kengine_tests)
     file(
-        GLOB test_src
-        kengine/helpers/tests/*.tests.cpp
-        kengine/helpers/tests/meta/*.tests.cpp
+            GLOB test_src
+            kengine/helpers/tests/*.tests.cpp
+            kengine/helpers/tests/meta/*.tests.cpp
     )
 
     putils_add_test_executable(${test_exe_name} ${test_src})
