@@ -94,12 +94,6 @@ putils_src_files(src_files
 	kengine/helpers/meta
 )
 
-option(KENGINE_TYPE_REGISTRATION "Automatically register kengine types" OFF)
-if (KENGINE_TYPE_REGISTRATION)
-    file(GLOB type_files kengine/types/*.cpp kengine/types/*.hpp)
-    set(src_files ${src_files} ${type_files})
-endif()
-
 add_library(kengine_core ${src_files})
 target_link_libraries(kengine_core PUBLIC putils)
 target_include_directories(kengine_core PUBLIC .)
@@ -128,10 +122,6 @@ if (KENGINE_NDEBUG)
     target_compile_definitions(kengine_core PUBLIC KENGINE_NDEBUG)
 endif()
 
-if (KENGINE_TYPE_REGISTRATION)
-    target_compile_definitions(kengine_core PUBLIC KENGINE_TYPE_REGISTRATION)
-endif()
-
 target_link_libraries(kengine INTERFACE kengine_core)
 
 # Add systems
@@ -150,6 +140,18 @@ foreach(i RANGE ${system_count})
         target_link_libraries(kengine INTERFACE ${sys_lib})
     endif()
 endforeach()
+
+option(KENGINE_TYPE_REGISTRATION "Automatically register kengine types" OFF)
+if (KENGINE_TYPE_REGISTRATION)
+    target_compile_definitions(kengine_core PUBLIC KENGINE_TYPE_REGISTRATION)
+
+    file(GLOB type_files kengine/types/*.cpp kengine/types/*.hpp)
+    add_library(kengine_type_registration ${type_files})
+    putils_export_symbols(kengine_type_registration)
+    target_link_libraries(kengine_type_registration kengine_core)
+
+    target_link_libraries(kengine INTERFACE kengine_type_registration)
+endif()
 
 # Generate reflection headers now that all system include paths are known
 option(KENGINE_GENERATE_REFLECTION OFF)
