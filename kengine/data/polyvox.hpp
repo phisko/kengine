@@ -8,6 +8,7 @@
 #include <PolyVox/RawVolume.h>
 
 namespace kengine::data {
+	//! putils reflect none
 	struct polyvox {
 		//! putils reflect all
 		struct vertex_data {
