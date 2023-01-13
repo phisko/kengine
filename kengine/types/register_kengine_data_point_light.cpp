@@ -12,6 +12,6 @@ namespace kengine::types {
 	void register_kengine_data_point_light(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		kengine_log(r, log, "init/register_types", "Registering 'kengine::data::point_light'");
-		kengine::register_everything<true, kengine::data::point_light>(r);
+		kengine::register_everything<kengine::data::point_light>(r);
 	}
 }

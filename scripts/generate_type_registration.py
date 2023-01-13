@@ -4,49 +4,31 @@ import os
 
 parser = argparse.ArgumentParser(formatter_class = argparse.RawTextHelpFormatter, description = 'Generate kengine type registration functions', epilog = '''
 Type files should contain the following format:
-{
-	"components": [
-		{
-			"type": "kengine::data::transform",
-			"header": "kengine/data/transform.hpp"
-		},
-		...
-	],
-	"types": [
-		{
-			"type": "putils::point3f",
-			"header": "putils/point.hpp"
-		},
-		...
-	]
-}
+[
+	{
+		"type": "kengine::data::transform",
+		"header": "kengine/data/transform.hpp"
+	},
+	...
+]
 
 Registration files should contain the following format:
-{
-	"components": [
-		{
-			"registration": "kengine::register_components",
-			"header": "kengine/helpers/register_type_helper.hpp"
-		},
-		...
-	],
-	"types": [
-		{
-			"registration": "kengine::register_types",
-			"header": "kengine/helpers/register_type_helper.hpp"
-		},
-		...
-	]
-}
+[
+	{
+		"registration": "kengine::register_components",
+		"header": "kengine/helpers/register_type_helper.hpp"
+	},
+	...
+]
 
 The script will generate a separate cpp file for each type,
-as well as a 'register_types.cpp' file and a corresponding header.
+as well as a 'add_type_registrator.cpp' file and a corresponding header.
 
 All you need to do to have your types registered with the various
-kengine systems is to include 'register_types.hpp' and call 'register_types()'.
+kengine systems is to include 'add_type_registrator.hpp' and call 'add_type_registrator()'
+before calling `kengine::register_all_types()`.
 
-For more information, see kengine/helpers/register_type_helper.md
-''')
+For more information, see kengine/helpers/register_type_helper.md''')
 
 parser.add_argument('--types', help = 'input types, as JSON files', nargs = '+', required = True)
 parser.add_argument('--registrations', help = 'registrations to use, as JSON files', nargs = '+', required = True)
@@ -68,21 +50,12 @@ def process_type_file(input_file):
 	json_file = open(input_file)
 	json_data = json.load(json_file)
 
-	def process_types(json_array_name, is_component):
-		if not json_array_name in json_data:
-			return
-		for type in json_data[json_array_name]:
-			process_type(type, is_component)
-
-	process_types('components', True)
-	process_types('types', False)
-
-def process_type(type, is_component):
-	if 'enabled' in type and not type['enabled']:
-		return
-	clean_name = type['type'].replace('::', '_')
-	function_name = 'register_' + clean_name
-	all_types.append({ 'json_type': type, 'is_component': is_component, 'function_name': function_name, 'clean_name': clean_name })
+	for type in json_data:
+		if 'enabled' in type and not type['enabled']:
+			continue
+		type['clean_name'] = type['type'].replace('::', '_')
+		type['function_name'] = f'register_{type["clean_name"]}'
+		all_types.append(type)
 
 all_registrations = [] # output
 
@@ -106,18 +79,20 @@ def generate_registration(type):
 	out_path = os.path.join(args.output, type['function_name'] + '.cpp')
 
 	if os.path.exists(out_path) and not args.force:
-		print('Skipping "' + type['json_type']['type'] + '": ' + out_path + ' exists')
+		print('Skipping "' + type['type'] + '": ' + out_path + ' exists')
 		return
 
-	print('Generating registration for "' + type['json_type']['type'] + '" from header "' + type['json_type']['header'] + '" in "' + out_path + '"')
+	print('Generating registration for "' + type['type'] + '" from header "' + type['header'] + '" in "' + out_path + '"')
 
 	content = generate_registration_headers(type)
-	if 'condition' in type['json_type']:
-		content += '\n#ifdef ' + type['json_type']['condition'] + '\n'
-	content += '#include "' + type['json_type']['header'] + '"'
-	if 'condition' in type['json_type']:
-		content += '''
-#endif'''
+
+	if 'condition' in type:
+		content += f'\n#ifdef {type["condition"]}\n'
+
+	content += f'#include "{type["header"]}"'
+
+	if 'condition' in type:
+		content += '\n#endif'
 
 	content += '''
 
@@ -129,7 +104,9 @@ def generate_registration(type):
 #include "kengine/helpers/profiling_helper.hpp"
 
 namespace ''' + args.namespace + ''' {
-	void ''' + type['function_name'] + '''(entt::registry & r) noexcept {''' + generate_conditional_registration(type) + '''	}
+	void ''' + type['function_name'] + '''(entt::registry & r) noexcept {
+''' + generate_registration_function_body(type) + '''
+	}
 }'''
 
 	open(out_path, 'w').write(content)
@@ -137,29 +114,25 @@ namespace ''' + args.namespace + ''' {
 def generate_registration_headers(type):
 	ret = ''
 	for registration in all_registrations:
-		ret += '#include "' + registration['header'] + '"\n'
+		ret += f'#include "{registration["header"]}"\n'
 	return ret
 
-def generate_conditional_registration(type):
+def generate_registration_function_body(type):
 	ret = ''
-	if 'condition' in type['json_type']:
-		ret += '''
-#ifdef ''' + type['json_type']['condition']
-	ret += '''
-		KENGINE_PROFILING_SCOPE;
-		kengine_log(r, log, "init/register_types", "Registering \'''' + type['json_type']['type'] + '''\'");
-		''' + generate_registration_implementation(type)
-	if 'condition' in type['json_type']:
-		ret += '''#else
-		kengine_log(r, log, "init/register_types", "Not registering \'''' + type['json_type']['type'] + '''\' because \'''' + type['json_type']['condition'] + '''\' is not defined");
-#endif
-'''
-	return ret
+	if 'condition' in type:
+		ret += f'#ifdef {type["condition"]}\n'
 
-def generate_registration_implementation(type):
-	ret = ''
+	ret += '\t\tKENGINE_PROFILING_SCOPE;\n'
+	ret += f'\t\tkengine_log(r, log, "init/register_types", "Registering \'{type["type"]}\'");'
+
 	for registration in all_registrations:
-		ret += registration['registration'] + '<' + ('true' if type['is_component'] else 'false') + ', ' + type['json_type']['type'] + '>(r);\n'
+		ret += f'\n\t\t{registration["registration"]}<{type["type"]}>(r);'
+
+	if 'condition' in type:
+		ret += '\n#else\n'
+		ret += f'\t\tkengine_log(r, log, "init/register_types", "Not registering \'{type["type"]}\' because \'{type["condition"]}\' is not defined");\n'
+		ret += '#endif'
+
 	return ret
 
 #
@@ -177,30 +150,43 @@ for f in args.registrations:
 for type in all_types:
 	generate_registration(type)
 
-main_file = os.path.join(args.output, 'register_types')
+main_file = os.path.join(args.output, 'add_type_registrator')
 
 main_file_cpp = '''
-#include "register_types.hpp"
+#include "add_type_registrator.hpp"
+
+// entt
+#include <entt/entity/registry.hpp>
+
+// kengine functions
+#include "kengine/functions/register_types.hpp"
 
 // kengine helpers
 #include "kengine/helpers/log_helper.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
 
-namespace ''' + args.namespace + ''' {
-	void register_types(entt::registry & r) noexcept {
+namespace ''' + args.namespace + ' {\n'
+
+for type in all_types:
+	main_file_cpp += f'\textern void {type["function_name"]}(entt::registry &) noexcept;\n'
+
+main_file_cpp += '''
+	void add_type_registrator(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_log(r, log, "Init", "Registering types");
+
+		const auto e = r.create();
+		r.emplace<kengine::functions::register_types>(e, [](entt::registry & r) noexcept {
+			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, log, "Init", "Registering types");
 '''
 
 for type in all_types:
-	main_file_cpp += '''
-		extern void ''' + type['function_name'] + '''(entt::registry &) noexcept;
-		''' + type['function_name'] + '(r);'
+	main_file_cpp += f'\n\t\t\t{type["function_name"]}(r);'
 
 main_file_cpp += '''
+		});
 	}
-}
-'''
+}'''
 
 open(main_file + '.cpp', 'w').write(main_file_cpp)
 open(main_file + '.hpp', 'w').write('''
@@ -210,6 +196,5 @@ open(main_file + '.hpp', 'w').write('''
 #include <entt/entity/fwd.hpp>
 
 namespace ''' + args.namespace + ''' {
-	''' + args.export_macro + ''' void register_types(entt::registry & r) noexcept;
-}
-''')
+	''' + args.export_macro + ''' void add_type_registrator(entt::registry & r) noexcept;
+}''')

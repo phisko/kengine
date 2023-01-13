@@ -12,6 +12,6 @@ namespace kengine::types {
 	void register_kengine_data_on_screen(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		kengine_log(r, log, "init/register_types", "Registering 'kengine::data::on_screen'");
-		kengine::register_everything<true, kengine::data::on_screen>(r);
+		kengine::register_everything<kengine::data::on_screen>(r);
 	}
 }

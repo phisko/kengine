@@ -12,6 +12,6 @@ namespace kengine::types {
 	void register_kengine_data_selected(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		kengine_log(r, log, "init/register_types", "Registering 'kengine::data::selected'");
-		kengine::register_everything<true, kengine::data::selected>(r);
+		kengine::register_everything<kengine::data::selected>(r);
 	}
 }

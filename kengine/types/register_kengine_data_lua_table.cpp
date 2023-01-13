@@ -16,7 +16,7 @@ namespace kengine::types {
 #ifdef KENGINE_LUA
 		KENGINE_PROFILING_SCOPE;
 		kengine_log(r, log, "init/register_types", "Registering 'kengine::data::lua_table'");
-		kengine::register_everything<true, kengine::data::lua_table>(r);
+		kengine::register_everything<kengine::data::lua_table>(r);
 #else
 		kengine_log(r, log, "init/register_types", "Not registering 'kengine::data::lua_table' because 'KENGINE_LUA' is not defined");
 #endif

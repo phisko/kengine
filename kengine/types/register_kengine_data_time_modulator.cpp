@@ -12,6 +12,6 @@ namespace kengine::types {
 	void register_kengine_data_time_modulator(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		kengine_log(r, log, "init/register_types", "Registering 'kengine::data::time_modulator'");
-		kengine::register_everything<true, kengine::data::time_modulator>(r);
+		kengine::register_everything<kengine::data::time_modulator>(r);
 	}
 }

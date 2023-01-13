@@ -12,6 +12,6 @@ namespace kengine::types {
 	void register_kengine_data_name(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		kengine_log(r, log, "init/register_types", "Registering 'kengine::data::name'");
-		kengine::register_everything<true, kengine::data::name>(r);
+		kengine::register_everything<kengine::data::name>(r);
 	}
 }

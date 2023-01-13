@@ -16,7 +16,7 @@ namespace kengine::types {
 #ifdef KENGINE_PYTHON
 		KENGINE_PROFILING_SCOPE;
 		kengine_log(r, log, "init/register_types", "Registering 'kengine::data::python'");
-		kengine::register_everything<true, kengine::data::python>(r);
+		kengine::register_everything<kengine::data::python>(r);
 #else
 		kengine_log(r, log, "init/register_types", "Not registering 'kengine::data::python' because 'KENGINE_PYTHON' is not defined");
 #endif

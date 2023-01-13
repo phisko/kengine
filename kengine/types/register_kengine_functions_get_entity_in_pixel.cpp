@@ -12,6 +12,6 @@ namespace kengine::types {
 	void register_kengine_functions_get_entity_in_pixel(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		kengine_log(r, log, "init/register_types", "Registering 'kengine::functions::get_entity_in_pixel'");
-		kengine::register_everything<true, kengine::functions::get_entity_in_pixel>(r);
+		kengine::register_everything<kengine::functions::get_entity_in_pixel>(r);
 	}
 }

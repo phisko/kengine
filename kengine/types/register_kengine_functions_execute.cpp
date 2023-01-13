@@ -12,6 +12,6 @@ namespace kengine::types {
 	void register_kengine_functions_execute(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		kengine_log(r, log, "init/register_types", "Registering 'kengine::functions::execute'");
-		kengine::register_everything<true, kengine::functions::execute>(r);
+		kengine::register_everything<kengine::functions::execute>(r);
 	}
 }
