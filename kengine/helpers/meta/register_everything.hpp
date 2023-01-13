@@ -4,7 +4,7 @@
 #include <entt/entity/fwd.hpp>
 
 namespace kengine {
-	template<bool IsComponent, typename... Comps>
+	template<typename... Comps>
 	void register_everything(entt::registry & r) noexcept;
 }
 

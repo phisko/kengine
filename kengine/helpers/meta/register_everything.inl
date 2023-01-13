@@ -13,7 +13,7 @@
 #include "register_with_script_languages.hpp"
 
 namespace kengine {
-	template<bool IsComponent, typename... Comps>
+	template<typename... Comps>
 	void register_everything(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
