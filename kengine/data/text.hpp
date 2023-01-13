@@ -15,6 +15,7 @@
 #include "kengine/data/on_screen.hpp"
 
 namespace kengine::data {
+	//! kengine registration off
 	//! putils reflect all
 	//! used_types: [refltype::string, putils::normalized_color]
 	struct text {
