@@ -15,7 +15,7 @@ list(APPEND src
 		${imguiResDir}/bindings/imgui_impl_glfw.cpp)
 
 add_library(${name} ${src})
-target_link_libraries(${name} PRIVATE kengine kreogl)
+target_link_libraries(${name} PRIVATE kengine_core kreogl)
 target_include_directories(${name} PRIVATE ${imguiResDir})
 
 putils_export_symbols(${name})
