@@ -12,6 +12,6 @@ namespace kengine::types {
 	void register_kengine_meta_display_imgui(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		kengine_log(r, log, "init/register_types", "Registering 'kengine::meta::display_imgui'");
-		kengine::register_everything<true, kengine::meta::display_imgui>(r);
+		kengine::register_everything<kengine::meta::display_imgui>(r);
 	}
 }

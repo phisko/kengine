@@ -16,7 +16,7 @@ namespace kengine::types {
 #ifdef KENGINE_GLM
 		KENGINE_PROFILING_SCOPE;
 		kengine_log(r, log, "init/register_types", "Registering 'kengine::data::skeleton'");
-		kengine::register_everything<true, kengine::data::skeleton>(r);
+		kengine::register_everything<kengine::data::skeleton>(r);
 #else
 		kengine_log(r, log, "init/register_types", "Not registering 'kengine::data::skeleton' because 'KENGINE_GLM' is not defined");
 #endif

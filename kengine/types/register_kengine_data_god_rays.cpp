@@ -12,6 +12,6 @@ namespace kengine::types {
 	void register_kengine_data_god_rays(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		kengine_log(r, log, "init/register_types", "Registering 'kengine::data::god_rays'");
-		kengine::register_everything<true, kengine::data::god_rays>(r);
+		kengine::register_everything<kengine::data::god_rays>(r);
 	}
 }

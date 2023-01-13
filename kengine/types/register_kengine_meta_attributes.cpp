@@ -12,6 +12,6 @@ namespace kengine::types {
 	void register_kengine_meta_attributes(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		kengine_log(r, log, "init/register_types", "Registering 'kengine::meta::attributes'");
-		kengine::register_everything<true, kengine::meta::attributes>(r);
+		kengine::register_everything<kengine::meta::attributes>(r);
 	}
 }

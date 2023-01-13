@@ -12,6 +12,6 @@ namespace kengine::types {
 	void register_kengine_data_keep_alive(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		kengine_log(r, log, "init/register_types", "Registering 'kengine::data::keep_alive'");
-		kengine::register_everything<true, kengine::data::keep_alive>(r);
+		kengine::register_everything<kengine::data::keep_alive>(r);
 	}
 }

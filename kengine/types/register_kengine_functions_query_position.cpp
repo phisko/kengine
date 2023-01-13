@@ -12,6 +12,6 @@ namespace kengine::types {
 	void register_kengine_functions_query_position(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		kengine_log(r, log, "init/register_types", "Registering 'kengine::functions::query_position'");
-		kengine::register_everything<true, kengine::functions::query_position>(r);
+		kengine::register_everything<kengine::functions::query_position>(r);
 	}
 }

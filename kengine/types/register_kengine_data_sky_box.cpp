@@ -12,6 +12,6 @@ namespace kengine::types {
 	void register_kengine_data_sky_box(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		kengine_log(r, log, "init/register_types", "Registering 'kengine::data::sky_box'");
-		kengine::register_everything<true, kengine::data::sky_box>(r);
+		kengine::register_everything<kengine::data::sky_box>(r);
 	}
 }
