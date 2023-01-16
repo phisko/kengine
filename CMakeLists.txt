@@ -86,15 +86,20 @@ add_subdirectory(putils)
 
 add_library(kengine INTERFACE)
 
-putils_src_files(src_files
-	kengine/data
-	kengine/functions
-	kengine/meta
-	kengine/helpers
-	kengine/helpers/meta
+putils_src_files(
+        components
+        kengine/data
+        kengine/functions
+        kengine/meta
 )
 
-add_library(kengine_core ${src_files})
+putils_src_files(
+        src_files
+        kengine/helpers
+        kengine/helpers/meta
+)
+
+add_library(kengine_core ${components} ${src_files})
 target_link_libraries(kengine_core PUBLIC putils)
 target_include_directories(kengine_core PUBLIC .)
 putils_export_symbols(kengine_core)
@@ -158,7 +163,7 @@ option(KENGINE_GENERATE_REFLECTION OFF)
 if(KENGINE_GENERATE_REFLECTION)
     putils_generate_reflection_headers(
             TARGET kengine_core
-            SOURCES ${src_files}
+            SOURCES ${components}
     )
 endif()
 
