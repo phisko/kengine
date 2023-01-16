@@ -6,8 +6,13 @@
 // kengine functions
 #include "kengine/functions/register_types.hpp"
 
+// kengine helpers
+#include "kengine/helpers/profiling_helper.hpp"
+
 namespace kengine {
 	void register_all_types(entt::registry & destination_registry, const entt::registry * main_registry) noexcept {
+		KENGINE_PROFILING_SCOPE;
+
 		if (!main_registry)
 			main_registry = &destination_registry;
 
