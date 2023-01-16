@@ -146,16 +146,20 @@ foreach(i RANGE ${system_count})
     endif()
 endforeach()
 
-option(KENGINE_TYPE_REGISTRATION "Automatically register kengine types" OFF)
+option(KENGINE_TYPE_REGISTRATION "Generate kengine type registration" OFF)
 if (KENGINE_TYPE_REGISTRATION)
     target_compile_definitions(kengine_core PUBLIC KENGINE_TYPE_REGISTRATION)
 
-    file(GLOB type_files kengine/types/*.cpp kengine/types/*.hpp)
-    add_library(kengine_type_registration ${type_files})
-    putils_export_symbols(kengine_type_registration)
-    target_link_libraries(kengine_type_registration kengine_core)
-
-    target_link_libraries(kengine INTERFACE kengine_type_registration)
+    include(scripts/generate_type_registration.cmake)
+    kengine_generate_type_registration(
+            TARGET kengine_core
+            INCLUDE_DIR kengine/types
+            SOURCES ${components}
+            REGISTRATIONS_JSON ${CMAKE_CURRENT_LIST_DIR}/scripts/registrations.json
+            NAMESPACE kengine::types
+    )
+    target_link_libraries(kengine_core_type_registration PUBLIC kengine)
+    target_link_libraries(kengine INTERFACE kengine_core_type_registration)
 endif()
 
 # Generate reflection headers now that all system include paths are known
