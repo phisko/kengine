@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef KENGINE_POLYVOX
+
 #ifndef KENGINE_POLYVOX_CHUNK_SIDE
 #define KENGINE_POLYVOX_CHUNK_SIDE 16
 #endif
@@ -52,3 +54,5 @@ namespace kengine::data {
 }
 
 #include "polyvox.reflection.hpp"
+
+#endif

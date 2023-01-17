@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef KENGINE_GLM
+
 // stl
 #include <vector>
 
@@ -28,3 +30,5 @@ namespace kengine::data {
 }
 
 #include "skeleton.reflection.hpp"
+
+#endif
