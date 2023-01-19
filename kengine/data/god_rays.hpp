@@ -10,4 +10,4 @@ namespace kengine::data {
 	};
 }
 
-#include "god_rays.reflection.hpp"
+#include "god_rays.rpp"

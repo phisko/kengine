@@ -70,4 +70,4 @@ namespace kengine::data {
 	};
 }
 
-#include "debug_graphics.reflection.hpp"
+#include "debug_graphics.rpp"

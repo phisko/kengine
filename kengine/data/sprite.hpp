@@ -17,4 +17,4 @@ namespace kengine::data {
 	};
 }
 
-#include "sprite.reflection.hpp"
+#include "sprite.rpp"

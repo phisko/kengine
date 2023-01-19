@@ -8,4 +8,4 @@ namespace kengine::data {
 	struct no_shadow {};
 }
 
-#include "no_shadow.reflection.hpp"
+#include "no_shadow.rpp"

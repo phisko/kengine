@@ -87,16 +87,22 @@ add_subdirectory(putils)
 add_library(kengine INTERFACE)
 
 putils_src_files(
-        components
+    components
+    DIRECTORIES
         kengine/data
         kengine/functions
         kengine/meta
+    EXTENSIONS
+        hpp
 )
 
 putils_src_files(
-        src_files
+    src_files
+    DIRECTORIES
         kengine/helpers
         kengine/helpers/meta
+    EXTENSIONS
+        cpp hpp inl
 )
 
 add_library(kengine_core ${components} ${src_files})

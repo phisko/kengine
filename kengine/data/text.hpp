@@ -46,4 +46,4 @@ namespace kengine::data {
 	struct text_3d : text {};
 }
 
-#include "text.reflection.hpp"
+#include "text.rpp"

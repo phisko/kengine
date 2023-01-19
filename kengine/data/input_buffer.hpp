@@ -56,4 +56,4 @@ namespace kengine::data {
 	};
 }
 
-#include "input_buffer.reflection.hpp"
+#include "input_buffer.rpp"

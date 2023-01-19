@@ -5,4 +5,4 @@ namespace kengine::data {
 	struct keep_alive {};
 }
 
-#include "keep_alive.reflection.hpp"
+#include "keep_alive.rpp"
