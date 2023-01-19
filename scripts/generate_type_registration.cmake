@@ -13,22 +13,13 @@ function(kengine_generate_type_registration)
     set(python_script ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/generate_type_registration.py)
     putils_build_clang_arguments(clang_args ${ARGUMENTS_TARGET} ${ARGUMENTS_CLANG_ARGS})
 
-    # Get only header files
-    set(headers)
-    foreach(file ${ARGUMENTS_SOURCES})
-        get_filename_component(extension ${file} EXT)
-        if (${extension} STREQUAL ".hpp")
-            list(APPEND headers ${file})
-        endif()
-    endforeach()
-
     get_target_property(binary_dir ${ARGUMENTS_TARGET} BINARY_DIR)
     set(include_dir ${binary_dir}/type_registration)
     set(output_dir ${include_dir}/${ARGUMENTS_INCLUDE_DIR})
     file(MAKE_DIRECTORY ${output_dir})
 
     set(registration_src)
-    foreach(header ${headers})
+    foreach(header ${ARGUMENTS_SOURCES})
         get_target_property(source_dir ${ARGUMENTS_TARGET} SOURCE_DIR)
         file(RELATIVE_PATH header_relative_path ${source_dir} ${header})
 
@@ -77,7 +68,7 @@ function(kengine_generate_type_registration)
             OUTPUT ${main_file}
             COMMENT "Generating type registration code for ${ARGUMENTS_TARGET}"
             COMMAND ${command}
-            DEPENDS ${headers} ${python_script}
+            DEPENDS ${ARGUMENTS_SOURCES} ${python_script}
     )
 
     add_library(${registration_target} ${registration_src})
