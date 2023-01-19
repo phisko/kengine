@@ -35,6 +35,7 @@
 
 namespace kengine::systems {
 	static auto build_mesh(PolyVox::RawVolume<data::polyvox::vertex_data> && volume) noexcept {
+		KENGINE_PROFILING_SCOPE;
 		const auto encoded_mesh = PolyVox::extractCubicMesh(&volume, volume.getEnclosingRegion());
 		const auto mesh = PolyVox::decodeMesh(encoded_mesh);
 		return mesh;
@@ -224,6 +225,7 @@ namespace kengine::systems {
 		}
 
 		bool id_matches(const char * s1, const char * s2) noexcept {
+			KENGINE_PROFILING_SCOPE;
 			return strncmp(s1, s2, 4) == 0;
 		}
 
@@ -302,6 +304,7 @@ namespace kengine::systems {
 
 		template<typename T>
 		void read_from_stream(T & header, std::istream & s) noexcept {
+			KENGINE_PROFILING_SCOPE;
 			s.read((char *)&header, sizeof(header));
 			kengine_assert(r, s.gcount() == sizeof(header));
 		}
