@@ -29,6 +29,6 @@ namespace kengine::data {
 	};
 }
 
-#include "skeleton.reflection.hpp"
+#include "skeleton.rpp"
 
 #endif

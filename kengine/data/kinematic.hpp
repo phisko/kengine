@@ -5,4 +5,4 @@ namespace kengine::data {
 	struct kinematic {};
 }
 
-#include "kinematic.reflection.hpp"
+#include "kinematic.rpp"

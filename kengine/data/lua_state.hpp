@@ -12,6 +12,6 @@ namespace kengine::data {
 	};
 }
 
-#include "lua_state.reflection.hpp"
+#include "lua_state.rpp"
 
 #endif

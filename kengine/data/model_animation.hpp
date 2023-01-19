@@ -37,4 +37,4 @@ namespace kengine::data {
 	};
 }
 
-#include "model_animation.reflection.hpp"
+#include "model_animation.rpp"

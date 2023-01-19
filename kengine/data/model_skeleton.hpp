@@ -20,4 +20,4 @@ namespace kengine::data {
 	};
 }
 
-#include "model_skeleton.reflection.hpp"
+#include "model_skeleton.rpp"

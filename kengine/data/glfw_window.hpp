@@ -26,6 +26,6 @@ namespace kengine::data {
 	};
 }
 
-#include "glfw_window.reflection.hpp"
+#include "glfw_window.rpp"
 
 #endif
