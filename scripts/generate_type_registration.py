@@ -98,8 +98,6 @@ def generate_registration_functions(types):
 # Main
 #
 
-types_to_register = []
-
 args = parser.parse_args()
 
 all_types = {}
