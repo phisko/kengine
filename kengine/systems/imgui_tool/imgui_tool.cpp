@@ -48,7 +48,8 @@ namespace kengine::systems {
 			conf_file.parse();
 			for (const auto & [tool_entity, name, tool] : r.view<data::name, data::imgui_tool>().each()) {
 				kengine_logf(r, log, "Init/systems/imgui_tool", "Initializing %s", name.name.c_str());
-				tool.enabled = conf_file.get_value(name.name.c_str());
+				if (const auto value = conf_file.get_value(name.name.c_str()))
+					tool.enabled = *value;
 			}
 
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
@@ -101,7 +102,8 @@ namespace kengine::systems {
 
 			auto & tool = r.get<data::imgui_tool>(e);
 			kengine_logf(r, log, "Init/systems/imgui_tool", "Initializing %s", name->name.c_str());
-			tool.enabled = conf_file.get_value(name->name.c_str());
+			if (const auto value = conf_file.get_value(name->name.c_str()))
+				tool.enabled = *value;
 		}
 
 		void save_tools() noexcept {
@@ -135,11 +137,11 @@ namespace kengine::systems {
 				_values[line.substr(0, index)] = putils::parse<bool>(line.substr(index + 1).c_str());
 			}
 
-			bool get_value(const char * name) const noexcept {
+			std::optional<bool> get_value(const char * name) const noexcept {
 				KENGINE_PROFILING_SCOPE;
 				const auto it = _values.find(name);
 				if (it == _values.end())
-					return false;
+					return std::nullopt;
 				return it->second;
 			}
 
