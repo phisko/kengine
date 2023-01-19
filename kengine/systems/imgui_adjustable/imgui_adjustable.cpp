@@ -72,7 +72,6 @@ namespace kengine::systems {
 
 			e.emplace<data::name>("Adjustables");
 			auto & tool = e.emplace<data::imgui_tool>();
-			tool.enabled = true;
 			enabled = &tool.enabled;
 
 			connection = r.on_construct<data::adjustable>().connect<&imgui_adjustable::init_adjustable>(this);

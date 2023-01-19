@@ -50,7 +50,7 @@ namespace kengine::systems {
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 
 			e.emplace<data::name>("Engine stats");
-			auto & tool = e.emplace<data::imgui_tool>(true);
+			auto & tool = e.emplace<data::imgui_tool>();
 			enabled = &tool.enabled;
 		}
 
