@@ -4,7 +4,7 @@
 #include "kreogl/animation/animation_file.hpp"
 
 // putils
-#include "kreogl/impl/default_constructors.hpp"
+#include "putils/default_constructors.hpp"
 
 namespace kengine::data {
 	struct kreogl_animation_files {

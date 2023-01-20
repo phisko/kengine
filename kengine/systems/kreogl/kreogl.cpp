@@ -23,10 +23,11 @@
 #include "putils/forward_to.hpp"
 
 // kreogl
+#include "kreogl/animation/animated_object.hpp"
+#include "kreogl/impl/texture/texture_data.hpp"
+#include "kreogl/loaders/assimp/assimp.hpp"
 #include "kreogl/window.hpp"
 #include "kreogl/world.hpp"
-#include "kreogl/animation/animated_object.hpp"
-#include "kreogl/loaders/assimp/assimp.hpp"
 
 // kengine data
 #include "kengine/data/adjustable.hpp"
@@ -78,6 +79,7 @@
 namespace kengine::systems {
 	struct kreogl {
 		entt::registry & r;
+		putils::vector<entt::scoped_connection, 2> connections;
 
 		kreogl(entt::handle e) noexcept
 			: r(*e.registry()) {
@@ -96,6 +98,9 @@ namespace kengine::systems {
 
 			e.emplace<functions::get_entity_in_pixel>(putils_forward_to_this(get_entity_in_pixel));
 			e.emplace<functions::get_position_in_pixel>(putils_forward_to_this(get_position_in_pixel));
+
+			connections.emplace_back(r.on_construct<data::model>().connect<&kreogl::create_model_from_disk>(this));
+			connections.emplace_back(r.on_construct<data::animation_files>().connect<&kreogl::load_animation_files>(this));
 
 			init_window();
 		}
@@ -174,7 +179,7 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, verbose, "execute", "kreogl");
 
-			create_missing_models();
+			load_models_to_opengl();
 			create_missing_objects();
 			tick_animations(delta_time);
 
@@ -193,58 +198,52 @@ namespace kengine::systems {
 			last_scale = scale;
 		}
 
-		void create_missing_models() noexcept {
+		void create_model_from_disk(entt::registry & r, entt::entity model_entity) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			create_models_from_disk();
-			create_models_from_model_data();
-		}
-
-		void create_models_from_disk() noexcept {
-			KENGINE_PROFILING_SCOPE;
-
-			for (auto [model_entity, model] : r.view<data::model>(entt::exclude<data::kreogl_model, ::kreogl::image_texture>).each()) {
-				kengine_logf(r, verbose, "execute/kreogl", "Creating Kreogl model for %zu (%s)", model_entity, model.file.c_str());
-				if (::kreogl::image_texture::is_supported_format(model.file.c_str()))
-					r.emplace<::kreogl::image_texture>(model_entity, model.file.c_str());
-				else if (::kreogl::assimp::is_supported_file_format(model.file.c_str()))
-					create_model_with_assimp(model_entity, model);
+			const auto & model = r.get<data::model>(model_entity);
+			kengine_logf(r, verbose, "execute/kreogl", "Creating Kreogl model for %zu (%s)", model_entity, model.file.c_str());
+			if (::kreogl::texture_data::is_supported_format(model.file.c_str())) {
+				r.emplace<::kreogl::texture_data>(model_entity, model.file.c_str());
 			}
+			else if (::kreogl::assimp::is_supported_file_format(model.file.c_str()))
+				create_model_with_assimp(model_entity, model);
 		}
 
 		void create_model_with_assimp(entt::entity model_entity, const data::model & model) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			auto animated_model = ::kreogl::assimp::load_animated_model(model.file.c_str());
-			if (animated_model) {
-				// Sync properties from loaded model to kengine components
-				add_animations_to_model_animation_component(r.get_or_emplace<data::model_animation>(model_entity), model.file.c_str(), animated_model->animations);
-				if (animated_model->skeleton) {
-					auto & model_skeleton = r.emplace<data::model_skeleton>(model_entity);
-					for (const auto & mesh : animated_model->skeleton->meshes)
-						model_skeleton.meshes.push_back(data::model_skeleton::mesh{
-							.bone_names = mesh.bone_names,
-						});
-				}
+			auto model_data = ::kreogl::assimp::load_model_data(model.file.c_str());
+			// Sync properties from loaded model to kengine components
+			add_animations_to_model_animation_component(r.get_or_emplace<data::model_animation>(model_entity), model.file.c_str(), *model_data.animations);
+			if (model_data.skeleton) {
+				auto & model_skeleton = r.emplace<data::model_skeleton>(model_entity);
+				for (const auto & mesh : model_data.skeleton->meshes)
+					model_skeleton.meshes.push_back(data::model_skeleton::mesh{
+						.bone_names = mesh.bone_names,
+					});
 			}
-			r.emplace<data::kreogl_model>(model_entity, std::move(animated_model));
+			r.emplace<::kreogl::assimp_model_data>(model_entity, std::move(model_data));
+		}
 
-			// Load animations from external files
-			if (const auto animation_files = r.try_get<data::animation_files>(model_entity)) {
-				auto & model_animation = r.get<data::model_animation>(model_entity);
-				auto & kreogl_animation_files = r.emplace<data::kreogl_animation_files>(model_entity);
-				for (const auto & file : animation_files->files) {
-					auto kreogl_animation_file = ::kreogl::assimp::load_animation_file(file.c_str());
-					add_animations_to_model_animation_component(model_animation, file.c_str(), kreogl_animation_file->animations);
-					kreogl_animation_files.files.push_back(std::move(kreogl_animation_file));
-				}
+		void load_animation_files(entt::registry & r, entt::entity model_entity) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			const auto & animation_files = r.get<data::animation_files>(model_entity);
+
+			auto & model_animation = r.get_or_emplace<data::model_animation>(model_entity);
+			auto & kreogl_animation_files = r.emplace<data::kreogl_animation_files>(model_entity);
+			for (const auto & file : animation_files.files) {
+				auto kreogl_animation_file = ::kreogl::assimp::load_animation_file(file.c_str());
+				add_animations_to_model_animation_component(model_animation, file.c_str(), *kreogl_animation_file);
+				kreogl_animation_files.files.push_back(std::move(kreogl_animation_file));
 			}
 		}
 
-		void add_animations_to_model_animation_component(data::model_animation & model_animation, const char * file, const std::vector<std::unique_ptr<::kreogl::animation_model>> & animations) noexcept {
+		void add_animations_to_model_animation_component(data::model_animation & model_animation, const char * file, const ::kreogl::animation_file & animations) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			for (const auto & animation : animations) {
+			for (const auto & animation : animations.animations) {
 				std::string name = file;
 				name += '/';
 				name += animation->name;
@@ -256,48 +255,65 @@ namespace kengine::systems {
 			}
 		}
 
-		void create_models_from_model_data() noexcept {
+		void load_models_to_opengl() noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			for (auto [model_entity, model_data] : r.view<data::model_data>(entt::exclude<data::kreogl_model>).each()) {
-				::kreogl::model_data kreogl_model_data;
-
-				for (const auto & mesh_data : model_data.meshes) {
-					static const std::unordered_map<putils::meta::type_index, GLenum> types = {
-						{ putils::meta::type<char>::index, GL_BYTE },
-						{ putils::meta::type<unsigned char>::index, GL_UNSIGNED_BYTE },
-						{ putils::meta::type<short>::index, GL_SHORT },
-						{ putils::meta::type<unsigned short>::index, GL_UNSIGNED_SHORT },
-						{ putils::meta::type<int>::index, GL_INT },
-						{ putils::meta::type<unsigned int>::index, GL_UNSIGNED_INT },
-						{ putils::meta::type<float>::index, GL_FLOAT },
-						{ putils::meta::type<double>::index, GL_DOUBLE }
-					};
-
-					kreogl_model_data.meshes.push_back(::kreogl::mesh_data{
-						.vertices = {
-							.nb_elements = mesh_data.vertices.nb_elements,
-							.element_size = mesh_data.vertices.element_size,
-							.data = mesh_data.vertices.data,
-						},
-						.indices = {
-							.nb_elements = mesh_data.indices.nb_elements,
-							.element_size = mesh_data.indices.element_size,
-							.data = mesh_data.indices.data,
-						},
-						.index_type = types.at(mesh_data.index_type),
-					});
-				}
-
-				for (const auto & vertex_attribute : model_data.vertex_attributes)
-					kreogl_model_data.vertex_attribute_offsets.push_back(vertex_attribute.offset);
-
-				kreogl_model_data.vertex_size = model_data.vertex_size;
-
-				// We assume custom-built meshes are voxels, might need a better alternative to this
-				const auto & vertex_specification = ::kreogl::vertex_specification::position_color;
-				r.emplace<data::kreogl_model>(model_entity, std::make_unique<::kreogl::animated_model>(vertex_specification, kreogl_model_data));
+			for (const auto & [model_entity, texture_data] : r.view<::kreogl::texture_data>().each()) {
+				const auto & model = r.get<data::model>(model_entity);
+				r.emplace<::kreogl::texture>(model_entity, texture_data.load_to_texture());
+				r.remove<::kreogl::texture_data>(model_entity);
 			}
+
+			for (const auto & [model_entity, model_data] : r.view<::kreogl::assimp_model_data>().each()) {
+				const auto & model = r.get<data::model>(model_entity);
+				r.emplace<data::kreogl_model>(model_entity, ::kreogl::assimp::load_animated_model(std::move(model_data)));
+				r.remove<::kreogl::assimp_model_data>(model_entity);
+			}
+
+			for (const auto & [model_entity, model_data] : r.view<data::model_data>(entt::exclude<data::kreogl_model>).each())
+				create_model_from_model_data(r, model_entity, model_data);
+		}
+
+		void create_model_from_model_data(entt::registry & r, entt::entity model_entity, const data::model_data & model_data) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			::kreogl::model_data kreogl_model_data;
+
+			for (const auto & mesh_data : model_data.meshes) {
+				static const std::unordered_map<putils::meta::type_index, GLenum> types = {
+					{ putils::meta::type<char>::index, GL_BYTE },
+					{ putils::meta::type<unsigned char>::index, GL_UNSIGNED_BYTE },
+					{ putils::meta::type<short>::index, GL_SHORT },
+					{ putils::meta::type<unsigned short>::index, GL_UNSIGNED_SHORT },
+					{ putils::meta::type<int>::index, GL_INT },
+					{ putils::meta::type<unsigned int>::index, GL_UNSIGNED_INT },
+					{ putils::meta::type<float>::index, GL_FLOAT },
+					{ putils::meta::type<double>::index, GL_DOUBLE }
+				};
+
+				kreogl_model_data.meshes.push_back(::kreogl::mesh_data{
+					.vertices = {
+						.nb_elements = mesh_data.vertices.nb_elements,
+						.element_size = mesh_data.vertices.element_size,
+						.data = mesh_data.vertices.data,
+					},
+					.indices = {
+						.nb_elements = mesh_data.indices.nb_elements,
+						.element_size = mesh_data.indices.element_size,
+						.data = mesh_data.indices.data,
+					},
+					.index_type = types.at(mesh_data.index_type),
+				});
+			}
+
+			for (const auto & vertex_attribute : model_data.vertex_attributes)
+				kreogl_model_data.vertex_attribute_offsets.push_back(vertex_attribute.offset);
+
+			kreogl_model_data.vertex_size = model_data.vertex_size;
+
+			// We assume custom-built meshes are voxels, might need a better alternative to this
+			const auto & vertex_specification = ::kreogl::vertex_specification::position_color;
+			r.emplace<data::kreogl_model>(model_entity, std::make_unique<::kreogl::animated_model>(vertex_specification, kreogl_model_data));
 		}
 
 		void create_missing_objects() noexcept {
@@ -315,11 +331,11 @@ namespace kengine::systems {
 						r.emplace<data::skeleton>(entity);
 				}
 
-				if (const auto kreogl_texture = r.try_get<::kreogl::image_texture>(model_entity)) {
+				if (const auto kreogl_texture = r.try_get<::kreogl::texture>(model_entity)) {
 					if (r.all_of<data::sprite_2d>(entity))
-						r.emplace<::kreogl::sprite_2d>(entity).texture = kreogl_texture;
+						r.emplace<::kreogl::sprite_2d>(entity).tex = kreogl_texture;
 					if (r.all_of<data::sprite_3d>(entity))
-						r.emplace<::kreogl::sprite_3d>(entity).texture = kreogl_texture;
+						r.emplace<::kreogl::sprite_3d>(entity).tex = kreogl_texture;
 				}
 			}
 
@@ -552,14 +568,14 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 
 			const auto & kreogl_model = instance_helper::get_model<data::kreogl_model>(r, instance);
-			if (animation_index < kreogl_model.model->animations.size())
-				return kreogl_model.model->animations[animation_index].get();
+			if (animation_index < kreogl_model.model->animations->animations.size())
+				return kreogl_model.model->animations->animations[animation_index].get();
 
 			const auto kreogl_model_animation_files = instance_helper::try_get_model<data::kreogl_animation_files>(r, instance);
 			if (!kreogl_model_animation_files)
 				return nullptr;
 
-			size_t skipped_animations = kreogl_model.model->animations.size();
+			size_t skipped_animations = kreogl_model.model->animations->animations.size();
 			for (const auto & file : kreogl_model_animation_files->files) {
 				const auto index_in_file = animation_index - skipped_animations;
 				if (index_in_file < file->animations.size())
