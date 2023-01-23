@@ -150,8 +150,9 @@ namespace kengine::systems {
 		} conf_file;
 	};
 
-	void add_imgui_tool(entt::registry & r) noexcept {
+	entt::entity add_imgui_tool(entt::registry & r) noexcept {
 		const entt::handle e{ r, r.create() };
 		e.emplace<imgui_tool>(e);
+		return e;
 	}
 }

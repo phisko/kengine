@@ -75,9 +75,10 @@ namespace kengine::systems {
 		}
 	};
 
-	void add_log_visual_studio(entt::registry & r) noexcept {
+	entt::entity add_log_visual_studio(entt::registry & r) noexcept {
 		const entt::handle e{ r, r.create() };
 		e.emplace<log_visual_studio>(e);
+		return e;
 	}
 }
 

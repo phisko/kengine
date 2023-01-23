@@ -49,8 +49,9 @@ namespace kengine::systems {
 		}
 	};
 
-	void add_on_click(entt::registry & r) noexcept {
+	entt::entity add_on_click(entt::registry & r) noexcept {
 		const entt::handle e{ r, r.create() };
 		e.emplace<on_click>(e);
+		return e;
 	}
 }

@@ -217,8 +217,9 @@ namespace kengine::systems {
 		} input;
 	};
 
-	void add_glfw(entt::registry & r) noexcept {
+	entt::entity add_glfw(entt::registry & r) noexcept {
 		const entt::handle e{ r, r.create() };
 		e.emplace<glfw>(e);
+		return e;
 	}
 }

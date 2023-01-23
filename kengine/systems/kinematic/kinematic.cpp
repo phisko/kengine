@@ -51,8 +51,9 @@ namespace kengine::systems {
 		}
 	};
 
-	void add_kinematic(entt::registry & r) noexcept {
+	entt::entity add_kinematic(entt::registry & r) noexcept {
 		const entt::handle e{ r, r.create() };
 		e.emplace<kinematic>(e);
+		return e;
 	}
 }
