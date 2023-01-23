@@ -2,6 +2,8 @@
 
 // stl
 #include <fstream>
+#include <map>
+#include <variant>
 
 // entt
 #include <entt/entity/handle.hpp>
@@ -12,6 +14,7 @@
 
 // putils
 #include "putils/forward_to.hpp"
+#include "putils/split.hpp"
 #include "putils/to_string.hpp"
 
 // kengine data
@@ -38,7 +41,14 @@
 namespace kengine::systems {
 	struct imgui_tool {
 		entt::registry & r;
-		entt::scoped_connection connection;
+		putils::vector<entt::scoped_connection, 2> connections;
+
+		struct menu_entry {
+			using entry_map = std::map<std::string, menu_entry>;
+			entry_map subentries;
+			data::imgui_tool * tool = nullptr;
+		};
+		menu_entry root_entry;
 
 		imgui_tool(entt::handle e) noexcept
 			: r(*e.registry()) {
@@ -54,7 +64,11 @@ namespace kengine::systems {
 
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 
-			connection = r.on_construct<data::imgui_tool>().connect<&imgui_tool::on_construct_imgui_tool>(this);
+			for (const auto tool_entity : r.view<data::imgui_tool>())
+				on_construct_imgui_tool(r, tool_entity);
+
+			connections.emplace_back(r.on_construct<data::imgui_tool>().connect<&imgui_tool::on_construct_imgui_tool>(this));
+			connections.emplace_back(r.on_destroy<data::imgui_tool>().connect<&imgui_tool::on_destroy_imgui_tool>(this));
 		}
 
 		~imgui_tool() noexcept {
@@ -75,13 +89,8 @@ namespace kengine::systems {
 							tool.enabled = false;
 					}
 
-					const auto sorted = sort_helper::get_name_sorted_entities<KENGINE_IMGUI_MAX_TOOLS, data::imgui_tool>(r);
-					for (auto & [e, name, tool] : sorted)
-						if (ImGui::MenuItem(name->name.c_str())) {
-							tool->enabled = !tool->enabled;
-							kengine_logf(r, log, "imgui_tool", "Turned %s %s", tool->enabled ? "on" : "off", name->name.c_str());
-							must_save = true;
-						}
+					for (const auto & [name, entry] : root_entry.subentries)
+						display_menu_entry(name.c_str(), entry, must_save);
 					ImGui::EndMenu();
 				}
 
@@ -89,6 +98,25 @@ namespace kengine::systems {
 					save_tools();
 			}
 			ImGui::EndMainMenuBar();
+		}
+
+		void display_menu_entry(const char * name, const menu_entry & entry, bool & must_save) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			if (entry.tool) {
+				if (ImGui::MenuItem(name, nullptr, entry.tool->enabled)) {
+					entry.tool->enabled = !entry.tool->enabled;
+					kengine_logf(r, log, "imgui_tool", "Turned %s %s", entry.tool->enabled ? "on" : "off", name);
+					must_save = true;
+				}
+				return;
+			}
+
+			if (ImGui::BeginMenu(name)) {
+				for (const auto & [subentry_name, subentry] : entry.subentries)
+					display_menu_entry(subentry_name.c_str(), subentry, must_save);
+				ImGui::EndMenu();
+			}
 		}
 
 		void on_construct_imgui_tool(entt::registry & r, entt::entity e) noexcept {
@@ -104,6 +132,42 @@ namespace kengine::systems {
 			kengine_logf(r, log, "Init/systems/imgui_tool", "Initializing %s", name->name.c_str());
 			if (const auto value = conf_file.get_value(name->name.c_str()))
 				tool.enabled = *value;
+
+			menu_entry * current_entry = &root_entry;
+			const auto entry_names = putils::split(name->name.c_str(), '/');
+			for (const auto & entry_name : entry_names) {
+				kengine_assert_with_message(r, current_entry->tool == nullptr, "Intermediate menu '", entry_name, "' for ImGui tool '", name->name, "' has the name of an existing tool");
+				current_entry = &current_entry->subentries[entry_name];
+			}
+
+			kengine_assert_with_message(r, current_entry->subentries.empty(), "Leaf entry for ImGui tool '", name->name, "' was previously used as an intermediate menu");
+			current_entry->tool = &tool;
+		}
+
+		void on_destroy_imgui_tool(entt::registry & r, entt::entity e) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			const auto & tool = r.get<data::imgui_tool>(e);
+			if (!remove_tool_from_entry(tool, root_entry))
+				kengine_assert_failed(r, "Removed ImGui tool was not found in map");
+		}
+
+		bool remove_tool_from_entry(const data::imgui_tool & tool, menu_entry & entry) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			if (entry.tool == &tool)
+				return true;
+
+			for (auto it = entry.subentries.begin(); it != entry.subentries.end(); ++it) {
+				auto & subentry = it->second;
+				if (remove_tool_from_entry(tool, subentry)) {
+					if (subentry.subentries.empty())
+						entry.subentries.erase(it);
+					return true;
+				}
+			}
+
+			return false;
 		}
 
 		void save_tools() noexcept {
