@@ -36,7 +36,7 @@ namespace kengine::systems {
 
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 
-			e.emplace<data::name>("Entity editor");
+			e.emplace<data::name>("Entities/Editor");
 			auto & tool = e.emplace<data::imgui_tool>(true);
 			enabled = &tool.enabled;
 		}
