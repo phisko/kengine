@@ -43,8 +43,9 @@ namespace kengine::systems {
 		}
 	};
 
-	void add_collision(entt::registry & r) noexcept {
+	entt::entity add_collision(entt::registry & r) noexcept {
 		const entt::handle e{ r, r.create() };
 		e.emplace<collision>(e);
+		return e;
 	}
 }

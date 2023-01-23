@@ -87,9 +87,10 @@ namespace kengine::systems {
 		};
 	};
 
-	void add_log_file(entt::registry & r) noexcept {
+	entt::entity add_log_file(entt::registry & r) noexcept {
 		const entt::handle e{ r, r.create() };
 		e.emplace<log_file>(e);
+		return e;
 	}
 }
 

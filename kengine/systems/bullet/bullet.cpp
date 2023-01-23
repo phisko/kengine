@@ -482,8 +482,9 @@ namespace kengine::systems {
 #endif
 	};
 
-	void add_bullet(entt::registry & r) noexcept {
+	entt::entity add_bullet(entt::registry & r) noexcept {
 		const entt::handle e{ r, r.create() };
 		e.emplace<bullet>(e);
+		return e;
 	}
 }

@@ -60,8 +60,9 @@ namespace kengine::systems {
 		}
 	};
 
-	void add_input(entt::registry & r) noexcept {
+	entt::entity add_input(entt::registry & r) noexcept {
 		const entt::handle e{ r, r.create() };
 		e.emplace<input>(e);
+		return e;
 	}
 }

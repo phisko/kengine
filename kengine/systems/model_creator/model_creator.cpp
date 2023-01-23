@@ -50,8 +50,9 @@ namespace kengine::systems {
 		}
 	};
 
-	void add_model_creator(entt::registry & r) noexcept {
+	entt::entity add_model_creator(entt::registry & r) noexcept {
 		const entt::handle e{ r, r.create() };
 		e.emplace<model_creator>(e);
+		return e;
 	}
 }

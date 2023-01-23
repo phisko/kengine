@@ -910,8 +910,9 @@ namespace kengine::systems {
 		}
 	};
 
-	void add_kreogl(entt::registry & r) noexcept {
+	entt::entity add_kreogl(entt::registry & r) noexcept {
 		const entt::handle e{ r, r.create() };
 		e.emplace<kreogl>(e);
+		return e;
 	}
 }

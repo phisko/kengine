@@ -310,8 +310,9 @@ namespace kengine::systems {
 		}
 	};
 
-	void add_magica_voxel(entt::registry & r) noexcept {
+	entt::entity add_magica_voxel(entt::registry & r) noexcept {
 		const entt::handle e{ r, r.create() };
 		e.emplace<magica_voxel>(e);
+		return e;
 	}
 }

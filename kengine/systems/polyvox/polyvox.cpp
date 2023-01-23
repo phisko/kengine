@@ -91,8 +91,9 @@ namespace kengine::systems {
 		};
 	};
 
-	void add_polyvox(entt::registry & r) noexcept {
+	entt::entity add_polyvox(entt::registry & r) noexcept {
 		const entt::handle e{ r, r.create() };
 		e.emplace<polyvox>(e);
+		return e;
 	}
 }

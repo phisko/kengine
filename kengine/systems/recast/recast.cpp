@@ -77,8 +77,9 @@ namespace kengine::systems {
 		}
 	};
 
-	void add_recast(entt::registry & r) noexcept {
+	entt::entity add_recast(entt::registry & r) noexcept {
 		const entt::handle e{ r, r.create() };
 		e.emplace<recast>(e);
+		return e;
 	}
 }

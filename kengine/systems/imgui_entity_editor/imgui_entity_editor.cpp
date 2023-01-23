@@ -70,8 +70,9 @@ namespace kengine::systems {
 		}
 	};
 
-	void add_imgui_entity_editor(entt::registry & r) noexcept {
+	entt::entity add_imgui_entity_editor(entt::registry & r) noexcept {
 		const entt::handle e{ r, r.create() };
 		e.emplace<imgui_entity_editor>(e);
+		return e;
 	}
 }

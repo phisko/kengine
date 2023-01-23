@@ -275,8 +275,9 @@ namespace kengine::systems {
 		}
 	};
 
-	void add_imgui_engine_stats(entt::registry & r) noexcept {
+	entt::entity add_imgui_engine_stats(entt::registry & r) noexcept {
 		const entt::handle e{ r, r.create() };
 		e.emplace<imgui_engine_stats>(e);
+		return e;
 	}
 }

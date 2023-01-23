@@ -186,8 +186,9 @@ namespace kengine::systems {
 		}
 	};
 
-	void add_log_imgui(entt::registry & r) noexcept {
+	entt::entity add_log_imgui(entt::registry & r) noexcept {
 		const entt::handle e{ r, r.create() };
 		e.emplace<log_imgui>(e);
+		return e;
 	}
 }
