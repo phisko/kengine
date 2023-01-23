@@ -69,12 +69,12 @@ namespace kengine::systems {
 			e.emplace<functions::log>(putils_forward_to_this(log));
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 
-			e.emplace<data::name>("log");
+			e.emplace<data::name>("Log");
 			auto & tool = e.emplace<data::imgui_tool>();
 			enabled = &tool.enabled;
 
 			e.emplace<data::adjustable>() = {
-				"log",
+				"Log",
 				{
 					{ "ImGui max events", &max_events },
 				}

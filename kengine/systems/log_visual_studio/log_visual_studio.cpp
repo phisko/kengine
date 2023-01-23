@@ -43,7 +43,7 @@ namespace kengine::systems {
 			severity = &severity_control.severity;
 
 			e.emplace<data::adjustable>() = {
-				"log",
+				"Log",
 				{
 					{ "Visual Studio Console", severity },
 				}
