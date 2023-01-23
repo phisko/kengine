@@ -37,7 +37,7 @@ namespace kengine::systems {
 
 		language selected_language = language::lua;
 		int max_lines = 128;
-		char buff[1024];
+		char buff[1024] = "";
 
 		imgui_prompt(entt::handle e) noexcept
 			: r(*e.registry()) {
