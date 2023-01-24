@@ -292,6 +292,7 @@ pip install conan
 These are helper functions and macros to factorize typical manipulations of components.
 
 * [assert_helper](kengine/helpers/assert_helper.md): higher-level assertions
+* [async_helper](kengine/helpers/async_helper.md): run async tasks
 * [camera_helper](kengine/helpers/camera_helper.md): manipulate cameras
 * [command_line_helper](kengine/helpers/command_line_helper.md): create and query the command-line
 * [entity_to_string](kengine/helpers/entity_to_string.md): specialization of `putils::to_string` for `entt::entity`
