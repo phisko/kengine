@@ -39,7 +39,7 @@ namespace kengine::main_loop {
 		auto previous_time = std::chrono::system_clock::now();
 		while (kengine::is_running(r)) {
 			const auto now = std::chrono::system_clock::now();
-			const float delta_time = std::chrono::duration<float, std::ratio<1>>(now - previous_time).count();
+			const float delta_time = std::chrono::duration<float>(now - previous_time).count();
 			previous_time = now;
 
 			run_frame(r, delta_time, get_time_factor);
