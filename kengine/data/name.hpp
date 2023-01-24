@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef KENGINE_NAME_COMPONENT_MAX_LENGTH
-#define KENGINE_NAME_COMPONENT_MAX_LENGTH 64
+#ifndef KENGINE_NAME_STRING_MAX_LENGTH
+#define KENGINE_NAME_STRING_MAX_LENGTH 64
 #endif
 
 // putils
@@ -12,7 +12,7 @@ namespace kengine::data {
 	//! used_types: [refltype::string]
 	struct name {
 		static constexpr char string_name[] = "name_string";
-		using string = putils::string<KENGINE_NAME_COMPONENT_MAX_LENGTH, string_name>;
+		using string = putils::string<KENGINE_NAME_STRING_MAX_LENGTH, string_name>;
 		string name;
 	};
 }
