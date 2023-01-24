@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <atomic>
 #include <execution>
-#include <filesystem>
 #include <future>
 
 // entt
@@ -13,7 +12,6 @@
 
 // gl
 #include <GL/glew.h>
-#include <GL/gl.h>
 
 // imgui
 #include <imgui.h>
@@ -64,6 +62,7 @@
 #include "kengine/functions/get_position_in_pixel.hpp"
 
 // kengine helpers
+#include "kengine/helpers/async_helper.hpp"
 #include "kengine/helpers/camera_helper.hpp"
 #include "kengine/helpers/imgui_helper.hpp"
 #include "kengine/helpers/instance_helper.hpp"
@@ -82,14 +81,6 @@ namespace kengine::systems {
 	struct kreogl {
 		entt::registry & r;
 		putils::vector<entt::scoped_connection, 2> connections;
-
-		struct texture_loading_task {
-			std::future<::kreogl::texture_data> future;
-		};
-
-		struct model_loading_task {
-			std::future<::kreogl::assimp_model_data> future;
-		};
 
 		kreogl(entt::handle e) noexcept
 			: r(*e.registry()) {
@@ -216,22 +207,14 @@ namespace kengine::systems {
 			const auto & file = model.file.c_str();
 
 			kengine_logf(r, verbose, "execute/kreogl", "Creating Kreogl model for %zu (%s)", model_entity, file);
-			if (::kreogl::texture_data::is_supported_format(file)) {
-				r.emplace<data::async_task>(model_entity, data::async_task::string("kreogl: load %s", file));
-				r.emplace<texture_loading_task>(
-					model_entity, std::async(std::launch::async, [&file] {
-						return ::kreogl::texture_data(file);
-					})
-				);
-			}
-			else if (::kreogl::assimp::is_supported_file_format(model.file.c_str())) {
-				r.emplace<data::async_task>(model_entity, data::async_task::string("kreogl: load %s", file));
-				r.emplace<model_loading_task>(
-					model_entity, std::async(std::launch::async, [&file] {
-						return ::kreogl::assimp::load_model_data(file);
-					})
-				);
-			}
+			if (::kreogl::texture_data::is_supported_format(file))
+				kengine::start_async_task<::kreogl::texture_data>(r, model_entity, data::async_task::string("kreogl: load %s", file), [&file] {
+					return ::kreogl::texture_data(file);
+				});
+			else if (::kreogl::assimp::is_supported_file_format(model.file.c_str()))
+				kengine::start_async_task<::kreogl::assimp_model_data>(r, model_entity, data::async_task::string("kreogl: load %s", file), [&file] {
+					return ::kreogl::assimp::load_model_data(file);
+				});
 		}
 
 		void load_animation_files(entt::registry & r, entt::entity model_entity) noexcept {
@@ -268,40 +251,24 @@ namespace kengine::systems {
 
 			using namespace std::chrono_literals;
 
-			for (const auto & [model_entity, task] : r.view<texture_loading_task>().each()) {
-				const auto status = task.future.wait_for(0s);
-				if (status != std::future_status::ready)
-					continue;
+			kengine::process_async_results<::kreogl::texture_data>(r, [this](entt::entity e, ::kreogl::texture_data && texture_data) {
+				r.emplace<::kreogl::texture>(e, texture_data.load_to_texture());
+			});
 
-				const auto texture_data = task.future.get();
-				r.emplace<::kreogl::texture>(model_entity, texture_data.load_to_texture());
-
-				r.erase<data::async_task>(model_entity);
-				r.erase<texture_loading_task>(model_entity);
-			}
-
-			for (const auto & [model_entity, model, task] : r.view<data::model, model_loading_task>().each()) {
-				const auto status = task.future.wait_for(0s);
-				if (status != std::future_status::ready)
-					continue;
-
-				auto model_data = task.future.get();
-
+			kengine::process_async_results<::kreogl::assimp_model_data>(r, [this](entt::entity e, ::kreogl::assimp_model_data && model_data) {
 				// Sync properties from loaded model to kengine components
-				add_animations_to_model_animation_component(r.get_or_emplace<data::model_animation>(model_entity), model.file.c_str(), *model_data.animations);
+				const auto & model = r.get<data::model>(e);
+				add_animations_to_model_animation_component(r.get_or_emplace<data::model_animation>(e), model.file.c_str(), *model_data.animations);
 				if (model_data.skeleton) {
-					auto & model_skeleton = r.emplace<data::model_skeleton>(model_entity);
+					auto & model_skeleton = r.emplace<data::model_skeleton>(e);
 					for (const auto & mesh : model_data.skeleton->meshes)
 						model_skeleton.meshes.push_back(data::model_skeleton::mesh{
 							.bone_names = mesh.bone_names,
 						});
 				}
 
-				r.emplace<data::kreogl_model>(model_entity, ::kreogl::assimp::load_animated_model(std::move(model_data)));
-
-				r.erase<data::async_task>(model_entity);
-				r.erase<model_loading_task>(model_entity);
-			}
+				r.emplace<data::kreogl_model>(e, ::kreogl::assimp::load_animated_model(std::move(model_data)));
+			});
 		}
 
 		void load_models_to_opengl() noexcept {
