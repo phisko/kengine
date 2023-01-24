@@ -5,6 +5,7 @@
 
 // entt
 #include <entt/entity/handle.hpp>
+#include <entt/entity/observer.hpp>
 #include <entt/entity/registry.hpp>
 
 // magic_enum
@@ -15,11 +16,11 @@
 
 // putils
 #include "putils/forward_to.hpp"
-#include "putils/vector.hpp"
-#include "putils/to_string.hpp"
-#include "putils/visit.hpp"
 #include "putils/ini_file.hpp"
+#include "putils/split.hpp"
 #include "putils/static_assert.hpp"
+#include "putils/to_string.hpp"
+#include "putils/vector.hpp"
 
 // kengine data
 #include "kengine/data/adjustable.hpp"
@@ -46,10 +47,6 @@
 #define KENGINE_ADJUSTABLE_SEPARATOR ';'
 #endif
 
-#ifndef KENGINE_MAX_ADJUSTABLES_SECTIONS
-#define KENGINE_MAX_ADJUSTABLES_SECTIONS 8
-#endif
-
 #ifndef KENGINE_MAX_ADJUSTABLES
 #define KENGINE_MAX_ADJUSTABLES 256
 #endif
@@ -61,6 +58,20 @@ namespace kengine::systems {
 
 		bool * enabled;
 		putils::ini_file loaded_file;
+
+		struct section {
+			using section_map = std::map<std::string, section>;
+			section_map subsections;
+
+			struct entry {
+				data::adjustable * adjustable = nullptr;
+				std::vector<bool> values_pass_search; // Indexed by adjustable->values
+			};
+
+			std::vector<entry> entries;
+			bool passes_search = true;
+		};
+		section root_section;
 
 		imgui_adjustable(entt::handle e) noexcept
 			: r(*e.registry()) {
@@ -74,23 +85,20 @@ namespace kengine::systems {
 			auto & tool = e.emplace<data::imgui_tool>();
 			enabled = &tool.enabled;
 
-			connection = r.on_construct<data::adjustable>().connect<&imgui_adjustable::init_adjustable>(this);
-		}
-
-		~imgui_adjustable() noexcept {
-			KENGINE_PROFILING_SCOPE;
-			save();
+			connection = r.on_destroy<data::adjustable>().connect<&imgui_adjustable::on_destroy_adjustable>(this);
 		}
 
 		char name_search[1024] = "";
 		using string = data::adjustable::string;
-		using sections = putils::vector<string, KENGINE_MAX_ADJUSTABLES_SECTIONS>;
+		using sections = std::vector<std::string>;
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			if (!*enabled)
 				return;
 			kengine_log(r, verbose, "execute", "imgui_adjustable");
+
+			detect_new_adjustables();
 
 			if (ImGui::Begin("Adjustables", enabled)) {
 				ImGui::Columns(2);
@@ -102,148 +110,84 @@ namespace kengine::systems {
 				ImGui::Columns();
 
 				ImGui::Separator();
-				ImGui::InputText("Name", name_search, sizeof(name_search));
+				if (ImGui::InputText("Name", name_search, sizeof(name_search)))
+					update_search_results("", root_section);
 				ImGui::Separator();
 
-				if (ImGui::BeginChild("##adjustables")) {
-					const auto comps = get_filtered_comps(name_search);
-
-					sections previous_subsections;
-					string previous_section;
-					bool hidden = false;
-					for (const auto comp : comps) {
-						const bool section_matches = comp->section.find(name_search) != std::string::npos;
-
-						if (comp->section != previous_section) {
-							const auto subs = split(comp->section, '/');
-							const auto current = update_imgui_tree(hidden, subs, previous_subsections);
-							previous_subsections = subs;
-							if (current < previous_subsections.size())
-								previous_subsections.erase(previous_subsections.begin() + current + 1, previous_subsections.end());
-							previous_section = reconstitute_path(previous_subsections);
-						}
-
-						if (hidden)
-							continue;
-
-						for (auto & value : comp->values)
-							if (section_matches || value.name.find(name_search) != std::string::npos)
-								draw(value.name.c_str(), value);
-					}
-					for (size_t i = hidden ? 1 : 0; i < previous_subsections.size(); ++i)
-						ImGui::TreePop();
-				}
+				if (ImGui::BeginChild("##adjustables"))
+					for (const auto & [name, section] : root_section.subsections)
+						display_menu_entry(name.c_str(), section);
 				ImGui::EndChild();
 			}
 			ImGui::End();
 		}
 
-		putils::vector<data::adjustable *, KENGINE_MAX_ADJUSTABLES> get_filtered_comps(const char * name_search) noexcept {
+		entt::observer observer{ r, entt::collector.group<data::adjustable>() };
+		void detect_new_adjustables() noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			putils::vector<data::adjustable *, KENGINE_MAX_ADJUSTABLES> comps;
+			for (const auto e : observer)
+				on_construct_adjustable(r, e);
+			observer.clear();
+		}
 
-			for (const auto & [e, comp] : r.view<data::adjustable>().each()) {
-				if (comp.section.find(name_search) != std::string::npos) {
-					comps.emplace_back(&comp);
-					continue;
-				}
+		void update_search_results(const std::string & name, section & section) noexcept {
+			KENGINE_PROFILING_SCOPE;
 
-				for (const auto & value : comp.values)
-					if (value.name.find(name_search) != std::string::npos) {
-						comps.emplace_back(&comp);
-						continue;
+			section.passes_search = false;
+
+			for (auto & [subentry_name, subsection] : section.subsections) {
+				update_search_results(name + '/' + subentry_name, subsection);
+				if (subsection.passes_search)
+					section.passes_search = true;
+			}
+
+			for (auto & entry : section.entries) {
+				entry.values_pass_search.clear();
+				entry.values_pass_search.resize(entry.adjustable->values.size());
+
+				size_t index = 0;
+				for (const auto & value : entry.adjustable->values) {
+					const auto value_name = name + '/' + value.name.c_str();
+
+					if (value_name.find(name_search) != std::string::npos) {
+						entry.values_pass_search[index] = true;
+						section.passes_search = true;
 					}
-			}
 
-			std::sort(comps.begin(), comps.end(), [](const auto lhs, const auto rhs) noexcept {
-				return strcmp(lhs->section.c_str(), rhs->section.c_str()) < 0;
-			});
-
-			return comps;
-		}
-
-		sections split(const string & s, char delim) noexcept {
-			KENGINE_PROFILING_SCOPE;
-
-			sections ret;
-
-			size_t previous = 0;
-			size_t next = 0;
-			while (next < s.size()) {
-				next = s.find(delim, previous);
-				if (next == string::npos)
-					next = s.size();
-				ret.emplace_back(s.substr(previous, next - previous));
-				previous = next + 1;
-			}
-
-			return ret;
-		}
-
-		string reconstitute_path(const sections & sub_sections) noexcept {
-			KENGINE_PROFILING_SCOPE;
-
-			string ret;
-
-			bool first = true;
-			for (const auto & s : sub_sections) {
-				if (!first)
-					ret += '/';
-				first = false;
-				ret += s;
-			}
-
-			return ret;
-		}
-
-		size_t update_imgui_tree(bool & hidden, const sections & subs, const sections & previous_subsections) noexcept {
-			KENGINE_PROFILING_SCOPE;
-
-			auto current = previous_subsections.size() - 1;
-
-			if (!previous_subsections.empty()) {
-				while (current >= subs.size()) {
-					if (!hidden)
-						ImGui::TreePop();
-					hidden = false;
-					--current;
+					++index;
 				}
+			}
+		}
 
-				while (subs[current] != previous_subsections[current]) {
-					if (current == 0) {
-						if (!hidden)
-							ImGui::TreePop();
-						hidden = false;
-						--current;
-						break;
+		void display_menu_entry(const char * name, const section & section) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			if (!section.passes_search)
+				return;
+
+			if (ImGui::TreeNodeEx(name)) {
+				for (const auto & entry : section.entries) {
+					size_t i = 0;
+					for (auto & value : entry.adjustable->values) {
+						if (entry.values_pass_search[i])
+							draw(value);
+						++i;
 					}
-					if (!hidden)
-						ImGui::TreePop();
-					hidden = false;
-					--current;
 				}
-			}
 
-			if (!hidden) {
-				++current;
-				while (current < subs.size()) {
-					if (!ImGui::TreeNodeEx(subs[current].c_str())) {
-						hidden = true;
-						break;
-					}
-					++current;
-				}
-			}
+				for (const auto & [subsection_name, subsection] : section.subsections)
+					display_menu_entry(subsection_name.c_str(), subsection);
 
-			return current;
+				ImGui::TreePop();
+			}
 		}
 
-		void draw(const char * name, data::adjustable::value & value) noexcept {
+		void draw(data::adjustable::value & value) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			ImGui::Columns(2);
-			ImGui::Text("%s", name);
+			ImGui::Text("%s", value.name.c_str());
 			ImGui::NextColumn();
 
 			switch (value.type) {
@@ -306,10 +250,52 @@ namespace kengine::systems {
 			ImGui::Columns();
 		}
 
-		void init_adjustable(entt::registry & r, entt::entity e) noexcept {
+		void on_construct_adjustable(entt::registry & r, entt::entity e) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			auto & comp = r.get<data::adjustable>(e);
+			init_adjustable(comp);
+
+			section * current_section = &root_section;
+			const auto section_names = putils::split(comp.section.c_str(), '/');
+			for (const auto & section_name : section_names)
+				current_section = &current_section->subsections[section_name];
+
+			section::entry entry;
+			entry.adjustable = &comp;
+			current_section->entries.push_back(std::move(entry));
+		}
+
+		void on_destroy_adjustable(entt::registry & r, entt::entity e) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			auto & comp = r.get<data::adjustable>(e);
+			remove_adjustable_from_section(comp, root_section);
+		}
+
+		bool remove_adjustable_from_section(const data::adjustable & comp, section & section) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			if (const auto it = std::ranges::find_if(section.entries, [&](const auto & entry) { return entry.adjustable == &comp; }); it != section.entries.end()) {
+				section.entries.erase(it);
+				return true;
+			}
+
+			for (auto it = section.subsections.begin(); it != section.subsections.end(); ++it) {
+				auto & subsection = it->second;
+				if (remove_adjustable_from_section(comp, subsection)) {
+					if (subsection.subsections.empty())
+						section.subsections.erase(it);
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		void init_adjustable(data::adjustable & comp) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
 			kengine_logf(r, log, "Init/systems/imgui_adjustable", "Initializing section %s", comp.section.c_str());
 
 			const auto it = loaded_file.sections.find(comp.section.c_str());
@@ -374,8 +360,8 @@ namespace kengine::systems {
 
 			std::ifstream f(KENGINE_ADJUSTABLE_SAVE_FILE);
 			f >> loaded_file;
-			for (auto [e, comp] : r.view<data::adjustable>().each())
-				init_adjustable(r, e);
+			for (const auto e : r.view<data::adjustable>())
+				on_construct_adjustable(r, e);
 		}
 
 		void save() noexcept {
