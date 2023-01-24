@@ -71,11 +71,6 @@ namespace kengine::systems {
 			connections.emplace_back(r.on_destroy<data::imgui_tool>().connect<&imgui_tool::on_destroy_imgui_tool>(this));
 		}
 
-		~imgui_tool() noexcept {
-			KENGINE_PROFILING_SCOPE;
-			save_tools();
-		}
-
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, verbose, "execute", "imgui_tool");
