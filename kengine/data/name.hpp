@@ -4,8 +4,6 @@
 #define KENGINE_NAME_COMPONENT_MAX_LENGTH 64
 #endif
 
-#include <vector>
-
 // putils
 #include "putils/string.hpp"
 
