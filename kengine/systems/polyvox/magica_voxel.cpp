@@ -30,6 +30,7 @@
 
 // kengine helpers
 #include "kengine/helpers/assert_helper.hpp"
+#include "kengine/helpers/async_helper.hpp"
 #include "kengine/helpers/instance_helper.hpp"
 #include "kengine/helpers/log_helper.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
@@ -65,31 +66,19 @@ namespace kengine::systems {
 			magica_voxel_format::chunk_content::size offset_to_apply;
 		};
 
-		struct loading_task {
-			struct loaded_data {
-				data::model_data model_data;
-				magica_voxel_format::chunk_content::size offset_to_apply;
-			};
-			std::future<loaded_data> future;
+		struct async_loaded_data {
+			data::model_data model_data;
+			magica_voxel_format::chunk_content::size offset_to_apply;
 		};
 
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, log, "execute", "systems/magica_voxel");
 
-			for (const auto & [e, task] : r.view<loading_task>().each()) {
-				using namespace std::chrono_literals;
-				const auto status = task.future.wait_for(0s);
-				if (status != std::future_status::ready)
-					continue;
-
-				auto loaded_data = task.future.get();
+			kengine::process_async_results<async_loaded_data>(r, [this](entt::entity e, async_loaded_data && loaded_data) {
 				r.emplace<data::model_data>(e, std::move(loaded_data.model_data));
 				apply_offset(e, loaded_data.offset_to_apply);
-
-				r.erase<data::async_task>(e);
-				r.erase<loading_task>(e);
-			}
+			});
 		}
 
 		void load_model(entt::registry &, entt::entity e) noexcept {
@@ -99,15 +88,12 @@ namespace kengine::systems {
 			if (std::filesystem::path(f).extension() != ".vox")
 				return;
 
-			r.emplace<data::async_task>(e, data::async_task::string("magica_voxel: load %s", f));
-			r.emplace<loading_task>(
-				e, std::async(std::launch::async, [this, e, &f] {
-					return load_model_data(e, f);
-				})
-			);
+			kengine::start_async_task<async_loaded_data>(r, e, data::async_task::string("magica_voxel: load %s", f), [this, e, &f] {
+				return load_model_data(e, f);
+			});
 		}
 
-		loading_task::loaded_data load_model_data(entt::entity e, const char * file) noexcept {
+		async_loaded_data load_model_data(entt::entity e, const char * file) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			kengine_logf(r, log, "systems/magica_voxel", "Loading model %zu for %s", e, file);
@@ -120,7 +106,7 @@ namespace kengine::systems {
 				serialize(binary_file.c_str(), model_data, model_and_offset.offset_to_apply);
 			}
 
-			loading_task::loaded_data ret;
+			async_loaded_data ret;
 			unserialize(binary_file.c_str(), ret.model_data.meshes.emplace_back(), ret.offset_to_apply);
 			ret.model_data.free = release(e);
 			ret.model_data.init<mesh_type::VertexType>();
