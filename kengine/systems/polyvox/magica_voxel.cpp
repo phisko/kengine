@@ -2,8 +2,9 @@
 
 // stl
 #include <filesystem>
-#include <unordered_map>
 #include <fstream>
+#include <future>
+#include <unordered_map>
 
 // entt
 #include <entt/entity/registry.hpp>
@@ -14,15 +15,18 @@
 #include <PolyVox/VolumeResampler.h>
 
 // putils
+#include "putils/forward_to.hpp"
 #include "putils/string.hpp"
 
 // kengine data
-#include "kengine/data/instance.hpp"
+#include "kengine/data/async_task.hpp"
 #include "kengine/data/model_data.hpp"
 #include "kengine/data/model.hpp"
 #include "kengine/data/transform.hpp"
-#include "kengine/data/graphics.hpp"
 #include "kengine/data/polyvox.hpp"
+
+// kengine functions
+#include "kengine/functions/execute.hpp"
 
 // kengine helpers
 #include "kengine/helpers/assert_helper.hpp"
@@ -51,65 +55,76 @@ namespace kengine::systems {
 			kengine_log(r, log, "Init", "systems/magica_voxel");
 
 			connection = r.on_construct<data::model>().connect<&magica_voxel::load_model>(this);
+			e.emplace<functions::execute>(putils_forward_to_this(execute));
 		}
 
 		using mesh_type = decltype(build_mesh(PolyVox::RawVolume<data::polyvox::vertex_data>{ {} }));
-		struct model {
+
+		struct model_and_offset {
 			mesh_type mesh;
-		};
-		struct mesh_info {
-			mesh_type mesh;
-			magica_voxel_format::chunk_content::size size;
+			magica_voxel_format::chunk_content::size offset_to_apply;
 		};
 
-		void load_model(entt::registry & r, entt::entity e) noexcept {
+		struct loading_task {
+			struct loaded_data {
+				data::model_data model_data;
+				magica_voxel_format::chunk_content::size offset_to_apply;
+			};
+			std::future<loaded_data> future;
+		};
+
+		void execute(float delta_time) noexcept {
+			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, log, "execute", "systems/magica_voxel");
+
+			for (const auto & [e, task] : r.view<loading_task>().each()) {
+				using namespace std::chrono_literals;
+				const auto status = task.future.wait_for(0s);
+				if (status != std::future_status::ready)
+					continue;
+
+				auto loaded_data = task.future.get();
+				r.emplace<data::model_data>(e, std::move(loaded_data.model_data));
+				apply_offset(e, loaded_data.offset_to_apply);
+
+				r.erase<data::async_task>(e);
+				r.erase<loading_task>(e);
+			}
+		}
+
+		void load_model(entt::registry &, entt::entity e) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			const auto & f = r.get<data::model>(e).file.c_str();
 			if (std::filesystem::path(f).extension() != ".vox")
 				return;
 
-			kengine_logf(r, log, "systems/magica_voxel", "Loading model %zu for %s", e, f);
-			const putils::string<256> binary_file("%s.bin", f);
-
-			if (std::filesystem::exists(binary_file.c_str())) {
-				kengine_log(r, log, "magica_voxel/load_model", "Binary file exists, loading it");
-				load_binary_model(e, binary_file.c_str());
-				return;
-			}
-
-			auto mesh_info = load_vox_model(f);
-			auto & mesh = r.emplace<model>(e).mesh;
-			mesh = std::move(mesh_info.mesh);
-
-			auto model_data = generate_model_data(e, mesh);
-			serialize(binary_file.c_str(), model_data, mesh_info.size);
-			r.emplace<data::model_data>(e, std::move(model_data));
-
-			apply_offset(e, mesh_info.size);
+			r.emplace<data::async_task>(e, data::async_task::string("magica_voxel: load %s", f));
+			r.emplace<loading_task>(
+				e, std::async(std::launch::async, [this, e, &f] {
+					return load_model_data(e, f);
+				})
+			);
 		}
 
-		void load_binary_model(entt::entity e, const char * binary_file) noexcept {
+		loading_task::loaded_data load_model_data(entt::entity e, const char * file) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			magica_voxel_format::chunk_content::size size;
+			kengine_logf(r, log, "systems/magica_voxel", "Loading model %zu for %s", e, file);
+			const putils::string<256> binary_file("%s.bin", file);
 
-			data::model_data model_data;
-			model_data.meshes.push_back({});
-			unserialize(binary_file, model_data.meshes.back(), size);
-			model_data.free = release(e);
-			model_data.init<mesh_type::VertexType>();
-			r.emplace<data::model_data>(e, std::move(model_data));
-
-			if (r.all_of<data::transform>(e)) {
-				kengine_logf(r, log, "magica_voxel/load_model", "%zu already has a data::transform. Mesh offset will not be applied", e);
-				return;
+			if (!std::filesystem::exists(binary_file.c_str())) {
+				kengine_log(r, log, "magica_voxel/load_model", "Binary file does not exist, creating it");
+				const auto model_and_offset = load_vox_model(file);
+				const auto model_data = generate_model_data(e, model_and_offset.mesh);
+				serialize(binary_file.c_str(), model_data, model_and_offset.offset_to_apply);
 			}
-			kengine_log(r, log, "magica_voxel/load_model", "Applying mesh offset");
 
-			auto & box = r.emplace<data::transform>(e).bounding_box;
-			box.position.x -= size.x / 2.f * box.size.x;
-			box.position.z -= size.y / 2.f * box.size.z;
+			loading_task::loaded_data ret;
+			unserialize(binary_file.c_str(), ret.model_data.meshes.emplace_back(), ret.offset_to_apply);
+			ret.model_data.free = release(e);
+			ret.model_data.init<mesh_type::VertexType>();
+			return ret;
 		}
 
 		void unserialize(const char * f, data::model_data::mesh & mesh_data, magica_voxel_format::chunk_content::size & size) noexcept {
@@ -150,27 +165,20 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 
 			return [this, e] {
-				const auto model = r.try_get<magica_voxel::model>(e);
-				if (model) {
-					model->mesh.clear();
-					r.remove<magica_voxel::model>(e);
-				}
-				else { // Was unserialized and we simply `new`-ed the data buffers
-					if (const auto model_data = r.try_get<data::model_data>(e)) {
-						delete[] (const char *)model_data->meshes[0].vertices.data;
-						delete[] (const char *)model_data->meshes[0].indices.data;
-					}
+				if (const auto model_data = r.try_get<data::model_data>(e)) {
+					delete[] (const char *)model_data->meshes[0].vertices.data;
+					delete[] (const char *)model_data->meshes[0].indices.data;
 				}
 			};
 		}
 
-		mesh_info load_vox_model(const char * f) noexcept {
+		model_and_offset load_vox_model(const char * f) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			std::ifstream stream(f, std::ios::binary);
 			if (!stream) {
 				kengine_assert_failed(r, "[magica_voxel] Failed to load '", f, "'");
-				return mesh_info{};
+				return model_and_offset{};
 			}
 
 			check_header(stream);
@@ -179,14 +187,14 @@ namespace kengine::systems {
 			read_from_stream(main, stream);
 			if (!id_matches(main.id, "MAIN")) {
 				kengine_assert_failed(r, "[magica_voxel] Expected 'MAIN' chunk header in '", f, "'");
-				return mesh_info{};
+				return model_and_offset{};
 			}
 
 			magica_voxel_format::chunk_header first;
 			read_from_stream(first, stream);
 			if (!id_matches(first.id, "SIZE")) {
 				kengine_assert_failed(r, "[magica_voxel] Expected 'SIZE' chunk header in '", f, "'");
-				return mesh_info{};
+				return model_and_offset{};
 			}
 			kengine_assert(r, first.children_bytes == 0);
 			kengine_assert(r, first.content_bytes == sizeof(magica_voxel_format::chunk_content::size));
@@ -203,7 +211,7 @@ namespace kengine::systems {
 			read_from_stream(voxels_header, stream);
 			if (!id_matches(voxels_header.id, "XYZI")) {
 				kengine_assert_failed(r, "[magica_voxel] Expected 'XYZI' chunk header in '", f, "'");
-				return mesh_info{};
+				return model_and_offset{};
 			}
 
 			magica_voxel_format::chunk_content::rgba rgba;
@@ -242,14 +250,13 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 
 			data::model_data model_data;
-			model_data.meshes.push_back({});
-			auto & mesh_data = model_data.meshes.back();
+			model_data.free = release(e);
+			model_data.init<mesh_type::VertexType>();
+
+			auto & mesh_data = model_data.meshes.emplace_back();
 			mesh_data.vertices = { mesh.getNoOfVertices(), sizeof(putils_typeof(mesh)::VertexType), mesh.getRawVertexData() };
 			mesh_data.indices = { mesh.getNoOfIndices(), sizeof(putils_typeof(mesh)::IndexType), mesh.getRawIndexData() };
 			mesh_data.index_type = putils::meta::type<putils_typeof(mesh)::IndexType>::index;
-
-			model_data.free = release(e);
-			model_data.init<mesh_type::VertexType>();
 
 			return model_data;
 		}
