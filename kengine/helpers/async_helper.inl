@@ -19,13 +19,13 @@ namespace kengine {
 		};
 	}
 
-	template<typename T, typename ... Args, typename Func>
-	void start_async_task(entt::registry & r, entt::entity e, const data::async_task::string & task_name, Func && func) noexcept {
+	template<typename T>
+	void start_async_task(entt::registry & r, entt::entity e, const data::async_task::string & task_name, std::future<T> && future) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
 		kengine_logf(r, log, "async", "Async task '%s' starting", task_name.c_str());
 		r.emplace<data::async_task>(e, task_name);
-		r.emplace<impl::async_result<T>>(e, std::async(std::launch::async, FWD(func)));
+		r.emplace<impl::async_result<T>>(e, std::move(future));
 	}
 
 	template<typename T>
@@ -40,7 +40,7 @@ namespace kengine {
 		for (const auto & [e, result, task] : r.view<impl::async_result<T>, data::async_task>().each()) {
 			using namespace std::chrono_literals;
 			const auto status = result.future.wait_for(0s);
-			if (status != std::future_status::ready)
+			if (status == std::future_status::timeout)
 				continue;
 
 			kengine_logf(r, log, "async", "Async task '%s' completed", task.name.c_str());

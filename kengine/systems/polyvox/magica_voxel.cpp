@@ -88,9 +88,13 @@ namespace kengine::systems {
 			if (std::filesystem::path(f).extension() != ".vox")
 				return;
 
-			kengine::start_async_task<async_loaded_data>(r, e, data::async_task::string("magica_voxel: load %s", f), [this, e, &f] {
-				return load_model_data(e, f);
-			});
+			kengine::start_async_task(
+				r, e,
+				data::async_task::string("magica_voxel: load %s", f),
+				std::async(std::launch::async, [this, e, &f] {
+					return load_model_data(e, f);
+				})
+			);
 		}
 
 		async_loaded_data load_model_data(entt::entity e, const char * file) noexcept {
