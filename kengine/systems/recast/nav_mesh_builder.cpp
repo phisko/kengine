@@ -23,6 +23,7 @@
 
 // kengine helpers
 #include "kengine/helpers/assert_helper.hpp"
+#include "kengine/helpers/async_helper.hpp"
 #include "kengine/helpers/matrix_helper.hpp"
 #include "kengine/helpers/log_helper.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
@@ -36,15 +37,20 @@ namespace kengine::systems::recast_impl {
 		static void run(entt::registry & r, entt::entity e) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			const auto model = r.try_get<data::model>(e);
-			const auto model_data = r.try_get<data::model_data>(e);
-			const auto nav_mesh = r.try_get<data::nav_mesh>(e);
+			const auto & model = r.get<data::model>(e);
+			const auto & model_data = r.get<data::model_data>(e);
+			const auto & nav_mesh = r.get<data::nav_mesh>(e);
 
-			if (model && model_data && nav_mesh) {
-				kengine_logf(r, verbose, "execute/recast", "Building navmesh for %zu", e);
-				kengine_assert(r, nav_mesh->verts_per_poly <= DT_VERTS_PER_POLYGON);
-				create_recast_mesh(model->file.c_str(), { r, e }, *nav_mesh, *model_data);
-			}
+			kengine_logf(r, verbose, "execute/recast", "Building navmesh for %zu", e);
+			kengine_assert(r, nav_mesh.verts_per_poly <= DT_VERTS_PER_POLYGON);
+
+			kengine::start_async_task(
+				r, e,
+				data::async_task::string("recast: load %s", model.file.c_str()),
+				std::async(std::launch::async, [&r, e, &model, &model_data, &nav_mesh] {
+					return create_recast_mesh(model.file.c_str(), { r, e }, nav_mesh, model_data);
+				})
+			);
 		}
 
 		using height_field_ptr = unique_ptr<rcHeightfield, rcFreeHeightField>;
@@ -59,49 +65,40 @@ namespace kengine::systems::recast_impl {
 			float area_size = 0.f;
 		};
 
-		static void create_recast_mesh(const char * file, entt::handle e, data::nav_mesh & nav_mesh, const data::model_data & model_data) noexcept {
+		static std::optional<data::recast_nav_mesh> create_recast_mesh(const char * file, entt::handle e, const data::nav_mesh & nav_mesh, const data::model_data & model_data) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			const auto & r = *e.registry();
 
-			nav_mesh_data data;
+			data::recast_nav_mesh result;
 
 			const putils::string<4096> binary_file("%s.nav", file);
-			bool must_save = false;
-			data = load_binary_file(binary_file.c_str(), nav_mesh);
-			if (data.data == nullptr) {
-				kengine_logf(r, verbose, "execute/recast/create_recast_mesh", "Found no binary file for %s, creating nav mesh data", file);
-				data = create_nav_mesh_data(r, nav_mesh, model_data, model_data.meshes[nav_mesh.concerned_mesh]);
-				if (data.data == nullptr)
-					return;
-				must_save = true;
-			}
-			else
+			result.data = load_binary_file(binary_file.c_str(), nav_mesh);
+			if (result.data.data)
 				kengine_logf(r, verbose, "execute/recast/create_recast_mesh", "Found binary file for %s", file);
-
-			auto & recast = e.get_or_emplace<data::recast_nav_mesh>();
-			recast.nav_mesh = create_nav_mesh(r, data);
-			if (recast.nav_mesh == nullptr) {
-				dtFree(data.data);
-				return;
+			else {
+				kengine_logf(r, verbose, "execute/recast/create_recast_mesh", "Found no binary file for %s, creating nav mesh data", file);
+				result.data = create_nav_mesh_data(r, nav_mesh, model_data, model_data.meshes[nav_mesh.concerned_mesh]);
+				if (result.data.data == nullptr)
+					return std::nullopt;
+				save_binary_file(r, binary_file.c_str(), result.data, nav_mesh);
 			}
 
-			recast.nav_mesh_query = create_nav_mesh_query(r, nav_mesh, *recast.nav_mesh);
-			if (recast.nav_mesh_query == nullptr) {
-				dtFree(data.data);
-				return;
-			}
+			result.nav_mesh = create_nav_mesh(r, result.data);
+			if (result.nav_mesh == nullptr)
+				return std::nullopt;
 
-			if (must_save)
-				save_binary_file(r, binary_file.c_str(), data, nav_mesh);
+			result.nav_mesh_query = create_nav_mesh_query(r, nav_mesh, *result.nav_mesh);
+			if (result.nav_mesh_query == nullptr)
+				return std::nullopt;
 
-			(void)e.get_or_emplace<functions::get_path>(get_path(e.try_get<data::transform>(), nav_mesh, recast));
+			return result;
 		}
 
-		static nav_mesh_data load_binary_file(const char * binary_file, const data::nav_mesh & nav_mesh) noexcept {
+		static data::nav_mesh_data load_binary_file(const char * binary_file, const data::nav_mesh & nav_mesh) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			nav_mesh_data data;
+			data::nav_mesh_data data;
 
 			std::ifstream f(binary_file, std::ifstream::binary);
 			if (!f)
@@ -113,26 +110,26 @@ namespace kengine::systems::recast_impl {
 				return data; // Different parameters
 
 			f.read((char *)&data.size, sizeof(data.size));
-			data.data = (unsigned char *)dtAlloc(data.size, dtAllocHint::DT_ALLOC_PERM);
-			f.read((char *)data.data, data.size);
+			data.data.reset(dtAlloc(data.size, dtAllocHint::DT_ALLOC_PERM));
+			f.read((char *)data.data.get(), data.size);
 
 			return data;
 		}
 
-		static void save_binary_file(const entt::registry & r, const char * binary_file, const nav_mesh_data & data, const data::nav_mesh & nav_mesh) noexcept {
+		static void save_binary_file(const entt::registry & r, const char * binary_file, const data::nav_mesh_data & data, const data::nav_mesh & nav_mesh) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_logf(r, verbose, "execute/RecastSystem/create_recast_mesh", "Saving binary file %s", binary_file);
 
 			std::ofstream f(binary_file, std::ofstream::trunc | std::ofstream::binary);
 			f.write((const char *)&nav_mesh, sizeof(nav_mesh));
 			f.write((const char *)&data.size, sizeof(data.size));
-			f.write((const char *)data.data, data.size);
+			f.write((const char *)data.data.get(), data.size);
 		}
 
-		static nav_mesh_data create_nav_mesh_data(const entt::registry & r, const data::nav_mesh & nav_mesh, const data::model_data & model_data, const data::model_data::mesh & mesh_data) noexcept {
+		static data::nav_mesh_data create_nav_mesh_data(const entt::registry & r, const data::nav_mesh & nav_mesh, const data::model_data & model_data, const data::model_data::mesh & mesh_data) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			nav_mesh_data ret;
+			data::nav_mesh_data ret;
 
 			const auto vertices = get_vertices(r, model_data, mesh_data);
 
@@ -206,10 +203,11 @@ namespace kengine::systems::recast_impl {
 			params.cs = cfg.cs;
 			params.ch = cfg.ch;
 
-			if (!dtCreateNavMeshData(&params, &ret.data, &ret.size))
+			unsigned char * data = nullptr;
+			if (!dtCreateNavMeshData(&params, &data, &ret.size))
 				kengine_assert_failed(r, "[Recast] Failed to create Detour navmesh data");
+			ret.data.reset(data);
 
-			ret.area_size = putils::get_length(putils::point3f(cfg.bmax) - putils::point3f(cfg.bmin));
 			return ret;
 		}
 
@@ -445,7 +443,7 @@ namespace kengine::systems::recast_impl {
 			return poly_mesh_detail;
 		}
 
-		static data::nav_mesh_ptr create_nav_mesh(const entt::registry & r, const nav_mesh_data & data) noexcept {
+		static data::nav_mesh_ptr create_nav_mesh(const entt::registry & r, const data::nav_mesh_data & data) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			data::nav_mesh_ptr nav_mesh{ dtAllocNavMesh() };
@@ -454,7 +452,7 @@ namespace kengine::systems::recast_impl {
 				return nullptr;
 			}
 
-			const auto status = nav_mesh->init(data.data, data.size, DT_TILE_FREE_DATA);
+			const auto status = nav_mesh->init((unsigned char *)data.data.get(), data.size, 0);
 			if (dtStatusFailed(status)) {
 				kengine_assert_failed(r, "[Recast] Failed to init Detour navmesh");
 				return nullptr;
@@ -555,5 +553,18 @@ namespace kengine::systems::recast_impl {
 
 	void build_recast_component(entt::registry & r, entt::entity e) noexcept {
 		build_recast_component::run(r, e);
+	}
+
+	void process_built_recast_components(entt::registry & r) noexcept {
+		KENGINE_PROFILING_SCOPE;
+
+		kengine::process_async_results<std::optional<data::recast_nav_mesh>>(r, [&](entt::entity e, std::optional<data::recast_nav_mesh> && opt) {
+			if (!opt)
+				return;
+
+			const auto & recast = r.emplace<data::recast_nav_mesh>(e, std::move(*opt));
+			const auto & nav_mesh = r.get<data::nav_mesh>(e);
+			r.emplace<functions::get_path>(e, build_recast_component::get_path(r.try_get<data::transform>(e), nav_mesh, recast));
+		});
 	}
 }
