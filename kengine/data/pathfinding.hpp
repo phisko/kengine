@@ -14,7 +14,7 @@ namespace kengine::data {
 	//! used_types: [putils::point3f]
 	struct pathfinding {
 		entt::entity environment = entt::null; // Entity in which we are navigating. Should have a model with a data::nav_mesh
-		putils::point3f destination;
+		putils::point3f destination{ 0.f, 0.f, 0.f };
 		float search_distance = 2.f;
 		float max_speed = 1.f;
 	};
