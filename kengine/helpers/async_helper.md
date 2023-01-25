@@ -7,13 +7,15 @@ Helper functions for running [async tasks](../data/async_task.md).
 ### start_async_task
 
 ```cpp
-template<typename T, typename ... Args, typename Func>
-void start_async_task(entt::registry & r, entt::entity e, const data::async_task::string & task_name, Func && func) noexcept;
+template<typename T>
+void start_async_task(entt::registry & r, entt::entity e, const data::async_task::string & task_name, std::future<T> && future) noexcept;
 ```
 
 Runs an async task returning `T`. The function will attach to `e`:
 * an [async_task](../data/async_task.md) initialized with `task_name`
-* an internal structure containing an `std::future<T>`
+* an internal structure containing `future`
+
+`future` may have been created however the user wishes (typically by calling `std::async`).
 
 ### process_async_results
 

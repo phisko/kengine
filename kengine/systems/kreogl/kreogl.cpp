@@ -208,13 +208,21 @@ namespace kengine::systems {
 
 			kengine_logf(r, verbose, "execute/kreogl", "Creating Kreogl model for %zu (%s)", model_entity, file);
 			if (::kreogl::texture_data::is_supported_format(file))
-				kengine::start_async_task<::kreogl::texture_data>(r, model_entity, data::async_task::string("kreogl: load %s", file), [&file] {
-					return ::kreogl::texture_data(file);
-				});
+				kengine::start_async_task(
+					r, model_entity,
+					data::async_task::string("kreogl: load %s", file),
+					std::async(std::launch::async, [&file] {
+						return ::kreogl::texture_data(file);
+					})
+				);
 			else if (::kreogl::assimp::is_supported_file_format(model.file.c_str()))
-				kengine::start_async_task<::kreogl::assimp_model_data>(r, model_entity, data::async_task::string("kreogl: load %s", file), [&file] {
-					return ::kreogl::assimp::load_model_data(file);
-				});
+				kengine::start_async_task(
+					r, model_entity,
+					data::async_task::string("kreogl: load %s", file),
+					std::async(std::launch::async, [&file] {
+						return ::kreogl::assimp::load_model_data(file);
+					})
+				);
 		}
 
 		void load_animation_files(entt::registry & r, entt::entity model_entity) noexcept {
