@@ -3,6 +3,7 @@
 
 // entt
 #include <entt/entity/handle.hpp>
+#include <entt/entity/observer.hpp>
 #include <entt/entity/registry.hpp>
 
 // putils
@@ -53,10 +54,6 @@ namespace kengine::systems {
 			};
 
 			connections.emplace_back(r.on_destroy<data::recast_agent>().connect<remove_agent_from_crowds>());
-			connections.emplace_back(r.on_construct<data::model>().connect<recast_impl::build_recast_component>());
-			connections.emplace_back(r.on_construct<data::model_data>().connect<recast_impl::build_recast_component>());
-			connections.emplace_back(r.on_construct<data::nav_mesh>().connect<recast_impl::build_recast_component>());
-			connections.emplace_back(r.on_update<data::nav_mesh>().connect<recast_impl::build_recast_component>());
 		}
 
 		static void remove_agent_from_crowds(entt::registry & r, entt::entity e) noexcept {
@@ -70,9 +67,15 @@ namespace kengine::systems {
 			}
 		}
 
+		entt::observer observer{ r, entt::collector.group<data::model, data::model_data, data::nav_mesh>() };
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, verbose, "execute", "recast");
+
+			for (const auto e : observer)
+				recast_impl::build_recast_component(r, e);
+			observer.clear();
+
 			recast_impl::do_pathfinding(r, delta_time);
 		}
 	};
