@@ -31,6 +31,7 @@ namespace kengine::systems {
 		adjustables g_adjustables;
 
 		void build_recast_component(entt::registry & r, entt::entity e) noexcept;
+		void process_built_recast_components(entt::registry & r) noexcept;
 		void do_pathfinding(entt::registry & r, float delta_time) noexcept;
 	}
 
@@ -76,6 +77,7 @@ namespace kengine::systems {
 				recast_impl::build_recast_component(r, e);
 			observer.clear();
 
+			recast_impl::process_built_recast_components(r);
 			recast_impl::do_pathfinding(r, delta_time);
 		}
 	};
