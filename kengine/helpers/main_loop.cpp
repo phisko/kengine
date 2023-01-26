@@ -6,6 +6,9 @@
 // entt
 #include <entt/entity/registry.hpp>
 
+// meta
+#include "putils/meta/concepts/invocable.hpp"
+
 // kengine data
 #include "kengine/data/time_modulator.hpp"
 
@@ -18,7 +21,10 @@
 #include "kengine/helpers/profiling_helper.hpp"
 
 namespace kengine::main_loop {
-	template<typename F>
+	template<typename T>
+	concept time_factor_callback = putils::invocable<T, float(const entt::registry &)>;
+
+	template<time_factor_callback F>
 	static void run_frame(const entt::registry & r, float delta_time, F && get_time_factor) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
@@ -32,7 +38,7 @@ namespace kengine::main_loop {
 		}
 	}
 
-	template<typename F>
+	template<time_factor_callback F>
 	static void run(entt::registry & r, F && get_time_factor) noexcept {
 		kengine_log(r, log, "MainLoop", "Starting");
 

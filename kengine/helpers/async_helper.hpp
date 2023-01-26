@@ -1,6 +1,7 @@
 #pragma once
 
 // stl
+#include <concepts>
 #include <future>
 
 // entt
@@ -16,7 +17,7 @@ namespace kengine {
 	template<typename T>
 	bool process_async_results(entt::registry & r) noexcept;
 
-	template<typename T, typename Func> // Func: void(entt::entity, T &&)
+	template<typename T, std::invocable<entt::entity, T &&> Func>
 	bool process_async_results(entt::registry & r, Func && func) noexcept;
 }
 
