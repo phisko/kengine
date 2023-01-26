@@ -213,6 +213,7 @@ namespace kengine::systems {
 					r, model_entity,
 					data::async_task::string("kreogl: load %s", file),
 					std::async(std::launch::async, [&file] {
+						KENGINE_PROFILING_SCOPE;
 						return ::kreogl::texture_data(file);
 					})
 				);
@@ -221,6 +222,7 @@ namespace kengine::systems {
 					r, model_entity,
 					data::async_task::string("kreogl: load %s", file),
 					std::async(std::launch::async, [&file] {
+						KENGINE_PROFILING_SCOPE;
 						return ::kreogl::assimp::load_model_data(file);
 					})
 				);
