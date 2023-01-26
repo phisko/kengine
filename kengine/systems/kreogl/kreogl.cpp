@@ -80,7 +80,7 @@
 namespace kengine::systems {
 	struct kreogl {
 		entt::registry & r;
-		putils::vector<entt::scoped_connection, 2> connections;
+		putils::vector<entt::scoped_connection, 3> connections;
 
 		kreogl(entt::handle e) noexcept
 			: r(*e.registry()) {
@@ -102,6 +102,7 @@ namespace kengine::systems {
 
 			connections.emplace_back(r.on_construct<data::model>().connect<&kreogl::create_model_from_disk>(this));
 			connections.emplace_back(r.on_construct<data::animation_files>().connect<&kreogl::load_animation_files>(this));
+			connections.emplace_back(r.on_construct<data::sky_box_model>().connect<&kreogl::create_sky_box_from_disk>(this));
 
 			init_window();
 		}
@@ -254,6 +255,37 @@ namespace kengine::systems {
 			}
 		}
 
+		struct sky_box_task_result {
+			entt::entity sky_box_entity;
+			::kreogl::texture_data left;
+			::kreogl::texture_data right;
+			::kreogl::texture_data top;
+			::kreogl::texture_data bottom;
+			::kreogl::texture_data front;
+			::kreogl::texture_data back;
+		};
+
+		void create_sky_box_from_disk(entt::registry & r, entt::entity sky_box_entity) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			const auto & sky_box = r.get<data::sky_box_model>(sky_box_entity);
+
+			const auto task_entity = r.create();
+			kengine::start_async_task(
+				r, task_entity,
+				data::async_task::string("kreogl: load sky_box for %d", int(sky_box_entity)),
+				std::async(std::launch::async, [sky_box_entity, &sky_box] {
+					KENGINE_PROFILING_SCOPE;
+					return sky_box_task_result{
+						sky_box_entity,
+						sky_box.left.c_str(), sky_box.right.c_str(),
+						sky_box.top.c_str(), sky_box.bottom.c_str(),
+						sky_box.front.c_str(), sky_box.back.c_str()
+					};
+				})
+			);
+		}
+
 		void complete_loading_tasks() noexcept {
 			KENGINE_PROFILING_SCOPE;
 
@@ -276,6 +308,11 @@ namespace kengine::systems {
 				}
 
 				r.emplace<data::kreogl_model>(e, ::kreogl::assimp::load_animated_model(std::move(model_data)));
+			});
+
+			kengine::process_async_results<sky_box_task_result>(r, [this](entt::entity task_entity, sky_box_task_result && result) noexcept {
+				r.emplace<::kreogl::skybox_texture>(result.sky_box_entity, result.left, result.right, result.top, result.bottom, result.front, result.back);
+				r.destroy(task_entity);
 			});
 		}
 
@@ -365,9 +402,6 @@ namespace kengine::systems {
 
 			for (auto [light_entity, light] : r.view<data::spot_light>(entt::exclude<::kreogl::spot_light>).each())
 				r.emplace<::kreogl::spot_light>(light_entity);
-
-			for (auto [sky_box_entity, sky_box] : r.view<data::sky_box>(entt::exclude<::kreogl::skybox_texture>).each())
-				r.emplace<::kreogl::skybox_texture>(sky_box_entity, sky_box.left.c_str(), sky_box.right.c_str(), sky_box.top.c_str(), sky_box.bottom.c_str(), sky_box.front.c_str(), sky_box.back.c_str());
 
 			for (auto [debug_entity, debug_graphics] : r.view<data::debug_graphics>(entt::exclude<data::kreogl_debug_graphics>).each())
 				r.emplace<data::kreogl_debug_graphics>(debug_entity);
@@ -538,11 +572,14 @@ namespace kengine::systems {
 
 			sync_debug_graphics_properties(kreogl_world, camera_entity);
 
-			for (const auto & [sky_box_entity, sky_box, kreogl_skybox] : r.view<data::sky_box, ::kreogl::skybox_texture>().each()) {
+			for (const auto & [sky_box_entity, sky_box] : r.view<data::sky_box>().each()) {
 				if (!camera_helper::entity_appears_in_viewport(r, sky_box_entity, camera_entity))
 					continue;
+				const auto kreogl_skybox = instance_helper::try_get_model<::kreogl::skybox_texture>({ r, sky_box_entity });
+				if (!kreogl_skybox)
+					continue;
 				kreogl_world.skybox.color = toglm(sky_box.color);
-				kreogl_world.skybox.texture = &kreogl_skybox;
+				kreogl_world.skybox.texture = kreogl_skybox;
 			}
 		}
 
