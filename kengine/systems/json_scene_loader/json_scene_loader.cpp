@@ -1,6 +1,7 @@
 #include "json_scene_loader.hpp"
 
 // stl
+#include <concepts>
 #include <filesystem>
 #include <fstream>
 
@@ -84,11 +85,11 @@ namespace kengine::systems {
 			});
 		}
 
-		template<typename Result, typename Func>
+		template<std::invocable Func>
 		void perform_step(entt::entity e, const data::json_scene_loader::loading_step & step, const char * description, Func && step_func) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			kengine::start_async_task<Result>(
+			kengine::start_async_task(
 				r, e,
 				data::async_task::string("json_scene: load %s %s", description, step.file.c_str()),
 				std::async(step.policy, FWD(step_func))
@@ -98,7 +99,7 @@ namespace kengine::systems {
 		void load_temporary_scene(entt::entity e, const data::json_scene_loader & loader) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			perform_step<temporary_scene>(
+			perform_step(
 				e, loader.temporary_scene, "temporary scene",
 				[this, &loader] {
 					return load_temporary_scene(loader.temporary_scene.file.c_str());
@@ -109,7 +110,7 @@ namespace kengine::systems {
 		void load_models(entt::entity e, const data::json_scene_loader & loader) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			perform_step<load_models_task>(
+			perform_step(
 				e, loader.model_directory, "models from",
 				[this, e, &loader] {
 					return load_models(loader.model_directory.file.c_str());
@@ -120,7 +121,7 @@ namespace kengine::systems {
 		void load_scene(entt::entity e, const data::json_scene_loader & loader) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			perform_step<load_scene_task>(
+			perform_step(
 				e, loader.scene, "scene",
 				[this, e, &loader] {
 					return load_scene(loader.scene.file.c_str());

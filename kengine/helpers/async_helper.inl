@@ -2,6 +2,7 @@
 
 // stl
 #include <chrono>
+#include <concepts>
 #include <future>
 
 // kengine data
@@ -33,7 +34,7 @@ namespace kengine {
 		return process_async_results<T>(r, [](auto &&...) {});
 	}
 
-	template<typename T, typename Func>
+	template<typename T, std::invocable<entt::entity, T &&> Func>
 	bool process_async_results(entt::registry & r, Func && func) noexcept {
 		KENGINE_PROFILING_SCOPE;
 

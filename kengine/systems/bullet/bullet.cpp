@@ -21,6 +21,9 @@
 // magic_enum
 #include <magic_enum.hpp>
 
+// meta
+#include "putils/meta/concepts/invocable.hpp"
+
 // putils
 #include "putils/forward_to.hpp"
 
@@ -166,7 +169,7 @@ namespace kengine::systems {
 		}
 
 		using collision_shape_map = std::map<putils::point3f, std::unique_ptr<btCollisionShape>>;
-		template<typename Func>
+		template<putils::invocable<btCollisionShape *()> Func>
 		btCollisionShape * get_collision_shape(collision_shape_map & shapes, const putils::vec3f & size, Func && creator) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
