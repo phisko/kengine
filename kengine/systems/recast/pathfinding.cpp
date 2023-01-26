@@ -62,9 +62,12 @@ namespace kengine::systems::recast_impl {
 
 				r.emplace<nav_mesh_backup>(agent.crowd, *nav_mesh);
 
-				auto & crowd = attach_crowd_component({ r, agent.crowd });
+				const auto crowd = get_crowd_component({ r, agent.crowd });
+				if (!crowd)
+					continue;
+
 				const auto object_info = get_object_info(get_environment_info({ r, agent.crowd }), transform, pathfinding);
-				attach_agent_component({ r, e }, object_info, crowd, agent.crowd);
+				attach_agent_component({ r, e }, object_info, *crowd, agent.crowd);
 			}
 		}
 
@@ -86,11 +89,13 @@ namespace kengine::systems::recast_impl {
 				if (pathfinding.environment == entt::null)
 					continue;
 
-				kengine_logf(r, verbose, "execute/RecastSystem", "Adding agent %zu to crowd %zu", e, pathfinding.environment);
-
 				auto crowd = r.try_get<data::recast_crowd>(pathfinding.environment);
 				if (!crowd)
-					crowd = &attach_crowd_component({ r, pathfinding.environment });
+					crowd = get_crowd_component({ r, pathfinding.environment });
+				if (!crowd)
+					continue;
+
+				kengine_logf(r, verbose, "execute/RecastSystem", "Adding agent %zu to crowd %zu", e, pathfinding.environment);
 
 				const auto object_info = get_object_info(get_environment_info({ r, pathfinding.environment }), transform, pathfinding);
 				attach_agent_component({ r, e }, object_info, *crowd, pathfinding.environment);
@@ -134,14 +139,20 @@ namespace kengine::systems::recast_impl {
 			return ret;
 		}
 
-		static data::recast_crowd & attach_crowd_component(entt::handle e) noexcept {
+		static data::recast_crowd * get_crowd_component(entt::handle e) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			auto & crowd = e.emplace<data::recast_crowd>();
-			crowd.crowd.reset(dtAllocCrowd());
+			auto crowd = e.try_get<data::recast_crowd>();
+			if (crowd)
+				return crowd;
 
-			const auto & nav_mesh = instance_helper::get_model<data::recast_nav_mesh>(e);
-			crowd.crowd->init(KENGINE_RECAST_MAX_AGENTS, nav_mesh.nav_mesh->getParams()->tileWidth, nav_mesh.nav_mesh.get());
+			const auto nav_mesh = instance_helper::try_get_model<data::recast_nav_mesh>(e);
+			if (!nav_mesh)
+				return crowd;
+
+			crowd = &e.emplace<data::recast_crowd>();
+			crowd->crowd.reset(dtAllocCrowd());
+			crowd->crowd->init(KENGINE_RECAST_MAX_AGENTS, nav_mesh->nav_mesh->getParams()->tileWidth, nav_mesh->nav_mesh.get());
 
 			return crowd;
 		}
@@ -185,13 +196,13 @@ namespace kengine::systems::recast_impl {
 				if (pathfinding.environment == agent.crowd)
 					continue;
 
+				const auto new_crowd = get_crowd_component({ r, pathfinding.environment });
+				if (!new_crowd)
+					continue;
+
 				const auto old_crowd = r.try_get<data::recast_crowd>(agent.crowd);
 				if (old_crowd)
 					old_crowd->crowd->removeAgent(agent.index);
-
-				auto new_crowd = r.try_get<data::recast_crowd>(pathfinding.environment);
-				if (!new_crowd)
-					new_crowd = &attach_crowd_component({ r, pathfinding.environment });
 
 				const auto object_info = get_object_info(get_environment_info({ r, pathfinding.environment }), r.get<data::transform>(e), pathfinding);
 				attach_agent_component({ r, e }, object_info, *new_crowd, pathfinding.environment);
