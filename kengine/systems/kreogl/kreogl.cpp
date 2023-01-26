@@ -228,18 +228,44 @@ namespace kengine::systems {
 				);
 		}
 
+		struct animation_files_task_result {
+			struct animation_file {
+				const char * file_name;
+				std::unique_ptr<::kreogl::animation_file> kreogl_animation_file;
+			};
+			entt::entity model_entity;
+			std::vector<animation_file> animation_files;
+		};
+
 		void load_animation_files(entt::registry & r, entt::entity model_entity) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			const auto & animation_files = r.get<data::animation_files>(model_entity);
+			const auto task_entity = r.create(); // A task might be attached to model_entity to load the model itself
+			kengine::start_async_task(
+				r, task_entity,
+				data::async_task::string("kreogl: load animation files for %d", int(model_entity)),
+				std::async(std::launch::async, [&animation_files, model_entity] {
+					KENGINE_PROFILING_SCOPE;
+					animation_files_task_result result;
+					result.model_entity = model_entity;
+					result.animation_files.resize(animation_files.files.size());
 
-			auto & model_animation = r.get_or_emplace<data::model_animation>(model_entity);
-			auto & kreogl_animation_files = r.emplace<data::kreogl_animation_files>(model_entity);
-			for (const auto & file : animation_files.files) {
-				auto kreogl_animation_file = ::kreogl::assimp::load_animation_file(file.c_str());
-				add_animations_to_model_animation_component(model_animation, file.c_str(), *kreogl_animation_file);
-				kreogl_animation_files.files.push_back(std::move(kreogl_animation_file));
-			}
+					// Profiling this shows that:
+					// * with par_unseq, each thread takes ~700ms
+					// * with no execution policy, each call takes ~50ms
+					// This isn't a performance loss so I'm leaving it as is, but I haven't found an explanation so far
+					std::transform(
+						std::execution::par_unseq,
+						animation_files.files.begin(), animation_files.files.end(),
+						result.animation_files.begin(),
+						[](const std::string & file) {
+							return animation_files_task_result::animation_file{ file.c_str(), ::kreogl::assimp::load_animation_file(file.c_str()) };
+						}
+					);
+					return result;
+				})
+			);
 		}
 
 		void add_animations_to_model_animation_component(data::model_animation & model_animation, const char * file, const ::kreogl::animation_file & animations) noexcept {
@@ -310,6 +336,16 @@ namespace kengine::systems {
 				}
 
 				r.emplace<data::kreogl_model>(e, ::kreogl::assimp::load_animated_model(std::move(model_data)));
+			});
+
+			kengine::process_async_results<animation_files_task_result>(r, [this](entt::entity task_entity, animation_files_task_result && result) {
+				auto & model_animation = r.get_or_emplace<data::model_animation>(result.model_entity);
+				auto & kreogl_animation_files = r.emplace<data::kreogl_animation_files>(result.model_entity);
+				for (auto & animation_file : result.animation_files) {
+					add_animations_to_model_animation_component(model_animation, animation_file.file_name, *animation_file.kreogl_animation_file);
+					kreogl_animation_files.files.push_back(std::move(animation_file.kreogl_animation_file));
+				}
+				r.destroy(task_entity);
 			});
 
 			kengine::process_async_results<sky_box_task_result>(r, [this](entt::entity task_entity, sky_box_task_result && result) noexcept {
