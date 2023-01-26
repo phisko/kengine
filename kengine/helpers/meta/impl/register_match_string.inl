@@ -65,6 +65,9 @@ namespace kengine {
 			else if constexpr (std::is_same_v<Member, double>) {
 				return (str[0] == '-' || str[0] == '.' || (str[0] >= '0' && str[0] <= '9')) && putils::parse<double>(str) == member;
 			}
+			else if constexpr (std::is_same_v<Member, entt::entity> || std::is_same_v<Member, entt::handle>) {
+				return str[0] >= '0' && str[0] <= '9' && putils::parse<entt::id_type>(str) == entt::id_type(member);
+			}
 
 			return false;
 		}
