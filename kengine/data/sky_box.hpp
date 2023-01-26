@@ -11,7 +11,7 @@
 namespace kengine::data {
 	//! putils reflect all
 	//! used_types: [refltype::string, putils::normalized_color]
-	struct sky_box {
+	struct sky_box_model {
 		static constexpr char string_name[] = "sky_box_string";
 		using string = putils::string<KENGINE_SKYBOX_TEXTURE_PATH_MAX_NAME, string_name>;
 
@@ -21,7 +21,10 @@ namespace kengine::data {
 		string bottom;
 		string front;
 		string back;
+	};
 
+	//! putils reflect all
+	struct sky_box {
 		putils::normalized_color color;
 	};
 }
