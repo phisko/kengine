@@ -20,6 +20,7 @@
 
 // putils
 #include "putils/forward_to.hpp"
+#include "putils/range.hpp"
 
 // kreogl
 #include "kreogl/animation/animated_object.hpp"
@@ -257,7 +258,7 @@ namespace kengine::systems {
 					// This isn't a performance loss so I'm leaving it as is, but I haven't found an explanation so far
 					std::transform(
 						std::execution::par_unseq,
-						animation_files.files.begin(), animation_files.files.end(),
+						putils_range(animation_files.files),
 						result.animation_files.begin(),
 						[](const std::string & file) {
 							return animation_files_task_result::animation_file{ file.c_str(), ::kreogl::assimp::load_animation_file(file.c_str()) };
@@ -449,7 +450,7 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 
 			const auto view = r.view<::kreogl::animated_object, data::animation>();
-			std::for_each(std::execution::par_unseq, view.begin(), view.end(), [&](entt::entity entity) noexcept {
+			std::for_each(std::execution::par_unseq, putils_range(view), [&](entt::entity entity) noexcept {
 				const auto & [kreogl_object, animation] = view.get(entity);
 				tick_object_animation(delta_time, entity, kreogl_object, animation);
 			});

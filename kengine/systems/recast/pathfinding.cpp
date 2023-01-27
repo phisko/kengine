@@ -12,7 +12,7 @@
 
 // putils
 #include "putils/lengthof.hpp"
-#include "putils/on_scope_exit.hpp"
+#include "putils/range.hpp"
 
 // kengine data
 #include "kengine/data/pathfinding.hpp"
@@ -213,7 +213,7 @@ namespace kengine::systems::recast_impl {
 			KENGINE_PROFILING_SCOPE;
 
 			const auto view = r.view<data::recast_crowd>();
-			std::for_each(std::execution::par_unseq, view.begin(), view.end(), [&](entt::entity environment) noexcept {
+			std::for_each(std::execution::par_unseq, putils_range(view), [&](entt::entity environment) noexcept {
 				const auto & [crowd] = view.get(environment);
 				update_crowd(delta_time, { r, environment }, crowd);
 			});

@@ -15,6 +15,7 @@
 
 // putils
 #include "putils/forward_to.hpp"
+#include "putils/range.hpp"
 
 // kengine data
 #include "kengine/data/json_scene_loader.hpp"
@@ -80,7 +81,7 @@ namespace kengine::systems {
 
 			kengine::process_async_results<load_scene_task>(r, [this](entt::entity e, load_scene_task &&) {
 				if (const auto scene = r.try_get<temporary_scene>(e))
-					r.destroy(scene->loaded_entities.begin(), scene->loaded_entities.end());
+					r.destroy(putils_range(scene->loaded_entities));
 				r.destroy(e);
 			});
 		}

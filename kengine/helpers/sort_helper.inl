@@ -52,7 +52,7 @@ namespace kengine::sort_helper {
 			ret.emplace_back();
 			impl::set(ret.back(), t, std::make_index_sequence<sizeof...(Comps)>());
 		}
-		std::sort(ret.begin(), ret.end(), FWD(pred));
+		std::ranges::sort(ret, FWD(pred));
 
 		return ret;
 	}
