@@ -10,8 +10,25 @@
 #include "kengine/helpers/profiling_helper.hpp"
 
 namespace kengine {
+	struct pre_registered {};
+
+	void pre_register_all_types(entt::registry & destination_registry, const entt::registry * main_registry) noexcept {
+		KENGINE_PROFILING_SCOPE;
+
+		if (!main_registry)
+			main_registry = &destination_registry;
+
+		destination_registry.emplace<pre_registered>(destination_registry.create());
+
+		for (const auto & [e, pre_register_types] : main_registry->view<functions::pre_register_types>().each())
+			pre_register_types(destination_registry);
+	}
+
 	void register_all_types(entt::registry & destination_registry, const entt::registry * main_registry) noexcept {
 		KENGINE_PROFILING_SCOPE;
+
+		if (destination_registry.view<pre_registered>().empty())
+			pre_register_all_types(destination_registry, main_registry);
 
 		if (!main_registry)
 			main_registry = &destination_registry;
