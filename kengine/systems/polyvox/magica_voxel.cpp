@@ -73,7 +73,7 @@ namespace kengine::systems {
 
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "execute", "systems/magica_voxel");
+			kengine_log(r, verbose, "execute", "systems/magica_voxel");
 
 			kengine::process_async_results<async_loaded_data>(r, [this](entt::entity e, async_loaded_data && loaded_data) {
 				r.emplace<data::model_data>(e, std::move(loaded_data.model_data));
