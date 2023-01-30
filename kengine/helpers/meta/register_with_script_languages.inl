@@ -29,6 +29,7 @@ namespace kengine {
 
 		using language_registrator = void(entt::registry &);
 		static constexpr language_registrator * language_registrators[] = {
+			nullptr, // Needed to avoid zero-sized array
 #ifdef KENGINE_PYTHON
 			python_helper::register_types<IsComponent, Comps...>,
 #endif
@@ -38,7 +39,8 @@ namespace kengine {
 		};
 
 		std::for_each(std::execution::par_unseq, putils_range(language_registrators), [&](const auto func) {
-			func(r);
+			if (func)
+				func(r);
 		});
 
 		putils::for_each_type<Comps...>([&](auto && t) noexcept {
