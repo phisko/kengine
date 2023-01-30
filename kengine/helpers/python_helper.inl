@@ -39,6 +39,8 @@ namespace kengine::python_helper {
 		void register_type_with_state(entt::registry & r, data::python_state & state) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
+			const py::gil_scoped_acquire acquire; // In case we're called from a worker thread
+
 			// avoid double registration
 			if (hasattr(state.module_, putils::reflection::get_class_name<T>()))
 				return;
@@ -77,6 +79,7 @@ namespace kengine::python_helper {
 			using type = putils_wrapped_type(t);
 
 			kengine_logf(r, log, "python/register_types", "Registering %s", putils::reflection::get_class_name<type>());
+			// No point in multithreading this since the GIL can only be owned by one thread
 			for (const auto & [e, comp] : r.view<data::python_state>().each())
 				impl::register_type_with_state<IsComponent, type>(r, comp);
 		});
