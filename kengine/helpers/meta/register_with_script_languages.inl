@@ -13,6 +13,16 @@
 #include "kengine/helpers/python_helper.hpp"
 
 namespace kengine {
+	template<typename... Comps>
+	void register_component_with_script_languages(entt::registry & r) noexcept {
+		register_with_script_languages<true, Comps...>(r);
+	}
+
+	template<typename... Comps>
+	void register_type_with_script_languages(entt::registry & r) noexcept {
+		register_with_script_languages<false, Comps...>(r);
+	}
+
 	template<bool IsComponent, typename... Comps>
 	void register_with_script_languages(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;

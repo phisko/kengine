@@ -4,6 +4,12 @@
 #include <entt/entity/fwd.hpp>
 
 namespace kengine {
+	template<typename... Comps>
+	void register_component_with_script_languages(entt::registry & r) noexcept;
+
+	template<typename... Comps>
+	void register_type_with_script_languages(entt::registry & r) noexcept;
+
 	template<bool IsComponent, typename... Comps>
 	void register_with_script_languages(entt::registry & r) noexcept;
 
