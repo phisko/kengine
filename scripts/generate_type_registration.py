@@ -15,13 +15,21 @@ from putils.reflection.scripts import clang_helpers
 
 parser = argparse.ArgumentParser(formatter_class = argparse.RawTextHelpFormatter, description = 'Generate kengine type registration functions', epilog = '''
 Registration files should contain the following format:
-[
-	{
-		"registration": "kengine::register_everything",
-		"header": "kengine/helpers/meta/register_everything.hpp"
-	},
-	...
-]
+{
+	"pre_registrations": [
+		{
+			"registration": "kengine::register_metadata",
+			"header": "kengine/helpers/meta/register_metadata.hpp"
+		},
+	]
+	"registrations": [
+		{
+			"registration": "kengine::register_component_with_script_languages",
+			"header": "kengine/helpers/meta/register_with_script_languages.hpp"
+		},
+		...
+	]
+}
 
 Registration can be disabled for a specific type by placing a `//! kengine registration off`
 comment before it.
@@ -77,7 +85,9 @@ namespace ''' + args.namespace + ' {'
 
 def generate_registration_headers():
 	ret = ''
-	for registration in all_registrations:
+	for registration in pre_registrators:
+		ret += f'#include "{registration["header"]}"\n'
+	for registration in registrators:
 		ret += f'#include "{registration["header"]}"\n'
 	return ret
 
@@ -85,13 +95,31 @@ def generate_registration_functions(types):
 	ret = ''
 
 	for type in types:
-		ret += f'\n\tvoid {type["function_name"]}(entt::registry & r) noexcept ' + '{\n'
-		ret += '\t\tKENGINE_PROFILING_SCOPE;\n'
-		ret += f'\n\t\tkengine_log(r, log, "init/register_types", "Registering \'{type["type"]}\'");'
-		for registration in all_registrations:
-			ret += f'\n\t\t{registration["registration"]}<{type["type"]}>(r);\n'
-		ret += '\t}\n'
+		ret += '''
+	void pre_''' + type['function_name'] + '''(entt::registry & r) noexcept {
+		KENGINE_PROFILING_SCOPE;
+		kengine_log(r, log, "init/register_types", "Pre-registering \'''' + type['type'] + '''\'");
+'''
 
+		for registration in pre_registrators:
+			ret += '''
+		''' + registration['registration'] + '<' + type['type'] + '>(r);'
+
+		ret += '''
+	}
+
+	void ''' + type['function_name'] + '''(entt::registry & r) noexcept {
+		KENGINE_PROFILING_SCOPE;
+		kengine_log(r, log, "init/register_types", "Registering \'''' + type['type'] + '''\'");
+'''
+
+		for registration in registrators:
+			ret += '''
+		''' + registration['registration'] + '<' + type['type'] + '>(r);'
+
+		ret += '''
+	}
+'''
 	return ret
 
 #
@@ -142,11 +170,13 @@ for file_name, parsed_file in parsed_files.items():
 		visit_node(node)
 
 if not args.no_write_type_files:
-	all_registrations = []
+	pre_registrators = []
+	registrators = []
 	for registration_file in args.registrations:
 		json_file = open(registration_file)
 		json_data = json.load(json_file)
-		all_registrations += json_data
+		pre_registrators += json_data['pre_registrations']
+		registrators += json_data['registrations']
 
 	for file_name, types in all_types.items():
 		generate_registration(file_name, types)
@@ -155,50 +185,86 @@ if not args.no_write_main_file:
 	main_file = os.path.join(args.output, 'add_type_registrator')
 
 	main_file_cpp = '''
-	#include "add_type_registrator.hpp"
+#include "add_type_registrator.hpp"
 
-	// entt
-	#include <entt/entity/registry.hpp>
+// stl
+#include <algorithm>
+#include <execution>
 
-	// kengine functions
-	#include "kengine/functions/register_types.hpp"
+// entt
+#include <entt/entity/registry.hpp>
 
-	// kengine helpers
-	#include "kengine/helpers/log_helper.hpp"
-	#include "kengine/helpers/profiling_helper.hpp"
+// putils
+#include "putils/range.hpp"
 
-	namespace ''' + args.namespace + ' {\n'
+// kengine functions
+#include "kengine/functions/register_types.hpp"
+
+// kengine helpers
+#include "kengine/helpers/log_helper.hpp"
+#include "kengine/helpers/profiling_helper.hpp"
+
+namespace ''' + args.namespace + ' {'
 
 	for file_name, types in all_types.items():
 		for type in types:
-			main_file_cpp += f'\t\textern void {type["function_name"]}(entt::registry &) noexcept;\n'
+			main_file_cpp += '''
+	extern void pre_''' + type['function_name'] + '''(entt::registry &) noexcept;
+	extern void ''' + type['function_name'] + '''(entt::registry &) noexcept;
+'''
 
 	main_file_cpp += '''
-		void add_type_registrator(entt::registry & r) noexcept {
+	using registrator_function = void (*)(entt::registry &) noexcept;
+	static constexpr registrator_function pre_registrators[] = {'''
+
+	for file_name, types in all_types.items():
+		for type in types:
+			main_file_cpp += '''
+		pre_''' + type['function_name'] + ','
+
+	main_file_cpp += '''
+	};
+
+	static constexpr registrator_function registrators[] = {'''
+
+	for file_name, types in all_types.items():
+		for type in types:
+			main_file_cpp += '''
+		''' + type['function_name'] + ','
+
+	main_file_cpp += '''
+	};'''
+
+	main_file_cpp += '''
+	void add_type_registrator(entt::registry & r) noexcept {
+		KENGINE_PROFILING_SCOPE;
+
+		const auto e = r.create();
+		r.emplace<kengine::functions::pre_register_types>(e, [](entt::registry & r) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, log, "Init", "Pre-registering types");
 
-			const auto e = r.create();
-			r.emplace<kengine::functions::register_types>(e, [](entt::registry & r) noexcept {
-				KENGINE_PROFILING_SCOPE;
-				kengine_log(r, log, "Init", "Registering types");
-	'''
+			for (const auto pre_registrator : pre_registrators)
+				pre_registrator(r);
+		});
 
-	for file_name, types in all_types.items():
-		for type in types:
-			main_file_cpp += f'\n\t\t\t\t{type["function_name"]}(r);'
+		r.emplace<kengine::functions::register_types>(e, [](entt::registry & r) noexcept {
+			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, log, "Init", "Registering types");
 
-	main_file_cpp += '''
-			});
-		}
-	}'''
+			for (const auto registrator : registrators)
+				registrator(r);
+		});
+	}
+}'''
 
 	open(main_file + '.cpp', 'w').write(main_file_cpp)
 	open(main_file + '.hpp', 'w').write('''
-	#pragma once
+#pragma once
 
-	// entt
-	#include <entt/entity/fwd.hpp>
+// entt
+#include <entt/entity/fwd.hpp>
 
-	namespace ''' + args.namespace + ''' {
-		''' + args.export_macro + ''' void add_type_registrator(entt::registry & r) noexcept;
-	}''')
+namespace ''' + args.namespace + ''' {
+	''' + args.export_macro + ''' void add_type_registrator(entt::registry & r) noexcept;
+}''')
