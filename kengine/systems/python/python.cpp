@@ -53,9 +53,14 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, verbose, "execute", "python");
 
+			const auto view = r.view<data::python>();
+
+			if (view.empty())
+				return;
+
 			module_->attr("delta_time") = delta_time;
 
-			for (auto [e, comp] : r.view<data::python>().each()) {
+			for (auto [e, comp] : view.each()) {
 				module_->attr("self") = entt::handle{ r, e };
 
 				for (const auto & s : comp.scripts) {
