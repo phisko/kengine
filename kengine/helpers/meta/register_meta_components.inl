@@ -44,6 +44,23 @@ namespace kengine {
 			register_save_to_json<Comps...>,
 		};
 
+		// Pre-instatiate storages
+		r.storage<meta::attributes>();
+		r.storage<meta::count>();
+		r.storage<meta::display_imgui>();
+		r.storage<meta::edit_imgui>();
+		r.storage<meta::emplace_or_replace>();
+		r.storage<meta::emplace_or_replace_move>();
+		r.storage<meta::for_each_entity>();
+		r.storage<meta::for_each_entity_without>();
+		r.storage<meta::get>();
+		r.storage<meta::get_const>();
+		r.storage<meta::has>();
+		r.storage<meta::load_from_json>();
+		r.storage<meta::match_string>();
+		r.storage<meta::remove>();
+		r.storage<meta::save_to_json>();
+
 		std::for_each(std::execution::par_unseq, putils_range(component_registrators), [&](auto registrator) {
 			registrator(r);
 		});
