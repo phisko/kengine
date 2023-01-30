@@ -1,10 +1,15 @@
 #include "lua_helper.hpp"
 
+// stl
+#include <algorithm>
+#include <execution>
+
 // entt
 #include <entt/entity/registry.hpp>
 
 // putils
 #include "putils/lua/lua_helper.hpp"
+#include "putils/range.hpp"
 
 // kengine helpers
 #include "kengine/helpers/log_helper.hpp"
@@ -51,8 +56,11 @@ namespace kengine::lua_helper {
 		putils::for_each_type<Types...>([&](auto && t) noexcept {
 			using type = putils_wrapped_type(t);
 			kengine_logf(r, log, "lua/register_types", "Registering %s", putils::reflection::get_class_name<type>());
-			for (const auto & [e, comp] : r.view<data::lua_state>().each())
+			const auto view = r.view<data::lua_state>();
+			std::for_each(std::execution::par_unseq, putils_range(view), [&](entt::entity e) {
+				const auto & [comp] = view.get(e);
 				impl::register_type_with_state<IsComponent, type>(r, *comp.state);
+			});
 		});
 	}
 
