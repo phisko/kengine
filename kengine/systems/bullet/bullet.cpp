@@ -107,14 +107,14 @@ namespace kengine::systems {
 				data::transform * transform;
 			};
 
-			systems::bullet * system;
-			btCompoundShape shape{ false };
-			btRigidBody body{ { 0.f, nullptr, nullptr } };
-			motion_state motion_state;
+			std::unique_ptr<btCompoundShape> shape;
+			std::unique_ptr<btRigidBody> body;
+			std::unique_ptr<motion_state> state;
 
 			~bullet_data() noexcept {
 				KENGINE_PROFILING_SCOPE;
-				system->dynamics_world.removeRigidBody(&body);
+				if (state)
+					state->system->dynamics_world.removeRigidBody(body.get());
 			}
 
 			bullet_data() noexcept = default;
@@ -219,8 +219,11 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 
 			auto & comp = r.emplace<bullet_data>(e);
-			comp.motion_state.system = this;
-			comp.motion_state.transform = &transform;
+			comp.shape = std::make_unique<btCompoundShape>();
+
+			comp.state = std::make_unique<bullet_data::motion_state>();
+			comp.state->system = this;
+			comp.state->transform = &transform;
 
 			const auto & model_collider = r.get<data::model_collider>(model_entity);
 
@@ -234,15 +237,15 @@ namespace kengine::systems {
 			btVector3 local_inertia{ 0.f, 0.f, 0.f };
 			{
 				if (physics.mass != 0.f)
-					comp.shape.calculateLocalInertia(physics.mass, local_inertia);
+					comp.shape->calculateLocalInertia(physics.mass, local_inertia);
 			}
 
-			btRigidBody::btRigidBodyConstructionInfo rigid_body_info(physics.mass, &comp.motion_state, &comp.shape, local_inertia);
-			comp.body = btRigidBody(rigid_body_info);
-			comp.body.setUserIndex(int(e));
+			btRigidBody::btRigidBodyConstructionInfo rigid_body_info(physics.mass, comp.state.get(), comp.shape.get(), local_inertia);
+			comp.body = std::make_unique<btRigidBody>(rigid_body_info);
+			comp.body->setUserIndex(int(e));
 
 			update_bullet_data(e, comp, transform, physics, model_entity, true);
-			dynamics_world.addRigidBody(&comp.body);
+			dynamics_world.addRigidBody(comp.body.get());
 		}
 
 		void add_shape(bullet_data & comp, const data::model_collider::collider & collider, const data::transform & transform, const data::skeleton * skeleton, const data::model_skeleton * model_skeleton, const data::transform * model_transform) {
@@ -283,7 +286,7 @@ namespace kengine::systems {
 						return;
 				}
 			}
-			comp.shape.addChildShape(to_bullet(transform, collider, skeleton, model_skeleton, model_transform), shape);
+			comp.shape->addChildShape(to_bullet(transform, collider, skeleton, model_skeleton, model_transform), shape);
 		}
 
 		void update_bullet_data(entt::entity e, bullet_data & comp, const data::transform & transform, data::physics & physics, entt::entity model_entity, bool first = false) noexcept {
@@ -293,34 +296,34 @@ namespace kengine::systems {
 
 			if (physics.changed || first) {
 				// comp.body->clearForces();
-				comp.body.setLinearVelocity(to_bullet(physics.movement));
-				comp.body.setAngularVelocity(btVector3{ physics.pitch, physics.yaw, physics.roll });
+				comp.body->setLinearVelocity(to_bullet(physics.movement));
+				comp.body->setAngularVelocity(btVector3{ physics.pitch, physics.yaw, physics.roll });
 
 				btVector3 local_inertia{ 0.f, 0.f, 0.f };
 				if (physics.mass != 0.f)
-					comp.body.getCollisionShape()->calculateLocalInertia(physics.mass, local_inertia);
-				comp.body.setMassProps(physics.mass, local_inertia);
+					comp.body->getCollisionShape()->calculateLocalInertia(physics.mass, local_inertia);
+				comp.body->setMassProps(physics.mass, local_inertia);
 
-				comp.body.forceActivationState(kinematic ? ISLAND_SLEEPING : ACTIVE_TAG);
-				comp.body.setWorldTransform(to_bullet(transform));
+				comp.body->forceActivationState(kinematic ? ISLAND_SLEEPING : ACTIVE_TAG);
+				comp.body->setWorldTransform(to_bullet(transform));
 			}
 			else if (kinematic) {
-				comp.body.setWorldTransform(to_bullet(transform));
+				comp.body->setWorldTransform(to_bullet(transform));
 			}
 			else if (!kinematic) {
-				physics.movement = to_putils(comp.body.getLinearVelocity());
-				physics.pitch = comp.body.getAngularVelocity().x();
-				physics.yaw = comp.body.getAngularVelocity().y();
-				physics.roll = comp.body.getAngularVelocity().z();
+				physics.movement = to_putils(comp.body->getLinearVelocity());
+				physics.pitch = comp.body->getAngularVelocity().x();
+				physics.yaw = comp.body->getAngularVelocity().y();
+				physics.roll = comp.body->getAngularVelocity().z();
 			}
 
 			if (kinematic) {
-				comp.body.setCollisionFlags(comp.body.getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
-				comp.body.setActivationState(WANTS_DEACTIVATION);
+				comp.body->setCollisionFlags(comp.body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
+				comp.body->setActivationState(WANTS_DEACTIVATION);
 			}
-			else if (comp.body.getCollisionFlags() & btCollisionObject::CF_KINEMATIC_OBJECT) { // Kinematic -> not kinematic
-				comp.body.setCollisionFlags(comp.body.getCollisionFlags() & ~btCollisionObject::CF_KINEMATIC_OBJECT);
-				comp.body.setActivationState(ACTIVE_TAG);
+			else if (comp.body->getCollisionFlags() & btCollisionObject::CF_KINEMATIC_OBJECT) { // Kinematic -> not kinematic
+				comp.body->setCollisionFlags(comp.body->getCollisionFlags() & ~btCollisionObject::CF_KINEMATIC_OBJECT);
+				comp.body->setActivationState(ACTIVE_TAG);
 			}
 
 			physics.changed = false;
@@ -332,7 +335,7 @@ namespace kengine::systems {
 				const auto model_transform = r.try_get<data::transform>(model_entity);
 				int i = 0;
 				for (const auto & collider : r.get<data::model_collider>(model_entity).colliders) {
-					comp.shape.updateChildTransform(i, to_bullet(transform, collider, skeleton, model_skeleton, model_transform));
+					comp.shape->updateChildTransform(i, to_bullet(transform, collider, skeleton, model_skeleton, model_transform));
 					++i;
 				}
 			}
