@@ -13,28 +13,25 @@
 #include "kengine/helpers/profiling_helper.hpp"
 
 namespace kengine {
-	template<typename Meta, typename... Comps, typename Func>
-	void register_meta_component_implementation(entt::registry & r, Func && f) noexcept {
-		register_meta_component_implementation_with_predicate<Meta, std::is_default_constructible, Comps...>(r, FWD(f));
-	}
-
-	template<typename Meta, template<typename T> typename Predicate, typename... Comps, typename Func>
-	void register_meta_component_implementation_with_predicate(entt::registry & r, Func && f) noexcept {
+	template<typename Meta, typename... Comps>
+	void register_meta_component_implementation(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
 		putils::for_each_type<Comps...>([&](auto t) noexcept {
 			using Type = putils_wrapped_type(t);
-			if constexpr (!Predicate<Type>()) {
-				kengine_logf(r, warning, "Init/register_meta_components", "Skipping %s for %s because predicate is not met", putils::reflection::get_class_name<Meta>(), putils::reflection::get_class_name<Type>());
-			}
-			else {
-				if constexpr (putils::reflection::has_class_name<Meta>() && putils::reflection::has_class_name<Type>())
+
+			constexpr auto can_log = putils::reflection::has_class_name<Meta>() && putils::reflection::has_class_name<Type>();
+
+			using implementation = meta_component_implementation<Meta, Type>;
+			if constexpr (implementation::value) {
+				if constexpr (can_log)
 					kengine_logf(r, log, "Init/register_meta_components", "Registering %s for %s", putils::reflection::get_class_name<Meta>(), putils::reflection::get_class_name<Type>());
+
 				const auto type = type_helper::get_type_entity<Type>(r);
-				r.emplace<Meta>(type, [=](auto &&... args) noexcept {
-					return f(t, FWD(args)...);
-				});
+				r.emplace<Meta>(type, implementation::function);
 			}
+			else if constexpr (can_log)
+				kengine_logf(r, log, "Init/register_meta_components", "Skipping %s registration for %s (conditions not met)", putils::reflection::get_class_name<Meta>(), putils::reflection::get_class_name<Type>());
 		});
 	}
 }

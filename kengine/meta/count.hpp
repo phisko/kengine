@@ -1,10 +1,13 @@
 #pragma once
 
+// entt
+#include <entt/entity/fwd.hpp>
+
 // kengine functions
 #include "kengine/base_function.hpp"
 
 namespace kengine::meta {
-	using count_signature = size_t();
+	using count_signature = size_t(entt::registry &);
 	struct count : functions::base_function<count_signature> {};
 }
 

@@ -5,13 +5,14 @@
 ## Prototype
 
 ```cpp
-void (const entity_iterator_func & func);
+void (entt::registry & r, const entity_iterator_func & func);
 
 using entity_iterator_signature = void(entt::handle);
 ```
 
 ### Parameters
 
+* `r`: registry to iterate over
 * `func`: function that will be called for each entity. Its maximum size defaults to 64 and can be adjusted by defining the `KENGINE_ENTITY_ITERATOR_FUNC_SIZE` macro.
 
 ## Usage

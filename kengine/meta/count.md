@@ -5,7 +5,7 @@
 ## Prototype
 
 ```cpp
-size_t ();
+size_t (entt::registry & r);
 ```
 
 ## Usage

@@ -171,7 +171,7 @@ namespace kengine::systems {
 				const auto comp = collection.components[0];
 				const auto count = r.try_get<meta::count>(comp);
 				if (count)
-					return count->call();
+					return count->call(r);
 			}
 
 			size_t ret = 0;
