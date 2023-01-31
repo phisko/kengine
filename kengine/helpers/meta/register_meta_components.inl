@@ -3,25 +3,24 @@
 // stl
 #include <algorithm>
 #include <execution>
+#include <vector>
 
 // putils
 #include "putils/range.hpp"
 
 // kengine helpers
 #include "kengine/helpers/profiling_helper.hpp"
-
-#include "impl/register_attributes.hpp"
-#include "impl/register_count.hpp"
-#include "impl/register_display_imgui.hpp"
-#include "impl/register_edit_imgui.hpp"
-#include "impl/register_emplace_or_replace.hpp"
-#include "impl/register_for_each_entity.hpp"
-#include "impl/register_get.hpp"
-#include "impl/register_has.hpp"
-#include "impl/register_load_from_json.hpp"
-#include "impl/register_match_string.hpp"
-#include "impl/register_remove.hpp"
-#include "impl/register_save_to_json.hpp"
+#include "impl/count.hpp"
+#include "impl/display_imgui.hpp"
+#include "impl/edit_imgui.hpp"
+#include "impl/emplace_or_replace.hpp"
+#include "impl/for_each_entity.hpp"
+#include "impl/get.hpp"
+#include "impl/has.hpp"
+#include "impl/load_from_json.hpp"
+#include "impl/match_string.hpp"
+#include "impl/remove.hpp"
+#include "impl/save_to_json.hpp"
 
 namespace kengine {
 	template<typename... Comps>
@@ -29,39 +28,28 @@ namespace kengine {
 		KENGINE_PROFILING_SCOPE;
 
 		using component_registrator = void(entt::registry &);
-		static constexpr component_registrator * component_registrators[] = {
-			register_attributes<Comps...>,
-			register_count<Comps...>,
-			register_display_imgui<Comps...>,
-			register_edit_imgui<Comps...>,
-			register_emplace_or_replace<Comps...>,
-			register_for_each_entity<Comps...>,
-			register_get<Comps...>,
-			register_has<Comps...>,
-			register_load_from_json<Comps...>,
-			register_match_string<Comps...>,
-			register_remove<Comps...>,
-			register_save_to_json<Comps...>,
-		};
+		std::vector<component_registrator *> registrators;
 
-		// Pre-instatiate storages
-		r.storage<meta::attributes>();
-		r.storage<meta::count>();
-		r.storage<meta::display_imgui>();
-		r.storage<meta::edit_imgui>();
-		r.storage<meta::emplace_or_replace>();
-		r.storage<meta::emplace_or_replace_move>();
-		r.storage<meta::for_each_entity>();
-		r.storage<meta::for_each_entity_without>();
-		r.storage<meta::get>();
-		r.storage<meta::get_const>();
-		r.storage<meta::has>();
-		r.storage<meta::load_from_json>();
-		r.storage<meta::match_string>();
-		r.storage<meta::remove>();
-		r.storage<meta::save_to_json>();
+		putils::for_each_type<
+			meta::count,
+			meta::display_imgui,
+			meta::edit_imgui,
+			meta::emplace_or_replace, meta::emplace_or_replace_move,
+			meta::for_each_entity, meta::for_each_entity_without,
+			meta::get, meta::get_const,
+			meta::has,
+			meta::load_from_json,
+			meta::match_string,
+			meta::remove,
+			meta::save_to_json>([&](auto t) {
+			using type = putils_wrapped_type(t);
 
-		std::for_each(std::execution::par_unseq, putils_range(component_registrators), [&](auto registrator) {
+			// Pre-instantiate storage
+			r.storage<type>();
+			registrators.emplace_back(register_meta_component_implementation<type, Comps...>);
+		});
+
+		std::for_each(std::execution::par_unseq, putils_range(registrators), [&](auto registrator) {
 			registrator(r);
 		});
 	}

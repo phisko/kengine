@@ -308,6 +308,7 @@ These are helper functions and macros to factorize typical manipulations of comp
 * [profiling_helper](kengine/helpers/profiling_helper.md): instrument code
 * [python_helper](kengine/helpers/python_helper.md): register types and functions to Python
 * [register_all_types](kengine/helpers/register_all_types.md): register all known types with a `registry`
+* [register_metadata](kengine/helpers/meta/register_metadata.md): registers general metadata about a component type
 * [register_meta_components](kengine/helpers/meta/register_meta_components.md): register all currently implemented meta components for a set of types
 * [register_with_script_languages](kengine/helpers/meta/register_with_script_languages.md): register a set of types with all currently implemented script languages
 * [register_everything](kengine/helpers/meta/register_everything.md): registers a set of types with all the engine's reflection facilities
@@ -322,20 +323,19 @@ These are helper functions and macros to factorize typical manipulations of comp
 
 These provide helper functions to register standard implementations for the respective meta components.
 
-* [register_attach_to](kengine/helpers/meta/impl/register_attach_to.md)
-* [register_attributes](kengine/helpers/meta/impl/register_attributes.md)
-* [register_copy](kengine/helpers/meta/impl/register_copy.md)
-* [register_count](kengine/helpers/meta/impl/register_count.md)
-* [register_detach_from](kengine/helpers/meta/impl/register_detach_from.md)
-* [register_display_imgui](kengine/helpers/meta/register_display_imgui.md)
-* [register_edit_imgui](kengine/helpers/meta/register_edit_imgui.md)
-* [register_for_each_entity](kengine/helpers/meta/register_for_each_entity.md)
-* [register_get](kengine/helpers/meta/register_get.md)
-* [register_has](kengine/helpers/meta/register_has.md)
-* [register_load_from_json](kengine/helpers/meta/register_load_from_json.md)
-* [register_match_string](kengine/helpers/meta/register_match_string.md)
-* [register_move](kengine/helpers/meta/register_move.md)
-* [register_save_to_json](kengine/helpers/meta/register_save_to_json.md)
+* [attach_to](kengine/helpers/meta/impl/attach_to.md)
+* [copy](kengine/helpers/meta/impl/copy.md)
+* [count](kengine/helpers/meta/impl/count.md)
+* [detach_from](kengine/helpers/meta/impl/detach_from.md)
+* [display_imgui](kengine/helpers/meta/display_imgui.md)
+* [edit_imgui](kengine/helpers/meta/edit_imgui.md)
+* [for_each_entity](kengine/helpers/meta/for_each_entity.md)
+* [get](kengine/helpers/meta/get.md)
+* [has](kengine/helpers/meta/has.md)
+* [load_from_json](kengine/helpers/meta/load_from_json.md)
+* [match_string](kengine/helpers/meta/match_string.md)
+* [move](kengine/helpers/meta/move.md)
+* [save_to_json](kengine/helpers/meta/save_to_json.md)
 
 ## Scripts
 
