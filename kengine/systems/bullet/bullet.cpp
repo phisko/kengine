@@ -131,13 +131,14 @@ namespace kengine::systems {
 			e.emplace<functions::query_position>(putils_forward_to_this(query_position));
 
 			e.emplace<data::adjustable>() = {
-				"Physics", { { "Gravity", &adjustables.gravity }
+				"Physics",
+				{
+					{ "Gravity", &adjustables.gravity },
 #ifndef KENGINE_NDEBUG
-							 ,
-							 { "Debug", &adjustables.enable_debug },
-							 { "Editor mode (reload colliders each frame)", &adjustables.editor_mode }
+					{ "Debug", &adjustables.enable_debug },
+					{ "Editor mode (reload colliders each frame)", &adjustables.editor_mode },
 #endif
-						   }
+				}
 			};
 
 			connections.emplace_back(r.on_construct<data::physics>().connect<&bullet::add_or_update_bullet_data>(this));
