@@ -135,6 +135,11 @@ if (KENGINE_NDEBUG)
     target_compile_definitions(kengine_core PUBLIC KENGINE_NDEBUG)
 endif()
 
+option(KENGINE_NO_LOG "Disable logging" OFF)
+if (KENGINE_NO_LOG)
+    target_compile_definitions(kengine_core PUBLIC KENGINE_NO_LOG)
+endif()
+
 target_link_libraries(kengine INTERFACE kengine_core)
 
 # Add systems
