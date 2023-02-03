@@ -7,7 +7,6 @@
 
 // entt
 #include <entt/entity/handle.hpp>
-#include <entt/entity/observer.hpp>
 #include <entt/entity/registry.hpp>
 
 // nlohmann
@@ -25,6 +24,7 @@
 
 // kengine helpers
 #include "kengine/helpers/async_helper.hpp"
+#include "kengine/helpers/backward_compatible_observer.hpp"
 #include "kengine/helpers/json_helper.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
 
@@ -32,101 +32,65 @@ namespace kengine::systems {
 	struct json_scene_loader {
 		entt::registry & r;
 
-		struct task {};
-
 		json_scene_loader(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
 
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
-
-			for (const auto & [loader_entity, loader] : r.view<data::json_scene_loader>().each())
-				load_temporary_scene(loader_entity, loader);
 		}
 
 		struct temporary_scene {
 			std::vector<entt::entity> loaded_entities;
 		};
-
 		struct load_models_task {};
-		struct load_scene_task {};
-
-		entt::observer observer{ r, entt::collector.group<data::json_scene_loader>() };
+		kengine::backward_compatible_observer<data::json_scene_loader> observer{ r, putils_forward_to_this(process_new_loader) };
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			for (const auto e : observer) {
-				const auto & loader = r.get<data::json_scene_loader>(e);
-				load_temporary_scene(e, loader);
-			}
-			observer.clear();
-
-			kengine::process_async_results<temporary_scene>(r, [this](entt::entity e, temporary_scene && scene) {
-				r.emplace<temporary_scene>(e, std::move(scene));
-				const auto & loader = r.get<data::json_scene_loader>(e);
-				load_models(e, loader);
-			});
+			observer.process();
 
 			kengine::process_async_results<load_models_task>(r, [this](entt::entity e, load_models_task &&) {
 				// Entity that will wait until all async loading tasks are completed before loading the scene
 				const auto poller = r.create();
 				r.emplace<functions::execute>(poller, [this, e, poller](float delta_time) {
-					if (!r.view<data::async_task>().empty())
+					if (!r.view<data::async_task>().empty()) {
+						kengine_log(r, verbose, "json_scene_loader", "Waiting to load scene (async_tasks are still running)");
 						return;
+					}
 					const auto & loader = r.get<data::json_scene_loader>(e);
-					load_scene(e, loader);
+					load_scene(loader.scene.c_str());
+
+					kengine_log(r, log, "json_scene_loader", "Destroying temporary scene");
+					const auto & scene = r.get<temporary_scene>(e);
+					r.destroy(putils_range(scene.loaded_entities));
+
 					r.destroy(poller);
 				});
 			});
-
-			kengine::process_async_results<load_scene_task>(r, [this](entt::entity e, load_scene_task &&) {
-				if (const auto scene = r.try_get<temporary_scene>(e))
-					r.destroy(putils_range(scene->loaded_entities));
-				r.destroy(e);
-			});
 		}
 
-		template<std::invocable Func>
-		void perform_step(entt::entity e, const data::json_scene_loader::loading_step & step, const char * description, Func && step_func) noexcept {
+		void process_new_loader(entt::entity e, const data::json_scene_loader & loader) noexcept {
+			if (loader.model_directory.empty()) {
+				if (!loader.scene.empty())
+					load_scene(loader.scene.c_str());
+				else
+					kengine_logf(r, warning, "json_scene_loader", "Empty scene loader found in %zu", e);
+				return;
+			}
+
+			r.emplace<temporary_scene>(e, load_temporary_scene(loader.temporary_scene.c_str()));
+			start_async_model_loading(e, loader);
+		}
+
+		void start_async_model_loading(entt::entity e, const data::json_scene_loader & loader) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			kengine::start_async_task(
 				r, e,
-				data::async_task::string("json_scene: load %s %s", description, step.file.c_str()),
-				std::async(step.policy, FWD(step_func))
-			);
-		}
-
-		void load_temporary_scene(entt::entity e, const data::json_scene_loader & loader) noexcept {
-			KENGINE_PROFILING_SCOPE;
-
-			perform_step(
-				e, loader.temporary_scene, "temporary scene",
-				[this, &loader] {
-					return load_temporary_scene(loader.temporary_scene.file.c_str());
-				}
-			);
-		}
-
-		void load_models(entt::entity e, const data::json_scene_loader & loader) noexcept {
-			KENGINE_PROFILING_SCOPE;
-
-			perform_step(
-				e, loader.model_directory, "models from",
-				[this, e, &loader] {
-					return load_models(loader.model_directory.file.c_str());
-				}
-			);
-		}
-
-		void load_scene(entt::entity e, const data::json_scene_loader & loader) noexcept {
-			KENGINE_PROFILING_SCOPE;
-
-			perform_step(
-				e, loader.scene, "scene",
-				[this, e, &loader] {
-					return load_scene(loader.scene.file.c_str());
-				}
+				data::async_task::string("json_scene_loader: load models from %s", loader.model_directory.c_str()),
+				std::async(std::launch::async, [this, &loader] {
+					return load_models(loader.model_directory.c_str());
+				})
 			);
 		}
 
@@ -134,17 +98,24 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 
 			temporary_scene scene;
-			if (file[0] == 0)
+			if (file[0] == 0) {
+				kengine_log(r, warning, "json_scene_loader", "No temporary scene specified, consider adding a loading screen");
 				return scene;
+			}
+
+			kengine_logf(r, log, "json_scene_loader", "Loading temporary scene from %s", file);
 
 			std::ifstream f(file);
 			const auto temporary_scene_json = nlohmann::json::parse(f);
 
 			for (const auto & json : temporary_scene_json) {
 				const auto e = r.create();
+				kengine_logf(r, verbose, "json_scene_loader", "Creating temporary %zu from %s", e, json.dump(4).c_str());
 				scene.loaded_entities.push_back(e);
 				json_helper::load_entity(json, { r, e });
 			}
+
+			kengine_log(r, log, "json_scene_loader", "Temporary scene loaded");
 
 			return scene;
 		}
@@ -152,36 +123,35 @@ namespace kengine::systems {
 		load_models_task load_models(const char * dir) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			if (dir[0] == 0)
-				return {};
-
 			for (const auto & entry : std::filesystem::recursive_directory_iterator(dir)) {
 				if (entry.path().extension() != ".json")
 					continue;
 
 				const auto e = r.create();
 				std::ifstream f(entry.path());
-				json_helper::load_entity(nlohmann::json::parse(f), { r, e });
+				const auto json = nlohmann::json::parse(f);
+				kengine_logf(r, verbose, "json_scene_loader", "Creating model %zu from %s", e, json.dump(4).c_str());
+				json_helper::load_entity(json, { r, e });
 			}
 
 			return {};
 		}
 
-		load_scene_task load_scene(const char * file) noexcept {
+		void load_scene(const char * file) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			if (file[0] == 0)
-				return {};
+			kengine_logf(r, log, "json_scene_loader", "Loading scene from %s", file);
 
 			std::ifstream f(file);
 			const auto scene_json = nlohmann::json::parse(f);
 
 			for (const auto & json : scene_json) {
 				const auto e = r.create();
+				kengine_logf(r, verbose, "json_scene_loader", "Creating %zu from %s", e, json.dump(4).c_str());
 				json_helper::load_entity(json, { r, e });
 			}
 
-			return {};
+			kengine_log(r, log, "json_scene_loader", "Scene loaded");
 		}
 	};
 

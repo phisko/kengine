@@ -17,15 +17,9 @@ namespace kengine::data {
 		static constexpr char string_name[] = "json_scene_loader_string";
 		using string = putils::string<KENGINE_JSON_SCENE_LOADER_STRING_MAX_LENGTH, string_name>;
 
-		//! putils reflect all
-		struct loading_step {
-			string file;
-			std::launch policy = std::launch::async;
-		};
-
-		loading_step temporary_scene;
-		loading_step model_directory;
-		loading_step scene;
+		string temporary_scene;
+		string model_directory;
+		string scene;
 	};
 }
 
