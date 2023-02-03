@@ -3,7 +3,6 @@
 
 // entt
 #include <entt/entity/handle.hpp>
-#include <entt/entity/observer.hpp>
 #include <entt/entity/registry.hpp>
 
 // putils
@@ -19,6 +18,7 @@
 #include "kengine/functions/execute.hpp"
 
 // kengine helpers
+#include "kengine/helpers/backward_compatible_observer.hpp"
 #include "kengine/helpers/log_helper.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
 
@@ -31,15 +31,13 @@ namespace kengine::systems {
 	namespace recast_impl {
 		adjustables g_adjustables;
 
-		void build_recast_component(entt::registry & r, entt::entity e) noexcept;
+		void build_recast_component(entt::registry & r, entt::entity e, const data::model & model, const data::model_data & model_data, const data::nav_mesh & nav_mesh) noexcept;
 		void process_built_recast_components(entt::registry & r) noexcept;
 		void do_pathfinding(entt::registry & r, float delta_time) noexcept;
 	}
 
 	struct recast {
 		entt::registry & r;
-		putils::vector<entt::scoped_connection, 5> connections;
-
 		recast(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
@@ -54,14 +52,17 @@ namespace kengine::systems {
 			};
 		}
 
-		entt::observer observer{ r, entt::collector.group<data::model, data::model_data, data::nav_mesh>() };
+		kengine::backward_compatible_observer<data::model, data::model_data, data::nav_mesh> observer{
+			r,
+			[this](auto &&... args) {
+				recast_impl::build_recast_component(r, FWD(args)...);
+			}
+		};
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, verbose, "execute", "recast");
 
-			for (const auto e : observer)
-				recast_impl::build_recast_component(r, e);
-			observer.clear();
+			observer.process();
 
 			recast_impl::process_built_recast_components(r);
 			recast_impl::do_pathfinding(r, delta_time);
