@@ -5,7 +5,6 @@
 
 // entt
 #include <entt/entity/handle.hpp>
-#include <entt/entity/observer.hpp>
 #include <entt/entity/registry.hpp>
 
 // magic_enum
@@ -32,6 +31,7 @@
 
 // kengine helpers
 #include "kengine/helpers/assert_helper.hpp"
+#include "kengine/helpers/backward_compatible_observer.hpp"
 #include "kengine/helpers/log_helper.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
 
@@ -57,7 +57,7 @@ namespace kengine::systems {
 		entt::scoped_connection connection;
 
 		bool * enabled;
-		putils::ini_file loaded_file;
+		putils::ini_file loaded_file = load_ini_file();
 
 		struct section {
 			using section_map = std::map<std::string, section>;
@@ -77,8 +77,6 @@ namespace kengine::systems {
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
 
-			load();
-
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 
 			e.emplace<data::name>("Adjustables");
@@ -91,6 +89,7 @@ namespace kengine::systems {
 		char name_search[1024] = "";
 		using string = data::adjustable::string;
 		using sections = std::vector<std::string>;
+		kengine::backward_compatible_observer<data::adjustable> observer{ r, putils_forward_to_this(on_construct_adjustable) };
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
@@ -98,7 +97,7 @@ namespace kengine::systems {
 				return;
 			kengine_log(r, verbose, "execute", "imgui_adjustable");
 
-			detect_new_adjustables();
+			observer.process();
 
 			if (ImGui::Begin("Adjustables", enabled)) {
 				ImGui::Columns(2);
@@ -106,7 +105,7 @@ namespace kengine::systems {
 					save();
 				ImGui::NextColumn();
 				if (ImGui::Button("Load", { -1.f, 0.f }))
-					load();
+					loaded_file = load_ini_file();
 				ImGui::Columns();
 
 				ImGui::Separator();
@@ -120,15 +119,6 @@ namespace kengine::systems {
 				ImGui::EndChild();
 			}
 			ImGui::End();
-		}
-
-		entt::observer observer{ r, entt::collector.group<data::adjustable>() };
-		void detect_new_adjustables() noexcept {
-			KENGINE_PROFILING_SCOPE;
-
-			for (const auto e : observer)
-				on_construct_adjustable(r, e);
-			observer.clear();
 		}
 
 		void update_search_results(const std::string & name, section & section) noexcept {
@@ -250,10 +240,9 @@ namespace kengine::systems {
 			ImGui::Columns();
 		}
 
-		void on_construct_adjustable(entt::registry & r, entt::entity e) noexcept {
+		void on_construct_adjustable(entt::entity e, data::adjustable & comp) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			auto & comp = r.get<data::adjustable>(e);
 			init_adjustable(comp);
 
 			section * current_section = &root_section;
@@ -354,14 +343,15 @@ namespace kengine::systems {
 			}
 		}
 
-		void load() noexcept {
+		putils::ini_file load_ini_file() noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, log, "systems/imgui_adjustable", "Loading from " KENGINE_ADJUSTABLE_SAVE_FILE);
 
 			std::ifstream f(KENGINE_ADJUSTABLE_SAVE_FILE);
+
+			putils::ini_file ret;
 			f >> loaded_file;
-			for (const auto e : r.view<data::adjustable>())
-				on_construct_adjustable(r, e);
+			return ret;
 		}
 
 		void save() noexcept {
