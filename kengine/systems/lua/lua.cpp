@@ -55,9 +55,11 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, verbose, "execute", "lua");
 
-			(*state)["delta_time"] = delta_time;
+			const auto view = r.view<data::lua>();
+			if (!view.empty())
+				(*state)["delta_time"] = delta_time;
 
-			for (auto [e, comp] : r.view<data::lua>().each()) {
+			for (const auto & [e, comp] : view.each()) {
 				(*state)["self"] = entt::handle{ r, e };
 
 				for (const auto & s : comp.scripts) {
