@@ -45,6 +45,7 @@
 
 // kengine helpers
 #include "kengine/helpers/assert_helper.hpp"
+#include "kengine/helpers/backward_compatible_observer.hpp"
 #include "kengine/helpers/log_helper.hpp"
 #include "kengine/helpers/matrix_helper.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
@@ -141,17 +142,16 @@ namespace kengine::systems {
 				}
 			};
 
-			connections.emplace_back(r.on_construct<data::physics>().connect<&bullet::add_or_update_bullet_data>(this));
-			connections.emplace_back(r.on_construct<data::transform>().connect<&bullet::add_or_update_bullet_data>(this));
-			connections.emplace_back(r.on_construct<data::instance>().connect<&bullet::add_or_update_bullet_data>(this));
-
 			connections.emplace_back(r.on_construct<data::model_collider>().connect<&bullet::update_all_instances>(this));
 			connections.emplace_back(r.on_update<data::model_collider>().connect<&bullet::update_all_instances>(this));
 		}
 
+		kengine::backward_compatible_observer<data::transform, data::physics, data::instance> observer{ r, putils_forward_to_this(add_or_update_bullet_data) };
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, verbose, "execute", "systems/bullet");
+
+			observer.process();
 
 			for (auto [e, bullet] : r.view<bullet_data>(entt::exclude<data::physics>).each()) {
 				kengine_logf(r, verbose, "execute/bullet", "Removing BulletComponent from %zu", e);
@@ -183,13 +183,8 @@ namespace kengine::systems {
 			return ret;
 		}
 
-		void add_or_update_bullet_data(entt::registry & r, entt::entity e) noexcept {
+		void add_or_update_bullet_data(entt::entity e, data::transform & transform, data::physics & physics, const data::instance & instance) noexcept {
 			KENGINE_PROFILING_SCOPE;
-
-			if (!r.all_of<data::transform, data::physics, data::instance>(e))
-				return;
-
-			const auto & instance = r.get<data::instance>(e);
 
 			if (!r.all_of<data::model_collider>(instance.model))
 				return;
@@ -201,9 +196,6 @@ namespace kengine::systems {
 
 			kengine_logf(r, verbose, "systems/bullet", "Adding BulletComponent to %zu", e);
 
-			auto & transform = r.get<data::transform>(e);
-			auto & physics = r.get<data::physics>(e);
-
 			r.remove<bullet_data>(e);
 			add_bullet_data(e, transform, physics, instance.model);
 		}
@@ -211,9 +203,9 @@ namespace kengine::systems {
 		void update_all_instances(entt::registry & r, entt::entity model_entity) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			for (const auto & [instanceEntity, instance] : r.view<data::instance>().each())
+			for (const auto & [e, transform, physics, instance] : r.view<data::transform, data::physics, data::instance>().each())
 				if (instance.model == model_entity)
-					add_or_update_bullet_data(r, instanceEntity);
+					add_or_update_bullet_data(e, transform, physics, instance);
 		}
 
 		void add_bullet_data(entt::entity e, data::transform & transform, data::physics & physics, entt::entity model_entity) noexcept {
