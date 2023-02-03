@@ -120,7 +120,7 @@ namespace kengine::systems {
 					ret = true;
 				if (ImGui::MenuItem("Remove")) {
 					r.destroy(e);
-					return false;
+					ret = false;
 				}
 				ImGui::EndPopup();
 			}
