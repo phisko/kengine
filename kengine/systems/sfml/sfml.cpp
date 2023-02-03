@@ -36,6 +36,7 @@
 #include "kengine/functions/execute.hpp"
 
 // kengine helpers
+#include "kengine/helpers/backward_compatible_observer.hpp"
 #include "kengine/helpers/camera_helper.hpp"
 #include "kengine/helpers/instance_helper.hpp"
 #include "kengine/helpers/is_running.hpp"
@@ -95,9 +96,6 @@ namespace kengine::systems {
 					{ "scale", &scale.scale },
 				}
 			};
-
-			connections.emplace_back(r.on_construct<data::window>().connect<&sfml::create_window>(this));
-			connections.emplace_back(r.on_construct<data::model>().connect<create_texture>());
 		}
 
 		~sfml() noexcept {
@@ -106,9 +104,14 @@ namespace kengine::systems {
 			ImGui::SFML::Shutdown();
 		}
 
+		kengine::backward_compatible_observer<data::window> window_observer{ r, putils_forward_to_this(create_window) };
+		kengine::backward_compatible_observer<data::model> model_observer{ r, putils_forward_to_this(create_texture) };
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, verbose, "execute", "sfml");
+
+			window_observer.process();
+			model_observer.process();
 
 			const auto sf_delta_time = delta_clock.restart();
 
@@ -448,10 +451,9 @@ namespace kengine::systems {
 			return render_texture_sprite;
 		}
 
-		void create_window(entt::registry & r, entt::entity e) noexcept {
+		void create_window(entt::entity e, const data::window & window_comp) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			const auto & window_comp = r.get<data::window>(e);
 			kengine_logf(r, log, "SFML", "Creating window '%s'", window_comp.name.c_str());
 
 			auto & sf_window = r.emplace<data::sfml_window>(
@@ -475,10 +477,9 @@ namespace kengine::systems {
 			ImGui::SFML::Update(*sf_window.window, delta_clock.restart());
 		}
 
-		static void create_texture(entt::registry & r, entt::entity e) noexcept {
+		void create_texture(entt::entity e, const data::model & model) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			const auto & model = r.get<data::model>(e);
 			sf::Texture texture;
 			if (texture.loadFromFile(model.file.c_str())) {
 				kengine_logf(r, log, "SFML", "Loaded texture for '%s'", model.file.c_str());
