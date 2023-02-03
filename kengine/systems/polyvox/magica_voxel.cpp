@@ -31,6 +31,7 @@
 // kengine helpers
 #include "kengine/helpers/assert_helper.hpp"
 #include "kengine/helpers/async_helper.hpp"
+#include "kengine/helpers/backward_compatible_observer.hpp"
 #include "kengine/helpers/instance_helper.hpp"
 #include "kengine/helpers/log_helper.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
@@ -48,14 +49,11 @@ namespace kengine::systems {
 
 	struct magica_voxel {
 		entt::registry & r;
-		entt::scoped_connection connection;
 
 		magica_voxel(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, log, "Init", "systems/magica_voxel");
-
-			connection = r.on_construct<data::model>().connect<&magica_voxel::load_model>(this);
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 		}
 
@@ -71,9 +69,12 @@ namespace kengine::systems {
 			magica_voxel_format::chunk_content::size offset_to_apply;
 		};
 
+		kengine::backward_compatible_observer<data::model> observer{ r, putils_forward_to_this(load_model) };
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, verbose, "execute", "systems/magica_voxel");
+
+			observer.process();
 
 			kengine::process_async_results<async_loaded_data>(r, [this](entt::entity e, async_loaded_data && loaded_data) {
 				r.emplace<data::model_data>(e, std::move(loaded_data.model_data));
@@ -81,10 +82,10 @@ namespace kengine::systems {
 			});
 		}
 
-		void load_model(entt::registry &, entt::entity e) noexcept {
+		void load_model(entt::entity e, const data::model & model) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			const auto & f = r.get<data::model>(e).file.c_str();
+			const auto & f = model.file.c_str();
 			if (std::filesystem::path(f).extension() != ".vox")
 				return;
 
