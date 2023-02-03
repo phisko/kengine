@@ -39,7 +39,7 @@ namespace kengine::systems {
 		glfw(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "Init", "systems/glfw");
+			kengine_log(r, log, "glfw", "Initializing");
 
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 			e.emplace<functions::on_mouse_captured>(putils_forward_to_this(on_mouse_captured));
@@ -47,7 +47,7 @@ namespace kengine::systems {
 
 		~glfw() noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "Terminate", "systems/glfw");
+			kengine_log(r, log, "glfw", "Shutting down");
 			r.clear<data::glfw_window>(); // Need to clear these before glfwTerminate is called
 			glfwTerminate();
 		}
@@ -58,7 +58,7 @@ namespace kengine::systems {
 			const auto input_mode = captured ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL;
 			const auto state = captured ? "captured" : "released";
 
-			kengine_logf(r, log, "systems/glfw", "Mouse %s for ImGui", state);
+			kengine_logf(r, verbose, "glfw", "Mouse %s for ImGui", state);
 			if (captured)
 				ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NoMouse;
 			else
@@ -66,7 +66,7 @@ namespace kengine::systems {
 
 			if (window == entt::null) {
 				for (const auto & [e, glfw] : r.view<data::glfw_window>().each()) {
-					kengine_logf(r, log, "systems/glfw", "Mouse %s for %zu", state, e);
+					kengine_logf(r, verbose, "glfw", "Mouse %s for %zu", state, e);
 					glfwSetInputMode(glfw.window.get(), GLFW_CURSOR, input_mode);
 				}
 				return;
@@ -75,7 +75,7 @@ namespace kengine::systems {
 			const auto glfw = r.try_get<data::glfw_window>(window);
 			if (glfw == nullptr)
 				return;
-			kengine_logf(r, log, "systems/glfw", "Mouse %s for %zu", state, window);
+			kengine_logf(r, verbose, "glfw", "Mouse %s for %zu", state, window);
 			glfwSetInputMode(glfw->window.get(), GLFW_CURSOR, input_mode);
 		}
 
@@ -83,15 +83,16 @@ namespace kengine::systems {
 		kengine::backward_compatible_observer<data::window, data::glfw_window_init> window_observer{ r, putils_forward_to_this(create_window) };
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, verbose, "execute", "systems/glfw");
 
 			input_buffer_observer.process();
 			window_observer.process();
 
 			glfwPollEvents();
 			for (const auto & [e, window, glfw] : r.view<data::window, data::glfw_window>().each()) {
-				if (glfwWindowShouldClose(glfw.window.get()))
+				if (glfwWindowShouldClose(glfw.window.get())) {
+					kengine_logf(r, log, "glfw", "Destroying %zu because its window was closed", e);
 					r.destroy(e);
+				}
 			}
 		}
 
@@ -102,7 +103,7 @@ namespace kengine::systems {
 
 		void create_window(entt::entity e, data::window & window, const data::glfw_window_init & init_glfw) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, log, "systems/glfw", "Initializing window for %zu", e);
+			kengine_logf(r, log, "glfw", "Creating window for %zu", e);
 
 			init_global_glfw();
 
@@ -152,11 +153,11 @@ namespace kengine::systems {
 			if (!is_glfw_init) {
 				is_glfw_init = true;
 
-				kengine_log(r, log, "systems/glfw", "Performing one-time GLFW initialization");
+				kengine_log(r, log, "glfw", "Performing one-time GLFW initialization");
 
 				static const entt::registry * g_r = &r;
 				glfwSetErrorCallback([](int error, const char * desc) {
-					kengine_logf(*g_r, error, "GLFW", "Error code: %d. Description: '%s'", error, desc);
+					kengine_logf(*g_r, error, "glfw", "Error code: %d. Description: '%s'", error, desc);
 				});
 
 				const auto ret = glfwInit();

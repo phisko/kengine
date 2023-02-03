@@ -6,6 +6,7 @@
 
 // putils
 #include "putils/range.hpp"
+#include "putils/thread_name.hpp"
 
 // kengine helpers
 #include "kengine/helpers/lua_helper.hpp"
@@ -39,6 +40,7 @@ namespace kengine {
 		};
 
 		std::for_each(std::execution::par_unseq, putils_range(language_registrators), [&](const auto func) {
+			const putils::scoped_thread_name thread_name("Script language type registration");
 			if (func)
 				func(r);
 		});

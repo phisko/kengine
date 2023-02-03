@@ -13,6 +13,7 @@
 // putils
 #include "putils/lengthof.hpp"
 #include "putils/range.hpp"
+#include "putils/thread_name.hpp"
 
 // kengine data
 #include "kengine/data/pathfinding.hpp"
@@ -47,7 +48,7 @@ namespace kengine::systems::recast_impl {
 			KENGINE_PROFILING_SCOPE;
 
 			for (auto [e, agent] : r.view<data::recast_agent>(entt::exclude<data::pathfinding>).each()) {
-				kengine_logf(r, verbose, "execute/RecastSystem", "Removing agent %zu from crowd %zu", e, agent.crowd);
+				kengine_logf(r, verbose, "recast", "Removing agent %zu from crowd %zu", e, agent.crowd);
 				auto & crowd = r.get<data::recast_crowd>(agent.crowd);
 				crowd.crowd->removeAgent(agent.index);
 				r.remove<data::recast_agent>(e);
@@ -67,7 +68,7 @@ namespace kengine::systems::recast_impl {
 				if (!crowd)
 					continue;
 
-				kengine_logf(r, verbose, "execute/RecastSystem", "Adding agent %zu to crowd %zu", e, pathfinding.environment);
+				kengine_logf(r, verbose, "recast", "Adding agent %zu to crowd %zu", e, pathfinding.environment);
 
 				const auto object_info = get_object_info(get_environment_info({ r, pathfinding.environment }), transform, pathfinding);
 				attach_agent_component({ r, e }, object_info, *crowd, pathfinding.environment);
@@ -188,6 +189,7 @@ namespace kengine::systems::recast_impl {
 
 			const auto view = r.view<data::recast_crowd>();
 			std::for_each(std::execution::par_unseq, putils_range(view), [&](entt::entity environment) noexcept {
+				const putils::scoped_thread_name thread_name("Recast crowd updater");
 				const auto & [crowd] = view.get(environment);
 				update_crowd(delta_time, { r, environment }, crowd);
 			});

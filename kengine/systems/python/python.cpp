@@ -27,14 +27,14 @@ namespace kengine::systems {
 		python(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "Init", "systems/python");
+			kengine_log(r, log, "python", "Initializing");
 
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 
-			kengine_log(r, log, "Init/systems/python", "Creating data::python_state");
+			kengine_log(r, log, "python", "Creating Python state");
 			auto & state = e.emplace<data::python_state>();
 
-			kengine_log(r, log, "Init/systems/python", "Registering script_language_helper functions");
+			kengine_log(r, log, "python", "Registering script_language_helper functions");
 			py::globals()["kengine"] = state.module_;
 			module_ = &state.module_;
 			script_language_helper::init(
@@ -51,7 +51,6 @@ namespace kengine::systems {
 
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, verbose, "execute", "python");
 
 			const auto view = r.view<data::python>();
 
@@ -64,7 +63,7 @@ namespace kengine::systems {
 				module_->attr("self") = entt::handle{ r, e };
 
 				for (const auto & s : comp.scripts) {
-					kengine_logf(r, verbose, "execute/python", "%zu: %s", e, s.c_str());
+					kengine_logf(r, verbose, "python", "Running script %s for %zu", s.c_str(), e);
 					try {
 						py::eval_file(s.c_str(), py::globals());
 					}

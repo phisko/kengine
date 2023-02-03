@@ -45,7 +45,7 @@ namespace kengine::systems {
 		imgui_entity_selector(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "Init", "systems/imgui_entity_selector");
+			kengine_log(r, log, "imgui_entity_selector", "Initializing");
 
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 
@@ -61,7 +61,6 @@ namespace kengine::systems {
 
 			if (!*enabled)
 				return;
-			kengine_log(r, verbose, "execute", "imgui_entity_selector");
 
 			if (ImGui::Begin("Entity selector", enabled)) {
 				if (ImGui::InputText("Search", name_search, sizeof(name_search)))

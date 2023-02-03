@@ -27,26 +27,25 @@ namespace kengine::systems {
 		kinematic(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "Init", "systems/kinematic");
+			kengine_log(r, log, "kinematic", "Initializing");
 
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 		}
 
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, verbose, "execute", "kinematic");
 
 			for (const auto & [e, transform, physics] : r.view<data::transform, data::physics, data::kinematic>().each()) {
 				transform.bounding_box.position += physics.movement * delta_time;
 
-				const auto applyRotation = [delta_time](float & transformMember, float physicsMember) noexcept {
+				const auto apply_rotation = [delta_time](float & transformMember, float physicsMember) noexcept {
 					transformMember += physicsMember * delta_time;
 					transformMember = putils::constrain_angle(transformMember);
 				};
 
-				applyRotation(transform.pitch, physics.pitch);
-				applyRotation(transform.yaw, physics.yaw);
-				applyRotation(transform.roll, physics.roll);
+				apply_rotation(transform.pitch, physics.pitch);
+				apply_rotation(transform.yaw, physics.yaw);
+				apply_rotation(transform.roll, physics.roll);
 			}
 		}
 	};

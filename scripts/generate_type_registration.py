@@ -98,7 +98,7 @@ def generate_registration_functions(types):
 		ret += '''
 	void pre_''' + type['function_name'] + '''(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_log(r, log, "init/register_types", "Pre-registering \'''' + type['type'] + '''\'");
+		kengine_log(r, log, "register_types", "Pre-registering \'''' + type['type'] + '''\'");
 '''
 
 		for registration in pre_registrators:
@@ -110,7 +110,7 @@ def generate_registration_functions(types):
 
 	void ''' + type['function_name'] + '''(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_log(r, log, "init/register_types", "Registering \'''' + type['type'] + '''\'");
+		kengine_log(r, log, "register_types", "Registering \'''' + type['type'] + '''\'");
 '''
 
 		for registration in registrators:
@@ -242,7 +242,7 @@ namespace ''' + args.namespace + ' {'
 		const auto e = r.create();
 		r.emplace<kengine::functions::pre_register_types>(e, [](entt::registry & r) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "Init", "Pre-registering types");
+			kengine_log(r, log, "register_types", "Pre-registering ''' + args.namespace + ''' types");
 
 			for (const auto pre_registrator : pre_registrators)
 				pre_registrator(r);
@@ -250,7 +250,7 @@ namespace ''' + args.namespace + ' {'
 
 		r.emplace<kengine::functions::register_types>(e, [](entt::registry & r) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "Init", "Registering types");
+			kengine_log(r, log, "register_types", "Registering ''' + args.namespace + ''' types");
 
 			for (const auto registrator : registrators)
 				registrator(r);

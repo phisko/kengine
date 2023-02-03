@@ -38,19 +38,18 @@ namespace kengine::systems {
 		polyvox(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "Init", "systems/polyvox");
+			kengine_log(r, log, "polyvox", "Initializing");
 
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 		}
 
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, verbose, "execute", "polyvox");
 
 			for (auto [e, poly] : r.view<data::polyvox>().each()) {
 				if (!poly.changed)
 					continue;
-				kengine_logf(r, verbose, "execute/polyvox", "Rebuilding mesh for %zu", e);
+				kengine_logf(r, verbose, "polyvox", "Rebuilding mesh for %zu", e);
 				poly.changed = false;
 
 				data::model_data model_data;
@@ -78,8 +77,10 @@ namespace kengine::systems {
 		data::model_data::free_func free_polyvox_mesh_data(entt::entity e) noexcept {
 			return [this, e]() noexcept {
 				KENGINE_PROFILING_SCOPE;
-				kengine_logf(r, log, "polyvox", "Releasing PolyVoxMeshContainer for %zu", e);
-				auto & mesh = r.get_or_emplace<mesh_container>(e).mesh; // previous `attach` hasn't been processed yet, so `get` would assert
+				if (!r.all_of<mesh_container>(e))
+					return;
+				kengine_logf(r, log, "polyvox", "Releasing mesh for %zu", e);
+				auto & mesh = r.get<mesh_container>(e).mesh;
 				mesh.clear();
 				r.remove<mesh_container>(e);
 			};

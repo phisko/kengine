@@ -30,7 +30,7 @@ namespace kengine::main_loop {
 
 		delta_time *= get_time_factor(r);
 
-		kengine_logf(r, verbose, "MainLoop", "Calling execute (dt: %f)", delta_time);
+		kengine_logf(r, verbose, "main_loop", "Calling execute (dt: %f)", delta_time);
 		for (const auto & [e, func] : r.view<kengine::functions::execute>().each()) {
 			if (!is_running(r))
 				break;
@@ -40,7 +40,7 @@ namespace kengine::main_loop {
 
 	template<time_factor_callback F>
 	static void run(entt::registry & r, F && get_time_factor) noexcept {
-		kengine_log(r, log, "MainLoop", "Starting");
+		kengine_log(r, log, "main_loop", "Starting");
 
 		auto previous_time = std::chrono::system_clock::now();
 		while (kengine::is_running(r)) {
@@ -53,7 +53,7 @@ namespace kengine::main_loop {
 			KENGINE_PROFILING_FRAME;
 		}
 
-		kengine_log(r, log, "MainLoop", "Stopping due to no more data::keep_alive components remaining");
+		kengine_log(r, log, "main_loop", "Stopping due to no more data::keep_alive components remaining");
 	}
 
 	void run(entt::registry & r) noexcept {

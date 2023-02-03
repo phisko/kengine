@@ -26,7 +26,7 @@ namespace kengine::systems {
 		input(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "Init", "systems/input");
+			kengine_log(r, log, "input", "Initializing");
 
 			buffer = &e.emplace<data::input_buffer>();
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
@@ -34,7 +34,6 @@ namespace kengine::systems {
 
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, verbose, "execute", "input");
 
 			for (const auto & [e, comp] : r.view<data::input>().each()) {
 				for (const auto & e : buffer->keys)

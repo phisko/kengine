@@ -27,18 +27,18 @@ namespace kengine::systems {
 		lua(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "Init", "systems/lua");
+			kengine_log(r, log, "lua", "Initializing");
 
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 
-			kengine_log(r, log, "Init/systems/lua", "Creating data::lua_state");
+			kengine_log(r, log, "lua", "Creating Lua state");
 			state = new sol::state;
 			e.emplace<data::lua_state>(state);
 
-			kengine_log(r, log, "Init/systems/lua", "Opening libraries");
+			kengine_log(r, log, "lua", "Opening libraries");
 			state->open_libraries();
 
-			kengine_log(r, log, "Init/systems/lua", "Registering script_language_helper functions");
+			kengine_log(r, log, "lua", "Registering script_language_helper functions");
 			script_language_helper::init(
 				r,
 				[&](auto &&... args) noexcept {
@@ -53,7 +53,6 @@ namespace kengine::systems {
 
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, verbose, "execute", "lua");
 
 			const auto view = r.view<data::lua>();
 			if (!view.empty())
@@ -63,7 +62,7 @@ namespace kengine::systems {
 				(*state)["self"] = entt::handle{ r, e };
 
 				for (const auto & s : comp.scripts) {
-					kengine_logf(r, verbose, "execute/lua", "%zu: %s", e, s.c_str());
+					kengine_logf(r, verbose, "lua", "Running script %s for %zu", s.c_str(), e);
 
 					state->safe_script_file(s.c_str(), [this](lua_State *, sol::protected_function_result pfr) {
 						const sol::error err = pfr;

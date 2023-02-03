@@ -13,6 +13,7 @@
 // putils
 #include "putils/lengthof.hpp"
 #include "putils/on_scope_exit.hpp"
+#include "putils/thread_name.hpp"
 #include "putils/with.hpp"
 
 // kengine data
@@ -50,15 +51,16 @@ namespace kengine::systems::recast_impl {
 			KENGINE_PROFILING_SCOPE;
 
 			const auto & r = *e.registry();
+			kengine_logf(r, log, "recast", "Building navmesh for %s", file);
 
 			data::recast_nav_mesh result;
 
 			const putils::string<4096> binary_file("%s.nav", file);
 			result.data = load_binary_file(binary_file.c_str(), nav_mesh);
 			if (result.data.data)
-				kengine_logf(r, verbose, "execute/recast/create_recast_mesh", "Found binary file for %s", file);
+				kengine_log(r, log, "recast", "Found binary file");
 			else {
-				kengine_logf(r, verbose, "execute/recast/create_recast_mesh", "Found no binary file for %s, creating nav mesh data", file);
+				kengine_logf(r, log, "recast", "Found no binary file for %s, creating nav mesh data", file);
 				result.data = create_nav_mesh_data(r, nav_mesh, model_data, model_data.meshes[nav_mesh.concerned_mesh]);
 				if (result.data.data == nullptr)
 					return std::nullopt;
@@ -99,7 +101,7 @@ namespace kengine::systems::recast_impl {
 
 		static void save_binary_file(const entt::registry & r, const char * binary_file, const data::nav_mesh_data & data, const data::nav_mesh & nav_mesh) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, verbose, "execute/RecastSystem/create_recast_mesh", "Saving binary file %s", binary_file);
+			kengine_logf(r, log, "recast", "Saving binary file %s", binary_file);
 
 			std::ofstream f(binary_file, std::ofstream::trunc | std::ofstream::binary);
 			f.write((const char *)&nav_mesh, sizeof(nav_mesh));
@@ -469,7 +471,7 @@ namespace kengine::systems::recast_impl {
 			return [&, model_transform](entt::handle environment, const putils::point3f & start_world_space, const putils::point3f & end_world_space) {
 				KENGINE_PROFILING_SCOPE;
 				kengine_logf(
-					*environment.registry(), verbose, "RecastSystem", "Getting path in %zu from { %f, %f, %f } to { %f, %f, %f }",
+					*environment.registry(), verbose, "recast", "Getting path in %zu from { %f, %f, %f } to { %f, %f, %f }",
 					environment, start_world_space.x, start_world_space.y, start_world_space.z, end_world_space.x, end_world_space.y, end_world_space.z
 				);
 				static const dtQueryFilter filter;
@@ -489,7 +491,7 @@ namespace kengine::systems::recast_impl {
 				float start_pt[3];
 				auto status = recast.nav_mesh_query->findNearestPoly(start.raw, extents, &filter, &start_ref, start_pt);
 				if (dtStatusFailed(status) || start_ref == 0) {
-					kengine_log(*environment.registry(), error, "RecastSystem/get_path", "Failed to find nearest poly to start");
+					kengine_log(*environment.registry(), verbose, "recast", "Failed to find nearest poly to start");
 					return ret;
 				}
 
@@ -497,7 +499,7 @@ namespace kengine::systems::recast_impl {
 				float end_pt[3];
 				status = recast.nav_mesh_query->findNearestPoly(end.raw, extents, &filter, &end_ref, end_pt);
 				if (dtStatusFailed(status) || end_ref == 0) {
-					kengine_log(*environment.registry(), error, "RecastSystem/get_path", "Failed to find nearest poly to end");
+					kengine_log(*environment.registry(), verbose, "recast", "Failed to find nearest poly to end");
 					return ret;
 				}
 
@@ -505,7 +507,7 @@ namespace kengine::systems::recast_impl {
 				int path_count = 0;
 				status = recast.nav_mesh_query->findPath(start_ref, end_ref, start_pt, end_pt, &filter, path, &path_count, (int)putils::lengthof(path));
 				if (dtStatusFailed(status)) {
-					kengine_log(*environment.registry(), error, "RecastSystem/get_path", "Failed to find path");
+					kengine_log(*environment.registry(), verbose, "recast", "Failed to find path");
 					return ret;
 				}
 
@@ -515,7 +517,7 @@ namespace kengine::systems::recast_impl {
 				static_assert(sizeof(putils::point3f) == sizeof(float[3]));
 				status = recast.nav_mesh_query->findStraightPath(start_pt, end_pt, path, path_count, ret[0].raw, nullptr, nullptr, &straight_path_count, (int)ret.capacity());
 				if (dtStatusFailed(status)) {
-					kengine_log(*environment.registry(), error, "RecastSystem/get_path", "Failed to find straight path");
+					kengine_log(*environment.registry(), verbose, "recast", "Failed to find straight path");
 					return ret;
 				}
 
@@ -535,13 +537,12 @@ namespace kengine::systems::recast_impl {
 	void build_recast_component(entt::registry & r, entt::entity e, const data::model & model, const data::model_data & model_data, const data::nav_mesh & nav_mesh) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
-		kengine_logf(r, verbose, "execute/recast", "Building navmesh for %zu", e);
 		kengine_assert(r, nav_mesh.verts_per_poly <= DT_VERTS_PER_POLYGON);
-
 		kengine::start_async_task(
 			r, e,
 			data::async_task::string("recast: load %s", model.file.c_str()),
 			std::async(std::launch::async, [&r, e, &model, &model_data, &nav_mesh] {
+				const putils::scoped_thread_name thread_name(putils::string<64>("Load navmesh for %s", model.file.c_str()));
 				return build_recast_component::create_recast_mesh(model.file.c_str(), { r, e }, nav_mesh, model_data);
 			})
 		);

@@ -24,12 +24,13 @@ namespace kengine::systems {
 		collision(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, log, "collision", "Initializing");
 			e.emplace<functions::on_collision>(putils_forward_to_this(on_collision));
 		}
 
 		void on_collision(entt::entity first, entt::entity second) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, verbose, "systems/collision", "Collision between %zu and %zu", first, second);
+			kengine_logf(r, verbose, "collision", "Collision between %zu and %zu", first, second);
 			trigger(first, second);
 			trigger(second, first);
 		}

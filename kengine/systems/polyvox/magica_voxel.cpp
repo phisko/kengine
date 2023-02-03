@@ -17,6 +17,7 @@
 // putils
 #include "putils/forward_to.hpp"
 #include "putils/string.hpp"
+#include "putils/thread_name.hpp"
 
 // kengine data
 #include "kengine/data/async_task.hpp"
@@ -53,7 +54,7 @@ namespace kengine::systems {
 		magica_voxel(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "Init", "systems/magica_voxel");
+			kengine_log(r, log, "magica_voxel", "Initializing");
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 		}
 
@@ -72,7 +73,6 @@ namespace kengine::systems {
 		kengine::backward_compatible_observer<data::model> observer{ r, putils_forward_to_this(load_model) };
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, verbose, "execute", "systems/magica_voxel");
 
 			observer.process();
 
@@ -93,6 +93,7 @@ namespace kengine::systems {
 				r, e,
 				data::async_task::string("magica_voxel: load %s", f),
 				std::async(std::launch::async, [this, e, &f] {
+					const putils::scoped_thread_name thread_name(putils::string<64>("Load %s", f));
 					return load_model_data(e, f);
 				})
 			);
@@ -101,11 +102,11 @@ namespace kengine::systems {
 		async_loaded_data load_model_data(entt::entity e, const char * file) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			kengine_logf(r, log, "systems/magica_voxel", "Loading model %zu for %s", e, file);
+			kengine_logf(r, log, "magica_voxel", "Loading model %s for %zu", file, e);
 			const putils::string<256> binary_file("%s.bin", file);
 
 			if (!std::filesystem::exists(binary_file.c_str())) {
-				kengine_log(r, log, "magica_voxel/load_model", "Binary file does not exist, creating it");
+				kengine_log(r, log, "magica_voxel", "Binary file does not exist, creating it");
 				const auto model_and_offset = load_vox_model(file);
 				const auto model_data = generate_model_data(e, model_and_offset.mesh);
 				serialize(binary_file.c_str(), model_data, model_and_offset.offset_to_apply);
@@ -256,12 +257,12 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 
 			if (r.all_of<data::transform>(e)) {
-				kengine_logf(r, log, "magica_voxel/load_model", "%zu already has a data::transform. mesh offset will not be applied", e);
+				kengine_logf(r, log, "magica_voxel", "%zu already has a data::transform. Mesh offset will not be applied", e);
 				return;
 			}
-			kengine_log(r, log, "magica_voxel/load_model", "Applying mesh offset");
+			kengine_log(r, log, "magica_voxel", "Applying mesh offset");
 
-			auto & box = r.get_or_emplace<data::transform>(e).bounding_box;
+			auto & box = r.emplace<data::transform>(e).bounding_box;
 			box.position.x -= size.x / 2.f * box.size.x;
 			box.position.z -= size.y / 2.f * box.size.z;
 		}

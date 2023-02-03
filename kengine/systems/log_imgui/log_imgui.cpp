@@ -58,7 +58,7 @@ namespace kengine::systems {
 		log_imgui(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "Init", "systems/log_imgui");
+			kengine_log(r, log, "log_imgui", "Initializing");
 
 			std::fill(std::begin(filters.severities), std::end(filters.severities), true);
 
@@ -106,8 +106,6 @@ namespace kengine::systems {
 			if (!*enabled)
 				return;
 
-			kengine_log(r, verbose, "execute", "log_imgui");
-
 			if (ImGui::Begin("log", enabled)) {
 				draw_filters();
 				draw_filtered_events();
@@ -135,7 +133,7 @@ namespace kengine::systems {
 
 		void update_filtered_events() noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, verbose, "execute/log_imgui", "Updating filters");
+			kengine_log(r, verbose, "log_imgui", "Updating filters");
 
 			const std::lock_guard lock(mutex);
 			filtered_events.clear();

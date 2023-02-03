@@ -21,7 +21,7 @@ namespace kengine::imgui_lua_helper {
 		KENGINE_PROFILING_SCOPE;
 
 		for (const auto & [e, state] : r.view<data::lua_state>().each()) {
-			kengine_logf(r, log, "InitImguiLuaBindings", "Initializing bindings for state Entity %zu", e);
+			kengine_logf(r, log, "imgui_lua_bindings", "Initializing bindings for state entity %zu", e);
 			lState = *state.state;
 			LoadImguiBindings();
 		}

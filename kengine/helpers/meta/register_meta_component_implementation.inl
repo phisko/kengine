@@ -25,13 +25,13 @@ namespace kengine {
 			using implementation = meta_component_implementation<Meta, Type>;
 			if constexpr (implementation::value) {
 				if constexpr (can_log)
-					kengine_logf(r, log, "Init/register_meta_components", "Registering %s for %s", putils::reflection::get_class_name<Meta>(), putils::reflection::get_class_name<Type>());
+					kengine_logf(r, log, "register_meta_component_implementation", "Registering %s for %s", putils::reflection::get_class_name<Meta>(), putils::reflection::get_class_name<Type>());
 
 				const auto type = type_helper::get_type_entity<Type>(r);
 				r.emplace<Meta>(type, implementation::function);
 			}
 			else if constexpr (can_log)
-				kengine_logf(r, log, "Init/register_meta_components", "Skipping %s registration for %s (conditions not met)", putils::reflection::get_class_name<Meta>(), putils::reflection::get_class_name<Type>());
+				kengine_logf(r, log, "register_meta_component_implementation", "Skipping %s registration for %s (conditions not met)", putils::reflection::get_class_name<Meta>(), putils::reflection::get_class_name<Type>());
 		});
 	}
 }

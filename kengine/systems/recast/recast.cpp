@@ -41,7 +41,7 @@ namespace kengine::systems {
 		recast(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "Init", "systems/recast");
+			kengine_log(r, log, "recast", "Initializing");
 
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 			e.emplace<data::adjustable>() = {
@@ -60,7 +60,6 @@ namespace kengine::systems {
 		};
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, verbose, "execute", "recast");
 
 			observer.process();
 

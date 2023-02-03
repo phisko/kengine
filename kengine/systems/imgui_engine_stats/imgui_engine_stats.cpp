@@ -45,7 +45,7 @@ namespace kengine::systems {
 		imgui_engine_stats(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "Init", "systems/imgui_engine_stats");
+			kengine_log(r, log, "imgui_engine_stats", "Initializing");
 
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 
@@ -59,8 +59,6 @@ namespace kengine::systems {
 
 			if (!*enabled)
 				return;
-
-			kengine_log(r, verbose, "execute", "imgui_engine_stats");
 
 			if (ImGui::Begin("Engine stats", enabled)) {
 				ImGui::Text("Entities: %zu", r.alive());
@@ -83,7 +81,7 @@ namespace kengine::systems {
 
 			const auto new_collection = display_collection_creator();
 			if (new_collection) {
-				kengine_logf(r, log, "systems/imgui_engine_stats", "New tracked collection: %s", new_collection->name.c_str());
+				kengine_logf(r, log, "imgui_engine_stats", "New tracked collection: %s", new_collection->name.c_str());
 				tracked.push_back(*new_collection);
 				save_tracked_collections(tracked);
 			}
@@ -195,7 +193,7 @@ namespace kengine::systems {
 
 		void save_tracked_collections(const std::vector<collection> & collections) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "systems/imgui_engine_stats", "Saving tracked collections to " KENGINE_STATS_TRACKED_COLLECTIONS_SAVE_FILE);
+			kengine_log(r, log, "imgui_engine_stats", "Saving tracked collections to " KENGINE_STATS_TRACKED_COLLECTIONS_SAVE_FILE);
 
 			std::ofstream f(KENGINE_STATS_TRACKED_COLLECTIONS_SAVE_FILE);
 			if (!f) {
@@ -219,7 +217,7 @@ namespace kengine::systems {
 
 		std::vector<collection> load_tracked_collections() noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "systems/imgui_engine_stats", "Loading tracked collections from " KENGINE_STATS_TRACKED_COLLECTIONS_SAVE_FILE);
+			kengine_log(r, log, "imgui_engine_stats", "Loading tracked collections from " KENGINE_STATS_TRACKED_COLLECTIONS_SAVE_FILE);
 
 			std::vector<collection> ret;
 
@@ -247,7 +245,7 @@ namespace kengine::systems {
 						}
 
 					if (!found) {
-						kengine_logf(r, log, "systems/imgui_engine_stats/load_tracked_collections", "Missing component Entity for %s", std::string(name_json).c_str());
+						kengine_logf(r, warning, "imgui_engine_stats", "Missing type entity for %s", std::string(name_json).c_str());
 						collection.missing_components.push_back(name_json);
 					}
 				}
@@ -265,7 +263,7 @@ namespace kengine::systems {
 				const auto & comp_name = collection.missing_components[i];
 				for (const auto & [e, name] : r.view<data::name>().each())
 					if (comp_name == name.name) {
-						kengine_logf(r, log, "systems/imgui_engine_stats", "Found component Entity for %s", comp_name.c_str());
+						kengine_logf(r, log, "imgui_engine_stats", "Found type entity for %s", comp_name.c_str());
 						collection.components.push_back(e);
 						collection.missing_components.erase(collection.missing_components.begin() + i);
 						--i;
