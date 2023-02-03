@@ -27,9 +27,13 @@
 #include "kengine/helpers/log_helper.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
 
+// impl
+#include "glfw_input_handler.hpp"
+
 namespace kengine::systems {
 	struct glfw {
 		entt::registry & r;
+		glfw_input_handler input_handler;
 
 		glfw(entt::handle e) noexcept
 			: r(*e.registry()) {
@@ -40,7 +44,7 @@ namespace kengine::systems {
 			e.emplace<functions::on_mouse_captured>(putils_forward_to_this(on_mouse_captured));
 
 			for (const auto & [buffer_entity, buffer] : r.view<data::input_buffer>().each()) {
-				input.buffer = &buffer;
+				input_handler.buffer = &buffer;
 				break;
 			}
 
@@ -140,81 +144,17 @@ namespace kengine::systems {
 				comp.size = { (unsigned int)width, (unsigned int)height };
 			});
 
-#define forward_to_input(function) [](auto... args) { g_this->input.function(args...); }
-			glfwSetMouseButtonCallback(glfw_comp.window.get(), forward_to_input(on_click));
-			glfwSetCursorPosCallback(glfw_comp.window.get(), forward_to_input(on_mouse_move));
-			glfwSetScrollCallback(glfw_comp.window.get(), forward_to_input(on_scroll));
-			glfwSetKeyCallback(glfw_comp.window.get(), forward_to_input(on_key));
-#undef forward_to_input
+#define forward_to_input_handler(function) [](auto... args) { g_this->input_handler.function(args...); }
+			glfwSetMouseButtonCallback(glfw_comp.window.get(), forward_to_input_handler(on_click));
+			glfwSetCursorPosCallback(glfw_comp.window.get(), forward_to_input_handler(on_mouse_move));
+			glfwSetScrollCallback(glfw_comp.window.get(), forward_to_input_handler(on_scroll));
+			glfwSetKeyCallback(glfw_comp.window.get(), forward_to_input_handler(on_key));
+#undef forward_to_input_handler
 
 			if (init_glfw.on_window_created)
 				init_glfw.on_window_created();
 		}
 
-		struct {
-			void on_key(GLFWwindow * window, int key, int scancode, int action, int mods) noexcept {
-				KENGINE_PROFILING_SCOPE;
-
-				if (buffer == nullptr || (ImGui::GetCurrentContext() != nullptr && ImGui::GetIO().WantCaptureKeyboard))
-					return;
-
-				const auto e = entt::entity(intptr_t(glfwGetWindowUserPointer(window)));
-
-				if (action == GLFW_PRESS)
-					buffer->keys.push_back(data::input_buffer::key_event{ e, key, true });
-				else if (action == GLFW_RELEASE)
-					buffer->keys.push_back(data::input_buffer::key_event{ e, key, false });
-			}
-
-			void on_click(GLFWwindow * window, int button, int action, int mods) noexcept {
-				KENGINE_PROFILING_SCOPE;
-
-				if (buffer == nullptr || (ImGui::GetCurrentContext() != nullptr && ImGui::GetIO().WantCaptureMouse))
-					return;
-
-				const auto e = entt::entity(intptr_t(glfwGetWindowUserPointer(window)));
-
-				if (action == GLFW_PRESS)
-					buffer->clicks.push_back(data::input_buffer::click_event{ e, last_pos, button, true });
-				else if (action == GLFW_RELEASE)
-					buffer->clicks.push_back(data::input_buffer::click_event{ e, last_pos, button, false });
-			}
-
-			void on_mouse_move(GLFWwindow * window, double xpos, double ypos) noexcept {
-				KENGINE_PROFILING_SCOPE;
-
-				if (last_pos.x == FLT_MAX) {
-					last_pos.x = (float)xpos;
-					last_pos.y = (float)ypos;
-				}
-
-				if (buffer == nullptr || (ImGui::GetCurrentContext() != nullptr && ImGui::GetIO().WantCaptureMouse))
-					return;
-
-				const auto e = entt::entity(intptr_t(glfwGetWindowUserPointer(window)));
-
-				data::input_buffer::mouse_move_event info;
-				info.window = e;
-				info.pos = { (float)xpos, (float)ypos };
-				info.rel = { (float)xpos - last_pos.x, (float)ypos - last_pos.y };
-				last_pos = info.pos;
-
-				buffer->moves.push_back(info);
-			}
-
-			void on_scroll(GLFWwindow * window, double xoffset, double yoffset) noexcept {
-				KENGINE_PROFILING_SCOPE;
-
-				if (buffer == nullptr || (ImGui::GetCurrentContext() != nullptr && ImGui::GetIO().WantCaptureMouse))
-					return;
-
-				const auto e = entt::entity(intptr_t(glfwGetWindowUserPointer(window)));
-				buffer->scrolls.push_back(data::input_buffer::mouse_scroll_event{ e, (float)xoffset, (float)yoffset, last_pos });
-			}
-
-			putils::point2f last_pos{ FLT_MAX, FLT_MAX };
-			data::input_buffer * buffer = nullptr;
-		} input;
 	};
 
 	DEFINE_KENGINE_SYSTEM_CREATOR(glfw)
