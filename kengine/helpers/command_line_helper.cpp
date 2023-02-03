@@ -10,14 +10,21 @@
 #include "kengine/data/command_line.hpp"
 
 // kengine helpers
+#include "kengine/helpers/log_helper.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
 
 namespace kengine {
 	void create_command_line_entity(entt::registry & r, int argc, const char ** argv) noexcept {
 		KENGINE_PROFILING_SCOPE;
+
 		const auto e = r.create();
 		auto & command_line = r.emplace<data::command_line>(e);
-		for (const char * argument : std::span(argv, argc))
+		std::stringstream s;
+		for (const char * argument : std::span(argv, argc)) {
 			command_line.arguments.emplace_back(argument);
+			s << ' ' << argument;
+		}
+
+		kengine_logf(r, log, "command_line", "Creating command-line:%s", s.str().c_str());
 	}
 }

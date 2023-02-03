@@ -7,6 +7,7 @@
 
 // putils
 #include "putils/range.hpp"
+#include "putils/thread_name.hpp"
 
 // kengine helpers
 #include "kengine/helpers/profiling_helper.hpp"
@@ -50,6 +51,7 @@ namespace kengine {
 		});
 
 		std::for_each(std::execution::par_unseq, putils_range(registrators), [&](auto registrator) {
+			const putils::scoped_thread_name thread_name("Type registrator");
 			registrator(r);
 		});
 	}

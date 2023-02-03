@@ -133,7 +133,7 @@ namespace kengine::systems {
 		bullet(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "Init", "systems/bullet");
+			kengine_log(r, log, "bullet", "Initializing");
 
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 			e.emplace<functions::query_position>(putils_forward_to_this(query_position));
@@ -151,6 +151,9 @@ namespace kengine::systems {
 		}
 
 		~bullet() noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			kengine_log(r, log, "bullet", "Shutting down");
 			// Make sure these are destroyed before the system
 			r.storage<bullet_data>().clear();
 		}
@@ -158,18 +161,17 @@ namespace kengine::systems {
 		kengine::backward_compatible_observer<data::transform, data::physics, data::instance> observer{ r, putils_forward_to_this(add_or_update_bullet_data) };
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, verbose, "execute", "systems/bullet");
 
 			observer.process();
 
 			for (auto [e, bullet] : r.view<bullet_data>(entt::exclude<data::physics>).each()) {
-				kengine_logf(r, verbose, "execute/bullet", "Removing BulletComponent from %zu", e);
+				kengine_logf(r, verbose, "bullet", "Removing bullet_data from %zu", e);
 				r.remove<bullet_data>(e);
 			}
 
 			dynamics_world.setGravity({ 0.f, -adjustables.gravity, 0.f });
 			dynamics_world.stepSimulation(delta_time);
-			detectCollisions();
+			detect_collisions();
 
 #ifndef KENGINE_NDEBUG
 			drawer.cleanup();
@@ -206,11 +208,11 @@ namespace kengine::systems {
 				return;
 
 			if (r.all_of<data::model_skeleton>(instance.model) && !r.all_of<data::skeleton>(e)) {
-				kengine_logf(r, verbose, "execute/bullet", "Not adding BulletComponent to %zu because it doesn't have a skeleton yet, while its model does", e);
+				kengine_logf(r, verbose, "bullet", "Not adding bullet_data to %zu because it doesn't have a skeleton yet, while its model does", e);
 				return;
 			}
 
-			kengine_logf(r, verbose, "systems/bullet", "Adding BulletComponent to %zu", e);
+			kengine_logf(r, verbose, "bullet", "Adding bullet_data to %zu", e);
 
 			r.remove<bullet_data>(e);
 			add_bullet_data(e, transform, physics, instance.model);
@@ -350,13 +352,13 @@ namespace kengine::systems {
 			}
 		}
 
-		void detectCollisions() noexcept {
+		void detect_collisions() noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			const auto num_manifolds = dispatcher.getNumManifolds();
 			if (num_manifolds <= 0)
 				return;
-			kengine_log(r, verbose, "execute/bullet", "Detecting collisions");
+			kengine_log(r, verbose, "bullet", "Detecting collisions");
 			for (const auto & [callback_entity, on_collision] : r.view<functions::on_collision>().each())
 				for (int i = 0; i < num_manifolds; ++i) {
 					const auto contact_manifold = dispatcher.getManifoldByIndexInternal(i);
@@ -365,14 +367,14 @@ namespace kengine::systems {
 
 					const auto e1 = entt::entity(object_a->getUserIndex());
 					const auto e2 = entt::entity(object_b->getUserIndex());
-					kengine_logf(r, verbose, "execute/bullet/detectCollisions", "Found collision between %zu & %zu", e1, e2);
+					kengine_logf(r, verbose, "bullet", "Collision between %zu & %zu", e1, e2);
 					on_collision(e1, e2);
 				}
 		}
 
 		void query_position(const putils::point3f & pos, float radius, const entity_iterator_func & func) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, verbose, "systems/bullet", "Querying radius %f around position { %f, %f, %f }", radius, pos.x, pos.y, pos.z);
+			kengine_logf(r, verbose, "bullet", "Querying radius %f around position { %f, %f, %f }", radius, pos.x, pos.y, pos.z);
 
 			btSphereShape sphere(radius);
 			btPairCachingGhostObject ghost;
@@ -390,7 +392,7 @@ namespace kengine::systems {
 				btScalar addSingleResult(btManifoldPoint & cp, const btCollisionObjectWrapper * colObj0Wrap, int partId0, int index0, const btCollisionObjectWrapper * colObj1Wrap, int partId1, int index1) final {
 					kengine_assert(r, colObj1Wrap->m_collisionObject == &ghost);
 					const auto e = entt::entity(colObj0Wrap->m_collisionObject->getUserIndex());
-					kengine_logf(r, verbose, "systems/bullet/query_position", "Found %zu", e);
+					kengine_logf(r, verbose, "bullet", "Found %zu", e);
 					func({ r, e });
 					return 1.f;
 				}

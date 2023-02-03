@@ -42,7 +42,7 @@ namespace kengine::systems {
 		imgui_prompt(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "Init", "systems/imgui_prompt");
+			kengine_log(r, log, "imgui_prompt", "Initializing");
 
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 
@@ -56,8 +56,6 @@ namespace kengine::systems {
 
 			if (!*enabled)
 				return;
-
-			kengine_log(r, verbose, "execute", "imgui_prompt");
 
 			if (ImGui::Begin("Prompt", enabled)) {
 				ImGui::Columns(2);
@@ -151,14 +149,14 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 
 #ifndef KENGINE_LUA
-			kengine_log(error, "execute/imgui_prompt", "Attempt to evaluate Lua script but KENGINE_LUA is not defined");
+			kengine_log(error, "imgui_prompt", "Attempt to evaluate Lua script but KENGINE_LUA is not defined");
 			add_line_to_history(
 				"Please compile with KENGINE_LUA",
 				false,
 				putils::normalized_color{ 1.f, 0.f, 0.f }
 			);
 #else
-			kengine_logf(r, log, "execute/imgui_prompt", "Evaluating Lua script: '%s'", buff);
+			kengine_logf(r, log, "imgui_prompt", "Evaluating Lua script: '%s'", buff);
 
 			for (const auto & [e, state] : r.view<kengine::data::lua_state>().each()) {
 				if (first_eval_lua) {
@@ -181,7 +179,7 @@ namespace kengine::systems {
 #ifdef KENGINE_LUA
 		void setup_output_redirect(sol::state & state) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "Init/systems/imgui_prompt", "Setting up output redirection for Lua");
+			kengine_log(r, log, "imgui_prompt", "Setting up output redirection for Lua");
 
 			static imgui_prompt * g_this = nullptr;
 			kengine_assert_with_message(r, !g_this, "imgui_prompt system doesn't support existing in multiple registries currently. Fix this!");
@@ -231,14 +229,14 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 
 #ifndef KENGINE_PYTHON
-			kengine_log(error, "execute/imgui_prompt", "Attempt to evaluate python script but KENGINE_PYTHON is not defined");
+			kengine_log(error, "imgui_prompt", "Attempt to evaluate python script but KENGINE_PYTHON is not defined");
 			add_line_to_history(
 				"Please compile with KENGINE_PYTHON",
 				false,
 				putils::normalized_color{ 1.f, 0.f, 0.f }
 			);
 #else
-			kengine_logf(r, log, "execute/imgui_prompt", "Evaluating python script: '%s'", buff);
+			kengine_logf(r, log, "imgui_prompt", "Evaluating python script: '%s'", buff);
 
 #ifdef __GNUC__
 // Ignore "declared with greater visibility than the type of its field" warnings

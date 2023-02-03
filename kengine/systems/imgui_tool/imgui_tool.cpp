@@ -88,7 +88,7 @@ namespace kengine::systems {
 		imgui_tool(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "Init", "systems/imgui_tool");
+			kengine_log(r, log, "imgui_tool", "Initializing");
 
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 		}
@@ -96,7 +96,6 @@ namespace kengine::systems {
 		kengine::backward_compatible_observer<data::imgui_tool> observer{ r, putils_forward_to_this(on_construct_imgui_tool) };
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, verbose, "execute", "imgui_tool");
 
 			observer.process();
 
@@ -148,7 +147,7 @@ namespace kengine::systems {
 				return;
 			}
 
-			kengine_logf(r, log, "Init/systems/imgui_tool", "Initializing %s", name->name.c_str());
+			kengine_logf(r, log, "imgui_tool", "Initializing %s", name->name.c_str());
 			if (const auto value = configuration.get_value(name->name.c_str()))
 				tool.enabled = *value;
 

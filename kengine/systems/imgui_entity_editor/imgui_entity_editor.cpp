@@ -32,7 +32,7 @@ namespace kengine::systems {
 		imgui_entity_editor(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "Init", "systems/imgui_entity_editor");
+			kengine_log(r, log, "imgui_entity_editor", "Initializing");
 
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 
@@ -47,7 +47,6 @@ namespace kengine::systems {
 			if (!*enabled)
 				return;
 
-			kengine_log(r, verbose, "execute", "imgui_entity_editor");
 			const auto scale = imgui_helper::get_scale(r);
 			for (auto [selected] : r.view<data::selected>().each()) {
 				bool open = true;

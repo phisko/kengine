@@ -19,7 +19,7 @@ namespace kengine::systems {
 	struct on_click {
 		on_click(entt::handle e) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(*e.registry(), log, "Init", "systems/on_click");
+			kengine_log(*e.registry(), log, "on_click", "Initializing");
 
 			e.emplace<data::input>().on_mouse_button = on_mouse_button;
 		}
@@ -31,7 +31,7 @@ namespace kengine::systems {
 				return;
 
 			const auto & r = *window.registry();
-			kengine_logf(r, log, "systems/on_click", "Click in { %f, %f }", coords.x, coords.y);
+			kengine_logf(r, log, "on_click", "Click in { %f, %f }", coords.x, coords.y);
 
 			for (const auto & [_, get_entity] : r.view<functions::get_entity_in_pixel>().each()) {
 				const auto e = get_entity(window, coords);
@@ -40,11 +40,11 @@ namespace kengine::systems {
 
 				const auto on_click = r.try_get<functions::on_click>(e);
 				if (on_click) {
-					kengine_logf(r, log, "systems/on_click", "Calling on_click on %zu", e);
+					kengine_logf(r, log, "on_click", "Calling on_click on %zu", e);
 					on_click->call(button);
 				}
 				else
-					kengine_logf(r, log, "systems/on_click", "Clicked %zu, did not have on_click", e);
+					kengine_logf(r, log, "on_click", "Clicked %zu, did not have on_click", e);
 			}
 		}
 	};

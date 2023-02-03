@@ -76,6 +76,7 @@ namespace kengine::systems {
 		imgui_adjustable(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, log, "imgui_adjustable", "Initializing");
 
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 
@@ -94,7 +95,6 @@ namespace kengine::systems {
 
 			if (!*enabled)
 				return;
-			kengine_log(r, verbose, "execute", "imgui_adjustable");
 
 			observer.process();
 
@@ -292,22 +292,24 @@ namespace kengine::systems {
 		void init_adjustable(data::adjustable & comp) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			kengine_logf(r, log, "Init/systems/imgui_adjustable", "Initializing section %s", comp.section.c_str());
+			kengine_logf(r, log, "imgui_adjustable", "Initializing section %s", comp.section.c_str());
 
 			const auto it = loaded_file.sections.find(comp.section.c_str());
 			if (it == loaded_file.sections.end()) {
-				kengine_logf(r, warning, "Init/systems/imgui_adjustable", "Section '%s' not found in INI file", comp.section.c_str());
+				kengine_logf(r, warning, "imgui_adjustable", "Section '%s' not found in INI file", comp.section.c_str());
 				return;
 			}
+
 			const auto & section = it->second;
 			for (auto & value : comp.values) {
 				const auto it = section.values.find(value.name.c_str());
-				if (it != section.values.end()) {
-					kengine_logf(r, log, "Init/systems/imgui_adjustable", "Initializing %s", value.name.c_str());
-					set_value(value, it->second.c_str());
+				if (it == section.values.end()) {
+					kengine_logf(r, warning, "imgui_adjustable", "Value for '%s' not found in INI file", value.name.c_str());
+					continue;
 				}
-				else
-					kengine_logf(r, log, "Init/systems/imgui_adjustable", "value not found in INI for %s", value.name.c_str());
+
+				kengine_logf(r, log, "imgui_adjustable", "Initializing %s to %s", value.name.c_str(), it->second.c_str());
+				set_value(value, it->second.c_str());
 			}
 		}
 
@@ -352,7 +354,7 @@ namespace kengine::systems {
 
 		putils::ini_file load_ini_file() noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "systems/imgui_adjustable", "Loading from " KENGINE_ADJUSTABLE_SAVE_FILE);
+			kengine_log(r, log, "imgui_adjustable", "Loading from " KENGINE_ADJUSTABLE_SAVE_FILE);
 
 			std::ifstream f(KENGINE_ADJUSTABLE_SAVE_FILE);
 
@@ -363,7 +365,7 @@ namespace kengine::systems {
 
 		void save() noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "systems/imgui_adjustable", "Saving to " KENGINE_ADJUSTABLE_SAVE_FILE);
+			kengine_log(r, log, "imgui_adjustable", "Saving to " KENGINE_ADJUSTABLE_SAVE_FILE);
 
 			std::ofstream f(KENGINE_ADJUSTABLE_SAVE_FILE, std::ofstream::trunc);
 			if (!f) {

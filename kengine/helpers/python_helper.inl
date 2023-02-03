@@ -78,7 +78,7 @@ namespace kengine::python_helper {
 		putils::for_each_type<Types...>([&](auto && t) noexcept {
 			using type = putils_wrapped_type(t);
 
-			kengine_logf(r, log, "python/register_types", "Registering %s", putils::reflection::get_class_name<type>());
+			kengine_logf(r, log, "python", "Registering type %s", putils::reflection::get_class_name<type>());
 			// No point in multithreading this since the GIL can only be owned by one thread
 			for (const auto & [e, comp] : r.view<data::python_state>().each())
 				impl::register_type_with_state<IsComponent, type>(r, comp);
@@ -88,7 +88,7 @@ namespace kengine::python_helper {
 	template<typename Ret, typename... Args>
 	void register_function(const entt::registry & r, const char * name, const script_language_helper::function<Ret(Args...)> & func) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_logf(r, log, "python/register_function", "Registering %s", name);
+		kengine_logf(r, log, "python", "Registering function %s", name);
 
 		for (const auto & [e, comp] : r.view<data::python_state>().each())
 			impl::register_function_with_state(comp, name, func);

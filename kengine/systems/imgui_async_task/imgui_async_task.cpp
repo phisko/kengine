@@ -30,7 +30,7 @@ namespace kengine::systems {
 		imgui_async_task(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "Init", "systems/imgui_async_task");
+			kengine_log(r, log, "imgui_async_task", "Initializing");
 
 			e.emplace<data::name>("Async tasks");
 			auto & tool = e.emplace<data::imgui_tool>();
@@ -44,7 +44,6 @@ namespace kengine::systems {
 
 			if (!*enabled)
 				return;
-			kengine_log(r, verbose, "execute", "imgui_async_task");
 
 			if (ImGui::Begin("Async tasks", enabled)) {
 				if (ImGui::BeginTable("Tasks", 2)) {
