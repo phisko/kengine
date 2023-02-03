@@ -1,8 +1,8 @@
 #pragma once
 
-// entt
-#include <entt/entity/fwd.hpp>
+// kengine helpers
+#include "kengine/helpers/system_creator_helper.hpp"
 
 namespace kengine::systems {
-	KENGINE_RECAST_EXPORT entt::entity add_recast(entt::registry & r) noexcept;
+	DECLARE_KENGINE_SYSTEM_CREATOR(KENGINE_RECAST_EXPORT, recast)
 }

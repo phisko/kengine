@@ -71,9 +71,5 @@ namespace kengine::systems {
 		}
 	};
 
-	entt::entity add_imgui_async_task(entt::registry & r) noexcept {
-		const entt::handle e{ r, r.create() };
-		e.emplace<imgui_async_task>(e);
-		return e;
-	}
+	DEFINE_KENGINE_SYSTEM_CREATOR(imgui_async_task)
 }

@@ -209,9 +209,5 @@ namespace kengine::systems {
 		} conf_file;
 	};
 
-	entt::entity add_imgui_tool(entt::registry & r) noexcept {
-		const entt::handle e{ r, r.create() };
-		e.emplace<imgui_tool>(e);
-		return e;
-	}
+	DEFINE_KENGINE_SYSTEM_CREATOR(imgui_tool)
 }

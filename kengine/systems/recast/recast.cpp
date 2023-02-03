@@ -25,6 +25,7 @@
 // impl
 #include "recast_agent.hpp"
 #include "recast_crowd.hpp"
+#include "recast_nav_mesh.hpp"
 
 namespace kengine::systems {
 	namespace recast_impl {
@@ -82,9 +83,10 @@ namespace kengine::systems {
 		}
 	};
 
-	entt::entity add_recast(entt::registry & r) noexcept {
-		const entt::handle e{ r, r.create() };
-		e.emplace<recast>(e);
-		return e;
-	}
+	DEFINE_KENGINE_SYSTEM_CREATOR(
+		recast,
+		data::recast_agent,
+		data::recast_crowd,
+		data::recast_nav_mesh
+	)
 }

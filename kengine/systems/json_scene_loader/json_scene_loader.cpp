@@ -185,9 +185,8 @@ namespace kengine::systems {
 		}
 	};
 
-	entt::entity add_json_scene_loader(entt::registry & r) noexcept {
-		const entt::handle e{ r, r.create() };
-		e.emplace<json_scene_loader>(e);
-		return e;
-	}
+	DEFINE_KENGINE_SYSTEM_CREATOR(
+		json_scene_loader,
+		json_scene_loader::temporary_scene
+	)
 }

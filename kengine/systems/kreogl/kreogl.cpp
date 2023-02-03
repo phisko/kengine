@@ -998,9 +998,22 @@ namespace kengine::systems {
 		}
 	};
 
-	entt::entity add_kreogl(entt::registry & r) noexcept {
-		const entt::handle e{ r, r.create() };
-		e.emplace<kreogl>(e);
-		return e;
-	}
+	DEFINE_KENGINE_SYSTEM_CREATOR(
+		kreogl,
+		data::kreogl_animation_files,
+		data::kreogl_debug_graphics,
+		data::kreogl_model,
+		::kreogl::animated_object,
+		::kreogl::camera,
+		::kreogl::directional_light,
+		::kreogl::point_light,
+		::kreogl::skybox_texture,
+		::kreogl::spot_light,
+		::kreogl::sprite_2d,
+		::kreogl::sprite_3d,
+		::kreogl::text_2d,
+		::kreogl::text_3d,
+		::kreogl::texture,
+		::kreogl::window
+	)
 }

@@ -1,8 +1,8 @@
 #pragma once
 
-// entt
-#include <entt/entity/fwd.hpp>
+// kengine helpers
+#include "kengine/helpers/system_creator_helper.hpp"
 
 namespace kengine::systems {
-	KENGINE_MODEL_CREATOR_EXPORT entt::entity add_model_creator(entt::registry & r) noexcept;
+	DECLARE_KENGINE_SYSTEM_CREATOR(KENGINE_MODEL_CREATOR_EXPORT, model_creator)
 }

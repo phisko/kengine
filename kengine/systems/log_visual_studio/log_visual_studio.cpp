@@ -75,11 +75,7 @@ namespace kengine::systems {
 		}
 	};
 
-	entt::entity add_log_visual_studio(entt::registry & r) noexcept {
-		const entt::handle e{ r, r.create() };
-		e.emplace<log_visual_studio>(e);
-		return e;
-	}
+	DEFINE_KENGINE_SYSTEM_CREATOR(log_visual_studio)
 }
 
 #endif

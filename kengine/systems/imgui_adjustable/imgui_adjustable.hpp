@@ -1,8 +1,11 @@
 #pragma once
 
+// kengine helpers
+#include "kengine/helpers/system_creator_helper.hpp"
+
 // entt
 #include <entt/entity/fwd.hpp>
 
 namespace kengine::systems {
-	KENGINE_IMGUI_ADJUSTABLE_EXPORT entt::entity add_imgui_adjustable(entt::registry & r) noexcept;
+	DECLARE_KENGINE_SYSTEM_CREATOR(KENGINE_IMGUI_ADJUSTABLE_EXPORT, imgui_adjustable)
 }

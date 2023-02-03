@@ -1,8 +1,8 @@
 #pragma once
 
-// entt
-#include <entt/entity/fwd.hpp>
+// kengine helpers
+#include "kengine/helpers/system_creator_helper.hpp"
 
 namespace kengine::systems {
-	KENGINE_IMGUI_ENGINE_STATS_EXPORT entt::entity add_imgui_engine_stats(entt::registry & r) noexcept;
+	DECLARE_KENGINE_SYSTEM_CREATOR(KENGINE_IMGUI_ENGINE_STATS_EXPORT, imgui_engine_stats)
 }
