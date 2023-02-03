@@ -46,12 +46,10 @@ namespace kengine::systems {
 			kengine_log(r, log, "Init", "systems/recast");
 
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
-
 			e.emplace<data::adjustable>() = {
 				"Recast",
 				{
 					{ "Path optimization range", &recast_impl::g_adjustables.path_optimization_range },
-					{ "Editor mode (rebuild navmesh each frame)", &recast_impl::g_adjustables.editor_mode },
 				}
 			};
 
