@@ -146,7 +146,9 @@ namespace kengine::systems::recast_impl {
 			const auto idx = crowd.crowd->addAgent(object_info.object_in_nav_mesh.position.raw, &params);
 			kengine_assert(*e.registry(), idx >= 0);
 
-			e.emplace<data::recast_agent>(idx, crowd_id);
+			auto & agent = e.emplace<data::recast_agent>();
+			agent.index = idx;
+			agent.crowd = { *e.registry(), crowd_id };
 		}
 
 		static void fill_crowd_agent_params(dtCrowdAgentParams & params, const object_info & object_info) noexcept {
