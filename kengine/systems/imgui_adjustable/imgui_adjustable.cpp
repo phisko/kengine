@@ -54,7 +54,7 @@
 namespace kengine::systems {
 	struct imgui_adjustable {
 		entt::registry & r;
-		entt::scoped_connection connection;
+		const entt::scoped_connection connection = r.on_destroy<data::adjustable>().connect<&imgui_adjustable::on_destroy_adjustable>(this);
 
 		bool * enabled;
 		putils::ini_file loaded_file = load_ini_file();
@@ -82,14 +82,13 @@ namespace kengine::systems {
 			e.emplace<data::name>("Adjustables");
 			auto & tool = e.emplace<data::imgui_tool>();
 			enabled = &tool.enabled;
-
-			connection = r.on_destroy<data::adjustable>().connect<&imgui_adjustable::on_destroy_adjustable>(this);
 		}
 
 		char name_search[1024] = "";
 		using string = data::adjustable::string;
 		using sections = std::vector<std::string>;
 		kengine::backward_compatible_observer<data::adjustable> observer{ r, putils_forward_to_this(on_construct_adjustable) };
+		bool search_out_of_date = true;
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
@@ -110,8 +109,13 @@ namespace kengine::systems {
 
 				ImGui::Separator();
 				if (ImGui::InputText("Name", name_search, sizeof(name_search)))
-					update_search_results("", root_section);
+					search_out_of_date = true;
 				ImGui::Separator();
+
+				if (search_out_of_date) {
+					update_search_results("", root_section);
+					search_out_of_date = false;
+				}
 
 				if (ImGui::BeginChild("##adjustables"))
 					for (const auto & [name, section] : root_section.subsections)
@@ -253,6 +257,8 @@ namespace kengine::systems {
 			section::entry entry;
 			entry.adjustable = &comp;
 			current_section->entries.push_back(std::move(entry));
+
+			search_out_of_date = true;
 		}
 
 		void on_destroy_adjustable(entt::registry & r, entt::entity e) noexcept {
@@ -279,6 +285,7 @@ namespace kengine::systems {
 				}
 			}
 
+			search_out_of_date = true;
 			return false;
 		}
 
