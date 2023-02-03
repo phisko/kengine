@@ -37,38 +37,10 @@ namespace kengine::systems::recast_impl {
 		static void run(entt::registry & r, float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			if (g_adjustables.editor_mode)
-				recreate_crowds(r);
 			remove_old_agents(r);
 			move_changed_agents(r);
 			create_new_agents(r);
 			update_crowds(r, delta_time);
-		}
-
-		static void recreate_crowds(entt::registry & r) noexcept {
-			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, verbose, "execute/RecastSystem", "Recreating crowds for editor mode");
-
-			for (auto [e, agent, transform, pathfinding] : r.view<data::recast_agent, data::transform, data::pathfinding>().each()) {
-				const auto nav_mesh = instance_helper::try_get_model<data::nav_mesh>({ r, agent.crowd });
-				if (!nav_mesh)
-					continue;
-
-				struct nav_mesh_backup : data::nav_mesh {};
-				const auto backup = r.try_get<nav_mesh_backup>(agent.crowd);
-				if (backup)
-					if (std::memcmp(nav_mesh, backup, sizeof(*nav_mesh)) == 0)
-						continue;
-
-				r.emplace<nav_mesh_backup>(agent.crowd, *nav_mesh);
-
-				const auto crowd = get_crowd_component({ r, agent.crowd });
-				if (!crowd)
-					continue;
-
-				const auto object_info = get_object_info(get_environment_info({ r, agent.crowd }), transform, pathfinding);
-				attach_agent_component({ r, e }, object_info, *crowd, agent.crowd);
-			}
 		}
 
 		static void remove_old_agents(entt::registry & r) noexcept {
