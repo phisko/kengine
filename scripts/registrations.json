@@ -1,6 +1,10 @@
 {
 	"pre_registrations": [
 		{
+			"registration": "kengine::register_storage",
+			"header": "kengine/helpers/meta/register_storage.hpp"
+		},
+		{
 			"registration": "kengine::register_metadata",
 			"header": "kengine/helpers/meta/register_metadata.hpp"
 		}
