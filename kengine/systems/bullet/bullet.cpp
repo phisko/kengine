@@ -73,7 +73,14 @@ namespace kengine::systems {
 	struct bullet {
 		entt::registry & r;
 
-		putils::vector<entt::scoped_connection, 5> connections;
+		const entt::scoped_connection connections[6] = {
+			r.on_construct<data::model_collider>().connect<&bullet::update_all_instances>(this),
+			r.on_update<data::model_collider>().connect<&bullet::update_all_instances>(this),
+			r.on_construct<data::model_skeleton>().connect<&bullet::update_all_instances>(this),
+			r.on_update<data::model_skeleton>().connect<&bullet::update_all_instances>(this),
+			r.on_construct<data::skeleton>().connect<&bullet::on_skeleton_updated>(this),
+			r.on_update<data::skeleton>().connect<&bullet::on_skeleton_updated>(this),
+		};
 
 		btDefaultCollisionConfiguration collisionConfiguration;
 		btCollisionDispatcher dispatcher{ &collisionConfiguration };
@@ -141,9 +148,6 @@ namespace kengine::systems {
 #endif
 				}
 			};
-
-			connections.emplace_back(r.on_construct<data::model_collider>().connect<&bullet::update_all_instances>(this));
-			connections.emplace_back(r.on_update<data::model_collider>().connect<&bullet::update_all_instances>(this));
 		}
 
 		kengine::backward_compatible_observer<data::transform, data::physics, data::instance> observer{ r, putils_forward_to_this(add_or_update_bullet_data) };
@@ -181,6 +185,13 @@ namespace kengine::systems {
 			ret->setLocalScaling({ 1.f, 1.f, 1.f });
 			shapes.emplace(size, ret);
 			return ret;
+		}
+
+		void on_skeleton_updated(entt::registry & r, entt::entity e) noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			if (r.all_of<data::transform, data::physics, data::instance>(e))
+				add_or_update_bullet_data(e, r.get<data::transform>(e), r.get<data::physics>(e), r.get<data::instance>(e));
 		}
 
 		void add_or_update_bullet_data(entt::entity e, data::transform & transform, data::physics & physics, const data::instance & instance) noexcept {
@@ -410,10 +421,9 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 			glm::mat4 mat{ 1.f };
 
-			if (!collider.bone_name.empty()) {
+			if (!collider.bone_name.empty() && skeleton && model_skeleton) {
 				// Also apply model transform to re-align bones
 				mat *= matrix_helper::get_model_matrix({}, model_transform);
-				kengine_assert(*g_r, skeleton != nullptr && model_skeleton != nullptr);
 				mat *= skeleton_helper::get_bone_matrix(r, collider.bone_name.c_str(), *skeleton, *model_skeleton);
 			}
 
