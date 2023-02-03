@@ -189,20 +189,7 @@ namespace kengine::systems {
 			load_models_to_opengl();
 			create_missing_objects();
 			tick_animations(delta_time);
-
-			update_imgui_scale();
 			draw();
-			end_imgui_frame();
-		}
-
-		float last_scale = 1.f;
-		void update_imgui_scale() noexcept {
-			KENGINE_PROFILING_SCOPE;
-
-			const auto scale = imgui_helper::get_scale(r);
-			ImGui::GetIO().FontGlobalScale = scale;
-			ImGui::GetStyle().ScaleAllSizes(scale / last_scale);
-			last_scale = scale;
 		}
 
 		void create_model_from_disk(entt::entity model_entity, const data::model & model) noexcept {
@@ -482,14 +469,47 @@ namespace kengine::systems {
 		void draw() noexcept {
 			KENGINE_PROFILING_SCOPE;
 
+			const auto view = r.view<::kreogl::window>();
+			if (view.empty())
+				return;
+
+			update_imgui_scale();
 			ImGui::Render();
 
-			for (const auto & [window_entity, kreogl_window] : r.view<::kreogl::window>().each()) {
+			for (const auto & [window_entity, kreogl_window] : view.each()) {
 				kreogl_window.prepare_for_draw();
 				draw_to_cameras(window_entity, kreogl_window);
 				ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 				kreogl_window.display();
 			}
+
+			end_imgui_frame();
+		}
+
+		float last_scale = 1.f;
+		void update_imgui_scale() noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			const auto scale = imgui_helper::get_scale(r);
+			ImGui::GetIO().FontGlobalScale = scale;
+			ImGui::GetStyle().ScaleAllSizes(scale / last_scale);
+			last_scale = scale;
+		}
+
+		void end_imgui_frame() noexcept {
+			KENGINE_PROFILING_SCOPE;
+
+			if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+				GLFWwindow * backup_current_context = glfwGetCurrentContext();
+				ImGui::UpdatePlatformWindows();
+				ImGui::RenderPlatformWindowsDefault();
+				glfwMakeContextCurrent(backup_current_context);
+			}
+
+			ImGui_ImplOpenGL3_NewFrame();
+			ImGui_ImplGlfw_NewFrame();
+			if (!r.view<data::glfw_window>().empty())
+				ImGui::NewFrame();
 		}
 
 		void draw_to_cameras(entt::entity window_entity, ::kreogl::window & kreogl_window) noexcept {
@@ -896,22 +916,6 @@ namespace kengine::systems {
 			kreogl_light.attenuation_constant = light.attenuation_constant;
 			kreogl_light.attenuation_linear = light.attenuation_linear;
 			kreogl_light.attenuation_quadratic = light.attenuation_quadratic;
-		}
-
-		void end_imgui_frame() noexcept {
-			KENGINE_PROFILING_SCOPE;
-
-			if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-				GLFWwindow * backup_current_context = glfwGetCurrentContext();
-				ImGui::UpdatePlatformWindows();
-				ImGui::RenderPlatformWindowsDefault();
-				glfwMakeContextCurrent(backup_current_context);
-			}
-
-			ImGui_ImplOpenGL3_NewFrame();
-			ImGui_ImplGlfw_NewFrame();
-			if (!r.view<data::glfw_window>().empty())
-				ImGui::NewFrame();
 		}
 
 		entt::entity get_entity_in_pixel(entt::entity window_id, const putils::point2ui & pixel) noexcept {
