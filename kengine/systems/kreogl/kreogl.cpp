@@ -64,6 +64,7 @@
 
 // kengine helpers
 #include "kengine/helpers/async_helper.hpp"
+#include "kengine/helpers/backward_compatible_observer.hpp"
 #include "kengine/helpers/camera_helper.hpp"
 #include "kengine/helpers/imgui_helper.hpp"
 #include "kengine/helpers/instance_helper.hpp"
@@ -81,7 +82,6 @@
 namespace kengine::systems {
 	struct kreogl {
 		entt::registry & r;
-		putils::vector<entt::scoped_connection, 3> connections;
 
 		kreogl(entt::handle e) noexcept
 			: r(*e.registry()) {
@@ -100,10 +100,6 @@ namespace kengine::systems {
 
 			e.emplace<functions::get_entity_in_pixel>(putils_forward_to_this(get_entity_in_pixel));
 			e.emplace<functions::get_position_in_pixel>(putils_forward_to_this(get_position_in_pixel));
-
-			connections.emplace_back(r.on_construct<data::model>().connect<&kreogl::create_model_from_disk>(this));
-			connections.emplace_back(r.on_construct<data::animation_files>().connect<&kreogl::load_animation_files>(this));
-			connections.emplace_back(r.on_construct<data::sky_box_model>().connect<&kreogl::create_sky_box_from_disk>(this));
 
 			init_window();
 		}
@@ -178,9 +174,16 @@ namespace kengine::systems {
 			ImGui::NewFrame();
 		}
 
+		kengine::backward_compatible_observer<data::model> model_observer{ r, putils_forward_to_this(create_model_from_disk) };
+		kengine::backward_compatible_observer<data::animation_files> animation_observer{ r, putils_forward_to_this(load_animation_files) };
+		kengine::backward_compatible_observer<data::sky_box_model> sky_box_observer{ r, putils_forward_to_this(create_sky_box_from_disk) };
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, verbose, "execute", "kreogl");
+
+			model_observer.process();
+			animation_observer.process();
+			sky_box_observer.process();
 
 			complete_loading_tasks();
 			load_models_to_opengl();
@@ -202,10 +205,9 @@ namespace kengine::systems {
 			last_scale = scale;
 		}
 
-		void create_model_from_disk(entt::registry & r, entt::entity model_entity) noexcept {
+		void create_model_from_disk(entt::entity model_entity, const data::model & model) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			const auto & model = r.get<data::model>(model_entity);
 			const auto & file = model.file.c_str();
 
 			kengine_logf(r, verbose, "execute/kreogl", "Creating Kreogl model for %zu (%s)", model_entity, file);
@@ -238,10 +240,9 @@ namespace kengine::systems {
 			std::vector<animation_file> animation_files;
 		};
 
-		void load_animation_files(entt::registry & r, entt::entity model_entity) noexcept {
+		void load_animation_files(entt::entity model_entity, const data::animation_files & animation_files) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			const auto & animation_files = r.get<data::animation_files>(model_entity);
 			const auto task_entity = r.create(); // A task might be attached to model_entity to load the model itself
 			kengine::start_async_task(
 				r, task_entity,
@@ -294,10 +295,8 @@ namespace kengine::systems {
 			::kreogl::texture_data back;
 		};
 
-		void create_sky_box_from_disk(entt::registry & r, entt::entity sky_box_entity) noexcept {
+		void create_sky_box_from_disk(entt::entity sky_box_entity, const data::sky_box_model & sky_box) noexcept {
 			KENGINE_PROFILING_SCOPE;
-
-			const auto & sky_box = r.get<data::sky_box_model>(sky_box_entity);
 
 			const auto task_entity = r.create();
 			kengine::start_async_task(
@@ -611,10 +610,10 @@ namespace kengine::systems {
 
 			sync_debug_graphics_properties(kreogl_world, camera_entity);
 
-			for (const auto & [sky_box_entity, sky_box] : r.view<data::sky_box>().each()) {
+			for (const auto & [sky_box_entity, sky_box, instance] : r.view<data::sky_box, data::instance>().each()) {
 				if (!camera_helper::entity_appears_in_viewport(r, sky_box_entity, camera_entity))
 					continue;
-				const auto kreogl_skybox = instance_helper::try_get_model<::kreogl::skybox_texture>({ r, sky_box_entity });
+				const auto kreogl_skybox = instance_helper::try_get_model<::kreogl::skybox_texture>(r, instance);
 				if (!kreogl_skybox)
 					continue;
 				kreogl_world.skybox.color = toglm(sky_box.color);
