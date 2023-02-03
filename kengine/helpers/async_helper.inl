@@ -38,13 +38,19 @@ namespace kengine {
 	bool process_async_results(entt::registry & r, Func && func) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
+		const auto now = std::chrono::system_clock::now();
+
 		for (const auto & [e, result, task] : r.view<impl::async_result<T>, data::async_task>().each()) {
+			const auto time_running = std::chrono::duration<float>(now - task.start).count();
+
 			using namespace std::chrono_literals;
 			const auto status = result.future.wait_for(0s);
-			if (status == std::future_status::timeout)
+			if (status == std::future_status::timeout) {
+				kengine_logf(r, verbose, "async", "Async task '%s' still running (started %fs ago)", task.name.c_str(), time_running);
 				continue;
+			}
 
-			kengine_logf(r, log, "async", "Async task '%s' completed", task.name.c_str());
+			kengine_logf(r, log, "async", "Async task '%s' completed after %fs", task.name.c_str(), time_running);
 
 			auto data = result.future.get();
 
