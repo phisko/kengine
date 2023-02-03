@@ -1,8 +1,8 @@
 #pragma once
 
-// entt
-#include <entt/entity/fwd.hpp>
+// kengine helpers
+#include "kengine/helpers/system_creator_helper.hpp"
 
 namespace kengine::systems {
-	KENGINE_JSON_SCENE_LOADER_EXPORT entt::entity add_json_scene_loader(entt::registry & r) noexcept;
+	DECLARE_KENGINE_SYSTEM_CREATOR(KENGINE_JSON_SCENE_LOADER_EXPORT, json_scene_loader)
 }

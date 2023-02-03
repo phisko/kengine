@@ -487,9 +487,9 @@ namespace kengine::systems {
 		}
 	};
 
-	entt::entity add_sfml(entt::registry & r) noexcept {
-		const entt::handle e{ r, r.create() };
-		e.emplace<sfml>(e);
-		return e;
-	}
+	DEFINE_KENGINE_SYSTEM_CREATOR(
+		sfml,
+		data::sfml_window,
+		data::sfml_texture
+	)
 }

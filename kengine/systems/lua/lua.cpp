@@ -73,9 +73,5 @@ namespace kengine::systems {
 		}
 	};
 
-	entt::entity add_lua(entt::registry & r) noexcept {
-		const entt::handle e{ r, r.create() };
-		e.emplace<lua>(e);
-		return e;
-	}
+	DEFINE_KENGINE_SYSTEM_CREATOR(lua)
 }

@@ -49,9 +49,5 @@ namespace kengine::systems {
 		}
 	};
 
-	entt::entity add_on_click(entt::registry & r) noexcept {
-		const entt::handle e{ r, r.create() };
-		e.emplace<on_click>(e);
-		return e;
-	}
+	DEFINE_KENGINE_SYSTEM_CREATOR(on_click)
 }

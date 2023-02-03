@@ -91,9 +91,8 @@ namespace kengine::systems {
 		};
 	};
 
-	entt::entity add_polyvox(entt::registry & r) noexcept {
-		const entt::handle e{ r, r.create() };
-		e.emplace<polyvox>(e);
-		return e;
-	}
+	DEFINE_KENGINE_SYSTEM_CREATOR(
+		polyvox,
+		polyvox::mesh_container
+	)
 }

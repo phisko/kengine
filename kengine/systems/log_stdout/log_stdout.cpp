@@ -72,9 +72,5 @@ namespace kengine::systems {
 		}
 	};
 
-	entt::entity add_log_stdout(entt::registry & r) noexcept {
-		const entt::handle e{ r, r.create() };
-		e.emplace<log_stdout>(e);
-		return e;
-	}
+	DEFINE_KENGINE_SYSTEM_CREATOR(log_stdout)
 }

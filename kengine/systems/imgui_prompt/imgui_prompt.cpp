@@ -320,9 +320,5 @@ namespace kengine::systems {
 		} history;
 	};
 
-	entt::entity add_imgui_prompt(entt::registry & r) noexcept {
-		const entt::handle e{ r, r.create() };
-		e.emplace<imgui_prompt>(e);
-		return e;
-	}
+	DEFINE_KENGINE_SYSTEM_CREATOR(imgui_prompt)
 }

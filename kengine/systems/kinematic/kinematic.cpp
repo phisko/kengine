@@ -51,9 +51,5 @@ namespace kengine::systems {
 		}
 	};
 
-	entt::entity add_kinematic(entt::registry & r) noexcept {
-		const entt::handle e{ r, r.create() };
-		e.emplace<kinematic>(e);
-		return e;
-	}
+	DEFINE_KENGINE_SYSTEM_CREATOR(kinematic)
 }

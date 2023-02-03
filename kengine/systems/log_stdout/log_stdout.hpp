@@ -1,8 +1,8 @@
 #pragma once
 
-// entt
-#include <entt/entity/fwd.hpp>
+// kengine helpers
+#include "kengine/helpers/system_creator_helper.hpp"
 
 namespace kengine::systems {
-	KENGINE_LOG_STDOUT_EXPORT entt::entity add_log_stdout(entt::registry & r) noexcept;
+	DECLARE_KENGINE_SYSTEM_CREATOR(KENGINE_LOG_STDOUT_EXPORT, log_stdout)
 }

@@ -2,11 +2,11 @@
 
 #ifdef _WIN32
 
-// entt
-#include <entt/entity/fwd.hpp>
+// kengine helpers
+#include "kengine/helpers/system_creator_helper.hpp"
 
 namespace kengine::systems {
-	KENGINE_LOG_VISUAL_STUDIO_EXPORT entt::entity add_log_visual_studio(entt::registry & r) noexcept;
+	DECLARE_KENGINE_SYSTEM_CREATOR(KENGINE_LOG_VISUAL_STUDIO_EXPORT, log_visual_studio)
 }
 
 #endif
