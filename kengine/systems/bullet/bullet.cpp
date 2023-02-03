@@ -150,6 +150,11 @@ namespace kengine::systems {
 			};
 		}
 
+		~bullet() noexcept {
+			// Make sure these are destroyed before the system
+			r.storage<bullet_data>().clear();
+		}
+
 		kengine::backward_compatible_observer<data::transform, data::physics, data::instance> observer{ r, putils_forward_to_this(add_or_update_bullet_data) };
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
