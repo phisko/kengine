@@ -34,25 +34,6 @@
 
 namespace kengine::systems::recast_impl {
 	struct build_recast_component {
-		static void run(entt::registry & r, entt::entity e) noexcept {
-			KENGINE_PROFILING_SCOPE;
-
-			const auto & model = r.get<data::model>(e);
-			const auto & model_data = r.get<data::model_data>(e);
-			const auto & nav_mesh = r.get<data::nav_mesh>(e);
-
-			kengine_logf(r, verbose, "execute/recast", "Building navmesh for %zu", e);
-			kengine_assert(r, nav_mesh.verts_per_poly <= DT_VERTS_PER_POLYGON);
-
-			kengine::start_async_task(
-				r, e,
-				data::async_task::string("recast: load %s", model.file.c_str()),
-				std::async(std::launch::async, [&r, e, &model, &model_data, &nav_mesh] {
-					return create_recast_mesh(model.file.c_str(), { r, e }, nav_mesh, model_data);
-				})
-			);
-		}
-
 		using height_field_ptr = unique_ptr<rcHeightfield, rcFreeHeightField>;
 		using compact_height_field_ptr = unique_ptr<rcCompactHeightfield, rcFreeCompactHeightfield>;
 		using contour_set_ptr = unique_ptr<rcContourSet, rcFreeContourSet>;
@@ -551,8 +532,19 @@ namespace kengine::systems::recast_impl {
 		};
 	};
 
-	void build_recast_component(entt::registry & r, entt::entity e) noexcept {
-		build_recast_component::run(r, e);
+	void build_recast_component(entt::registry & r, entt::entity e, const data::model & model, const data::model_data & model_data, const data::nav_mesh & nav_mesh) noexcept {
+		KENGINE_PROFILING_SCOPE;
+
+		kengine_logf(r, verbose, "execute/recast", "Building navmesh for %zu", e);
+		kengine_assert(r, nav_mesh.verts_per_poly <= DT_VERTS_PER_POLYGON);
+
+		kengine::start_async_task(
+			r, e,
+			data::async_task::string("recast: load %s", model.file.c_str()),
+			std::async(std::launch::async, [&r, e, &model, &model_data, &nav_mesh] {
+				return build_recast_component::create_recast_mesh(model.file.c_str(), { r, e }, nav_mesh, model_data);
+			})
+		);
 	}
 
 	void process_built_recast_components(entt::registry & r) noexcept {
