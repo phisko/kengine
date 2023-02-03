@@ -4,35 +4,45 @@
 #include <entt/entity/handle.hpp>
 #include <entt/entity/registry.hpp>
 
+// putils
+#include "putils/forward_to.hpp"
+
 // kengine data
 #include "kengine/data/graphics.hpp"
 #include "kengine/data/instance.hpp"
 #include "kengine/data/model.hpp"
 
+// kengine functions
+#include "kengine/functions/execute.hpp"
+
 // kengine helpers
+#include "kengine/helpers/backward_compatible_observer.hpp"
 #include "kengine/helpers/log_helper.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
 
 namespace kengine::systems {
 	struct model_creator {
 		entt::registry & r;
-		entt::scoped_connection connection;
 
 		model_creator(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, log, "Init", "systems/model_creator");
-			connection = r.on_construct<data::graphics>().connect<find_or_create_model>();
+			e.emplace<functions::execute>(putils_forward_to_this(execute));
 		}
 
-		static void find_or_create_model(entt::registry & r, entt::entity e) noexcept {
+		kengine::backward_compatible_observer<data::graphics> observer{ r, putils_forward_to_this(find_or_create_model) };
+		void execute(float delta_time) noexcept {
+			KENGINE_PROFILING_SCOPE;
+			observer.process();
+		}
+
+		void find_or_create_model(entt::entity e, const data::graphics & graphics) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			auto & instance = r.get_or_emplace<data::instance>(e);
 			if (instance.model != entt::null)
 				return;
-
-			const auto & graphics = r.get<data::graphics>(e);
 
 			kengine_logf(r, log, "systems/model_creator", "Looking for model for %zu: %s", e, graphics.appearance.c_str());
 
