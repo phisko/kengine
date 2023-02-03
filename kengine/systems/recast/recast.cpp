@@ -52,19 +52,6 @@ namespace kengine::systems {
 					{ "Path optimization range", &recast_impl::g_adjustables.path_optimization_range },
 				}
 			};
-
-			connections.emplace_back(r.on_destroy<data::recast_agent>().connect<remove_agent_from_crowds>());
-		}
-
-		static void remove_agent_from_crowds(entt::registry & r, entt::entity e) noexcept {
-			KENGINE_PROFILING_SCOPE;
-
-			const auto agent = r.try_get<data::recast_agent>(e);
-			if (agent) {
-				kengine_logf(r, log, "systems/recast", "Removing agent %zu from crowd %zu", e, agent->crowd);
-				const auto & crowd = r.get<data::recast_crowd>(agent->crowd);
-				crowd.crowd->removeAgent(agent->index);
-			}
 		}
 
 		entt::observer observer{ r, entt::collector.group<data::model, data::model_data, data::nav_mesh>() };
