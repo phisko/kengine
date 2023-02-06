@@ -13,6 +13,8 @@
 #include "kengine/helpers/profiling_helper.hpp"
 
 namespace {
+	static kengine::log_severity max_log_severity = kengine::log_severity::none;
+
 	struct options {
 		kengine::log_severity log_level = kengine::log_severity::log;
 	};
@@ -28,6 +30,11 @@ putils_reflection_info {
 #undef refltype
 
 namespace kengine::log_helper {
+	void set_minimum_log_severity(log_severity severity) noexcept {
+		if (severity < max_log_severity)
+			max_log_severity = severity;
+	}
+
 	log_severity parse_command_line_severity(const entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
@@ -40,12 +47,18 @@ namespace kengine::log_helper {
 			const auto opts = putils::parse_arguments<options>(command_line.arguments);
 			result = opts.log_level;
 		}
+
+		set_minimum_log_severity(result);
+
 		command_line_severity = result;
 		return *command_line_severity;
 	}
 
 	void log(const entt::registry & r, log_severity severity, const char * category, const char * message) noexcept {
 		KENGINE_PROFILING_SCOPE;
+
+		if (severity < max_log_severity)
+			return;
 
 		const kengine::log_event event{
 			.severity = severity,
