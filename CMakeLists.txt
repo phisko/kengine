@@ -140,6 +140,9 @@ if (KENGINE_NO_LOG)
     target_compile_definitions(kengine_core PUBLIC KENGINE_NO_LOG)
 endif()
 
+set(KENGINE_LOG_MAX_SEVERITY verbose CACHE STRING "Maximum allowed severity (see log_severity in log.hpp)")
+target_compile_definitions(kengine_core PUBLIC KENGINE_LOG_MAX_SEVERITY=${KENGINE_LOG_MAX_SEVERITY})
+
 target_link_libraries(kengine INTERFACE kengine_core)
 
 # Add systems

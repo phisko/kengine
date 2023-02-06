@@ -57,8 +57,9 @@ namespace kengine::systems::recast_impl {
 
 			const putils::string<4096> binary_file("%s.nav", file);
 			result.data = load_binary_file(binary_file.c_str(), nav_mesh);
-			if (result.data.data)
+			if (result.data.data) {
 				kengine_log(r, log, "recast", "Found binary file");
+			}
 			else {
 				kengine_logf(r, log, "recast", "Found no binary file for %s, creating nav mesh data", file);
 				result.data = create_nav_mesh_data(r, nav_mesh, model_data, model_data.meshes[nav_mesh.concerned_mesh]);
