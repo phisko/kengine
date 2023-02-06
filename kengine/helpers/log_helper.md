@@ -2,7 +2,9 @@
 
 Helper functions for message logging.
 
-## log
+## Functions
+
+### log
 
 ```cpp
 void log(const entt::registry & r, log_severity severity, const char * category, const char * message) noexcept;
@@ -10,7 +12,11 @@ void log(const entt::registry & r, log_severity severity, const char * category,
 
 Calls the [log](../functions/log.md) `function component` on all entities which have it.
 
-## parse_command_line_severity
+If `severity` is lower or equal to the maximum log severity that has been requested, nothing will be done.
+
+The requested log severity is determined by what `parse_command_line_severity` returns, or by calls to `set_minimum_log_severity`.
+
+### parse_command_line_severity
 
 ```cpp
 log_severity parse_command_line_severity() noexcept;
@@ -18,15 +24,25 @@ log_severity parse_command_line_severity() noexcept;
 
 Parses the command-line for a `--log_level` parameter indicating the maximum log verbosity desired by the user.
 
-## kengine_log
+### set_minimum_log_severity
+
+```cpp
+void set_minimum_log_severity(log_severity severity) noexcept;
+```
+
+Ensures that messages with the requested severity will be logged.
+
+## Macros
+
+### kengine_log
 
 ```cpp
 #define kengine_log(r, severity, category, message)
 ```
 
-Helper macro for logging, simply calls `log`.
+Helper macro for logging, calls `log` if `severity` is lower or equal to `KENGINE_LOG_MAX_SEVERITY`. `KENGINE_LOG_MAX_SEVERITY` defaults to `all`, and can be specified as a CMake option or defined at compile-time.
 
-## kengine_logf
+### kengine_logf
 
 ```cpp
 #define kengine_logf(r, severity, category, format, ...)
