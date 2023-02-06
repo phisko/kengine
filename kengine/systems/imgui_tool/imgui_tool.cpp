@@ -14,6 +14,7 @@
 
 // putils
 #include "putils/forward_to.hpp"
+#include "putils/ini_file.hpp"
 #include "putils/split.hpp"
 #include "putils/to_string.hpp"
 
@@ -32,7 +33,7 @@
 #include "kengine/helpers/sort_helper.hpp"
 
 #ifndef KENGINE_IMGUI_TOOLS_SAVE_FILE
-#define KENGINE_IMGUI_TOOLS_SAVE_FILE "tools.cnf"
+#define KENGINE_IMGUI_TOOLS_SAVE_FILE "imgui_tools.ini"
 #endif
 
 #ifndef KENGINE_IMGUI_MAX_TOOLS
@@ -41,39 +42,7 @@
 
 namespace kengine::systems {
 	struct imgui_tool {
-		struct conf_file {
-			conf_file() noexcept {
-				parse();
-			}
-
-			void parse() noexcept {
-				KENGINE_PROFILING_SCOPE;
-				std::ifstream f(KENGINE_IMGUI_TOOLS_SAVE_FILE);
-				if (!f)
-					return;
-				for (std::string line; std::getline(f, line);)
-					add_line(line);
-			}
-
-			void add_line(const std::string & line) noexcept {
-				KENGINE_PROFILING_SCOPE;
-				const auto index = line.find(';');
-				_values[line.substr(0, index)] = putils::parse<bool>(line.substr(index + 1).c_str());
-			}
-
-			std::optional<bool> get_value(const char * name) const noexcept {
-				KENGINE_PROFILING_SCOPE;
-				const auto it = _values.find(name);
-				if (it == _values.end())
-					return std::nullopt;
-				return it->second;
-			}
-
-		private:
-			std::unordered_map<std::string, bool> _values;
-		};
-
-		conf_file configuration;
+		putils::ini_file configuration;
 
 		entt::registry & r;
 		const entt::scoped_connection remove_tool = r.on_destroy<data::imgui_tool>().connect<&imgui_tool::on_destroy_imgui_tool>(this);
@@ -91,6 +60,9 @@ namespace kengine::systems {
 			kengine_log(r, log, "imgui_tool", "Initializing");
 
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
+
+			std::ifstream f(KENGINE_IMGUI_TOOLS_SAVE_FILE);
+			f >> configuration;
 		}
 
 		kengine::backward_compatible_observer<data::imgui_tool> observer{ r, putils_forward_to_this(on_construct_imgui_tool) };
@@ -148,8 +120,9 @@ namespace kengine::systems {
 			}
 
 			kengine_logf(r, log, "imgui_tool", "Initializing %s", name->name.c_str());
-			if (const auto value = configuration.get_value(name->name.c_str()))
-				tool.enabled = *value;
+			const auto & section = configuration.sections["Tools"];
+			if (const auto it = section.values.find(name->name.c_str()); it != section.values.end())
+				tool.enabled = putils::parse<bool>(it->second);
 
 			menu_entry * current_entry = &root_entry;
 			const auto entry_names = putils::split(name->name.c_str(), '/');
@@ -197,10 +170,15 @@ namespace kengine::systems {
 				kengine_assert_failed(r, "Failed to open '", KENGINE_IMGUI_TOOLS_SAVE_FILE, "' with write permission");
 				return;
 			}
+
+			putils::ini_file output_configuration;
+			auto & section = output_configuration.sections["Tools"];
+
 			const auto sorted = sort_helper::get_name_sorted_entities<KENGINE_IMGUI_MAX_TOOLS, data::imgui_tool>(r);
 			for (const auto & [e, name, tool] : sorted)
-				f << name->name << ';' << std::boolalpha << tool->enabled << std::noboolalpha << std::endl;
-			f.flush();
+				section.values[name->name.c_str()] = putils::to_string(tool->enabled);
+
+			f << output_configuration;
 		}
 	};
 
