@@ -34,22 +34,20 @@
 
 #define kengine_assert_failed(r, ...) \
 	do { \
-		const bool shouldBreak = kengine::assert_helper::assert_failed(r, __FILE__, __LINE__, putils::concatenate(__VA_ARGS__)); \
-		if (shouldBreak && kengine::assert_helper::is_debugger_present()) \
+		const bool should_break = kengine::assert_helper::assert_failed(r, __FILE__, __LINE__, putils::concatenate(__VA_ARGS__)); \
+		if (should_break && kengine::assert_helper::is_debugger_present()) \
 			kengine_debug_break; \
 	} while (false)
 
 #define kengine_assert_with_message(r, x, ...) \
 	do { \
-		if (!!(x)) \
-			(void)0; \
-		else \
+		if (!(x)) \
 			kengine_assert_failed(r, putils::concatenate(__VA_ARGS__)); \
-		kengine_assume(!!(x)); \
+		kengine_assume(x); \
 	} while (false)
 
 #define kengine_assert(r, x) \
-	kengine_assert_with_message(x, #x)
+	kengine_assert_with_message(r, x, #x)
 
 namespace kengine {
 	namespace assert_helper {
