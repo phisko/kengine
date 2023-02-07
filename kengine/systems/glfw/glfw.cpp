@@ -66,7 +66,7 @@ namespace kengine::systems {
 
 			if (window == entt::null) {
 				for (const auto & [e, glfw] : r.view<data::glfw_window>().each()) {
-					kengine_logf(r, verbose, "glfw", "Mouse %s for [%zu]", state, e);
+					kengine_logf(r, verbose, "glfw", "Mouse %s for [%u]", state, e);
 					glfwSetInputMode(glfw.window.get(), GLFW_CURSOR, input_mode);
 				}
 				return;
@@ -75,7 +75,7 @@ namespace kengine::systems {
 			const auto glfw = r.try_get<data::glfw_window>(window);
 			if (glfw == nullptr)
 				return;
-			kengine_logf(r, verbose, "glfw", "Mouse %s for [%zu]", state, window);
+			kengine_logf(r, verbose, "glfw", "Mouse %s for [%u]", state, window);
 			glfwSetInputMode(glfw->window.get(), GLFW_CURSOR, input_mode);
 		}
 
@@ -93,9 +93,9 @@ namespace kengine::systems {
 
 			kengine_log(r, very_verbose, "glfw", "Checking if windows were closed");
 			for (const auto & [e, window, glfw] : r.view<data::window, data::glfw_window>().each()) {
-				kengine_logf(r, very_verbose, "glfw", "Checking if [%zu] was closed", e);
+				kengine_logf(r, very_verbose, "glfw", "Checking if [%u] was closed", e);
 				if (glfwWindowShouldClose(glfw.window.get())) {
-					kengine_logf(r, log, "glfw", "Destroying [%zu] because its window was closed", e);
+					kengine_logf(r, log, "glfw", "Destroying [%u] because its window was closed", e);
 					r.destroy(e);
 				}
 			}
@@ -109,7 +109,7 @@ namespace kengine::systems {
 
 		void create_window(entt::entity e, data::window & window, const data::glfw_window_init & init_glfw) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, verbose, "glfw", "Creating window for [%zu]", e);
+			kengine_logf(r, verbose, "glfw", "Creating window for [%u]", e);
 
 			init_global_glfw();
 
@@ -137,7 +137,7 @@ namespace kengine::systems {
 			glfwSetWindowUserPointer(glfw_comp.window.get(), (void *)e);
 			glfwSetWindowSizeCallback(glfw_comp.window.get(), [](GLFWwindow * window, int width, int height) noexcept {
 				const auto e = entt::entity(intptr_t(glfwGetWindowUserPointer(window)));
-				kengine_logf(g_this->r, verbose, "glfw", "Window size for [%zu] changed to { %d, %d }", e, width, height);
+				kengine_logf(g_this->r, verbose, "glfw", "Window size for [%u] changed to { %d, %d }", e, width, height);
 				auto & comp = g_this->r.get<data::window>(e);
 				comp.size = { (unsigned int)width, (unsigned int)height };
 			});

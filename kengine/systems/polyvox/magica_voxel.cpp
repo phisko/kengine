@@ -160,7 +160,7 @@ namespace kengine::systems {
 
 			return [this, e] {
 				if (const auto model_data = r.try_get<data::model_data>(e)) {
-					kengine_logf(r, verbose, "magica_voxel", "Releasing data for [%zu]", e);
+					kengine_logf(r, verbose, "magica_voxel", "Releasing data for [%u]", e);
 					delete[] (const char *)model_data->meshes[0].vertices.data;
 					delete[] (const char *)model_data->meshes[0].indices.data;
 				}
@@ -246,7 +246,7 @@ namespace kengine::systems {
 
 		data::model_data generate_model_data(entt::entity e, const mesh_type & mesh) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, verbose, "magica_voxel", "Generating model data for [%zu]", e);
+			kengine_logf(r, verbose, "magica_voxel", "Generating model data for [%u]", e);
 
 			data::model_data model_data;
 			model_data.free = release(e);
@@ -264,7 +264,7 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 
 			if (r.all_of<data::transform>(e)) {
-				kengine_logf(r, verbose, "magica_voxel", "[%zu] already has a data::transform. Mesh offset will not be applied", e);
+				kengine_logf(r, verbose, "magica_voxel", "[%u] already has a data::transform. Mesh offset will not be applied", e);
 				return;
 			}
 			kengine_log(r, log, "magica_voxel", "Applying mesh offset");

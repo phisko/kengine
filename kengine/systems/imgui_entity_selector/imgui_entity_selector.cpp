@@ -97,11 +97,11 @@ namespace kengine::systems {
 
 		void apply_search(entt::entity e) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, very_verbose, "imgui_entity_selector", "Applying search to [%zu]", e);
+			kengine_logf(r, very_verbose, "imgui_entity_selector", "Applying search to [%u]", e);
 
 			search_result result {
 				e,
-				{ "[%zu]", e }
+				{ "[%u]", e }
 			};
 
 			const auto name = r.try_get<data::name>(e);
@@ -153,11 +153,11 @@ namespace kengine::systems {
 			for (const auto & result : search_results)
 				if (display_search_result(result)) {
 					if (r.all_of<data::selected>(result.e)) {
-						kengine_logf(r, log, "imgui_entity_selector", "De-selecting [%zu]", result.e);
+						kengine_logf(r, log, "imgui_entity_selector", "De-selecting [%u]", result.e);
 						r.erase<data::selected>(result.e);
 					}
 					else {
-						kengine_logf(r, log, "imgui_entity_selector", "Selecting [%zu]", result.e);
+						kengine_logf(r, log, "imgui_entity_selector", "Selecting [%u]", result.e);
 						r.emplace<data::selected>(result.e);
 					}
 				}
@@ -165,7 +165,7 @@ namespace kengine::systems {
 
 		bool display_search_result(const search_result & result) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, very_verbose, "imgui_entity_selector", "Displaying search result [%zu]", result.e);
+			kengine_logf(r, very_verbose, "imgui_entity_selector", "Displaying search result [%u]", result.e);
 
 			ImGui::PushID(int(result.e));
 
@@ -174,11 +174,11 @@ namespace kengine::systems {
 			const auto open_tree_node = ImGui::TreeNode(result.display_text.c_str());
 			if (ImGui::BeginPopupContextItem()) {
 				if (ImGui::MenuItem("Select")) {
-					kengine_logf(r, log, "imgui_entity_selector", "Toggling selection for [%zu]", result.e);
+					kengine_logf(r, log, "imgui_entity_selector", "Toggling selection for [%u]", result.e);
 					ret = true;
 				}
 				if (ImGui::MenuItem("Remove")) {
-					kengine_logf(r, log, "imgui_entity_selector", "Destroying [%zu]", result.e);
+					kengine_logf(r, log, "imgui_entity_selector", "Destroying [%u]", result.e);
 					r.destroy(result.e);
 					ret = false;
 				}

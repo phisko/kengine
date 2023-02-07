@@ -14,7 +14,7 @@ namespace kengine {
 	template<typename T>
 	void meta_component_implementation<meta::load_from_json, T>::function(const nlohmann::json & json_entity, entt::handle e) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_logf(*e.registry(), very_verbose, "meta::load_from_json", "Loading [%zu]'s %s from JSON", e.entity(), putils::reflection::get_class_name<T>());
+		kengine_logf(*e.registry(), very_verbose, "meta::load_from_json", "Loading [%u]'s %s from JSON", e.entity(), putils::reflection::get_class_name<T>());
 
 		const auto it = json_entity.find(putils::reflection::get_class_name<T>());
 		if (it == json_entity.end()) {

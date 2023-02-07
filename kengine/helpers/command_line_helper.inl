@@ -20,7 +20,7 @@ namespace kengine {
 		kengine_log(r, verbose, "command_line", "Parsing command-line");
 
 		for (const auto & [e, args] : r.view<data::command_line>().each()) {
-			kengine_logf(r, very_verbose, "command_line", "Parsing command-line from [%zu]", e);
+			kengine_logf(r, very_verbose, "command_line", "Parsing command-line from [%u]", e);
 			return putils::parse_arguments<T>(args.arguments);
 		}
 

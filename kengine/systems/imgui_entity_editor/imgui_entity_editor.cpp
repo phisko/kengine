@@ -61,14 +61,14 @@ namespace kengine::systems {
 					name ?
 					putils::string<64>("%s##[%d]", name->name.c_str(), selected) :
 					putils::string<64>("[%d] Entity editor", selected);
-				kengine_logf(r, very_verbose, "imgui_entity_editor", "Displaying [%zu] (%s)", selected, window_title.c_str());
+				kengine_logf(r, very_verbose, "imgui_entity_editor", "Displaying [%u] (%s)", selected, window_title.c_str());
 
 				if (ImGui::Begin(window_title.c_str(), &open, ImGuiWindowFlags_NoSavedSettings))
 					imgui_helper::edit_entity_and_model({ r, selected });
 				ImGui::End();
 
 				if (!open) {
-					kengine_logf(r, log, "imgui_entity_editor", "De-selecting [%zu]", selected);
+					kengine_logf(r, log, "imgui_entity_editor", "De-selecting [%u]", selected);
 					r.remove<data::selected>(selected);
 				}
 			}

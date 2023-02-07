@@ -167,7 +167,7 @@ namespace kengine::systems {
 
 			kengine_log(r, very_verbose, "bullet", "Removing obsolete bullet_data");
 			for (auto [e, bullet] : r.view<bullet_data>(entt::exclude<data::physics>).each()) {
-				kengine_logf(r, verbose, "bullet", "Removing bullet_data from [%zu]", e);
+				kengine_logf(r, verbose, "bullet", "Removing bullet_data from [%u]", e);
 				r.remove<bullet_data>(e);
 			}
 
@@ -210,16 +210,16 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 
 			if (!r.all_of<data::model_collider>(instance.model)) {
-				kengine_logf(r, verbose, "bullet", "Not adding bullet_data to [%zu] because its model doesn't have a model_collider", e);
+				kengine_logf(r, verbose, "bullet", "Not adding bullet_data to [%u] because its model doesn't have a model_collider", e);
 				return;
 			}
 
 			if (r.all_of<data::model_skeleton>(instance.model) && !r.all_of<data::skeleton>(e)) {
-				kengine_logf(r, verbose, "bullet", "Not adding bullet_data to [%zu] because it doesn't have a skeleton yet, while its model does", e);
+				kengine_logf(r, verbose, "bullet", "Not adding bullet_data to [%u] because it doesn't have a skeleton yet, while its model does", e);
 				return;
 			}
 
-			kengine_logf(r, verbose, "bullet", "Adding bullet_data to [%zu]", e);
+			kengine_logf(r, verbose, "bullet", "Adding bullet_data to [%u]", e);
 
 			r.remove<bullet_data>(e);
 			add_bullet_data(e, transform, physics, instance.model);
@@ -227,7 +227,7 @@ namespace kengine::systems {
 
 		void update_all_instances(entt::registry & r, entt::entity model_entity) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, verbose, "bullet", "Updating all instances of [%zu]", model_entity);
+			kengine_logf(r, verbose, "bullet", "Updating all instances of [%u]", model_entity);
 
 			for (const auto & [e, transform, physics, instance] : r.view<data::transform, data::physics, data::instance>().each())
 				if (instance.model == model_entity)
@@ -375,7 +375,7 @@ namespace kengine::systems {
 
 					const auto e1 = entt::entity(object_a->getUserIndex());
 					const auto e2 = entt::entity(object_b->getUserIndex());
-					kengine_logf(r, verbose, "bullet", "Collision between [%zu] & [%zu]", e1, e2);
+					kengine_logf(r, verbose, "bullet", "Collision between [%u] & [%u]", e1, e2);
 					on_collision(e1, e2);
 				}
 		}
@@ -400,7 +400,7 @@ namespace kengine::systems {
 				btScalar addSingleResult(btManifoldPoint & cp, const btCollisionObjectWrapper * colObj0Wrap, int partId0, int index0, const btCollisionObjectWrapper * colObj1Wrap, int partId1, int index1) final {
 					kengine_assert(r, colObj1Wrap->m_collisionObject == &ghost);
 					const auto e = entt::entity(colObj0Wrap->m_collisionObject->getUserIndex());
-					kengine_logf(r, verbose, "bullet", "Found [%zu]", e);
+					kengine_logf(r, verbose, "bullet", "Found [%u]", e);
 					func({ r, e });
 					return 1.f;
 				}

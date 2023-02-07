@@ -191,14 +191,14 @@ namespace kengine::systems {
 				for (const auto comp : collection.components) {
 					const auto & has = r.get<meta::has>(comp);
 					if (!has({ r, e })) {
-						kengine_logf(r, very_verbose, "imgui_engine_stats", "Discarding entity [%zu] because it doesn't have %s", e, r.get<data::name>(comp).name.c_str());
+						kengine_logf(r, very_verbose, "imgui_engine_stats", "Discarding entity [%u] because it doesn't have %s", e, r.get<data::name>(comp).name.c_str());
 						good = false;
 						break;
 					}
 				}
 
 				if (good) {
-					kengine_logf(r, very_verbose, "imgui_engine_stats", "Found entity [%zu]", e);
+					kengine_logf(r, very_verbose, "imgui_engine_stats", "Found entity [%u]", e);
 					++ret;
 				}
 			});

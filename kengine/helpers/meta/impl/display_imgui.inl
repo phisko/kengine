@@ -12,7 +12,7 @@ namespace kengine {
 	template<typename T>
 	void meta_component_implementation<meta::display_imgui, T>::function(entt::const_handle e) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_logf(*e.registry(), very_verbose, "meta::display_imgui", "Displaying [%zu]'s %s", e.entity(), putils::reflection::get_class_name<T>());
+		kengine_logf(*e.registry(), very_verbose, "meta::display_imgui", "Displaying [%u]'s %s", e.entity(), putils::reflection::get_class_name<T>());
 
 		const T * comp = nullptr;
 

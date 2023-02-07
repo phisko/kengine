@@ -141,7 +141,7 @@ namespace kengine::systems {
 
 		void on_destroy_imgui_tool(entt::registry & r, entt::entity e) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, verbose, "imgui_tool", "Destroyed ImGui tool in [%zu]", e);
+			kengine_logf(r, verbose, "imgui_tool", "Destroyed ImGui tool in [%u]", e);
 
 			const auto & tool = r.get<data::imgui_tool>(e);
 			if (!remove_tool_from_entry(tool, root_entry))

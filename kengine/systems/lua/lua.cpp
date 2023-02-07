@@ -62,11 +62,11 @@ namespace kengine::systems {
 			}
 
 			for (const auto & [e, comp] : view.each()) {
-				kengine_logf(r, very_verbose, "lua", "Setting 'self' to [%zu]", e);
+				kengine_logf(r, very_verbose, "lua", "Setting 'self' to [%u]", e);
 				(*state)["self"] = entt::handle{ r, e };
 
 				for (const auto & s : comp.scripts) {
-					kengine_logf(r, very_verbose, "lua", "Running script %s for [%zu]", s.c_str(), e);
+					kengine_logf(r, very_verbose, "lua", "Running script %s for [%u]", s.c_str(), e);
 
 					state->safe_script_file(s.c_str(), [this](lua_State *, sol::protected_function_result pfr) {
 						const sol::error err = pfr;

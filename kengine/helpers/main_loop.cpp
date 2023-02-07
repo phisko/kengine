@@ -34,7 +34,7 @@ namespace kengine::main_loop {
 		for (const auto & [e, func] : r.view<kengine::functions::execute>().each()) {
 			if (!is_running(r))
 				break;
-			kengine_logf(r, very_verbose, "main_loop", "Calling execute on [%zu]", e);
+			kengine_logf(r, very_verbose, "main_loop", "Calling execute on [%u]", e);
 			func(delta_time);
 		}
 	}
@@ -68,7 +68,7 @@ namespace kengine::main_loop {
 
 			float ret = 1.f;
 			for (const auto & [e, time_modulator] : r.view<data::time_modulator>().each()) {
-				kengine_logf(r, very_verbose, "main_loop", "Found time modulator [%zu] (%f)", e, time_modulator.factor);
+				kengine_logf(r, very_verbose, "main_loop", "Found time modulator [%u] (%f)", e, time_modulator.factor);
 				ret *= time_modulator.factor;
 			}
 

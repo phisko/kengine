@@ -62,11 +62,11 @@ namespace kengine::systems {
 			module_->attr("delta_time") = delta_time;
 
 			for (auto [e, comp] : view.each()) {
-				kengine_logf(r, very_verbose, "python", "Setting 'self' to [%zu]", e);
+				kengine_logf(r, very_verbose, "python", "Setting 'self' to [%u]", e);
 				module_->attr("self") = entt::handle{ r, e };
 
 				for (const auto & s : comp.scripts) {
-					kengine_logf(r, very_verbose, "python", "Running script %s for [%zu]", s.c_str(), e);
+					kengine_logf(r, very_verbose, "python", "Running script %s for [%u]", s.c_str(), e);
 					try {
 						py::eval_file(s.c_str(), py::globals());
 					}

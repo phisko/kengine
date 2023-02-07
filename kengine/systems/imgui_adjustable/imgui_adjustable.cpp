@@ -271,7 +271,7 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 
 			auto & comp = r.get<data::adjustable>(e);
-			kengine_logf(r, verbose, "imgui_adjustable", "Adjustable destroyed in [%zu] (section %s)", e, comp.section.c_str());
+			kengine_logf(r, verbose, "imgui_adjustable", "Adjustable destroyed in [%u] (section %s)", e, comp.section.c_str());
 			remove_adjustable_from_section(comp, root_section);
 		}
 
