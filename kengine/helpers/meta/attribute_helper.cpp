@@ -17,7 +17,7 @@
 namespace kengine::meta::attribute_helper {
 	const putils::reflection::runtime::attribute_info * find_attribute(entt::handle type_entity, std::string_view path, std::string_view separator) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_logf(*type_entity.registry(), very_verbose, "attribute_helper", "Finding [%zu]'s '%s' attribute ", type_entity.entity(), std::string(path).c_str());
+		kengine_logf(*type_entity.registry(), very_verbose, "attribute_helper", "Finding [%u]'s '%s' attribute ", type_entity.entity(), std::string(path).c_str());
 
 		const auto attrs = type_entity.try_get<attributes>();
 		if (!attrs) {

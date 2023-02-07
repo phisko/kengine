@@ -54,7 +54,7 @@ namespace kengine::systems {
 			kengine::process_async_results<load_models_task>(r, [this](entt::entity e, load_models_task &&) {
 				// Entity that will wait until all async loading tasks are completed before loading the scene
 				const auto poller = r.create();
-				kengine_logf(r, verbose, "json_scene_loader", "Creating polling entity [%zu]", poller);
+				kengine_logf(r, verbose, "json_scene_loader", "Creating polling entity [%u]", poller);
 				r.emplace<functions::execute>(poller, [this, e, poller](float delta_time) {
 					if (!r.view<data::async_task>().empty()) {
 						kengine_log(r, verbose, "json_scene_loader", "Waiting to load scene (async_tasks are still running)");
@@ -68,20 +68,20 @@ namespace kengine::systems {
 					const auto & loader = r.get<data::json_scene_loader>(e);
 					load_scene(loader.scene.c_str());
 
-					kengine_logf(r, verbose, "json_scene_loader", "Destroying polling entity [%zu]", poller);
+					kengine_logf(r, verbose, "json_scene_loader", "Destroying polling entity [%u]", poller);
 					r.destroy(poller);
 				});
 			});
 		}
 
 		void process_new_loader(entt::entity e, const data::json_scene_loader & loader) noexcept {
-			kengine_logf(r, verbose, "json_scene_loader", "Processing new scene loader [%zu]", e);
+			kengine_logf(r, verbose, "json_scene_loader", "Processing new scene loader [%u]", e);
 
 			if (loader.model_directory.empty()) {
 				if (!loader.scene.empty())
 					load_scene(loader.scene.c_str());
 				else
-					kengine_logf(r, warning, "json_scene_loader", "Empty scene loader found in [%zu]", e);
+					kengine_logf(r, warning, "json_scene_loader", "Empty scene loader found in [%u]", e);
 				return;
 			}
 
@@ -117,7 +117,7 @@ namespace kengine::systems {
 
 			for (const auto & json : temporary_scene_json) {
 				const auto e = r.create();
-				kengine_logf(r, verbose, "json_scene_loader", "Creating temporary [%zu]", e);
+				kengine_logf(r, verbose, "json_scene_loader", "Creating temporary [%u]", e);
 				scene.loaded_entities.push_back(e);
 				json_helper::load_entity(json, { r, e });
 			}
@@ -137,7 +137,7 @@ namespace kengine::systems {
 				const auto e = r.create();
 				std::ifstream f(entry.path());
 				const auto json = nlohmann::json::parse(f);
-				kengine_logf(r, verbose, "json_scene_loader", "Creating model [%zu]", e);
+				kengine_logf(r, verbose, "json_scene_loader", "Creating model [%u]", e);
 				json_helper::load_entity(json, { r, e });
 			}
 
@@ -153,7 +153,7 @@ namespace kengine::systems {
 
 			for (const auto & json : scene_json) {
 				const auto e = r.create();
-				kengine_logf(r, verbose, "json_scene_loader", "Creating [%zu]", e);
+				kengine_logf(r, verbose, "json_scene_loader", "Creating [%u]", e);
 				json_helper::load_entity(json, { r, e });
 			}
 

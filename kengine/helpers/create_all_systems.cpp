@@ -19,7 +19,7 @@ namespace kengine {
 			main_registry = &destination_registry;
 
 		for (const auto & [e, create_system] : main_registry->view<functions::create_system>().each()) {
-			kengine_logf(destination_registry, verbose, "create_all_systems", "Creating system from [%zu]", e);
+			kengine_logf(destination_registry, verbose, "create_all_systems", "Creating system from [%u]", e);
 			create_system(destination_registry);
 		}
 	}

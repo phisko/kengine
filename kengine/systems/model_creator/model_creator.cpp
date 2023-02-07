@@ -43,21 +43,21 @@ namespace kengine::systems {
 
 			auto & instance = r.get_or_emplace<data::instance>(e);
 			if (instance.model != entt::null) {
-				kengine_logf(r, verbose, "model_creator", "[%zu] already has a model ([%zu])", instance.model);
+				kengine_logf(r, verbose, "model_creator", "[%u] already has a model ([%u])", instance.model);
 				return;
 			}
 
-			kengine_logf(r, verbose, "model_creator", "Looking for model for [%zu] (%s)", e, graphics.appearance.c_str());
+			kengine_logf(r, verbose, "model_creator", "Looking for model for [%u] (%s)", e, graphics.appearance.c_str());
 
 			for (const auto & [model, comp] : r.view<data::model>().each())
 				if (comp.file == graphics.appearance) {
 					instance.model = model;
-					kengine_logf(r, verbose, "model_creator", "Found existing model ([%zu])", model);
+					kengine_logf(r, verbose, "model_creator", "Found existing model ([%u])", model);
 					return;
 				}
 
 			const auto model = r.create();
-			kengine_logf(r, log, "model_creator", "Created new model [%zu] for %s", model, graphics.appearance.c_str());
+			kengine_logf(r, log, "model_creator", "Created new model [%u] for %s", model, graphics.appearance.c_str());
 			r.emplace<data::model>(model, graphics.appearance.c_str());
 			instance.model = model;
 		}

@@ -181,7 +181,7 @@ namespace kengine::systems {
 
 				active = true;
 				try {
-					kengine_logf(r, verbose, "imgui_prompt", "Evaluating with state [%zu]", e);
+					kengine_logf(r, verbose, "imgui_prompt", "Evaluating with state [%u]", e);
 					state.state->script(buff);
 				}
 				catch (const std::exception & e) {

@@ -39,29 +39,29 @@ namespace kengine::systems {
 			kengine_log(r, very_verbose, "input", "Executing");
 
 			for (const auto & [e, comp] : r.view<data::input>().each()) {
-				kengine_logf(r, very_verbose, "input", "Forwarding buffered events to [%zu]", e);
+				kengine_logf(r, very_verbose, "input", "Forwarding buffered events to [%u]", e);
 
 				for (const auto & event : buffer->keys)
 					if (comp.on_key != nullptr) {
-						kengine_logf(r, very_verbose, "input", "Forwarding key event %s to [%zu]", putils::reflection::to_json(event).dump().c_str(), e);
+						kengine_logf(r, very_verbose, "input", "Forwarding key event %s to [%u]", putils::reflection::to_json(event).dump().c_str(), e);
 						comp.on_key({ r, event.window }, event.key, event.pressed);
 					}
 
 				if (comp.on_mouse_button != nullptr)
 					for (const auto & event : buffer->clicks) {
-						kengine_logf(r, very_verbose, "input", "Forwarding mouse button event %s to [%zu]", putils::reflection::to_json(event).dump().c_str(), e);
+						kengine_logf(r, very_verbose, "input", "Forwarding mouse button event %s to [%u]", putils::reflection::to_json(event).dump().c_str(), e);
 						comp.on_mouse_button({ r, event.window }, event.button, event.pos, event.pressed);
 					}
 
 				if (comp.on_mouse_move != nullptr)
 					for (const auto & event : buffer->moves) {
-						kengine_logf(r, very_verbose, "input", "Forwarding mouse move event %s to [%zu]", putils::reflection::to_json(event).dump().c_str(), e);
+						kengine_logf(r, very_verbose, "input", "Forwarding mouse move event %s to [%u]", putils::reflection::to_json(event).dump().c_str(), e);
 						comp.on_mouse_move({ r, event.window }, event.pos, event.rel);
 					}
 
 				if (comp.on_scroll != nullptr)
 					for (const auto & event : buffer->scrolls) {
-						kengine_logf(r, very_verbose, "input", "Forwarding scroll event %s to [%zu]", putils::reflection::to_json(event).dump().c_str(), e);
+						kengine_logf(r, very_verbose, "input", "Forwarding scroll event %s to [%u]", putils::reflection::to_json(event).dump().c_str(), e);
 						comp.on_scroll({ r, event.window }, event.xoffset, event.yoffset, event.pos);
 					}
 			}

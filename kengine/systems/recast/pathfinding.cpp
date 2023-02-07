@@ -50,7 +50,7 @@ namespace kengine::systems::recast_impl {
 			kengine_log(r, very_verbose, "recast", "Removing old agents");
 
 			for (auto [e, agent] : r.view<data::recast_agent>(entt::exclude<data::pathfinding>).each()) {
-				kengine_logf(r, verbose, "recast", "Removing agent [%zu] from crowd [%zu]", e, agent.crowd);
+				kengine_logf(r, verbose, "recast", "Removing agent [%u] from crowd [%u]", e, agent.crowd);
 				auto & crowd = r.get<data::recast_crowd>(agent.crowd);
 				crowd.crowd->removeAgent(agent.index);
 				r.remove<data::recast_agent>(e);
@@ -63,17 +63,17 @@ namespace kengine::systems::recast_impl {
 
 			for (auto [e, pathfinding, transform] : r.view<data::pathfinding, data::transform>(entt::exclude<data::recast_agent>).each()) {
 				if (pathfinding.environment == entt::null) {
-					kengine_logf(r, very_verbose, "recast", "Entity [%zu] has null environment", e);
+					kengine_logf(r, very_verbose, "recast", "Entity [%u] has null environment", e);
 					continue;
 				}
 
 				const auto crowd = get_crowd_component({ r, pathfinding.environment });
 				if (!crowd) {
-					kengine_logf(r, warning, "recast", "Entity [%zu]'s environment [%zu] has no crowd component", e, pathfinding.environment);
+					kengine_logf(r, warning, "recast", "Entity [%u]'s environment [%u] has no crowd component", e, pathfinding.environment);
 					continue;
 				}
 
-				kengine_logf(r, verbose, "recast", "Adding agent [%zu] to crowd [%zu]", e, pathfinding.environment);
+				kengine_logf(r, verbose, "recast", "Adding agent [%u] to crowd [%u]", e, pathfinding.environment);
 
 				const auto object_info = get_object_info(get_environment_info({ r, pathfinding.environment }), transform, pathfinding);
 				attach_agent_component({ r, e }, object_info, *crowd, pathfinding.environment);
@@ -87,7 +87,7 @@ namespace kengine::systems::recast_impl {
 		};
 		static environment_info get_environment_info(entt::handle environment) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(*environment.registry(), very_verbose, "recast", "Getting environment info for [%zu]", environment.entity());
+			kengine_logf(*environment.registry(), very_verbose, "recast", "Getting environment info for [%u]", environment.entity());
 
 			environment_info ret;
 
@@ -120,16 +120,16 @@ namespace kengine::systems::recast_impl {
 
 		static data::recast_crowd * get_crowd_component(entt::handle e) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(*e.registry(), very_verbose, "recast", "Getting crowd component for [%zu]", e.entity());
+			kengine_logf(*e.registry(), very_verbose, "recast", "Getting crowd component for [%u]", e.entity());
 
 			auto crowd = e.try_get<data::recast_crowd>();
 			if (crowd)
 				return crowd;
 
-			kengine_logf(*e.registry(), very_verbose, "recast", "No crowd component in [%zu], creating a new one", e.entity());
+			kengine_logf(*e.registry(), very_verbose, "recast", "No crowd component in [%u], creating a new one", e.entity());
 			const auto nav_mesh = instance_helper::try_get_model<data::recast_nav_mesh>(e);
 			if (!nav_mesh) {
-				kengine_logf(*e.registry(), very_verbose, "recast", "No recast nav mesh in [%zu], cannot create crowd", e.entity());
+				kengine_logf(*e.registry(), very_verbose, "recast", "No recast nav mesh in [%u], cannot create crowd", e.entity());
 				return crowd;
 			}
 
@@ -142,7 +142,7 @@ namespace kengine::systems::recast_impl {
 
 		static void attach_agent_component(entt::handle e, const object_info & object_info, const data::recast_crowd & crowd, entt::entity crowd_id) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(*e.registry(), very_verbose, "recast", "Attaching agent component to [%zu] (crowd [%zu])", e.entity(), crowd_id);
+			kengine_logf(*e.registry(), very_verbose, "recast", "Attaching agent component to [%u] (crowd [%u])", e.entity(), crowd_id);
 
 			dtCrowdAgentParams params;
 			fill_crowd_agent_params(params, object_info);
@@ -181,19 +181,19 @@ namespace kengine::systems::recast_impl {
 
 			for (auto [e, pathfinding, agent] : r.view<data::pathfinding, data::recast_agent>().each()) {
 				if (pathfinding.environment == agent.crowd) {
-					kengine_logf(r, very_verbose, "recast", "Entity [%zu] has a null environment", e);
+					kengine_logf(r, very_verbose, "recast", "Entity [%u] has a null environment", e);
 					continue;
 				}
 
 				const auto new_crowd = get_crowd_component({ r, pathfinding.environment });
 				if (!new_crowd) {
-					kengine_logf(r, warning, "recast", "Entity [%zu]'s environment [%zu] has no crowd component", e, pathfinding.environment);
+					kengine_logf(r, warning, "recast", "Entity [%u]'s environment [%u] has no crowd component", e, pathfinding.environment);
 					continue;
 				}
 
 				const auto old_crowd = r.try_get<data::recast_crowd>(agent.crowd);
 				if (old_crowd) {
-					kengine_logf(r, verbose, "recast", "Removing [%zu] from its old crowd ([%zu])", e, agent.crowd);
+					kengine_logf(r, verbose, "recast", "Removing [%u] from its old crowd ([%u])", e, agent.crowd);
 					old_crowd->crowd->removeAgent(agent.index);
 				}
 
@@ -216,7 +216,7 @@ namespace kengine::systems::recast_impl {
 
 		static void update_crowd(float delta_time, entt::handle environment, const data::recast_crowd & crowd) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(*environment.registry(), very_verbose, "recast", "Updating crowd for [%zu]", environment.entity());
+			kengine_logf(*environment.registry(), very_verbose, "recast", "Updating crowd for [%u]", environment.entity());
 
 			const auto & nav_mesh = instance_helper::get_model<data::recast_nav_mesh>(environment);
 			const auto environment_info = get_environment_info(environment);
@@ -255,7 +255,7 @@ namespace kengine::systems::recast_impl {
 
 		static void write_to_agent(entt::handle e, const data::transform & transform, const data::pathfinding & pathfinding, const environment_info & environment_info, const data::recast_nav_mesh & nav_mesh, const data::recast_crowd & crowd) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(*e.registry(), very_verbose, "recast", "Writing to agent [%zu]", e.entity());
+			kengine_logf(*e.registry(), very_verbose, "recast", "Writing to agent [%u]", e.entity());
 
 			const auto object_info = get_object_info(environment_info, transform, pathfinding);
 			update_agent_component(e, object_info, crowd);
@@ -267,7 +267,7 @@ namespace kengine::systems::recast_impl {
 
 		static void update_agent_component(entt::handle e, const object_info & object_info, const data::recast_crowd & crowd) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(*e.registry(), very_verbose, "recast", "Updating agent component for [%zu]", e.entity());
+			kengine_logf(*e.registry(), very_verbose, "recast", "Updating agent component for [%u]", e.entity());
 
 			const auto & agent = e.get<data::recast_agent>();
 			const auto editableAgent = crowd.crowd->getEditableAgent(agent.index);
@@ -278,7 +278,7 @@ namespace kengine::systems::recast_impl {
 
 		static void update_destination(entt::handle e, const data::recast_nav_mesh & nav_mesh, const data::recast_crowd & crowd, const putils::point3f & destination_in_model, const putils::point3f & search_extents) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(*e.registry(), very_verbose, "recast", "Updating destination for [%zu]", e.entity());
+			kengine_logf(*e.registry(), very_verbose, "recast", "Updating destination for [%u]", e.entity());
 
 			static const dtQueryFilter filter;
 			dtPolyRef nearest_poly;

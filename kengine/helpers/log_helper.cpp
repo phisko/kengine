@@ -59,7 +59,7 @@ namespace kengine::log_helper {
 		for (const auto & [e, command_line] : r.view<data::command_line>().each()) {
 			const auto opts = putils::parse_arguments<options>(command_line.arguments);
 			result = opts.log_level;
-			kengine_logf(r, very_verbose, "log_helper", "Found %s in [%zu]", std::string(magic_enum::enum_names<log_severity>()[int(result)]).c_str(), e);
+			kengine_logf(r, very_verbose, "log_helper", "Found %s in [%u]", std::string(magic_enum::enum_names<log_severity>()[int(result)]).c_str(), e);
 		}
 
 		kengine_log(r, very_verbose, "log_helper", "Setting minimum log severity");

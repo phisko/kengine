@@ -12,7 +12,7 @@ namespace kengine {
 	template<typename T>
 	void meta_component_implementation<meta::edit_imgui, T>::function(entt::handle e) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_logf(*e.registry(), very_verbose, "meta::edit_imgui", "Editing [%zu]'s %s", e.entity(), putils::reflection::get_class_name<T>());
+		kengine_logf(*e.registry(), very_verbose, "meta::edit_imgui", "Editing [%u]'s %s", e.entity(), putils::reflection::get_class_name<T>());
 
 		T * comp = nullptr;
 

@@ -27,7 +27,7 @@ namespace kengine {
 	template<typename T>
 	void meta_component_implementation<meta::emplace_or_replace, T>::function(entt::handle e, const void * comp) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_logf(*e.registry(), very_verbose, "meta::emplace_or_replace", "Emplacing or replacing [%zu]'s %s", e.entity(), putils::reflection::get_class_name<T>());
+		kengine_logf(*e.registry(), very_verbose, "meta::emplace_or_replace", "Emplacing or replacing [%u]'s %s", e.entity(), putils::reflection::get_class_name<T>());
 
 		if (comp) {
 			kengine_log(*e.registry(), very_verbose, "meta::emplace_or_replace", "Copying from argument");
@@ -45,7 +45,7 @@ namespace kengine {
 	template<typename T>
 	void meta_component_implementation<meta::emplace_or_replace_move, T>::function(entt::handle e, void * comp) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_logf(*e.registry(), very_verbose, "meta::emplace_or_replace_move", "Emplacing or replacing [%zu]'s %s by move", e.entity(), putils::reflection::get_class_name<T>());
+		kengine_logf(*e.registry(), very_verbose, "meta::emplace_or_replace_move", "Emplacing or replacing [%u]'s %s by move", e.entity(), putils::reflection::get_class_name<T>());
 
 		if (comp) {
 			kengine_log(*e.registry(), very_verbose, "meta::emplace_or_replace_move", "Moving from argument");

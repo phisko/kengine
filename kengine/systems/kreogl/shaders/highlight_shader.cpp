@@ -65,7 +65,7 @@ void kengine::highlight_shader::draw(const kreogl::draw_params & params) noexcep
 	_glsl.screen_size = params.camera.get_viewport().get_resolution();
 
 	for (const auto & [entity, highlight] : _r->view<data::highlight>().each()) {
-		kengine_logf(*_r, very_verbose, "kreogl", "Drawing highlights for [%zu]", entity);
+		kengine_logf(*_r, very_verbose, "kreogl", "Drawing highlights for [%u]", entity);
 
 		uniform_checker.should_check = true;
 		_glsl.entity_id = float(entity);

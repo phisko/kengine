@@ -14,7 +14,7 @@ namespace kengine {
 		kengine_logf(r, very_verbose, "meta::for_each_entity", "Iterating over all entities with %s", putils::reflection::get_class_name<T>());
 
 		for (const auto e : r.view<T>()) {
-			kengine_logf(r, very_verbose, "meta::for_each_entity", "Found [%zu]", e);
+			kengine_logf(r, very_verbose, "meta::for_each_entity", "Found [%u]", e);
 			func({ r, e });
 		}
 	}
@@ -26,7 +26,7 @@ namespace kengine {
 
 		r.each([&](entt::entity e) {
 			if (!r.all_of<T>(e)) {
-				kengine_logf(r, very_verbose, "meta::for_each_entity_without", "Found [%zu]", e);
+				kengine_logf(r, very_verbose, "meta::for_each_entity_without", "Found [%u]", e);
 				func({ r, e });
 			}
 		});

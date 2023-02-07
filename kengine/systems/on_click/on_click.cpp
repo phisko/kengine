@@ -42,11 +42,11 @@ namespace kengine::systems {
 
 				const auto on_click = r.try_get<functions::on_click>(e);
 				if (on_click) {
-					kengine_logf(r, log, "on_click", "Calling on_click on [%zu]", e);
+					kengine_logf(r, log, "on_click", "Calling on_click on [%u]", e);
 					on_click->call(button);
 				}
 				else
-					kengine_logf(r, verbose, "on_click", "Clicked [%zu], did not have on_click", e);
+					kengine_logf(r, verbose, "on_click", "Clicked [%u], did not have on_click", e);
 			}
 		}
 	};

@@ -22,7 +22,7 @@ namespace kengine::imgui_lua_helper {
 		kengine_log(r, log, "imgui_lua_bindings", "Initializing bindings");
 
 		for (const auto & [e, state] : r.view<data::lua_state>().each()) {
-			kengine_logf(r, verbose, "imgui_lua_bindings", "Initializing bindings for state entity [%zu]", e);
+			kengine_logf(r, verbose, "imgui_lua_bindings", "Initializing bindings for state entity [%u]", e);
 			lState = *state.state;
 			LoadImguiBindings();
 		}

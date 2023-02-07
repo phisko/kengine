@@ -224,7 +224,7 @@ namespace kengine::systems::recast_impl {
 			for (const auto name : potential_names)
 				for (const auto & attribute : model_data.vertex_attributes)
 					if (attribute.name == name) {
-						kengine_logf(r, very_verbose, "recast", "Found vertex position offset [%zu] (named %s)", attribute.offset, attribute.name);
+						kengine_logf(r, very_verbose, "recast", "Found vertex position offset [%u] (named %s)", attribute.offset, attribute.name);
 						return attribute.offset;
 					}
 
@@ -483,7 +483,7 @@ namespace kengine::systems::recast_impl {
 			return [&, model_transform](entt::handle environment, const putils::point3f & start_world_space, const putils::point3f & end_world_space) {
 				KENGINE_PROFILING_SCOPE;
 				kengine_logf(
-					*environment.registry(), verbose, "recast", "Getting path in [%zu] from { %f, %f, %f } to { %f, %f, %f }",
+					*environment.registry(), verbose, "recast", "Getting path in [%u] from { %f, %f, %f } to { %f, %f, %f }",
 					environment, start_world_space.x, start_world_space.y, start_world_space.z, end_world_space.x, end_world_space.y, end_world_space.z
 				);
 				static const dtQueryFilter filter;
@@ -548,7 +548,7 @@ namespace kengine::systems::recast_impl {
 
 	void build_recast_component(entt::registry & r, entt::entity e, const data::model & model, const data::model_data & model_data, const data::nav_mesh & nav_mesh) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_logf(r, verbose, "recast", "Building recast component for [%zu]", e);
+		kengine_logf(r, verbose, "recast", "Building recast component for [%u]", e);
 
 		kengine_assert(r, nav_mesh.verts_per_poly <= DT_VERTS_PER_POLYGON);
 		kengine::start_async_task(

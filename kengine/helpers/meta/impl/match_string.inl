@@ -72,7 +72,7 @@ namespace kengine {
 	template<typename T>
 	bool meta_component_implementation<meta::match_string, T>::function(entt::const_handle e, const char * str) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_logf(*e.registry(), very_verbose, "meta::match_string", "Matching [%zu]'s %s against %s", e.entity(), putils::reflection::get_class_name<T>(), str);
+		kengine_logf(*e.registry(), very_verbose, "meta::match_string", "Matching [%u]'s %s against %s", e.entity(), putils::reflection::get_class_name<T>(), str);
 
 		if constexpr (std::is_empty<T>()) {
 			kengine_log(*e.registry(), very_verbose, "meta::match_string", "Component is empty, returning false");

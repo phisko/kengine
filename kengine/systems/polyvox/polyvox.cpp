@@ -49,11 +49,11 @@ namespace kengine::systems {
 
 			for (auto [e, poly] : r.view<data::polyvox>().each()) {
 				if (!poly.changed) {
-					kengine_logf(r, very_verbose, "polyvox", "Polyvox component in [%zu] hasn't changed", e);
+					kengine_logf(r, very_verbose, "polyvox", "Polyvox component in [%u] hasn't changed", e);
 					continue;
 				}
 
-				kengine_logf(r, log, "polyvox", "Rebuilding mesh for [%zu]", e);
+				kengine_logf(r, log, "polyvox", "Rebuilding mesh for [%u]", e);
 				poly.changed = false;
 
 				data::model_data model_data;
@@ -83,7 +83,7 @@ namespace kengine::systems {
 				KENGINE_PROFILING_SCOPE;
 				if (!r.all_of<mesh_container>(e))
 					return;
-				kengine_logf(r, log, "polyvox", "Releasing mesh for [%zu]", e);
+				kengine_logf(r, log, "polyvox", "Releasing mesh for [%u]", e);
 				auto & mesh = r.get<mesh_container>(e).mesh;
 				mesh.clear();
 				r.remove<mesh_container>(e);
