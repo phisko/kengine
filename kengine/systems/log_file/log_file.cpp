@@ -39,6 +39,7 @@ namespace kengine::systems {
 
 		log_file(entt::handle e) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(*e.registry(), log, "log_file", "Initializing");
 
 			const auto & r = *e.registry();
 

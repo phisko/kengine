@@ -53,9 +53,12 @@ namespace kengine::systems {
 
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, very_verbose, "imgui_prompt", "Executing");
 
-			if (!*enabled)
+			if (!*enabled) {
+				kengine_log(r, very_verbose, "imgui_prompt", "Disabled");
 				return;
+			}
 
 			if (ImGui::Begin("Prompt", enabled)) {
 				ImGui::Columns(2);
@@ -76,10 +79,13 @@ namespace kengine::systems {
 		bool should_scroll_down = false;
 		void draw_history() noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, very_verbose, "imgui_prompt", "Drawing history");
 
 			int tmp = max_lines;
-			if (ImGui::InputInt("Max history", &tmp, 0, 0, ImGuiInputTextFlags_EnterReturnsTrue))
+			if (ImGui::InputInt("Max history", &tmp, 0, 0, ImGuiInputTextFlags_EnterReturnsTrue)) {
+				kengine_logf(r, verbose, "imgui_prompt", "Max history changed to %d", tmp);
 				max_lines = tmp;
+			}
 
 			ImGui::BeginChild("History");
 			for (const auto & line : history.lines) {
@@ -89,13 +95,16 @@ namespace kengine::systems {
 				ImGui::PushTextWrapPos();
 				ImGui::TextColored({ line.color.r, line.color.g, line.color.b, line.color.a }, "%s", line.text.c_str());
 				ImGui::PopTextWrapPos();
-				if (ImGui::IsItemClicked(1))
+				if (ImGui::IsItemClicked(1)) {
+					kengine_logf(r, log, "imgui_prompt", "Setting clipboard text to '%s'", line.text.c_str());
 					ImGui::SetClipboardText(line.text.c_str());
+				}
 				if (ImGui::IsItemHovered())
 					ImGui::SetTooltip("Right-click to copy to clipboard");
 			}
 
 			if (should_scroll_down) {
+				kengine_log(r, log, "imgui_prompt", "Scrolling down");
 				ImGui::SetScrollHereY();
 				should_scroll_down = false;
 			}
@@ -106,10 +115,14 @@ namespace kengine::systems {
 		bool first_draw_prompt = true;
 		bool draw_prompt() noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, very_verbose, "imgui_prompt", "Drawing prompt");
 
 			if (putils::reflection::imgui_enum_combo("##language", selected_language) || first_draw_prompt) {
+				std::string new_language(magic_enum::enum_names<language>()[(int)selected_language]);
+
+				kengine_logf(r, log, "imgui_prompt", "Changed language to %s", new_language.c_str());
 				history.add_line(
-					std::string(magic_enum::enum_names<language>()[(int)selected_language]),
+					std::move(new_language),
 					true,
 					putils::normalized_color{ 1.f, 1.f, 0.f }
 				);
@@ -122,6 +135,7 @@ namespace kengine::systems {
 				ImGui::SetTooltip("Ctrl+Enter to execute");
 
 			if (ret) {
+				kengine_log(r, log, "imgui_prompt", "User confirmed prompt");
 				should_scroll_down = true;
 				ImGui::SetKeyboardFocusHere(-1);
 			}
@@ -130,6 +144,7 @@ namespace kengine::systems {
 
 		void eval() noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_logf(r, log, "imgui_prompt", "Evaluating '%s'", buff);
 
 			switch (selected_language) {
 				case language::lua:
@@ -166,9 +181,11 @@ namespace kengine::systems {
 
 				active = true;
 				try {
+					kengine_logf(r, verbose, "imgui_prompt", "Evaluating with state [%zu]", e);
 					state.state->script(buff);
 				}
 				catch (const std::exception & e) {
+					kengine_logf(r, error, "imgui_prompt", "Error: %s", e.what());
 					history.add_error(e.what());
 				}
 				active = false;
@@ -284,6 +301,7 @@ namespace kengine::systems {
 				py::exec(buff);
 			}
 			catch (const std::exception & e) {
+				kengine_logf(r, error, "imgui_prompt", "Error: %s", e.what());
 				history.add_error(e.what());
 			}
 

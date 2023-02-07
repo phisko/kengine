@@ -49,19 +49,19 @@ namespace kengine::systems::recast_impl {
 
 		static std::optional<data::recast_nav_mesh> create_recast_mesh(const char * file, entt::handle e, const data::nav_mesh & nav_mesh, const data::model_data & model_data) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_logf(*e.registry(), verbose, "recast", "Building navmesh for %s", file);
 
 			const auto & r = *e.registry();
-			kengine_logf(r, log, "recast", "Building navmesh for %s", file);
 
 			data::recast_nav_mesh result;
 
 			const putils::string<4096> binary_file("%s.nav", file);
 			result.data = load_binary_file(binary_file.c_str(), nav_mesh);
 			if (result.data.data) {
-				kengine_log(r, log, "recast", "Found binary file");
+				kengine_log(r, verbose, "recast", "Found binary file");
 			}
 			else {
-				kengine_logf(r, log, "recast", "Found no binary file for %s, creating nav mesh data", file);
+				kengine_logf(r, verbose, "recast", "Found no binary file for %s, creating nav mesh data", file);
 				result.data = create_nav_mesh_data(r, nav_mesh, model_data, model_data.meshes[nav_mesh.concerned_mesh]);
 				if (result.data.data == nullptr)
 					return std::nullopt;
@@ -102,7 +102,7 @@ namespace kengine::systems::recast_impl {
 
 		static void save_binary_file(const entt::registry & r, const char * binary_file, const data::nav_mesh_data & data, const data::nav_mesh & nav_mesh) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, log, "recast", "Saving binary file %s", binary_file);
+			kengine_logf(r, verbose, "recast", "Saving binary file %s", binary_file);
 
 			std::ofstream f(binary_file, std::ofstream::trunc | std::ofstream::binary);
 			f.write((const char *)&nav_mesh, sizeof(nav_mesh));
@@ -112,6 +112,7 @@ namespace kengine::systems::recast_impl {
 
 		static data::nav_mesh_data create_nav_mesh_data(const entt::registry & r, const data::nav_mesh & nav_mesh, const data::model_data & model_data, const data::model_data::mesh & mesh_data) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, verbose, "recast", "Creating navmesh data");
 
 			data::nav_mesh_data ret;
 
@@ -197,6 +198,7 @@ namespace kengine::systems::recast_impl {
 
 		static std::unique_ptr<float[]> get_vertices(const entt::registry & r, const data::model_data & model_data, const data::model_data::mesh & mesh_data) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, very_verbose, "recast", "Getting vertices");
 
 			const auto position_offset = get_vertex_position_offset(r, model_data);
 			if (position_offset == std::nullopt)
@@ -215,27 +217,29 @@ namespace kengine::systems::recast_impl {
 
 		static std::optional<std::ptrdiff_t> get_vertex_position_offset(const entt::registry & r, const data::model_data & model_data) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, very_verbose, "recast", "Getting vertex position offset");
 
 			static const std::string_view potential_names[] = { "pos", "position" };
 
 			for (const auto name : potential_names)
 				for (const auto & attribute : model_data.vertex_attributes)
-					if (attribute.name == name)
+					if (attribute.name == name) {
+						kengine_logf(r, very_verbose, "recast", "Found vertex position offset [%zu] (named %s)", attribute.offset, attribute.name);
 						return attribute.offset;
+					}
 
 			kengine_assert_failed(r, "[Recast] Could not find vertex position");
 			return std::nullopt;
 		}
 
 		static const float * get_vertex_position(const void * vertices, size_t index, size_t vertex_size, std::ptrdiff_t position_offset) noexcept {
-			KENGINE_PROFILING_SCOPE;
-
 			const auto vertex = (const char *)vertices + index * vertex_size;
 			return (const float *)(vertex + position_offset);
 		}
 
 		static rcConfig get_config(const entt::registry & r, const data::nav_mesh & nav_mesh, const data::model_data::mesh & mesh_data, const float * vertices) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, very_verbose, "recast", "Getting rcConfig");
 
 			rcConfig cfg;
 			memset(&cfg, 0, sizeof(cfg));
@@ -292,6 +296,7 @@ namespace kengine::systems::recast_impl {
 
 		static height_field_ptr create_height_field(const entt::registry & r, rcContext & ctx, const rcConfig & cfg, const kengine::data::model_data::mesh & mesh_data, const float * vertices) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, very_verbose, "recast", "Creating height field");
 
 			height_field_ptr height_field{ rcAllocHeightfield() };
 
@@ -342,6 +347,7 @@ namespace kengine::systems::recast_impl {
 
 		static compact_height_field_ptr create_compact_height_field(const entt::registry & r, rcContext & ctx, const rcConfig & cfg, rcHeightfield & height_field) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, very_verbose, "recast", "Creating compact height field");
 
 			compact_height_field_ptr compact_height_field{ rcAllocCompactHeightfield() };
 
@@ -376,6 +382,7 @@ namespace kengine::systems::recast_impl {
 
 		static contour_set_ptr create_contour_set(const entt::registry & r, rcContext & ctx, const rcConfig & cfg, rcCompactHeightfield & chf) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, very_verbose, "recast", "Creating contour set");
 
 			contour_set_ptr contour_set{ rcAllocContourSet() };
 
@@ -394,6 +401,7 @@ namespace kengine::systems::recast_impl {
 
 		static poly_mesh_ptr create_poly_mesh(const entt::registry & r, rcContext & ctx, const rcConfig & cfg, rcContourSet & contour_set) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, very_verbose, "recast", "Creating poly mesh");
 
 			poly_mesh_ptr poly_mesh{ rcAllocPolyMesh() };
 
@@ -412,6 +420,7 @@ namespace kengine::systems::recast_impl {
 
 		static poly_mesh_detail_ptr create_poly_mesh_detail(const entt::registry & r, rcContext & ctx, const rcConfig & cfg, const rcPolyMesh & poly_mesh, const rcCompactHeightfield & chf) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, very_verbose, "recast", "Creating poly mesh detail");
 
 			poly_mesh_detail_ptr poly_mesh_detail{ rcAllocPolyMeshDetail() };
 			if (poly_mesh_detail == nullptr) {
@@ -429,6 +438,7 @@ namespace kengine::systems::recast_impl {
 
 		static data::nav_mesh_ptr create_nav_mesh(const entt::registry & r, const data::nav_mesh_data & data) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, very_verbose, "recast", "Creating nav mesh");
 
 			data::nav_mesh_ptr nav_mesh{ dtAllocNavMesh() };
 			if (nav_mesh == nullptr) {
@@ -447,6 +457,7 @@ namespace kengine::systems::recast_impl {
 
 		static data::nav_mesh_query_ptr create_nav_mesh_query(const entt::registry & r, const data::nav_mesh & params, const dtNavMesh & nav_mesh) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, very_verbose, "recast", "Creating nav mesh query");
 
 			data::nav_mesh_query_ptr nav_mesh_query{ dtAllocNavMeshQuery() };
 
@@ -472,7 +483,7 @@ namespace kengine::systems::recast_impl {
 			return [&, model_transform](entt::handle environment, const putils::point3f & start_world_space, const putils::point3f & end_world_space) {
 				KENGINE_PROFILING_SCOPE;
 				kengine_logf(
-					*environment.registry(), verbose, "recast", "Getting path in %zu from { %f, %f, %f } to { %f, %f, %f }",
+					*environment.registry(), verbose, "recast", "Getting path in [%zu] from { %f, %f, %f } to { %f, %f, %f }",
 					environment, start_world_space.x, start_world_space.y, start_world_space.z, end_world_space.x, end_world_space.y, end_world_space.z
 				);
 				static const dtQueryFilter filter;
@@ -537,6 +548,7 @@ namespace kengine::systems::recast_impl {
 
 	void build_recast_component(entt::registry & r, entt::entity e, const data::model & model, const data::model_data & model_data, const data::nav_mesh & nav_mesh) noexcept {
 		KENGINE_PROFILING_SCOPE;
+		kengine_logf(r, verbose, "recast", "Building recast component for [%zu]", e);
 
 		kengine_assert(r, nav_mesh.verts_per_poly <= DT_VERTS_PER_POLYGON);
 		kengine::start_async_task(
@@ -551,6 +563,7 @@ namespace kengine::systems::recast_impl {
 
 	void process_built_recast_components(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
+		kengine_log(r, very_verbose, "recast", "Processing built recast components");
 
 		kengine::process_async_results<std::optional<data::recast_nav_mesh>>(r, [&](entt::entity e, std::optional<data::recast_nav_mesh> && opt) {
 			if (!opt)

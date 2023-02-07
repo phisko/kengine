@@ -9,15 +9,18 @@
 #include "putils/meta/for_each.hpp"
 
 // kengine helpers
+#include "kengine/helpers/log_helper.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
 
 namespace kengine {
 	template<typename... Comps>
 	void register_storage(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
+		kengine_log(r, verbose, "register_storage", "Registering storage");
 
 		putils::for_each_type<Comps...>([&](auto && t) noexcept {
 			using type = putils_wrapped_type(t);
+			kengine_logf(r, verbose, "register_storage", "Pre-instantiating storage for %s", putils::reflection::get_class_name<type>());
 			r.storage<type>(); // Pre-instantiate the component pool
 		});
 	}

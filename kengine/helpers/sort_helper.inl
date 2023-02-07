@@ -13,6 +13,7 @@
 #include "kengine/data/name.hpp"
 
 // kengine helpers
+#include "kengine/helpers/log_helper.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
 
 namespace kengine::sort_helper {
@@ -59,6 +60,7 @@ namespace kengine::sort_helper {
 
 	template<typename... Comps, typename Registry, typename Pred>
 	auto get_sorted_entities(Registry && r, Pred && pred) noexcept {
+		kengine_log(r, very_verbose, "sort_helper", "Getting sorted entities");
 		return get_sorted_entities<0, Comps...>(FWD(r), FWD(pred));
 	}
 
@@ -75,6 +77,7 @@ namespace kengine::sort_helper {
 
 	template<typename... Comps, typename Registry>
 	auto get_name_sorted_entities(Registry && r) noexcept {
+		kengine_log(r, very_verbose, "sort_helper", "Getting name sorted entities");
 		return get_name_sorted_entities<0, Comps...>(FWD(r));
 	}
 }

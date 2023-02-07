@@ -45,11 +45,15 @@ namespace kengine::systems {
 
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, very_verbose, "polyvox", "Executing");
 
 			for (auto [e, poly] : r.view<data::polyvox>().each()) {
-				if (!poly.changed)
+				if (!poly.changed) {
+					kengine_logf(r, very_verbose, "polyvox", "Polyvox component in [%zu] hasn't changed", e);
 					continue;
-				kengine_logf(r, verbose, "polyvox", "Rebuilding mesh for %zu", e);
+				}
+
+				kengine_logf(r, log, "polyvox", "Rebuilding mesh for [%zu]", e);
 				poly.changed = false;
 
 				data::model_data model_data;
@@ -79,7 +83,7 @@ namespace kengine::systems {
 				KENGINE_PROFILING_SCOPE;
 				if (!r.all_of<mesh_container>(e))
 					return;
-				kengine_logf(r, log, "polyvox", "Releasing mesh for %zu", e);
+				kengine_logf(r, log, "polyvox", "Releasing mesh for [%zu]", e);
 				auto & mesh = r.get<mesh_container>(e).mesh;
 				mesh.clear();
 				r.remove<mesh_container>(e);

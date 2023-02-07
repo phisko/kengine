@@ -43,12 +43,15 @@ namespace kengine::systems {
 
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, very_verbose, "imgui_entity_editor", "Executing");
 
-			if (!*enabled)
+			if (!*enabled) {
+				kengine_log(r, very_verbose, "imgui_entity_editor", "Disabled");
 				return;
+			}
 
 			const auto scale = imgui_helper::get_scale(r);
-			for (auto [selected] : r.view<data::selected>().each()) {
+			for (const auto selected : r.view<data::selected>()) {
 				bool open = true;
 
 				ImGui::SetNextWindowSize({ 200.f * scale, 200.f * scale }, ImGuiCond_FirstUseEver);
@@ -58,13 +61,16 @@ namespace kengine::systems {
 					name ?
 					putils::string<64>("%s##[%d]", name->name.c_str(), selected) :
 					putils::string<64>("[%d] Entity editor", selected);
+				kengine_logf(r, very_verbose, "imgui_entity_editor", "Displaying [%zu] (%s)", selected, window_title.c_str());
 
 				if (ImGui::Begin(window_title.c_str(), &open, ImGuiWindowFlags_NoSavedSettings))
 					imgui_helper::edit_entity_and_model({ r, selected });
 				ImGui::End();
 
-				if (!open)
+				if (!open) {
+					kengine_logf(r, log, "imgui_entity_editor", "De-selecting [%zu]", selected);
 					r.remove<data::selected>(selected);
+				}
 			}
 		}
 	};

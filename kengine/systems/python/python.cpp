@@ -31,10 +31,10 @@ namespace kengine::systems {
 
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 
-			kengine_log(r, log, "python", "Creating Python state");
+			kengine_log(r, verbose, "python", "Creating Python state");
 			auto & state = e.emplace<data::python_state>();
 
-			kengine_log(r, log, "python", "Registering script_language_helper functions");
+			kengine_log(r, verbose, "python", "Registering script_language_helper functions");
 			py::globals()["kengine"] = state.module_;
 			module_ = &state.module_;
 			script_language_helper::init(
@@ -51,19 +51,22 @@ namespace kengine::systems {
 
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, very_verbose, "python", "Executing");
 
 			const auto view = r.view<data::python>();
 
 			if (view.empty())
 				return;
 
+			kengine_log(r, very_verbose, "python", "Setting delta_time");
 			module_->attr("delta_time") = delta_time;
 
 			for (auto [e, comp] : view.each()) {
+				kengine_logf(r, very_verbose, "python", "Setting 'self' to [%zu]", e);
 				module_->attr("self") = entt::handle{ r, e };
 
 				for (const auto & s : comp.scripts) {
-					kengine_logf(r, verbose, "python", "Running script %s for %zu", s.c_str(), e);
+					kengine_logf(r, very_verbose, "python", "Running script %s for [%zu]", s.c_str(), e);
 					try {
 						py::eval_file(s.c_str(), py::globals());
 					}

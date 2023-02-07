@@ -12,6 +12,7 @@ namespace kengine {
 	template<typename... Comps>
 	void register_everything(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
+		kengine_log(r, verbose, "register_everything", "Registering types");
 
 		register_storage<Comps...>(r);
 		register_metadata<Comps...>(r);

@@ -73,6 +73,7 @@ namespace kengine::systems {
 		kengine::backward_compatible_observer<data::model> observer{ r, putils_forward_to_this(load_model) };
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, very_verbose, "magica_voxel", "Executing");
 
 			observer.process();
 
@@ -84,6 +85,7 @@ namespace kengine::systems {
 
 		void load_model(entt::entity e, const data::model & model) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_logf(r, verbose, "magica_voxel", "Loading model for %s", model.file.c_str());
 
 			const auto & f = model.file.c_str();
 			if (std::filesystem::path(f).extension() != ".vox")
@@ -102,11 +104,10 @@ namespace kengine::systems {
 		async_loaded_data load_model_data(entt::entity e, const char * file) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			kengine_logf(r, log, "magica_voxel", "Loading model %s for %zu", file, e);
 			const putils::string<256> binary_file("%s.bin", file);
 
 			if (!std::filesystem::exists(binary_file.c_str())) {
-				kengine_log(r, log, "magica_voxel", "Binary file does not exist, creating it");
+				kengine_log(r, verbose, "magica_voxel", "Binary file does not exist, creating it");
 				const auto model_and_offset = load_vox_model(file);
 				const auto model_data = generate_model_data(e, model_and_offset.mesh);
 				serialize(binary_file.c_str(), model_data, model_and_offset.offset_to_apply);
@@ -121,6 +122,7 @@ namespace kengine::systems {
 
 		void unserialize(const char * f, data::model_data::mesh & mesh_data, magica_voxel_format::chunk_content::size & size) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_logf(r, verbose, "magica_voxel", "Unserializing from %s", f);
 
 			std::ifstream file(f, std::ofstream::binary);
 			if (!file) {
@@ -158,6 +160,7 @@ namespace kengine::systems {
 
 			return [this, e] {
 				if (const auto model_data = r.try_get<data::model_data>(e)) {
+					kengine_logf(r, verbose, "magica_voxel", "Releasing data for [%zu]", e);
 					delete[] (const char *)model_data->meshes[0].vertices.data;
 					delete[] (const char *)model_data->meshes[0].indices.data;
 				}
@@ -166,6 +169,7 @@ namespace kengine::systems {
 
 		model_and_offset load_vox_model(const char * f) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_logf(r, verbose, "magica_voxel", "Loading vox model from %s", f);
 
 			std::ifstream stream(f, std::ios::binary);
 			if (!stream) {
@@ -226,11 +230,13 @@ namespace kengine::systems {
 
 		bool id_matches(const char * s1, const char * s2) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_logf(r, very_verbose, "magica_voxel", "Checking ID %s", s2);
 			return strncmp(s1, s2, 4) == 0;
 		}
 
 		void check_header(std::istream & s) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, very_verbose, "magica_voxel", "Checking header");
 
 			magica_voxel_format::file_header header;
 			read_from_stream(header, s);
@@ -240,6 +246,7 @@ namespace kengine::systems {
 
 		data::model_data generate_model_data(entt::entity e, const mesh_type & mesh) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_logf(r, verbose, "magica_voxel", "Generating model data for [%zu]", e);
 
 			data::model_data model_data;
 			model_data.free = release(e);
@@ -257,7 +264,7 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 
 			if (r.all_of<data::transform>(e)) {
-				kengine_logf(r, log, "magica_voxel", "%zu already has a data::transform. Mesh offset will not be applied", e);
+				kengine_logf(r, verbose, "magica_voxel", "[%zu] already has a data::transform. Mesh offset will not be applied", e);
 				return;
 			}
 			kengine_log(r, log, "magica_voxel", "Applying mesh offset");
@@ -269,6 +276,7 @@ namespace kengine::systems {
 
 		void serialize(const char * f, const data::model_data & model_data, const magica_voxel_format::chunk_content::size & size) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_logf(r, verbose, "magica_voxel", "Serializing to %s", f);
 
 			std::ofstream file(f, std::ofstream::binary | std::ofstream::trunc);
 			if (!file) {

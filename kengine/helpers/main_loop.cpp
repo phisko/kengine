@@ -30,10 +30,11 @@ namespace kengine::main_loop {
 
 		delta_time *= get_time_factor(r);
 
-		kengine_logf(r, verbose, "main_loop", "Calling execute (dt: %f)", delta_time);
+		kengine_logf(r, very_verbose, "main_loop", "Calling execute (dt: %f)", delta_time);
 		for (const auto & [e, func] : r.view<kengine::functions::execute>().each()) {
 			if (!is_running(r))
 				break;
+			kengine_logf(r, very_verbose, "main_loop", "Calling execute on [%zu]", e);
 			func(delta_time);
 		}
 	}
@@ -63,10 +64,15 @@ namespace kengine::main_loop {
 	namespace time_modulated {
 		static float get_time_factor(const entt::registry & r) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, very_verbose, "main_loop", "Getting time factor");
 
 			float ret = 1.f;
-			for (const auto & [e, time_modulator] : r.view<data::time_modulator>().each())
+			for (const auto & [e, time_modulator] : r.view<data::time_modulator>().each()) {
+				kengine_logf(r, very_verbose, "main_loop", "Found time modulator [%zu] (%f)", e, time_modulator.factor);
 				ret *= time_modulator.factor;
+			}
+
+			kengine_logf(r, very_verbose, "main_loop", "Final time modulator: %f", ret);
 			return ret;
 		}
 

@@ -37,6 +37,7 @@ namespace kengine::systems {
 
 		log_visual_studio(entt::handle e) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(*e.registry(), log, "log_visual_studio", "Initializing");
 
 			auto & severity_control = e.emplace<log_severity_control>();
 			severity_control.severity = log_helper::parse_command_line_severity(*e.registry());

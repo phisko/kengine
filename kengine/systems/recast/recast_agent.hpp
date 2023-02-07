@@ -21,7 +21,7 @@ namespace kengine::data {
 			if (!crowd)
 				return;
 
-			kengine_logf(*crowd.registry(), verbose, "recast", "Removing agent from crowd %zu", crowd.entity());
+			kengine_logf(*crowd.registry(), verbose, "recast", "Removing agent from crowd [%zu]", crowd.entity());
 			const auto & crowd_component = crowd.get<data::recast_crowd>();
 			crowd_component.crowd->removeAgent(index);
 		}

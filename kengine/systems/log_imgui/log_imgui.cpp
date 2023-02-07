@@ -102,9 +102,12 @@ namespace kengine::systems {
 
 		void execute(float) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, very_verbose, "log_imgui", "Executing");
 
-			if (!*enabled)
+			if (!*enabled) {
+				kengine_log(r, very_verbose, "log_imgui", "Disabled");
 				return;
+			}
 
 			if (ImGui::Begin("log", enabled)) {
 				draw_filters();
@@ -115,17 +118,24 @@ namespace kengine::systems {
 
 		void draw_filters() noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, very_verbose, "log_imgui", "Drawing filters");
 
 			bool changed = false;
 			for (const auto & [severity, name] : magic_enum::enum_entries<log_severity>())
-				if (ImGui::Checkbox(putils::string<32>(name).c_str(), &filters.severities[(int)severity]))
+				if (ImGui::Checkbox(putils::string<32>(name).c_str(), &filters.severities[(int)severity])) {
+					kengine_logf(r, verbose, "log_imgui", "Filter for %s changed to %d", putils::string<32>(name).c_str(), filters.severities[(int)severity]);
 					changed = true;
+				}
 
-			if (ImGui::InputText("Category", filters.category_search, putils::lengthof(filters.category_search)))
+			if (ImGui::InputText("Category", filters.category_search, putils::lengthof(filters.category_search))) {
+				kengine_logf(r, verbose, "log_imgui", "Category filter changed to '%s'", filters.category_search);
 				changed = true;
+			}
 
-			if (ImGui::InputText("Thread", filters.thread_search, putils::lengthof(filters.thread_search)))
+			if (ImGui::InputText("Thread", filters.thread_search, putils::lengthof(filters.thread_search))) {
+				kengine_logf(r, verbose, "log_imgui", "Thread filter changed to '%s'", filters.thread_search);
 				changed = true;
+			}
 
 			if (changed)
 				update_filtered_events();
@@ -133,7 +143,7 @@ namespace kengine::systems {
 
 		void update_filtered_events() noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, verbose, "log_imgui", "Updating filters");
+			kengine_log(r, verbose, "log_imgui", "Updating filtered events");
 
 			const std::lock_guard lock(mutex);
 			filtered_events.clear();
@@ -159,6 +169,7 @@ namespace kengine::systems {
 
 		void draw_filtered_events() noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, very_verbose, "log_imgui", "Drawing filtered events");
 
 			if (ImGui::BeginTable("##logEvents", 4)) {
 				ImGui::TableSetupColumn("Severity");

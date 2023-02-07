@@ -98,7 +98,7 @@ def generate_registration_functions(types):
 		ret += '''
 	void pre_''' + type['function_name'] + '''(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_log(r, log, "register_types", "Pre-registering \'''' + type['type'] + '''\'");
+		kengine_log(r, verbose, "register_types", "Pre-registering \'''' + type['type'] + '''\'");
 '''
 
 		for registration in pre_registrators:
@@ -110,7 +110,7 @@ def generate_registration_functions(types):
 
 	void ''' + type['function_name'] + '''(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_log(r, log, "register_types", "Registering \'''' + type['type'] + '''\'");
+		kengine_log(r, verbose, "register_types", "Registering \'''' + type['type'] + '''\'");
 '''
 
 		for registration in registrators:

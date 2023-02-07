@@ -30,7 +30,7 @@ namespace kengine::systems {
 
 		void on_collision(entt::entity first, entt::entity second) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, verbose, "collision", "Collision between %zu and %zu", first, second);
+			kengine_logf(r, verbose, "collision", "Collision between [%zu] and [%zu]", first, second);
 			trigger(first, second);
 			trigger(second, first);
 		}

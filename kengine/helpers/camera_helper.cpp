@@ -12,11 +12,13 @@
 #include "kengine/data/window.hpp"
 
 // kengine helpers
+#include "kengine/helpers/log_helper.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
 
 namespace kengine::camera_helper {
 	viewport_info get_viewport_for_pixel(entt::handle window_entity, const putils::point2ui & pixel) noexcept {
 		KENGINE_PROFILING_SCOPE;
+		kengine_logf(*window_entity.registry(), very_verbose, "camera_helper", "Getting viewport for [%zu]'s pixel { %zu, %zu }", window_entity.entity(), pixel.x, pixel.y);
 
 		viewport_info ret;
 
@@ -24,10 +26,15 @@ namespace kengine::camera_helper {
 
 		float highest_z = -std::numeric_limits<float>::max();
 		for (const auto & [e, viewport] : window_entity.registry()->view<data::viewport>().each()) {
-			if (viewport.window != window_entity)
+			if (viewport.window != window_entity) {
+				kengine_logf(*window_entity.registry(), very_verbose, "camera_helper", "Dismissing viewport [%zu] because its window ([%zu]) does not match", e, viewport.window);
 				continue;
-			if (highest_z != -std::numeric_limits<float>::max() && highest_z >= viewport.z_order)
+			}
+
+			if (highest_z != -std::numeric_limits<float>::max() && highest_z >= viewport.z_order) {
+				kengine_logf(*window_entity.registry(), very_verbose, "camera_helper", "Dismissing viewport [%zu] because its z-order (%f) is below previously found [%zu]'s (%f)", e, viewport.z_order, ret.camera, highest_z);
 				continue;
+			}
 
 			const auto box = camera_helper::convert_to_screen_percentage(viewport.bounding_box, window.size, viewport);
 
@@ -38,8 +45,10 @@ namespace kengine::camera_helper {
 
 			if (pixel.x < start_x || pixel.y < start_y ||
 				pixel.x >= start_x + size_x ||
-				pixel.y >= start_y + size_y)
+				pixel.y >= start_y + size_y) {
+				kengine_logf(*window_entity.registry(), very_verbose, "camera_helper", "Dismissing viewport [%zu] because the pixel isn't in its bounds", e);
 				continue;
+			}
 
 			highest_z = viewport.z_order;
 
@@ -48,16 +57,20 @@ namespace kengine::camera_helper {
 			ret.viewport_percent = (ret.pixel - putils::point2f(box.position)) / putils::point2f(box.size);
 		}
 
+		kengine_logf(*window_entity.registry(), very_verbose, "camera_helper", "Found camera [%zu], pixel { %zu, %zu }, viewport percentage { %f, %f }", ret.camera, ret.pixel.x, ret.pixel.y, ret.viewport_percent.x, ret.viewport_percent.y);
 		return ret;
 	}
 
 	bool entity_appears_in_viewport(const entt::registry & r, entt::entity entity, entt::entity viewport_entity) noexcept {
 		KENGINE_PROFILING_SCOPE;
+		kengine_logf(r, very_verbose, "camera_helper", "Checking whether [%zu] appears in viewport [%zu]", entity, viewport_entity);
 
 		const auto wants_to_appear = [&](entt::entity lhs, entt::entity rhs) noexcept {
 			if (const auto appears_in_viewport = r.try_get<functions::appears_in_viewport>(lhs))
-				if (!appears_in_viewport->call(rhs))
+				if (!appears_in_viewport->call(rhs)) {
+					kengine_logf(r, very_verbose, "camera_helper", "[%zu] refused", lhs);
 					return false;
+				}
 			return true;
 		};
 

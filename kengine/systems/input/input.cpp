@@ -6,6 +6,7 @@
 
 // putils
 #include "putils/forward_to.hpp"
+#include "putils/reflection_helpers/json_helper.hpp"
 
 // kengine data
 #include "kengine/data/input.hpp"
@@ -17,6 +18,7 @@
 // kengine helpers
 #include "kengine/helpers/log_helper.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
+#include "kengine/helpers/json_helper.hpp"
 
 namespace kengine::systems {
 	struct input {
@@ -34,24 +36,37 @@ namespace kengine::systems {
 
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, very_verbose, "input", "Executing");
 
 			for (const auto & [e, comp] : r.view<data::input>().each()) {
-				for (const auto & e : buffer->keys)
-					if (comp.on_key != nullptr)
-						comp.on_key({ r, e.window }, e.key, e.pressed);
+				kengine_logf(r, very_verbose, "input", "Forwarding buffered events to [%zu]", e);
+
+				for (const auto & event : buffer->keys)
+					if (comp.on_key != nullptr) {
+						kengine_logf(r, very_verbose, "input", "Forwarding key event %s to [%zu]", putils::reflection::to_json(event).dump().c_str(), e);
+						comp.on_key({ r, event.window }, event.key, event.pressed);
+					}
 
 				if (comp.on_mouse_button != nullptr)
-					for (const auto & e : buffer->clicks)
-						comp.on_mouse_button({ r, e.window }, e.button, e.pos, e.pressed);
+					for (const auto & event : buffer->clicks) {
+						kengine_logf(r, very_verbose, "input", "Forwarding mouse button event %s to [%zu]", putils::reflection::to_json(event).dump().c_str(), e);
+						comp.on_mouse_button({ r, event.window }, event.button, event.pos, event.pressed);
+					}
 
 				if (comp.on_mouse_move != nullptr)
-					for (const auto & e : buffer->moves)
-						comp.on_mouse_move({ r, e.window }, e.pos, e.rel);
+					for (const auto & event : buffer->moves) {
+						kengine_logf(r, very_verbose, "input", "Forwarding mouse move event %s to [%zu]", putils::reflection::to_json(event).dump().c_str(), e);
+						comp.on_mouse_move({ r, event.window }, event.pos, event.rel);
+					}
 
 				if (comp.on_scroll != nullptr)
-					for (const auto & e : buffer->scrolls)
-						comp.on_scroll({ r, e.window }, e.xoffset, e.yoffset, e.pos);
+					for (const auto & event : buffer->scrolls) {
+						kengine_logf(r, very_verbose, "input", "Forwarding scroll event %s to [%zu]", putils::reflection::to_json(event).dump().c_str(), e);
+						comp.on_scroll({ r, event.window }, event.xoffset, event.yoffset, event.pos);
+					}
 			}
+
+			kengine_log(r, very_verbose, "input", "Clearing buffered events");
 			buffer->keys.clear();
 			buffer->clicks.clear();
 			buffer->moves.clear();

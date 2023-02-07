@@ -7,11 +7,13 @@
 
 // kengine helpers
 #include "kengine/helpers/assert_helper.hpp"
+#include "kengine/helpers/log_helper.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
 
 namespace kengine::skeleton_helper {
 	bone_indices get_bone_index(const entt::registry & r, const char * bone, const data::model_skeleton & model) noexcept {
 		KENGINE_PROFILING_SCOPE;
+		kengine_logf(r, very_verbose, "skeleton_helper", "Getting bone index for %s", bone);
 
 		bone_indices indexes;
 
@@ -32,6 +34,7 @@ namespace kengine::skeleton_helper {
 
 	glm::mat4 get_bone_matrix(const entt::registry & r, const char * bone, const data::skeleton & skeleton, const data::model_skeleton & model) noexcept {
 		KENGINE_PROFILING_SCOPE;
+		kengine_logf(r, very_verbose, "skeleton_helper", "Getting bone matrix for %s", bone);
 
 		const auto indexes = get_bone_index(r, bone, model);
 		if (indexes.mesh_index >= skeleton.meshes.size())
@@ -43,6 +46,7 @@ namespace kengine::skeleton_helper {
 
 	void set_bone_matrix(const entt::registry & r, const char * bone, const glm::mat4 & m, data::skeleton & skeleton, const data::model_skeleton & model) noexcept {
 		KENGINE_PROFILING_SCOPE;
+		kengine_logf(r, very_verbose, "skeleton_helper", "Setting bone matrix for %s", bone);
 
 		const auto indexes = get_bone_index(r, bone, model);
 		if (indexes.mesh_index >= skeleton.meshes.size())
