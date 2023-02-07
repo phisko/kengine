@@ -92,9 +92,12 @@ namespace kengine::systems {
 		bool search_out_of_date = true;
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, very_verbose, "imgui_adjustable", "Executing");
 
-			if (!*enabled)
+			if (!*enabled) {
+				kengine_log(r, very_verbose, "imgui_adjustable", "Disabled");
 				return;
+			}
 
 			observer.process();
 
@@ -108,11 +111,14 @@ namespace kengine::systems {
 				ImGui::Columns();
 
 				ImGui::Separator();
-				if (ImGui::InputText("Name", name_search, sizeof(name_search)))
+				if (ImGui::InputText("Name", name_search, sizeof(name_search))) {
+					kengine_logf(r, verbose, "imgui_adjustable", "Name search changed to '%s'", name_search);
 					search_out_of_date = true;
+				}
 				ImGui::Separator();
 
 				if (search_out_of_date) {
+					kengine_log(r, verbose, "imgui_adjustable", "Updating search results");
 					update_search_results("", root_section);
 					search_out_of_date = false;
 				}
@@ -265,6 +271,7 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 
 			auto & comp = r.get<data::adjustable>(e);
+			kengine_logf(r, verbose, "imgui_adjustable", "Adjustable destroyed in [%zu] (section %s)", e, comp.section.c_str());
 			remove_adjustable_from_section(comp, root_section);
 		}
 
@@ -291,8 +298,7 @@ namespace kengine::systems {
 
 		void init_adjustable(data::adjustable & comp) noexcept {
 			KENGINE_PROFILING_SCOPE;
-
-			kengine_logf(r, log, "imgui_adjustable", "Initializing section %s", comp.section.c_str());
+			kengine_logf(r, verbose, "imgui_adjustable", "Initializing section %s", comp.section.c_str());
 
 			const auto it = loaded_file.sections.find(comp.section.c_str());
 			if (it == loaded_file.sections.end()) {
@@ -308,7 +314,7 @@ namespace kengine::systems {
 					continue;
 				}
 
-				kengine_logf(r, log, "imgui_adjustable", "Initializing %s to %s", value.name.c_str(), it->second.c_str());
+				kengine_logf(r, verbose, "imgui_adjustable", "Initializing %s to %s", value.name.c_str(), it->second.c_str());
 				set_value(value, it->second.c_str());
 			}
 		}
@@ -354,7 +360,7 @@ namespace kengine::systems {
 
 		putils::ini_file load_ini_file() noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "imgui_adjustable", "Loading from " KENGINE_ADJUSTABLE_SAVE_FILE);
+			kengine_log(r, verbose, "imgui_adjustable", "Loading from " KENGINE_ADJUSTABLE_SAVE_FILE);
 
 			std::ifstream f(KENGINE_ADJUSTABLE_SAVE_FILE);
 
@@ -365,7 +371,7 @@ namespace kengine::systems {
 
 		void save() noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "imgui_adjustable", "Saving to " KENGINE_ADJUSTABLE_SAVE_FILE);
+			kengine_log(r, verbose, "imgui_adjustable", "Saving to " KENGINE_ADJUSTABLE_SAVE_FILE);
 
 			std::ofstream f(KENGINE_ADJUSTABLE_SAVE_FILE, std::ofstream::trunc);
 			if (!f) {
@@ -376,26 +382,32 @@ namespace kengine::systems {
 			putils::ini_file ini;
 
 			for (const auto & [e, comp] : r.view<data::adjustable>().each()) {
+				kengine_logf(r, verbose, "imgui_adjustable", "Adding section %s to INI file", e, comp.section.c_str());
 				auto & section = ini.sections[comp.section.c_str()];
 
 				for (const auto & value : comp.values) {
+					kengine_logf(r, verbose, "imgui_adjustable", "Adding value %s to section %s of INI file", e, value.name.c_str());
 					auto & ini_value = section.values[value.name.c_str()];
 
 					switch (value.type) {
 						case data::adjustable::value_type::Int: {
 							ini_value = putils::to_string(value.int_storage.value);
+							kengine_logf(r, verbose, "imgui_adjustable", "Adding int value %s", e, ini_value.c_str());
 							break;
 						}
 						case data::adjustable::value_type::Float: {
 							ini_value = putils::to_string(value.float_storage.value);
+							kengine_logf(r, verbose, "imgui_adjustable", "Adding float value %s", e, ini_value.c_str());
 							break;
 						}
 						case data::adjustable::value_type::Bool: {
 							ini_value = putils::to_string(value.bool_storage.value);
+							kengine_logf(r, verbose, "imgui_adjustable", "Adding bool value %s", e, ini_value.c_str());
 							break;
 						}
 						case data::adjustable::value_type::Color: {
 							ini_value = putils::to_string(putils::to_rgba(value.color_storage.value));
+							kengine_logf(r, verbose, "imgui_adjustable", "Adding color value %s", e, ini_value.c_str());
 							break;
 						}
 						default: {

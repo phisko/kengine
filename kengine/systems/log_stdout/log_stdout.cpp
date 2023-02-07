@@ -35,6 +35,7 @@ namespace kengine::systems {
 
 		log_stdout(entt::handle e) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(*e.registry(), log, "log_stdout", "Initializing");
 
 			auto & severity_control = e.emplace<log_severity_control>();
 			severity_control.severity = log_helper::parse_command_line_severity(*e.registry());

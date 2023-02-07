@@ -13,11 +13,13 @@
 #include "kengine/data/highlight.hpp"
 
 // kengine helpers
+#include "kengine/helpers/log_helper.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
 
 kengine::highlight_shader::highlight_shader(const entt::registry & r) noexcept
 	: _r(&r) {
 	KENGINE_PROFILING_SCOPE;
+	kengine_log(r, log, "kreogl", "Initializing highlight shader");
 
 	init("highlight_shader");
 
@@ -29,12 +31,15 @@ kengine::highlight_shader::highlight_shader(const entt::registry & r) noexcept
 
 void kengine::highlight_shader::add_source_files() noexcept {
 	KENGINE_PROFILING_SCOPE;
+	kengine_log(*_r, verbose, "kreogl", "Adding source files for highlight shader");
 
 	add_source_file(kreogl::quad_glsl::vert, GL_VERTEX_SHADER);
 	add_source_file(highlight_glsl::frag, GL_FRAGMENT_SHADER);
 }
 
 std::vector<kreogl::uniform_base *> kengine::highlight_shader::get_uniforms() noexcept {
+	kengine_log(*_r, verbose, "kreogl", "Getting uniforms for highlight shader");
+
 	return {
 		&_glsl.gposition,
 		&_glsl.guser_data,
@@ -48,6 +53,7 @@ std::vector<kreogl::uniform_base *> kengine::highlight_shader::get_uniforms() no
 
 void kengine::highlight_shader::draw(const kreogl::draw_params & params) noexcept {
 	KENGINE_PROFILING_SCOPE;
+	kengine_log(*_r, very_verbose, "kreogl", "Drawing highlight shader");
 
 	auto uniform_checker = use(false);
 
@@ -59,6 +65,8 @@ void kengine::highlight_shader::draw(const kreogl::draw_params & params) noexcep
 	_glsl.screen_size = params.camera.get_viewport().get_resolution();
 
 	for (const auto & [entity, highlight] : _r->view<data::highlight>().each()) {
+		kengine_logf(*_r, very_verbose, "kreogl", "Drawing highlights for [%zu]", entity);
+
 		uniform_checker.should_check = true;
 		_glsl.entity_id = float(entity);
 		_glsl.highlight_color = { highlight.color.r, highlight.color.g, highlight.color.b, highlight.color.a };

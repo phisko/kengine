@@ -34,13 +34,16 @@ namespace kengine::systems {
 
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, very_verbose, "kinematic", "Executing");
 
 			for (const auto & [e, transform, physics] : r.view<data::transform, data::physics, data::kinematic>().each()) {
+				kengine_logf(r, very_verbose, "kinematic", "Moving [%zu]", e);
+
 				transform.bounding_box.position += physics.movement * delta_time;
 
-				const auto apply_rotation = [delta_time](float & transformMember, float physicsMember) noexcept {
-					transformMember += physicsMember * delta_time;
-					transformMember = putils::constrain_angle(transformMember);
+				const auto apply_rotation = [delta_time](float & transform_member, float physics_member) noexcept {
+					transform_member += physics_member * delta_time;
+					transform_member = putils::constrain_angle(transform_member);
 				};
 
 				apply_rotation(transform.pitch, physics.pitch);

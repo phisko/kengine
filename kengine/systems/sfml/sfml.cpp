@@ -108,6 +108,7 @@ namespace kengine::systems {
 		kengine::backward_compatible_observer<data::model> model_observer{ r, putils_forward_to_this(create_texture) };
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, very_verbose, "sfml", "Executing");
 
 			window_observer.process();
 			model_observer.process();
@@ -115,14 +116,16 @@ namespace kengine::systems {
 			const auto sf_delta_time = delta_clock.restart();
 
 			if (input_buffer == nullptr) {
+				kengine_log(r, verbose, "sfml", "Finding input buffer");
 				for (const auto & [e, buffer] : r.view<data::input_buffer>().each()) {
 					input_buffer = &buffer;
 					break;
 				}
 			}
 
+			kengine_log(r, very_verbose, "sfml", "Processing windows");
 			for (auto [window, sf_window] : r.view<data::sfml_window>().each()) {
-				kengine_logf(r, verbose, "sfml", "Processing window %zu", window);
+				kengine_logf(r, very_verbose, "sfml", "Processing window [%zu]", window);
 				if (!update_window_state(window, sf_window))
 					continue;
 				// We process events after rendering, even though it's not the expected order, because
@@ -134,16 +137,17 @@ namespace kengine::systems {
 
 		bool update_window_state(entt::entity window_entity, data::sfml_window & sf_window_comp) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_logf(r, very_verbose, "sfml", "Updating window state for [%zu]", window_entity);
 
 			const auto * window_comp = r.try_get<data::window>(window_entity);
 			if (window_comp == nullptr) {
-				kengine_logf(r, verbose, "sfml", "Destroying window %zu as data::window was removed", window_entity);
+				kengine_logf(r, verbose, "sfml", "Destroying window [%zu] as data::window was removed", window_entity);
 				r.remove<data::sfml_window>(window_entity);
 				return false;
 			}
 
 			if (!sf_window_comp.window->isOpen()) {
-				kengine_logf(r, verbose, "sfml", "Destroying %zu because window was closed", window_entity);
+				kengine_logf(r, verbose, "sfml", "Destroying [%zu] because window was closed", window_entity);
 				r.destroy(window_entity);
 				return false;
 			}
@@ -154,6 +158,7 @@ namespace kengine::systems {
 
 		void process_events(entt::entity window, sf::RenderWindow & sf_window, sf::Time delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_logf(r, very_verbose, "sfml", "Processing events for [%zu]", window);
 
 			sf::Event event;
 			while (sf_window.pollEvent(event)) {
@@ -170,9 +175,12 @@ namespace kengine::systems {
 		putils::point2f previous_mouse_pos{ 0.f, 0.f };
 		void process_input(entt::entity window, const sf::Event & e) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_logf(r, very_verbose, "sfml", "Processing input event for [%zu]", window);
 
-			if (input_buffer == nullptr)
+			if (input_buffer == nullptr) {
+				kengine_log(r, verbose, "sfml", "No input buffer, cannot process event");
 				return;
+			}
 
 			switch (e.type) {
 				case sf::Event::KeyPressed:
@@ -235,6 +243,7 @@ namespace kengine::systems {
 
 		void render(entt::entity window_entity, data::sfml_window & sf_window) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_logf(r, very_verbose, "sfml", "Rendering to [%zu]", window_entity);
 
 			sf_window.window->clear();
 
@@ -245,15 +254,20 @@ namespace kengine::systems {
 			putils::vector<viewport_to_blit, KENGINE_MAX_VIEWPORTS> to_blit;
 
 			for (auto [e, cam, viewport] : r.view<data::camera, data::viewport>().each()) {
+				kengine_logf(r, very_verbose, "sfml", "Rendering to camera [%zu]", e);
+
 				if (viewport.window == entt::null) {
-					kengine_logf(r, log, "sfml", "Setting target window for data::viewport in %zu", e);
+					kengine_logf(r, verbose, "sfml", "Setting target window for data::viewport in [%zu]", e);
 					viewport.window = window_entity;
 				}
-				else if (viewport.window != window_entity)
+				else if (viewport.window != window_entity) {
+					kengine_logf(r, very_verbose, "sfml", "Skipping camera [%zu] because its viewport ([%zu]) doesn't match", e, viewport.window);
 					continue;
+				}
 
 				sf::RenderTexture * render_texture = (sf::RenderTexture *)viewport.texture;
 				if (viewport.texture == data::viewport::INVALID_RENDER_TEXTURE) {
+					kengine_logf(r, verbose, "sfml", "Creating render texture for camera [%zu]", e);
 					render_texture = new sf::RenderTexture;
 					render_texture->create(viewport.resolution.x, viewport.resolution.y);
 					viewport.texture = (data::viewport::render_texture)render_texture;
@@ -279,6 +293,7 @@ namespace kengine::systems {
 
 		void render_to_texture(sf::RenderTexture & render_texture) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, very_verbose, "sfml", "Rendering to texture");
 
 			render_texture.clear();
 
@@ -307,9 +322,11 @@ namespace kengine::systems {
 				std::vector<element> ordered_elements;
 			} drawables;
 
+			kengine_log(r, very_verbose, "sfml", "Queueing sprites");
 			for (const auto & [e, transform, graphics] : r.view<data::transform, data::graphics>().each()) {
 				auto sprite = create_entity_sprite(e, transform, graphics);
 				if (sprite != std::nullopt) {
+					kengine_logf(r, very_verbose, "sfml", "Queueing sprite for [%zu]", e);
 					drawables.sprites.emplace_back(std::move(*sprite));
 					drawables.ordered_elements.push_back({
 						.type = drawables::element::sprite,
@@ -319,7 +336,9 @@ namespace kengine::systems {
 				}
 			}
 
+			kengine_log(r, very_verbose, "sfml", "Queueing debug graphics");
 			for (const auto & [e, transform, debug] : r.view<data::transform, data::debug_graphics>().each()) {
+				kengine_logf(r, very_verbose, "sfml", "Queueing debug graphics for [%zu]", e);
 				for (const auto & element : debug.elements) {
 					const sf::Color color(convert_color(element.color));
 
@@ -381,10 +400,12 @@ namespace kengine::systems {
 				}
 			}
 
+			kengine_log(r, very_verbose, "sfml", "Sorting drawables");
 			std::ranges::sort(drawables.ordered_elements, [](const drawables::element & lhs, const drawables::element & rhs) noexcept {
 				return lhs.height < rhs.height;
 			});
 
+			kengine_log(r, very_verbose, "sfml", "Drawing drawables");
 			for (const auto & element : drawables.ordered_elements) {
 				switch (element.type) {
 					case drawables::element::sprite: {
@@ -420,10 +441,13 @@ namespace kengine::systems {
 
 		std::optional<sf::Sprite> create_entity_sprite(entt::entity e, const data::transform & transform, const data::graphics & graphics) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_logf(r, very_verbose, "sfml", "Creating entity sprite for [%zu] (%s)", e, graphics.appearance.c_str());
 
 			const auto * texture = instance_helper::try_get_model<data::sfml_texture>({ r, e });
-			if (texture == nullptr)
+			if (texture == nullptr) {
+				kengine_logf(r, warning, "sfml", "Failed to find sfml_texture in [%zu]'s model", e);
 				return std::nullopt;
+			}
 
 			sf::Sprite sprite(texture->texture);
 			sprite.setColor(convert_color(graphics.color));
@@ -437,6 +461,7 @@ namespace kengine::systems {
 
 		sf::Sprite create_render_texture_sprite(const sf::RenderTexture & render_texture, const sf::RenderWindow & window, const data::viewport & viewport) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, verbose, "sfml", "Creating render texture sprite");
 
 			sf::Sprite render_texture_sprite(render_texture.getTexture());
 
@@ -452,8 +477,7 @@ namespace kengine::systems {
 
 		void create_window(entt::entity e, const data::window & window_comp) noexcept {
 			KENGINE_PROFILING_SCOPE;
-
-			kengine_logf(r, log, "sfml", "Creating window '%s'", window_comp.name.c_str());
+			kengine_logf(r, log, "sfml", "Creating window for [%zu] (%s)", e, window_comp.name.c_str());
 
 			auto & sf_window = r.emplace<data::sfml_window>(
 				e,
@@ -478,6 +502,7 @@ namespace kengine::systems {
 
 		void create_texture(entt::entity e, const data::model & model) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_logf(r, verbose, "sfml", "Attempting to load texture for [%zu] (%s)", e, model.file.c_str());
 
 			sf::Texture texture;
 			if (texture.loadFromFile(model.file.c_str())) {

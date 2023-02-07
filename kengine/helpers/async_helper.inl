@@ -37,6 +37,7 @@ namespace kengine {
 	template<typename T, std::invocable<entt::entity, T &&> Func>
 	bool process_async_results(entt::registry & r, Func && func) noexcept {
 		KENGINE_PROFILING_SCOPE;
+		kengine_log(r, very_verbose, "async", "Processing async results");
 
 		const auto now = std::chrono::system_clock::now();
 

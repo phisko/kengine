@@ -10,12 +10,14 @@ namespace kengine {
 		  observer(r, entt::collector.group<Comps...>()),
 		  callback(callback) {
 		KENGINE_PROFILING_SCOPE;
+		kengine_log(r, very_verbose, "backward_compatible_observer", "Applying callback to existing entities");
 		r.view<Comps...>().each(callback);
 	}
 
 	template<typename... Comps>
 	void backward_compatible_observer<Comps...>::process() noexcept {
 		KENGINE_PROFILING_SCOPE;
+		kengine_log(r, very_verbose, "backward_compatible_observer", "Applying callback to new entities");
 		for (const auto e : observer)
 			callback(e, r.get<Comps>(e)...);
 		observer.clear();

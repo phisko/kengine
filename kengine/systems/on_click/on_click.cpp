@@ -31,20 +31,22 @@ namespace kengine::systems {
 				return;
 
 			const auto & r = *window.registry();
-			kengine_logf(r, log, "on_click", "Click in { %f, %f }", coords.x, coords.y);
+			kengine_logf(r, verbose, "on_click", "Click in { %f, %f }", coords.x, coords.y);
 
 			for (const auto & [_, get_entity] : r.view<functions::get_entity_in_pixel>().each()) {
 				const auto e = get_entity(window, coords);
-				if (e == entt::null)
+				if (e == entt::null) {
+					kengine_log(r, verbose, "on_click", "No entity found in pixel");
 					continue;
+				}
 
 				const auto on_click = r.try_get<functions::on_click>(e);
 				if (on_click) {
-					kengine_logf(r, log, "on_click", "Calling on_click on %zu", e);
+					kengine_logf(r, log, "on_click", "Calling on_click on [%zu]", e);
 					on_click->call(button);
 				}
 				else
-					kengine_logf(r, log, "on_click", "Clicked %zu, did not have on_click", e);
+					kengine_logf(r, verbose, "on_click", "Clicked [%zu], did not have on_click", e);
 			}
 		}
 	};

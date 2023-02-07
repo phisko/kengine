@@ -32,8 +32,8 @@ namespace kengine::script_language_helper {
 	template<typename Func, typename Func2>
 	void init(entt::registry & r, Func && register_function, Func2 && register_type) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_log(r, verbose, "script_language_helper", "Registering function create_entity");
 
+		kengine_log(r, verbose, "script_language_helper", "Registering function create_entity");
 		register_function(
 			"create_entity",
 			function<entt::handle()>(

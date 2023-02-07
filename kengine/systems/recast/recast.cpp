@@ -60,6 +60,7 @@ namespace kengine::systems {
 		};
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, very_verbose, "recast", "Executing");
 
 			observer.process();
 

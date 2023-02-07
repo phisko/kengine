@@ -19,12 +19,16 @@
 namespace kengine::json_helper {
 	void load_entity(const nlohmann::json & entity_json, entt::handle e) noexcept {
 		KENGINE_PROFILING_SCOPE;
+		kengine_logf(*e.registry(), verbose, "json_helper", "Loading [%zu] from JSON", e.entity());
+		kengine_logf(*e.registry(), very_verbose, "json_helper", "Input: %s", entity_json.dump(4).c_str());
+
 		for (const auto & [_, loader] : e.registry()->view<const meta::load_from_json>().each())
 			loader(entity_json, e);
 	}
 
 	nlohmann::json save_entity(entt::const_handle e) noexcept {
 		KENGINE_PROFILING_SCOPE;
+		kengine_logf(*e.registry(), verbose, "json_helper", "Saving [%zu] to JSON", e.entity());
 
 		nlohmann::json ret;
 
@@ -37,6 +41,7 @@ namespace kengine::json_helper {
 			ret[name->name.c_str()] = save->call(e);
 		}
 
+		kengine_logf(*e.registry(), very_verbose, "json_helper", "Output: %s", ret.dump(4).c_str());
 		return ret;
 	}
 }

@@ -58,13 +58,18 @@ namespace kengine::systems {
 		bool search_out_of_date = true;
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, very_verbose, "imgui_entity_selector", "Executing");
 
-			if (!*enabled)
+			if (!*enabled) {
+				kengine_log(r, very_verbose, "imgui_entity_selector", "Disabled");
 				return;
+			}
 
 			if (ImGui::Begin("Entity selector", enabled)) {
-				if (ImGui::InputText("Search", name_search, sizeof(name_search)))
+				if (ImGui::InputText("Search", name_search, sizeof(name_search))) {
+					kengine_logf(r, verbose, "imgui_entity_selector", "New name search entered: '%s'", name_search);
 					search_out_of_date = true;
+				}
 
 				if (search_out_of_date) {
 					update_search_results();
@@ -82,6 +87,7 @@ namespace kengine::systems {
 
 		void update_search_results() noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, verbose, "imgui_entity_selector", "Updating search results");
 
 			search_results.clear();
 			r.each([&](entt::entity e) {
@@ -91,6 +97,7 @@ namespace kengine::systems {
 
 		void apply_search(entt::entity e) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_logf(r, very_verbose, "imgui_entity_selector", "Applying search to [%zu]", e);
 
 			search_result result {
 				e,
@@ -108,13 +115,14 @@ namespace kengine::systems {
 
 				bool matches = false;
 				if (std::isdigit(name_search[0]) && putils::parse<entt::entity>(name_search) == e) {
+					kengine_log(r, very_verbose, "imgui_entity_selector", "Match found in ID");
 					matches = true;
 					result.display_text += "ID";
 				}
 				else {
 					const auto types = sort_helper::get_name_sorted_entities<const meta::has, const meta::match_string>(r);
 
-					for (const auto & [_, type, has, match_func] : types) {
+					for (const auto & [type_entity, type, has, match_func] : types) {
 						if (!has->call({ r, e }) || !match_func->call({ r, e }, name_search))
 							continue;
 
@@ -123,12 +131,16 @@ namespace kengine::systems {
 								result.display_text += ", ";
 							result.display_text += type->name;
 						}
+
+						kengine_logf(r, very_verbose, "imgui_entity_selector", "Match found in %s", r.get<data::name>(type_entity));
 						matches = true;
 					}
 				}
 
-				if (!matches)
+				if (!matches) {
+					kengine_log(r, very_verbose, "imgui_entity_selector", "No match found");
 					return;
+				}
 			}
 
 			search_results.push_back(result);
@@ -136,18 +148,24 @@ namespace kengine::systems {
 
 		void display_search_results() noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, very_verbose, "imgui_entity_selector", "Displaying search results");
 
 			for (const auto & result : search_results)
 				if (display_search_result(result)) {
-					if (r.all_of<data::selected>(result.e))
+					if (r.all_of<data::selected>(result.e)) {
+						kengine_logf(r, log, "imgui_entity_selector", "De-selecting [%zu]", result.e);
 						r.erase<data::selected>(result.e);
-					else
+					}
+					else {
+						kengine_logf(r, log, "imgui_entity_selector", "Selecting [%zu]", result.e);
 						r.emplace<data::selected>(result.e);
+					}
 				}
 		}
 
 		bool display_search_result(const search_result & result) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_logf(r, very_verbose, "imgui_entity_selector", "Displaying search result [%zu]", result.e);
 
 			ImGui::PushID(int(result.e));
 
@@ -155,9 +173,12 @@ namespace kengine::systems {
 
 			const auto open_tree_node = ImGui::TreeNode(result.display_text.c_str());
 			if (ImGui::BeginPopupContextItem()) {
-				if (ImGui::MenuItem("Select"))
+				if (ImGui::MenuItem("Select")) {
+					kengine_logf(r, log, "imgui_entity_selector", "Toggling selection for [%zu]", result.e);
 					ret = true;
+				}
 				if (ImGui::MenuItem("Remove")) {
+					kengine_logf(r, log, "imgui_entity_selector", "Destroying [%zu]", result.e);
 					r.destroy(result.e);
 					ret = false;
 				}

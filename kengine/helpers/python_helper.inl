@@ -74,11 +74,12 @@ namespace kengine::python_helper {
 	template<bool IsComponent, typename... Types>
 	void register_types(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
+		kengine_log(r, verbose, "python", "Registering types");
 
 		putils::for_each_type<Types...>([&](auto && t) noexcept {
 			using type = putils_wrapped_type(t);
 
-			kengine_logf(r, log, "python", "Registering type %s", putils::reflection::get_class_name<type>());
+			kengine_logf(r, verbose, "python", "Registering type %s", putils::reflection::get_class_name<type>());
 			// No point in multithreading this since the GIL can only be owned by one thread
 			for (const auto & [e, comp] : r.view<data::python_state>().each())
 				impl::register_type_with_state<IsComponent, type>(r, comp);

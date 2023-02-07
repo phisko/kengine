@@ -68,6 +68,7 @@ namespace kengine::systems {
 		kengine::backward_compatible_observer<data::imgui_tool> observer{ r, putils_forward_to_this(on_construct_imgui_tool) };
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, very_verbose, "imgui_tool", "Executing");
 
 			observer.process();
 
@@ -76,8 +77,10 @@ namespace kengine::systems {
 				if (ImGui::BeginMenu("Tools")) {
 					if (ImGui::MenuItem("Disable all")) {
 						kengine_log(r, log, "imgui_tool", "Disabling all tools");
-						for (auto [e, tool] : r.view<data::imgui_tool>().each())
+						for (auto [e, tool] : r.view<data::imgui_tool>().each()) {
+							kengine_logf(r, verbose, "imgui_tool", "Disabling %s", r.get<data::name>(e));
 							tool.enabled = false;
+						}
 					}
 
 					for (const auto & [name, entry] : root_entry.subentries)
@@ -93,6 +96,7 @@ namespace kengine::systems {
 
 		void display_menu_entry(const char * name, const menu_entry & entry, bool & must_save) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_logf(r, very_verbose, "imgui_tool", "Displaying menu entry %s", name);
 
 			if (entry.tool) {
 				if (ImGui::MenuItem(name, nullptr, entry.tool->enabled)) {
@@ -119,7 +123,7 @@ namespace kengine::systems {
 				return;
 			}
 
-			kengine_logf(r, log, "imgui_tool", "Initializing %s", name->name.c_str());
+			kengine_logf(r, verbose, "imgui_tool", "Initializing %s", name->name.c_str());
 			const auto & section = configuration.sections["Tools"];
 			if (const auto it = section.values.find(name->name.c_str()); it != section.values.end())
 				tool.enabled = putils::parse<bool>(it->second);
@@ -137,6 +141,7 @@ namespace kengine::systems {
 
 		void on_destroy_imgui_tool(entt::registry & r, entt::entity e) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_logf(r, verbose, "imgui_tool", "Destroyed ImGui tool in [%zu]", e);
 
 			const auto & tool = r.get<data::imgui_tool>(e);
 			if (!remove_tool_from_entry(tool, root_entry))
@@ -175,8 +180,11 @@ namespace kengine::systems {
 			auto & section = output_configuration.sections["Tools"];
 
 			const auto sorted = sort_helper::get_name_sorted_entities<KENGINE_IMGUI_MAX_TOOLS, data::imgui_tool>(r);
-			for (const auto & [e, name, tool] : sorted)
-				section.values[name->name.c_str()] = putils::to_string(tool->enabled);
+			for (const auto & [e, name, tool] : sorted) {
+				std::string value = putils::to_string(tool->enabled);
+				kengine_logf(r, verbose, "imgui_tool", "Saving %s (%s)", name->name.c_str(), value.c_str());
+				section.values[name->name.c_str()] = std::move(value);
+			}
 
 			f << output_configuration;
 		}

@@ -41,9 +41,12 @@ namespace kengine::systems {
 
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, very_verbose, "imgui_async_task", "Executing");
 
-			if (!*enabled)
+			if (!*enabled) {
+				kengine_log(r, very_verbose, "imgui_async_task", "Disabled");
 				return;
+			}
 
 			if (ImGui::Begin("Async tasks", enabled)) {
 				if (ImGui::BeginTable("Tasks", 2)) {
@@ -53,6 +56,8 @@ namespace kengine::systems {
 
 					const auto now = std::chrono::system_clock::now();
 					for (const auto & [e, async_task] : r.view<data::async_task>().each()) {
+						kengine_logf(r, very_verbose, "imgui_async_task", "Found async task %s", async_task.name.c_str());
+
 						ImGui::TableNextRow();
 
 						ImGui::TableNextColumn();
