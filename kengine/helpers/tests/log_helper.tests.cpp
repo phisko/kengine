@@ -10,6 +10,8 @@
 TEST(log_helper, log_helper) {
 	entt::registry r;
 
+	kengine::log_helper::set_minimum_log_severity(r, kengine::log_severity::verbose);
+
 	struct event {
 		kengine::log_severity severity;
 		std::string category;
