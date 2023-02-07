@@ -40,3 +40,18 @@ namespace kengine::json_helper {
 		return ret;
 	}
 }
+
+namespace putils::reflection::detail::json {
+	template<>
+	void from_to_json(const nlohmann::json & json_object, entt::entity & obj) noexcept {
+		auto non_enum_value = entt::id_type(obj);
+		from_to_json(json_object, non_enum_value);
+		obj = entt::entity(non_enum_value);
+	}
+
+	template<>
+	inline void from_to_json(nlohmann::json & json_object, const entt::entity & obj) noexcept {
+		const auto non_enum_value = entt::id_type(obj);
+		from_to_json(json_object, non_enum_value);
+	}
+}
