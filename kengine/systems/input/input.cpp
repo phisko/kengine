@@ -18,7 +18,6 @@
 // kengine helpers
 #include "kengine/helpers/log_helper.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
-#include "kengine/helpers/json_helper.hpp"
 
 namespace kengine::systems {
 	struct input {
