@@ -1,8 +1,15 @@
 #include "json_helper.hpp"
 
+// stl
+#include <algorithm>
+#include <execution>
+
 // entt
 #include <entt/entity/handle.hpp>
 #include <entt/entity/registry.hpp>
+
+// putils
+#include "putils/range.hpp"
 
 // kengine data
 #include "kengine/data/name.hpp"
@@ -22,8 +29,11 @@ namespace kengine::json_helper {
 		kengine_logf(*e.registry(), verbose, "json_helper", "Loading [%u] from JSON", e.entity());
 		kengine_logf(*e.registry(), very_verbose, "json_helper", "Input: %s", entity_json.dump(4).c_str());
 
-		for (const auto & [_, loader] : e.registry()->view<const meta::load_from_json>().each())
+		const auto view = e.registry()->view<const meta::load_from_json>();
+		std::for_each(std::execution::par_unseq, putils_range(view), [&](entt::entity loader_entity) {
+			const auto & [loader] = view.get(loader_entity);
 			loader(entity_json, e);
+		});
 	}
 
 	nlohmann::json save_entity(entt::const_handle e) noexcept {
