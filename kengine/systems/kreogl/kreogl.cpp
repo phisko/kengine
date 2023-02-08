@@ -65,7 +65,6 @@
 
 // kengine helpers
 #include "kengine/helpers/async_helper.hpp"
-#include "kengine/helpers/backward_compatible_observer.hpp"
 #include "kengine/helpers/camera_helper.hpp"
 #include "kengine/helpers/imgui_helper.hpp"
 #include "kengine/helpers/instance_helper.hpp"
@@ -103,6 +102,7 @@ namespace kengine::systems {
 			e.emplace<functions::get_position_in_pixel>(putils_forward_to_this(get_position_in_pixel));
 
 			init_window();
+			process_new_entities();
 		}
 
 		void init_window() noexcept {
@@ -179,22 +179,40 @@ namespace kengine::systems {
 			ImGui::NewFrame();
 		}
 
-		kengine::backward_compatible_observer<data::model> model_observer{ r, putils_forward_to_this(create_model_from_disk) };
-		kengine::backward_compatible_observer<data::animation_files> animation_observer{ r, putils_forward_to_this(load_animation_files) };
-		kengine::backward_compatible_observer<data::sky_box_model> sky_box_observer{ r, putils_forward_to_this(create_sky_box_from_disk) };
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, very_verbose, "kreogl", "Executing");
 
-			model_observer.process();
-			animation_observer.process();
-			sky_box_observer.process();
+			process_new_entities();
 
 			complete_loading_tasks();
 			load_models_to_opengl();
 			create_missing_objects();
 			tick_animations(delta_time);
 			draw();
+		}
+
+		struct processed_model {};
+		struct processed_animation_files {};
+		struct processed_sky_box {};
+		void process_new_entities() noexcept {
+			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, very_verbose, "kreogl", "Processing new entities");
+
+			for (const auto & [e, model] : r.view<data::model>(entt::exclude<processed_model>).each()) {
+				r.emplace<processed_model>(e);
+				create_model_from_disk(e, model);
+			}
+
+			for (const auto & [e, animation_files] : r.view<data::animation_files>(entt::exclude<processed_animation_files>).each()) {
+				r.emplace<processed_animation_files>(e);
+				load_animation_files(e, animation_files);
+			}
+
+			for (const auto & [e, sky_box] : r.view<data::sky_box_model>(entt::exclude<processed_sky_box>).each()) {
+				r.emplace<processed_sky_box>(e);
+				create_sky_box_from_disk(e, sky_box);
+			}
 		}
 
 		void create_model_from_disk(entt::entity model_entity, const data::model & model) noexcept {
@@ -1092,6 +1110,9 @@ namespace kengine::systems {
 
 	DEFINE_KENGINE_SYSTEM_CREATOR(
 		kreogl,
+		kreogl::processed_animation_files,
+		kreogl::processed_model,
+		kreogl::processed_sky_box,
 		data::kreogl_animation_files,
 		data::kreogl_debug_graphics,
 		data::kreogl_model,

@@ -24,7 +24,6 @@
 
 // kengine helpers
 #include "kengine/helpers/assert_helper.hpp"
-#include "kengine/helpers/backward_compatible_observer.hpp"
 #include "kengine/helpers/log_helper.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
 
@@ -43,6 +42,8 @@ namespace kengine::systems {
 
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 			e.emplace<functions::on_mouse_captured>(putils_forward_to_this(on_mouse_captured));
+
+			process_new_entities();
 		}
 
 		~glfw() noexcept {
@@ -79,14 +80,11 @@ namespace kengine::systems {
 			glfwSetInputMode(glfw->window.get(), GLFW_CURSOR, input_mode);
 		}
 
-		kengine::backward_compatible_observer<data::input_buffer> input_buffer_observer{ r, putils_forward_to_this(set_input_buffer) };
-		kengine::backward_compatible_observer<data::window, data::glfw_window_init> window_observer{ r, putils_forward_to_this(create_window) };
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, very_verbose, "glfw", "Executing");
 
-			input_buffer_observer.process();
-			window_observer.process();
+			process_new_entities();
 
 			kengine_log(r, very_verbose, "glfw", "Polling events");
 			glfwPollEvents();
@@ -99,6 +97,18 @@ namespace kengine::systems {
 					r.destroy(e);
 				}
 			}
+		}
+
+		void process_new_entities() noexcept {
+			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, very_verbose, "glfw", "Processing new entities");
+
+			if (input_handler.buffer == nullptr)
+				for (const auto & [e, input_buffer] : r.view<data::input_buffer>().each())
+					set_input_buffer(e, input_buffer);
+
+			for (const auto & [e, window, glfw_window_init] : r.view<data::window, data::glfw_window_init>(entt::exclude<data::glfw_window>).each())
+				create_window(e, window, glfw_window_init);
 		}
 
 		void set_input_buffer(entt::entity e, data::input_buffer & input_buffer) noexcept {

@@ -31,7 +31,6 @@
 
 // kengine helpers
 #include "kengine/helpers/assert_helper.hpp"
-#include "kengine/helpers/backward_compatible_observer.hpp"
 #include "kengine/helpers/log_helper.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
 
@@ -83,12 +82,13 @@ namespace kengine::systems {
 			e.emplace<data::name>("Adjustables");
 			auto & tool = e.emplace<data::imgui_tool>();
 			enabled = &tool.enabled;
+
+			process_new_entities();
 		}
 
 		char name_search[1024] = "";
 		using string = data::adjustable::string;
 		using sections = std::vector<std::string>;
-		kengine::backward_compatible_observer<data::adjustable> observer{ r, putils_forward_to_this(on_construct_adjustable) };
 		bool search_out_of_date = true;
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
@@ -99,7 +99,7 @@ namespace kengine::systems {
 				return;
 			}
 
-			observer.process();
+			process_new_entities();
 
 			if (ImGui::Begin("Adjustables", enabled)) {
 				ImGui::Columns(2);
@@ -129,6 +129,14 @@ namespace kengine::systems {
 				ImGui::EndChild();
 			}
 			ImGui::End();
+		}
+
+		struct processed {};
+		void process_new_entities() noexcept {
+			for (const auto & [e, adjustable] : r.view<data::adjustable>(entt::exclude<processed>).each()) {
+				r.emplace<processed>(e);
+				on_construct_adjustable(e, adjustable);
+			}
 		}
 
 		void update_search_results(const std::string & name, section & section) noexcept {
@@ -423,5 +431,8 @@ namespace kengine::systems {
 		}
 	};
 
-	DEFINE_KENGINE_SYSTEM_CREATOR(imgui_adjustable)
+	DEFINE_KENGINE_SYSTEM_CREATOR(
+		imgui_adjustable,
+		imgui_adjustable::processed
+	)
 }

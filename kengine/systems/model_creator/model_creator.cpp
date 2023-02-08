@@ -16,7 +16,6 @@
 #include "kengine/functions/execute.hpp"
 
 // kengine helpers
-#include "kengine/helpers/backward_compatible_observer.hpp"
 #include "kengine/helpers/log_helper.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
 
@@ -29,13 +28,22 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, log, "model_creator", "Initializing");
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
+
+			process_new_entities();
 		}
 
-		kengine::backward_compatible_observer<data::graphics> observer{ r, putils_forward_to_this(find_or_create_model) };
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, very_verbose, "model_creator", "Executing");
-			observer.process();
+			process_new_entities();
+		}
+
+		void process_new_entities() noexcept {
+			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, very_verbose, "model_creator", "Processing new entities");
+
+			for (const auto & [e, graphics] : r.view<data::graphics>(entt::exclude<data::instance>).each())
+				find_or_create_model(e, graphics);
 		}
 
 		void find_or_create_model(entt::entity e, const data::graphics & graphics) noexcept {
