@@ -3,8 +3,10 @@
 // entt
 #include <entt/entity/handle.hpp>
 
+// putils
+#include "putils/reflection_helpers/imgui_helper.hpp"
+
 // kengine helpers
-#include "kengine/helpers/imgui_edit_entity.hpp"
 #include "kengine/helpers/log_helper.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
 
