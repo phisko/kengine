@@ -35,7 +35,7 @@ namespace kengine::systems {
 	struct log_file {
 		std::ofstream file;
 		std::mutex mutex;
-		const log_severity * severity = nullptr;
+		log_severity_control * severity_control = new log_severity_control; // Pointer to make sure it outlives log function component
 
 		log_file(entt::handle e) noexcept {
 			KENGINE_PROFILING_SCOPE;
@@ -52,14 +52,11 @@ namespace kengine::systems {
 				return;
 			}
 
-			auto & severity_control = e.emplace<log_severity_control>();
-			severity_control.severity = log_helper::parse_command_line_severity(r);
-			severity = &severity_control.severity;
-
+			*severity_control = log_helper::parse_command_line_severity(r);
 			e.emplace<data::adjustable>() = {
 				"Log",
 				{
-					{ "File", severity },
+					{ "File", &severity_control->global_severity },
 				}
 			};
 
@@ -69,7 +66,7 @@ namespace kengine::systems {
 		void log(const log_event & event) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			if (event.severity < *severity)
+			if (!severity_control->passes(event))
 				return;
 
 			const std::lock_guard lock(mutex);

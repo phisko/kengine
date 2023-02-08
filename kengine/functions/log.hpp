@@ -23,7 +23,14 @@ namespace kengine {
 
 	//! putils reflect all
 	struct log_severity_control {
-		log_severity severity = log_severity::log;
+		log_severity global_severity = log_severity::log;
+		std::unordered_map<std::string, log_severity> category_severities;
+
+		bool passes(const log_event & event) noexcept {
+			if (const auto it = category_severities.find(event.category); it != category_severities.end())
+				return event.severity >= it->second;
+			return event.severity >= global_severity;
+		}
 	};
 
 	namespace functions {

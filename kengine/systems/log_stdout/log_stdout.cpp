@@ -25,26 +25,24 @@
 #include "kengine/functions/log.hpp"
 
 // kengine helpers
+#include "kengine/helpers/is_running.hpp"
 #include "kengine/helpers/log_helper.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
 
 namespace kengine::systems {
 	struct log_stdout {
 		std::mutex mutex;
-		log_severity * severity = nullptr;
+		log_severity_control * severity_control = new log_severity_control; // Pointer to make sure it outlives log function component
 
 		log_stdout(entt::handle e) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(*e.registry(), log, "log_stdout", "Initializing");
 
-			auto & severity_control = e.emplace<log_severity_control>();
-			severity_control.severity = log_helper::parse_command_line_severity(*e.registry());
-			severity = &severity_control.severity;
-
+			*severity_control = log_helper::parse_command_line_severity(*e.registry());
 			e.emplace<data::adjustable>() = {
 				"Log",
 				{
-					{ "Standard output", severity },
+					{ "Standard output", &severity_control->global_severity },
 				}
 			};
 
@@ -54,7 +52,7 @@ namespace kengine::systems {
 		void log(const log_event & event) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			if (event.severity < *severity)
+			if (!severity_control->passes(event))
 				return;
 
 			const std::lock_guard lock(mutex);
