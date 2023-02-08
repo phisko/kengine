@@ -11,7 +11,7 @@
 
 namespace kengine::log_helper {
 	KENGINE_CORE_EXPORT void log(const entt::registry & r, log_severity severity, const char * category, const char * message) noexcept;
-	KENGINE_CORE_EXPORT log_severity parse_command_line_severity(const entt::registry & r) noexcept;
+	KENGINE_CORE_EXPORT log_severity_control parse_command_line_severity(const entt::registry & r) noexcept;
 	KENGINE_CORE_EXPORT void set_minimum_log_severity(const entt::registry & r, log_severity severity) noexcept;
 }
 

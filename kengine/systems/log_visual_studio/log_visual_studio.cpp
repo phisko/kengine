@@ -32,21 +32,18 @@
 
 namespace kengine::systems {
 	struct log_visual_studio {
-		const log_severity * severity = nullptr;
+		log_severity_control severity_control;
 		std::mutex mutex;
 
 		log_visual_studio(entt::handle e) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(*e.registry(), log, "log_visual_studio", "Initializing");
 
-			auto & severity_control = e.emplace<log_severity_control>();
-			severity_control.severity = log_helper::parse_command_line_severity(*e.registry());
-			severity = &severity_control.severity;
-
+			severity_control = log_helper::parse_command_line_severity(*e.registry());
 			e.emplace<data::adjustable>() = {
 				"Log",
 				{
-					{ "Visual Studio Console", severity },
+					{ "Visual Studio Console", &severity_control.global_severity },
 				}
 			};
 
@@ -56,7 +53,7 @@ namespace kengine::systems {
 		void log(const log_event & event) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			if (event.severity < *severity)
+			if (!severity_control.passes(event))
 				return;
 
 			putils::string<4096> s;

@@ -19,10 +19,12 @@ The requested log severity is determined by what `parse_command_line_severity` r
 ### parse_command_line_severity
 
 ```cpp
-log_severity parse_command_line_severity() noexcept;
+log_severity_control parse_command_line_severity() noexcept;
 ```
 
-Parses the command-line for a `--log_level` parameter indicating the maximum log verbosity desired by the user.
+Parses the command-line for:
+* a `--log_level` parameter indicating the maximum log verbosity desired by the user
+* a `--log_category_levels` parameter specifying category-specific verbosities (under the format `--log_category_levels=first_category:verbose,second_category:very_verbose,third_category:warning`)
 
 ### set_minimum_log_severity
 

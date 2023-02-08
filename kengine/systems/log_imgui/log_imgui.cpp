@@ -18,6 +18,7 @@
 #include "putils/forward_to.hpp"
 #include "putils/lengthof.hpp"
 #include "putils/thread_name.hpp"
+#include "putils/reflection_helpers/imgui_helper.hpp"
 
 // kengine data
 #include "kengine/data/adjustable.hpp"
@@ -51,6 +52,7 @@ namespace kengine::systems {
 
 		struct {
 			bool severities[magic_enum::enum_count<kengine::log_severity>()];
+			std::unordered_map<std::string, log_severity> category_severities;
 			char category_search[4096] = "";
 			char thread_search[4096] = "";
 		} filters;
@@ -62,9 +64,10 @@ namespace kengine::systems {
 
 			std::fill(std::begin(filters.severities), std::end(filters.severities), true);
 
-			const auto severity = log_helper::parse_command_line_severity(r);
-			for (int i = 0; i < (int)severity; ++i)
+			auto command_line_severity = log_helper::parse_command_line_severity(r);
+			for (int i = 0; i < (int)command_line_severity.global_severity; ++i)
 				filters.severities[i] = false;
+			filters.category_severities = std::move(command_line_severity.category_severities);
 
 			e.emplace<functions::log>(putils_forward_to_this(log));
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
@@ -127,6 +130,10 @@ namespace kengine::systems {
 					changed = true;
 				}
 
+			putils::reflection::imgui_edit("Categories", filters.category_severities);
+			for (const auto & [category, severity] : filters.category_severities)
+				log_helper::set_minimum_log_severity(r, severity);
+
 			if (ImGui::InputText("Category", filters.category_search, putils::lengthof(filters.category_search))) {
 				kengine_logf(r, verbose, "log_imgui", "Category filter changed to '%s'", filters.category_search);
 				changed = true;
@@ -155,13 +162,32 @@ namespace kengine::systems {
 		bool matches_filters(const internal_log_event & e) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			if (!filters.severities[(int)e.severity])
+			const auto passes_severity = [&] {
+				if (const auto it = filters.category_severities.find(e.category); it != filters.category_severities.end())
+					if (e.severity >= it->second)
+						return true;
+				return filters.severities[int(e.severity)];
+			};
+
+			if (!passes_severity())
 				return false;
 
-			if (!e.category.empty() && e.category.find(filters.category_search) == std::string::npos)
+			const auto passes_search = [](const std::string & haystack, const char * needle) {
+				if (haystack.empty()) {
+					if (needle[0])
+						return false;
+				}
+				else {
+					if (haystack.find(needle) == std::string::npos)
+						return false;
+				}
+				return true;
+			};
+
+			if (!passes_search(e.category, filters.category_search))
 				return false;
 
-			if (!e.thread.empty() && e.thread.find(filters.thread_search) == std::string::npos)
+			if (!passes_search(e.thread, filters.thread_search))
 				return false;
 
 			return true;
