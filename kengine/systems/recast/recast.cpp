@@ -18,7 +18,6 @@
 #include "kengine/functions/execute.hpp"
 
 // kengine helpers
-#include "kengine/helpers/backward_compatible_observer.hpp"
 #include "kengine/helpers/log_helper.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
 
@@ -50,27 +49,35 @@ namespace kengine::systems {
 					{ "Path optimization range", &recast_impl::g_adjustables.path_optimization_range },
 				}
 			};
+
+			process_new_entities();
 		}
 
-		kengine::backward_compatible_observer<data::model, data::model_data, data::nav_mesh> observer{
-			r,
-			[this](auto &&... args) {
-				recast_impl::build_recast_component(r, FWD(args)...);
-			}
-		};
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, very_verbose, "recast", "Executing");
 
-			observer.process();
+			process_new_entities();
 
 			recast_impl::process_built_recast_components(r);
 			recast_impl::do_pathfinding(r, delta_time);
+		}
+
+		struct processed {};
+		void process_new_entities() noexcept {
+			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, very_verbose, "recast", "Processing new entities");
+
+			for (const auto & [e, model, model_data, nav_mesh] : r.view<data::model, data::model_data, data::nav_mesh>(entt::exclude<processed>).each()) {
+				r.emplace<processed>(e);
+				recast_impl::build_recast_component(r, e, model, model_data, nav_mesh);
+			}
 		}
 	};
 
 	DEFINE_KENGINE_SYSTEM_CREATOR(
 		recast,
+		recast::processed,
 		data::recast_agent,
 		data::recast_crowd,
 		data::recast_nav_mesh

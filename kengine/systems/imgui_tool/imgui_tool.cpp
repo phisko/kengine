@@ -27,7 +27,6 @@
 
 // kengine helpers
 #include "kengine/helpers/assert_helper.hpp"
-#include "kengine/helpers/backward_compatible_observer.hpp"
 #include "kengine/helpers/log_helper.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
 #include "kengine/helpers/sort_helper.hpp"
@@ -63,14 +62,15 @@ namespace kengine::systems {
 
 			std::ifstream f(KENGINE_IMGUI_TOOLS_SAVE_FILE);
 			f >> configuration;
+
+			process_new_entities();
 		}
 
-		kengine::backward_compatible_observer<data::imgui_tool> observer{ r, putils_forward_to_this(on_construct_imgui_tool) };
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, very_verbose, "imgui_tool", "Executing");
 
-			observer.process();
+			process_new_entities();
 
 			if (ImGui::BeginMainMenuBar()) {
 				bool must_save = false;
@@ -92,6 +92,17 @@ namespace kengine::systems {
 					save_tools();
 			}
 			ImGui::EndMainMenuBar();
+		}
+
+		struct processed {};
+		void process_new_entities() noexcept {
+			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, very_verbose, "imgui_tool", "Processing new entities");
+
+			for (const auto & [e, imgui_tool] : r.view<data::imgui_tool>(entt::exclude<processed>).each()) {
+				r.emplace<processed>(e);
+				on_construct_imgui_tool(e, imgui_tool);
+			}
 		}
 
 		void display_menu_entry(const char * name, const menu_entry & entry, bool & must_save) noexcept {
@@ -190,5 +201,8 @@ namespace kengine::systems {
 		}
 	};
 
-	DEFINE_KENGINE_SYSTEM_CREATOR(imgui_tool)
+	DEFINE_KENGINE_SYSTEM_CREATOR(
+		imgui_tool,
+		imgui_tool::processed
+	)
 }

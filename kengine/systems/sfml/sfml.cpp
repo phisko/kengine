@@ -36,7 +36,6 @@
 #include "kengine/functions/execute.hpp"
 
 // kengine helpers
-#include "kengine/helpers/backward_compatible_observer.hpp"
 #include "kengine/helpers/camera_helper.hpp"
 #include "kengine/helpers/instance_helper.hpp"
 #include "kengine/helpers/is_running.hpp"
@@ -87,15 +86,15 @@ namespace kengine::systems {
 			kengine_log(r, log, "sfml", "Initializing");
 
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
-
 			auto & scale = e.emplace<data::imgui_scale>();
-
 			e.emplace<data::adjustable>() = {
 				"ImGui",
 				{
 					{ "scale", &scale.scale },
 				}
 			};
+
+			process_new_entities();
 		}
 
 		~sfml() noexcept {
@@ -104,14 +103,11 @@ namespace kengine::systems {
 			ImGui::SFML::Shutdown();
 		}
 
-		kengine::backward_compatible_observer<data::window> window_observer{ r, putils_forward_to_this(create_window) };
-		kengine::backward_compatible_observer<data::model> model_observer{ r, putils_forward_to_this(create_texture) };
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, very_verbose, "sfml", "Executing");
 
-			window_observer.process();
-			model_observer.process();
+			process_new_entities();
 
 			const auto sf_delta_time = delta_clock.restart();
 
@@ -132,6 +128,20 @@ namespace kengine::systems {
 				// of how the SFML-ImGui binding handles input :(
 				render(window, sf_window);
 				process_events(window, *sf_window.window, sf_delta_time);
+			}
+		}
+
+		struct processed {};
+		void process_new_entities() noexcept {
+			KENGINE_PROFILING_SCOPE;
+			kengine_log(r, very_verbose, "sfml", "Processing new entities");
+
+			for (const auto & [e, window] : r.view<data::window>(entt::exclude<data::sfml_window>).each())
+				create_window(e, window);
+
+			for (const auto & [e, model] : r.view<data::model>(entt::exclude<processed>).each()) {
+				r.emplace<processed>(e);
+				create_texture(e, model);
 			}
 		}
 
@@ -514,6 +524,7 @@ namespace kengine::systems {
 
 	DEFINE_KENGINE_SYSTEM_CREATOR(
 		sfml,
+		sfml::processed,
 		data::sfml_window,
 		data::sfml_texture
 	)
