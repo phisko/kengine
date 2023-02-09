@@ -295,7 +295,6 @@ These are helper functions and macros to factorize typical manipulations of comp
 * [async_helper](kengine/helpers/async_helper.md): run async tasks
 * [camera_helper](kengine/helpers/camera_helper.md): manipulate cameras
 * [command_line_helper](kengine/helpers/command_line_helper.md): create and query the command-line
-* [entity_to_string](kengine/helpers/entity_to_string.md): specialization of `putils::to_string` for `entt::entity`
 * [imgui_helper](kengine/helpers/imgui_helper.md): display and edit entities in ImGui
 * [imgui_lua_helper](kengine/helpers/imgui_lua_helper.md): register Lua bindings for ImGui
 * [instance_helper](kengine/helpers/instance_helper.md): access an [instance](kengine/data/instance.md)'s [model](kengine/data/model.md)
