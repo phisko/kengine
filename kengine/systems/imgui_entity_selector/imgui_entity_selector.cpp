@@ -25,7 +25,6 @@
 #include "kengine/meta/match_string.hpp"
 
 // kengine helpers
-#include "kengine/helpers/entity_to_string.hpp"
 #include "kengine/helpers/imgui_helper.hpp"
 #include "kengine/helpers/log_helper.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
