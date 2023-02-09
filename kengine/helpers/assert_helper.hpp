@@ -1,11 +1,5 @@
 #pragma once
 
-#ifdef _MSC_VER
-#define kengine_assume(x) __assume(x)
-#else
-#define kengine_assume(x) (void)0
-#endif
-
 #ifdef KENGINE_NDEBUG
 #define kengine_assert(x) (void)0
 #define kengine_assert_with_message(x, ...) (void)0
@@ -42,8 +36,7 @@
 #define kengine_assert_with_message(r, x, ...) \
 	do { \
 		if (!(x)) \
-			kengine_assert_failed(r, putils::concatenate(__VA_ARGS__)); \
-		kengine_assume(x); \
+			kengine_assert_failed(r, __VA_ARGS__); \
 	} while (false)
 
 #define kengine_assert(r, x) \
