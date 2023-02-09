@@ -47,6 +47,7 @@
 #include "kengine/helpers/assert_helper.hpp"
 #include "kengine/helpers/log_helper.hpp"
 #include "kengine/helpers/matrix_helper.hpp"
+#include "kengine/helpers/new_entity_processor.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
 #include "kengine/helpers/skeleton_helper.hpp"
 
@@ -71,6 +72,9 @@ namespace putils {
 namespace kengine::systems {
 	struct bullet {
 		entt::registry & r;
+
+		struct processed {};
+		kengine::new_entity_processor<processed, data::transform, data::physics, data::instance> processor{ r, putils_forward_to_this(add_or_update_bullet_data) };
 
 		const entt::scoped_connection connections[6] = {
 			r.on_construct<data::model_collider>().connect<&bullet::update_all_instances>(this),
@@ -148,7 +152,7 @@ namespace kengine::systems {
 				}
 			};
 
-			process_new_entities();
+			processor.process();
 		}
 
 		~bullet() noexcept {
@@ -163,7 +167,7 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, very_verbose, "bullet", "Executing");
 
-			process_new_entities();
+			processor.process();
 
 			kengine_log(r, very_verbose, "bullet", "Removing obsolete bullet_data");
 			for (auto [e, bullet] : r.view<bullet_data>(entt::exclude<data::physics>).each()) {
@@ -183,17 +187,6 @@ namespace kengine::systems {
 			dynamics_world.setDebugDrawer(adjustables.enable_debug ? &drawer : nullptr);
 			dynamics_world.debugDrawWorld();
 #endif
-		}
-
-		struct processed {};
-		void process_new_entities() noexcept {
-			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, very_verbose, "bullet", "Processing new entities");
-
-			for (const auto & [e, transform, physics, instance] : r.view<data::transform, data::physics, data::instance>(entt::exclude<processed>).each()) {
-				r.emplace<processed>(e);
-				add_or_update_bullet_data(e, transform, physics, instance);
-			}
 		}
 
 		using collision_shape_map = std::map<putils::point3f, std::unique_ptr<btCollisionShape>>;

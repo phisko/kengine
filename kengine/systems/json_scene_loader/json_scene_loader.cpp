@@ -25,11 +25,15 @@
 // kengine helpers
 #include "kengine/helpers/async_helper.hpp"
 #include "kengine/helpers/json_helper.hpp"
+#include "kengine/helpers/new_entity_processor.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
 
 namespace kengine::systems {
 	struct json_scene_loader {
 		entt::registry & r;
+
+		struct processed {};
+		kengine::new_entity_processor<processed, data::json_scene_loader> processor{ r, putils_forward_to_this(process_new_loader) };
 
 		json_scene_loader(entt::handle e) noexcept
 			: r(*e.registry()) {
@@ -37,7 +41,7 @@ namespace kengine::systems {
 			kengine_log(r, log, "json_scene_loader", "Initializing");
 
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
-			process_new_entities();
+			processor.process();
 		}
 
 		struct temporary_scene {
@@ -48,7 +52,7 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, very_verbose, "json_scene_loader", "Executing");
 
-			process_new_entities();
+			processor.process();
 
 			kengine::process_async_results<load_models_task>(r, [this](entt::entity e, load_models_task &&) {
 				// Entity that will wait until all async loading tasks are completed before loading the scene
@@ -71,17 +75,6 @@ namespace kengine::systems {
 					r.destroy(poller);
 				});
 			});
-		}
-
-		struct processed {};
-		void process_new_entities() noexcept {
-			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, verbose, "json_scene_loader", "Processing new entities");
-
-			for (const auto & [e, loader] : r.view<data::json_scene_loader>(entt::exclude<processed>).each()) {
-				r.emplace<processed>(e);
-				process_new_loader(e, loader);
-			}
 		}
 
 		void process_new_loader(entt::entity e, const data::json_scene_loader & loader) noexcept {

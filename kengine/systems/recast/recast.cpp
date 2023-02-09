@@ -19,6 +19,7 @@
 
 // kengine helpers
 #include "kengine/helpers/log_helper.hpp"
+#include "kengine/helpers/new_entity_processor.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
 
 // impl
@@ -37,6 +38,15 @@ namespace kengine::systems {
 
 	struct recast {
 		entt::registry & r;
+
+		struct processed {};
+		kengine::new_entity_processor<processed, data::model, data::model_data, data::nav_mesh> processor{
+			r,
+			[this](auto &&... args) noexcept {
+				recast_impl::build_recast_component(r, FWD(args)...);
+			}
+		};
+
 		recast(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
@@ -50,28 +60,17 @@ namespace kengine::systems {
 				}
 			};
 
-			process_new_entities();
+			processor.process();
 		}
 
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, very_verbose, "recast", "Executing");
 
-			process_new_entities();
+			processor.process();
 
 			recast_impl::process_built_recast_components(r);
 			recast_impl::do_pathfinding(r, delta_time);
-		}
-
-		struct processed {};
-		void process_new_entities() noexcept {
-			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, very_verbose, "recast", "Processing new entities");
-
-			for (const auto & [e, model, model_data, nav_mesh] : r.view<data::model, data::model_data, data::nav_mesh>(entt::exclude<processed>).each()) {
-				r.emplace<processed>(e);
-				recast_impl::build_recast_component(r, e, model, model_data, nav_mesh);
-			}
 		}
 	};
 

@@ -70,6 +70,7 @@
 #include "kengine/helpers/instance_helper.hpp"
 #include "kengine/helpers/log_helper.hpp"
 #include "kengine/helpers/matrix_helper.hpp"
+#include "kengine/helpers/new_entity_processor.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
 
 // impl
@@ -82,6 +83,15 @@
 namespace kengine::systems {
 	struct kreogl {
 		entt::registry & r;
+
+		struct processed_model {};
+		kengine::new_entity_processor<processed_model, data::model> model_processor{ r, putils_forward_to_this(create_model_from_disk) };
+
+		struct processed_animation_files {};
+		kengine::new_entity_processor<processed_animation_files, data::animation_files> animation_files_processor{ r, putils_forward_to_this(load_animation_files) };
+
+		struct processed_sky_box {};
+		kengine::new_entity_processor<processed_sky_box, data::sky_box_model> sky_box_processor{ r, putils_forward_to_this(create_sky_box_from_disk) };
 
 		kreogl(entt::handle e) noexcept
 			: r(*e.registry()) {
@@ -102,7 +112,10 @@ namespace kengine::systems {
 			e.emplace<functions::get_position_in_pixel>(putils_forward_to_this(get_position_in_pixel));
 
 			init_window();
-			process_new_entities();
+
+			model_processor.process();
+			animation_files_processor.process();
+			sky_box_processor.process();
 		}
 
 		void init_window() noexcept {
@@ -183,36 +196,15 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, very_verbose, "kreogl", "Executing");
 
-			process_new_entities();
+			model_processor.process();
+			animation_files_processor.process();
+			sky_box_processor.process();
 
 			complete_loading_tasks();
 			load_models_to_opengl();
 			create_missing_objects();
 			tick_animations(delta_time);
 			draw();
-		}
-
-		struct processed_model {};
-		struct processed_animation_files {};
-		struct processed_sky_box {};
-		void process_new_entities() noexcept {
-			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, very_verbose, "kreogl", "Processing new entities");
-
-			for (const auto & [e, model] : r.view<data::model>(entt::exclude<processed_model>).each()) {
-				r.emplace<processed_model>(e);
-				create_model_from_disk(e, model);
-			}
-
-			for (const auto & [e, animation_files] : r.view<data::animation_files>(entt::exclude<processed_animation_files>).each()) {
-				r.emplace<processed_animation_files>(e);
-				load_animation_files(e, animation_files);
-			}
-
-			for (const auto & [e, sky_box] : r.view<data::sky_box_model>(entt::exclude<processed_sky_box>).each()) {
-				r.emplace<processed_sky_box>(e);
-				create_sky_box_from_disk(e, sky_box);
-			}
 		}
 
 		void create_model_from_disk(entt::entity model_entity, const data::model & model) noexcept {
@@ -430,7 +422,7 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, very_verbose, "kreogl", "Creating missing objects");
 
-			for (const auto & [entity, instance] : r.view<data::instance>(entt::exclude<::kreogl::animated_object, ::kreogl::sprite_2d, ::kreogl::sprite_3d>).each()) {
+			for (const auto & [entity, instance] : r.view<data::instance>(entt::exclude<::kreogl::animated_object, ::kreogl::sprite_2d, ::kreogl::sprite_3d, data::sky_box>).each()) {
 				if (instance.model == entt::null) {
 					kengine_logf(r, warning, "kreogl", "[%u] has no model", entity);
 					continue;
