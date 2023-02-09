@@ -98,7 +98,7 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 			kengine_logf(r, very_verbose, "imgui_entity_selector", "Applying search to [%u]", e);
 
-			search_result result {
+			search_result result{
 				e,
 				{ "[%u]", e }
 			};

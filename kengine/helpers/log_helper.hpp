@@ -23,10 +23,10 @@ namespace kengine::log_helper {
 #define kengine_log(...) (void)0
 #define kengine_logf(...) (void)0
 #else
-#define kengine_log(registry, severity, category, message)\
-	do {\
-		if constexpr (kengine::log_severity::severity >= kengine::log_severity::KENGINE_LOG_MAX_SEVERITY)\
-			kengine::log_helper::log(registry, kengine::log_severity::severity, category, message);\
+#define kengine_log(registry, severity, category, message) \
+	do { \
+		if constexpr (kengine::log_severity::severity >= kengine::log_severity::KENGINE_LOG_MAX_SEVERITY) \
+			kengine::log_helper::log(registry, kengine::log_severity::severity, category, message); \
 	} while (false)
 #define kengine_logf(registry, severity, category, format, ...) kengine_log(registry, severity, category, putils::string<1024>(format, __VA_ARGS__).c_str())
 #endif
