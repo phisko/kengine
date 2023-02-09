@@ -84,6 +84,9 @@ namespace kengine::systems {
 	struct kreogl {
 		entt::registry & r;
 
+		struct processed_window {};
+		kengine::new_entity_processor<processed_window, data::window> window_processor{ r, putils_forward_to_this(create_window) };
+
 		struct processed_model {};
 		kengine::new_entity_processor<processed_model, data::model> model_processor{ r, putils_forward_to_this(create_model_from_disk) };
 
@@ -111,43 +114,18 @@ namespace kengine::systems {
 			e.emplace<functions::get_entity_in_pixel>(putils_forward_to_this(get_entity_in_pixel));
 			e.emplace<functions::get_position_in_pixel>(putils_forward_to_this(get_position_in_pixel));
 
-			init_window();
-
+			window_processor.process();
 			model_processor.process();
 			animation_files_processor.process();
 			sky_box_processor.process();
 		}
 
-		void init_window() noexcept {
+		void create_window(entt::entity window_entity, data::window & window) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "kreogl", "Initializing window");
-
-			entt::entity window_entity = entt::null;
-
-			// Find potential existing window
-			for (const auto & [e, w] : r.view<data::window>().each()) {
-				if (!w.assigned_system.empty()) {
-					kengine_logf(r, verbose, "kreogl", "Skipping [%u] because it is already assigned to system '%s'", e, w.assigned_system.c_str());
-					continue;
-				}
-
-				kengine_logf(r, log, "kreogl", "Found existing window: [%u]", e);
-				window_entity = e;
-				break;
-			}
-
-			// If none found, create one
-			if (window_entity == entt::null) {
-				const auto e = r.create();
-				kengine_logf(r, log, "kreogl", "Created default window: [%u]", e);
-				r.emplace<data::keep_alive>(e);
-				auto & window_comp = r.emplace<data::window>(e);
-				window_comp.name = "Kengine";
-				window_entity = e;
-			}
+			kengine_logf(r, log, "kreogl", "Initializing window for [%u]", window_entity);
 
 			// Ask the GLFW system to initialize the window
-			r.get<data::window>(window_entity).assigned_system = "Kreogl";
+			window.assigned_system = "Kreogl";
 			r.emplace<data::glfw_window_init>(window_entity) = {
 				.set_hints = [this]() noexcept {
 					kengine_log(r, verbose, "kreogl", "Setting window hints");
@@ -196,6 +174,7 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, very_verbose, "kreogl", "Executing");
 
+			window_processor.process();
 			model_processor.process();
 			animation_files_processor.process();
 			sky_box_processor.process();
