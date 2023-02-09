@@ -24,4 +24,15 @@ namespace kengine {
 			r.storage<type>(); // Pre-instantiate the component pool
 		});
 	}
+
+	template<typename... Comps>
+	bool is_storage_registered(const entt::registry & r) noexcept {
+		KENGINE_PROFILING_SCOPE;
+		kengine_log(r, very_verbose, "register_storage", "Checking storage existence");
+		const bool any_failed = putils::for_each_type<Comps...>([&](auto && t) noexcept {
+			using type = putils_wrapped_type(t);
+			return r.storage(entt::type_hash<type>::value()) == nullptr;
+		});
+		return !any_failed;
+	}
 }
