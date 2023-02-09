@@ -32,6 +32,7 @@
 // kengine helpers
 #include "kengine/helpers/assert_helper.hpp"
 #include "kengine/helpers/log_helper.hpp"
+#include "kengine/helpers/new_entity_processor.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
 
 #ifndef KENGINE_DEFAULT_ADJUSTABLE_SAVE_PATH
@@ -72,6 +73,9 @@ namespace kengine::systems {
 		};
 		section root_section;
 
+		struct processed {};
+		kengine::new_entity_processor<processed, data::adjustable> processor{ r, putils_forward_to_this(on_construct_adjustable) };
+
 		imgui_adjustable(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
@@ -83,7 +87,7 @@ namespace kengine::systems {
 			auto & tool = e.emplace<data::imgui_tool>();
 			enabled = &tool.enabled;
 
-			process_new_entities();
+			processor.process();
 		}
 
 		char name_search[1024] = "";
@@ -99,7 +103,7 @@ namespace kengine::systems {
 				return;
 			}
 
-			process_new_entities();
+			processor.process();
 
 			if (ImGui::Begin("Adjustables", enabled)) {
 				ImGui::Columns(2);
@@ -129,14 +133,6 @@ namespace kengine::systems {
 				ImGui::EndChild();
 			}
 			ImGui::End();
-		}
-
-		struct processed {};
-		void process_new_entities() noexcept {
-			for (const auto & [e, adjustable] : r.view<data::adjustable>(entt::exclude<processed>).each()) {
-				r.emplace<processed>(e);
-				on_construct_adjustable(e, adjustable);
-			}
 		}
 
 		void update_search_results(const std::string & name, section & section) noexcept {

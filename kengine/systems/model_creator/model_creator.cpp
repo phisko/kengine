@@ -17,11 +17,15 @@
 
 // kengine helpers
 #include "kengine/helpers/log_helper.hpp"
+#include "kengine/helpers/new_entity_processor.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
 
 namespace kengine::systems {
 	struct model_creator {
 		entt::registry & r;
+
+		struct processed {};
+		kengine::new_entity_processor<processed, data::graphics> processor{ r, putils_forward_to_this(find_or_create_model) };
 
 		model_creator(entt::handle e) noexcept
 			: r(*e.registry()) {
@@ -29,21 +33,13 @@ namespace kengine::systems {
 			kengine_log(r, log, "model_creator", "Initializing");
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 
-			process_new_entities();
+			processor.process();
 		}
 
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, very_verbose, "model_creator", "Executing");
-			process_new_entities();
-		}
-
-		void process_new_entities() noexcept {
-			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, very_verbose, "model_creator", "Processing new entities");
-
-			for (const auto & [e, graphics] : r.view<data::graphics>(entt::exclude<data::instance>).each())
-				find_or_create_model(e, graphics);
+			processor.process();
 		}
 
 		void find_or_create_model(entt::entity e, const data::graphics & graphics) noexcept {
@@ -71,5 +67,8 @@ namespace kengine::systems {
 		}
 	};
 
-	DEFINE_KENGINE_SYSTEM_CREATOR(model_creator)
+	DEFINE_KENGINE_SYSTEM_CREATOR(
+		model_creator,
+		model_creator::processed
+	)
 }

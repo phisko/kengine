@@ -25,6 +25,7 @@
 // kengine helpers
 #include "kengine/helpers/assert_helper.hpp"
 #include "kengine/helpers/log_helper.hpp"
+#include "kengine/helpers/new_entity_processor.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
 
 // impl
@@ -35,6 +36,12 @@ namespace kengine::systems {
 		entt::registry & r;
 		glfw_input_handler input_handler;
 
+		struct processed_input_buffer {};
+		kengine::new_entity_processor<processed_input_buffer, data::input_buffer> input_buffer_processor{ r, putils_forward_to_this(set_input_buffer) };
+
+		struct processed_window {};
+		kengine::new_entity_processor<processed_window, data::window, data::glfw_window_init> window_processor{ r, putils_forward_to_this(create_window) };
+
 		glfw(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
@@ -43,7 +50,8 @@ namespace kengine::systems {
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 			e.emplace<functions::on_mouse_captured>(putils_forward_to_this(on_mouse_captured));
 
-			process_new_entities();
+			input_buffer_processor.process();
+			window_processor.process();
 		}
 
 		~glfw() noexcept {
@@ -84,7 +92,8 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, very_verbose, "glfw", "Executing");
 
-			process_new_entities();
+			input_buffer_processor.process();
+			window_processor.process();
 
 			kengine_log(r, very_verbose, "glfw", "Polling events");
 			glfwPollEvents();
@@ -97,18 +106,6 @@ namespace kengine::systems {
 					r.destroy(e);
 				}
 			}
-		}
-
-		void process_new_entities() noexcept {
-			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, very_verbose, "glfw", "Processing new entities");
-
-			if (input_handler.buffer == nullptr)
-				for (const auto & [e, input_buffer] : r.view<data::input_buffer>().each())
-					set_input_buffer(e, input_buffer);
-
-			for (const auto & [e, window, glfw_window_init] : r.view<data::window, data::glfw_window_init>(entt::exclude<data::glfw_window>).each())
-				create_window(e, window, glfw_window_init);
 		}
 
 		void set_input_buffer(entt::entity e, data::input_buffer & input_buffer) noexcept {
@@ -185,5 +182,9 @@ namespace kengine::systems {
 		}
 	};
 
-	DEFINE_KENGINE_SYSTEM_CREATOR(glfw)
+	DEFINE_KENGINE_SYSTEM_CREATOR(
+		glfw,
+		glfw::processed_input_buffer,
+		glfw::processed_window
+	)
 }

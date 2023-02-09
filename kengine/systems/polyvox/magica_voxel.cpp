@@ -34,6 +34,7 @@
 #include "kengine/helpers/async_helper.hpp"
 #include "kengine/helpers/instance_helper.hpp"
 #include "kengine/helpers/log_helper.hpp"
+#include "kengine/helpers/new_entity_processor.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
 
 // local
@@ -50,13 +51,16 @@ namespace kengine::systems {
 	struct magica_voxel {
 		entt::registry & r;
 
+		struct processed {};
+		kengine::new_entity_processor<processed, data::model> processor{ r, putils_forward_to_this(load_model) };
+
 		magica_voxel(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, log, "magica_voxel", "Initializing");
 
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
-			process_new_entities();
+			processor.process();
 		}
 
 		using mesh_type = decltype(build_mesh(PolyVox::RawVolume<data::polyvox::vertex_data>{ {} }));
@@ -75,23 +79,12 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, very_verbose, "magica_voxel", "Executing");
 
-			process_new_entities();
+			processor.process();
 
 			kengine::process_async_results<async_loaded_data>(r, [this](entt::entity e, async_loaded_data && loaded_data) {
 				r.emplace<data::model_data>(e, std::move(loaded_data.model_data));
 				apply_offset(e, loaded_data.offset_to_apply);
 			});
-		}
-
-		struct processed {};
-		void process_new_entities() noexcept {
-			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, verbose, "magica_voxel", "Processing new entities");
-
-			for (const auto & [e, model] : r.view<data::model>(entt::exclude<processed>).each()) {
-				r.emplace<processed>(e);
-				load_model(e, model);
-			}
 		}
 
 		void load_model(entt::entity e, const data::model & model) noexcept {

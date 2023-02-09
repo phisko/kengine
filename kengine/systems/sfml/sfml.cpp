@@ -40,6 +40,7 @@
 #include "kengine/helpers/instance_helper.hpp"
 #include "kengine/helpers/is_running.hpp"
 #include "kengine/helpers/log_helper.hpp"
+#include "kengine/helpers/new_entity_processor.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
 
 // impl
@@ -80,6 +81,12 @@ namespace kengine::systems {
 		sf::Clock delta_clock;
 		data::input_buffer * input_buffer = nullptr;
 
+		struct processed_window {};
+		kengine::new_entity_processor<processed_window, data::window> window_processor{ r, putils_forward_to_this(create_window) };
+
+		struct processed_model {};
+		kengine::new_entity_processor<processed_model, data::model> model_processor{ r, putils_forward_to_this(create_texture) };
+
 		sfml(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
@@ -94,7 +101,8 @@ namespace kengine::systems {
 				}
 			};
 
-			process_new_entities();
+			window_processor.process();
+			model_processor.process();
 		}
 
 		~sfml() noexcept {
@@ -107,7 +115,8 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, very_verbose, "sfml", "Executing");
 
-			process_new_entities();
+			window_processor.process();
+			model_processor.process();
 
 			const auto sf_delta_time = delta_clock.restart();
 
@@ -128,20 +137,6 @@ namespace kengine::systems {
 				// of how the SFML-ImGui binding handles input :(
 				render(window, sf_window);
 				process_events(window, *sf_window.window, sf_delta_time);
-			}
-		}
-
-		struct processed {};
-		void process_new_entities() noexcept {
-			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, very_verbose, "sfml", "Processing new entities");
-
-			for (const auto & [e, window] : r.view<data::window>(entt::exclude<data::sfml_window>).each())
-				create_window(e, window);
-
-			for (const auto & [e, model] : r.view<data::model>(entt::exclude<processed>).each()) {
-				r.emplace<processed>(e);
-				create_texture(e, model);
 			}
 		}
 
@@ -524,7 +519,8 @@ namespace kengine::systems {
 
 	DEFINE_KENGINE_SYSTEM_CREATOR(
 		sfml,
-		sfml::processed,
+		sfml::processed_model,
+		sfml::processed_window,
 		data::sfml_window,
 		data::sfml_texture
 	)

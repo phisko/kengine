@@ -28,6 +28,7 @@
 // kengine helpers
 #include "kengine/helpers/assert_helper.hpp"
 #include "kengine/helpers/log_helper.hpp"
+#include "kengine/helpers/new_entity_processor.hpp"
 #include "kengine/helpers/profiling_helper.hpp"
 #include "kengine/helpers/sort_helper.hpp"
 
@@ -42,9 +43,7 @@
 namespace kengine::systems {
 	struct imgui_tool {
 		putils::ini_file configuration;
-
 		entt::registry & r;
-		const entt::scoped_connection remove_tool = r.on_destroy<data::imgui_tool>().connect<&imgui_tool::on_destroy_imgui_tool>(this);
 
 		struct menu_entry {
 			using entry_map = std::map<std::string, menu_entry>;
@@ -52,6 +51,10 @@ namespace kengine::systems {
 			data::imgui_tool * tool = nullptr;
 		};
 		menu_entry root_entry;
+
+		struct processed {};
+		kengine::new_entity_processor<processed, data::imgui_tool> processor{ r, putils_forward_to_this(on_construct_imgui_tool) };
+		const entt::scoped_connection remove_tool = r.on_destroy<data::imgui_tool>().connect<&imgui_tool::on_destroy_imgui_tool>(this);
 
 		imgui_tool(entt::handle e) noexcept
 			: r(*e.registry()) {
@@ -63,14 +66,14 @@ namespace kengine::systems {
 			std::ifstream f(KENGINE_IMGUI_TOOLS_SAVE_FILE);
 			f >> configuration;
 
-			process_new_entities();
+			processor.process();
 		}
 
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, very_verbose, "imgui_tool", "Executing");
 
-			process_new_entities();
+			processor.process();
 
 			if (ImGui::BeginMainMenuBar()) {
 				bool must_save = false;
@@ -92,17 +95,6 @@ namespace kengine::systems {
 					save_tools();
 			}
 			ImGui::EndMainMenuBar();
-		}
-
-		struct processed {};
-		void process_new_entities() noexcept {
-			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, very_verbose, "imgui_tool", "Processing new entities");
-
-			for (const auto & [e, imgui_tool] : r.view<data::imgui_tool>(entt::exclude<processed>).each()) {
-				r.emplace<processed>(e);
-				on_construct_imgui_tool(e, imgui_tool);
-			}
 		}
 
 		void display_menu_entry(const char * name, const menu_entry & entry, bool & must_save) noexcept {
