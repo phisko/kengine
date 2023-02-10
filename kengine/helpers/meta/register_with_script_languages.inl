@@ -42,6 +42,14 @@ namespace kengine {
 #endif
 		};
 
+#ifdef KENGINE_PYTHON
+		r.storage<data::python_state>();
+#endif
+
+#ifdef KENGINE_LUA
+		r.storage<data::lua_state>();
+#endif
+
 		std::for_each(std::execution::par_unseq, putils_range(language_registrators), [&](const auto func) {
 			const putils::scoped_thread_name thread_name("Script language type registration");
 			if (func)
