@@ -7,7 +7,7 @@
 #include "putils/string.hpp"
 
 // kengine functions
-#include "kengine/functions/log.hpp"
+#include "kengine/core/functions/log.hpp"
 
 namespace kengine::log_helper {
 	KENGINE_CORE_EXPORT void log(const entt::registry & r, log_severity severity, const char * category, const char * message) noexcept;

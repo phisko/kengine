@@ -10,7 +10,7 @@
 #include "putils/thread_name.hpp"
 
 // kengine helpers
-#include "kengine/helpers/profiling_helper.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 #include "impl/count.hpp"
 #include "impl/display_imgui.hpp"
 #include "impl/edit_imgui.hpp"

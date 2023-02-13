@@ -133,7 +133,6 @@ endfunction()
 
 # Add core first so other systems can link against it
 add_system(${CMAKE_CURRENT_LIST_DIR}/kengine/core)
-
 set(ignored_subdirectories ${CMAKE_CURRENT_LIST_DIR}/kengine/core)
 
 target_include_directories(kengine_core PUBLIC .)

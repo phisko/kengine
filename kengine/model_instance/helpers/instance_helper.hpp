@@ -3,8 +3,8 @@
 // entt
 #include <entt/entity/fwd.hpp>
 
-// kengine data
-#include "kengine/data/instance.hpp"
+// kengine model_instance
+#include "kengine/model_instance/data/instance.hpp"
 
 namespace kengine::instance_helper {
 	template<typename Comp>

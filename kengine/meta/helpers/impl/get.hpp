@@ -4,10 +4,10 @@
 #include <entt/entity/fwd.hpp>
 
 // kengine meta
-#include "kengine/meta/get.hpp"
+#include "kengine/meta/functions/get.hpp"
 
 // kengine helpers
-#include "kengine/helpers/meta/register_meta_component_implementation.hpp"
+#include "kengine/meta/helpers/register_meta_component_implementation.hpp"
 
 namespace kengine {
 	template<typename T>

@@ -5,8 +5,8 @@
 #include <entt/entity/registry.hpp>
 
 // kengine helpers
-#include "kengine/helpers/assert_helper.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+#include "kengine/core/helpers/assert_helper.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
 namespace kengine::instance_helper {
 	template<typename Comp>

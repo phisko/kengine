@@ -1,12 +1,10 @@
 #pragma once
 
-#ifdef KENGINE_PYTHON
-
 // entt
 #include <entt/entity/fwd.hpp>
 
-// kengine helpers
-#include "kengine/helpers/script_language_helper.hpp"
+// kengine scripting
+#include "kengine/scripting/helpers/script_language_helper.hpp"
 
 namespace kengine::python_helper {
 	template<bool IsComponent, typename... Types>
@@ -17,5 +15,3 @@ namespace kengine::python_helper {
 }
 
 #include "python_helper.inl"
-
-#endif

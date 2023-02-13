@@ -3,11 +3,11 @@
 // entt
 #include <entt/entity/registry.hpp>
 
-// kengine data
-#include "kengine/data/keep_alive.hpp"
+// kengine core
+#include "kengine/core/helpers/log_helper.hpp"
 
-// kengine helpers
-#include "kengine/helpers/log_helper.hpp"
+// kengine main_loop
+#include "kengine/main_loop/data/keep_alive.hpp"
 
 namespace kengine {
 	bool is_running(const entt::registry & r) noexcept {

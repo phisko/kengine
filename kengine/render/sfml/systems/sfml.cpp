@@ -19,34 +19,44 @@
 #include "putils/forward_to.hpp"
 #include "putils/vector.hpp"
 
-// kengine data
-#include "kengine/data/camera.hpp"
-#include "kengine/data/debug_graphics.hpp"
-#include "kengine/data/graphics.hpp"
-#include "kengine/data/imgui_context.hpp"
-#include "kengine/data/input_buffer.hpp"
-#include "kengine/data/model.hpp"
-#include "kengine/data/transform.hpp"
-#include "kengine/data/viewport.hpp"
-#include "kengine/data/window.hpp"
-#include "kengine/data/adjustable.hpp"
-#include "kengine/data/imgui_scale.hpp"
+// kengine core
+#include "kengine/core/data/transform.hpp"
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/new_entity_processor.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
-// kengine functions
-#include "kengine/functions/execute.hpp"
+// kengine adjustable
+#include "kengine/adjustable/data/adjustable.hpp"
 
-// kengine helpers
-#include "kengine/helpers/camera_helper.hpp"
-#include "kengine/helpers/instance_helper.hpp"
-#include "kengine/helpers/is_running.hpp"
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/new_entity_processor.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine imgui
+#include "kengine/imgui/data/imgui_context.hpp"
+#include "kengine/imgui/data/imgui_scale.hpp"
 
-// impl
+// kengine input
+#include "kengine/input/data/input_buffer.hpp"
+
+// kengine main_loop
+#include "kengine/main_loop/functions/execute.hpp"
+#include "kengine/main_loop/helpers/is_running.hpp"
+
+// kengine model_instance
+#include "kengine/model_instance/data/graphics.hpp"
+#include "kengine/model_instance/data/model.hpp"
+#include "kengine/model_instance/helpers/instance_helper.hpp"
+
+// kengine render
+#include "kengine/render/data/camera.hpp"
+#include "kengine/render/data/debug_graphics.hpp"
+#include "kengine/render/data/viewport.hpp"
+#include "kengine/render/data/window.hpp"
+#include "kengine/render/helpers/camera_helper.hpp"
+
+// kengine render/sfml
+#include "kengine/render/sfml/data/sfml_window.hpp"
+#include "kengine/render/sfml/data/sfml_texture.hpp"
+
+// imgui-sfml
 #include "imgui-sfml/imgui-SFML.h"
-#include "sfml_window.hpp"
-#include "sfml_texture.hpp"
 
 #ifndef KENGINE_MAX_VIEWPORTS
 #define KENGINE_MAX_VIEWPORTS 8

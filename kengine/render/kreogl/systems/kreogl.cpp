@@ -30,55 +30,71 @@
 #include "kreogl/window.hpp"
 #include "kreogl/world.hpp"
 
-// kengine data
-#include "kengine/data/adjustable.hpp"
-#include "kengine/data/animation.hpp"
-#include "kengine/data/animation_files.hpp"
-#include "kengine/data/async_task.hpp"
-#include "kengine/data/camera.hpp"
-#include "kengine/data/debug_graphics.hpp"
-#include "kengine/data/glfw_window.hpp"
-#include "kengine/data/god_rays.hpp"
-#include "kengine/data/graphics.hpp"
-#include "kengine/data/imgui_context.hpp"
-#include "kengine/data/imgui_scale.hpp"
-#include "kengine/data/instance.hpp"
-#include "kengine/data/keep_alive.hpp"
-#include "kengine/data/light.hpp"
-#include "kengine/data/model.hpp"
-#include "kengine/data/model_animation.hpp"
-#include "kengine/data/model_data.hpp"
-#include "kengine/data/model_skeleton.hpp"
-#include "kengine/data/no_shadow.hpp"
-#include "kengine/data/skeleton.hpp"
-#include "kengine/data/sky_box.hpp"
-#include "kengine/data/sprite.hpp"
-#include "kengine/data/text.hpp"
-#include "kengine/data/transform.hpp"
-#include "kengine/data/viewport.hpp"
-#include "kengine/data/window.hpp"
+// kengine core
+#include "kengine/core/data/transform.hpp"
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/new_entity_processor.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
-// kengine functions
-#include "kengine/functions/execute.hpp"
-#include "kengine/functions/get_entity_in_pixel.hpp"
-#include "kengine/functions/get_position_in_pixel.hpp"
+// kengine adjustable
+#include "kengine/adjustable/data/adjustable.hpp"
 
-// kengine helpers
-#include "kengine/helpers/async_helper.hpp"
-#include "kengine/helpers/camera_helper.hpp"
-#include "kengine/helpers/imgui_helper.hpp"
-#include "kengine/helpers/instance_helper.hpp"
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/matrix_helper.hpp"
-#include "kengine/helpers/new_entity_processor.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine animation
+#include "kengine/animation/data/animation.hpp"
+#include "kengine/animation/data/animation_files.hpp"
+#include "kengine/animation/data/model_animation.hpp"
 
-// impl
-#include "kreogl_animation_files.hpp"
-#include "kreogl_debug_graphics.hpp"
-#include "kreogl_model.hpp"
-#include "shaders/highlight_shader.hpp"
-#include "putils_to_glm.hpp"
+// kengine async
+#include "kengine/async/data/async_task.hpp"
+#include "kengine/async/helpers/async_helper.hpp"
+
+// kengine glm
+#include "kengine/glm/helpers/matrix_helper.hpp"
+
+// kengine imgui
+#include "kengine/imgui/data/imgui_context.hpp"
+#include "kengine/imgui/data/imgui_scale.hpp"
+#include "kengine/imgui/helpers/imgui_helper.hpp"
+
+// kengine main_loop
+#include "kengine/main_loop/data/keep_alive.hpp"
+#include "kengine/main_loop/functions/execute.hpp"
+
+// kengine model_instance
+#include "kengine/model_instance/data/graphics.hpp"
+#include "kengine/model_instance/data/instance.hpp"
+#include "kengine/model_instance/data/model.hpp"
+#include "kengine/model_instance/data/model_data.hpp"
+#include "kengine/model_instance/helpers/instance_helper.hpp"
+
+// kengine render
+#include "kengine/render/data/camera.hpp"
+#include "kengine/render/data/debug_graphics.hpp"
+#include "kengine/render/data/god_rays.hpp"
+#include "kengine/render/data/light.hpp"
+#include "kengine/render/data/no_shadow.hpp"
+#include "kengine/render/data/sky_box.hpp"
+#include "kengine/render/data/sprite.hpp"
+#include "kengine/render/data/text.hpp"
+#include "kengine/render/data/viewport.hpp"
+#include "kengine/render/data/window.hpp"
+#include "kengine/render/functions/get_entity_in_pixel.hpp"
+#include "kengine/render/functions/get_position_in_pixel.hpp"
+#include "kengine/render/helpers/camera_helper.hpp"
+
+// kengine render/glfw
+#include "kengine/render/glfw/data/glfw_window.hpp"
+
+// kengine render/kreogl
+#include "kengine/render/kreogl/data/kreogl_animation_files.hpp"
+#include "kengine/render/kreogl/data/kreogl_debug_graphics.hpp"
+#include "kengine/render/kreogl/data/kreogl_model.hpp"
+#include "kengine/render/kreogl/shaders/highlight_shader.hpp"
+#include "kengine/render/kreogl/helpers/putils_to_glm.hpp"
+
+// kengine skeleton
+#include "kengine/skeleton/data/model_skeleton.hpp"
+#include "kengine/skeleton/data/skeleton.hpp"
 
 namespace kengine::systems {
 	struct kreogl {

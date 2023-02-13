@@ -18,19 +18,19 @@
 #include "putils/split.hpp"
 #include "putils/to_string.hpp"
 
-// kengine data
-#include "kengine/data/imgui_tool.hpp"
-#include "kengine/data/name.hpp"
+// kengine core
+#include "kengine/core/data/name.hpp"
+#include "kengine/core/helpers/assert_helper.hpp"
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/new_entity_processor.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
+#include "kengine/core/helpers/sort_helper.hpp"
 
-// kengine functions
-#include "kengine/functions/execute.hpp"
+// kengine imgui/imgui_tool
+#include "kengine/imgui/imgui_tool/data/imgui_tool.hpp"
 
-// kengine helpers
-#include "kengine/helpers/assert_helper.hpp"
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/new_entity_processor.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
-#include "kengine/helpers/sort_helper.hpp"
+// kengine main_loop
+#include "kengine/main_loop/functions/execute.hpp"
 
 #ifndef KENGINE_IMGUI_TOOLS_SAVE_FILE
 #define KENGINE_IMGUI_TOOLS_SAVE_FILE "imgui_tools.ini"

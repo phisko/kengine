@@ -8,16 +8,16 @@
 #include "putils/forward_to.hpp"
 #include "putils/reflection_helpers/json_helper.hpp"
 
-// kengine data
-#include "kengine/data/input.hpp"
-#include "kengine/data/input_buffer.hpp"
+// kengine core
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
-// kengine functions
-#include "kengine/functions/execute.hpp"
+// kengine input
+#include "kengine/input/data/input.hpp"
+#include "kengine/input/data/input_buffer.hpp"
 
-// kengine helpers
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine main_loop
+#include "kengine/main_loop/functions/execute.hpp"
 
 namespace kengine::systems {
 	struct input {

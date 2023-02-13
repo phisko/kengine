@@ -4,7 +4,7 @@
 #include <entt/entity/handle.hpp>
 
 // sol
-#ifdef KENGINE_LUA
+#ifdef KENGINE_SCRIPTING_LUA
 #include <sol/sol.hpp>
 #endif
 
@@ -12,8 +12,8 @@
 #include "putils/to_string.hpp"
 #include "putils/reflection_helpers/imgui_helper.hpp"
 
-// kengine helpers
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine core
+#include "kengine/core/helpers/profiling_helper.hpp"
 
 namespace kengine {
 	namespace impl {
@@ -28,7 +28,7 @@ namespace kengine {
 			// 	ImGui::LabelText(name, member);
 
 			else if constexpr (std::ranges::range<Member>
-#ifdef KENGINE_LUA
+#ifdef KENGINE_SCRIPTING_LUA
 							   && !std::is_same<sol::object, Member>() && !std::is_base_of<sol::object, Member>()
 #endif
 			) {
@@ -62,7 +62,7 @@ namespace kengine {
 				return (str[0] == '-' || str[0] == '.' || (str[0] >= '0' && str[0] <= '9')) && putils::parse<double>(str) == member;
 			}
 			else if constexpr (std::is_same_v<Member, entt::entity> || std::is_same_v<Member, entt::handle>) {
-				return str[0] >= '0' && str[0] <= '9' && putils::parse<entt::id_type>(str) == entt::id_type(member);
+				return str[0] >= '0' && str[0] <= '9' && putils::parse<entt::entity>(str) == member;
 			}
 
 			return false;
@@ -85,10 +85,11 @@ namespace kengine {
 				return false;
 			}
 
-			if (strstr(putils::reflection::get_class_name<T>(), str)) {
-				kengine_log(*e.registry(), very_verbose, "meta::match_string", "Component's name matches, returning true");
-				return true;
-			}
+			if constexpr (putils::reflection::has_class_name<T>())
+				if (strstr(putils::reflection::get_class_name<T>(), str)) {
+					kengine_log(*e.registry(), very_verbose, "meta::match_string", "Component's name matches, returning true");
+					return true;
+				}
 
 			bool matches = false;
 			putils::reflection::for_each_attribute(*comp, [&](const auto & attr) noexcept {

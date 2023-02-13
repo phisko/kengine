@@ -8,24 +8,28 @@
 // putils
 #include "putils/forward_to.hpp"
 
-// kengine data
-#include "kengine/data/adjustable.hpp"
-#include "kengine/data/model.hpp"
-#include "kengine/data/model_data.hpp"
-#include "kengine/data/nav_mesh.hpp"
+// kengine core
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/new_entity_processor.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
-// kengine functions
-#include "kengine/functions/execute.hpp"
+// kengine adjustable
+#include "kengine/adjustable/data/adjustable.hpp"
 
-// kengine helpers
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/new_entity_processor.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine main_loop
+#include "kengine/main_loop/functions/execute.hpp"
 
-// impl
-#include "recast_agent.hpp"
-#include "recast_crowd.hpp"
-#include "recast_nav_mesh.hpp"
+// kengine model_instance
+#include "kengine/model_instance/data/model.hpp"
+#include "kengine/model_instance/data/model_data.hpp"
+
+// kengine pathfinding
+#include "kengine/pathfinding/data/nav_mesh.hpp"
+
+// kengine pathfinding/recast
+#include "kengine/pathfinding/recast/data/recast_agent.hpp"
+#include "kengine/pathfinding/recast/data/recast_crowd.hpp"
+#include "kengine/pathfinding/recast/data/recast_nav_mesh.hpp"
 
 namespace kengine::systems {
 	namespace recast_impl {

@@ -11,15 +11,13 @@
 // putils
 #include "putils/reflection_helpers/runtime_helper.hpp"
 
-// kengine data
-#include "kengine/data/name.hpp"
+// kengine core
+#include "kengine/core/data/name.hpp"
 
 // kengine meta
-#include "kengine/meta/attributes.hpp"
-#include "kengine/meta/size.hpp"
-
-// kengine helpers
-#include "kengine/helpers/type_helper.hpp"
+#include "kengine/meta/data/attributes.hpp"
+#include "kengine/meta/data/size.hpp"
+#include "kengine/meta/helpers/type_helper.hpp"
 
 namespace kengine {
 	template<typename... Comps>

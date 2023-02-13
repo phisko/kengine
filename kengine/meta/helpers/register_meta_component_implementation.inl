@@ -7,10 +7,12 @@
 #include "putils/meta/for_each.hpp"
 #include "putils/meta/fwd.hpp"
 
-// kengine helpers
-#include "kengine/helpers/type_helper.hpp"
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine core
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
+
+// kengine meta
+#include "kengine/meta/helpers/type_helper.hpp"
 
 namespace kengine {
 	template<typename Meta, typename... Comps>

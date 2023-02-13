@@ -8,13 +8,12 @@
 #include "putils/split.hpp"
 #include "putils/reflection_helpers/json_helper.hpp"
 
-// kengine data
-#include "kengine/data/command_line.hpp"
+// kengine core
+#include "kengine/core/helpers/assert_helper.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
-// kengine helpers
-#include "kengine/helpers/assert_helper.hpp"
-#include "kengine/helpers/is_running.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine command_line
+#include "kengine/command_line/data/command_line.hpp"
 
 namespace {
 	static kengine::log_severity max_log_severity = kengine::log_severity::none;

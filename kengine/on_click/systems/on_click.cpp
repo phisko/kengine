@@ -4,16 +4,18 @@
 #include <entt/entity/handle.hpp>
 #include <entt/entity/registry.hpp>
 
-// kengine data
-#include "kengine/data/input.hpp"
+// kengine core
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
-// kengine functions
-#include "kengine/functions/get_entity_in_pixel.hpp"
-#include "kengine/functions/on_click.hpp"
+// kengine input
+#include "kengine/input/data/input.hpp"
 
-// kengine helpers
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine on_click
+#include "kengine/on_click/functions/on_click.hpp"
+
+// kengine render
+#include "kengine/render/functions/get_entity_in_pixel.hpp"
 
 namespace kengine::systems {
 	struct on_click {

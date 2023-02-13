@@ -5,7 +5,7 @@
 #include <gtest/gtest.h>
 
 // kengine helpers
-#include "kengine/helpers/log_helper.hpp"
+#include "kengine/log/helpers/log_helper.hpp"
 
 TEST(log_helper, log_helper) {
 	entt::registry r;

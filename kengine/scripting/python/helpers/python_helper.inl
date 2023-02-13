@@ -6,12 +6,12 @@
 // putils
 #include "putils/python/python_helper.hpp"
 
-// kengine data
-#include "kengine/data/python_state.hpp"
+// kengine core
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
-// kengine helpers
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine scripting/python
+#include "kengine/scripting/python/data/python_state.hpp"
 
 namespace kengine::python_helper {
 	namespace impl {

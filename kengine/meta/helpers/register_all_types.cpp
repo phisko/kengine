@@ -3,12 +3,12 @@
 // entt
 #include <entt/entity/registry.hpp>
 
-// kengine functions
-#include "kengine/functions/register_types.hpp"
+// kengine core
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
-// kengine helpers
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine meta
+#include "kengine/meta/functions/register_types.hpp"
 
 namespace kengine {
 	struct pre_registered {};

@@ -3,12 +3,12 @@
 // entt
 #include <entt/entity/registry.hpp>
 
-// kengine functions
-#include "kengine/functions/create_system.hpp"
+// kengine core
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
-// kengine helpers
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine system_creator
+#include "kengine/system_creator/functions/create_system.hpp"
 
 namespace kengine {
 	void create_all_systems(entt::registry & destination_registry, const entt::registry * main_registry) noexcept {

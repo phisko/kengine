@@ -11,19 +11,27 @@
 #include "putils/forward_to.hpp"
 #include "putils/reflection_helpers/imgui_helper.hpp"
 
-// kengine data
-#include "kengine/data/name.hpp"
-#include "kengine/data/imgui_tool.hpp"
-#include "kengine/data/lua_state.hpp"
-#include "kengine/data/python_state.hpp"
+// kengine core
+#include "kengine/core/data/name.hpp"
+#include "kengine/core/helpers/assert_helper.hpp"
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
-// kengine functions
-#include "kengine/functions/execute.hpp"
+// kengine imgui/imgui_tool
+#include "kengine/imgui/imgui_tool/data/imgui_tool.hpp"
 
-// kengine helpers
-#include "kengine/helpers/assert_helper.hpp"
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine main_loop
+#include "kengine/main_loop/functions/execute.hpp"
+
+#ifdef KENGINE_SCRIPTING_LUA
+// kengine scripting/lua
+#include "kengine/scripting/lua/data/lua_state.hpp"
+#endif
+
+#ifdef KENGINE_SCRIPTING_PYTHON
+// kengine scripting/python
+#include "kengine/scripting/python/data/python_state.hpp"
+#endif
 
 namespace kengine::systems {
 	struct imgui_prompt {
@@ -164,8 +172,8 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 
 #ifndef KENGINE_LUA
-			kengine_log(error, "imgui_prompt", "Attempt to evaluate Lua script but KENGINE_LUA is not defined");
-			add_line_to_history(
+			kengine_log(r, error, "imgui_prompt", "Attempt to evaluate Lua script but KENGINE_LUA is not defined");
+			history.add_line(
 				"Please compile with KENGINE_LUA",
 				false,
 				putils::normalized_color{ 1.f, 0.f, 0.f }
@@ -193,7 +201,7 @@ namespace kengine::systems {
 #endif
 		}
 
-#ifdef KENGINE_LUA
+#ifdef KENGINE_SCRIPTING_LUA
 		void setup_output_redirect(sol::state & state) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, log, "imgui_prompt", "Setting up output redirection for Lua");
@@ -245,9 +253,9 @@ namespace kengine::systems {
 		void eval_python() {
 			KENGINE_PROFILING_SCOPE;
 
-#ifndef KENGINE_PYTHON
-			kengine_log(error, "imgui_prompt", "Attempt to evaluate python script but KENGINE_PYTHON is not defined");
-			add_line_to_history(
+#ifndef KENGINE_SCRIPTING_PYTHON
+			kengine_log(r, error, "imgui_prompt", "Attempt to evaluate python script but KENGINE_PYTHON is not defined");
+			history.add_line(
 				"Please compile with KENGINE_PYTHON",
 				false,
 				putils::normalized_color{ 1.f, 0.f, 0.f }

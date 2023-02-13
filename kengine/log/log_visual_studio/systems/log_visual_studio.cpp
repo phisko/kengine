@@ -20,15 +20,13 @@
 #include "putils/forward_to.hpp"
 #include "putils/thread_name.hpp"
 
-// kengine data
-#include "kengine/data/adjustable.hpp"
+// kengine adjustable
+#include "kengine/adjustable/data/adjustable.hpp"
 
-// kengine functions
-#include "kengine/functions/log.hpp"
-
-// kengine helpers
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine core
+#include "kengine/core/functions/log.hpp"
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
 namespace kengine::systems {
 	struct log_visual_studio {

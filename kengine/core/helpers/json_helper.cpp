@@ -11,17 +11,15 @@
 // putils
 #include "putils/range.hpp"
 
-// kengine data
-#include "kengine/data/name.hpp"
+// kengine core
+#include "kengine/core/data/name.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
+#include "kengine/core/helpers/sort_helper.hpp"
 
 // kengine meta
-#include "kengine/meta/has.hpp"
-#include "kengine/meta/load_from_json.hpp"
-#include "kengine/meta/save_to_json.hpp"
-
-// kengine helpers
-#include "kengine/helpers/sort_helper.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+#include "kengine/meta/functions/has.hpp"
+#include "kengine/meta/functions/load_from_json.hpp"
+#include "kengine/meta/functions/save_to_json.hpp"
 
 namespace kengine::json_helper {
 	void load_entity(const nlohmann::json & entity_json, entt::handle e) noexcept {

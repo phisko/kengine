@@ -27,29 +27,42 @@
 // putils
 #include "putils/forward_to.hpp"
 
-// kengine data
-#include "kengine/data/adjustable.hpp"
-#include "kengine/data/debug_graphics.hpp"
-#include "kengine/data/instance.hpp"
-#include "kengine/data/kinematic.hpp"
-#include "kengine/data/model_collider.hpp"
-#include "kengine/data/model_skeleton.hpp"
-#include "kengine/data/physics.hpp"
-#include "kengine/data/skeleton.hpp"
-#include "kengine/data/transform.hpp"
+// kengine core
+#include "kengine/core/data/transform.hpp"
+#include "kengine/core/helpers/assert_helper.hpp"
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/new_entity_processor.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
-// kengine functions
-#include "kengine/functions/execute.hpp"
-#include "kengine/functions/on_collision.hpp"
-#include "kengine/functions/query_position.hpp"
+// kengine adjustable
+#include "kengine/adjustable/data/adjustable.hpp"
 
-// kengine helpers
-#include "kengine/helpers/assert_helper.hpp"
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/matrix_helper.hpp"
-#include "kengine/helpers/new_entity_processor.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
-#include "kengine/helpers/skeleton_helper.hpp"
+// kengine glm
+#include "kengine/glm/helpers/matrix_helper.hpp"
+
+// kengine main_loop
+#include "kengine/main_loop/functions/execute.hpp"
+
+// kengine model_instance
+#include "kengine/model_instance/data/instance.hpp"
+
+// kengine physics
+#include "kengine/physics/data/model_collider.hpp"
+#include "kengine/physics/data/physics.hpp"
+
+// kengine physics/kinematic
+#include "kengine/physics/kinematic/data/kinematic.hpp"
+
+// kengine render
+#include "kengine/render/data/debug_graphics.hpp"
+
+// kengine skeleton
+#include "kengine/skeleton/data/model_skeleton.hpp"
+#include "kengine/skeleton/data/skeleton.hpp"
+#include "kengine/skeleton/helpers/skeleton_helper.hpp"
+
+#include "kengine/physics/functions/on_collision.hpp"
+#include "kengine/physics/functions/query_position.hpp"
 
 namespace putils {
 	inline bool operator<(const point3f & lhs, const point3f & rhs) noexcept {

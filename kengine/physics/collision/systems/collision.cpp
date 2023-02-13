@@ -7,15 +7,15 @@
 // putils
 #include "putils/forward_to.hpp"
 
-// kengine data
-#include "kengine/data/collision.hpp"
+// kengine core
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
-// kengine functions
-#include "kengine/functions/on_collision.hpp"
+// kengine physics
+#include "kengine/physics/functions/on_collision.hpp"
 
-// kengine helpers
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine physics/collision
+#include "kengine/physics/collision/data/collision.hpp"
 
 namespace kengine::systems {
 	struct collision {

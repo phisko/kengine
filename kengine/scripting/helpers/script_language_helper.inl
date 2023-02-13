@@ -12,10 +12,12 @@
 #include "putils/with.hpp"
 #include "putils/function.hpp"
 
-// kengine helpers
-#include "kengine/helpers/is_running.hpp"
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine core
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
+
+// kengine main_loop
+#include "kengine/main_loop/helpers/is_running.hpp"
 
 // Reflection API for entt::handle
 // We use entt::handle as entt::entity is a scalar and doesn't play well with scripting languages

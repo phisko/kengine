@@ -16,17 +16,19 @@
 #include "putils/forward_to.hpp"
 #include "putils/range.hpp"
 
-// kengine data
-#include "kengine/data/json_scene_loader.hpp"
-
-// kengine functions
-#include "kengine/functions/execute.hpp"
+// kengine core
+#include "kengine/core/helpers/json_helper.hpp"
+#include "kengine/core/helpers/new_entity_processor.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
 // kengine helpers
-#include "kengine/helpers/async_helper.hpp"
-#include "kengine/helpers/json_helper.hpp"
-#include "kengine/helpers/new_entity_processor.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+#include "kengine/async/helpers/async_helper.hpp"
+
+// kengine json_scene_loader
+#include "kengine/json_scene_loader/data/json_scene_loader.hpp"
+
+// kengine main_loop
+#include "kengine/main_loop/functions/execute.hpp"
 
 namespace kengine::systems {
 	struct json_scene_loader {

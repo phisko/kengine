@@ -6,9 +6,9 @@
 #include "putils/string.hpp"
 #include "putils/get_call_stack.hpp"
 
-// kengine helpers
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine core
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
 namespace kengine::assert_helper {
 	std::function<bool(const entt::registry & r, const char * file, int line, const std::string & expr)> assert_handler = nullptr;

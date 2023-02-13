@@ -6,12 +6,12 @@
 // entt
 #include <entt/entity/registry.hpp>
 
-// kengine data
-#include "kengine/data/command_line.hpp"
+// kengine core
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
-// kengine helpers
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine command_line
+#include "kengine/command_line/data/command_line.hpp"
 
 namespace kengine {
 	void create_command_line_entity(entt::registry & r, int argc, const char ** argv) noexcept {

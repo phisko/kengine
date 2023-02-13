@@ -7,8 +7,8 @@
 // entt
 #include <entt/entity/fwd.hpp>
 
-// kengine data
-#include "kengine/data/async_task.hpp"
+// kengine async
+#include "kengine/async/data/async_task.hpp"
 
 namespace kengine {
 	template<typename T>

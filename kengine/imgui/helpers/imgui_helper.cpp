@@ -7,21 +7,23 @@
 // imgui
 #include <imgui.h>
 
-// kengine data
-#include "kengine/data/imgui_scale.hpp"
-#include "kengine/data/instance.hpp"
+// kengine core
+#include "kengine/core/helpers/sort_helper.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
 // kengine meta
-#include "kengine/meta/has.hpp"
-#include "kengine/meta/display_imgui.hpp"
-#include "kengine/meta/edit_imgui.hpp"
-#include "kengine/meta/emplace_or_replace.hpp"
-#include "kengine/meta/remove.hpp"
+#include "kengine/meta/functions/has.hpp"
+#include "kengine/meta/functions/display_imgui.hpp"
+#include "kengine/meta/functions/edit_imgui.hpp"
+#include "kengine/meta/functions/emplace_or_replace.hpp"
+#include "kengine/meta/functions/remove.hpp"
+#include "kengine/meta/helpers/type_helper.hpp"
 
-// kengine helpers
-#include "kengine/helpers/type_helper.hpp"
-#include "kengine/helpers/sort_helper.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine imgui
+#include "kengine/imgui/data/imgui_scale.hpp"
+
+// kengine model_instance
+#include "kengine/model_instance/data/instance.hpp"
 
 namespace kengine::imgui_helper {
 	void display_entity(entt::const_handle e) noexcept {

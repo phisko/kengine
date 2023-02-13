@@ -15,23 +15,29 @@
 #include "putils/range.hpp"
 #include "putils/thread_name.hpp"
 
-// kengine data
-#include "kengine/data/pathfinding.hpp"
-#include "kengine/data/physics.hpp"
-#include "kengine/data/transform.hpp"
-#include "kengine/data/nav_mesh.hpp"
+// kengine core
+#include "kengine/core/data/transform.hpp"
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
-// kengine helpers
-#include "kengine/helpers/instance_helper.hpp"
-#include "kengine/helpers/matrix_helper.hpp"
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine glm
+#include "kengine/glm/helpers/matrix_helper.hpp"
 
-// impl
+// kengine model_instance
+#include "kengine/model_instance/helpers/instance_helper.hpp"
+
+// kengine pathfinding
+#include "kengine/pathfinding/data/pathfinding.hpp"
+#include "kengine/pathfinding/data/nav_mesh.hpp"
+
+// kengine physics
+#include "kengine/physics/data/physics.hpp"
+
+// kengine recast
 #include "common.hpp"
-#include "recast_agent.hpp"
-#include "recast_crowd.hpp"
-#include "recast_nav_mesh.hpp"
+#include "kengine/pathfinding/recast/data/recast_agent.hpp"
+#include "kengine/pathfinding/recast/data/recast_crowd.hpp"
+#include "kengine/pathfinding/recast/data/recast_nav_mesh.hpp"
 
 namespace kengine::systems::recast_impl {
 	struct do_pathfinding {
