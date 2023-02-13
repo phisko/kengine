@@ -9,16 +9,14 @@
 // meta
 #include "putils/meta/concepts/invocable.hpp"
 
-// kengine data
-#include "kengine/data/time_modulator.hpp"
+// kengine core
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
-// kengine functions
-#include "kengine/functions/execute.hpp"
-
-// kengine helpers
-#include "kengine/helpers/is_running.hpp"
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine main_loop
+#include "kengine/main_loop/data/time_modulator.hpp"
+#include "kengine/main_loop/functions/execute.hpp"
+#include "kengine/main_loop/helpers/is_running.hpp"
 
 namespace kengine::main_loop {
 	template<typename T>

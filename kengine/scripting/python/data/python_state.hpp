@@ -1,7 +1,5 @@
 #pragma once
 
-#ifdef KENGINE_PYTHON
-
 // entt
 #include <entt/entity/fwd.hpp>
 
@@ -30,5 +28,3 @@ namespace kengine::data {
 #endif
 
 #include "python_state.rpp"
-
-#endif

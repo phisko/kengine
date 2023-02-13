@@ -4,11 +4,11 @@
 #include <entt/entity/handle.hpp>
 
 // kengine functions
-#include "kengine/functions/create_system.hpp"
+#include "kengine/system_creator/functions/create_system.hpp"
 
 // kengine helpers
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/meta/register_storage.hpp"
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/meta/helpers/register_storage.hpp"
 
 #define DECLARE_KENGINE_SYSTEM_CREATOR(EXPORT_MACRO, system_name) \
 	EXPORT_MACRO entt::entity add_##system_name(entt::registry & r) noexcept; \

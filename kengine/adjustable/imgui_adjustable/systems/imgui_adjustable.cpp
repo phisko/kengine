@@ -21,19 +21,21 @@
 #include "putils/to_string.hpp"
 #include "putils/vector.hpp"
 
-// kengine data
-#include "kengine/data/adjustable.hpp"
-#include "kengine/data/imgui_tool.hpp"
-#include "kengine/data/name.hpp"
+// kengine core
+#include "kengine/core/data/name.hpp"
+#include "kengine/core/helpers/assert_helper.hpp"
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/new_entity_processor.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
-// kengine functions
-#include "kengine/functions/execute.hpp"
+// kengine adjustable
+#include "kengine/adjustable/data/adjustable.hpp"
 
-// kengine helpers
-#include "kengine/helpers/assert_helper.hpp"
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/new_entity_processor.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine imgui/imgui_tool
+#include "kengine/imgui/imgui_tool/data/imgui_tool.hpp"
+
+// kengine main_loop
+#include "kengine/main_loop/functions/execute.hpp"
 
 #ifndef KENGINE_DEFAULT_ADJUSTABLE_SAVE_PATH
 #define KENGINE_DEFAULT_ADJUSTABLE_SAVE_PATH "."

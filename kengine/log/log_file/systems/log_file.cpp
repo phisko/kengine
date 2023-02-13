@@ -15,17 +15,17 @@
 #include "putils/forward_to.hpp"
 #include "putils/thread_name.hpp"
 
-// kengine data
-#include "kengine/data/adjustable.hpp"
+// kengine adjustable
+#include "kengine/adjustable/data/adjustable.hpp"
 
-// kengine functions
-#include "kengine/functions/log.hpp"
+// kengine core
+#include "kengine/core/functions/log.hpp"
+#include "kengine/core/helpers/assert_helper.hpp"
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
-// kengine helpers
-#include "kengine/helpers/assert_helper.hpp"
-#include "kengine/helpers/command_line_helper.hpp"
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine command_line
+#include "kengine/command_line/helpers/command_line_helper.hpp"
 
 #ifndef KENGINE_LOG_FILE_LOCATION
 #define KENGINE_LOG_FILE_LOCATION "kengine.log"

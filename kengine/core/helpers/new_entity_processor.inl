@@ -6,10 +6,12 @@
 // meta
 #include "putils/meta/fwd.hpp"
 
-// kengine helpers
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
-#include "kengine/helpers/meta/register_storage.hpp"
+// kengine core
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
+
+// kengine meta
+#include "kengine/meta/helpers/register_storage.hpp"
 
 namespace kengine {
 	template<typename ProcessedTag, typename... Comps>

@@ -13,17 +13,19 @@
 // putils
 #include "putils/forward_to.hpp"
 
-// kengine data
-#include "kengine/data/model_data.hpp"
-#include "kengine/data/polyvox.hpp"
-#include "kengine/data/transform.hpp"
+// kengine core
+#include "kengine/core/data/transform.hpp"
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
-// kengine functions
-#include "kengine/functions/execute.hpp"
+// kengine model_instance
+#include "kengine/model_instance/data/model_data.hpp"
 
-// kengine helpers
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine render/polyvox
+#include "kengine/render/polyvox/data/polyvox.hpp"
+
+// kengine main_loop
+#include "kengine/main_loop/functions/execute.hpp"
 
 namespace kengine::systems {
 	static auto build_mesh(PolyVox::RawVolume<data::polyvox::vertex_data> && volume) noexcept {

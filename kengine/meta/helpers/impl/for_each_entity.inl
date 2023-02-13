@@ -4,8 +4,8 @@
 #include <entt/entity/handle.hpp>
 #include <entt/entity/registry.hpp>
 
-// kengine helpers
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine core
+#include "kengine/core/helpers/profiling_helper.hpp"
 
 namespace kengine {
 	template<typename T>

@@ -1,14 +1,12 @@
-#ifdef KENGINE_GLM
-
 #include "skeleton_helper.hpp"
 
 // entt
 #include <entt/entity/registry.hpp>
 
-// kengine helpers
-#include "kengine/helpers/assert_helper.hpp"
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine core
+#include "kengine/core/helpers/assert_helper.hpp"
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
 namespace kengine::skeleton_helper {
 	bone_indices get_bone_index(const entt::registry & r, const char * bone, const data::model_skeleton & model) noexcept {
@@ -56,5 +54,3 @@ namespace kengine::skeleton_helper {
 		mesh.bone_mats_mesh_space[indexes.bone_index] = m;
 	}
 }
-
-#endif

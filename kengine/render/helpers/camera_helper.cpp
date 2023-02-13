@@ -7,13 +7,13 @@
 // magic_enum
 #include <magic_enum.hpp>
 
-// kengine data
-#include "kengine/data/viewport.hpp"
-#include "kengine/data/window.hpp"
+// kengine core
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
-// kengine helpers
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine render
+#include "kengine/render/data/viewport.hpp"
+#include "kengine/render/data/window.hpp"
 
 namespace kengine::camera_helper {
 	viewport_info get_viewport_for_pixel(entt::handle window_entity, const putils::point2ui & pixel) noexcept {

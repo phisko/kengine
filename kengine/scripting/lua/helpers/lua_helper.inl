@@ -12,9 +12,9 @@
 #include "putils/range.hpp"
 #include "putils/thread_name.hpp"
 
-// kengine helpers
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine core
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
 namespace kengine::lua_helper {
 	namespace impl {

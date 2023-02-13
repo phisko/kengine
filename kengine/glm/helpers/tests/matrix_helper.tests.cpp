@@ -1,5 +1,3 @@
-#ifdef KENGINE_GLM
-
 // gtest
 #include <gtest/gtest.h>
 
@@ -70,5 +68,3 @@ TEST(matrix_helper, get_model_matrix) {
 	const auto rotation = kengine::matrix_helper::get_rotation(mat);
 	EXPECT_EQ(rotation, expected_rotation);
 }
-
-#endif

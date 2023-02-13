@@ -13,23 +13,25 @@
 // putils
 #include "putils/forward_to.hpp"
 
-// kengine data
-#include "kengine/data/glfw_window.hpp"
-#include "kengine/data/input_buffer.hpp"
-#include "kengine/data/window.hpp"
+// kengine core
+#include "kengine/core/helpers/assert_helper.hpp"
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/new_entity_processor.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
-// kengine functions
-#include "kengine/functions/on_mouse_captured.hpp"
-#include "kengine/functions/execute.hpp"
+// kengine input
+#include "kengine/input/data/input_buffer.hpp"
 
-// kengine helpers
-#include "kengine/helpers/assert_helper.hpp"
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/new_entity_processor.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine main_loop
+#include "kengine/main_loop/functions/execute.hpp"
 
-// impl
-#include "glfw_input_handler.hpp"
+// kengine render
+#include "kengine/render/data/window.hpp"
+#include "kengine/render/functions/on_mouse_captured.hpp"
+
+// kengine render/glfw
+#include "kengine/render/glfw/data/glfw_window.hpp"
+#include "kengine/render/glfw/helpers/glfw_input_handler.hpp"
 
 namespace kengine::systems {
 	struct glfw {

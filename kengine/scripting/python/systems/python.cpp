@@ -7,17 +7,17 @@
 // putils
 #include "putils/forward_to.hpp"
 
-// kengine data
-#include "kengine/data/python.hpp"
+// kengine core
+#include "kengine/core/helpers/assert_helper.hpp"
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
-// kengine functions
-#include "kengine/functions/execute.hpp"
+// kengine scripting/python
+#include "kengine/scripting/python/data/python.hpp"
+#include "kengine/scripting/python/helpers/python_helper.hpp"
 
-// kengine helpers
-#include "kengine/helpers/assert_helper.hpp"
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
-#include "kengine/helpers/python_helper.hpp"
+// kengine main_loop
+#include "kengine/main_loop/functions/execute.hpp"
 
 namespace kengine::systems {
 	struct python {

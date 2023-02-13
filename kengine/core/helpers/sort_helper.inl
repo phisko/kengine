@@ -9,12 +9,10 @@
 // putils
 #include "putils/vector.hpp"
 
-// kengine data
-#include "kengine/data/name.hpp"
-
-// kengine helpers
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine core
+#include "kengine/core/data/name.hpp"
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
 namespace kengine::sort_helper {
 	namespace impl {

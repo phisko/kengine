@@ -1,5 +1,3 @@
-#ifdef KENGINE_LUA
-
 #include "imgui_lua_helper.hpp"
 
 // entt
@@ -8,13 +6,15 @@
 // putils
 #include "putils/imgui_lua_bindings/imgui_lua_bindings.hpp"
 
-// kengine data
-#include "kengine/data/lua_state.hpp"
+// kengine core
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
-// kengine helpers
-#include "kengine/helpers/imgui_helper.hpp"
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine imgui
+#include "kengine/imgui/helpers/imgui_helper.hpp"
+
+// kengine scripting/lua
+#include "kengine/scripting/lua/data/lua_state.hpp"
 
 namespace kengine::imgui_lua_helper {
 	void init_bindings(const entt::registry & r) noexcept {
@@ -28,5 +28,3 @@ namespace kengine::imgui_lua_helper {
 		}
 	}
 }
-
-#endif

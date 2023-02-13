@@ -3,8 +3,8 @@
 // entt
 #include <entt/entity/registry.hpp>
 
-// kengine helpers
-#include "kengine/helpers/log_helper.hpp"
+// kengine core
+#include "kengine/core/helpers/log_helper.hpp"
 
 namespace kengine {
 	template<typename T>

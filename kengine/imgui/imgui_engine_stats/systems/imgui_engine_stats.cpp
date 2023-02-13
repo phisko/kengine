@@ -16,22 +16,22 @@
 // putils
 #include "putils/forward_to.hpp"
 
-// kengine data
-#include "kengine/data/name.hpp"
-#include "kengine/data/imgui_tool.hpp"
+// kengine core
+#include "kengine/core/data/name.hpp"
+#include "kengine/core/helpers/assert_helper.hpp"
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
+#include "kengine/core/helpers/sort_helper.hpp"
 
-// kengine functions
-#include "kengine/functions/execute.hpp"
+// kengine imgui/imgui_tool
+#include "kengine/imgui/imgui_tool/data/imgui_tool.hpp"
+
+// kengine main_loop
+#include "kengine/main_loop/functions/execute.hpp"
 
 // kengine meta
-#include "kengine/meta/count.hpp"
-#include "kengine/meta/has.hpp"
-
-// kengine helpers
-#include "kengine/helpers/assert_helper.hpp"
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
-#include "kengine/helpers/sort_helper.hpp"
+#include "kengine/meta/functions/count.hpp"
+#include "kengine/meta/functions/has.hpp"
 
 #ifndef KENGINE_STATS_TRACKED_COLLECTIONS_SAVE_FILE
 #define KENGINE_STATS_TRACKED_COLLECTIONS_SAVE_FILE "tracked_entity_collections.json"

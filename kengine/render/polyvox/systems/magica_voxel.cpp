@@ -19,26 +19,28 @@
 #include "putils/string.hpp"
 #include "putils/thread_name.hpp"
 
-// kengine data
-#include "kengine/data/async_task.hpp"
-#include "kengine/data/model_data.hpp"
-#include "kengine/data/model.hpp"
-#include "kengine/data/transform.hpp"
-#include "kengine/data/polyvox.hpp"
+// kengine core
+#include "kengine/core/data/transform.hpp"
+#include "kengine/core/helpers/assert_helper.hpp"
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/new_entity_processor.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
-// kengine functions
-#include "kengine/functions/execute.hpp"
+// kengine async
+#include "kengine/async/data/async_task.hpp"
+#include "kengine/async/helpers/async_helper.hpp"
 
-// kengine helpers
-#include "kengine/helpers/assert_helper.hpp"
-#include "kengine/helpers/async_helper.hpp"
-#include "kengine/helpers/instance_helper.hpp"
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/new_entity_processor.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine main_loop
+#include "kengine/main_loop/functions/execute.hpp"
 
-// local
-#include "magica_voxel_format.hpp"
+// kengine model_instance
+#include "kengine/model_instance/data/model_data.hpp"
+#include "kengine/model_instance/data/model.hpp"
+#include "kengine/model_instance/helpers/instance_helper.hpp"
+
+// kengine render/polyvox
+#include "kengine/render/polyvox/data/polyvox.hpp"
+#include "kengine/render/polyvox/helpers/magica_voxel_format.hpp"
 
 namespace kengine::systems {
 	static auto build_mesh(PolyVox::RawVolume<data::polyvox::vertex_data> && volume) noexcept {

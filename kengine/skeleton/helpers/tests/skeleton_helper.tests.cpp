@@ -1,5 +1,3 @@
-#ifdef KENGINE_GLM
-
 // entt
 #include <entt/entity/registry.hpp>
 
@@ -71,5 +69,3 @@ TEST(skeleton_helper, set_bone_matrix) {
 	const auto mat = kengine::skeleton_helper::get_bone_matrix(r, bone_name, comp, model);
 	EXPECT_EQ(mat, expected);
 }
-
-#endif

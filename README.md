@@ -277,7 +277,7 @@ These systems must be enabled by setting the corresponding CMake variable to `ON
 
 It is possible to test for the existence of these systems during compilation thanks to C++ define macros. These have the same name as the CMake variables, e.g.:
 ```cpp
-#ifdef KENGINE_LUA
+#ifdef KENGINE_SCRIPTING_LUA
 // The LuaSystem exists, and we can safely use the lua library
 #endif
 ```

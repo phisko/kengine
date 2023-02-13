@@ -5,12 +5,12 @@
 #include <concepts>
 #include <future>
 
-// kengine data
-#include "kengine/data/async_task.hpp"
+// kengine core
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
-// kengine helpers
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine async
+#include "kengine/async/data/async_task.hpp"
 
 namespace kengine {
 	namespace impl {

@@ -9,12 +9,12 @@
 #include "kreogl/impl/shaders/helpers/quad/quad_glsl.hpp"
 #include "kreogl/impl/shapes/quad.hpp"
 
-// kengine data
-#include "kengine/data/highlight.hpp"
+// kengine core
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
-// kengine helpers
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine render
+#include "kengine/render/data/highlight.hpp"
 
 kengine::highlight_shader::highlight_shader(const entt::registry & r) noexcept
 	: _r(&r) {

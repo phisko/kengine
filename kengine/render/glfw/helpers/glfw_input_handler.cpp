@@ -4,7 +4,7 @@
 #include <imgui.h>
 
 // kengine helpers
-#include "kengine/helpers/profiling_helper.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
 namespace kengine::systems {
 	void glfw_input_handler::on_key(GLFWwindow * window, int key, int scancode, int action, int mods) noexcept {

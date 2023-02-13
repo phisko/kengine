@@ -6,13 +6,13 @@
 // putils
 #include "putils/reflection_helpers/runtime_helper.hpp"
 
-// kengine data
-#include "kengine/data/name.hpp"
+// kengine core
+#include "kengine/core/data/name.hpp"
+#include "kengine/core/helpers/assert_helper.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
-// kengine helpers
-#include "kengine/helpers/assert_helper.hpp"
-#include "kengine/helpers/type_helper.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine meta
+#include "kengine/meta/helpers/type_helper.hpp"
 
 namespace kengine::meta::attribute_helper {
 	const putils::reflection::runtime::attribute_info * find_attribute(entt::handle type_entity, std::string_view path, std::string_view separator) noexcept {

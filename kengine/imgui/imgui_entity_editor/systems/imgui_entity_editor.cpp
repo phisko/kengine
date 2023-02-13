@@ -10,19 +10,23 @@
 // putils
 #include "putils/forward_to.hpp"
 
-// kengine data
-#include "kengine/data/imgui_tool.hpp"
-#include "kengine/data/instance.hpp"
-#include "kengine/data/selected.hpp"
-#include "kengine/data/name.hpp"
+// kengine core
+#include "kengine/core/data/name.hpp"
+#include "kengine/core/data/selected.hpp"
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
-// kengine functions
-#include "kengine/functions/execute.hpp"
+// kengine model_instance
+#include "kengine/model_instance/data/instance.hpp"
 
-// kengine helpers
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/imgui_helper.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine imgui
+#include "kengine/imgui/helpers/imgui_helper.hpp"
+
+// kengine imgui/imgui_tool
+#include "kengine/imgui/imgui_tool/data/imgui_tool.hpp"
+
+// kengine main_loop
+#include "kengine/main_loop/functions/execute.hpp"
 
 namespace kengine::systems {
 	struct imgui_entity_editor {

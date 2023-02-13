@@ -1,16 +1,11 @@
-#ifdef KENGINE_GLM
-
 #include "matrix_helper.hpp"
 
 // glm
 #include <glm/gtc/matrix_transform.hpp>
 
-// kengine data
-#include "kengine/data/transform.hpp"
-
-// kengine helpers
-#include "kengine/helpers/camera_helper.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine core
+#include "kengine/core/data/transform.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
 namespace kengine::matrix_helper {
 	glm::vec3 to_vec(const putils::point3f & pos) noexcept {
@@ -68,5 +63,3 @@ namespace kengine::matrix_helper {
 		return model;
 	}
 }
-
-#endif

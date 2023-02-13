@@ -10,8 +10,11 @@
 #include "imgui-sfml/imgui-SFML.h"
 
 namespace kengine::data {
+	//! putils reflect name
 	struct sfml_window {
 		std::unique_ptr<sf::RenderWindow> window;
+
+		sfml_window() noexcept = default;
 
 		sfml_window(std::unique_ptr<sf::RenderWindow> && window) noexcept
 			: window(std::move(window)) {}
@@ -22,3 +25,5 @@ namespace kengine::data {
 		}
 	};
 }
+
+#include "sfml_window.rpp"

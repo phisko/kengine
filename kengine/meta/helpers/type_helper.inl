@@ -9,9 +9,9 @@
 // putils
 #include "putils/on_scope_exit.hpp"
 
-// kengine helpers
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine core
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
 namespace kengine::type_helper {
 	template<typename T>

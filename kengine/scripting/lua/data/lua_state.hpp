@@ -1,7 +1,5 @@
 #pragma once
 
-#ifdef KENGINE_LUA
-
 // sol
 #include <sol/sol.hpp>
 
@@ -13,5 +11,3 @@ namespace kengine::data {
 }
 
 #include "lua_state.rpp"
-
-#endif

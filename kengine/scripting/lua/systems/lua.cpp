@@ -7,17 +7,17 @@
 // putils
 #include "putils/forward_to.hpp"
 
-// kengine data
-#include "kengine/data/lua.hpp"
+// kengine core
+#include "kengine/core/helpers/assert_helper.hpp"
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
-// kengine functions
-#include "kengine/functions/execute.hpp"
+// kengine main_loop
+#include "kengine/main_loop/functions/execute.hpp"
 
-// kengine helpers
-#include "kengine/helpers/assert_helper.hpp"
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/lua_helper.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine scripting/lua
+#include "kengine/scripting/lua/data/lua.hpp"
+#include "kengine/scripting/lua/helpers/lua_helper.hpp"
 
 namespace kengine::systems {
 	struct lua {

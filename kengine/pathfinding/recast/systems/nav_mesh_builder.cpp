@@ -16,22 +16,28 @@
 #include "putils/thread_name.hpp"
 #include "putils/with.hpp"
 
-// kengine data
-#include "kengine/data/model.hpp"
-#include "kengine/data/model_data.hpp"
-#include "kengine/data/nav_mesh.hpp"
-#include "kengine/data/transform.hpp"
+// kengine core
+#include "kengine/core/data/transform.hpp"
+#include "kengine/core/helpers/assert_helper.hpp"
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
 
-// kengine helpers
-#include "kengine/helpers/assert_helper.hpp"
-#include "kengine/helpers/async_helper.hpp"
-#include "kengine/helpers/matrix_helper.hpp"
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
+// kengine async
+#include "kengine/async/helpers/async_helper.hpp"
 
-// impl
+// kengine glm
+#include "kengine/glm/helpers/matrix_helper.hpp"
+
+// kengine model_instance
+#include "kengine/model_instance/data/model.hpp"
+#include "kengine/model_instance/data/model_data.hpp"
+
+// kengine pathfinding
+#include "kengine/pathfinding/data/nav_mesh.hpp"
+
+// kengine pathfinding/recast
 #include "common.hpp"
-#include "recast_nav_mesh.hpp"
+#include "kengine/pathfinding/recast/data/recast_nav_mesh.hpp"
 
 namespace kengine::systems::recast_impl {
 	struct build_recast_component {

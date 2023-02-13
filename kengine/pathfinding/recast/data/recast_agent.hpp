@@ -6,13 +6,14 @@
 // putils
 #include "putils/default_constructors.hpp"
 
-// kengine helpers
-#include "kengine/helpers/log_helper.hpp"
+// kengine core
+#include "kengine/core/helpers/log_helper.hpp"
 
 // impl
 #include "recast_crowd.hpp"
 
 namespace kengine::data {
+	//! putils reflect all
 	struct recast_agent {
 		int index = 0;
 		entt::handle crowd;
@@ -38,3 +39,5 @@ namespace kengine::data {
 		}
 	};
 }
+
+#include "recast_agent.rpp"

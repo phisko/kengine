@@ -12,23 +12,25 @@
 #include "putils/string.hpp"
 #include "putils/to_string.hpp"
 
-// kengine data
-#include "kengine/data/imgui_tool.hpp"
-#include "kengine/data/name.hpp"
-#include "kengine/data/selected.hpp"
+// kengine core
+#include "kengine/core/data/name.hpp"
+#include "kengine/core/data/selected.hpp"
+#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/helpers/profiling_helper.hpp"
+#include "kengine/core/helpers/sort_helper.hpp"
 
-// kengine functions
-#include "kengine/functions/execute.hpp"
+// kengine imgui
+#include "kengine/imgui/helpers/imgui_helper.hpp"
+
+// kengine imgui/imgui_tool
+#include "kengine/imgui/imgui_tool/data/imgui_tool.hpp"
+
+// kengine main_loop
+#include "kengine/main_loop/functions/execute.hpp"
 
 // kengine meta
-#include "kengine/meta/has.hpp"
-#include "kengine/meta/match_string.hpp"
-
-// kengine helpers
-#include "kengine/helpers/imgui_helper.hpp"
-#include "kengine/helpers/log_helper.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
-#include "kengine/helpers/sort_helper.hpp"
+#include "kengine/meta/functions/has.hpp"
+#include "kengine/meta/functions/match_string.hpp"
 
 namespace kengine::systems {
 	struct imgui_entity_selector {

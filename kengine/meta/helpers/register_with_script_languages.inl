@@ -8,10 +8,14 @@
 #include "putils/range.hpp"
 #include "putils/thread_name.hpp"
 
-// kengine helpers
-#include "kengine/helpers/lua_helper.hpp"
-#include "kengine/helpers/profiling_helper.hpp"
-#include "kengine/helpers/python_helper.hpp"
+// kengine core
+#include "kengine/core/helpers/profiling_helper.hpp"
+
+// kengine scripting/lua
+#include "kengine/scripting/lua/helpers/lua_helper.hpp"
+
+// kengine scripting/python
+#include "kengine/scripting/python/helpers/python_helper.hpp"
 
 namespace kengine {
 	template<typename... Comps>
@@ -34,10 +38,10 @@ namespace kengine {
 		using language_registrator = void(entt::registry &);
 		static constexpr language_registrator * language_registrators[] = {
 			nullptr, // Needed to avoid zero-sized array
-#ifdef KENGINE_PYTHON
+#ifdef KENGINE_SCRIPTING_PYTHON
 			python_helper::register_types<IsComponent, Comps...>,
 #endif
-#ifdef KENGINE_LUA
+#ifdef KENGINE_SCRIPTING_LUA
 			lua_helper::register_types<IsComponent, Comps...>,
 #endif
 		};
@@ -72,11 +76,11 @@ namespace kengine {
 		KENGINE_PROFILING_SCOPE;
 		kengine_logf(r, verbose, "register_with_script_languages", "Registering function %s", name);
 
-#ifdef KENGINE_PYTHON
+#ifdef KENGINE_SCRIPTING_PYTHON
 		python_helper::register_function(r, name, func);
 #endif
 
-#ifdef KENGINE_LUA
+#ifdef KENGINE_SCRIPTING_LUA
 		lua_helper::register_function(r, name, func);
 #endif
 	}

@@ -10,7 +10,7 @@
 #include "putils/point.hpp"
 
 // kengine data
-#include "kengine/data/input_buffer.hpp"
+#include "kengine/input/data/input_buffer.hpp"
 
 namespace kengine::systems {
 	struct glfw_input_handler {

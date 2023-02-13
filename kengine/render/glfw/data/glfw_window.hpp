@@ -1,7 +1,5 @@
 #pragma once
 
-#ifdef KENGINE_GLFW
-
 // glfw
 #include <GLFW/glfw3.h>
 
@@ -27,5 +25,3 @@ namespace kengine::data {
 }
 
 #include "glfw_window.rpp"
-
-#endif
