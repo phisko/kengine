@@ -1,8 +1,0 @@
-#pragma once
-
-// kengine helpers
-#include "kengine/helpers/system_creator_helper.hpp"
-
-namespace kengine::systems {
-	DECLARE_KENGINE_SYSTEM_CREATOR(KENGINE_JSON_SCENE_LOADER_EXPORT, json_scene_loader)
-}

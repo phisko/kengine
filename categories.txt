@@ -1,0 +1,201 @@
+adjustable
+    data/adjustable
+    functions/save_adjustables
+    helpers/save_all_adjustables
+    systems/adjustable_ini_file
+
+    imgui_adjustable
+        systems/imgui_adjustable
+
+animation
+    data/animation
+    data/animation_files
+    data/model_animation
+
+async
+    data/async_task
+    helpers/async_helper
+
+core
+    data/name
+    data/selected
+    data/transform
+    helpers/assert_helper
+    helpers/json_helper
+    helpers/new_entity_processor
+    helpers/profiling_helper
+    helpers/sort_helper
+
+command_line
+    data/command_line
+    helpers/command_line_helper
+
+model_instance
+    data/graphics
+    data/instance
+    data/model
+    data/model_data
+    helpers/instance_helper
+    systems/model_creator
+
+log
+    functions/log
+    helpers/log_helper
+
+    log_file
+        systems/log_file
+
+    log_stdout
+        systems/log_stdout
+
+    log_visual_studio
+        systems/log_visual_studio
+
+main_loop
+    data/keep_alive
+    data/time_modulator
+    helpers/is_running
+    helpers/main_loop
+    functions/execute
+
+system_creator
+    functions/create_system
+    helpers/create_all_systems
+    helpers/system_creator_helper
+
+imgui
+    data/imgui_context
+    data/imgui_scale
+    data/imgui_tool
+    helpers/imgui_helper
+
+    imgui_async_task
+        systems/imgui_async_task
+
+    imgui_engine_stats
+        systems/imgui_engine_stats
+
+    imgui_entity_editor
+        systems/imgui_entity_editor
+
+    imgui_entity_selector
+        systems/imgui_entity_selector
+
+    imgui_prompt
+        systems/imgui_prompt
+
+    imgui_tool
+        systems/imgui_tool
+
+    log_imgui
+        systems/log_imgui
+
+input
+    data/input
+    data/input_buffer
+    systems/input
+
+json_scene_loader
+    data/json_scene_loader
+    systems/json_scene_loader
+
+kinematic
+    data/kinematic
+    systems/kinematic
+
+scripting
+    helpers/script_language_helper
+
+    lua
+        data/lua
+        data/lua_state
+        data/lua_table
+        helpers/imgui_lua_helper
+        helpers/lua_helper
+        systems/lua
+
+    python
+        data/python
+        data/python_state
+        helpers/python_helper
+        systems/python
+
+on_click
+    functions/on_click
+    systems/on_click
+
+pathfinding
+    data/nav_mesh
+    data/pathfinding
+
+    recast
+        systems/recast
+
+physics
+    data/collision
+    data/physics
+    data/model_collider
+    functions/on_collision
+    functions/query_position
+    systems/collision
+
+    bullet
+        systems/bullet
+
+render
+    data/camera
+    data/debug_graphics
+    data/god_rays
+    data/highlight
+    data/light
+    data/no_shadow
+    data/on_screen
+    data/sky_box
+    data/sprite
+    data/text
+    data/viewport
+    data/window
+    functions/appears_in_viewport
+    functions/get_entity_in_pixel
+    functions/get_position_in_pixel
+    functions/on_mouse_captured
+    helpers/camera_helper
+    helpers/matrix_helper
+
+    glfw
+        data/glfw_window
+        systems/glfw
+
+    kreogl
+        systems/kreogl
+
+    polyvox
+        data/polyvox
+        systems/polyvox
+
+    sfml
+        systems/sfml
+
+skeleton
+    data/model_skeleton
+    data/skeleton
+    helpers/skeleton_helper
+
+meta
+    functions/register_types
+    helpers/meta
+    helpers/register_all_types
+    helpers/type_helper
+    functions/attributes
+    functions/count
+    functions/display_imgui
+    functions/edit_imgui
+    functions/emplace_or_replace
+    functions/for_each_entity
+    functions/get
+    functions/has
+    functions/load_from_json
+    functions/match_string
+    functions/remove
+    functions/save_to_json
+    functions/size

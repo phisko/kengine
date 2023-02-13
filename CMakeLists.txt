@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.8)
 project(kengine)
 
 cmake_policy(VERSION 3.13) # options shouldn't clear variables
@@ -8,110 +8,128 @@ if (MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /DNOMINMAX")
 endif()
 
-# System lists
+add_library(kengine INTERFACE)
 
-macro(add_system)
-    list(APPEND system_options ${ARGV0})
-    list(APPEND system_dirs kengine/systems/${ARGV1})
-    list(APPEND system_libs ${ARGV2})
-    list(APPEND system_dependent_options ${ARGV3})
-endmacro()
-
-add_system(KENGINE_BULLET bullet kengine_bullet KENGINE_GLM)
-add_system(KENGINE_COLLISION collision kengine_collision KENGINE_NO_DEPENDENCY)
-add_system(KENGINE_GLFW glfw kengine_glfw KENGINE_NO_DEPENDENCY)
-add_system(KENGINE_IMGUI_ADJUSTABLE imgui_adjustable kengine_imgui_adjustable KENGINE_NO_DEPENDENCY)
-add_system(KENGINE_IMGUI_ASYNC_TASK imgui_async_task kengine_imgui_async_task KENGINE_NO_DEPENDENCY)
-add_system(KENGINE_IMGUI_ENGINE_STATS imgui_engine_stats kengine_imgui_engine_stats KENGINE_NO_DEPENDENCY)
-add_system(KENGINE_IMGUI_ENTITY_EDITOR imgui_entity_editor kengine_imgui_entity_editor KENGINE_NO_DEPENDENCY)
-add_system(KENGINE_IMGUI_ENTITY_SELECTOR imgui_entity_selector kengine_imgui_entity_selector KENGINE_NO_DEPENDENCY)
-add_system(KENGINE_IMGUI_PROMPT imgui_prompt kengine_imgui_prompt KENGINE_NO_DEPENDENCY)
-add_system(KENGINE_IMGUI_TOOL imgui_tool kengine_imgui_tool KENGINE_NO_DEPENDENCY)
-add_system(KENGINE_JSON_SCENE_LOADER json_scene_loader kengine_json_scene_loader KENGINE_NO_DEPENDENCY)
-add_system(KENGINE_INPUT input kengine_input KENGINE_NO_DEPENDENCY)
-add_system(KENGINE_KINEMATIC kinematic kengine_kinematic KENGINE_NO_DEPENDENCY)
-add_system(KENGINE_KREOGL kreogl kengine_kreogl KENGINE_NO_DEPENDENCY)
-add_system(KENGINE_LOG_FILE log_file kengine_log_file KENGINE_NO_DEPENDENCY)
-add_system(KENGINE_LOG_IMGUI log_imgui kengine_log_imgui KENGINE_NO_DEPENDENCY)
-add_system(KENGINE_LOG_STDOUT log_stdout kengine_log_stdout KENGINE_NO_DEPENDENCY)
-add_system(KENGINE_LOG_VISUAL_STUDIO log_visual_studio kengine_log_visual_studio KENGINE_NO_DEPENDENCY)
-add_system(KENGINE_LUA lua kengine_lua PUTILS_LUA)
-add_system(KENGINE_MODEL_CREATOR model_creator kengine_model_creator KENGINE_NO_DEPENDENCY)
-add_system(KENGINE_ONCLICK on_click kengine_onclick KENGINE_NO_DEPENDENCY)
-add_system(KENGINE_POLYVOX polyvox kengine_polyvox KENGINE_NO_DEPENDENCY)
-add_system(KENGINE_PYTHON python kengine_python PUTILS_PYTHON)
-add_system(KENGINE_RECAST recast kengine_recast KENGINE_GLM)
-add_system(KENGINE_SFML sfml kengine_sfml PUTILS_PSE)
-
-list(LENGTH system_options system_count)
-math(EXPR system_count "${system_count} - 1")
-
-# Options
-
-option(KENGINE_ALL_SYSTEMS "Build all systems" OFF)
-foreach(i RANGE ${system_count})
-    list(GET system_options ${i} sys_option)
-    list(GET system_libs ${i} sys_lib)
-    list(GET system_dependent_options ${i} sys_dependent_options)
-
-    option(${sys_option} "Build ${sys_lib}" OFF)
-    if (KENGINE_ALL_SYSTEMS)
-        set(${sys_option} ON)
-    endif()
-
-    foreach(opt in ${sys_dependent_options})
-        if(${sys_option})
-            option(${opt} OFF)
-            set(${opt} ON)
-        endif()
-    endforeach()
-endforeach()
-
+# Include this here so systems can use helpers
+add_subdirectory(putils/reflection/meta/cmake_helpers kengine_cmake_helpers)
 if (NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
-    # These must be set before processing putils, as conan DLLs need to be copied next to executables
-    include(${CMAKE_CURRENT_LIST_DIR}/putils/reflection/meta/cmake_helpers/putils_set_output_directories.cmake)
+    # These must be set before processing systems, as conan DLLs need to be copied next to executables
     putils_set_output_directories(bin lib lib)
 endif()
 
-# putils
+option(KENGINE_GENERATE_REFLECTION "Generate reflection headers for kengine data types")
+option(KENGINE_ALL_SYSTEMS "Build all systems")
 
-option(PUTILS_PLUGIN_MANAGER "Build PluginManager" OFF)
-set(PUTILS_PLUGIN_MANAGER ON)
+function(add_system path)
+    file(RELATIVE_PATH relative_path ${CMAKE_CURRENT_LIST_DIR} ${path})
+    # Convert kengine/render/kreogl to kengine_render_kreogl
+    string(REPLACE "/" "_" system_name ${relative_path})
 
-option(KENGINE_PROFILING OFF)
-option(PUTILS_PROFILING OFF)
-set(PUTILS_PROFILING ${KENGINE_PROFILING})
+    # Expose system name to parent scope so that the system's CMakeLists can use it
+    set(system_name ${system_name} PARENT_SCOPE)
 
-add_subdirectory(putils)
+    # Convert kengine_render_kreogl to KENGINE_RENDER_KREOGL
+    string(TOUPPER ${system_name} upper_system_name)
 
-# Library
+    option(${upper_system_name} "Build ${system_name}" ${KENGINE_ALL_SYSTEMS})
+    if(NOT ${${upper_system_name}})
+        return()
+    endif()
 
-add_library(kengine INTERFACE)
+    file(GLOB sources
+            ${path}/helpers/*.cpp
+            ${path}/systems/*.cpp)
 
-putils_src_files(
-    components
-    DIRECTORIES
-        kengine/data
-        kengine/functions
-        kengine/meta
-    EXTENSIONS
-        hpp
-)
+    list(LENGTH sources sources_length)
+    if(sources_length GREATER 0)
+        set(link_type PUBLIC)
+        add_library(${system_name} ${sources})
+        putils_export_symbols(${system_name})
+    else()
+        set(link_type INTERFACE)
+        add_library(${system_name} INTERFACE)
+    endif()
 
-putils_src_files(
-    src_files
-    DIRECTORIES
-        kengine/helpers
-        kengine/helpers/meta
-    EXTENSIONS
-        cpp hpp inl
-)
+    # Expose link type so that the system's CMakeLists can use it
+    set(link_type ${link_type} PARENT_SCOPE)
 
-add_library(kengine_core ${components} ${src_files})
-target_link_libraries(kengine_core PUBLIC putils)
+    target_link_libraries(kengine INTERFACE ${system_name})
+
+    target_compile_definitions(${system_name} ${link_type} ${upper_system_name})
+    if(NOT ${system_name} STREQUAL kengine_core)
+        target_link_libraries(${system_name} ${link_type} kengine_core)
+    endif()
+
+    if(NOT "${parent_system_name}" STREQUAL "")
+        target_link_libraries(${system_name} ${link_type} ${parent_system_name})
+    endif()
+
+    file(GLOB types
+            ${path}/data/*.hpp
+            ${path}/functions/*.hpp)
+
+    list(LENGTH types types_length)
+    if(types_length GREATER 0)
+        get_target_property(cxx_standard ${system_name} CXX_STANDARD)
+        if(${cxx_standard} STREQUAL cxx_standard-NOTFOUND)
+            set_target_properties(${system_name} PROPERTIES CXX_STANDARD ${CMAKE_CXX_STANDARD})
+        endif()
+
+        include(putils/reflection/scripts/generate_reflection_headers.cmake)
+        if(${KENGINE_GENERATE_REFLECTION})
+            putils_generate_reflection_headers(
+                    TARGET ${system_name}
+                    SOURCES ${types}
+            )
+        endif()
+    endif()
+
+    set(types_to_register ${types_to_register} ${types} PARENT_SCOPE)
+endfunction()
+
+function(recursively_add_subdirectories root)
+    file(GLOB children ${root}/*)
+    foreach(child ${children})
+        if(NOT IS_DIRECTORY ${child})
+            continue()
+        endif()
+
+        list(FIND ignored_subdirectories ${child} ignored_index)
+        if(NOT ${ignored_index} EQUAL -1)
+            continue()
+        endif()
+
+        add_system(${child})
+        if(EXISTS ${child}/CMakeLists.txt)
+            macro(subdirectory_is_not_system path)
+                set(ignored_subdirectories ${ignored_subdirectories} ${CMAKE_CURRENT_LIST_DIR}/${path} PARENT_SCOPE)
+            endmacro()
+            function(system_link_public_libraries)
+                target_link_libraries(${system_name} ${link_type} ${ARGN})
+            endfunction()
+            function(system_link_private_libraries)
+                target_link_libraries(${system_name} PRIVATE ${ARGN})
+            endfunction()
+            add_subdirectory(${child})
+        endif()
+
+        set(previous_parent_system_name ${parent_system_name})
+        set(parent_system_name ${system_name})
+        recursively_add_subdirectories(${child})
+        set(parent_system_name ${previous_parent_system_name})
+    endforeach()
+
+    set(types_to_register ${types_to_register} ${types} PARENT_SCOPE)
+endfunction()
+
+# Add core first so other systems can link against it
+add_system(${CMAKE_CURRENT_LIST_DIR}/kengine/core)
+set(ignored_subdirectories ${CMAKE_CURRENT_LIST_DIR}/kengine/core)
+
 target_include_directories(kengine_core PUBLIC .)
-putils_export_symbols(kengine_core)
+target_link_libraries(kengine INTERFACE kengine_core)
 
+# entt
 set(customFindPackageNames entt:EnTT)
 set(customLibraryNames entt:EnTT)
 putils_conan_download_and_link_packages_with_names(
@@ -121,86 +139,38 @@ putils_conan_download_and_link_packages_with_names(
         entt/3.11.0
 )
 
-if (KENGINE_PROFILING)
-    target_compile_definitions(kengine_core PUBLIC KENGINE_PROFILING)
-endif()
+# Then add the other systems
+recursively_add_subdirectories(kengine)
 
-if (KENGINE_GLM)
-    target_compile_definitions(kengine_core PUBLIC KENGINE_GLM)
-    putils_conan_download_and_link_packages(kengine_core PUBLIC glm/0.9.9.8)
-endif()
+# putils
+add_subdirectory(putils)
+target_link_libraries(kengine_core PUBLIC putils)
 
-option(KENGINE_NDEBUG "Disable debug" OFF)
+option(KENGINE_NDEBUG "Disable debug")
 if (KENGINE_NDEBUG)
     target_compile_definitions(kengine_core PUBLIC KENGINE_NDEBUG)
 endif()
 
-option(KENGINE_NO_LOG "Disable logging" OFF)
-if (KENGINE_NO_LOG)
-    target_compile_definitions(kengine_core PUBLIC KENGINE_NO_LOG)
-endif()
-
-set(KENGINE_LOG_MAX_SEVERITY verbose CACHE STRING "Maximum allowed severity (see log_severity in log.hpp)")
-target_compile_definitions(kengine_core PUBLIC KENGINE_LOG_MAX_SEVERITY=${KENGINE_LOG_MAX_SEVERITY})
-
-target_link_libraries(kengine INTERFACE kengine_core)
-
-# Add systems
-
-foreach(i RANGE ${system_count})
-    list(GET system_options ${i} sys_option)
-    list(GET system_dirs ${i} sys_dir)
-    list(GET system_libs ${i} sys_lib)
-
-    if (${sys_option})
-        # Add definition to core, so that helpers which depend on a library get compiled
-        # TODO: move those helpers into the associated systems and only add the definitions to them
-        target_compile_definitions(kengine_core PUBLIC ${sys_option})
-
-        add_subdirectory(${sys_dir})
-        target_link_libraries(kengine INTERFACE ${sys_lib})
-    endif()
-endforeach()
-
-option(KENGINE_TYPE_REGISTRATION "Generate kengine type registration" OFF)
+option(KENGINE_TYPE_REGISTRATION "Generate kengine type registration")
 if (KENGINE_TYPE_REGISTRATION)
-    target_compile_definitions(kengine_core PUBLIC KENGINE_TYPE_REGISTRATION)
-
     include(scripts/generate_type_registration.cmake)
-    kengine_generate_type_registration(
-            TARGET kengine_core
-            INCLUDE_DIR kengine/types
-            SOURCES ${components}
-            REGISTRATIONS_JSON ${CMAKE_CURRENT_LIST_DIR}/scripts/registrations.json
-            NAMESPACE kengine::types
-    )
-    target_link_libraries(kengine_core_type_registration PUBLIC kengine)
-    target_link_libraries(kengine INTERFACE kengine_core_type_registration)
-endif()
 
-# Generate reflection headers now that all system include paths are known
-option(KENGINE_GENERATE_REFLECTION OFF)
-if(KENGINE_GENERATE_REFLECTION)
-    putils_generate_reflection_headers(
-            TARGET kengine_core
-            SOURCES ${components}
-    )
-endif()
+    list(LENGTH types_to_register types_to_register_length)
+    if(types_to_register_length GREATER 0)
+        get_target_property(cxx_standard kengine CXX_STANDARD)
+        if(${cxx_standard} STREQUAL cxx_standard-NOTFOUND)
+            set_target_properties(kengine PROPERTIES CXX_STANDARD ${CMAKE_CXX_STANDARD})
+        endif()
 
-#
-# Tests
-#
-
-option(KENGINE_TESTS "Build kengine tests" OFF)
-if (KENGINE_TESTS)
-    enable_testing()
-    set(test_exe_name kengine_tests)
-    file(
-            GLOB test_src
-            kengine/helpers/tests/*.tests.cpp
-            kengine/helpers/tests/meta/*.tests.cpp
-    )
-
-    putils_add_test_executable(${test_exe_name} ${test_src})
-    target_link_libraries(${test_exe_name} PRIVATE kengine_core)
+        kengine_generate_type_registration(
+                TARGET kengine
+                INCLUDE_DIR kengine/type_registration
+                SOURCES ${types_to_register}
+                REGISTRATIONS_JSON ${CMAKE_CURRENT_LIST_DIR}/scripts/registrations.json
+                NAMESPACE kengine::types
+        )
+        target_compile_definitions(kengine_type_registration PUBLIC KENGINE_TYPE_REGISTRATION)
+        target_link_libraries(kengine_type_registration PUBLIC kengine)
+        target_link_libraries(kengine INTERFACE kengine_type_registration)
+    endif()
 endif()

@@ -225,7 +225,7 @@
 	},
 	{
 		"type": "kengine::functions::log",
-		"header": "kengine/functions/log.hpp"
+		"header": "kengine/log/functions/log.hpp"
 	},
 	{
 		"type": "kengine::functions::on_click",

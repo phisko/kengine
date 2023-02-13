@@ -41,7 +41,7 @@ function(kengine_generate_type_registration)
         )
         add_custom_command(
                 OUTPUT ${registration_file}
-                COMMENT "Generating type registration code for ${header}"
+                COMMENT "Generating type registration code for ${header} (target ${ARGUMENTS_TARGET})"
                 COMMAND ${command}
                 DEPENDS ${header} ${python_script} ${ARGUMENTS_REGISTRATION_JSON}
         )
