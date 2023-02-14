@@ -1100,6 +1100,7 @@ namespace kengine::systems {
 		kreogl::processed_animation_files,
 		kreogl::processed_model,
 		kreogl::processed_sky_box,
+		kreogl::processed_window,
 		data::kreogl_animation_files,
 		data::kreogl_debug_graphics,
 		data::kreogl_model,
