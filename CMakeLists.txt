@@ -8,14 +8,29 @@ if (MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /DNOMINMAX")
 endif()
 
+add_library(kengine_include INTERFACE)
+target_include_directories(kengine_include INTERFACE .)
+
 add_library(kengine INTERFACE)
+target_link_libraries(kengine INTERFACE kengine_include)
 
 # Include this here so systems can use helpers
 add_subdirectory(putils/reflection/meta/cmake_helpers kengine_cmake_helpers)
+
 if (NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
     # These must be set before processing systems, as conan DLLs need to be copied next to executables
     putils_set_output_directories(bin lib lib)
 endif()
+
+# entt
+set(customFindPackageNames entt:EnTT)
+set(customLibraryNames entt:EnTT)
+putils_conan_download_and_link_packages_with_names(
+        kengine_include INTERFACE
+        "${customFindPackageNames}"
+        "${customLibraryNames}"
+        entt/3.11.0
+)
 
 option(KENGINE_GENERATE_REFLECTION "Generate reflection headers for kengine data types")
 option(KENGINE_ALL_SYSTEMS "Build all systems")
@@ -24,9 +39,6 @@ function(add_system path)
     file(RELATIVE_PATH relative_path ${CMAKE_CURRENT_LIST_DIR} ${path})
     # Convert kengine/render/kreogl to kengine_render_kreogl
     string(REPLACE "/" "_" system_name ${relative_path})
-
-    # Expose system name to parent scope so that the system's CMakeLists can use it
-    set(system_name ${system_name} PARENT_SCOPE)
 
     # Convert kengine_render_kreogl to KENGINE_RENDER_KREOGL
     string(TOUPPER ${system_name} upper_system_name)
@@ -56,8 +68,11 @@ function(add_system path)
     target_link_libraries(kengine INTERFACE ${system_name})
 
     target_compile_definitions(${system_name} ${link_type} ${upper_system_name})
+    target_link_libraries(${system_name} ${link_type} kengine_include)
     if(NOT ${system_name} STREQUAL kengine_core)
-        target_link_libraries(${system_name} ${link_type} kengine_core)
+        if(TARGET kengine_core)
+            target_link_libraries(${system_name} ${link_type} kengine_core)
+        endif()
     endif()
 
     if(NOT "${parent_system_name}" STREQUAL "")
@@ -135,29 +150,16 @@ endfunction()
 add_system(${CMAKE_CURRENT_LIST_DIR}/kengine/core)
 set(ignored_subdirectories ${CMAKE_CURRENT_LIST_DIR}/kengine/core)
 
-target_include_directories(kengine_core PUBLIC .)
-target_link_libraries(kengine INTERFACE kengine_core)
-
-# entt
-set(customFindPackageNames entt:EnTT)
-set(customLibraryNames entt:EnTT)
-putils_conan_download_and_link_packages_with_names(
-        kengine_core PUBLIC
-        "${customFindPackageNames}"
-        "${customLibraryNames}"
-        entt/3.11.0
-)
-
 # Then add the other systems
 add_systems_in_directory(kengine)
 
 # putils
 add_subdirectory(putils)
-target_link_libraries(kengine_core PUBLIC putils)
+target_link_libraries(kengine_include INTERFACE putils)
 
 option(KENGINE_NDEBUG "Disable debug")
 if (KENGINE_NDEBUG)
-    target_compile_definitions(kengine_core PUBLIC KENGINE_NDEBUG)
+    target_compile_definitions(kengine_include INTERFACE KENGINE_NDEBUG)
 endif()
 
 option(KENGINE_TYPE_REGISTRATION "Generate kengine type registration")
