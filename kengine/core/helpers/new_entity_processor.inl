@@ -18,8 +18,10 @@ namespace kengine {
 	new_entity_processor<ProcessedTag, Comps...>::new_entity_processor(entt::registry & r, const callback_type & callback) noexcept
 		: r(r),
 		  callback(callback) {
-		if (!kengine::is_storage_registered<ProcessedTag>(r))
+		if (!kengine::is_storage_registered<ProcessedTag>(r)) {
 			kengine_log(r, verbose, "new_entity_processor", "Processed tag wasn't pre-registered. Consider pre-registering it to avoid potential race conditions.");
+			kengine::register_storage<ProcessedTag>(r);
+		}
 	}
 
 	template<typename ProcessedTag, typename... Comps>
