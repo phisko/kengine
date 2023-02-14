@@ -34,6 +34,10 @@ putils_conan_download_and_link_packages_with_names(
 
 option(KENGINE_GENERATE_REFLECTION "Generate reflection headers for kengine data types")
 option(KENGINE_ALL_SYSTEMS "Build all systems")
+option(KENGINE_TESTS "Build tests")
+if(KENGINE_TESTS)
+    enable_testing()
+endif()
 
 function(add_system path)
     file(RELATIVE_PATH relative_path ${CMAKE_CURRENT_LIST_DIR} ${path})
@@ -60,6 +64,18 @@ function(add_system path)
     else()
         set(link_type INTERFACE)
         add_library(${system_name} INTERFACE)
+    endif()
+
+    if(KENGINE_TESTS)
+        file(GLOB test_sources
+                ${path}/helpers/tests/*.tests.cpp
+                ${path}/systems/tests/*.tests.cpp)
+        list(LENGTH test_sources test_sources_length)
+        if(test_sources_length GREATER 0)
+            set(system_tests_name ${system_name}_tests)
+            putils_add_test_executable(${system_tests_name} ${test_sources})
+            target_link_libraries(${system_tests_name} PRIVATE ${system_name})
+        endif()
     endif()
 
     # Expose link type so that the system's CMakeLists can use it
