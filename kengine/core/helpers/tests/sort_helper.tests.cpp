@@ -4,8 +4,8 @@
 // gtest
 #include <gtest/gtest.h>
 
-// kengine helpers
-#include "kengine/helpers/sort_helper.hpp"
+// kengine core
+#include "kengine/core/helpers/sort_helper.hpp"
 
 struct sort_helper : ::testing::Test {
 	struct entity_data {

@@ -4,8 +4,8 @@
 // gtest
 #include <gtest/gtest.h>
 
-// kengine helpers
-#include "kengine/helpers/skeleton_helper.hpp"
+// kengine skeleton
+#include "kengine/skeleton/helpers/skeleton_helper.hpp"
 
 TEST(skeleton_helper, get_bone_index) {
 	const kengine::data::model_skeleton comp{

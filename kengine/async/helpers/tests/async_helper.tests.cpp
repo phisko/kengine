@@ -4,11 +4,9 @@
 // entt
 #include <entt/entity/registry.hpp>
 
-// kengine data
-#include "kengine/data/async_task.hpp"
-
-// kengine helpers
-#include "kengine/helpers/async_helper.hpp"
+// kengine async
+#include "kengine/async/data/async_task.hpp"
+#include "kengine/async/helpers/async_helper.hpp"
 
 TEST(async_helper, start_async_task_component_created) {
 	entt::registry r;

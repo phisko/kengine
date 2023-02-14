@@ -4,19 +4,21 @@
 // gtest
 #include <gtest/gtest.h>
 
-// kengine data
-#include "kengine/data/name.hpp"
-#include "kengine/data/transform.hpp"
+// kengine core
+#include "kengine/core/data/name.hpp"
+#include "kengine/core/data/transform.hpp"
+#include "kengine/core/helpers/json_helper.hpp"
 
-// kengine helpers
-#include "kengine/helpers/json_helper.hpp"
-#include "kengine/helpers/meta/register_everything.hpp"
+// kengine meta
+#include "kengine/meta/helpers/register_metadata.hpp"
+#include "kengine/meta/helpers/register_meta_components.hpp"
 
 struct json_helper : ::testing::Test {
 	entt::registry r;
 
 	json_helper() noexcept {
-		kengine::register_everything<kengine::data::name, kengine::data::transform>(r);
+		kengine::register_metadata<kengine::data::name, kengine::data::transform>(r);
+		kengine::register_meta_components<kengine::data::name, kengine::data::transform>(r);
 		json["name"]["name"] = expected_name;
 		auto & transform = json["transform"];
 		auto & bounding_box = transform["bounding_box"];

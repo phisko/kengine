@@ -4,8 +4,8 @@
 // gtest
 #include <gtest/gtest.h>
 
-// kengine helpers
-#include "kengine/log/helpers/log_helper.hpp"
+// kengine core
+#include "kengine/core/helpers/log_helper.hpp"
 
 TEST(log_helper, log_helper) {
 	entt::registry r;
