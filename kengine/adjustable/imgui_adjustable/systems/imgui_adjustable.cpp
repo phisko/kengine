@@ -371,7 +371,7 @@ namespace kengine::systems {
 			std::ifstream f(KENGINE_ADJUSTABLE_SAVE_FILE);
 
 			putils::ini_file ret;
-			f >> loaded_file;
+			f >> ret;
 			return ret;
 		}
 
