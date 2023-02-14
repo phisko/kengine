@@ -1,5 +1,8 @@
 #include "imgui_prompt.hpp"
 
+// stl
+#include <list>
+
 // entt
 #include <entt/entity/handle.hpp>
 #include <entt/entity/registry.hpp>
