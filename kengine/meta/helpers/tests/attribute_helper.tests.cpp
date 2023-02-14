@@ -5,13 +5,13 @@
 // gtest
 #include <gtest/gtest.h>
 
-// kengine data
-#include "kengine/data/transform.hpp"
+// kengine core
+#include "kengine/core/data/transform.hpp"
 
-// kengine helpers
-#include "kengine/helpers/meta/attribute_helper.hpp"
-#include "kengine/helpers/meta/register_metadata.hpp"
-#include "kengine/helpers/type_helper.hpp"
+// kengine meta
+#include "kengine/meta/helpers/attribute_helper.hpp"
+#include "kengine/meta/helpers/register_metadata.hpp"
+#include "kengine/meta/helpers/type_helper.hpp"
 
 TEST(attribute_helper, find_attribute) {
 	entt::registry r;

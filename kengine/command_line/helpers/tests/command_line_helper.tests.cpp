@@ -4,8 +4,8 @@
 // gtest
 #include <gtest/gtest.h>
 
-// kengine helpers
-#include "kengine/helpers/command_line_helper.hpp"
+// kengine command_line
+#include "kengine/command_line/helpers/command_line_helper.hpp"
 
 namespace {
 	struct options {

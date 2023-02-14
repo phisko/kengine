@@ -4,15 +4,11 @@
 // gtest
 #include <gtest/gtest.h>
 
-// kengine data
-#include "kengine/data/keep_alive.hpp"
-
-// kengine functions
-#include "kengine/functions/execute.hpp"
-
-// kengine helpers
-#include "kengine/helpers/is_running.hpp"
-#include "kengine/helpers/main_loop.hpp"
+// kengine main_loop
+#include "kengine/main_loop/data/keep_alive.hpp"
+#include "kengine/main_loop/functions/execute.hpp"
+#include "kengine/main_loop/helpers/is_running.hpp"
+#include "kengine/main_loop/helpers/main_loop.hpp"
 
 TEST(main_loop, run) {
 	entt::registry r;

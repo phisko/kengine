@@ -1,11 +1,11 @@
 // gtest
 #include <gtest/gtest.h>
 
-// kengine data
-#include "kengine/data/transform.hpp"
+// kengine core
+#include "kengine/core/data/transform.hpp"
 
-// kengine helpers
-#include "kengine/helpers/matrix_helper.hpp"
+// kengine glm
+#include "kengine/glm/helpers/matrix_helper.hpp"
 
 TEST(matrix_helper, to_vec) {
 	const auto vec = kengine::matrix_helper::to_vec(putils::point3f{ 42.f, -42.f, 0.f });

@@ -5,8 +5,8 @@
 // gtest
 #include <gtest/gtest.h>
 
-// kengine helpers
-#include "kengine/helpers/instance_helper.hpp"
+// kengine model_instance
+#include "kengine/model_instance/helpers/instance_helper.hpp"
 
 struct instance_helper : ::testing::Test {
 	instance_helper() noexcept {

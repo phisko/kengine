@@ -5,12 +5,10 @@
 // gtest
 #include <gtest/gtest.h>
 
-// kengine data
-#include "kengine/data/window.hpp"
-#include "kengine/data/viewport.hpp"
-
-// kengine helpers
-#include "kengine/helpers/camera_helper.hpp"
+// kengine render
+#include "kengine/render/data/window.hpp"
+#include "kengine/render/data/viewport.hpp"
+#include "kengine/render/helpers/camera_helper.hpp"
 
 struct params {
 	kengine::data::viewport viewport_component;

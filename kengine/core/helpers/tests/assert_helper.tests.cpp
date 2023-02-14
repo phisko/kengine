@@ -4,8 +4,8 @@
 // entt
 #include <entt/entity/registry.hpp>
 
-// kengine helpers
-#include "kengine/helpers/assert_helper.hpp"
+// kengine core
+#include "kengine/core/helpers/assert_helper.hpp"
 
 struct assert_helper : ::testing::Test {
 	assert_helper() noexcept {
