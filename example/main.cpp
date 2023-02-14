@@ -2,22 +2,16 @@
 #include <filesystem>
 #include <iostream>
 
-// kengine systems
-#include "kengine/systems/log_stdout/log_stdout.hpp"
-#include "kengine/systems/lua/lua.hpp"
-
-// kengine data
-#include "kengine/data/graphics.hpp"
-#include "kengine/data/keep_alive.hpp"
-#include "kengine/data/lua.hpp"
-#include "kengine/data/transform.hpp"
-
-// kengine functions
-#include "kengine/functions/execute.hpp"
-
-// kengine helpers
-#include "kengine/helpers/lua_helper.hpp"
-#include "kengine/helpers/main_loop.hpp"
+// kengine
+#include "kengine/core/data/transform.hpp"
+#include "kengine/log/stdout/systems/log_stdout.hpp"
+#include "kengine/main_loop/data/keep_alive.hpp"
+#include "kengine/main_loop/functions/execute.hpp"
+#include "kengine/main_loop/helpers/main_loop.hpp"
+#include "kengine/model_instance/data/graphics.hpp"
+#include "kengine/scripting/lua/data/lua.hpp"
+#include "kengine/scripting/lua/helpers/lua_helper.hpp"
+#include "kengine/scripting/lua/systems/lua.cpp"
 
 struct debug_system {
     debug_system(entt::handle e) noexcept
