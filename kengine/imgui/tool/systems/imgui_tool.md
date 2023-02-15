@@ -1,6 +1,6 @@
 # [imgui_tool](imgui_tool.hpp)
 
-System that displays a "Tools" item in ImGui's main menu bar, which lists all entities with an [imgui_tool](../../data/imgui_tool.md).
+System that displays a "Tools" item in ImGui's main menu bar, which lists all entities with an [imgui_tool](../data/imgui_tool.md).
 
 Clicking an item in the "Tools" dropdown will toggle the `imgui_tool`'s `enabled` attribute. Tools may then use this attribute to know if the user wants them to be displayed or not.
 

@@ -20,4 +20,4 @@ A pointer to the parent component attached to `e`.
 
 It is up to the user to implement this `meta component` for the component types they wish to be able to use it with.
 
-A helper [register_get](../helpers/meta/impl/register_get.md) function is provided which takes as a template parameter a set of component types and implements this `meta component` for them.
+A [standard implementation](../helpers/impl/get.md) is provided.

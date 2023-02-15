@@ -10,4 +10,4 @@ Helper function to quickly initialize ImGui bindings for Lua.
 void init_bindings(const entt::registry & r) noexcept;
 ```
 
-Initializes the bindings. Should be called after having added the [lua system](../systems/lua/lua.md).
+Initializes the bindings. Should be called after having added the [lua system](../../scripting/lua/systems/lua.md).

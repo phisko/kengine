@@ -1,6 +1,6 @@
 # [adjustable](adjustable.hpp)
 
-Utility component exposing values that may be adjusted at runtime, e.g. by the [imgui_adjustable](../systems/imgui_adjustable/imgui_adjustable.md) system.
+Utility component exposing values that may be adjusted at runtime, e.g. by the [imgui_adjustable](../imgui_adjustable/systems/imgui_adjustable.md) system.
 
 Currently supported types are `bool`, `int`, `float`, [putils::normalized_color](https://github.com/phisko/putils/blob/master/putils/color.md) and `enum` types.
 

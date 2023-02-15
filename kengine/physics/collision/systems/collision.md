@@ -1,6 +1,6 @@
 # [collision](collision.hpp)
 
-System that listens for [on_collision](../../functions/on_collision.md) events and checks each of the involved entities for a [collision](../../data/collision.md). If either of the entities is found to have a `collision` component, its `on_collide` member function is called with the two objects.
+System that listens for [on_collision](../../functions/on_collision.md) events and checks each of the involved entities for a [collision](../data/collision.md). If either of the entities is found to have a `collision` component, its `on_collide` member function is called with the two objects.
 
 ## Behavior
 

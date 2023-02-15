@@ -1,4 +1,4 @@
-# [Generate type registration](generateTypeRegistration.py)
+# [Generate type registration](generate_type_registration.py)
 
 This Python script will generate C++ files containing functions to register a set of specified types.
 

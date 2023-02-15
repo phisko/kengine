@@ -1,6 +1,6 @@
 # [model_data](model_data.hpp)
 
-Component holding the vertices and indices for a [model entity](model.md). These are used by graphics systems to load the model onto the GPU. Other systems may also want to access these elements (such as the [recast system](../systems/recast/recast.md), which uses them to generate the navmesh).
+Component holding the vertices and indices for a [model entity](model.md). These are used by graphics systems to load the model onto the GPU. Other systems may also want to access these elements (such as the [recast system](../../pathfinding/recast/systems/recast.md), which uses them to generate the navmesh).
 
 ## Members
 

@@ -6,7 +6,7 @@ Helper functions for serializing and de-serializing entities to JSON.
 
 These functions are implemented in terms of `meta components`.
 
-For components to be serializable, the [save_to_json](../meta/save_to_json.md) `meta component` must first have been registered for them. To be de-serializable, the [load_from_json](../meta/load_from_json.md) `meta component` must have been registered.
+For components to be serializable, the [save_to_json](../../meta/functions/save_to_json.md) `meta component` must first have been registered for them. To be de-serializable, the [load_from_json](../../meta/functions/load_from_json.md) `meta component` must have been registered.
 
 ## Members
 

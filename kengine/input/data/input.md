@@ -28,6 +28,6 @@ putils::function<void(entt::entity window, int button, const putils::point2f & s
 putils::function<void(entt::entity window, float xoffset, float yoffset, const putils::point2f & screen_coordinates), KENGINE_INPUT_FUNCTION_SIZE)> on_scroll;
 ```
 
-All these callbacks take as a first parameter the [window entity](window.md) in which the event happened.
+All these callbacks take as a first parameter the [window entity](../../render/data/window.md) in which the event happened.
 
 The maximum size for these functors defaults to 64 and can be adjusted by defining the `KENGINE_INPUT_FUNCTION_SIZE` macro.

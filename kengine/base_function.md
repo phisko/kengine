@@ -5,7 +5,7 @@ template<typename Ret, typename ... Args>
 struct base_function<Ret(Args...)>;
 ```
 
-Base type for `function components` (see [README](../README.md) for more information about these). Function components can simply inherit from `base_function`, templated on the function signature.
+Base type for `function components` (see [README](../README.md#function-components) for more information about these). Function components can simply inherit from `base_function`, templated on the function signature.
 
 ## Members
 

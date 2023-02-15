@@ -10,7 +10,7 @@ Component that plays an animation on the entity.
 unsigned int current_anim = 0;
 ```
 
-Index into the [model_animation::animations](model_animation.md) vector of this entity's [model entity](model.md).
+Index into the [model_animation::animations](model_animation.md) vector of this entity's [model entity](../../model_instance/data/model.md).
 
 ### current_time
 
@@ -51,6 +51,6 @@ mover_behavior scale_mover_behavior = mover_behavior::update_bones;
 ```
 
 Specifies how to apply the animation's movement:
-* by updating the entity's actual position through its [transform](transform.md)
-* by updating the bone matrices in its [skeleton](skeleton.md)
+* by updating the entity's actual position through its [transform](../../core/data/transform.md)
+* by updating the bone matrices in its [skeleton](../../skeleton/data/skeleton.md)
 * not at all

@@ -17,7 +17,7 @@ void (const nlohmann::json & json, entt::handle e);
 
 It is up to the user to implement this `meta component` for the component types they wish to be able to parse.
 
-A helper [register_load_from_json](../helpers/meta/impl/register_load_from_json.md) function is provided that takes as a template parameter a set of component types and implements this `meta component` for it.
+A [standard implementation](../helpers/impl/load_from_json.md) is provided.
 
-Note that the implementation provided in `register_load_from_json` is only a sample, and users may freely replace it with any other implementation they desire.
+Note that the implementation is only a sample, and users may freely replace it with any other implementation they desire.
 

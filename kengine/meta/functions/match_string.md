@@ -23,6 +23,6 @@ bool (entt::const_handle e, const char * str);
 
 It is up to the user to implement this `meta component` for the component types they wish to be able to parse.
 
-A helper [register_match_string](../helpers/meta/impl/register_match_string.md) function is provided that takes as a template parameter a set of component types and implements the `match_string` `meta component` for it.
+A [standard implementation](../helpers/impl/match_string.md) is provided.
 
-Note that the implementation provided in `register_match_string` is only a sample, and users may freely replace it with any other implementation they desire.
+Note that the implementation is only a sample, and users may freely replace it with any other implementation they desire.

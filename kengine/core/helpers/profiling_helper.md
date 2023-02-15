@@ -10,7 +10,7 @@ Placed at the start of a function, instruments it.
 
 ### KENGINE_PROFILING_FRAME
 
-Placed in client code to mark the end of a frame. The [main_loop](main_loop.md) helper takes care of this, if you're using it.
+Placed in client code to mark the end of a frame. The [main_loop](../../main_loop/helpers/main_loop.md) helper takes care of this, if you're using it.
 
 ## Cross-DLL usage
 

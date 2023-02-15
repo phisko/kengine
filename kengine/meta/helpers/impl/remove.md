@@ -1,3 +1,3 @@
 # [remove](remove.hpp)
 
-Standard implementation of the [remove](../../../meta/remove.md) `meta component`.
+Standard implementation of the [remove](../../functions/remove.md) `meta component`.

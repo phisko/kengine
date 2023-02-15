@@ -16,7 +16,7 @@ nlohmann::json (entt::const_handle);
 
 It is up to the user to implement this `meta component` for the component types they wish to be able to parse.
 
-A helper [register_save_to_json](../helpers/meta/impl/register_save_to_json.md) function is provided that takes as a template parameter a set of component types and implements this `meta component` for them.
+A [standard implementation](../helpers/impl/save_to_json.md) is provided.
 
-Note that the implementation provided in `register_save_to_json` is only a sample, and users may freely replace it with any other implementation they desire.
+Note that the implementation is only a sample, and users may freely replace it with any other implementation they desire.
 

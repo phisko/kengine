@@ -19,4 +19,4 @@ using entity_iterator_signature = void(entt::handle);
 
 It is up to the user to implement these `meta components` for the component types they wish to be able to filter.
 
-A helper [register_for_each_entity](../helpers/meta/impl/register_for_each_entity.md) function is provided that takes as a template parameter a set of component types and implements these `meta components` for them.
+A [standard implementation](../helpers/impl/for_each_entity.md) is provided.
