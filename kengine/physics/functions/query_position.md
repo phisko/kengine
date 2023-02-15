@@ -16,4 +16,4 @@ void (const putils::point3f & pos, float radius, const entity_iterator_func & fu
 
 ## Usage
 
-This `function component` is typically implemented in physics systems (such as the [bullet system](../systems/bullet/bullet.md)), and can be called by user-defined `systems`.
+This `function component` is typically implemented in physics systems (such as the [bullet system](../bullet/systems/bullet.md)), and can be called by user-defined `systems`.

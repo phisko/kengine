@@ -2,7 +2,7 @@
 
 Component that draws debug elements.
 
-The position and scale of the element that will be drawn is relative to the entity's [transform](transform.md).
+The position and scale of the element that will be drawn is relative to the entity's [transform](../../core/data/transform.md).
 
 Debug information can be:
 * line

@@ -18,14 +18,14 @@ entt::entity (entt::entity window, const putils::point2ui & pixel);
 
 ### Parameters
 
-* `window`: [window](window.md) we are inspecting
+* `window`: [window](../data/window.md) we are inspecting
 * `pixel`: pixel coordinates we are querying
 
 ## Usage
 
 Here is a small example that creates an input handler which, when the user clicks their mouse, outputs the ID of the entity seen in the clicked pixel.
 
-This piece of code is very similar to the behavior of the [on_click system](../systems/on_click/on_click.md).
+This piece of code is very similar to the behavior of the [on_click system](../../on_click/systems/on_click.md).
 
 ```cpp
 const auto e = r.create();

@@ -1,6 +1,6 @@
 # [attribute_helper](attribute_helper.hpp)
 
-Helper functions to inspect the [attributes](../../meta/attributes.md) `meta component`.
+Helper functions to inspect the [attributes](../data/attributes.md) `meta component`.
 
 ## Members
 

@@ -24,4 +24,4 @@ struct meta_component_implementation : std::true_type {};
 The specialization must define a static `function` function with the same prototype as the meta component.
 It must also expose a static `value` boolean, used to enable or disable the specialization for a given type.
 
-For examples, see [the engine's meta component implementations](meta/impl/).
+For examples, see [the engine's meta component implementations](impl/).
