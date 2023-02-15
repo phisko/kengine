@@ -39,11 +39,6 @@
 // kengine adjustable
 #include "kengine/adjustable/data/adjustable.hpp"
 
-// kengine animation
-#include "kengine/animation/data/animation.hpp"
-#include "kengine/animation/data/animation_files.hpp"
-#include "kengine/animation/data/model_animation.hpp"
-
 // kengine async
 #include "kengine/async/data/async_task.hpp"
 #include "kengine/async/helpers/async_helper.hpp"
@@ -81,6 +76,11 @@
 #include "kengine/render/functions/get_entity_in_pixel.hpp"
 #include "kengine/render/functions/get_position_in_pixel.hpp"
 #include "kengine/render/helpers/camera_helper.hpp"
+
+// kengine render/animation
+#include "kengine/render/animation/data/animation.hpp"
+#include "kengine/render/animation/data/animation_files.hpp"
+#include "kengine/render/animation/data/model_animation.hpp"
 
 // kengine render/glfw
 #include "kengine/render/glfw/data/glfw_window.hpp"
