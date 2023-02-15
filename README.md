@@ -149,15 +149,10 @@ See [CMake](#cmake) for instructions on how to enable each library.
 * [kengine_core](kengine/core/): components and helpers that are accessed by most (if not all) other libraries
 * [kengine_adjustable](kengine/adjustable/): expose global values that the user may adjust
     * [kengine_adjustable_imgui_adjustable](kengine/adjustable/imgui_adjustable/): display adjustables in an ImGui window
-* [kengine_animation](kengine/animation/): play animations on entities
 * [kengine_async](kengine/async/): run asynchronous tasks
 * [kengine_command_line](kengine/command_line/): manipulate the command-line
 * [kengine_glm](kengine/glm/): use [GLM](https://github.com/g-truc/glm)
 * [kengine_imgui](kengine/imgui/): use [ImGui](https://github.com/ocornut/imgui)
-    * [kengine_imgui_engine_stats](kengine/imgui/engine_stats/): display engine stats in an ImGui window
-    * [kengine_imgui_entity_editor](kengine/imgui/entity_editor/): edit entities in ImGui windows
-    * [kengine_imgui_entity_selector](kengine/imgui/entity_selector/): select entities in an ImGui window
-    * [kengine_imgui_prompt](kengine/imgui/prompt/): interpret scripting commands in an ImGui window
     * [kengine_imgui_tool](kengine/imgui/tool/): enable/disable ImGui tools from the main menu bar
 * [kengine_input](kengine/input/): handle user input
 * [kengine_json_scene_loader](kengine/json_scene_loader/): load scenes from JSON files
@@ -168,6 +163,11 @@ See [CMake](#cmake) for instructions on how to enable each library.
     * [kengine_log_visual_studio](kengine/log/visual_studio/): output log to VS's output window
 * [kengine_main_loop](kengine/main_loop/): run a game's main loop, handling delta time
 * [kengine_meta](kengine/meta/): meta components and reflection facilities
+    * [kengine_meta_imgui](kengine/meta/imgui/): meta components for ImGui
+        * [kengine_meta_imgui_engine_stats](kengine/imgui/engine_stats/): display engine stats in an ImGui window
+        * [kengine_meta_imgui_entity_editor](kengine/imgui/entity_editor/): edit entities in ImGui windows
+        * [kengine_meta_imgui_entity_selector](kengine/imgui/entity_selector/): select entities in an ImGui window
+    * [kengine_meta_json](kengine/meta/json/): meta components for JSON
 * [kengine_model_instance](kengine/model_instance/): use model entities, which other entities can be instances of
 * [kengine_on_click](kengine/on_click/): notify entities that are clicked by the user
 * [kengine_pathfinding](kengine/pathfinding/): add pathfinding capabilities to entities
@@ -175,10 +175,13 @@ See [CMake](#cmake) for instructions on how to enable each library.
 * [kengine_physics](kengine/physics/): move and query entities in space
     * [kengine_physics_bullet](kengine/physics/bullet/): implement physics using [Bullet](https://github.com/bulletphysics/bullet3)
 * [kengine_render](kengine/render/): display entities in graphical applications
+    * [kengine_render_animation](kengine/animation/): play animations on entities
     * [kengine_render_kreogl](kengine/render/kreogl/): implement rendering using [kreogl](https://github.com/phisko/kreogl)
     * [kengine_render_sfml](kengine/render/sfml/): implement rendering using [SFML](https://github.com/SFML/SFML)
 * [kengine_scripting](kengine/scripting/): run scripts from other languages
+    * [kengine_scripting_imgui_prompt](kengine/scripting/imgui_prompt/): interpret scripting commands in an ImGui window
     * [kengine_scripting_lua](kengine/scripting/lua/): run scripts in Lua
+        * [kengine_scripting_lua_imgui_bindings](kengine/scripting/lua/imgui_bindings/): ImGui bindings for Lua
     * [kengine_scripting_python](kengine/scripting/python/): run scripts in Python
 * [kengine_skeleton](kengine/skeleton/): manipulate entities' skeletons
 * [kengine_system_creator](kengine/system_creator/): helpers to manipulate system entities
