@@ -4,12 +4,12 @@ project(kengine_example)
 set(CMAKE_CXX_STANDARD 20)
 
 # Alternatively, set KENGINE_ALL_SYSTEMS to compile everything
-set(KENGINE_CORE ON)
-set(KENGINE_MAIN_LOOP ON)
-set(KENGINE_LOG ON)
-set(KENGINE_LOG_STDOUT ON)
-set(KENGINE_SCRIPTING ON)
-set(KENGINE_SCRIPTING_LUA ON)
+set(KENGINE_CORE ON CACHE BOOL "Enable kengine_core" FORCE)
+set(KENGINE_MAIN_LOOP ON CACHE BOOL "Enable kengine_main_loop" FORCE)
+set(KENGINE_LOG ON CACHE BOOL "Enable kengine_log" FORCE)
+set(KENGINE_LOG_STDOUT ON CACHE BOOL "Enable kengine_log_stdout" FORCE)
+set(KENGINE_SCRIPTING ON CACHE BOOL "Enable kengine_scripting" FORCE)
+set(KENGINE_SCRIPTING_LUA ON CACHE BOOL "Enable kengine_scripting_lua" FORCE)
 add_subdirectory(.. kengine)
 
 add_executable(kengine_example main.cpp)
