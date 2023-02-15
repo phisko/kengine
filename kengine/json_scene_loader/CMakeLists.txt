@@ -1,0 +1,3 @@
+project(kengine)
+
+system_link_private_libraries(kengine_meta_json)

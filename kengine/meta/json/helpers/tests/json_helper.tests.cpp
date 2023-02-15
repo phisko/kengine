@@ -7,7 +7,9 @@
 // kengine core
 #include "kengine/core/data/name.hpp"
 #include "kengine/core/data/transform.hpp"
-#include "kengine/core/helpers/json_helper.hpp"
+
+// kengine meta/json
+#include "kengine/meta/json/helpers/json_helper.hpp"
 
 // kengine meta
 #include "kengine/meta/helpers/register_metadata.hpp"

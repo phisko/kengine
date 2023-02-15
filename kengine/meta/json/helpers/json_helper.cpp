@@ -18,8 +18,10 @@
 
 // kengine meta
 #include "kengine/meta/functions/has.hpp"
-#include "kengine/meta/functions/load_from_json.hpp"
-#include "kengine/meta/functions/save_to_json.hpp"
+
+// kengine meta/json
+#include "kengine/meta/json/functions/load_from_json.hpp"
+#include "kengine/meta/json/functions/save_to_json.hpp"
 
 namespace kengine::json_helper {
 	void load_entity(const nlohmann::json & entity_json, entt::handle e) noexcept {

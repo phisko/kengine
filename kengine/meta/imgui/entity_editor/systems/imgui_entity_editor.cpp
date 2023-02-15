@@ -22,11 +22,14 @@
 // kengine imgui
 #include "kengine/imgui/helpers/imgui_helper.hpp"
 
-// kengine imgui/imgui_tool
+// kengine imgui/tool
 #include "kengine/imgui/tool/data/imgui_tool.hpp"
 
 // kengine main_loop
 #include "kengine/main_loop/functions/execute.hpp"
+
+// kengine meta/imgui
+#include "kengine/meta/imgui/helpers/imgui_helper.hpp"
 
 namespace kengine::systems {
 	struct imgui_entity_editor {

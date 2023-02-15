@@ -13,14 +13,13 @@
 
 // kengine meta
 #include "kengine/meta/functions/has.hpp"
-#include "kengine/meta/functions/display_imgui.hpp"
-#include "kengine/meta/functions/edit_imgui.hpp"
 #include "kengine/meta/functions/emplace_or_replace.hpp"
 #include "kengine/meta/functions/remove.hpp"
 #include "kengine/meta/helpers/type_helper.hpp"
 
-// kengine imgui
-#include "kengine/imgui/data/imgui_scale.hpp"
+// kengine meta/imgui
+#include "kengine/meta/imgui/functions/display_imgui.hpp"
+#include "kengine/meta/imgui/functions/edit_imgui.hpp"
 
 // kengine model_instance
 #include "kengine/model_instance/data/instance.hpp"

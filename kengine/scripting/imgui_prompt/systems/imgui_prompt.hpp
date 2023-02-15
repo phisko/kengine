@@ -4,5 +4,5 @@
 #include "kengine/system_creator/helpers/system_creator_helper.hpp"
 
 namespace kengine::systems {
-	DECLARE_KENGINE_SYSTEM_CREATOR(KENGINE_IMGUI_PROMPT_EXPORT, imgui_prompt)
+	DECLARE_KENGINE_SYSTEM_CREATOR(KENGINE_SCRIPTING_IMGUI_PROMPT_EXPORT, imgui_prompt)
 }
