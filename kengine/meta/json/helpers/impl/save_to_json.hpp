@@ -4,7 +4,7 @@
 #include <entt/entity/fwd.hpp>
 
 // kengine meta
-#include "kengine/meta/functions/save_to_json.hpp"
+#include "kengine/meta/json/functions/save_to_json.hpp"
 
 // kengine helpers
 #include "kengine/meta/helpers/register_meta_component_implementation.hpp"

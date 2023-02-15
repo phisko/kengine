@@ -10,9 +10,6 @@
 #include "kengine/core/helpers/log_helper.hpp"
 #include "kengine/core/helpers/profiling_helper.hpp"
 
-// kengine imgui
-#include "kengine/imgui/helpers/imgui_helper.hpp"
-
 // kengine scripting/lua
 #include "kengine/scripting/lua/data/lua_state.hpp"
 

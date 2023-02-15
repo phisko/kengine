@@ -4,7 +4,7 @@
 #include <entt/entity/fwd.hpp>
 
 // kengine meta
-#include "kengine/meta/functions/edit_imgui.hpp"
+#include "kengine/meta/imgui/functions/edit_imgui.hpp"
 
 // kengine helpers
 #include "kengine/meta/helpers/register_meta_component_implementation.hpp"

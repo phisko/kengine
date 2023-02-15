@@ -19,9 +19,6 @@
 #include "kengine/core/helpers/profiling_helper.hpp"
 #include "kengine/core/helpers/sort_helper.hpp"
 
-// kengine imgui
-#include "kengine/imgui/helpers/imgui_helper.hpp"
-
 // kengine imgui/imgui_tool
 #include "kengine/imgui/tool/data/imgui_tool.hpp"
 
@@ -31,6 +28,9 @@
 // kengine meta
 #include "kengine/meta/functions/has.hpp"
 #include "kengine/meta/functions/match_string.hpp"
+
+// kengine meta/imgui
+#include "kengine/meta/imgui/helpers/imgui_helper.hpp"
 
 namespace kengine::systems {
 	struct imgui_entity_selector {

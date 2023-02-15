@@ -9,19 +9,25 @@
 #include "putils/range.hpp"
 #include "putils/thread_name.hpp"
 
-// kengine helpers
+// kengine core
 #include "kengine/core/helpers/profiling_helper.hpp"
-#include "impl/count.hpp"
-#include "impl/display_imgui.hpp"
-#include "impl/edit_imgui.hpp"
-#include "impl/emplace_or_replace.hpp"
-#include "impl/for_each_entity.hpp"
-#include "impl/get.hpp"
-#include "impl/has.hpp"
-#include "impl/load_from_json.hpp"
-#include "impl/match_string.hpp"
-#include "impl/remove.hpp"
-#include "impl/save_to_json.hpp"
+
+// kengine meta
+#include "kengine/meta/helpers/impl/count.hpp"
+#include "kengine/meta/helpers/impl/emplace_or_replace.hpp"
+#include "kengine/meta/helpers/impl/for_each_entity.hpp"
+#include "kengine/meta/helpers/impl/get.hpp"
+#include "kengine/meta/helpers/impl/has.hpp"
+#include "kengine/meta/helpers/impl/match_string.hpp"
+#include "kengine/meta/helpers/impl/remove.hpp"
+
+// kengine meta/imgui
+#include "kengine/meta/imgui/helpers/impl/display_imgui.hpp"
+#include "kengine/meta/imgui/helpers/impl/edit_imgui.hpp"
+
+// kengine meta/json
+#include "kengine/meta/json/helpers/impl/load_from_json.hpp"
+#include "kengine/meta/json/helpers/impl/save_to_json.hpp"
 
 namespace kengine {
 	template<typename... Comps>

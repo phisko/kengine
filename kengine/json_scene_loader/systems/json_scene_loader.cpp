@@ -17,9 +17,11 @@
 #include "putils/range.hpp"
 
 // kengine core
-#include "kengine/core/helpers/json_helper.hpp"
 #include "kengine/core/helpers/new_entity_processor.hpp"
 #include "kengine/core/helpers/profiling_helper.hpp"
+
+// kengine meta/json
+#include "kengine/meta/json/helpers/json_helper.hpp"
 
 // kengine helpers
 #include "kengine/async/helpers/async_helper.hpp"
@@ -118,6 +120,11 @@ namespace kengine::systems {
 			kengine_logf(r, log, "json_scene_loader", "Loading temporary scene from %s", file);
 
 			std::ifstream f(file);
+			if (!f) {
+				kengine_logf(r, error, "json_scene_loader", "Failed to open %s", file);
+				return scene;
+			}
+
 			const auto temporary_scene_json = nlohmann::json::parse(f);
 
 			for (const auto & json : temporary_scene_json) {
@@ -134,6 +141,11 @@ namespace kengine::systems {
 
 		load_models_task load_models(const char * dir) noexcept {
 			KENGINE_PROFILING_SCOPE;
+
+			if (!std::filesystem::is_directory(dir)) {
+				kengine_logf(r, error, "json_scene_loader", "%s is not a directory", dir);
+				return {};
+			}
 
 			for (const auto & entry : std::filesystem::recursive_directory_iterator(dir)) {
 				if (entry.path().extension() != ".json")
@@ -154,6 +166,11 @@ namespace kengine::systems {
 			kengine_logf(r, log, "json_scene_loader", "Loading scene from %s", file);
 
 			std::ifstream f(file);
+			if (!f) {
+				kengine_logf(r, error, "json_scene_loader", "Failed to open %s", file);
+				return;
+			}
+
 			const auto scene_json = nlohmann::json::parse(f);
 
 			for (const auto & json : scene_json) {
