@@ -135,18 +135,4 @@ namespace kengine::imgui_helper {
 			ImGui::EndTabBar();
 		}
 	}
-
-	float get_scale(const entt::registry & r) noexcept {
-		KENGINE_PROFILING_SCOPE;
-		kengine_log(r, very_verbose, "imgui", "Getting scale");
-
-		float scale = 1.f;
-		for (const auto & [e, comp] : r.view<data::imgui_scale>().each()) {
-			kengine_logf(r, very_verbose, "imgui", "Found modifier [%u] (%f)", e, comp.scale);
-			scale *= comp.scale;
-		}
-
-		kengine_logf(r, very_verbose, "imgui", "Final scale: %f", scale);
-		return scale;
-	}
 }
