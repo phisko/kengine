@@ -120,7 +120,7 @@ namespace kengine::systems {
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 
 			auto & scale = e.emplace<data::imgui_scale>();
-			e.emplace<data::adjustable>() = {
+			e.emplace<adjustable::adjustable>() = {
 				"ImGui",
 				{
 					{ "Scale", &scale.scale },

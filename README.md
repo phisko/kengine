@@ -148,7 +148,7 @@ See [CMake](#cmake) for instructions on how to enable each library.
 
 * [kengine_core](kengine/core/): components and helpers that are accessed by most (if not all) other libraries
 * [kengine_adjustable](kengine/adjustable/): expose global values that the user may adjust
-    * [kengine_adjustable_imgui_adjustable](kengine/adjustable/imgui_adjustable/): display adjustables in an ImGui window
+    * [kengine_adjustable_imgui](kengine/adjustable/imgui/): display adjustables in an ImGui window
 * [kengine_async](kengine/async/): run asynchronous tasks
     * [kengine_async_imgui](kengine/async/imgui/): display running tasks in an ImGui window
 * [kengine_command_line](kengine/command_line/): manipulate the command-line

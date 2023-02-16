@@ -57,7 +57,7 @@ namespace kengine::systems {
 			kengine_log(r, log, "recast", "Initializing");
 
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
-			e.emplace<data::adjustable>() = {
+			e.emplace<adjustable::adjustable>() = {
 				"Recast",
 				{
 					{ "Path optimization range", &recast_impl::g_adjustables.path_optimization_range },
