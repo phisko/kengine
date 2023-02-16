@@ -11,16 +11,16 @@
 TEST(async_helper, start_async_task_component_created) {
 	entt::registry r;
 	const auto e = r.create();
-	kengine::start_async_task(
+	kengine::async::start_task(
 		r, e,
 		"task_name",
 		std::async(std::launch::deferred, [] {})
 	);
 
-	EXPECT_TRUE(r.all_of<kengine::data::async_task>(e));
-	EXPECT_EQ(r.get<kengine::data::async_task>(e).name, "task_name");
+	EXPECT_TRUE(r.all_of<kengine::async::task>(e));
+	EXPECT_EQ(r.get<kengine::async::task>(e).name, "task_name");
 
-	const auto view = r.view<kengine::data::async_task>();
+	const auto view = r.view<kengine::async::task>();
 	EXPECT_EQ(view.size(), 1);
 	EXPECT_EQ(view.front(), e);
 }
@@ -28,27 +28,27 @@ TEST(async_helper, start_async_task_component_created) {
 TEST(async_helper, start_async_task_formatted_name) {
 	entt::registry r;
 	const auto e = r.create();
-	kengine::start_async_task(
+	kengine::async::start_task(
 		r, e,
-		kengine::data::async_task::string("%s %d", "hello", 0),
+		kengine::async::task::string("%s %d", "hello", 0),
 		std::async(std::launch::deferred, [] {})
 	);
-	EXPECT_EQ(r.get<kengine::data::async_task>(e).name, "hello 0");
+	EXPECT_EQ(r.get<kengine::async::task>(e).name, "hello 0");
 }
 
 TEST(async_helper, process_async_results_deferred_return_value) {
 	entt::registry r;
 	const auto e = r.create();
-	kengine::start_async_task(
+	kengine::async::start_task(
 		r, e,
-		kengine::data::async_task::string("%s %d", "hello", 0),
+		kengine::async::task::string("%s %d", "hello", 0),
 		std::async(std::launch::deferred, [] {
 			return 42;
 		})
 	);
 
 	int processed = 0;
-	const auto done = kengine::process_async_results<int>(r, [&](entt::entity, int result) {
+	const auto done = kengine::async::process_results<int>(r, [&](entt::entity, int result) {
 		++processed;
 		EXPECT_EQ(result, 42);
 	});
@@ -61,9 +61,9 @@ TEST(async_helper, process_async_results_deferred_side_effect) {
 	const auto e = r.create();
 
 	int result = 0;
-	kengine::start_async_task(
+	kengine::async::start_task(
 		r, e,
-		kengine::data::async_task::string("%s %d", "hello", 0),
+		kengine::async::task::string("%s %d", "hello", 0),
 		std::async(std::launch::deferred, [&] {
 			result = 42;
 			return 0;
@@ -71,7 +71,7 @@ TEST(async_helper, process_async_results_deferred_side_effect) {
 	);
 
 	int processed = 0;
-	const auto done = kengine::process_async_results<int>(r, [&](entt::entity, int) {
+	const auto done = kengine::async::process_results<int>(r, [&](entt::entity, int) {
 		++processed;
 	});
 	EXPECT_TRUE(done);
@@ -82,16 +82,16 @@ TEST(async_helper, process_async_results_deferred_side_effect) {
 TEST(async_helper, process_async_results_async_return_value) {
 	entt::registry r;
 	const auto e = r.create();
-	kengine::start_async_task(
+	kengine::async::start_task(
 		r, e,
-		kengine::data::async_task::string("%s %d", "hello", 0),
+		kengine::async::task::string("%s %d", "hello", 0),
 		std::async(std::launch::async, [] {
 			return 42;
 		})
 	);
 
 	int processed = 0;
-	while (!kengine::process_async_results<int>(r, [&](entt::entity, int result) {
+	while (!kengine::async::process_results<int>(r, [&](entt::entity, int result) {
 		++processed;
 		EXPECT_EQ(result, 42);
 	}))
@@ -104,9 +104,9 @@ TEST(async_helper, process_async_results_async_side_effect) {
 	const auto e = r.create();
 
 	int result = 0;
-	kengine::start_async_task(
+	kengine::async::start_task(
 		r, e,
-		kengine::data::async_task::string("%s %d", "hello", 0),
+		kengine::async::task::string("%s %d", "hello", 0),
 		std::async(std::launch::async, [&] {
 			result = 42;
 			return 0;
@@ -114,7 +114,7 @@ TEST(async_helper, process_async_results_async_side_effect) {
 	);
 
 	int processed = 0;
-	while (!kengine::process_async_results<int>(r, [&](entt::entity, int) {
+	while (!kengine::async::process_results<int>(r, [&](entt::entity, int) {
 		++processed;
 	}))
 		;

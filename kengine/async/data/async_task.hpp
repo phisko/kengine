@@ -10,10 +10,10 @@
 // putils
 #include "putils/string.hpp"
 
-namespace kengine::data {
+namespace kengine::async {
 	//! putils reflect all
 	//! used_types: [refltype::string]
-	struct async_task {
+	struct task {
 		static constexpr char string_name[] = "async_task_string";
 		using string = putils::string<KENGINE_ASYNC_TASK_STRING_MAX_LENGTH, string_name>;
 		string name;

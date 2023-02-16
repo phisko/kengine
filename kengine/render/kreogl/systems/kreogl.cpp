@@ -209,9 +209,9 @@ namespace kengine::systems {
 			const auto & file = model.file.c_str();
 
 			if (::kreogl::texture_data::is_supported_format(file))
-				kengine::start_async_task(
+				kengine::async::start_task(
 					r, model_entity,
-					data::async_task::string("kreogl: load %s", file),
+					async::task::string("kreogl: load %s", file),
 					std::async(std::launch::async, [&file] {
 						KENGINE_PROFILING_SCOPE;
 						const putils::scoped_thread_name thread_name(putils::string<64>("Load %s", file));
@@ -219,9 +219,9 @@ namespace kengine::systems {
 					})
 				);
 			else if (::kreogl::assimp::is_supported_file_format(model.file.c_str()))
-				kengine::start_async_task(
+				kengine::async::start_task(
 					r, model_entity,
-					data::async_task::string("kreogl: load %s", file),
+					async::task::string("kreogl: load %s", file),
 					std::async(std::launch::async, [&file] {
 						KENGINE_PROFILING_SCOPE;
 						const putils::scoped_thread_name thread_name(putils::string<64>("Load %s", file));
@@ -244,9 +244,9 @@ namespace kengine::systems {
 			kengine_logf(r, verbose, "kreogl", "Loading animation files for [%u]", model_entity);
 
 			const auto task_entity = r.create(); // A task might be attached to model_entity to load the model itself
-			kengine::start_async_task(
+			kengine::async::start_task(
 				r, task_entity,
-				data::async_task::string("kreogl: load animation files for [%u]", model_entity),
+				async::task::string("kreogl: load animation files for [%u]", model_entity),
 				std::async(std::launch::async, [&animation_files, model_entity] {
 					KENGINE_PROFILING_SCOPE;
 					const putils::scoped_thread_name thread_name(putils::string<64>("Load animation files for [%u]", model_entity));
@@ -304,9 +304,9 @@ namespace kengine::systems {
 			kengine_logf(r, verbose, "kreogl", "Loading skybox for [%u]", sky_box_entity);
 
 			const auto task_entity = r.create();
-			kengine::start_async_task(
+			kengine::async::start_task(
 				r, task_entity,
-				data::async_task::string("kreogl: load sky_box for [%u]", sky_box_entity),
+				async::task::string("kreogl: load sky_box for [%u]", sky_box_entity),
 				std::async(std::launch::async, [sky_box_entity, &sky_box] {
 					KENGINE_PROFILING_SCOPE;
 					const putils::scoped_thread_name thread_name(putils::string<64>("Load sky_box for [%u]", sky_box_entity));
@@ -327,11 +327,11 @@ namespace kengine::systems {
 
 			using namespace std::chrono_literals;
 
-			kengine::process_async_results<::kreogl::texture_data>(r, [this](entt::entity e, ::kreogl::texture_data && texture_data) {
+			kengine::async::process_results<::kreogl::texture_data>(r, [this](entt::entity e, ::kreogl::texture_data && texture_data) {
 				r.emplace<::kreogl::texture>(e, texture_data.load_to_texture());
 			});
 
-			kengine::process_async_results<::kreogl::assimp_model_data>(r, [this](entt::entity e, ::kreogl::assimp_model_data && model_data) {
+			kengine::async::process_results<::kreogl::assimp_model_data>(r, [this](entt::entity e, ::kreogl::assimp_model_data && model_data) {
 				// Sync properties from loaded model to kengine components
 				const auto & model = r.get<data::model>(e);
 				add_animations_to_model_animation_component(r.get_or_emplace<data::model_animation>(e), model.file.c_str(), *model_data.animations);
@@ -346,7 +346,7 @@ namespace kengine::systems {
 				r.emplace<data::kreogl_model>(e, ::kreogl::assimp::load_animated_model(std::move(model_data)));
 			});
 
-			kengine::process_async_results<animation_files_task_result>(r, [this](entt::entity task_entity, animation_files_task_result && result) {
+			kengine::async::process_results<animation_files_task_result>(r, [this](entt::entity task_entity, animation_files_task_result && result) {
 				auto & model_animation = r.get_or_emplace<data::model_animation>(result.model_entity);
 				auto & kreogl_animation_files = r.emplace<data::kreogl_animation_files>(result.model_entity);
 				for (auto & animation_file : result.animation_files) {
@@ -356,7 +356,7 @@ namespace kengine::systems {
 				r.destroy(task_entity);
 			});
 
-			kengine::process_async_results<sky_box_task_result>(r, [this](entt::entity task_entity, sky_box_task_result && result) noexcept {
+			kengine::async::process_results<sky_box_task_result>(r, [this](entt::entity task_entity, sky_box_task_result && result) noexcept {
 				r.emplace<::kreogl::skybox_texture>(result.sky_box_entity, result.left, result.right, result.top, result.bottom, result.front, result.back);
 				r.destroy(task_entity);
 			});

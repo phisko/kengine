@@ -57,16 +57,16 @@ namespace kengine::systems {
 					ImGui::TableHeadersRow();
 
 					const auto now = std::chrono::system_clock::now();
-					for (const auto & [e, async_task] : r.view<data::async_task>().each()) {
-						kengine_logf(r, very_verbose, "imgui_async_task", "Found async task %s", async_task.name.c_str());
+					for (const auto & [e, task] : r.view<async::task>().each()) {
+						kengine_logf(r, very_verbose, "imgui_async_task", "Found async task %s", task.name.c_str());
 
 						ImGui::TableNextRow();
 
 						ImGui::TableNextColumn();
-						ImGui::Text("%s", async_task.name.c_str());
+						ImGui::Text("%s", task.name.c_str());
 
 						ImGui::TableNextColumn();
-						const auto time_since_start = now - async_task.start;
+						const auto time_since_start = now - task.start;
 						const auto seconds = std::chrono::duration<float>(time_since_start);
 						ImGui::Text("%f", seconds.count());
 					}

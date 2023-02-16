@@ -83,7 +83,7 @@ namespace kengine::systems {
 
 			processor.process();
 
-			kengine::process_async_results<async_loaded_data>(r, [this](entt::entity e, async_loaded_data && loaded_data) {
+			kengine::async::process_results<async_loaded_data>(r, [this](entt::entity e, async_loaded_data && loaded_data) {
 				r.emplace<data::model_data>(e, std::move(loaded_data.model_data));
 				apply_offset(e, loaded_data.offset_to_apply);
 			});
@@ -97,9 +97,9 @@ namespace kengine::systems {
 			if (std::filesystem::path(f).extension() != ".vox")
 				return;
 
-			kengine::start_async_task(
+			kengine::async::start_task(
 				r, e,
-				data::async_task::string("magica_voxel: load %s", f),
+				async::task::string("magica_voxel: load %s", f),
 				std::async(std::launch::async, [this, e, &f] {
 					const putils::scoped_thread_name thread_name(putils::string<64>("Load %s", f));
 					return load_model_data(e, f);
