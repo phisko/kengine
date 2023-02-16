@@ -1,6 +1,6 @@
-# [command_line](command_line.hpp)
+# [arguments](arguments.hpp)
 
-Component holding the command-line arguments received by the program. Can be created and queried using the [command_line_helper](../helpers/command_line_helper.md).
+Component holding the command-line arguments received by the program. Can be created and queried using the [helpers](../helpers/).
 
 ## Members
 

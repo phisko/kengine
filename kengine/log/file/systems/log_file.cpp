@@ -25,7 +25,7 @@
 #include "kengine/core/helpers/profiling_helper.hpp"
 
 // kengine command_line
-#include "kengine/command_line/helpers/command_line_helper.hpp"
+#include "kengine/command_line/helpers/parse.hpp"
 
 #ifndef KENGINE_LOG_FILE_LOCATION
 #define KENGINE_LOG_FILE_LOCATION "kengine.log"
@@ -43,7 +43,7 @@ namespace kengine::systems {
 
 			const auto & r = *e.registry();
 
-			const auto args = kengine::parse_command_line<options>(r);
+			const auto args = kengine::command_line::parse<options>(r);
 			const char * file_name = args.log_file ? args.log_file->c_str() : KENGINE_LOG_FILE_LOCATION;
 
 			file.open(file_name);

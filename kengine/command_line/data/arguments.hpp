@@ -4,11 +4,11 @@
 #include <vector>
 #include <string>
 
-namespace kengine::data {
+namespace kengine::command_line {
 	//! putils reflect all
-	struct command_line {
-		std::vector<std::string_view> arguments;
+	struct arguments {
+		std::vector<std::string_view> args;
 	};
 }
 
-#include "command_line.rpp"
+#include "arguments.rpp"
