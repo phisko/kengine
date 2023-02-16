@@ -11,11 +11,11 @@
 // kengine input
 #include "kengine/input/data/input.hpp"
 
-// kengine on_click
-#include "kengine/on_click/functions/on_click.hpp"
-
 // kengine render
 #include "kengine/render/functions/get_entity_in_pixel.hpp"
+
+// kengine render/on_click
+#include "kengine/render/on_click/functions/on_click.hpp"
 
 namespace kengine::systems {
 	struct on_click {
