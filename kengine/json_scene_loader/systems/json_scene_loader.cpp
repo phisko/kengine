@@ -24,7 +24,8 @@
 #include "kengine/meta/json/helpers/json_helper.hpp"
 
 // kengine helpers
-#include "kengine/async/helpers/async_helper.hpp"
+#include "kengine/async/helpers/start_task.hpp"
+#include "kengine/async/helpers/process_results.hpp"
 
 // kengine json_scene_loader
 #include "kengine/json_scene_loader/data/json_scene_loader.hpp"

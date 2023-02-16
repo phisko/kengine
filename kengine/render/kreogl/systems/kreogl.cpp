@@ -40,8 +40,8 @@
 #include "kengine/adjustable/data/adjustable.hpp"
 
 // kengine async
-#include "kengine/async/data/async_task.hpp"
-#include "kengine/async/helpers/async_helper.hpp"
+#include "kengine/async/helpers/start_task.hpp"
+#include "kengine/async/helpers/process_results.hpp"
 
 // kengine glm
 #include "kengine/glm/helpers/matrix_helper.hpp"
