@@ -1,6 +1,6 @@
 # [task](task.hpp)
 
-Component that tracks the progress of an asynchronous task (e.g. loading data from disk on a worker thread). This component does not run the task, and is simply used for tracking purposes. The [imgui_async_task](../imgui_async_task/systems/imgui_async_task.md) system will display running tasks in a debug window.
+Component that tracks the progress of an asynchronous task (e.g. loading data from disk on a worker thread). This component does not run the task, and is simply used for tracking purposes. The [async_imgui](../imgui/systems/system.md) system will display running tasks in a debug window.
 
 ## Members
 

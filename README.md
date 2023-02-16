@@ -150,6 +150,7 @@ See [CMake](#cmake) for instructions on how to enable each library.
 * [kengine_adjustable](kengine/adjustable/): expose global values that the user may adjust
     * [kengine_adjustable_imgui_adjustable](kengine/adjustable/imgui_adjustable/): display adjustables in an ImGui window
 * [kengine_async](kengine/async/): run asynchronous tasks
+    * [kengine_async_imgui](kengine/async/imgui/): display running tasks in an ImGui window
 * [kengine_command_line](kengine/command_line/): manipulate the command-line
 * [kengine_glm](kengine/glm/): use [GLM](https://github.com/g-truc/glm)
 * [kengine_imgui](kengine/imgui/): use [ImGui](https://github.com/ocornut/imgui)
