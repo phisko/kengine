@@ -39,10 +39,12 @@ function(kengine_generate_type_registration)
                 --root ${source_dir}
                 --clang-args ${clang_args}
         )
+        set(command_file ${registration_file}_command.py)
+        putils_generate_python_command_file(${command_file} "${command}")
         add_custom_command(
                 OUTPUT ${registration_file}
                 COMMENT "Generating type registration code for ${header}"
-                COMMAND ${command}
+                COMMAND python ${command_file}
                 DEPENDS ${header} ${python_script} ${ARGUMENTS_REGISTRATION_JSON}
         )
     endforeach()
@@ -64,10 +66,12 @@ function(kengine_generate_type_registration)
             --export-macro ${export_macro}
             --clang-args ${clang_args}
     )
+    set(command_file ${main_file}_command.py)
+    putils_generate_python_command_file(${command_file} "${command}")
     add_custom_command(
             OUTPUT ${main_file}
             COMMENT "Generating type registration code for ${ARGUMENTS_TARGET}"
-            COMMAND ${command}
+            COMMAND python ${command_file}
             DEPENDS ${ARGUMENTS_SOURCES} ${python_script}
     )
 
