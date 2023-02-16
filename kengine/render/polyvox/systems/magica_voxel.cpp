@@ -27,8 +27,8 @@
 #include "kengine/core/helpers/profiling_helper.hpp"
 
 // kengine async
-#include "kengine/async/data/async_task.hpp"
-#include "kengine/async/helpers/async_helper.hpp"
+#include "kengine/async/helpers/start_task.hpp"
+#include "kengine/async/helpers/process_results.hpp"
 
 // kengine main_loop
 #include "kengine/main_loop/functions/execute.hpp"
