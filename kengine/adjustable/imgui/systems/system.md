@@ -1,4 +1,4 @@
-# [imgui_adjustable](imgui_adjustable.hpp)
+# [system](system.hpp)
 
 System that renders an ImGui window with editing tools for [adjustable](../../data/adjustable.md) components.
 

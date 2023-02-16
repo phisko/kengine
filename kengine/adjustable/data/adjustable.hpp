@@ -16,7 +16,7 @@
 #include "putils/color.hpp"
 #include "putils/lengthof.hpp"
 
-namespace kengine::data {
+namespace kengine::adjustable {
 	//! putils reflect all
 	//! used_types: [refltype::string, refltype::value]
 	struct adjustable {
@@ -138,7 +138,7 @@ namespace kengine::data {
 #include "adjustable.rpp"
 
 template<typename T, const char * Name>
-#define refltype kengine::data::adjustable::value::storage<T, Name>
+#define refltype kengine::adjustable::adjustable::value::storage<T, Name>
 putils_reflection_info_template {
 	static constexpr auto class_name = Name;
 	putils_reflection_attributes(

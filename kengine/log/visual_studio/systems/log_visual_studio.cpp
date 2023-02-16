@@ -38,7 +38,7 @@ namespace kengine::systems {
 			kengine_log(*e.registry(), log, "log_visual_studio", "Initializing");
 
 			severity_control = log_helper::parse_command_line_severity(*e.registry());
-			e.emplace<data::adjustable>() = {
+			e.emplace<adjustable::adjustable>() = {
 				"Log",
 				{
 					{ "Visual Studio Console", &severity_control.global_severity },

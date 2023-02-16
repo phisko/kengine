@@ -53,7 +53,7 @@ namespace kengine::systems {
 			}
 
 			*severity_control = log_helper::parse_command_line_severity(r);
-			e.emplace<data::adjustable>() = {
+			e.emplace<adjustable::adjustable>() = {
 				"Log",
 				{
 					{ "File", &severity_control->global_severity },

@@ -1,6 +1,6 @@
 # [adjustable](adjustable.hpp)
 
-Utility component exposing values that may be adjusted at runtime, e.g. by the [imgui_adjustable](../imgui_adjustable/systems/imgui_adjustable.md) system.
+Utility component exposing values that may be adjusted at runtime, e.g. by the [imgui_adjustable](../imgui/systems/system.md) system.
 
 Currently supported types are `bool`, `int`, `float`, [putils::normalized_color](https://github.com/phisko/putils/blob/master/putils/color.md) and `enum` types.
 
@@ -13,7 +13,7 @@ static bool global_bool = false;
 static int global_int = 42;
 
 const auto e = registry.create();
-registry.emplace<kengine::data::adjustable>(e) = {
+registry.emplace<kengine::adjustable::adjustable>(e) = {
         "Globals", // Category for these adjustables
         { // vector of adjustables
             { "Bool name", &global_bool },

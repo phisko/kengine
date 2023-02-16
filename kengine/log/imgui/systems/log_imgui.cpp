@@ -78,7 +78,7 @@ namespace kengine::systems {
 			auto & tool = e.emplace<data::imgui_tool>();
 			enabled = &tool.enabled;
 
-			e.emplace<data::adjustable>() = {
+			e.emplace<adjustable::adjustable>() = {
 				"Log",
 				{
 					{ "ImGui max events", &max_events },

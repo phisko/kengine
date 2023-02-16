@@ -154,7 +154,7 @@ namespace kengine::systems {
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 			e.emplace<functions::query_position>(putils_forward_to_this(query_position));
 
-			e.emplace<data::adjustable>() = {
+			e.emplace<adjustable::adjustable>() = {
 				"Physics",
 				{
 					{ "Gravity", &adjustables.gravity },

@@ -1,4 +1,4 @@
-#include "imgui_adjustable.hpp"
+#include "system.hpp"
 
 // stl
 #include <fstream>
@@ -53,10 +53,10 @@
 #define KENGINE_MAX_ADJUSTABLES 256
 #endif
 
-namespace kengine::systems {
-	struct imgui_adjustable {
+namespace kengine::adjustable::imgui {
+	struct system {
 		entt::registry & r;
-		const entt::scoped_connection connection = r.on_destroy<data::adjustable>().connect<&imgui_adjustable::on_destroy_adjustable>(this);
+		const entt::scoped_connection connection = r.on_destroy<adjustable>().connect<&system::on_destroy_adjustable>(this);
 
 		bool * enabled;
 		putils::ini_file loaded_file = load_ini_file();
@@ -66,7 +66,7 @@ namespace kengine::systems {
 			section_map subsections;
 
 			struct entry {
-				data::adjustable * adjustable = nullptr;
+				adjustable * component = nullptr;
 				std::vector<bool> values_pass_search; // Indexed by adjustable->values
 			};
 
@@ -76,12 +76,12 @@ namespace kengine::systems {
 		section root_section;
 
 		struct processed {};
-		kengine::new_entity_processor<processed, data::adjustable> processor{ r, putils_forward_to_this(on_construct_adjustable) };
+		kengine::new_entity_processor<processed, adjustable> processor{ r, putils_forward_to_this(on_construct_adjustable) };
 
-		imgui_adjustable(entt::handle e) noexcept
+		system(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "imgui_adjustable", "Initializing");
+			kengine_log(r, log, "adjustable_imgui", "Initializing");
 
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 
@@ -93,15 +93,15 @@ namespace kengine::systems {
 		}
 
 		char name_search[1024] = "";
-		using string = data::adjustable::string;
+		using string = adjustable::string;
 		using sections = std::vector<std::string>;
 		bool search_out_of_date = true;
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, very_verbose, "imgui_adjustable", "Executing");
+			kengine_log(r, very_verbose, "adjustable_imgui", "Executing");
 
 			if (!*enabled) {
-				kengine_log(r, very_verbose, "imgui_adjustable", "Disabled");
+				kengine_log(r, very_verbose, "adjustable_imgui", "Disabled");
 				return;
 			}
 
@@ -118,13 +118,13 @@ namespace kengine::systems {
 
 				ImGui::Separator();
 				if (ImGui::InputText("Name", name_search, sizeof(name_search))) {
-					kengine_logf(r, verbose, "imgui_adjustable", "Name search changed to '%s'", name_search);
+					kengine_logf(r, verbose, "adjustable_imgui", "Name search changed to '%s'", name_search);
 					search_out_of_date = true;
 				}
 				ImGui::Separator();
 
 				if (search_out_of_date) {
-					kengine_log(r, verbose, "imgui_adjustable", "Updating search results");
+					kengine_log(r, verbose, "adjustable_imgui", "Updating search results");
 					update_search_results("", root_section);
 					search_out_of_date = false;
 				}
@@ -150,10 +150,10 @@ namespace kengine::systems {
 
 			for (auto & entry : section.entries) {
 				entry.values_pass_search.clear();
-				entry.values_pass_search.resize(entry.adjustable->values.size());
+				entry.values_pass_search.resize(entry.component->values.size());
 
 				size_t index = 0;
-				for (const auto & value : entry.adjustable->values) {
+				for (const auto & value : entry.component->values) {
 					const auto value_name = name + '/' + value.name.c_str();
 
 					if (value_name.find(name_search) != std::string::npos) {
@@ -175,7 +175,7 @@ namespace kengine::systems {
 			if (ImGui::TreeNodeEx(name)) {
 				for (const auto & entry : section.entries) {
 					size_t i = 0;
-					for (auto & value : entry.adjustable->values) {
+					for (auto & value : entry.component->values) {
 						if (entry.values_pass_search[i])
 							draw(value);
 						++i;
@@ -189,7 +189,7 @@ namespace kengine::systems {
 			}
 		}
 
-		void draw(data::adjustable::value & value) noexcept {
+		void draw(adjustable::value & value) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			ImGui::Columns(2);
@@ -197,7 +197,7 @@ namespace kengine::systems {
 			ImGui::NextColumn();
 
 			switch (value.type) {
-				case data::adjustable::value_type::Int: {
+				case adjustable::value_type::Int: {
 					auto & s = value.int_storage;
 					if (value.get_enum_names != nullptr)
 						ImGui::Combo((string("##") + value.name).c_str(), s.ptr != nullptr ? s.ptr : &s.value, value.get_enum_names(), (int)value.enum_count);
@@ -213,7 +213,7 @@ namespace kengine::systems {
 					}
 					break;
 				}
-				case data::adjustable::value_type::Float: {
+				case adjustable::value_type::Float: {
 					auto & s = value.float_storage;
 					ImGui::PushItemWidth(-1.f);
 					auto val = s.ptr != nullptr ? *s.ptr : s.value;
@@ -225,14 +225,14 @@ namespace kengine::systems {
 					ImGui::PopItemWidth();
 					break;
 				}
-				case data::adjustable::value_type::Bool: {
+				case adjustable::value_type::Bool: {
 					auto & s = value.bool_storage;
 					ImGui::Checkbox((string("##") + value.name).c_str(), s.ptr != nullptr ? s.ptr : &s.value);
 					if (s.ptr != nullptr)
 						s.value = *s.ptr;
 					break;
 				}
-				case data::adjustable::value_type::Color: {
+				case adjustable::value_type::Color: {
 					auto & s = value.color_storage;
 					const auto color = s.ptr != nullptr ? s.ptr->attributes : s.value.attributes;
 					if (ImGui::ColorButton((string("##") + value.name).c_str(), ImVec4(color[0], color[1], color[2], color[3])))
@@ -247,8 +247,8 @@ namespace kengine::systems {
 					break;
 				}
 				default: {
-					static_assert(magic_enum::enum_count<data::adjustable::value_type>() == 5); // + 1 for Invalid
-					kengine_assert_failed(r, "Unknown data::adjustable::value type");
+					static_assert(magic_enum::enum_count<adjustable::value_type>() == 5); // + 1 for Invalid
+					kengine_assert_failed(r, "Unknown adjustable::value type");
 					break;
 				}
 			}
@@ -256,7 +256,7 @@ namespace kengine::systems {
 			ImGui::Columns();
 		}
 
-		void on_construct_adjustable(entt::entity e, data::adjustable & comp) noexcept {
+		void on_construct_adjustable(entt::entity e, adjustable & comp) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			init_adjustable(comp);
@@ -267,7 +267,7 @@ namespace kengine::systems {
 				current_section = &current_section->subsections[section_name];
 
 			section::entry entry;
-			entry.adjustable = &comp;
+			entry.component = &comp;
 			current_section->entries.push_back(std::move(entry));
 
 			search_out_of_date = true;
@@ -276,15 +276,15 @@ namespace kengine::systems {
 		void on_destroy_adjustable(entt::registry & r, entt::entity e) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			auto & comp = r.get<data::adjustable>(e);
-			kengine_logf(r, verbose, "imgui_adjustable", "Adjustable destroyed in [%u] (section %s)", e, comp.section.c_str());
+			auto & comp = r.get<adjustable>(e);
+			kengine_logf(r, verbose, "adjustable_imgui", "Adjustable destroyed in [%u] (section %s)", e, comp.section.c_str());
 			remove_adjustable_from_section(comp, root_section);
 		}
 
-		bool remove_adjustable_from_section(const data::adjustable & comp, section & section) noexcept {
+		bool remove_adjustable_from_section(const adjustable & comp, section & section) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			if (const auto it = std::ranges::find_if(section.entries, [&](const auto & entry) { return entry.adjustable == &comp; }); it != section.entries.end()) {
+			if (const auto it = std::ranges::find_if(section.entries, [&](const auto & entry) { return entry.component == &comp; }); it != section.entries.end()) {
 				section.entries.erase(it);
 				return true;
 			}
@@ -302,13 +302,13 @@ namespace kengine::systems {
 			return false;
 		}
 
-		void init_adjustable(data::adjustable & comp) noexcept {
+		void init_adjustable(adjustable & comp) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, verbose, "imgui_adjustable", "Initializing section %s", comp.section.c_str());
+			kengine_logf(r, verbose, "adjustable_imgui", "Initializing section %s", comp.section.c_str());
 
 			const auto it = loaded_file.sections.find(comp.section.c_str());
 			if (it == loaded_file.sections.end()) {
-				kengine_logf(r, warning, "imgui_adjustable", "Section '%s' not found in INI file", comp.section.c_str());
+				kengine_logf(r, warning, "adjustable_imgui", "Section '%s' not found in INI file", comp.section.c_str());
 				return;
 			}
 
@@ -316,16 +316,16 @@ namespace kengine::systems {
 			for (auto & value : comp.values) {
 				const auto it = section.values.find(value.name.c_str());
 				if (it == section.values.end()) {
-					kengine_logf(r, warning, "imgui_adjustable", "Value for '%s' not found in INI file", value.name.c_str());
+					kengine_logf(r, warning, "adjustable_imgui", "Value for '%s' not found in INI file", value.name.c_str());
 					continue;
 				}
 
-				kengine_logf(r, verbose, "imgui_adjustable", "Initializing %s to %s", value.name.c_str(), it->second.c_str());
+				kengine_logf(r, verbose, "adjustable_imgui", "Initializing %s to %s", value.name.c_str(), it->second.c_str());
 				set_value(value, it->second.c_str());
 			}
 		}
 
-		void set_value(data::adjustable::value & value, const char * s) noexcept {
+		void set_value(adjustable::value & value, const char * s) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			const auto assign_ptr = [](auto & storage) {
@@ -334,22 +334,22 @@ namespace kengine::systems {
 			};
 
 			switch (value.type) {
-				case data::adjustable::value_type::Int: {
+				case adjustable::value_type::Int: {
 					value.int_storage.value = putils::parse<int>(s);
 					assign_ptr(value.int_storage);
 					break;
 				}
-				case data::adjustable::value_type::Float: {
+				case adjustable::value_type::Float: {
 					value.float_storage.value = putils::parse<float>(s);
 					assign_ptr(value.float_storage);
 					break;
 				}
-				case data::adjustable::value_type::Bool: {
+				case adjustable::value_type::Bool: {
 					value.bool_storage.value = putils::parse<bool>(s);
 					assign_ptr(value.bool_storage);
 					break;
 				}
-				case data::adjustable::value_type::Color: {
+				case adjustable::value_type::Color: {
 					putils::color tmp;
 					tmp.rgba = putils::parse<unsigned int>(s);
 					value.color_storage.value = putils::to_normalized_color(tmp);
@@ -357,8 +357,8 @@ namespace kengine::systems {
 					break;
 				}
 				default: {
-					static_assert(magic_enum::enum_count<data::adjustable::value_type>() == 5); // + 1 for Invalid
-					kengine_assert_failed(r, "Unknown data::adjustable::value type");
+					static_assert(magic_enum::enum_count<adjustable::value_type>() == 5); // + 1 for Invalid
+					kengine_assert_failed(r, "Unknown adjustable::value type");
 					break;
 				}
 			}
@@ -366,7 +366,7 @@ namespace kengine::systems {
 
 		putils::ini_file load_ini_file() noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, verbose, "imgui_adjustable", "Loading from " KENGINE_ADJUSTABLE_SAVE_FILE);
+			kengine_log(r, verbose, "adjustable_imgui", "Loading from " KENGINE_ADJUSTABLE_SAVE_FILE);
 
 			std::ifstream f(KENGINE_ADJUSTABLE_SAVE_FILE);
 
@@ -377,7 +377,7 @@ namespace kengine::systems {
 
 		void save() noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, verbose, "imgui_adjustable", "Saving to " KENGINE_ADJUSTABLE_SAVE_FILE);
+			kengine_log(r, verbose, "adjustable_imgui", "Saving to " KENGINE_ADJUSTABLE_SAVE_FILE);
 
 			std::ofstream f(KENGINE_ADJUSTABLE_SAVE_FILE, std::ofstream::trunc);
 			if (!f) {
@@ -387,38 +387,38 @@ namespace kengine::systems {
 
 			putils::ini_file ini;
 
-			for (const auto & [e, comp] : r.view<data::adjustable>().each()) {
-				kengine_logf(r, verbose, "imgui_adjustable", "Adding section %s to INI file", e, comp.section.c_str());
+			for (const auto & [e, comp] : r.view<adjustable>().each()) {
+				kengine_logf(r, verbose, "adjustable_imgui", "Adding section %s to INI file", e, comp.section.c_str());
 				auto & section = ini.sections[comp.section.c_str()];
 
 				for (const auto & value : comp.values) {
-					kengine_logf(r, verbose, "imgui_adjustable", "Adding value %s to section %s of INI file", e, value.name.c_str());
+					kengine_logf(r, verbose, "adjustable_imgui", "Adding value %s to section %s of INI file", e, value.name.c_str());
 					auto & ini_value = section.values[value.name.c_str()];
 
 					switch (value.type) {
-						case data::adjustable::value_type::Int: {
+						case adjustable::value_type::Int: {
 							ini_value = putils::to_string(value.int_storage.value);
-							kengine_logf(r, verbose, "imgui_adjustable", "Adding int value %s", e, ini_value.c_str());
+							kengine_logf(r, verbose, "adjustable_imgui", "Adding int value %s", e, ini_value.c_str());
 							break;
 						}
-						case data::adjustable::value_type::Float: {
+						case adjustable::value_type::Float: {
 							ini_value = putils::to_string(value.float_storage.value);
-							kengine_logf(r, verbose, "imgui_adjustable", "Adding float value %s", e, ini_value.c_str());
+							kengine_logf(r, verbose, "adjustable_imgui", "Adding float value %s", e, ini_value.c_str());
 							break;
 						}
-						case data::adjustable::value_type::Bool: {
+						case adjustable::value_type::Bool: {
 							ini_value = putils::to_string(value.bool_storage.value);
-							kengine_logf(r, verbose, "imgui_adjustable", "Adding bool value %s", e, ini_value.c_str());
+							kengine_logf(r, verbose, "adjustable_imgui", "Adding bool value %s", e, ini_value.c_str());
 							break;
 						}
-						case data::adjustable::value_type::Color: {
+						case adjustable::value_type::Color: {
 							ini_value = putils::to_string(putils::to_rgba(value.color_storage.value));
-							kengine_logf(r, verbose, "imgui_adjustable", "Adding color value %s", e, ini_value.c_str());
+							kengine_logf(r, verbose, "adjustable_imgui", "Adding color value %s", e, ini_value.c_str());
 							break;
 						}
 						default: {
-							static_assert(magic_enum::enum_count<data::adjustable::value_type>() == 5); // + 1 for Invalid
-							kengine_assert_failed(r, "Unknown data::adjustable::value type");
+							static_assert(magic_enum::enum_count<adjustable::value_type>() == 5); // + 1 for Invalid
+							kengine_assert_failed(r, "Unknown adjustable::value type");
 							break;
 						}
 					}
@@ -430,7 +430,7 @@ namespace kengine::systems {
 	};
 
 	DEFINE_KENGINE_SYSTEM_CREATOR(
-		imgui_adjustable,
-		imgui_adjustable::processed
+		system,
+		system::processed
 	)
 }
