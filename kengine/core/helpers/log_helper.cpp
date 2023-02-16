@@ -13,7 +13,7 @@
 #include "kengine/core/helpers/profiling_helper.hpp"
 
 // kengine command_line
-#include "kengine/command_line/data/command_line.hpp"
+#include "kengine/command_line/data/arguments.hpp"
 
 namespace {
 	static kengine::log_severity max_log_severity = kengine::log_severity::none;
@@ -58,8 +58,8 @@ namespace kengine::log_helper {
 
 		command_line_severity = log_severity_control{};
 
-		for (const auto & [e, command_line] : r.view<data::command_line>().each()) {
-			const auto opts = putils::parse_arguments<options>(command_line.arguments);
+		for (const auto & [e, command_line] : r.view<command_line::arguments>().each()) {
+			const auto opts = putils::parse_arguments<options>(command_line.args);
 			kengine_logf(r, very_verbose, "log_helper", "Found %s in [%u]", putils::reflection::to_json(opts).dump(4).c_str(), e);
 
 			command_line_severity->global_severity = opts.log_level;

@@ -1,4 +1,4 @@
-#include "command_line_helper.hpp"
+#include "parse.hpp"
 
 // entt
 #include <entt/entity/registry.hpp>
@@ -11,17 +11,17 @@
 #include "kengine/core/helpers/profiling_helper.hpp"
 
 // kengine command_line
-#include "kengine/command_line/data/command_line.hpp"
+#include "kengine/command_line/data/arguments.hpp"
 
-namespace kengine {
+namespace kengine::command_line {
 	template<typename T>
-	T parse_command_line(const entt::registry & r) noexcept {
+	T parse(const entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		kengine_log(r, verbose, "command_line", "Parsing command-line");
 
-		for (const auto & [e, args] : r.view<data::command_line>().each()) {
+		for (const auto & [e, args] : r.view<arguments>().each()) {
 			kengine_logf(r, very_verbose, "command_line", "Parsing command-line from [%u]", e);
-			return putils::parse_arguments<T>(args.arguments);
+			return putils::parse_arguments<T>(args.args);
 		}
 
 		kengine_log(r, verbose, "command_line", "Found no command-line entity");
