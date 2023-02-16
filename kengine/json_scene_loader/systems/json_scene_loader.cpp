@@ -58,12 +58,12 @@ namespace kengine::systems {
 
 			processor.process();
 
-			kengine::process_async_results<load_models_task>(r, [this](entt::entity e, load_models_task &&) {
+			kengine::async::process_results<load_models_task>(r, [this](entt::entity e, load_models_task &&) {
 				// Entity that will wait until all async loading tasks are completed before loading the scene
 				const auto poller = r.create();
 				kengine_logf(r, verbose, "json_scene_loader", "Creating polling entity [%u]", poller);
 				r.emplace<functions::execute>(poller, [this, e, poller](float delta_time) {
-					if (!r.view<data::async_task>().empty()) {
+					if (!r.view<async::task>().empty()) {
 						kengine_log(r, verbose, "json_scene_loader", "Waiting to load scene (async_tasks are still running)");
 						return;
 					}
@@ -99,9 +99,9 @@ namespace kengine::systems {
 		void start_async_model_loading(entt::entity e, const data::json_scene_loader & loader) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			kengine::start_async_task(
+			kengine::async::start_task(
 				r, e,
-				data::async_task::string("json_scene_loader: load models from %s", loader.model_directory.c_str()),
+				async::task::string("json_scene_loader: load models from %s", loader.model_directory.c_str()),
 				std::async(std::launch::async, [this, &loader] {
 					return load_models(loader.model_directory.c_str());
 				})

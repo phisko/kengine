@@ -557,9 +557,9 @@ namespace kengine::systems::recast_impl {
 		kengine_logf(r, verbose, "recast", "Building recast component for [%u]", e);
 
 		kengine_assert(r, nav_mesh.verts_per_poly <= DT_VERTS_PER_POLYGON);
-		kengine::start_async_task(
+		kengine::async::start_task(
 			r, e,
-			data::async_task::string("recast: load %s", model.file.c_str()),
+			async::task::string("recast: load %s", model.file.c_str()),
 			std::async(std::launch::async, [&r, e, &model, &model_data, &nav_mesh] {
 				const putils::scoped_thread_name thread_name(putils::string<64>("Load navmesh for %s", model.file.c_str()));
 				return build_recast_component::create_recast_mesh(model.file.c_str(), { r, e }, nav_mesh, model_data);
@@ -571,7 +571,7 @@ namespace kengine::systems::recast_impl {
 		KENGINE_PROFILING_SCOPE;
 		kengine_log(r, very_verbose, "recast", "Processing built recast components");
 
-		kengine::process_async_results<std::optional<data::recast_nav_mesh>>(r, [&](entt::entity e, std::optional<data::recast_nav_mesh> && opt) {
+		kengine::async::process_results<std::optional<data::recast_nav_mesh>>(r, [&](entt::entity e, std::optional<data::recast_nav_mesh> && opt) {
 			if (!opt)
 				return;
 
