@@ -159,7 +159,7 @@ function(add_systems_in_directory root)
         add_system(${child})
     endforeach()
 
-    set(headers_to_register ${headers_to_register} ${system_headers} PARENT_SCOPE)
+    set(headers_to_register ${headers_to_register} PARENT_SCOPE)
 endfunction()
 
 # Add core first so other systems can link against it
@@ -167,7 +167,7 @@ add_system(${CMAKE_CURRENT_LIST_DIR}/kengine/core)
 set(ignored_subdirectories ${CMAKE_CURRENT_LIST_DIR}/kengine/core)
 
 # Then add the other systems
-add_systems_in_directory(kengine)
+add_systems_in_directory(${CMAKE_CURRENT_LIST_DIR}/kengine)
 
 # putils
 add_subdirectory(putils)
