@@ -25,7 +25,7 @@ entt::entity (entt::entity window, const putils::point2ui & pixel);
 
 Here is a small example that creates an input handler which, when the user clicks their mouse, outputs the ID of the entity seen in the clicked pixel.
 
-This piece of code is very similar to the behavior of the [on_click system](../../on_click/systems/on_click.md).
+This piece of code is very similar to the behavior of the [on_click system](../on_click/systems/on_click.md).
 
 ```cpp
 const auto e = r.create();

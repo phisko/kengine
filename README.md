@@ -87,7 +87,7 @@ Function components hold functions to query, alter, or notify their entity.
 
 Function components are simply holders for functors that can be attached as components to entities. This mechanic can be used to:
 * attach behaviors to entities: [execute](kengine/main_loop/functions/execute.md) is called by the main loop each frame
-* register callbacks for system-wide events: [on_click](kengine/on_click/functions/on_click.md) is called whenever the user clicks the entity
+* register callbacks for system-wide events: [on_click](kengine/render/on_click/functions/on_click.md) is called whenever the user clicks the entity
 * provide new functionality that is implemented in a specific system: [query_position](kengine/physics/functions/query_position.md) is typically implemented by a physics system
 
 Function components are types that inherit from [base_function](kengine/base_function.hpp), giving it the function signature as a template parameter.
@@ -169,7 +169,6 @@ See [CMake](#cmake) for instructions on how to enable each library.
         * [kengine_meta_imgui_entity_selector](kengine/imgui/entity_selector/): select entities in an ImGui window
     * [kengine_meta_json](kengine/meta/json/): meta components for JSON
 * [kengine_model_instance](kengine/model_instance/): use model entities, which other entities can be instances of
-* [kengine_on_click](kengine/on_click/): notify entities that are clicked by the user
 * [kengine_pathfinding](kengine/pathfinding/): add pathfinding capabilities to entities
     * [kengine_pathfinding_recast](kengine/pathfinding/recast/): implement pathfinding using [Recast](https://github.com/recastnavigation/recastnavigation)
 * [kengine_physics](kengine/physics/): move and query entities in space
@@ -177,6 +176,7 @@ See [CMake](#cmake) for instructions on how to enable each library.
 * [kengine_render](kengine/render/): display entities in graphical applications
     * [kengine_render_animation](kengine/animation/): play animations on entities
     * [kengine_render_kreogl](kengine/render/kreogl/): implement rendering using [kreogl](https://github.com/phisko/kreogl)
+    * [kengine_render_on_click](kengine/render/on_click/): notify entities that are clicked by the user
     * [kengine_render_sfml](kengine/render/sfml/): implement rendering using [SFML](https://github.com/SFML/SFML)
 * [kengine_scripting](kengine/scripting/): run scripts from other languages
     * [kengine_scripting_imgui_prompt](kengine/scripting/imgui_prompt/): interpret scripting commands in an ImGui window
