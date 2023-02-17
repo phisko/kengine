@@ -39,6 +39,14 @@ if(KENGINE_TESTS)
     enable_testing()
 endif()
 
+set(
+        default_dependencies
+        kengine_core
+        kengine_core_assert
+        kengine_core_log
+        kengine_core_profiling
+)
+
 function(add_system path)
     file(RELATIVE_PATH relative_path ${CMAKE_CURRENT_LIST_DIR} ${path})
     # Convert kengine/render/kreogl to kengine_render_kreogl
@@ -47,7 +55,15 @@ function(add_system path)
     # Convert kengine_render_kreogl to KENGINE_RENDER_KREOGL
     string(TOUPPER ${system_name} upper_system_name)
 
-    option(${upper_system_name} "Build ${system_name}" ${KENGINE_ALL_SYSTEMS})
+    # If the plugin isn't one of the default dependencies, add an option to enable it
+    list(FIND default_dependencies ${system_name} default_dependencies_index)
+    if(${default_dependencies_index} EQUAL -1)
+        set(default_enabled ${KENGINE_ALL_SYSTEMS})
+    else()
+        set(default_enabled ON)
+    endif()
+
+    option(${upper_system_name} "Build ${system_name}" ${default_enabled})
     if(NOT ${${upper_system_name}})
         return()
     endif()
@@ -85,10 +101,10 @@ function(add_system path)
 
     target_compile_definitions(${system_name} ${link_type} ${upper_system_name})
     target_link_libraries(${system_name} ${link_type} kengine_include)
-    if(NOT ${system_name} STREQUAL kengine_core)
-        if(TARGET kengine_core)
-            target_link_libraries(${system_name} ${link_type} kengine_core)
-        endif()
+
+    # Link against the default dependencies
+    if(${default_dependencies_index} EQUAL -1)
+        target_link_libraries(${system_name} ${link_type} ${default_dependencies})
     endif()
 
     if(NOT "${parent_system_name}" STREQUAL "")
@@ -115,7 +131,9 @@ function(add_system path)
         endfunction()
 
         macro(register_types_from_headers)
-            set(system_headers ${system_headers} ${ARGN} PARENT_SCOPE)
+            foreach(header ${ARGN})
+                set(system_headers ${system_headers} ${path}/${header} PARENT_SCOPE)
+            endforeach()
         endmacro()
         add_subdirectory(${path})
     endif()
