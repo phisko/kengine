@@ -4,9 +4,9 @@
 #include <entt/entity/registry.hpp>
 
 // kengine core
-#include "kengine/core/helpers/assert_helper.hpp"
-#include "kengine/core/helpers/log_helper.hpp"
-#include "kengine/core/helpers/profiling_helper.hpp"
+#include "kengine/core/assert/helpers/kengine_assert.hpp"
+#include "kengine/core/log/helpers/kengine_log.hpp"
+#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 namespace kengine::skeleton_helper {
 	bone_indices get_bone_index(const entt::registry & r, const char * bone, const data::model_skeleton & model) noexcept {

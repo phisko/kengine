@@ -32,9 +32,9 @@
 
 // kengine core
 #include "kengine/core/data/transform.hpp"
-#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/helpers/new_entity_processor.hpp"
-#include "kengine/core/helpers/profiling_helper.hpp"
+#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 // kengine adjustable
 #include "kengine/adjustable/data/adjustable.hpp"

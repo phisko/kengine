@@ -8,8 +8,8 @@
 #include <imgui.h>
 
 // kengine core
-#include "kengine/core/helpers/sort_helper.hpp"
-#include "kengine/core/helpers/profiling_helper.hpp"
+#include "kengine/core/sort/helpers/get_name_sorted_entities.hpp"
+#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 // kengine meta
 #include "kengine/meta/functions/has.hpp"
@@ -29,7 +29,7 @@ namespace kengine::imgui_helper {
 		KENGINE_PROFILING_SCOPE;
 		kengine_logf(*e.registry(), very_verbose, "imgui", "Displaying [%u]", e.entity());
 
-		const auto types = sort_helper::get_name_sorted_entities<const meta::has, const meta::display_imgui>(*e.registry());
+		const auto types = core::sort::get_name_sorted_entities<const meta::has, const meta::display_imgui>(*e.registry());
 
 		for (const auto & [_, name, has, display] : types)
 			if (has->call(e))
@@ -73,7 +73,7 @@ namespace kengine::imgui_helper {
 		const auto & r = *e.registry();
 
 		if (ImGui::BeginPopupContextWindow()) {
-			const auto types = sort_helper::get_name_sorted_entities<const meta::has, const meta::emplace_or_replace>(r);
+			const auto types = core::sort::get_name_sorted_entities<const meta::has, const meta::emplace_or_replace>(r);
 
 			for (const auto & [_, name, has, emplace_or_replace] : types)
 				if (!has->call(e))
@@ -83,7 +83,7 @@ namespace kengine::imgui_helper {
 			ImGui::EndPopup();
 		}
 
-		const auto types = sort_helper::get_name_sorted_entities<const meta::has, const meta::edit_imgui>(r);
+		const auto types = core::sort::get_name_sorted_entities<const meta::has, const meta::edit_imgui>(r);
 
 		for (const auto & [type_entity, name, has, edit] : types) {
 			if (!has->call(e))

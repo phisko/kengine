@@ -20,11 +20,11 @@
 
 // kengine core
 #include "kengine/core/data/name.hpp"
-#include "kengine/core/helpers/assert_helper.hpp"
-#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/assert/helpers/kengine_assert.hpp"
+#include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/helpers/new_entity_processor.hpp"
-#include "kengine/core/helpers/profiling_helper.hpp"
-#include "kengine/core/helpers/sort_helper.hpp"
+#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
+#include "kengine/core/sort/helpers/get_name_sorted_entities.hpp"
 
 // kengine imgui/imgui_tool
 #include "kengine/imgui/tool/data/imgui_tool.hpp"
@@ -182,7 +182,7 @@ namespace kengine::systems {
 			putils::ini_file output_configuration;
 			auto & section = output_configuration.sections["Tools"];
 
-			const auto sorted = sort_helper::get_name_sorted_entities<KENGINE_IMGUI_MAX_TOOLS, data::imgui_tool>(r);
+			const auto sorted = core::sort::get_name_sorted_entities<KENGINE_IMGUI_MAX_TOOLS, data::imgui_tool>(r);
 			for (const auto & [e, name, tool] : sorted) {
 				std::string value = putils::to_string(tool->enabled);
 				kengine_logf(r, verbose, "imgui_tool", "Saving %s (%s)", name->name.c_str(), value.c_str());

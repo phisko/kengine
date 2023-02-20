@@ -1,3 +1,3 @@
-# [log_imgui](log_imgui.hpp)
+# [system](system.hpp)
 
-System that [logs](../../../core/functions/log.md) messages to an ImGui window, with configurable filters.
+System that [logs](../../functions/on_log.md) messages to an ImGui window, with configurable filters.

@@ -13,8 +13,8 @@
 #include "putils/function.hpp"
 
 // kengine core
-#include "kengine/core/helpers/log_helper.hpp"
-#include "kengine/core/helpers/profiling_helper.hpp"
+#include "kengine/core/log/helpers/kengine_log.hpp"
+#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 // kengine main_loop
 #include "kengine/main_loop/helpers/is_running.hpp"

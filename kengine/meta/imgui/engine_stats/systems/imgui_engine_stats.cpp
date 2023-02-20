@@ -18,10 +18,10 @@
 
 // kengine core
 #include "kengine/core/data/name.hpp"
-#include "kengine/core/helpers/assert_helper.hpp"
-#include "kengine/core/helpers/log_helper.hpp"
-#include "kengine/core/helpers/profiling_helper.hpp"
-#include "kengine/core/helpers/sort_helper.hpp"
+#include "kengine/core/assert/helpers/kengine_assert.hpp"
+#include "kengine/core/log/helpers/kengine_log.hpp"
+#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
+#include "kengine/core/sort/helpers/get_name_sorted_entities.hpp"
 
 // kengine imgui/imgui_tool
 #include "kengine/imgui/tool/data/imgui_tool.hpp"
@@ -154,7 +154,7 @@ namespace kengine::systems {
 					}
 				}
 
-				const auto sorted_entities = sort_helper::get_name_sorted_entities<meta::has>(r);
+				const auto sorted_entities = core::sort::get_name_sorted_entities<meta::has>(r);
 
 				for (const auto [e, name, has] : sorted_entities) {
 					const auto it = std::ranges::find(creating.components, e);

@@ -5,7 +5,7 @@
 
 // kengine core
 #include "kengine/core/data/transform.hpp"
-#include "kengine/core/helpers/profiling_helper.hpp"
+#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 namespace kengine::matrix_helper {
 	glm::vec3 to_vec(const putils::point3f & pos) noexcept {

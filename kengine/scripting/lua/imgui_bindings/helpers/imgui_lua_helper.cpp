@@ -7,8 +7,8 @@
 #include "putils/imgui_lua_bindings/imgui_lua_bindings.hpp"
 
 // kengine core
-#include "kengine/core/helpers/log_helper.hpp"
-#include "kengine/core/helpers/profiling_helper.hpp"
+#include "kengine/core/log/helpers/kengine_log.hpp"
+#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 // kengine scripting/lua
 #include "kengine/scripting/lua/data/lua_state.hpp"

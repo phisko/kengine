@@ -9,7 +9,7 @@
 #include "putils/thread_name.hpp"
 
 // kengine core
-#include "kengine/core/helpers/profiling_helper.hpp"
+#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 // kengine scripting/lua
 #include "kengine/scripting/lua/helpers/lua_helper.hpp"

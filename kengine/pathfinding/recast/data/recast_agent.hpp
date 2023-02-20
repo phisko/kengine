@@ -7,7 +7,7 @@
 #include "putils/default_constructors.hpp"
 
 // kengine core
-#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/log/helpers/kengine_log.hpp"
 
 // impl
 #include "recast_crowd.hpp"

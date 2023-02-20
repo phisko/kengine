@@ -5,7 +5,7 @@
 #include <entt/entity/registry.hpp>
 
 // kengine core
-#include "kengine/core/helpers/profiling_helper.hpp"
+#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 namespace kengine {
 	template<typename T>

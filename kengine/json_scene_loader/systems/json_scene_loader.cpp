@@ -18,7 +18,7 @@
 
 // kengine core
 #include "kengine/core/helpers/new_entity_processor.hpp"
-#include "kengine/core/helpers/profiling_helper.hpp"
+#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 // kengine meta/json
 #include "kengine/meta/json/helpers/json_helper.hpp"

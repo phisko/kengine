@@ -8,8 +8,8 @@
 
 // kengine core
 #include "kengine/core/data/name.hpp"
-#include "kengine/core/helpers/assert_helper.hpp"
-#include "kengine/core/helpers/profiling_helper.hpp"
+#include "kengine/core/assert/helpers/kengine_assert.hpp"
+#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 // kengine meta
 #include "kengine/meta/helpers/type_helper.hpp"

@@ -74,8 +74,8 @@ def generate_registration(file_name, types):
 #include <entt/entity/fwd.hpp>
 
 // kengine core
-#include "kengine/core/helpers/log_helper.hpp"
-#include "kengine/core/helpers/profiling_helper.hpp"
+#include "kengine/core/log/helpers/kengine_log.hpp"
+#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 namespace ''' + args.namespace + ' {'
 	content += generate_registration_functions(types)
@@ -198,8 +198,8 @@ if not args.no_write_main_file:
 #include "putils/range.hpp"
 
 // kengine core
-#include "kengine/core/helpers/log_helper.hpp"
-#include "kengine/core/helpers/profiling_helper.hpp"
+#include "kengine/core/log/helpers/kengine_log.hpp"
+#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 // kengine meta
 #include "kengine/meta/functions/register_types.hpp"

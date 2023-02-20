@@ -1,4 +1,4 @@
-#include "sort_helper.hpp"
+#include "get_sorted_entities.hpp"
 
 // entt
 #include <entt/entity/entity.hpp>
@@ -11,10 +11,10 @@
 
 // kengine core
 #include "kengine/core/data/name.hpp"
-#include "kengine/core/helpers/log_helper.hpp"
-#include "kengine/core/helpers/profiling_helper.hpp"
+#include "kengine/core/log/helpers/kengine_log.hpp"
+#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
-namespace kengine::sort_helper {
+namespace kengine::core::sort {
 	namespace impl {
 		template<typename PointerTuple, typename RefTuple>
 		void set_impl(PointerTuple & p, const RefTuple & r, std::index_sequence<>) noexcept {}
@@ -58,24 +58,7 @@ namespace kengine::sort_helper {
 
 	template<typename... Comps, typename Registry, typename Pred>
 	auto get_sorted_entities(Registry && r, Pred && pred) noexcept {
-		kengine_log(r, very_verbose, "sort_helper", "Getting sorted entities");
+		kengine_log(r, very_verbose, "core_sort", "Getting sorted entities");
 		return get_sorted_entities<0, Comps...>(FWD(r), FWD(pred));
-	}
-
-	template<size_t MaxCount, typename... Comps, typename Registry>
-	auto get_name_sorted_entities(Registry && r) noexcept {
-		KENGINE_PROFILING_SCOPE;
-
-		return get_sorted_entities<MaxCount, const data::name, Comps...>(
-			FWD(r), [](const auto & lhs, const auto & rhs) noexcept {
-				return strcmp(std::get<1>(lhs)->name.c_str(), std::get<1>(rhs)->name.c_str()) < 0;
-			}
-		);
-	}
-
-	template<typename... Comps, typename Registry>
-	auto get_name_sorted_entities(Registry && r) noexcept {
-		kengine_log(r, very_verbose, "sort_helper", "Getting name sorted entities");
-		return get_name_sorted_entities<0, Comps...>(FWD(r));
 	}
 }

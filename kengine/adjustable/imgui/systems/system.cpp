@@ -23,10 +23,16 @@
 
 // kengine core
 #include "kengine/core/data/name.hpp"
-#include "kengine/core/helpers/assert_helper.hpp"
-#include "kengine/core/helpers/log_helper.hpp"
 #include "kengine/core/helpers/new_entity_processor.hpp"
-#include "kengine/core/helpers/profiling_helper.hpp"
+
+// kengine core/assert
+#include "kengine/core/assert/helpers/kengine_assert.hpp"
+
+// kengine core/log
+#include "kengine/core/log/helpers/kengine_log.hpp"
+
+// kengine core/profiling
+#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 // kengine adjustable
 #include "kengine/adjustable/data/adjustable.hpp"

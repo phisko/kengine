@@ -13,8 +13,8 @@
 
 // kengine core
 #include "kengine/core/data/name.hpp"
-#include "kengine/core/helpers/profiling_helper.hpp"
-#include "kengine/core/helpers/sort_helper.hpp"
+#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
+#include "kengine/core/sort/helpers/get_name_sorted_entities.hpp"
 
 // kengine meta
 #include "kengine/meta/functions/has.hpp"
@@ -42,7 +42,7 @@ namespace kengine::json_helper {
 
 		nlohmann::json ret;
 
-		const auto types = sort_helper::get_name_sorted_entities<const meta::has, const meta::save_to_json>(*e.registry());
+		const auto types = core::sort::get_name_sorted_entities<const meta::has, const meta::save_to_json>(*e.registry());
 
 		for (const auto & [_, name, has, save] : types) {
 			if (!has->call(e))

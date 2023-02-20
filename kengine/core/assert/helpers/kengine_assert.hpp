@@ -26,10 +26,14 @@
 // putils
 #include "putils/concatenate.hpp"
 
+// kengine core/assert
+#include "kengine/core/assert/helpers/assert_failed.hpp"
+#include "kengine/core/assert/helpers/is_debugger_present.hpp"
+
 #define kengine_assert_failed(r, ...) \
 	do { \
-		const bool should_break = kengine::assert_helper::assert_failed(r, __FILE__, __LINE__, putils::concatenate(__VA_ARGS__)); \
-		if (should_break && kengine::assert_helper::is_debugger_present()) \
+		const bool should_break = kengine::core::assert::assert_failed(r, __FILE__, __LINE__, putils::concatenate(__VA_ARGS__)); \
+		if (should_break && kengine::core::assert::is_debugger_present()) \
 			kengine_debug_break; \
 	} while (false)
 
@@ -42,12 +46,4 @@
 #define kengine_assert(r, x) \
 	kengine_assert_with_message(r, x, #x)
 
-namespace kengine {
-	namespace assert_helper {
-		KENGINE_CORE_EXPORT extern std::function<bool(const entt::registry & r, const char * file, int line, const std::string & expr)> assert_handler;
-
-		KENGINE_CORE_EXPORT bool assert_failed(const entt::registry & r, const char * file, int line, const std::string & expr) noexcept;
-		KENGINE_CORE_EXPORT bool is_debugger_present() noexcept;
-	}
-}
 #endif

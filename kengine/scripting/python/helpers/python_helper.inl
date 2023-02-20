@@ -7,8 +7,8 @@
 #include "putils/python/python_helper.hpp"
 
 // kengine core
-#include "kengine/core/helpers/log_helper.hpp"
-#include "kengine/core/helpers/profiling_helper.hpp"
+#include "kengine/core/log/helpers/kengine_log.hpp"
+#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 // kengine scripting/python
 #include "kengine/scripting/python/data/python_state.hpp"
