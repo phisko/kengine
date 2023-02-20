@@ -20,8 +20,8 @@ namespace kengine::data {
 		//! putils reflect all
 		//! class_name: skeleton_mesh
 		struct mesh {
-			glm::mat4 bone_mats_bone_space[KENGINE_SKELETON_MAX_BONES]; // Used by shader
-			glm::mat4 bone_mats_mesh_space[KENGINE_SKELETON_MAX_BONES]; // Used to get bone matrix in world space
+			::glm::mat4 bone_mats_bone_space[KENGINE_SKELETON_MAX_BONES]; // Used by shader
+			::glm::mat4 bone_mats_mesh_space[KENGINE_SKELETON_MAX_BONES]; // Used to get bone matrix in world space
 		};
 		std::vector<mesh> meshes;
 	};

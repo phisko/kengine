@@ -21,7 +21,8 @@
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 // kengine glm
-#include "kengine/glm/helpers/matrix_helper.hpp"
+#include "kengine/glm/helpers/convert_to_referencial.hpp"
+#include "kengine/glm/helpers/get_model_matrix.hpp"
 
 // kengine model_instance
 #include "kengine/model_instance/helpers/instance_helper.hpp"
@@ -88,8 +89,8 @@ namespace kengine::systems::recast_impl {
 
 		struct environment_info {
 			putils::vec3f environment_scale;
-			glm::mat4 model_to_world;
-			glm::mat4 world_to_model;
+			::glm::mat4 model_to_world;
+			::glm::mat4 world_to_model;
 		};
 		static environment_info get_environment_info(entt::handle environment) noexcept {
 			KENGINE_PROFILING_SCOPE;
@@ -103,8 +104,8 @@ namespace kengine::systems::recast_impl {
 			ret.environment_scale = environment_transform.bounding_box.size;
 			if (model_transform)
 				ret.environment_scale *= model_transform->bounding_box.size;
-			ret.model_to_world = matrix_helper::get_model_matrix(environment_transform, model_transform);
-			ret.world_to_model = glm::inverse(ret.model_to_world);
+			ret.model_to_world = glm::get_model_matrix(environment_transform, model_transform);
+			ret.world_to_model = ::glm::inverse(ret.model_to_world);
 			return ret;
 		}
 
@@ -117,7 +118,7 @@ namespace kengine::systems::recast_impl {
 
 			object_info ret;
 			ret.object_in_nav_mesh = {
-				matrix_helper::convert_to_referencial(transform.bounding_box.position, environment.world_to_model),
+				glm::convert_to_referencial(transform.bounding_box.position, environment.world_to_model),
 				transform.bounding_box.size / environment.environment_scale
 			};
 			ret.max_speed = putils::get_length(putils::point3f{ pathfinding.max_speed, 0.f, 0.f } / environment.environment_scale);
@@ -256,7 +257,7 @@ namespace kengine::systems::recast_impl {
 			KENGINE_PROFILING_SCOPE;
 
 			physics.movement = environment_info.environment_scale * putils::point3f{ agent.vel };
-			transform.bounding_box.position = matrix_helper::convert_to_referencial(agent.npos, environment_info.model_to_world);
+			transform.bounding_box.position = glm::convert_to_referencial(agent.npos, environment_info.model_to_world);
 		}
 
 		static void write_to_agent(entt::handle e, const data::transform & transform, const data::pathfinding & pathfinding, const environment_info & environment_info, const data::recast_nav_mesh & nav_mesh, const data::recast_crowd & crowd) noexcept {
@@ -266,7 +267,7 @@ namespace kengine::systems::recast_impl {
 			const auto object_info = get_object_info(environment_info, transform, pathfinding);
 			update_agent_component(e, object_info, crowd);
 
-			const auto destination_in_model = matrix_helper::convert_to_referencial(pathfinding.destination, environment_info.world_to_model);
+			const auto destination_in_model = glm::convert_to_referencial(pathfinding.destination, environment_info.world_to_model);
 			const auto search_extents = putils::point3f{ pathfinding.search_distance, pathfinding.search_distance, pathfinding.search_distance } / environment_info.environment_scale;
 			update_destination(e, nav_mesh, crowd, destination_in_model, search_extents);
 		}

@@ -38,7 +38,7 @@
 #include "kengine/adjustable/data/adjustable.hpp"
 
 // kengine glm
-#include "kengine/glm/helpers/matrix_helper.hpp"
+#include "kengine/glm/helpers/get_model_matrix.hpp"
 
 // kengine main_loop
 #include "kengine/main_loop/functions/execute.hpp"
@@ -122,9 +122,9 @@ namespace kengine::systems {
 					KENGINE_PROFILING_SCOPE;
 
 					transform->bounding_box.position = system->to_putils(world_trans.getOrigin());
-					glm::mat4 mat;
-					world_trans.getOpenGLMatrix(glm::value_ptr(mat));
-					glm::extractEulerAngleYXZ(mat, transform->yaw, transform->pitch, transform->roll);
+					::glm::mat4 mat;
+					world_trans.getOpenGLMatrix(::glm::value_ptr(mat));
+					::glm::extractEulerAngleYXZ(mat, transform->yaw, transform->pitch, transform->roll);
 				}
 
 				systems::bullet * system;
@@ -431,22 +431,22 @@ namespace kengine::systems {
 			dynamics_world.contactTest(&ghost, callback);
 		}
 
-		glm::vec3 to_vec(const putils::point3f & p) noexcept { return { p.x, p.y, p.z }; }
+		::glm::vec3 to_vec(const putils::point3f & p) noexcept { return { p.x, p.y, p.z }; }
 		putils::point3f to_putils(const btVector3 & vec) noexcept { return { vec.getX(), vec.getY(), vec.getZ() }; }
 		btVector3 to_bullet(const putils::point3f & p) noexcept { return { p.x, p.y, p.z }; }
 
 		btTransform to_bullet(const data::transform & transform) noexcept {
 			kengine_log(r, very_verbose, "bullet", "Converting transform for entity");
 
-			glm::mat4 mat(1.f);
+			::glm::mat4 mat(1.f);
 
-			mat = glm::translate(mat, to_vec(transform.bounding_box.position));
-			mat = glm::rotate(mat, transform.yaw, { 0.f, 1.f, 0.f });
-			mat = glm::rotate(mat, transform.pitch, { 1.f, 0.f, 0.f });
-			mat = glm::rotate(mat, transform.roll, { 0.f, 0.f, 1.f });
+			mat = ::glm::translate(mat, to_vec(transform.bounding_box.position));
+			mat = ::glm::rotate(mat, transform.yaw, { 0.f, 1.f, 0.f });
+			mat = ::glm::rotate(mat, transform.pitch, { 1.f, 0.f, 0.f });
+			mat = ::glm::rotate(mat, transform.roll, { 0.f, 0.f, 1.f });
 
 			btTransform ret;
-			ret.setFromOpenGLMatrix(glm::value_ptr(mat));
+			ret.setFromOpenGLMatrix(::glm::value_ptr(mat));
 
 			return ret;
 		}
@@ -455,21 +455,21 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, very_verbose, "bullet", "Converting transform for collider");
 
-			glm::mat4 mat{ 1.f };
+			::glm::mat4 mat{ 1.f };
 
 			if (!collider.bone_name.empty() && skeleton && model_skeleton) {
 				// Also apply model transform to re-align bones
-				mat *= matrix_helper::get_model_matrix({}, model_transform);
+				mat *= glm::get_model_matrix({}, model_transform);
 				mat *= skeleton_helper::get_bone_matrix(r, collider.bone_name.c_str(), *skeleton, *model_skeleton);
 			}
 
-			mat = glm::translate(mat, to_vec(collider.transform.bounding_box.position));
-			mat = glm::rotate(mat, collider.transform.yaw, { 0.f, 1.f, 0.f });
-			mat = glm::rotate(mat, collider.transform.pitch, { 1.f, 0.f, 0.f });
-			mat = glm::rotate(mat, collider.transform.roll, { 0.f, 0.f, 1.f });
+			mat = ::glm::translate(mat, to_vec(collider.transform.bounding_box.position));
+			mat = ::glm::rotate(mat, collider.transform.yaw, { 0.f, 1.f, 0.f });
+			mat = ::glm::rotate(mat, collider.transform.pitch, { 1.f, 0.f, 0.f });
+			mat = ::glm::rotate(mat, collider.transform.roll, { 0.f, 0.f, 1.f });
 
 			btTransform ret;
-			ret.setFromOpenGLMatrix(glm::value_ptr(mat));
+			ret.setFromOpenGLMatrix(::glm::value_ptr(mat));
 
 			return ret;
 		}

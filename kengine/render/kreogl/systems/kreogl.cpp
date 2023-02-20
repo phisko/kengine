@@ -44,7 +44,7 @@
 #include "kengine/async/helpers/process_results.hpp"
 
 // kengine glm
-#include "kengine/glm/helpers/matrix_helper.hpp"
+#include "kengine/glm/helpers/get_model_matrix.hpp"
 
 // kengine imgui
 #include "kengine/imgui/data/imgui_context.hpp"
@@ -662,7 +662,7 @@ namespace kengine::systems {
 			const data::transform * model_transform = nullptr;
 			if (instance)
 				model_transform = instance_helper::try_get_model<data::transform>(r, *instance);
-			kreogl_object.transform = matrix_helper::get_model_matrix(transform, model_transform);
+			kreogl_object.transform = glm::get_model_matrix(transform, model_transform);
 			kreogl_object.color = toglm(colored_component.color);
 			kreogl_object.user_data[0] = float(entity);
 
@@ -831,7 +831,7 @@ namespace kengine::systems {
 					kreogl_element.color = toglm(element.color);
 					kreogl_element.user_data[0] = float(debug_entity);
 
-					kreogl_element.transform = glm::mat4{ 1.f };
+					kreogl_element.transform = ::glm::mat4{ 1.f };
 					switch (element.type) {
 						case data::debug_graphics::element_type::line:
 							kreogl_element.type = ::kreogl::debug_element::type::line;
@@ -844,7 +844,7 @@ namespace kengine::systems {
 							break;
 						case data::debug_graphics::element_type::sphere:
 							kreogl_element.type = ::kreogl::debug_element::type::sphere;
-							apply_debug_graphics_transform(kreogl_element.transform, transform, toglm(element.pos), glm::vec3(element.sphere.radius), element.relative_to);
+							apply_debug_graphics_transform(kreogl_element.transform, transform, toglm(element.pos), ::glm::vec3(element.sphere.radius), element.relative_to);
 							break;
 						default:
 							static_assert(magic_enum::enum_count<data::debug_graphics::element_type>() == 3); // Exhaustive switch
@@ -857,34 +857,34 @@ namespace kengine::systems {
 			}
 		}
 
-		void apply_debug_graphics_transform(glm::mat4 & matrix, const data::transform & transform, const glm::vec3 & pos, const glm::vec3 & size, data::debug_graphics::reference_space reference_space) noexcept {
+		void apply_debug_graphics_transform(::glm::mat4 & matrix, const data::transform & transform, const ::glm::vec3 & pos, const ::glm::vec3 & size, data::debug_graphics::reference_space reference_space) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			matrix = glm::translate(matrix, pos);
+			matrix = ::glm::translate(matrix, pos);
 			if (reference_space == data::debug_graphics::reference_space::object) {
-				matrix = glm::translate(matrix, toglm(transform.bounding_box.position));
-				matrix = glm::rotate(matrix, transform.yaw, { 0.f, 1.f, 0.f });
-				matrix = glm::rotate(matrix, transform.pitch, { 1.f, 0.f, 0.f });
-				matrix = glm::rotate(matrix, transform.roll, { 0.f, 0.f, 1.f });
+				matrix = ::glm::translate(matrix, toglm(transform.bounding_box.position));
+				matrix = ::glm::rotate(matrix, transform.yaw, { 0.f, 1.f, 0.f });
+				matrix = ::glm::rotate(matrix, transform.pitch, { 1.f, 0.f, 0.f });
+				matrix = ::glm::rotate(matrix, transform.roll, { 0.f, 0.f, 1.f });
 			}
-			matrix = glm::scale(matrix, size);
+			matrix = ::glm::scale(matrix, size);
 			if (reference_space == data::debug_graphics::reference_space::object)
-				matrix = glm::scale(matrix, toglm(transform.bounding_box.size));
+				matrix = ::glm::scale(matrix, toglm(transform.bounding_box.size));
 		}
 
-		glm::mat4 get_on_screen_matrix(const data::transform & transform, const putils::point3f & position, const putils::point3f & size, const data::on_screen & onScreen) noexcept {
+		::glm::mat4 get_on_screen_matrix(const data::transform & transform, const putils::point3f & position, const putils::point3f & size, const data::on_screen & onScreen) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			glm::mat4 model{ 1.f };
+			::glm::mat4 model{ 1.f };
 			// convert NDC to [0,1]
-			model = glm::translate(model, { -1.f, -1.f, 0.f });
-			const auto centre = 2.f * glm::vec3{ position.x, 1.f - position.y, position.z };
+			model = ::glm::translate(model, { -1.f, -1.f, 0.f });
+			const auto centre = 2.f * ::glm::vec3{ position.x, 1.f - position.y, position.z };
 
-			model = glm::translate(model, centre);
-			model = glm::scale(model, toglm(size));
-			model = glm::rotate(model, transform.yaw, { 0.f, 1.f, 0.f });
-			model = glm::rotate(model, transform.pitch, { 1.f, 0.f, 0.f });
-			model = glm::rotate(model, transform.roll, { 0.f, 0.f, 1.f });
+			model = ::glm::translate(model, centre);
+			model = ::glm::scale(model, toglm(size));
+			model = ::glm::rotate(model, transform.yaw, { 0.f, 1.f, 0.f });
+			model = ::glm::rotate(model, transform.pitch, { 1.f, 0.f, 0.f });
+			model = ::glm::rotate(model, transform.roll, { 0.f, 0.f, 1.f });
 			return model;
 		}
 
@@ -1046,7 +1046,7 @@ namespace kengine::systems {
 			return &position_in_pixel->x;
 		}
 
-		std::optional<glm::vec4> read_from_gbuffer(entt::entity window, const putils::point2ui & pixel, ::kreogl::gbuffer::texture texture) noexcept {
+		std::optional<::glm::vec4> read_from_gbuffer(entt::entity window, const putils::point2ui & pixel, ::kreogl::gbuffer::texture texture) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			static constexpr auto GBUFFER_TEXTURE_COMPONENTS = 4;
@@ -1085,7 +1085,7 @@ namespace kengine::systems {
 			const auto & gbuffer = viewport.get_gbuffer();
 			const auto gbuffer_size = viewport.get_resolution();
 
-			const auto pixel_in_gbuffer = glm::vec2(gbuffer_size) * toglm(viewport_info.viewport_percent);
+			const auto pixel_in_gbuffer = ::glm::vec2(gbuffer_size) * toglm(viewport_info.viewport_percent);
 			if (pixel_in_gbuffer.x >= float(gbuffer_size.x) || pixel_in_gbuffer.y > float(gbuffer_size.y) || pixel_in_gbuffer.y == 0) {
 				kengine_logf(r, verbose, "kreogl", "Pixel is out of [%u]'s gbuffer's bounds", camera_entity);
 				return std::nullopt;
