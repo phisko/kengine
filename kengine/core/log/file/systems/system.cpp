@@ -1,4 +1,4 @@
-#include "log_file.hpp"
+#include "system.hpp"
 
 // stl
 #include <fstream>
@@ -18,11 +18,17 @@
 // kengine adjustable
 #include "kengine/adjustable/data/adjustable.hpp"
 
-// kengine core
-#include "kengine/core/functions/log.hpp"
-#include "kengine/core/helpers/assert_helper.hpp"
-#include "kengine/core/helpers/log_helper.hpp"
-#include "kengine/core/helpers/profiling_helper.hpp"
+// kengine core/assert
+#include "kengine/core/assert/helpers/kengine_assert.hpp"
+
+// kengine core/log
+#include "kengine/core/log/data/severity_control.hpp"
+#include "kengine/core/log/functions/on_log.hpp"
+#include "kengine/core/log/helpers/kengine_log.hpp"
+#include "kengine/core/log/helpers/parse_command_line_severity.hpp"
+
+// kengine core/profiling
+#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 // kengine command_line
 #include "kengine/command_line/helpers/parse.hpp"
@@ -31,15 +37,19 @@
 #define KENGINE_LOG_FILE_LOCATION "kengine.log"
 #endif
 
-namespace kengine::systems {
-	struct log_file {
+namespace kengine::core::log::file {
+	static constexpr auto log_category = "core_log_file";
+
+	struct system {
 		std::ofstream file;
 		std::mutex mutex;
-		log_severity_control * severity_control = new log_severity_control; // Pointer to make sure it outlives log function component
 
-		log_file(entt::handle e) noexcept {
+		system(entt::handle e) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(*e.registry(), log, "log_file", "Initializing");
+
+			e.emplace<on_log>(putils_forward_to_this(log));
+
+			kengine_log(*e.registry(), log, log_category, "Initializing");
 
 			const auto & r = *e.registry();
 
@@ -52,22 +62,17 @@ namespace kengine::systems {
 				return;
 			}
 
-			*severity_control = log_helper::parse_command_line_severity(r);
+			auto & control = e.emplace<severity_control>(parse_command_line_severity(r));
 			e.emplace<adjustable::adjustable>() = {
 				"Log",
 				{
-					{ "File", &severity_control->global_severity },
+					{ "File", &control.global_severity },
 				}
 			};
-
-			e.emplace<functions::log>(putils_forward_to_this(log));
 		}
 
-		void log(const log_event & event) noexcept {
+		void log(const event & log_event) noexcept {
 			KENGINE_PROFILING_SCOPE;
-
-			if (!severity_control->passes(event))
-				return;
 
 			const std::lock_guard lock(mutex);
 
@@ -75,8 +80,8 @@ namespace kengine::systems {
 			if (!thread_name.empty())
 				file << '{' << thread_name << "}\t";
 
-			file << magic_enum::enum_name<log_severity>(event.severity) << "\t[" << event.category << "]\t"
-				 << event.message << std::endl;
+			file << magic_enum::enum_name<severity>(log_event.severity) << "\t[" << log_event.category << "]\t"
+				 << log_event.message << std::endl;
 		}
 
 		// Command-line arguments
@@ -85,10 +90,10 @@ namespace kengine::systems {
 		};
 	};
 
-	DEFINE_KENGINE_SYSTEM_CREATOR(log_file)
+	DEFINE_KENGINE_SYSTEM_CREATOR(system)
 }
 
-#define refltype kengine::systems::log_file::options
+#define refltype kengine::core::log::file::system::options
 putils_reflection_info {
 	putils_reflection_custom_class_name(log file);
 	putils_reflection_attributes(

@@ -1,3 +1,3 @@
-# [log_stdout](log_stdout.hpp)
+# [system](system.hpp)
 
-System that [logs](../../../core/functions/log.md) messages to the standard output.
+System that [logs](../../functions/on_log.md) messages to the standard output.

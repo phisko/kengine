@@ -7,7 +7,7 @@
 #include "kengine/system_creator/functions/create_system.hpp"
 
 // kengine helpers
-#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/meta/helpers/register_storage.hpp"
 
 #define DECLARE_KENGINE_SYSTEM_CREATOR(EXPORT_MACRO, system_name) \

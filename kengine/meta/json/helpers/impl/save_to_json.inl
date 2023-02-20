@@ -7,7 +7,7 @@
 #include "putils/reflection_helpers/json_helper.hpp"
 
 // kengine core
-#include "kengine/core/helpers/profiling_helper.hpp"
+#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 namespace kengine {
 	template<typename T>

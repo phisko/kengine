@@ -5,27 +5,25 @@
 #include <gtest/gtest.h>
 
 // kengine core
-#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/log/helpers/kengine_log.hpp"
 
-TEST(log_helper, log_helper) {
+TEST(log, kengine_log) {
 	entt::registry r;
 
-	kengine::log_helper::set_minimum_log_severity(r, kengine::log_severity::verbose);
-
 	struct event {
-		kengine::log_severity severity;
+		kengine::core::log::severity severity;
 		std::string category;
 		std::string message;
 	};
 	std::vector<event> output;
 
 	const auto e = r.create();
-	r.emplace<kengine::functions::log>(
-		e, [&](const kengine::log_event & log) {
+	r.emplace<kengine::core::log::on_log>(
+		e, [&](const kengine::core::log::event & event) {
 			output.push_back({
-				.severity = log.severity,
-				.category = log.category,
-				.message = log.message,
+				.severity = event.severity,
+				.category = event.category,
+				.message = event.message,
 			});
 		}
 	);
@@ -35,11 +33,11 @@ TEST(log_helper, log_helper) {
 
 	EXPECT_EQ(output.size(), 2);
 
-	EXPECT_EQ(output[0].severity, kengine::log_severity::verbose);
+	EXPECT_EQ(output[0].severity, kengine::core::log::severity::verbose);
 	EXPECT_EQ(output[0].category, "Category");
 	EXPECT_EQ(output[0].message, "Message");
 
-	EXPECT_EQ(output[1].severity, kengine::log_severity::warning);
+	EXPECT_EQ(output[1].severity, kengine::core::log::severity::warning);
 	EXPECT_EQ(output[1].category, "OtherCategory");
 	EXPECT_EQ(output[1].message, "OtherMessage");
 }

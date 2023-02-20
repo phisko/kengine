@@ -4,7 +4,7 @@
 #include <entt/entity/registry.hpp>
 
 // kengine core
-#include "kengine/core/helpers/log_helper.hpp"
+#include "kengine/core/log/helpers/kengine_log.hpp"
 
 namespace kengine {
 	template<typename T>

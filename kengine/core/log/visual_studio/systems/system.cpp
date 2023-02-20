@@ -1,4 +1,4 @@
-#include "log_visual_studio.hpp"
+#include "system.hpp"
 
 #ifdef _WIN32
 
@@ -23,47 +23,50 @@
 // kengine adjustable
 #include "kengine/adjustable/data/adjustable.hpp"
 
-// kengine core
-#include "kengine/core/functions/log.hpp"
-#include "kengine/core/helpers/log_helper.hpp"
-#include "kengine/core/helpers/profiling_helper.hpp"
+// kengine core/log
+#include "kengine/core/log/data/severity_control.hpp"
+#include "kengine/core/log/functions/on_log.hpp"
+#include "kengine/core/log/helpers/kengine_log.hpp"
+#include "kengine/core/log/helpers/parse_command_line_severity.hpp"
 
-namespace kengine::systems {
-	struct log_visual_studio {
-		log_severity_control severity_control;
+// kengine core/profiling
+#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
+
+namespace kengine::core::log::visual_studio {
+	static constexpr auto log_category = "core_log_visual_studio";
+
+	struct system {
 		std::mutex mutex;
 
-		log_visual_studio(entt::handle e) noexcept {
+		system(entt::handle e) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(*e.registry(), log, "log_visual_studio", "Initializing");
 
-			severity_control = log_helper::parse_command_line_severity(*e.registry());
+			e.emplace<on_log>(putils_forward_to_this(log));
+
+			kengine_log(*e.registry(), log, log_category, "Initializing");
+
+			auto & control = e.emplace<severity_control>(parse_command_line_severity(*e.registry()));
 			e.emplace<adjustable::adjustable>() = {
 				"Log",
 				{
-					{ "Visual Studio Console", &severity_control.global_severity },
+					{ "Visual Studio Console", &control.global_severity },
 				}
 			};
-
-			e.emplace<functions::log>(putils_forward_to_this(log));
 		}
 
-		void log(const log_event & event) noexcept {
+		void log(const event & log_event) noexcept {
 			KENGINE_PROFILING_SCOPE;
-
-			if (!severity_control.passes(event))
-				return;
 
 			putils::string<4096> s;
 
 			const auto & thread_name = putils::get_thread_name();
 			if (!thread_name.empty())
 				s += '{' + thread_name + "}\t";
-			s += magic_enum::enum_name<log_severity>(event.severity);
+			s += magic_enum::enum_name<severity>(log_event.severity);
 			s += "\t[";
-			s += event.category;
+			s += log_event.category;
 			s += "]\t";
-			s += event.message;
+			s += log_event.message;
 			s += '\n';
 
 			const std::lock_guard lock(mutex);
@@ -71,7 +74,7 @@ namespace kengine::systems {
 		}
 	};
 
-	DEFINE_KENGINE_SYSTEM_CREATOR(log_visual_studio)
+	DEFINE_KENGINE_SYSTEM_CREATOR(system)
 }
 
 #endif

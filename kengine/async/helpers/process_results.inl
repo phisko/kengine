@@ -3,9 +3,11 @@
 // stl
 #include <chrono>
 
-// kengine core
-#include "kengine/core/helpers/log_helper.hpp"
-#include "kengine/core/helpers/profiling_helper.hpp"
+// kengine core/log
+#include "kengine/core/log/helpers/kengine_log.hpp"
+
+// kengine core/profiling
+#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 // kengine async
 #include "kengine/async/data/result.hpp"

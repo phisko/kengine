@@ -15,8 +15,8 @@
 
 // kengine core
 #include "kengine/core/data/transform.hpp"
-#include "kengine/core/helpers/log_helper.hpp"
-#include "kengine/core/helpers/profiling_helper.hpp"
+#include "kengine/core/log/helpers/kengine_log.hpp"
+#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 // kengine model_instance
 #include "kengine/model_instance/data/model_data.hpp"

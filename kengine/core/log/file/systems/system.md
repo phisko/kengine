@@ -1,3 +1,3 @@
-# [log_file](log_file.hpp)
+# [system](system.hpp)
 
-System that [logs](../../../core/functions/log.md) messages to a file.
+System that [logs](../../functions/on_log.md) messages to a file.

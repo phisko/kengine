@@ -147,6 +147,14 @@ ImGui::End();
 See [CMake](#cmake) for instructions on how to enable each library.
 
 * [kengine_core](kengine/core/): components and helpers that are accessed by most (if not all) other libraries
+    * [kengine_core_assert](kengine/core/assert/): engine-level assertions
+    * [kengine_core_log](kengine/core/log/): generic logging support
+        * [kengine_core_log_file](kengine/core/log/file/): log to a file
+        * [kengine_core_log_imgui](kengine/core/log/imgui/): log to an ImGui window
+        * [kengine_core_log_standard_output](kengine/core/log/standard_output/): log stdout
+        * [kengine_core_log_visual_studio](kengine/core/log/visual_studio/): log to VS's output window
+    * [kengine_core_profiling](kengine/core/profiling/): profiling using [Tracy](https://github.com/wolfpld/tracy)
+    * [kengine_core_sort](kengine/core/sort/): entity sorting helpers
 * [kengine_adjustable](kengine/adjustable/): expose global values that the user may adjust
     * [kengine_adjustable_imgui](kengine/adjustable/imgui/): display adjustables in an ImGui window
 * [kengine_async](kengine/async/): run asynchronous tasks
@@ -157,11 +165,6 @@ See [CMake](#cmake) for instructions on how to enable each library.
     * [kengine_imgui_tool](kengine/imgui/tool/): enable/disable ImGui tools from the main menu bar
 * [kengine_input](kengine/input/): handle user input
 * [kengine_json_scene_loader](kengine/json_scene_loader/): load scenes from JSON files
-* [kengine_log](kengine/log/)
-    * [kengine_log_file](kengine/log/file/): output log to a file
-    * [kengine_log_imgui](kengine/log/imgui/): output log to an ImGui window
-    * [kengine_log_stdout](kengine/log/stdout/): output log to the standard output
-    * [kengine_log_visual_studio](kengine/log/visual_studio/): output log to VS's output window
 * [kengine_main_loop](kengine/main_loop/): run a game's main loop, handling delta time
 * [kengine_meta](kengine/meta/): meta components and reflection facilities
     * [kengine_meta_imgui](kengine/meta/imgui/): meta components for ImGui

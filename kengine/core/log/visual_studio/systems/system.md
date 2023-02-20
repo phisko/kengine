@@ -1,3 +1,3 @@
-# [log_visual_studio](log_visual_studio.hpp)
+# [system](system.hpp)
 
-System that [logs](../../../core/functions/log.md) messages to Visual Studio's Output window.
+System that [logs](../../functions/on_log.md) messages to Visual Studio's Output window.

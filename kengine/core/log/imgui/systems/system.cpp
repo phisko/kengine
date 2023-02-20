@@ -1,4 +1,4 @@
-#include "log_imgui.hpp"
+#include "system.hpp"
 
 // stl
 #include <mutex>
@@ -22,9 +22,14 @@
 
 // kengine core
 #include "kengine/core/data/name.hpp"
-#include "kengine/core/functions/log.hpp"
-#include "kengine/core/helpers/log_helper.hpp"
-#include "kengine/core/helpers/profiling_helper.hpp"
+
+// kengine core/log
+#include "kengine/core/log/functions/on_log.hpp"
+#include "kengine/core/log/helpers/kengine_log.hpp"
+#include "kengine/core/log/helpers/parse_command_line_severity.hpp"
+
+// kengine core/profiling
+#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 // kengine adjustable
 #include "kengine/adjustable/data/adjustable.hpp"
@@ -35,13 +40,13 @@
 // kengine main_loop
 #include "kengine/main_loop/functions/execute.hpp"
 
-namespace kengine::systems {
-	struct log_imgui {
+namespace kengine::core::log::imgui {
+	struct system {
 		const entt::registry & r;
 		bool * enabled;
 
 		struct internal_log_event {
-			kengine::log_severity severity;
+			severity severity;
 			std::string thread;
 			std::string category;
 			std::string message;
@@ -53,25 +58,27 @@ namespace kengine::systems {
 		std::vector<internal_log_event> filtered_events;
 
 		struct {
-			bool severities[magic_enum::enum_count<kengine::log_severity>()];
-			std::unordered_map<std::string, log_severity> category_severities;
+			bool severities[magic_enum::enum_count<severity>()];
+			std::unordered_map<std::string, severity> category_severities;
 			char category_search[4096] = "";
 			char thread_search[4096] = "";
 		} filters;
+		severity_control * control = nullptr;
 
-		log_imgui(entt::handle e) noexcept
+		system(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
+
+			e.emplace<on_log>(putils_forward_to_this(log));
+
 			kengine_log(r, log, "log_imgui", "Initializing");
 
 			std::fill(std::begin(filters.severities), std::end(filters.severities), true);
 
-			auto command_line_severity = log_helper::parse_command_line_severity(r);
-			for (int i = 0; i < (int)command_line_severity.global_severity; ++i)
+			control = &e.emplace<severity_control>(parse_command_line_severity(r));
+			for (int i = 0; i < (int)control->global_severity; ++i)
 				filters.severities[i] = false;
-			filters.category_severities = std::move(command_line_severity.category_severities);
-
-			e.emplace<functions::log>(putils_forward_to_this(log));
+			filters.category_severities = control->category_severities;
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 
 			e.emplace<data::name>("Log");
@@ -86,20 +93,20 @@ namespace kengine::systems {
 			};
 		}
 
-		void log(const kengine::log_event & event) noexcept {
+		void log(const event & log_event) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			internal_log_event e{
-				event.severity,
+			internal_log_event internal_event{
+				log_event.severity,
 				putils::get_thread_name(),
-				event.category,
-				event.message
+				log_event.category,
+				log_event.message
 			};
 
-			if (matches_filters(e)) {
+			if (matches_filters(internal_event)) {
 				const std::lock_guard lock(mutex);
-				filtered_events.push_back(e);
-				events.emplace_back(std::move(e));
+				filtered_events.push_back(internal_event);
+				events.emplace_back(std::move(internal_event));
 				if (events.size() >= max_events)
 					events.pop_front();
 			}
@@ -126,15 +133,22 @@ namespace kengine::systems {
 			kengine_log(r, very_verbose, "log_imgui", "Drawing filters");
 
 			bool changed = false;
-			for (const auto & [severity, name] : magic_enum::enum_entries<log_severity>())
-				if (ImGui::Checkbox(putils::string<32>(name).c_str(), &filters.severities[(int)severity])) {
-					kengine_logf(r, verbose, "log_imgui", "Filter for %s changed to %d", putils::string<32>(name).c_str(), filters.severities[(int)severity]);
+			for (const auto & [log_level, name] : magic_enum::enum_entries<severity>())
+				if (ImGui::Checkbox(putils::string<32>(name).c_str(), &filters.severities[(int)log_level])) {
+					kengine_logf(r, verbose, "log_imgui", "Filter for %s changed to %d", putils::string<32>(name).c_str(), filters.severities[(int)log_level]);
 					changed = true;
+
+					for (int i = 0; i < putils::lengthof(filters.severities); ++i)
+						if (filters.severities[i]) {
+							control->global_severity = severity(i);
+							break;
+						}
 				}
 
 			putils::reflection::imgui_edit("Categories", filters.category_severities);
+			control->category_severities.clear();
 			for (const auto & [category, severity] : filters.category_severities)
-				log_helper::set_minimum_log_severity(r, severity);
+				control->category_severities.emplace(category, severity);
 
 			if (ImGui::InputText("Category", filters.category_search, putils::lengthof(filters.category_search))) {
 				kengine_logf(r, verbose, "log_imgui", "Category filter changed to '%s'", filters.category_search);
@@ -223,5 +237,5 @@ namespace kengine::systems {
 		}
 	};
 
-	DEFINE_KENGINE_SYSTEM_CREATOR(log_imgui)
+	DEFINE_KENGINE_SYSTEM_CREATOR(system)
 }

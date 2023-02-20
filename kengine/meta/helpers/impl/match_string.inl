@@ -13,7 +13,7 @@
 #include "putils/reflection_helpers/imgui_helper.hpp"
 
 // kengine core
-#include "kengine/core/helpers/profiling_helper.hpp"
+#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 namespace kengine {
 	namespace impl {

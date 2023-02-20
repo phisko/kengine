@@ -15,9 +15,9 @@
 // kengine core
 #include "kengine/core/data/name.hpp"
 #include "kengine/core/data/selected.hpp"
-#include "kengine/core/helpers/log_helper.hpp"
-#include "kengine/core/helpers/profiling_helper.hpp"
-#include "kengine/core/helpers/sort_helper.hpp"
+#include "kengine/core/log/helpers/kengine_log.hpp"
+#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
+#include "kengine/core/sort/helpers/get_name_sorted_entities.hpp"
 
 // kengine imgui/imgui_tool
 #include "kengine/imgui/tool/data/imgui_tool.hpp"
@@ -121,7 +121,7 @@ namespace kengine::systems {
 					result.display_text += "ID";
 				}
 				else {
-					const auto types = sort_helper::get_name_sorted_entities<const meta::has, const meta::match_string>(r);
+					const auto types = core::sort::get_name_sorted_entities<const meta::has, const meta::match_string>(r);
 
 					for (const auto & [type_entity, type, has, match_func] : types) {
 						if (!has->call({ r, e }) || !match_func->call({ r, e }, name_search))

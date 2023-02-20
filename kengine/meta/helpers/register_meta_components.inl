@@ -10,7 +10,7 @@
 #include "putils/thread_name.hpp"
 
 // kengine core
-#include "kengine/core/helpers/profiling_helper.hpp"
+#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 // kengine meta
 #include "kengine/meta/helpers/impl/count.hpp"
