@@ -27,7 +27,8 @@
 #include "kengine/async/helpers/process_results.hpp"
 
 // kengine glm
-#include "kengine/glm/helpers/matrix_helper.hpp"
+#include "kengine/glm/helpers/convert_to_referencial.hpp"
+#include "kengine/glm/helpers/get_model_matrix.hpp"
 
 // kengine model_instance
 #include "kengine/model_instance/data/model.hpp"
@@ -495,11 +496,11 @@ namespace kengine::systems::recast_impl {
 				);
 				static const dtQueryFilter filter;
 
-				const auto model_to_world = matrix_helper::get_model_matrix(environment.get<data::transform>(), model_transform);
-				const auto world_to_model = glm::inverse(model_to_world);
+				const auto model_to_world = glm::get_model_matrix(environment.get<data::transform>(), model_transform);
+				const auto world_to_model = ::glm::inverse(model_to_world);
 
-				const auto start = matrix_helper::convert_to_referencial(start_world_space, world_to_model);
-				const auto end = matrix_helper::convert_to_referencial(end_world_space, world_to_model);
+				const auto start = glm::convert_to_referencial(start_world_space, world_to_model);
+				const auto end = glm::convert_to_referencial(end_world_space, world_to_model);
 
 				functions::get_path_impl::path ret;
 
@@ -542,7 +543,7 @@ namespace kengine::systems::recast_impl {
 
 				ret.resize(straight_path_count);
 				for (auto & step : ret)
-					step = matrix_helper::convert_to_referencial(step, model_to_world);
+					step = glm::convert_to_referencial(step, model_to_world);
 
 				return ret;
 			};

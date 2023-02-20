@@ -17,6 +17,6 @@ namespace kengine::skeleton_helper {
 	};
 
 	KENGINE_SKELETON_EXPORT bone_indices get_bone_index(const entt::registry & r, const char * bone, const data::model_skeleton & model) noexcept;
-	KENGINE_SKELETON_EXPORT glm::mat4 get_bone_matrix(const entt::registry & r, const char * bone, const data::skeleton & skeleton, const data::model_skeleton & model) noexcept;
-	KENGINE_SKELETON_EXPORT void set_bone_matrix(const entt::registry & r, const char * bone, const glm::mat4 & m, data::skeleton & skeleton, const data::model_skeleton & model) noexcept;
+	KENGINE_SKELETON_EXPORT ::glm::mat4 get_bone_matrix(const entt::registry & r, const char * bone, const data::skeleton & skeleton, const data::model_skeleton & model) noexcept;
+	KENGINE_SKELETON_EXPORT void set_bone_matrix(const entt::registry & r, const char * bone, const ::glm::mat4 & m, data::skeleton & skeleton, const data::model_skeleton & model) noexcept;
 }
