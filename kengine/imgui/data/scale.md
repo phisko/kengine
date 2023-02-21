@@ -1,4 +1,4 @@
-# [imgui_scale](imgui_scale.hpp)
+# [scale](scale.hpp)
 
 Component that scales all ImGui elements.
 
@@ -8,8 +8,8 @@ Graphics systems sometimes offer an [adjustable](../../adjustable/data/adjustabl
 
 ## Members
 
-### scale
+### modifier
 
 ```cpp
-float scale = 1.f;
+float modifier = 1.f;
 ```

@@ -19,7 +19,7 @@
 #include "kengine/async/data/task.hpp"
 
 // kengine imgui/imgui_tool
-#include "kengine/imgui/tool/data/imgui_tool.hpp"
+#include "kengine/imgui/tool/data/tool.hpp"
 
 // kengine main_loop
 #include "kengine/main_loop/functions/execute.hpp"
@@ -35,7 +35,7 @@ namespace kengine::async::imgui {
 			kengine_log(r, log, "async_imgui", "Initializing");
 
 			e.emplace<core::name>("Async tasks");
-			auto & tool = e.emplace<data::imgui_tool>();
+			auto & tool = e.emplace<kengine::imgui::tool::tool>();
 			enabled = &tool.enabled;
 
 			e.emplace<functions::execute>(putils_forward_to_this(execute));

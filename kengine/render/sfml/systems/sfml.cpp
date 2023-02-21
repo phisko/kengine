@@ -29,8 +29,8 @@
 #include "kengine/adjustable/data/adjustable.hpp"
 
 // kengine imgui
-#include "kengine/imgui/data/imgui_context.hpp"
-#include "kengine/imgui/data/imgui_scale.hpp"
+#include "kengine/imgui/data/context.hpp"
+#include "kengine/imgui/data/scale.hpp"
 
 // kengine input
 #include "kengine/input/data/input_buffer.hpp"
@@ -103,11 +103,11 @@ namespace kengine::systems {
 			kengine_log(r, log, "sfml", "Initializing");
 
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
-			auto & scale = e.emplace<data::imgui_scale>();
+			auto & scale = e.emplace<imgui::scale>();
 			e.emplace<adjustable::adjustable>() = {
 				"ImGui",
 				{
-					{ "scale", &scale.scale },
+					{ "scale", &scale.modifier },
 				}
 			};
 
@@ -505,7 +505,7 @@ namespace kengine::systems {
 
 			ImGui::SFML::Init(*sf_window.window);
 
-			r.emplace<data::imgui_context>(e, ImGui::GetCurrentContext());
+			r.emplace<imgui::context>(e, ImGui::GetCurrentContext());
 #if 0
 			auto & io = ImGui::GetIO();
 			io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;

@@ -1,10 +1,10 @@
 #pragma once
 
-namespace kengine::data {
+namespace kengine::imgui {
 	//! putils reflect all
-	struct imgui_context {
-		void * context;
+	struct context {
+		void * ptr;
 	};
 }
 
-#include "imgui_context.rpp"
+#include "context.rpp"

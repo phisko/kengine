@@ -1,10 +1,10 @@
 #pragma once
 
-namespace kengine::data {
+namespace kengine::imgui::tool {
 	//! putils reflect all
-	struct imgui_tool {
+	struct tool {
 		bool enabled = false;
 	};
 }
 
-#include "imgui_tool.rpp"
+#include "tool.rpp"

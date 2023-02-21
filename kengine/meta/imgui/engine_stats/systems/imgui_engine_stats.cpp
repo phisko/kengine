@@ -24,7 +24,7 @@
 #include "kengine/core/sort/helpers/get_name_sorted_entities.hpp"
 
 // kengine imgui/imgui_tool
-#include "kengine/imgui/tool/data/imgui_tool.hpp"
+#include "kengine/imgui/tool/data/tool.hpp"
 
 // kengine main_loop
 #include "kengine/main_loop/functions/execute.hpp"
@@ -50,7 +50,7 @@ namespace kengine::systems {
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 
 			e.emplace<core::name>("Entities/Stats");
-			auto & tool = e.emplace<data::imgui_tool>();
+			auto & tool = e.emplace<imgui::tool::tool>();
 			enabled = &tool.enabled;
 		}
 
