@@ -1,4 +1,4 @@
-#include "input.hpp"
+#include "system.hpp"
 
 // entt
 #include <entt/entity/handle.hpp>
@@ -13,59 +13,61 @@
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 // kengine input
-#include "kengine/input/data/input.hpp"
-#include "kengine/input/data/input_buffer.hpp"
+#include "kengine/input/data/buffer.hpp"
+#include "kengine/input/data/handler.hpp"
 
 // kengine main_loop
 #include "kengine/main_loop/functions/execute.hpp"
 
-namespace kengine::systems {
-	struct input {
-		entt::registry & r;
-		data::input_buffer * buffer;
+namespace kengine::input {
+	struct system {
+		static constexpr auto log_category = "input";
 
-		input(entt::handle e) noexcept
+		entt::registry & r;
+		input::buffer * buffer;
+
+		system(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "input", "Initializing");
+			kengine_log(r, log, log_category, "Initializing");
 
-			buffer = &e.emplace<data::input_buffer>();
+			buffer = &e.emplace<input::buffer>();
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 		}
 
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, very_verbose, "input", "Executing");
+			kengine_log(r, very_verbose, log_category, "Executing");
 
-			for (const auto & [e, comp] : r.view<data::input>().each()) {
-				kengine_logf(r, very_verbose, "input", "Forwarding buffered events to [%u]", e);
+			for (const auto & [e, comp] : r.view<handler>().each()) {
+				kengine_logf(r, very_verbose, log_category, "Forwarding buffered events to [%u]", e);
 
 				for (const auto & event : buffer->keys)
 					if (comp.on_key != nullptr) {
-						kengine_logf(r, very_verbose, "input", "Forwarding key event %s to [%u]", putils::reflection::to_json(event).dump().c_str(), e);
+						kengine_logf(r, very_verbose, log_category, "Forwarding key event %s to [%u]", putils::reflection::to_json(event).dump().c_str(), e);
 						comp.on_key({ r, event.window }, event.key, event.pressed);
 					}
 
 				if (comp.on_mouse_button != nullptr)
 					for (const auto & event : buffer->clicks) {
-						kengine_logf(r, very_verbose, "input", "Forwarding mouse button event %s to [%u]", putils::reflection::to_json(event).dump().c_str(), e);
+						kengine_logf(r, very_verbose, log_category, "Forwarding mouse button event %s to [%u]", putils::reflection::to_json(event).dump().c_str(), e);
 						comp.on_mouse_button({ r, event.window }, event.button, event.pos, event.pressed);
 					}
 
 				if (comp.on_mouse_move != nullptr)
 					for (const auto & event : buffer->moves) {
-						kengine_logf(r, very_verbose, "input", "Forwarding mouse move event %s to [%u]", putils::reflection::to_json(event).dump().c_str(), e);
+						kengine_logf(r, very_verbose, log_category, "Forwarding mouse move event %s to [%u]", putils::reflection::to_json(event).dump().c_str(), e);
 						comp.on_mouse_move({ r, event.window }, event.pos, event.rel);
 					}
 
 				if (comp.on_scroll != nullptr)
 					for (const auto & event : buffer->scrolls) {
-						kengine_logf(r, very_verbose, "input", "Forwarding scroll event %s to [%u]", putils::reflection::to_json(event).dump().c_str(), e);
+						kengine_logf(r, very_verbose, log_category, "Forwarding scroll event %s to [%u]", putils::reflection::to_json(event).dump().c_str(), e);
 						comp.on_scroll({ r, event.window }, event.xoffset, event.yoffset, event.pos);
 					}
 			}
 
-			kengine_log(r, very_verbose, "input", "Clearing buffered events");
+			kengine_log(r, very_verbose, log_category, "Clearing buffered events");
 			buffer->keys.clear();
 			buffer->clicks.clear();
 			buffer->moves.clear();
@@ -73,5 +75,5 @@ namespace kengine::systems {
 		}
 	};
 
-	DEFINE_KENGINE_SYSTEM_CREATOR(input)
+	DEFINE_KENGINE_SYSTEM_CREATOR(system)
 }

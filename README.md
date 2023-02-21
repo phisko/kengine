@@ -78,7 +78,7 @@ Data components hold data about their entity.
 Data components are what first comes to mind when thinking of a component, such as a [transform](kengine/core/data/transform.md) or a [name](kengine/core/data/name.md).
 
 Data components can sometimes hold functions:
-* [input](kengine/input/data/input.md) lets an entity hold callbacks to be called whenever an input event occurs
+* [input::handler](kengine/input/data/handler.md) lets an entity hold callbacks to be called whenever an input event occurs
 * [collision](kengine/physics/collision/data/collision.md) lets an entity be notified when it collides with another
 
 ### Function components

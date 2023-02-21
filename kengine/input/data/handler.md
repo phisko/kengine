@@ -1,4 +1,4 @@
-# [input](input.hpp)
+# [handler](handler.hpp)
 
 Component that receives input events.
 

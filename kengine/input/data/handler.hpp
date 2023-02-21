@@ -11,10 +11,10 @@
 #include "putils/function.hpp"
 #include "putils/point.hpp"
 
-namespace kengine::data {
+namespace kengine::input {
 	//! putils reflect all
 	//! used_types: [putils::point2f]
-	struct input {
+	struct handler {
 		template<typename T>
 		using function = putils::function<T, KENGINE_INPUT_FUNCTION_SIZE>;
 
@@ -25,4 +25,4 @@ namespace kengine::data {
 	};
 }
 
-#include "input.rpp"
+#include "handler.rpp"

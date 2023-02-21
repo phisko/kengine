@@ -9,7 +9,7 @@
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 // kengine input
-#include "kengine/input/data/input.hpp"
+#include "kengine/input/data/handler.hpp"
 
 // kengine render
 #include "kengine/render/functions/get_entity_in_pixel.hpp"
@@ -23,7 +23,7 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(*e.registry(), log, "on_click", "Initializing");
 
-			e.emplace<data::input>().on_mouse_button = on_mouse_button;
+			e.emplace<input::handler>().on_mouse_button = on_mouse_button;
 		}
 
 		static void on_mouse_button(entt::handle window, int button, const putils::point2f & coords, bool pressed) noexcept {

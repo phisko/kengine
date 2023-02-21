@@ -1,5 +1,5 @@
-# [input](input.hpp)
+# [system](system.hpp)
 
-System that reads the commands stored in an [input_buffer](../data/input_buffer.md) and forwards them to all entities with [input components](../data/input.md).
+System that reads the commands stored in an [buffer](../data/buffer.md) and forwards them to all entities with [input handlers](../data/handler.md).
 
-Graphics systems are responsible for filling the `input_buffer` with events.
+Graphics systems are responsible for filling the `buffer` with events.

@@ -13,10 +13,10 @@
 // putils
 #include "putils/point.hpp"
 
-namespace kengine::data {
+namespace kengine::input {
 	//! putils reflect all
 	//! used_types: [refltype::key_event, refltype::click_event, refltype::mouse_move_event, refltype::mouse_scroll_event]
-	struct input_buffer {
+	struct buffer {
 		//! putils reflect all
 		struct key_event {
 			entt::entity window;
@@ -56,4 +56,4 @@ namespace kengine::data {
 	};
 }
 
-#include "input_buffer.rpp"
+#include "buffer.rpp"

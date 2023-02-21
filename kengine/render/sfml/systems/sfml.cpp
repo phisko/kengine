@@ -33,7 +33,7 @@
 #include "kengine/imgui/data/scale.hpp"
 
 // kengine input
-#include "kengine/input/data/input_buffer.hpp"
+#include "kengine/input/data/buffer.hpp"
 
 // kengine main_loop
 #include "kengine/main_loop/functions/execute.hpp"
@@ -89,7 +89,7 @@ namespace kengine::systems {
 		putils::vector<entt::scoped_connection, 2> connections;
 
 		sf::Clock delta_clock;
-		data::input_buffer * input_buffer = nullptr;
+		input::buffer * input_buffer = nullptr;
 
 		struct processed_window {};
 		kengine::new_entity_processor<processed_window, data::window> window_processor{ r, putils_forward_to_this(create_window) };
@@ -132,7 +132,7 @@ namespace kengine::systems {
 
 			if (input_buffer == nullptr) {
 				kengine_log(r, verbose, "sfml", "Finding input buffer");
-				for (const auto & [e, buffer] : r.view<data::input_buffer>().each()) {
+				for (const auto & [e, buffer] : r.view<input::buffer>().each()) {
 					input_buffer = &buffer;
 					break;
 				}
@@ -203,7 +203,7 @@ namespace kengine::systems {
 					if (ImGui::GetIO().WantCaptureKeyboard)
 						break;
 
-					input_buffer->keys.push_back(data::input_buffer::key_event{
+					input_buffer->keys.push_back(input::buffer::key_event{
 						.window = window,
 						.key = e.key.code,
 						.pressed = e.type == sf::Event::KeyPressed,
@@ -218,7 +218,7 @@ namespace kengine::systems {
 					const putils::point2f rel = pos - previous_mouse_pos;
 					previous_mouse_pos = pos;
 
-					input_buffer->moves.push_back(data::input_buffer::mouse_move_event{
+					input_buffer->moves.push_back(input::buffer::mouse_move_event{
 						.window = window,
 						.pos = pos,
 						.rel = rel,
@@ -230,7 +230,7 @@ namespace kengine::systems {
 					if (ImGui::GetIO().WantCaptureMouse)
 						break;
 
-					input_buffer->clicks.push_back(data::input_buffer::click_event{
+					input_buffer->clicks.push_back(input::buffer::click_event{
 						.window = window,
 						.pos = { (float)e.mouseButton.x, (float)e.mouseButton.y },
 						.button = e.mouseButton.button,
@@ -242,7 +242,7 @@ namespace kengine::systems {
 					if (ImGui::GetIO().WantCaptureMouse)
 						return;
 
-					input_buffer->scrolls.push_back(data::input_buffer::mouse_scroll_event{
+					input_buffer->scrolls.push_back(input::buffer::mouse_scroll_event{
 						.window = window,
 						.xoffset = 0,
 						.yoffset = e.mouseWheelScroll.delta,

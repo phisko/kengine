@@ -29,12 +29,12 @@ This piece of code is very similar to the behavior of the [on_click system](../o
 
 ```cpp
 const auto e = r.create();
-data::input input;
+input::handler input;
 input.on_mouse_button = [](entt::entity window, int button, const putils::point2f & pixel, bool pressed) {
     for (const auto & [e, get_entity] : r.view<functions::get_entity_in_pixel>().each()) {
         const auto id = get_entity(window, pixel);
         std::cout << id << std::endl;
     }
 };
-r.emplace<data::input>(e, std::move(input));
+r.emplace<input::handler>(e, std::move(input));
 ```
