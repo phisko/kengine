@@ -5,7 +5,7 @@
 
 namespace kengine::core::assert {
 	using on_assert_failed_signature = bool (const char * file, int line, const std::string & expr);
-	struct on_assert_failed : functions::base_function<on_assert_failed_signature> {};
+	struct on_assert_failed : base_function<on_assert_failed_signature> {};
 }
 
 #define refltype kengine::core::assert::on_assert_failed

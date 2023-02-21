@@ -5,7 +5,7 @@
 
 namespace kengine::meta {
 	using edit_imgui_signature = void(entt::handle);
-	struct edit_imgui : functions::base_function<edit_imgui_signature> {};
+	struct edit_imgui : base_function<edit_imgui_signature> {};
 }
 
 #define refltype kengine::meta::edit_imgui

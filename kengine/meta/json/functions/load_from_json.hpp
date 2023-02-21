@@ -8,7 +8,7 @@
 
 namespace kengine::meta {
 	using load_from_json_signature = void(const nlohmann::json &, entt::handle);
-	struct load_from_json : functions::base_function<load_from_json_signature> {};
+	struct load_from_json : base_function<load_from_json_signature> {};
 }
 
 #define refltype kengine::meta::load_from_json

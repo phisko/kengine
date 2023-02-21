@@ -5,7 +5,7 @@
 
 namespace kengine::meta {
 	using match_string_signature = bool(entt::const_handle, const char *);
-	struct match_string : functions::base_function<match_string_signature> {};
+	struct match_string : base_function<match_string_signature> {};
 }
 
 #define refltype kengine::meta::match_string

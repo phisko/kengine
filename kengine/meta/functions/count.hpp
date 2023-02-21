@@ -8,7 +8,7 @@
 
 namespace kengine::meta {
 	using count_signature = size_t(entt::registry &);
-	struct count : functions::base_function<count_signature> {};
+	struct count : base_function<count_signature> {};
 }
 
 #define refltype kengine::meta::count

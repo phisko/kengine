@@ -6,10 +6,10 @@
 namespace kengine {
 	namespace meta {
 		using for_each_entity_signature = void(entt::registry & r, const entity_iterator_func & func);
-		struct for_each_entity : functions::base_function<for_each_entity_signature> {};
+		struct for_each_entity : base_function<for_each_entity_signature> {};
 
 		using for_each_entity_without_signature = void(entt::registry & r, const entity_iterator_func & func);
-		struct for_each_entity_without : functions::base_function<for_each_entity_without_signature> {};
+		struct for_each_entity_without : base_function<for_each_entity_without_signature> {};
 	}
 }
 
