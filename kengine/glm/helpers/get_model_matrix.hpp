@@ -6,10 +6,9 @@
 // putils
 #include "putils/point.hpp"
 
-namespace kengine::data {
-	struct transform;
-}
+// kengine
+#include "kengine/core/data/transform.hpp"
 
 namespace kengine::glm {
-	KENGINE_GLM_EXPORT ::glm::mat4 get_model_matrix(const data::transform & transform, const data::transform * model_transform = nullptr) noexcept;
+	KENGINE_GLM_EXPORT ::glm::mat4 get_model_matrix(const core::transform & transform, const core::transform * model_transform = nullptr) noexcept;
 }

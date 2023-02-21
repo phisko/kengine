@@ -36,7 +36,7 @@ namespace kengine::data {
 
 			shape_type shape;
 			string bone_name;
-			data::transform transform;
+			core::transform transform;
 		};
 
 		std::vector<collider> colliders;

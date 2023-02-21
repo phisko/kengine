@@ -3,7 +3,7 @@
 // reflection
 #include "putils/reflection.hpp"
 
-namespace kengine::data {
+namespace kengine::core {
 	//! putils reflect all
 	struct selected {};
 }

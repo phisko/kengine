@@ -68,7 +68,7 @@ namespace kengine::systems::recast_impl {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, very_verbose, "recast", "Creating new agents");
 
-			for (auto [e, pathfinding, transform] : r.view<data::pathfinding, data::transform>(entt::exclude<data::recast_agent>).each()) {
+			for (auto [e, pathfinding, transform] : r.view<data::pathfinding, core::transform>(entt::exclude<data::recast_agent>).each()) {
 				if (pathfinding.environment == entt::null) {
 					kengine_logf(r, very_verbose, "recast", "Entity [%u] has null environment", e);
 					continue;
@@ -98,8 +98,8 @@ namespace kengine::systems::recast_impl {
 
 			environment_info ret;
 
-			const auto model_transform = instance_helper::try_get_model<data::transform>(environment);
-			const auto & environment_transform = environment.get<data::transform>();
+			const auto model_transform = instance_helper::try_get_model<core::transform>(environment);
+			const auto & environment_transform = environment.get<core::transform>();
 
 			ret.environment_scale = environment_transform.bounding_box.size;
 			if (model_transform)
@@ -113,7 +113,7 @@ namespace kengine::systems::recast_impl {
 			putils::rect3f object_in_nav_mesh;
 			float max_speed;
 		};
-		static object_info get_object_info(const environment_info & environment, const data::transform & transform, const data::pathfinding & pathfinding) noexcept {
+		static object_info get_object_info(const environment_info & environment, const core::transform & transform, const data::pathfinding & pathfinding) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			object_info ret;
@@ -204,7 +204,7 @@ namespace kengine::systems::recast_impl {
 					old_crowd->crowd->removeAgent(agent.index);
 				}
 
-				const auto object_info = get_object_info(get_environment_info({ r, pathfinding.environment }), r.get<data::transform>(e), pathfinding);
+				const auto object_info = get_object_info(get_environment_info({ r, pathfinding.environment }), r.get<core::transform>(e), pathfinding);
 				attach_agent_component({ r, e }, object_info, *new_crowd, pathfinding.environment);
 			}
 		}
@@ -238,7 +238,7 @@ namespace kengine::systems::recast_impl {
 			for (int i = 0; i < nb_agents; ++i) {
 				const auto agent = active_agents[i];
 				const auto e = entt::entity(intptr_t(agent->params.userData));
-				const auto & [transform, pathfinding] = r.get<data::transform, data::pathfinding>(e);
+				const auto & [transform, pathfinding] = r.get<core::transform, data::pathfinding>(e);
 				write_to_agent({ r, e }, transform, pathfinding, environment_info, nav_mesh, crowd);
 			}
 
@@ -248,19 +248,19 @@ namespace kengine::systems::recast_impl {
 			for (int i = 0; i < nb_agents; ++i) {
 				const auto agent = active_agents[i];
 				const auto e = entt::entity(intptr_t(agent->params.userData));
-				const auto & [transform, physics] = r.get<data::transform, data::physics>(e);
+				const auto & [transform, physics] = r.get<core::transform, data::physics>(e);
 				read_from_agent(transform, physics, *agent, environment_info);
 			}
 		}
 
-		static void read_from_agent(data::transform & transform, data::physics & physics, const dtCrowdAgent & agent, const environment_info & environment_info) noexcept {
+		static void read_from_agent(core::transform & transform, data::physics & physics, const dtCrowdAgent & agent, const environment_info & environment_info) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			physics.movement = environment_info.environment_scale * putils::point3f{ agent.vel };
 			transform.bounding_box.position = glm::convert_to_referencial(agent.npos, environment_info.model_to_world);
 		}
 
-		static void write_to_agent(entt::handle e, const data::transform & transform, const data::pathfinding & pathfinding, const environment_info & environment_info, const data::recast_nav_mesh & nav_mesh, const data::recast_crowd & crowd) noexcept {
+		static void write_to_agent(entt::handle e, const core::transform & transform, const data::pathfinding & pathfinding, const environment_info & environment_info, const data::recast_nav_mesh & nav_mesh, const data::recast_crowd & crowd) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_logf(*e.registry(), very_verbose, "recast", "Writing to agent [%u]", e.entity());
 

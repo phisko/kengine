@@ -49,7 +49,7 @@ namespace kengine::systems {
 
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 
-			e.emplace<data::name>("Entities/Stats");
+			e.emplace<core::name>("Entities/Stats");
 			auto & tool = e.emplace<data::imgui_tool>();
 			enabled = &tool.enabled;
 		}
@@ -145,7 +145,7 @@ namespace kengine::systems {
 						for (const auto id : ret.components) {
 							if (!first)
 								ret.name += " + ";
-							ret.name += r.get<data::name>(id).name;
+							ret.name += r.get<core::name>(id).name;
 							first = false;
 						}
 
@@ -191,7 +191,7 @@ namespace kengine::systems {
 				for (const auto comp : collection.components) {
 					const auto & has = r.get<meta::has>(comp);
 					if (!has({ r, e })) {
-						kengine_logf(r, very_verbose, "imgui_engine_stats", "Discarding entity [%u] because it doesn't have %s", e, r.get<data::name>(comp).name.c_str());
+						kengine_logf(r, very_verbose, "imgui_engine_stats", "Discarding entity [%u] because it doesn't have %s", e, r.get<core::name>(comp).name.c_str());
 						good = false;
 						break;
 					}
@@ -221,7 +221,7 @@ namespace kengine::systems {
 			for (const auto & collection : collections) {
 				nlohmann::json collection_json;
 				for (const auto comp : collection.components) {
-					const auto & name = r.get<data::name>(comp);
+					const auto & name = r.get<core::name>(comp);
 					collection_json.push_back(name.name.c_str());
 				}
 				file_json.push_back(collection_json);
@@ -252,7 +252,7 @@ namespace kengine::systems {
 					collection.name += name_json;
 
 					bool found = false;
-					for (const auto & [e, name, has] : r.view<data::name, meta::has>().each())
+					for (const auto & [e, name, has] : r.view<core::name, meta::has>().each())
 						if (name.name.c_str() == name_json) {
 							collection.components.push_back(e);
 							found = true;
@@ -277,7 +277,7 @@ namespace kengine::systems {
 
 			for (size_t i = 0; i < collection.missing_components.size(); ++i) {
 				const auto & comp_name = collection.missing_components[i];
-				for (const auto & [e, name] : r.view<data::name>().each())
+				for (const auto & [e, name] : r.view<core::name>().each())
 					if (comp_name == name.name) {
 						kengine_logf(r, log, "imgui_engine_stats", "Found type entity for %s", comp_name.c_str());
 						collection.components.push_back(e);

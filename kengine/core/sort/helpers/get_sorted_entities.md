@@ -19,11 +19,11 @@ If `MaxCount` is provided, the function returns a fixed-size `putils::vector` in
 #### Example
 
 ```cpp
-const auto sorted = core::sort::get_sorted_entities<64, data::name, data::transform>(
+const auto sorted = core::sort::get_sorted_entities<64, core::name, core::transform>(
     r,
     [](const auto & lhs, const auto & rhs) {
-        // lhs and rhs are std::tuple<Entity, data::name *, data::transform *>;
-        // std::get<1> returns a data::name *
+        // lhs and rhs are std::tuple<Entity, core::name *, core::transform *>;
+        // std::get<1> returns a core::name *
         return strcmp(std::get<1>(lhs)->name, std::get<1>(rhs)->name) < 0;
     }
 );

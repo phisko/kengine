@@ -34,7 +34,7 @@ namespace kengine::async::imgui {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, log, "async_imgui", "Initializing");
 
-			e.emplace<data::name>("Async tasks");
+			e.emplace<core::name>("Async tasks");
 			auto & tool = e.emplace<data::imgui_tool>();
 			enabled = &tool.enabled;
 

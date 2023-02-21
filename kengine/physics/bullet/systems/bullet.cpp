@@ -87,7 +87,7 @@ namespace kengine::systems {
 		entt::registry & r;
 
 		struct processed {};
-		kengine::new_entity_processor<processed, data::transform, data::physics, data::instance> processor{ r, putils_forward_to_this(add_or_update_bullet_data) };
+		kengine::new_entity_processor<processed, core::transform, data::physics, data::instance> processor{ r, putils_forward_to_this(add_or_update_bullet_data) };
 
 		const entt::scoped_connection connections[6] = {
 			r.on_construct<data::model_collider>().connect<&bullet::update_all_instances>(this),
@@ -128,7 +128,7 @@ namespace kengine::systems {
 				}
 
 				systems::bullet * system;
-				data::transform * transform;
+				core::transform * transform;
 			};
 
 			std::unique_ptr<btCompoundShape> shape;
@@ -219,11 +219,11 @@ namespace kengine::systems {
 		void on_skeleton_updated(entt::registry & r, entt::entity e) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			if (r.all_of<data::transform, data::physics, data::instance>(e))
-				add_or_update_bullet_data(e, r.get<data::transform>(e), r.get<data::physics>(e), r.get<data::instance>(e));
+			if (r.all_of<core::transform, data::physics, data::instance>(e))
+				add_or_update_bullet_data(e, r.get<core::transform>(e), r.get<data::physics>(e), r.get<data::instance>(e));
 		}
 
-		void add_or_update_bullet_data(entt::entity e, data::transform & transform, data::physics & physics, const data::instance & instance) noexcept {
+		void add_or_update_bullet_data(entt::entity e, core::transform & transform, data::physics & physics, const data::instance & instance) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			if (!r.all_of<data::model_collider>(instance.model)) {
@@ -246,12 +246,12 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 			kengine_logf(r, verbose, "bullet", "Updating all instances of [%u]", model_entity);
 
-			for (const auto & [e, transform, physics, instance] : r.view<data::transform, data::physics, data::instance>().each())
+			for (const auto & [e, transform, physics, instance] : r.view<core::transform, data::physics, data::instance>().each())
 				if (instance.model == model_entity)
 					add_or_update_bullet_data(e, transform, physics, instance);
 		}
 
-		void add_bullet_data(entt::entity e, data::transform & transform, data::physics & physics, entt::entity model_entity) noexcept {
+		void add_bullet_data(entt::entity e, core::transform & transform, data::physics & physics, entt::entity model_entity) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			auto & comp = r.emplace<bullet_data>(e);
@@ -265,7 +265,7 @@ namespace kengine::systems {
 
 			const auto skeleton = r.try_get<data::skeleton>(e);
 			const auto model_skeleton = r.try_get<data::model_skeleton>(model_entity);
-			const auto model_transform = r.try_get<data::transform>(model_entity);
+			const auto model_transform = r.try_get<core::transform>(model_entity);
 
 			for (const auto & collider : model_collider.colliders)
 				add_shape(comp, collider, transform, skeleton, model_skeleton, model_transform);
@@ -284,7 +284,7 @@ namespace kengine::systems {
 			dynamics_world.addRigidBody(comp.body.get());
 		}
 
-		void add_shape(bullet_data & comp, const data::model_collider::collider & collider, const data::transform & transform, const data::skeleton * skeleton, const data::model_skeleton * model_skeleton, const data::transform * model_transform) {
+		void add_shape(bullet_data & comp, const data::model_collider::collider & collider, const core::transform & transform, const data::skeleton * skeleton, const data::model_skeleton * model_skeleton, const core::transform * model_transform) {
 			KENGINE_PROFILING_SCOPE;
 
 			const auto size = collider.transform.bounding_box.size * transform.bounding_box.size;
@@ -325,7 +325,7 @@ namespace kengine::systems {
 			comp.shape->addChildShape(to_bullet(transform, collider, skeleton, model_skeleton, model_transform), shape);
 		}
 
-		void update_bullet_data(entt::entity e, bullet_data & comp, const data::transform & transform, data::physics & physics, entt::entity model_entity, bool first = false) noexcept {
+		void update_bullet_data(entt::entity e, bullet_data & comp, const core::transform & transform, data::physics & physics, entt::entity model_entity, bool first = false) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			const bool kinematic = r.all_of<data::kinematic>(e);
@@ -368,7 +368,7 @@ namespace kengine::systems {
 			const auto model_skeleton = r.try_get<data::model_skeleton>(model_entity);
 
 			if (skeleton && model_skeleton) {
-				const auto model_transform = r.try_get<data::transform>(model_entity);
+				const auto model_transform = r.try_get<core::transform>(model_entity);
 				int i = 0;
 				for (const auto & collider : r.get<data::model_collider>(model_entity).colliders) {
 					comp.shape->updateChildTransform(i, to_bullet(transform, collider, skeleton, model_skeleton, model_transform));
@@ -435,7 +435,7 @@ namespace kengine::systems {
 		putils::point3f to_putils(const btVector3 & vec) noexcept { return { vec.getX(), vec.getY(), vec.getZ() }; }
 		btVector3 to_bullet(const putils::point3f & p) noexcept { return { p.x, p.y, p.z }; }
 
-		btTransform to_bullet(const data::transform & transform) noexcept {
+		btTransform to_bullet(const core::transform & transform) noexcept {
 			kengine_log(r, very_verbose, "bullet", "Converting transform for entity");
 
 			::glm::mat4 mat(1.f);
@@ -451,7 +451,7 @@ namespace kengine::systems {
 			return ret;
 		}
 
-		btTransform to_bullet(const data::transform & parent, const data::model_collider::collider & collider, const data::skeleton * skeleton, const data::model_skeleton * model_skeleton, const data::transform * model_transform) noexcept {
+		btTransform to_bullet(const core::transform & parent, const data::model_collider::collider & collider, const data::skeleton * skeleton, const data::model_skeleton * model_skeleton, const core::transform * model_transform) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, very_verbose, "bullet", "Converting transform for collider");
 
@@ -482,7 +482,7 @@ namespace kengine::systems {
 				KENGINE_PROFILING_SCOPE;
 				kengine_log(system.r, verbose, "bullet", "Constructing debug drawer");
 				debug_entity = system.r.create();
-				system.r.emplace<data::transform>(debug_entity);
+				system.r.emplace<core::transform>(debug_entity);
 				system.r.emplace<data::debug_graphics>(debug_entity);
 			}
 

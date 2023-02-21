@@ -38,7 +38,7 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, very_verbose, "kinematic", "Executing");
 
-			for (const auto & [e, transform, physics] : r.view<data::transform, data::physics, data::kinematic>().each()) {
+			for (const auto & [e, transform, physics] : r.view<core::transform, data::physics, data::kinematic>().each()) {
 				kengine_logf(r, very_verbose, "kinematic", "Moving [%u]", e);
 
 				transform.bounding_box.position += physics.movement * delta_time;

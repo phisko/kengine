@@ -485,7 +485,7 @@ namespace kengine::systems::recast_impl {
 			return nav_mesh_query;
 		}
 
-		static functions::get_path::callable get_path(const data::transform * model_transform, const data::nav_mesh & nav_mesh, const data::recast_nav_mesh & recast) noexcept {
+		static functions::get_path::callable get_path(const core::transform * model_transform, const data::nav_mesh & nav_mesh, const data::recast_nav_mesh & recast) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			return [&, model_transform](entt::handle environment, const putils::point3f & start_world_space, const putils::point3f & end_world_space) {
@@ -496,7 +496,7 @@ namespace kengine::systems::recast_impl {
 				);
 				static const dtQueryFilter filter;
 
-				const auto model_to_world = glm::get_model_matrix(environment.get<data::transform>(), model_transform);
+				const auto model_to_world = glm::get_model_matrix(environment.get<core::transform>(), model_transform);
 				const auto world_to_model = ::glm::inverse(model_to_world);
 
 				const auto start = glm::convert_to_referencial(start_world_space, world_to_model);
@@ -579,7 +579,7 @@ namespace kengine::systems::recast_impl {
 
 			const auto & recast = r.emplace<data::recast_nav_mesh>(e, std::move(*opt));
 			const auto & nav_mesh = r.get<data::nav_mesh>(e);
-			r.emplace<functions::get_path>(e, build_recast_component::get_path(r.try_get<data::transform>(e), nav_mesh, recast));
+			r.emplace<functions::get_path>(e, build_recast_component::get_path(r.try_get<core::transform>(e), nav_mesh, recast));
 		});
 	}
 }

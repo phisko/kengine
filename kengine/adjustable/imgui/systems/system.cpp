@@ -91,7 +91,7 @@ namespace kengine::adjustable::imgui {
 
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 
-			e.emplace<data::name>("Adjustables");
+			e.emplace<core::name>("Adjustables");
 			auto & tool = e.emplace<data::imgui_tool>();
 			enabled = &tool.enabled;
 

@@ -11,7 +11,7 @@ Clicking an item in the "Tools" dropdown will toggle the `imgui_tool`'s `enabled
 systems::add_imgui_tool(r);
 
 const auto e = r.create();
-r.emplace<data::name>(e, "My tool");
+r.emplace<core::name>(e, "My tool");
 
 auto & tool = r.emplace<data::imgui_tool>();
 tool.enabled = true;

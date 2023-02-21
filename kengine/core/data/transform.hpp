@@ -6,7 +6,7 @@
 // putils
 #include "putils/rect.hpp"
 
-namespace kengine::data {
+namespace kengine::core {
 	//! putils reflect all
 	//! used_types: [putils::rect3f]
 	struct transform {

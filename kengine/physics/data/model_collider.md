@@ -18,7 +18,7 @@ struct collider {
 
     shape shape;
     putils::string<KENGINE_BONE_NAME_MAX_LENGTH> bone_name;
-    data::transform transform;
+    core::transform transform;
 };
 ```
 

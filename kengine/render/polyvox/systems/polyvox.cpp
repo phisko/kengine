@@ -64,7 +64,7 @@ namespace kengine::systems {
 				mesh = build_mesh(std::move(poly.volume));
 
 				const auto & centre = poly.volume.getEnclosingRegion().getCentre();
-				auto & model = r.get_or_emplace<data::transform>(e);
+				auto & model = r.get_or_emplace<core::transform>(e);
 				model.bounding_box.position = { (float)centre.getX(), (float)centre.getY(), (float)centre.getZ() };
 
 				data::model_data::mesh mesh_data;

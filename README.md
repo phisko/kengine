@@ -120,9 +120,9 @@ An example makes this clearer: [edit_imgui](kengine/meta/functions/edit_imgui.md
 // r is a registry with the "type entity" for `name` already setup
 
 const auto e = r.create();
-r.emplace<data::name>(e);
+r.emplace<core::name>(e);
 
-const auto type_entity = type_helper::get_type_entity<data::name>(r);
+const auto type_entity = type_helper::get_type_entity<core::name>(r);
 const auto & edit_imgui = r.get<meta::edit_imgui>(type_entity);
 if (ImGui::Begin("Edit name"))
     edit_imgui({ r, e });

@@ -269,13 +269,13 @@ namespace kengine::systems {
 		void apply_offset(entt::entity e, const magica_voxel_format::chunk_content::size & size) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			if (r.all_of<data::transform>(e)) {
-				kengine_logf(r, verbose, "magica_voxel", "[%u] already has a data::transform. Mesh offset will not be applied", e);
+			if (r.all_of<core::transform>(e)) {
+				kengine_logf(r, verbose, "magica_voxel", "[%u] already has a core::transform. Mesh offset will not be applied", e);
 				return;
 			}
 			kengine_log(r, log, "magica_voxel", "Applying mesh offset");
 
-			auto & box = r.emplace<data::transform>(e).bounding_box;
+			auto & box = r.emplace<core::transform>(e).bounding_box;
 			box.position.x -= size.x / 2.f * box.size.x;
 			box.position.z -= size.y / 2.f * box.size.z;
 		}

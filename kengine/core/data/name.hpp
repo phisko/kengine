@@ -7,7 +7,7 @@
 // putils
 #include "putils/string.hpp"
 
-namespace kengine::data {
+namespace kengine::core {
 	//! putils reflect all
 	//! used_types: [refltype::string]
 	struct name {

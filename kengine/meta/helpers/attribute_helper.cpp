@@ -21,7 +21,7 @@ namespace kengine::meta::attribute_helper {
 
 		const auto attrs = type_entity.try_get<attributes>();
 		if (!attrs) {
-			const auto name_comp = type_entity.try_get<data::name>();
+			const auto name_comp = type_entity.try_get<core::name>();
 			const auto type_name = name_comp ? name_comp->name.c_str() : "<unknown>";
 			kengine_assert_failed(*type_entity.registry(), "Cannot search attributes for '", type_name, "' without meta::attributes");
 			return nullptr;
