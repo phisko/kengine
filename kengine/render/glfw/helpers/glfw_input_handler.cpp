@@ -16,9 +16,9 @@ namespace kengine::systems {
 		const auto e = entt::entity(intptr_t(glfwGetWindowUserPointer(window)));
 
 		if (action == GLFW_PRESS)
-			buffer->keys.push_back(data::input_buffer::key_event{ e, key, true });
+			buffer->keys.push_back(input::buffer::key_event{ e, key, true });
 		else if (action == GLFW_RELEASE)
-			buffer->keys.push_back(data::input_buffer::key_event{ e, key, false });
+			buffer->keys.push_back(input::buffer::key_event{ e, key, false });
 	}
 
 	void glfw_input_handler::on_click(GLFWwindow * window, int button, int action, int mods) noexcept {
@@ -30,9 +30,9 @@ namespace kengine::systems {
 		const auto e = entt::entity(intptr_t(glfwGetWindowUserPointer(window)));
 
 		if (action == GLFW_PRESS)
-			buffer->clicks.push_back(data::input_buffer::click_event{ e, last_pos, button, true });
+			buffer->clicks.push_back(input::buffer::click_event{ e, last_pos, button, true });
 		else if (action == GLFW_RELEASE)
-			buffer->clicks.push_back(data::input_buffer::click_event{ e, last_pos, button, false });
+			buffer->clicks.push_back(input::buffer::click_event{ e, last_pos, button, false });
 	}
 
 	void glfw_input_handler::on_mouse_move(GLFWwindow * window, double xpos, double ypos) noexcept {
@@ -48,7 +48,7 @@ namespace kengine::systems {
 
 		const auto e = entt::entity(intptr_t(glfwGetWindowUserPointer(window)));
 
-		data::input_buffer::mouse_move_event info;
+		input::buffer::mouse_move_event info;
 		info.window = e;
 		info.pos = { (float)xpos, (float)ypos };
 		info.rel = { (float)xpos - last_pos.x, (float)ypos - last_pos.y };
@@ -64,6 +64,6 @@ namespace kengine::systems {
 			return;
 
 		const auto e = entt::entity(intptr_t(glfwGetWindowUserPointer(window)));
-		buffer->scrolls.push_back(data::input_buffer::mouse_scroll_event{ e, (float)xoffset, (float)yoffset, last_pos });
+		buffer->scrolls.push_back(input::buffer::mouse_scroll_event{ e, (float)xoffset, (float)yoffset, last_pos });
 	}
 }

@@ -1,6 +1,6 @@
-# [input_buffer](input_buffer.hpp)
+# [buffer](buffer.hpp)
 
-Component that stores input events. These are sent by graphics systems (or whatever else is used to capture input). The [input system](../systems/input.md) then processes the `input_buffer` to send the buffered events to [input components](input.md).
+Component that stores input events. These are sent by graphics systems (or whatever else is used to capture input). The [input system](../systems/system.md) then processes the `buffer` to send the buffered events to [input handlers](handler.md).
 
 ## Members
 

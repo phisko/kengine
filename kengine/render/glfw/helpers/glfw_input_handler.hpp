@@ -10,7 +10,7 @@
 #include "putils/point.hpp"
 
 // kengine data
-#include "kengine/input/data/input_buffer.hpp"
+#include "kengine/input/data/buffer.hpp"
 
 namespace kengine::systems {
 	struct glfw_input_handler {
@@ -20,6 +20,6 @@ namespace kengine::systems {
 		void on_scroll(GLFWwindow * window, double xoffset, double yoffset) noexcept;
 
 		putils::point2f last_pos{ std::numeric_limits<float>::max(), std::numeric_limits<float>::max() };
-		data::input_buffer * buffer = nullptr;
+		input::buffer * buffer = nullptr;
 	};
 }

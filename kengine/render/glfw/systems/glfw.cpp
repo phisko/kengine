@@ -20,7 +20,7 @@
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 // kengine input
-#include "kengine/input/data/input_buffer.hpp"
+#include "kengine/input/data/buffer.hpp"
 
 // kengine main_loop
 #include "kengine/main_loop/functions/execute.hpp"
@@ -39,7 +39,7 @@ namespace kengine::systems {
 		glfw_input_handler input_handler;
 
 		struct processed_input_buffer {};
-		kengine::new_entity_processor<processed_input_buffer, data::input_buffer> input_buffer_processor{ r, putils_forward_to_this(set_input_buffer) };
+		kengine::new_entity_processor<processed_input_buffer, input::buffer> input_buffer_processor{ r, putils_forward_to_this(set_input_buffer) };
 
 		struct processed_window {};
 		kengine::new_entity_processor<processed_window, data::window, data::glfw_window_init> window_processor{ r, putils_forward_to_this(create_window) };
@@ -110,7 +110,7 @@ namespace kengine::systems {
 			}
 		}
 
-		void set_input_buffer(entt::entity e, data::input_buffer & input_buffer) noexcept {
+		void set_input_buffer(entt::entity e, input::buffer & input_buffer) noexcept {
 			kengine_log(r, verbose, "glfw", "Setting input buffer");
 			kengine_assert(r, input_handler.buffer == nullptr);
 			input_handler.buffer = &input_buffer;
