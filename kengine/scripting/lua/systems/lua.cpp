@@ -29,7 +29,7 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, log, "lua", "Initializing");
 
-			e.emplace<functions::execute>(putils_forward_to_this(execute));
+			e.emplace<main_loop::execute>(putils_forward_to_this(execute));
 
 			kengine_log(r, verbose, "lua", "Creating Lua state");
 			state = new sol::state;

@@ -31,7 +31,7 @@ namespace kengine::systems {
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, log, "model_creator", "Initializing");
-			e.emplace<functions::execute>(putils_forward_to_this(execute));
+			e.emplace<main_loop::execute>(putils_forward_to_this(execute));
 
 			processor.process();
 		}

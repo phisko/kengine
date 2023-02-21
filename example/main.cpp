@@ -17,7 +17,7 @@ struct debug_system {
     debug_system(entt::handle e) noexcept
         : r(*e.registry())
     {
-        e.emplace<kengine::functions::execute>([this](float delta_time) {
+        e.emplace<kengine::main_loop::execute>([this](float delta_time) {
              execute(delta_time);
         });
     }
@@ -59,7 +59,7 @@ int main(int, char **av) {
     add_debug_system(r);
 
     const auto e = r.create();
-    r.emplace<kengine::data::keep_alive>(e);
+    r.emplace<kengine::main_loop::keep_alive>(e);
     r.emplace<kengine::core::transform>(e).bounding_box.position = { 42.f, 0.f, 42.f };
     r.emplace<kengine::data::lua>(e).scripts = { "unit.lua" };
 

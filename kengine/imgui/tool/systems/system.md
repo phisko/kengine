@@ -13,7 +13,7 @@ r.emplace<core::name>(e, "My tool");
 auto & tool = r.emplace<imgui::tool::tool>();
 tool.enabled = true;
 
-r.emplace<functions::execute>(e, [&](float delta_time) {
+r.emplace<main_loop::execute>(e, [&](float delta_time) {
     if (!tool.enabled) // May be set to false by the system
         return;
 

@@ -89,7 +89,7 @@ namespace kengine::adjustable::imgui {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, log, "adjustable_imgui", "Initializing");
 
-			e.emplace<functions::execute>(putils_forward_to_this(execute));
+			e.emplace<main_loop::execute>(putils_forward_to_this(execute));
 
 			e.emplace<core::name>("Adjustables");
 			auto & tool = e.emplace<kengine::imgui::tool::tool>();

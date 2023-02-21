@@ -1,4 +1,4 @@
-#include "main_loop.hpp"
+#include "run.hpp"
 
 // stl
 #include <chrono>
@@ -20,6 +20,8 @@
 #include "kengine/main_loop/helpers/is_running.hpp"
 
 namespace kengine::main_loop {
+	static constexpr auto log_category = "main_loop";
+
 	template<typename T>
 	concept time_factor_callback = putils::invocable<T, float(const entt::registry &)>;
 
@@ -29,21 +31,21 @@ namespace kengine::main_loop {
 
 		delta_time *= get_time_factor(r);
 
-		kengine_logf(r, very_verbose, "main_loop", "Calling execute (dt: %f)", delta_time);
-		for (const auto & [e, func] : r.view<kengine::functions::execute>().each()) {
+		kengine_logf(r, very_verbose, log_category, "Calling execute (dt: %f)", delta_time);
+		for (const auto & [e, func] : r.view<kengine::main_loop::execute>().each()) {
 			if (!is_running(r))
 				break;
-			kengine_logf(r, very_verbose, "main_loop", "Calling execute on [%u]", e);
+			kengine_logf(r, very_verbose, log_category, "Calling execute on [%u]", e);
 			func(delta_time);
 		}
 	}
 
 	template<time_factor_callback F>
 	static void run(entt::registry & r, F && get_time_factor) noexcept {
-		kengine_log(r, log, "main_loop", "Starting");
+		kengine_log(r, log, log_category, "Starting");
 
 		auto previous_time = std::chrono::system_clock::now();
-		while (kengine::is_running(r)) {
+		while (is_running(r)) {
 			const auto now = std::chrono::system_clock::now();
 			const float delta_time = std::chrono::duration<float>(now - previous_time).count();
 			previous_time = now;
@@ -53,7 +55,7 @@ namespace kengine::main_loop {
 			KENGINE_PROFILING_FRAME;
 		}
 
-		kengine_log(r, log, "main_loop", "Stopping due to no more data::keep_alive components remaining");
+		kengine_log(r, log, log_category, "Stopping due to no more main_loop::keep_alive components remaining");
 	}
 
 	void run(entt::registry & r) noexcept {
@@ -63,15 +65,15 @@ namespace kengine::main_loop {
 	namespace time_modulated {
 		static float get_time_factor(const entt::registry & r) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, very_verbose, "main_loop", "Getting time factor");
+			kengine_log(r, very_verbose, log_category, "Getting time factor");
 
 			float ret = 1.f;
-			for (const auto & [e, time_modulator] : r.view<data::time_modulator>().each()) {
-				kengine_logf(r, very_verbose, "main_loop", "Found time modulator [%u] (%f)", e, time_modulator.factor);
+			for (const auto & [e, time_modulator] : r.view<time_modulator>().each()) {
+				kengine_logf(r, very_verbose, log_category, "Found time modulator [%u] (%f)", e, time_modulator.factor);
 				ret *= time_modulator.factor;
 			}
 
-			kengine_logf(r, very_verbose, "main_loop", "Final time modulator: %f", ret);
+			kengine_logf(r, very_verbose, log_category, "Final time modulator: %f", ret);
 			return ret;
 		}
 

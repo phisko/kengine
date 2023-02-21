@@ -3,11 +3,11 @@
 // kengine functions
 #include "kengine/base_function.hpp"
 
-namespace kengine::functions {
+namespace kengine::main_loop {
 	using execute_signature = void(float delta_time);
 	struct execute : base_function<execute_signature> {};
 }
 
-#define refltype kengine::functions::execute
+#define refltype kengine::main_loop::execute
 kengine_function_reflection_info;
 #undef refltype

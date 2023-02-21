@@ -2,7 +2,7 @@
 
 #include "putils/reflection.hpp"
 
-#define refltype kengine::data::keep_alive
+#define refltype kengine::main_loop::keep_alive
 putils_reflection_info {
 	putils_reflection_class_name;
 };

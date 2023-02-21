@@ -55,7 +55,7 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, log, "imgui_prompt", "Initializing");
 
-			e.emplace<functions::execute>(putils_forward_to_this(execute));
+			e.emplace<main_loop::execute>(putils_forward_to_this(execute));
 
 			e.emplace<core::name>("Prompt");
 			auto & tool = e.emplace<imgui::tool::tool>();

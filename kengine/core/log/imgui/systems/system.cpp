@@ -79,7 +79,7 @@ namespace kengine::core::log::imgui {
 			for (int i = 0; i < (int)control->global_severity; ++i)
 				filters.severities[i] = false;
 			filters.category_severities = control->category_severities;
-			e.emplace<functions::execute>(putils_forward_to_this(execute));
+			e.emplace<main_loop::execute>(putils_forward_to_this(execute));
 
 			e.emplace<core::name>("Log");
 			auto & tool = e.emplace<kengine::imgui::tool::tool>();

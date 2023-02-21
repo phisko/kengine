@@ -38,7 +38,7 @@ namespace kengine::async::imgui {
 			auto & tool = e.emplace<kengine::imgui::tool::tool>();
 			enabled = &tool.enabled;
 
-			e.emplace<functions::execute>(putils_forward_to_this(execute));
+			e.emplace<main_loop::execute>(putils_forward_to_this(execute));
 		}
 
 		void execute(float delta_time) noexcept {

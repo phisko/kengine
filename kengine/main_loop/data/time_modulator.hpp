@@ -3,7 +3,7 @@
 // reflection
 #include "putils/reflection.hpp"
 
-namespace kengine::data {
+namespace kengine::main_loop {
 	//! putils reflect all
 	struct time_modulator {
 		float factor = 1.f;

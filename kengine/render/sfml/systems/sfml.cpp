@@ -102,7 +102,7 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, log, "sfml", "Initializing");
 
-			e.emplace<functions::execute>(putils_forward_to_this(execute));
+			e.emplace<main_loop::execute>(putils_forward_to_this(execute));
 			auto & scale = e.emplace<imgui::scale>();
 			e.emplace<adjustable::adjustable>() = {
 				"ImGui",

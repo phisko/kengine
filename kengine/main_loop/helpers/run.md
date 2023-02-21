@@ -1,4 +1,4 @@
-# [main_loop](main_loop.hpp)
+# [run](run.hpp)
 
 Helper functions to use as an application's main loop.
 
