@@ -5,7 +5,7 @@
 
 namespace kengine::meta {
 	using has_signature = bool(entt::const_handle);
-	struct has : functions::base_function<has_signature> {};
+	struct has : base_function<has_signature> {};
 }
 
 #define refltype kengine::meta::has

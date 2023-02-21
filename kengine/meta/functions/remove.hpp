@@ -5,7 +5,7 @@
 
 namespace kengine::meta {
 	using remove_signature = void(entt::handle);
-	struct remove : functions::base_function<remove_signature> {};
+	struct remove : base_function<remove_signature> {};
 }
 
 #define refltype kengine::meta::remove
