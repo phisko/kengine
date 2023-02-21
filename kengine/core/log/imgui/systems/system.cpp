@@ -81,7 +81,7 @@ namespace kengine::core::log::imgui {
 			filters.category_severities = control->category_severities;
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 
-			e.emplace<data::name>("Log");
+			e.emplace<core::name>("Log");
 			auto & tool = e.emplace<data::imgui_tool>();
 			enabled = &tool.enabled;
 

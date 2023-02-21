@@ -19,8 +19,8 @@ struct json_helper : ::testing::Test {
 	entt::registry r;
 
 	json_helper() noexcept {
-		kengine::register_metadata<kengine::data::name, kengine::data::transform>(r);
-		kengine::register_meta_components<kengine::data::name, kengine::data::transform>(r);
+		kengine::register_metadata<kengine::core::name, kengine::core::transform>(r);
+		kengine::register_meta_components<kengine::core::name, kengine::core::transform>(r);
 		json["name"]["name"] = expected_name;
 		auto & transform = json["transform"];
 		auto & bounding_box = transform["bounding_box"];
@@ -44,11 +44,11 @@ TEST_F(json_helper, load_entity) {
 	const auto e = r.create();
 	kengine::json_helper::load_entity(json, { r, e });
 
-	EXPECT_TRUE(r.all_of<kengine::data::name>(e));
-	EXPECT_EQ(r.get<kengine::data::name>(e).name, "hello");
+	EXPECT_TRUE(r.all_of<kengine::core::name>(e));
+	EXPECT_EQ(r.get<kengine::core::name>(e).name, "hello");
 
-	EXPECT_TRUE(r.all_of<kengine::data::transform>(e));
-	const auto & transform = r.get<kengine::data::transform>(e);
+	EXPECT_TRUE(r.all_of<kengine::core::transform>(e));
+	const auto & transform = r.get<kengine::core::transform>(e);
 	const auto & bounding_box = transform.bounding_box;
 	const auto & pos = bounding_box.position;
 	EXPECT_EQ(pos, expected_pos);
@@ -58,8 +58,8 @@ TEST_F(json_helper, load_entity) {
 
 TEST_F(json_helper, save_entity) {
 	const auto e = r.create();
-	r.emplace<kengine::data::name>(e, expected_name);
-	r.emplace<kengine::data::transform>(e) = {
+	r.emplace<kengine::core::name>(e, expected_name);
+	r.emplace<kengine::core::transform>(e) = {
 		.bounding_box = {
 			.position = expected_pos,
 			.size = expected_size,

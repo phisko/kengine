@@ -15,13 +15,13 @@
 
 TEST(attribute_helper, find_attribute) {
 	entt::registry r;
-	kengine::register_metadata<kengine::data::transform>(r);
+	kengine::register_metadata<kengine::core::transform>(r);
 
-	const auto e = kengine::type_helper::get_type_entity<kengine::data::transform>(r);
+	const auto e = kengine::type_helper::get_type_entity<kengine::core::transform>(r);
 
 	const auto attr = kengine::meta::attribute_helper::find_attribute({ r, e }, "bounding_box");
 	EXPECT_NE(attr, nullptr);
 
-	const auto expected = putils::reflection::runtime::find_attribute<kengine::data::transform>("bounding_box");
+	const auto expected = putils::reflection::runtime::find_attribute<kengine::core::transform>("bounding_box");
 	EXPECT_EQ(attr, expected);
 }

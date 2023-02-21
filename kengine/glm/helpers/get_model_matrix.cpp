@@ -11,7 +11,7 @@
 #include "kengine/glm/helpers/to_vec.hpp"
 
 namespace kengine::glm {
-	::glm::mat4 get_model_matrix(const data::transform & transform, const data::transform * model_transform) noexcept {
+	::glm::mat4 get_model_matrix(const core::transform & transform, const core::transform * model_transform) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
 		::glm::mat4 model(1.f);

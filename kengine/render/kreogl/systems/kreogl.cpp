@@ -655,13 +655,13 @@ namespace kengine::systems {
 			sync_all_lights(kreogl_world, camera_entity);
 		}
 
-		void sync_common_properties(auto & kreogl_object, entt::entity entity, const data::instance * instance, const data::transform & transform, const auto & colored_component, ::kreogl::world & kreogl_world) noexcept {
+		void sync_common_properties(auto & kreogl_object, entt::entity entity, const data::instance * instance, const core::transform & transform, const auto & colored_component, ::kreogl::world & kreogl_world) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_logf(r, very_verbose, "kreogl", "Syncing common properties for [%u]", entity);
 
-			const data::transform * model_transform = nullptr;
+			const core::transform * model_transform = nullptr;
 			if (instance)
-				model_transform = instance_helper::try_get_model<data::transform>(r, *instance);
+				model_transform = instance_helper::try_get_model<core::transform>(r, *instance);
 			kreogl_object.transform = glm::get_model_matrix(transform, model_transform);
 			kreogl_object.color = toglm(colored_component.color);
 			kreogl_object.user_data[0] = float(entity);
@@ -673,7 +673,7 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 			kengine_logf(r, very_verbose, "kreogl", "Syncing all objects for camera [%u]", camera_entity);
 
-			for (const auto & [entity, instance, transform, graphics, kreogl_object] : r.view<data::instance, data::transform, data::graphics, ::kreogl::animated_object>().each()) {
+			for (const auto & [entity, instance, transform, graphics, kreogl_object] : r.view<data::instance, core::transform, data::graphics, ::kreogl::animated_object>().each()) {
 				if (!camera_helper::entity_appears_in_viewport(r, entity, camera_entity))
 					continue;
 				sync_common_properties(kreogl_object, entity, &instance, transform, graphics, kreogl_world);
@@ -682,14 +682,14 @@ namespace kengine::systems {
 			}
 
 			sync_sprite_2d_properties(kreogl_world, camera_entity);
-			for (const auto & [sprite_entity, instance, transform, graphics, kreogl_sprite_3d] : r.view<data::instance, data::transform, data::graphics, data::sprite_3d, ::kreogl::sprite_3d>().each()) {
+			for (const auto & [sprite_entity, instance, transform, graphics, kreogl_sprite_3d] : r.view<data::instance, core::transform, data::graphics, data::sprite_3d, ::kreogl::sprite_3d>().each()) {
 				if (!camera_helper::entity_appears_in_viewport(r, sprite_entity, camera_entity))
 					continue;
 				sync_common_properties(kreogl_sprite_3d, sprite_entity, &instance, transform, graphics, kreogl_world);
 			}
 
 			sync_text_2d_properties(kreogl_world, camera_entity);
-			for (const auto & [text_entity, transform, text_3d, kreogl_text_3d] : r.view<data::transform, data::text_3d, ::kreogl::text_3d>().each()) {
+			for (const auto & [text_entity, transform, text_3d, kreogl_text_3d] : r.view<core::transform, data::text_3d, ::kreogl::text_3d>().each()) {
 				if (!camera_helper::entity_appears_in_viewport(r, text_entity, camera_entity))
 					continue;
 				sync_text_properties(kreogl_text_3d, text_entity, transform, text_3d, kreogl_world);
@@ -775,7 +775,7 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 			kengine_logf(r, very_verbose, "kreogl", "Syncing sprite_2d properties for camera [%u]", camera_entity);
 
-			for (const auto & [sprite_entity, instance, transform, graphics, sprite_2d, kreogl_sprite_2d] : r.view<data::instance, data::transform, data::graphics, data::sprite_2d, ::kreogl::sprite_2d>().each()) {
+			for (const auto & [sprite_entity, instance, transform, graphics, sprite_2d, kreogl_sprite_2d] : r.view<data::instance, core::transform, data::graphics, data::sprite_2d, ::kreogl::sprite_2d>().each()) {
 				if (!camera_helper::entity_appears_in_viewport(r, sprite_entity, camera_entity))
 					continue;
 
@@ -792,7 +792,7 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 			kengine_logf(r, very_verbose, "kreogl", "Syncing text_2d properties for camera [%u]", camera_entity);
 
-			for (const auto & [text_entity, transform, text_2d, kreogl_text_2d] : r.view<data::transform, data::text_2d, ::kreogl::text_2d>().each()) {
+			for (const auto & [text_entity, transform, text_2d, kreogl_text_2d] : r.view<core::transform, data::text_2d, ::kreogl::text_2d>().each()) {
 				if (!camera_helper::entity_appears_in_viewport(r, text_entity, camera_entity))
 					continue;
 
@@ -819,7 +819,7 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 			kengine_logf(r, very_verbose, "kreogl", "Syncing debug_graphics properties for camera [%u]", camera_entity);
 
-			for (const auto & [debug_entity, transform, debug_graphics, kreogl_debug_graphics] : r.view<data::transform, data::debug_graphics, data::kreogl_debug_graphics>().each()) {
+			for (const auto & [debug_entity, transform, debug_graphics, kreogl_debug_graphics] : r.view<core::transform, data::debug_graphics, data::kreogl_debug_graphics>().each()) {
 				if (!camera_helper::entity_appears_in_viewport(r, debug_entity, camera_entity))
 					continue;
 
@@ -857,7 +857,7 @@ namespace kengine::systems {
 			}
 		}
 
-		void apply_debug_graphics_transform(::glm::mat4 & matrix, const data::transform & transform, const ::glm::vec3 & pos, const ::glm::vec3 & size, data::debug_graphics::reference_space reference_space) noexcept {
+		void apply_debug_graphics_transform(::glm::mat4 & matrix, const core::transform & transform, const ::glm::vec3 & pos, const ::glm::vec3 & size, data::debug_graphics::reference_space reference_space) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			matrix = ::glm::translate(matrix, pos);
@@ -872,7 +872,7 @@ namespace kengine::systems {
 				matrix = ::glm::scale(matrix, toglm(transform.bounding_box.size));
 		}
 
-		::glm::mat4 get_on_screen_matrix(const data::transform & transform, const putils::point3f & position, const putils::point3f & size, const data::on_screen & onScreen) noexcept {
+		::glm::mat4 get_on_screen_matrix(const core::transform & transform, const putils::point3f & position, const putils::point3f & size, const data::on_screen & onScreen) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			::glm::mat4 model{ 1.f };
@@ -888,7 +888,7 @@ namespace kengine::systems {
 			return model;
 		}
 
-		void sync_text_properties(auto & kreogl_text, entt::entity text_entity, const data::transform & transform, const data::text & text, ::kreogl::world & kreogl_world) noexcept {
+		void sync_text_properties(auto & kreogl_text, entt::entity text_entity, const core::transform & transform, const data::text & text, ::kreogl::world & kreogl_world) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			sync_common_properties(kreogl_text, text_entity, nullptr, transform, text, kreogl_world);
@@ -947,7 +947,7 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 			kengine_logf(r, very_verbose, "kreogl", "Syncing all point lights for camera [%u]", camera_entity);
 
-			for (const auto & [light_entity, transform, point_light, kreogl_point_light] : r.view<data::transform, data::point_light, ::kreogl::point_light>().each()) {
+			for (const auto & [light_entity, transform, point_light, kreogl_point_light] : r.view<core::transform, data::point_light, ::kreogl::point_light>().each()) {
 				if (!camera_helper::entity_appears_in_viewport(r, light_entity, camera_entity))
 					continue;
 				sync_point_light_properties(light_entity, transform, kreogl_point_light, point_light, kreogl_world);
@@ -958,7 +958,7 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 			kengine_logf(r, very_verbose, "kreogl", "Syncing all spot lights for camera [%u]", camera_entity);
 
-			for (const auto & [light_entity, transform, spot_light, kreogl_spot_light] : r.view<data::transform, data::spot_light, ::kreogl::spot_light>().each()) {
+			for (const auto & [light_entity, transform, spot_light, kreogl_spot_light] : r.view<core::transform, data::spot_light, ::kreogl::spot_light>().each()) {
 				if (!camera_helper::entity_appears_in_viewport(r, light_entity, camera_entity))
 					continue;
 
@@ -998,7 +998,7 @@ namespace kengine::systems {
 			kreogl_world.add(kreogl_light);
 		}
 
-		void sync_point_light_properties(entt::entity light_entity, const data::transform & transform, ::kreogl::point_light & kreogl_light, const data::point_light & light, ::kreogl::world & kreogl_world) noexcept {
+		void sync_point_light_properties(entt::entity light_entity, const core::transform & transform, ::kreogl::point_light & kreogl_light, const data::point_light & light, ::kreogl::world & kreogl_world) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_logf(r, very_verbose, "kreogl", "Syncing point light properties for [%u]", light_entity);
 

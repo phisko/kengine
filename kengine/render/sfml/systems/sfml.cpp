@@ -338,7 +338,7 @@ namespace kengine::systems {
 			} drawables;
 
 			kengine_log(r, very_verbose, "sfml", "Queueing sprites");
-			for (const auto & [e, transform, graphics] : r.view<data::transform, data::graphics>().each()) {
+			for (const auto & [e, transform, graphics] : r.view<core::transform, data::graphics>().each()) {
 				auto sprite = create_entity_sprite(e, transform, graphics);
 				if (sprite != std::nullopt) {
 					kengine_logf(r, very_verbose, "sfml", "Queueing sprite for [%u]", e);
@@ -352,7 +352,7 @@ namespace kengine::systems {
 			}
 
 			kengine_log(r, very_verbose, "sfml", "Queueing debug graphics");
-			for (const auto & [e, transform, debug] : r.view<data::transform, data::debug_graphics>().each()) {
+			for (const auto & [e, transform, debug] : r.view<core::transform, data::debug_graphics>().each()) {
 				kengine_logf(r, very_verbose, "sfml", "Queueing debug graphics for [%u]", e);
 				for (const auto & element : debug.elements) {
 					const sf::Color color(convert_color(element.color));
@@ -454,7 +454,7 @@ namespace kengine::systems {
 			render_texture.display();
 		}
 
-		std::optional<sf::Sprite> create_entity_sprite(entt::entity e, const data::transform & transform, const data::graphics & graphics) noexcept {
+		std::optional<sf::Sprite> create_entity_sprite(entt::entity e, const core::transform & transform, const data::graphics & graphics) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_logf(r, very_verbose, "sfml", "Creating entity sprite for [%u] (%s)", e, graphics.appearance.c_str());
 

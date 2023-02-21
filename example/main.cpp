@@ -23,7 +23,7 @@ struct debug_system {
     }
 
     void execute(float delta_time) noexcept {
-        for (const auto & [e, transform, lua] : r.view<kengine::data::transform, kengine::data::lua>().each()) {
+        for (const auto & [e, transform, lua] : r.view<kengine::core::transform, kengine::data::lua>().each()) {
             std::cout << "Entity " << (int)e << std::endl;
             std::cout << "\tTransform: "
                 << transform.bounding_box.position.x << ' '
@@ -60,13 +60,13 @@ int main(int, char **av) {
 
     const auto e = r.create();
     r.emplace<kengine::data::keep_alive>(e);
-    r.emplace<kengine::data::transform>(e).bounding_box.position = { 42.f, 0.f, 42.f };
+    r.emplace<kengine::core::transform>(e).bounding_box.position = { 42.f, 0.f, 42.f };
     r.emplace<kengine::data::lua>(e).scripts = { "unit.lua" };
 
 	// Register types to be used in lua
 	kengine::lua_helper::register_types<
 		true, // components
-		kengine::data::transform,
+		kengine::core::transform,
 		kengine::data::lua
 	>(r);
 

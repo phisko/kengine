@@ -81,7 +81,7 @@ namespace kengine::systems {
 					if (ImGui::MenuItem("Disable all")) {
 						kengine_log(r, log, "imgui_tool", "Disabling all tools");
 						for (auto [e, tool] : r.view<data::imgui_tool>().each()) {
-							kengine_logf(r, verbose, "imgui_tool", "Disabling %s", r.get<data::name>(e));
+							kengine_logf(r, verbose, "imgui_tool", "Disabling %s", r.get<core::name>(e).name.c_str());
 							tool.enabled = false;
 						}
 					}
@@ -120,9 +120,9 @@ namespace kengine::systems {
 		void on_construct_imgui_tool(entt::entity e, data::imgui_tool & tool) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			const auto name = r.try_get<data::name>(e);
+			const auto name = r.try_get<core::name>(e);
 			if (!name) {
-				kengine_assert_failed(r, "Entity ", int(e), " has a data::imgui_tool but no data::name");
+				kengine_assert_failed(r, "Entity ", int(e), " has a data::imgui_tool but no core::name");
 				return;
 			}
 

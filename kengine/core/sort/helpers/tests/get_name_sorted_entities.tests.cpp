@@ -11,7 +11,7 @@ struct core_sort : ::testing::Test {
 	struct entity_data {
 		std::string s;
 		int i = 0;
-		kengine::data::name name;
+		kengine::core::name name;
 	};
 
 	entt::registry r;
@@ -32,7 +32,7 @@ struct core_sort : ::testing::Test {
 			const auto e = r.create();
 			r.emplace<std::string>(e, d.s);
 			r.emplace<int>(e, d.i);
-			r.emplace<kengine::data::name>(e, d.name);
+			r.emplace<kengine::core::name>(e, d.name);
 		}
 	}
 };

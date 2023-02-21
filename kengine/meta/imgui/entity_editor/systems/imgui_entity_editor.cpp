@@ -43,7 +43,7 @@ namespace kengine::systems {
 
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 
-			e.emplace<data::name>("Entities/Editor");
+			e.emplace<core::name>("Entities/Editor");
 			auto & tool = e.emplace<data::imgui_tool>(true);
 			enabled = &tool.enabled;
 		}
@@ -58,12 +58,12 @@ namespace kengine::systems {
 			}
 
 			const auto scale = imgui_helper::get_scale(r);
-			for (const auto selected : r.view<data::selected>()) {
+			for (const auto selected : r.view<core::selected>()) {
 				bool open = true;
 
 				ImGui::SetNextWindowSize({ 200.f * scale, 200.f * scale }, ImGuiCond_FirstUseEver);
 
-				const auto name = r.try_get<data::name>(selected);
+				const auto name = r.try_get<core::name>(selected);
 				const auto window_title =
 					name ?
 					putils::string<64>("%s##[%d]", name->name.c_str(), selected) :
@@ -76,7 +76,7 @@ namespace kengine::systems {
 
 				if (!open) {
 					kengine_logf(r, log, "imgui_entity_editor", "De-selecting [%u]", selected);
-					r.remove<data::selected>(selected);
+					r.remove<core::selected>(selected);
 				}
 			}
 		}

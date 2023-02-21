@@ -33,7 +33,7 @@ namespace kengine {
 
 			const auto e = type_helper::get_type_entity<type>(r);
 			r.emplace<meta::attributes>(e, &putils::reflection::runtime::get_attributes<type>());
-			r.emplace<data::name>(e, putils::reflection::get_class_name<type>());
+			r.emplace<core::name>(e, putils::reflection::get_class_name<type>());
 			r.emplace<meta::size>(e, sizeof(type));
 		});
 	}

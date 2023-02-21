@@ -12,7 +12,7 @@ TEST(glm, get_model_matrix) {
 	const putils::point3f expected_pos{ 42.f, -42.f, 0.f };
 	const putils::vec3f expected_scale{ 42.f, 42.f, 1.f };
 
-	const kengine::data::transform transform{
+	const kengine::core::transform transform{
 		.bounding_box = {
 			.position = expected_pos,
 			.size = expected_scale,

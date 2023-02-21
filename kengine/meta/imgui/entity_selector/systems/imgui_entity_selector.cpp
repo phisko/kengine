@@ -50,7 +50,7 @@ namespace kengine::systems {
 
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 
-			e.emplace<data::name>("Entities/Selector");
+			e.emplace<core::name>("Entities/Selector");
 			auto & tool = e.emplace<data::imgui_tool>();
 			enabled = &tool.enabled;
 		}
@@ -105,7 +105,7 @@ namespace kengine::systems {
 				{ "[%u]", e }
 			};
 
-			const auto name = r.try_get<data::name>(e);
+			const auto name = r.try_get<core::name>(e);
 			if (name) {
 				result.display_text += " ";
 				result.display_text += name->name;
@@ -133,7 +133,7 @@ namespace kengine::systems {
 							result.display_text += type->name;
 						}
 
-						kengine_logf(r, very_verbose, "imgui_entity_selector", "Match found in %s", r.get<data::name>(type_entity));
+						kengine_logf(r, very_verbose, "imgui_entity_selector", "Match found in %s", r.get<core::name>(type_entity));
 						matches = true;
 					}
 				}
@@ -153,13 +153,13 @@ namespace kengine::systems {
 
 			for (const auto & result : search_results)
 				if (display_search_result(result)) {
-					if (r.all_of<data::selected>(result.e)) {
+					if (r.all_of<core::selected>(result.e)) {
 						kengine_logf(r, log, "imgui_entity_selector", "De-selecting [%u]", result.e);
-						r.erase<data::selected>(result.e);
+						r.erase<core::selected>(result.e);
 					}
 					else {
 						kengine_logf(r, log, "imgui_entity_selector", "Selecting [%u]", result.e);
-						r.emplace<data::selected>(result.e);
+						r.emplace<core::selected>(result.e);
 					}
 				}
 		}
