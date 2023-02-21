@@ -21,7 +21,7 @@
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 // kengine imgui/imgui_tool
-#include "kengine/imgui/tool/data/imgui_tool.hpp"
+#include "kengine/imgui/tool/data/tool.hpp"
 
 // kengine main_loop
 #include "kengine/main_loop/functions/execute.hpp"
@@ -58,7 +58,7 @@ namespace kengine::systems {
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 
 			e.emplace<core::name>("Prompt");
-			auto & tool = e.emplace<data::imgui_tool>();
+			auto & tool = e.emplace<imgui::tool::tool>();
 			enabled = &tool.enabled;
 		}
 

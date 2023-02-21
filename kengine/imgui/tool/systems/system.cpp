@@ -1,4 +1,4 @@
-#include "imgui_tool.hpp"
+#include "system.hpp"
 
 // stl
 #include <fstream>
@@ -26,8 +26,8 @@
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 #include "kengine/core/sort/helpers/get_name_sorted_entities.hpp"
 
-// kengine imgui/imgui_tool
-#include "kengine/imgui/tool/data/imgui_tool.hpp"
+// kengine imgui/tool
+#include "kengine/imgui/tool/data/tool.hpp"
 
 // kengine main_loop
 #include "kengine/main_loop/functions/execute.hpp"
@@ -40,26 +40,28 @@
 #define KENGINE_IMGUI_MAX_TOOLS 0 // no limit by default
 #endif
 
-namespace kengine::systems {
-	struct imgui_tool {
+namespace kengine::imgui::tool {
+	struct system {
+		static constexpr auto log_category = "imgui_tool";
+
 		putils::ini_file configuration;
 		entt::registry & r;
 
 		struct menu_entry {
 			using entry_map = std::map<std::string, menu_entry>;
 			entry_map subentries;
-			data::imgui_tool * tool = nullptr;
+			tool * comp = nullptr;
 		};
 		menu_entry root_entry;
 
 		struct processed {};
-		kengine::new_entity_processor<processed, data::imgui_tool> processor{ r, putils_forward_to_this(on_construct_imgui_tool) };
-		const entt::scoped_connection remove_tool = r.on_destroy<data::imgui_tool>().connect<&imgui_tool::on_destroy_imgui_tool>(this);
+		kengine::new_entity_processor<processed, tool> processor{ r, putils_forward_to_this(on_construct_tool) };
+		const entt::scoped_connection remove_tool = r.on_destroy<tool>().connect<&system::on_destroy_imgui_tool>(this);
 
-		imgui_tool(entt::handle e) noexcept
+		system(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "imgui_tool", "Initializing");
+			kengine_log(r, log, log_category, "Initializing");
 
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 
@@ -71,7 +73,7 @@ namespace kengine::systems {
 
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, very_verbose, "imgui_tool", "Executing");
+			kengine_log(r, very_verbose, log_category, "Executing");
 
 			processor.process();
 
@@ -79,10 +81,10 @@ namespace kengine::systems {
 				bool must_save = false;
 				if (ImGui::BeginMenu("Tools")) {
 					if (ImGui::MenuItem("Disable all")) {
-						kengine_log(r, log, "imgui_tool", "Disabling all tools");
-						for (auto [e, tool] : r.view<data::imgui_tool>().each()) {
-							kengine_logf(r, verbose, "imgui_tool", "Disabling %s", r.get<core::name>(e).name.c_str());
-							tool.enabled = false;
+						kengine_log(r, log, log_category, "Disabling all tools");
+						for (auto [e, comp] : r.view<tool>().each()) {
+							kengine_logf(r, verbose, log_category, "Disabling %s", r.get<core::name>(e).name.c_str());
+							comp.enabled = false;
 						}
 					}
 
@@ -99,12 +101,12 @@ namespace kengine::systems {
 
 		void display_menu_entry(const char * name, const menu_entry & entry, bool & must_save) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, very_verbose, "imgui_tool", "Displaying menu entry %s", name);
+			kengine_logf(r, very_verbose, log_category, "Displaying menu entry %s", name);
 
-			if (entry.tool) {
-				if (ImGui::MenuItem(name, nullptr, entry.tool->enabled)) {
-					entry.tool->enabled = !entry.tool->enabled;
-					kengine_logf(r, log, "imgui_tool", "Turned %s %s", entry.tool->enabled ? "on" : "off", name);
+			if (entry.comp) {
+				if (ImGui::MenuItem(name, nullptr, entry.comp->enabled)) {
+					entry.comp->enabled = !entry.comp->enabled;
+					kengine_logf(r, log, log_category, "Turned %s %s", entry.comp->enabled ? "on" : "off", name);
 					must_save = true;
 				}
 				return;
@@ -117,49 +119,49 @@ namespace kengine::systems {
 			}
 		}
 
-		void on_construct_imgui_tool(entt::entity e, data::imgui_tool & tool) noexcept {
+		void on_construct_tool(entt::entity e, tool & comp) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			const auto name = r.try_get<core::name>(e);
 			if (!name) {
-				kengine_assert_failed(r, "Entity ", int(e), " has a data::imgui_tool but no core::name");
+				kengine_assert_failed(r, "Entity ", int(e), " has a imgui::tool::tool but no core::name");
 				return;
 			}
 
-			kengine_logf(r, verbose, "imgui_tool", "Initializing %s", name->name.c_str());
+			kengine_logf(r, verbose, log_category, "Initializing %s", name->name.c_str());
 			const auto & section = configuration.sections["Tools"];
 			if (const auto it = section.values.find(name->name.c_str()); it != section.values.end())
-				tool.enabled = putils::parse<bool>(it->second);
+				comp.enabled = putils::parse<bool>(it->second);
 
 			menu_entry * current_entry = &root_entry;
 			const auto entry_names = putils::split(name->name.c_str(), '/');
 			for (const auto & entry_name : entry_names) {
-				kengine_assert_with_message(r, current_entry->tool == nullptr, "Intermediate menu '", entry_name, "' for ImGui tool '", name->name, "' has the name of an existing tool");
+				kengine_assert_with_message(r, current_entry->comp == nullptr, "Intermediate menu '", entry_name, "' for ImGui tool '", name->name, "' has the name of an existing tool");
 				current_entry = &current_entry->subentries[entry_name];
 			}
 
 			kengine_assert_with_message(r, current_entry->subentries.empty(), "Leaf entry for ImGui tool '", name->name, "' was previously used as an intermediate menu");
-			current_entry->tool = &tool;
+			current_entry->comp = &comp;
 		}
 
 		void on_destroy_imgui_tool(entt::registry & r, entt::entity e) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, verbose, "imgui_tool", "Destroyed ImGui tool in [%u]", e);
+			kengine_logf(r, verbose, log_category, "Destroyed ImGui tool in [%u]", e);
 
-			const auto & tool = r.get<data::imgui_tool>(e);
-			if (!remove_tool_from_entry(tool, root_entry))
+			const auto & comp = r.get<tool>(e);
+			if (!remove_tool_from_entry(comp, root_entry))
 				kengine_assert_failed(r, "Removed ImGui tool was not found in map");
 		}
 
-		bool remove_tool_from_entry(const data::imgui_tool & tool, menu_entry & entry) noexcept {
+		bool remove_tool_from_entry(const tool & comp, menu_entry & entry) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			if (entry.tool == &tool)
+			if (entry.comp == &comp)
 				return true;
 
 			for (auto it = entry.subentries.begin(); it != entry.subentries.end(); ++it) {
 				auto & subentry = it->second;
-				if (remove_tool_from_entry(tool, subentry)) {
+				if (remove_tool_from_entry(comp, subentry)) {
 					if (subentry.subentries.empty())
 						entry.subentries.erase(it);
 					return true;
@@ -171,7 +173,7 @@ namespace kengine::systems {
 
 		void save_tools() noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "imgui_tool", "Saving to " KENGINE_IMGUI_TOOLS_SAVE_FILE);
+			kengine_log(r, log, log_category, "Saving to " KENGINE_IMGUI_TOOLS_SAVE_FILE);
 
 			std::ofstream f(KENGINE_IMGUI_TOOLS_SAVE_FILE);
 			if (!f) {
@@ -182,10 +184,10 @@ namespace kengine::systems {
 			putils::ini_file output_configuration;
 			auto & section = output_configuration.sections["Tools"];
 
-			const auto sorted = core::sort::get_name_sorted_entities<KENGINE_IMGUI_MAX_TOOLS, data::imgui_tool>(r);
-			for (const auto & [e, name, tool] : sorted) {
-				std::string value = putils::to_string(tool->enabled);
-				kengine_logf(r, verbose, "imgui_tool", "Saving %s (%s)", name->name.c_str(), value.c_str());
+			const auto sorted = core::sort::get_name_sorted_entities<KENGINE_IMGUI_MAX_TOOLS, tool>(r);
+			for (const auto & [e, name, comp] : sorted) {
+				std::string value = putils::to_string(comp->enabled);
+				kengine_logf(r, verbose, log_category, "Saving %s (%s)", name->name.c_str(), value.c_str());
 				section.values[name->name.c_str()] = std::move(value);
 			}
 
@@ -194,7 +196,7 @@ namespace kengine::systems {
 	};
 
 	DEFINE_KENGINE_SYSTEM_CREATOR(
-		imgui_tool,
-		imgui_tool::processed
+		system,
+		system::processed
 	)
 }

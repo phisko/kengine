@@ -20,10 +20,10 @@
 #include "kengine/model_instance/data/instance.hpp"
 
 // kengine imgui
-#include "kengine/imgui/helpers/imgui_helper.hpp"
+#include "kengine/imgui/helpers/get_scale.hpp"
 
 // kengine imgui/tool
-#include "kengine/imgui/tool/data/imgui_tool.hpp"
+#include "kengine/imgui/tool/data/tool.hpp"
 
 // kengine main_loop
 #include "kengine/main_loop/functions/execute.hpp"
@@ -44,7 +44,7 @@ namespace kengine::systems {
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 
 			e.emplace<core::name>("Entities/Editor");
-			auto & tool = e.emplace<data::imgui_tool>(true);
+			auto & tool = e.emplace<imgui::tool::tool>(true);
 			enabled = &tool.enabled;
 		}
 
@@ -57,7 +57,7 @@ namespace kengine::systems {
 				return;
 			}
 
-			const auto scale = imgui_helper::get_scale(r);
+			const auto scale = imgui::get_scale(r);
 			for (const auto selected : r.view<core::selected>()) {
 				bool open = true;
 

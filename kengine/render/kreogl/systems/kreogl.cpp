@@ -47,9 +47,9 @@
 #include "kengine/glm/helpers/get_model_matrix.hpp"
 
 // kengine imgui
-#include "kengine/imgui/data/imgui_context.hpp"
-#include "kengine/imgui/data/imgui_scale.hpp"
-#include "kengine/imgui/helpers/imgui_helper.hpp"
+#include "kengine/imgui/data/context.hpp"
+#include "kengine/imgui/data/scale.hpp"
+#include "kengine/imgui/helpers/get_scale.hpp"
 
 // kengine main_loop
 #include "kengine/main_loop/data/keep_alive.hpp"
@@ -119,11 +119,11 @@ namespace kengine::systems {
 
 			e.emplace<functions::execute>(putils_forward_to_this(execute));
 
-			auto & scale = e.emplace<data::imgui_scale>();
+			auto & scale = e.emplace<imgui::scale>();
 			e.emplace<adjustable::adjustable>() = {
 				"ImGui",
 				{
-					{ "Scale", &scale.scale },
+					{ "Scale", &scale.modifier },
 				}
 			};
 
@@ -170,7 +170,7 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, log, "kreogl", "Initializing ImGui");
 
-			r.emplace<data::imgui_context>(window_entity, ImGui::CreateContext());
+			r.emplace<imgui::context>(window_entity, ImGui::CreateContext());
 
 			auto & io = ImGui::GetIO();
 			io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
@@ -546,7 +546,7 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, very_verbose, "kreogl", "Updating ImGui scale");
 
-			const auto scale = imgui_helper::get_scale(r);
+			const auto scale = imgui::get_scale(r);
 			ImGui::GetIO().FontGlobalScale = scale;
 			ImGui::GetStyle().ScaleAllSizes(scale / last_scale);
 			last_scale = scale;

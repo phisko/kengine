@@ -2,11 +2,11 @@
 
 #include "putils/reflection.hpp"
 
-#define refltype kengine::data::imgui_scale
+#define refltype kengine::imgui::scale
 putils_reflection_info {
 	putils_reflection_class_name;
 	putils_reflection_attributes(
-		putils_reflection_attribute(scale)
+		putils_reflection_attribute(modifier)
 	);
 };
 #undef refltype
