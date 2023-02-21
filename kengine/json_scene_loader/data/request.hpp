@@ -10,11 +10,11 @@
 // putils
 #include "putils/string.hpp"
 
-namespace kengine::data {
+namespace kengine::json_scene_loader {
 	//! putils reflect all
 	//! used_types: [refltype::string]
-	struct json_scene_loader {
-		static constexpr char string_name[] = "json_scene_loader_string";
+	struct request {
+		static constexpr char string_name[] = "json_scene_loader_request_string";
 		using string = putils::string<KENGINE_JSON_SCENE_LOADER_STRING_MAX_LENGTH, string_name>;
 
 		string temporary_scene;
@@ -23,4 +23,4 @@ namespace kengine::data {
 	};
 }
 
-#include "json_scene_loader.rpp"
+#include "request.rpp"

@@ -1,4 +1,4 @@
-# [json_scene_loader](json_scene_loader.hpp)
+# [request](request.hpp)
 
 Component that specifies loading steps for a scene.
 
