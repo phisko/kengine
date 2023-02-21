@@ -7,8 +7,8 @@
 // kengine main_loop
 #include "kengine/main_loop/data/keep_alive.hpp"
 #include "kengine/main_loop/functions/execute.hpp"
-#include "kengine/main_loop/helpers/is_running.hpp"
-#include "kengine/main_loop/helpers/main_loop.hpp"
+#include "kengine/main_loop/helpers/stop_running.hpp"
+#include "kengine/main_loop/helpers/run.hpp"
 
 TEST(main_loop, run) {
 	entt::registry r;
@@ -16,11 +16,11 @@ TEST(main_loop, run) {
 	size_t calls = 0;
 
 	const auto e = r.create();
-	r.emplace<kengine::data::keep_alive>(e);
-	r.emplace<kengine::functions::execute>(
+	r.emplace<kengine::main_loop::keep_alive>(e);
+	r.emplace<kengine::main_loop::execute>(
 		e, [&](float delta_time) {
 			++calls;
-			kengine::stop_running(r);
+			kengine::main_loop::stop_running(r);
 		}
 	);
 
@@ -34,12 +34,12 @@ TEST(main_loop, time_modulated) {
 	size_t calls = 0;
 
 	const auto e = r.create();
-	r.emplace<kengine::data::keep_alive>(e);
-	r.emplace<kengine::functions::execute>(
+	r.emplace<kengine::main_loop::keep_alive>(e);
+	r.emplace<kengine::main_loop::execute>(
 		e, [&](float delta_time) {
 			++calls;
 			EXPECT_NEAR(delta_time, 0.f, .001f);
-			kengine::stop_running(r);
+			kengine::main_loop::stop_running(r);
 		}
 	);
 

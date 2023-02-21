@@ -1,4 +1,4 @@
-#include "is_running.hpp"
+#include "stop_running.hpp"
 
 // entt
 #include <entt/entity/registry.hpp>
@@ -10,8 +10,8 @@
 #include "kengine/main_loop/data/keep_alive.hpp"
 
 namespace kengine::main_loop {
-	bool is_running(const entt::registry & r) noexcept {
-		kengine_log(r, very_verbose, "is_running", "Checking for main_loop::keep_alive");
-		return !r.view<keep_alive>().empty();
+	void stop_running(entt::registry & r) noexcept {
+		kengine_log(r, verbose, "stop_running", "Removing all main_loop::keep_alive");
+		r.clear<keep_alive>();
 	}
 }

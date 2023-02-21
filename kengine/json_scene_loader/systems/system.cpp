@@ -46,7 +46,7 @@ namespace kengine::json_scene_loader {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, log, log_category, "Initializing");
 
-			e.emplace<functions::execute>(putils_forward_to_this(execute));
+			e.emplace<main_loop::execute>(putils_forward_to_this(execute));
 			processor.process();
 		}
 
@@ -64,7 +64,7 @@ namespace kengine::json_scene_loader {
 				// Entity that will wait until all async loading tasks are completed before loading the scene
 				const auto poller = r.create();
 				kengine_logf(r, verbose, log_category, "Creating polling entity [%u]", poller);
-				r.emplace<functions::execute>(poller, [this, e, poller](float delta_time) {
+				r.emplace<main_loop::execute>(poller, [this, e, poller](float delta_time) {
 					if (!r.view<async::task>().empty()) {
 						kengine_log(r, verbose, log_category, "Waiting to load scene (async_tasks are still running)");
 						return;

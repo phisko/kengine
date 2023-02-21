@@ -32,7 +32,7 @@ namespace kengine::input {
 			kengine_log(r, log, log_category, "Initializing");
 
 			buffer = &e.emplace<input::buffer>();
-			e.emplace<functions::execute>(putils_forward_to_this(execute));
+			e.emplace<main_loop::execute>(putils_forward_to_this(execute));
 		}
 
 		void execute(float delta_time) noexcept {

@@ -17,7 +17,7 @@
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 // kengine main_loop
-#include "kengine/main_loop/helpers/is_running.hpp"
+#include "kengine/main_loop/helpers/stop_running.hpp"
 
 // Reflection API for entt::handle
 // We use entt::handle as entt::entity is a scalar and doesn't play well with scripting languages
@@ -69,7 +69,7 @@ namespace kengine::script_language_helper {
 			"stop_running",
 			function<void()>(
 				[&] {
-					stop_running(r);
+					main_loop::stop_running(r);
 				}
 			)
 		);

@@ -63,7 +63,7 @@ namespace kengine::imgui::tool {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, log, log_category, "Initializing");
 
-			e.emplace<functions::execute>(putils_forward_to_this(execute));
+			e.emplace<main_loop::execute>(putils_forward_to_this(execute));
 
 			std::ifstream f(KENGINE_IMGUI_TOOLS_SAVE_FILE);
 			f >> configuration;

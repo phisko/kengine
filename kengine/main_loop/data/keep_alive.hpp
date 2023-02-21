@@ -1,6 +1,6 @@
 #pragma once
 
-namespace kengine::data {
+namespace kengine::main_loop {
 	//! putils reflect all
 	struct keep_alive {};
 }

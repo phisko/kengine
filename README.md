@@ -97,11 +97,11 @@ To call a function component, one can use its `operator()` or its `call` functio
 ```cpp
 entt::registry r;
 const auto e = r.create();
-r.emplace<functions::execute>(e,
+r.emplace<main_loop::execute>(e,
     [](float delta_time) { std::cout << "Yay!" << std::endl; }
 );
 
-const auto & execute = r.get<functions::execute>(e); // Get the function
+const auto & execute = r.get<main_loop::execute>(e); // Get the function
 execute(0.f); // Call it with its parameters
 execute.call(42.f); // Alternatively
 ```
