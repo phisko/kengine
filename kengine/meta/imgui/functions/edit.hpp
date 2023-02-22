@@ -3,11 +3,11 @@
 // kengine functions
 #include "kengine/base_function.hpp"
 
-namespace kengine::meta {
-	using edit_imgui_signature = void(entt::handle);
-	struct edit_imgui : base_function<edit_imgui_signature> {};
+namespace kengine::meta::imgui {
+	using edit_signature = void(entt::handle);
+	struct edit : base_function<edit_signature> {};
 }
 
-#define refltype kengine::meta::edit_imgui
+#define refltype kengine::meta::imgui::edit
 kengine_function_reflection_info;
 #undef refltype

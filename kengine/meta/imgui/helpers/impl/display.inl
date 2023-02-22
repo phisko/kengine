@@ -1,4 +1,4 @@
-#include "display_imgui.hpp"
+#include "display.hpp"
 
 // entt
 #include <entt/entity/handle.hpp>
@@ -12,16 +12,16 @@
 
 namespace kengine::meta {
 	template<typename T>
-	void meta_component_implementation<display_imgui, T>::function(entt::const_handle e) noexcept {
+	void meta_component_implementation<imgui::display, T>::function(entt::const_handle e) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_logf(*e.registry(), very_verbose, "meta::display_imgui", "Displaying [%u]'s %s", e.entity(), putils::reflection::get_class_name<T>());
+		kengine_logf(*e.registry(), very_verbose, "meta::imgui::display", "Displaying [%u]'s %s", e.entity(), putils::reflection::get_class_name<T>());
 
 		const T * comp = nullptr;
 
 		if constexpr (!std::is_empty<T>())
 			comp = e.try_get<T>();
 		else {
-			kengine_log(*e.registry(), very_verbose, "meta::display_imgui", "Component is empty, using static instance");
+			kengine_log(*e.registry(), very_verbose, "meta::imgui::display", "Component is empty, using static instance");
 			static constexpr T instance;
 			comp = &instance;
 		}
@@ -29,6 +29,6 @@ namespace kengine::meta {
 		if (comp)
 			putils::reflection::imgui_edit(*comp);
 		else
-			kengine_log(*e.registry(), very_verbose, "meta::display_imgui", "Component not found");
+			kengine_log(*e.registry(), very_verbose, "meta::imgui::display", "Component not found");
 	}
 }

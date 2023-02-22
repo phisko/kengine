@@ -1,4 +1,4 @@
-# [save_to_json](save_to_json.hpp)
+# [save](save.hpp)
 
 `Meta component` that serializes the parent component into a [JSON](https://github.com/nlohmann/json) object. 
 
@@ -16,7 +16,7 @@ nlohmann::json (entt::const_handle);
 
 It is up to the user to implement this `meta component` for the component types they wish to be able to parse.
 
-A [standard implementation](../helpers/impl/save_to_json.md) is provided.
+A [standard implementation](../helpers/impl/save.md) is provided.
 
 Note that the implementation is only a sample, and users may freely replace it with any other implementation they desire.
 

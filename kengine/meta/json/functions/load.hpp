@@ -6,11 +6,11 @@
 // kengine functions
 #include "kengine/base_function.hpp"
 
-namespace kengine::meta {
-	using load_from_json_signature = void(const nlohmann::json &, entt::handle);
-	struct load_from_json : base_function<load_from_json_signature> {};
+namespace kengine::meta::json {
+	using load_signature = void(const nlohmann::json &, entt::handle);
+	struct load : base_function<load_signature> {};
 }
 
-#define refltype kengine::meta::load_from_json
+#define refltype kengine::meta::json::load
 kengine_function_reflection_info;
 #undef refltype
