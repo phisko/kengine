@@ -10,9 +10,9 @@
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
-namespace kengine {
+namespace kengine::meta {
 	template<typename T>
-	void meta_component_implementation<meta::edit_imgui, T>::function(entt::handle e) noexcept {
+	void meta_component_implementation<edit_imgui, T>::function(entt::handle e) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		kengine_logf(*e.registry(), very_verbose, "meta::edit_imgui", "Editing [%u]'s %s", e.entity(), putils::reflection::get_class_name<T>());
 

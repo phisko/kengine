@@ -3,7 +3,7 @@
 // entt
 #include <entt/entity/fwd.hpp>
 
-namespace kengine {
+namespace kengine::meta {
 	template<typename... Comps>
 	void register_component_with_script_languages(entt::registry & r) noexcept;
 

@@ -9,9 +9,9 @@
 // kengine helpers
 #include "kengine/meta/helpers/register_meta_component_implementation.hpp"
 
-namespace kengine {
+namespace kengine::meta {
 	template<typename T>
-	struct meta_component_implementation<meta::save_to_json, T> : std::true_type {
+	struct meta_component_implementation<save_to_json, T> : std::true_type {
 		static nlohmann::json function(entt::const_handle e) noexcept;
 	};
 }

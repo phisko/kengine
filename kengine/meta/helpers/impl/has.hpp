@@ -7,11 +7,11 @@
 #include "kengine/meta/functions/has.hpp"
 
 // kengine helpers
-#include "kengine/meta/helpers/register_meta_component_implementation.hpp"
+#include "meta_component_implementation.hpp"
 
-namespace kengine {
+namespace kengine::meta {
 	template<typename T>
-	struct meta_component_implementation<meta::has, T> : std::true_type {
+	struct meta_component_implementation<has, T> : std::true_type {
 		static bool function(entt::const_handle e) noexcept;
 	};
 }

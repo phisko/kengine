@@ -17,23 +17,24 @@
 // kengine scripting/python
 #include "kengine/scripting/python/helpers/python_helper.hpp"
 
-namespace kengine {
+namespace kengine::meta {
+
 	template<typename... Comps>
 	void register_component_with_script_languages(entt::registry & r) noexcept {
-		kengine_log(r, verbose, "register_storage", "Registering components");
+		kengine_log(r, verbose, "meta", "Registering components");
 		register_with_script_languages<true, Comps...>(r);
 	}
 
 	template<typename... Comps>
 	void register_type_with_script_languages(entt::registry & r) noexcept {
-		kengine_log(r, verbose, "register_storage", "Registering non-components");
+		kengine_log(r, verbose, "meta", "Registering non-components");
 		register_with_script_languages<false, Comps...>(r);
 	}
 
 	template<bool IsComponent, typename... Comps>
 	void register_with_script_languages(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_log(r, verbose, "register_storage", "Registering types");
+		kengine_log(r, verbose, "meta", "Registering types");
 
 		using language_registrator = void(entt::registry &);
 		static constexpr language_registrator * language_registrators[] = {
@@ -62,10 +63,10 @@ namespace kengine {
 
 		putils::for_each_type<Comps...>([&](auto && t) noexcept {
 			using type = putils_wrapped_type(t);
-			kengine_logf(r, verbose, "register_with_script_languages", "Registering used types for %s", putils::reflection::get_class_name<type>());
+			kengine_logf(r, verbose, "meta", "Registering used types for %s", putils::reflection::get_class_name<type>());
 			putils::reflection::for_each_used_type<type>([&](auto && t) noexcept {
 				using used_type = putils_wrapped_type(t.type);
-				kengine_logf(r, verbose, "register_with_script_languages", "Registering %s", putils::reflection::get_class_name<used_type>());
+				kengine_logf(r, verbose, "meta", "Registering %s", putils::reflection::get_class_name<used_type>());
 				register_with_script_languages<false, used_type>(r);
 			});
 		});
@@ -74,7 +75,7 @@ namespace kengine {
 	template<typename F>
 	void register_with_script_languages(const entt::registry & r, const char * name, F && func) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_logf(r, verbose, "register_with_script_languages", "Registering function %s", name);
+		kengine_logf(r, verbose, "meta", "Registering function %s", name);
 
 #ifdef KENGINE_SCRIPTING_PYTHON
 		python_helper::register_function(r, name, func);

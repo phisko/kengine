@@ -29,11 +29,11 @@
 #include "kengine/meta/json/helpers/impl/load_from_json.hpp"
 #include "kengine/meta/json/helpers/impl/save_to_json.hpp"
 
-namespace kengine {
+namespace kengine::meta {
 	template<typename... Comps>
 	void register_meta_components(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_log(r, verbose, "register_meta_components", "Registering meta components");
+		kengine_log(r, verbose, "meta", "Registering meta components");
 
 		using component_registrator = void(entt::registry &);
 		std::vector<component_registrator *> registrators;
@@ -52,7 +52,7 @@ namespace kengine {
 			meta::save_to_json>([&](auto t) {
 			using type = putils_wrapped_type(t);
 
-			kengine_logf(r, verbose, "register_meta_components", "Pre-instantiating storage for %s", putils::reflection::get_class_name<type>());
+			kengine_logf(r, verbose, "meta", "Pre-instantiating storage for %s", putils::reflection::get_class_name<type>());
 			r.storage<type>();
 			registrators.emplace_back(register_meta_component_implementation<type, Comps...>);
 		});

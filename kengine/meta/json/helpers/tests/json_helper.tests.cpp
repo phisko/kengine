@@ -19,8 +19,8 @@ struct json_helper : ::testing::Test {
 	entt::registry r;
 
 	json_helper() noexcept {
-		kengine::register_metadata<kengine::core::name, kengine::core::transform>(r);
-		kengine::register_meta_components<kengine::core::name, kengine::core::transform>(r);
+		kengine::meta::register_metadata<kengine::core::name, kengine::core::transform>(r);
+		kengine::meta::register_meta_components<kengine::core::name, kengine::core::transform>(r);
 		json["name"]["name"] = expected_name;
 		auto & transform = json["transform"];
 		auto & bounding_box = transform["bounding_box"];

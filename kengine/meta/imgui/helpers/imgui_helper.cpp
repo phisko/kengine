@@ -15,7 +15,7 @@
 #include "kengine/meta/functions/has.hpp"
 #include "kengine/meta/functions/emplace_or_replace.hpp"
 #include "kengine/meta/functions/remove.hpp"
-#include "kengine/meta/helpers/type_helper.hpp"
+#include "kengine/meta/helpers/get_type_entity.hpp"
 
 // kengine meta/imgui
 #include "kengine/meta/imgui/functions/display_imgui.hpp"

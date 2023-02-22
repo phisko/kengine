@@ -30,8 +30,8 @@
 	entt::entity register_##system_name(entt::registry & r) noexcept { \
 		KENGINE_PROFILING_SCOPE; \
 \
-		kengine::register_storage<system_name>(r); \
-		kengine::register_storage<__VA_ARGS__>(r); \
+		kengine::meta::register_storage<system_name>(r); \
+		kengine::meta::register_storage<__VA_ARGS__>(r); \
 \
 		const entt::handle e{ r, r.create() }; \
 		kengine_logf(r, verbose, "system_creator", "Registering " #system_name " system as [%u]", e.entity()); \
