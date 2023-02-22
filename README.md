@@ -114,7 +114,7 @@ The engine uses "type entities" to hold information about the various components
 
 Meta components are attached to these "type entities", and hold a generic function's implementation for that specific type. Because they hold functions, they are very similar to function components.
 
-An example makes this clearer: [edit_imgui](kengine/meta/imgui/functions/edit_imgui.md) is a meta component that, when called, will draw its "parent component"'s properties using [ImGui](https://github.com/ocornut/imgui/) for the given entity. The following code will display a window to edit `e`'s [name](kengine/core/data/name.md) component.
+An example makes this clearer: [meta::imgui::edit](kengine/meta/imgui/functions/edit.md) is a meta component that, when called, will draw its "parent component"'s properties using [ImGui](https://github.com/ocornut/imgui/) for the given entity. The following code will display a window to edit `e`'s [name](kengine/core/data/name.md) component.
 
 ```cpp
 // r is a registry with the "type entity" for `name` already setup
@@ -123,9 +123,9 @@ const auto e = r.create();
 r.emplace<core::name>(e);
 
 const auto type_entity = type_helper::get_type_entity<core::name>(r);
-const auto & edit_imgui = r.get<meta::edit_imgui>(type_entity);
+const auto & edit = r.get<meta::imgui::edit>(type_entity);
 if (ImGui::Begin("Edit name"))
-    edit_imgui({ r, e });
+    edit({ r, e });
 ImGui::End();
 ```
 
@@ -136,8 +136,8 @@ If you generalize this, you can edit all the components for an entity with the f
 // e is an entity with an unknown set of components
 
 if (ImGui::Begin("Edit entity"))
-    for (const auto & [type_entity, edit_imgui] : r.view<meta::edit_imgui>()) {
-        edit_imgui({ r, e });
+    for (const auto & [type_entity, edit] : r.view<meta::imgui::edit>()) {
+        edit({ r, e });
     }
 ImGui::End();
 ```

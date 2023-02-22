@@ -1,4 +1,4 @@
-#include "imgui_entity_editor.hpp"
+#include "system.hpp"
 
 // entt
 #include <entt/entity/handle.hpp>
@@ -29,35 +29,37 @@
 #include "kengine/main_loop/functions/execute.hpp"
 
 // kengine meta/imgui
-#include "kengine/meta/imgui/helpers/imgui_helper.hpp"
+#include "kengine/meta/imgui/helpers/edit_entity.hpp"
 
-namespace kengine::systems {
-	struct imgui_entity_editor {
+namespace kengine::meta::imgui::entity_editor {
+	static constexpr auto log_category = "meta_imgui_entity_editor";
+
+	struct system {
 		entt::registry & r;
 		bool * enabled;
 
-		imgui_entity_editor(entt::handle e) noexcept
+		system(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "imgui_entity_editor", "Initializing");
+			kengine_log(r, log, log_category, "Initializing");
 
 			e.emplace<main_loop::execute>(putils_forward_to_this(execute));
 
 			e.emplace<core::name>("Entities/Editor");
-			auto & tool = e.emplace<imgui::tool::tool>(true);
+			auto & tool = e.emplace<kengine::imgui::tool::tool>(true);
 			enabled = &tool.enabled;
 		}
 
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, very_verbose, "imgui_entity_editor", "Executing");
+			kengine_log(r, very_verbose, log_category, "Executing");
 
 			if (!*enabled) {
-				kengine_log(r, very_verbose, "imgui_entity_editor", "Disabled");
+				kengine_log(r, very_verbose, log_category, "Disabled");
 				return;
 			}
 
-			const auto scale = imgui::get_scale(r);
+			const auto scale = kengine::imgui::get_scale(r);
 			for (const auto selected : r.view<core::selected>()) {
 				bool open = true;
 
@@ -68,19 +70,19 @@ namespace kengine::systems {
 					name ?
 					putils::string<64>("%s##[%d]", name->name.c_str(), selected) :
 					putils::string<64>("[%d] Entity editor", selected);
-				kengine_logf(r, very_verbose, "imgui_entity_editor", "Displaying [%u] (%s)", selected, window_title.c_str());
+				kengine_logf(r, very_verbose, log_category, "Displaying [%u] (%s)", selected, window_title.c_str());
 
 				if (ImGui::Begin(window_title.c_str(), &open, ImGuiWindowFlags_NoSavedSettings))
-					imgui_helper::edit_entity_and_model({ r, selected });
+					edit_entity_and_model({ r, selected });
 				ImGui::End();
 
 				if (!open) {
-					kengine_logf(r, log, "imgui_entity_editor", "De-selecting [%u]", selected);
+					kengine_logf(r, log, log_category, "De-selecting [%u]", selected);
 					r.remove<core::selected>(selected);
 				}
 			}
 		}
 	};
 
-	DEFINE_KENGINE_SYSTEM_CREATOR(imgui_entity_editor)
+	DEFINE_KENGINE_SYSTEM_CREATOR(system)
 }

@@ -6,13 +6,11 @@
 // kengine functions
 #include "kengine/base_function.hpp"
 
-namespace kengine {
-	namespace meta {
-		using save_to_json_signature = nlohmann::json(entt::const_handle);
-		struct save_to_json : base_function<save_to_json_signature> {};
-	}
+namespace kengine::meta::json {
+	using save_signature = nlohmann::json(entt::const_handle);
+	struct save : base_function<save_signature> {};
 }
 
-#define refltype kengine::meta::save_to_json
+#define refltype kengine::meta::json::save
 kengine_function_reflection_info;
 #undef refltype

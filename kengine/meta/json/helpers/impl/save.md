@@ -1,3 +1,3 @@
-# [save_to_json](save_to_json.hpp)
+# [save](save.hpp)
 
-Standard implementation of the [save_to_json](../../functions/save_to_json.md) `meta component`.
+Standard implementation of the [save](../../functions/save.md) `meta component`.

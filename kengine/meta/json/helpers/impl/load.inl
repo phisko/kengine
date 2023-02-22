@@ -1,4 +1,4 @@
-#include "load_from_json.hpp"
+#include "load.hpp"
 
 // entt
 #include <entt/entity/handle.hpp>
@@ -11,13 +11,13 @@
 
 namespace kengine::meta {
 	template<typename T>
-	void meta_component_implementation<load_from_json, T>::function(const nlohmann::json & json_entity, entt::handle e) noexcept {
+	void meta_component_implementation<json::load, T>::function(const nlohmann::json & json_entity, entt::handle e) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_logf(*e.registry(), very_verbose, "meta::load_from_json", "Loading [%u]'s %s from JSON", e.entity(), putils::reflection::get_class_name<T>());
+		kengine_logf(*e.registry(), very_verbose, "meta::json::load", "Loading [%u]'s %s from JSON", e.entity(), putils::reflection::get_class_name<T>());
 
 		const auto it = json_entity.find(putils::reflection::get_class_name<T>());
 		if (it == json_entity.end()) {
-			kengine_log(*e.registry(), very_verbose, "meta::load_from_json", "Component not found in JSON");
+			kengine_log(*e.registry(), very_verbose, "meta::json::load", "Component not found in JSON");
 			return;
 		}
 
@@ -27,7 +27,7 @@ namespace kengine::meta {
 			e.emplace_or_replace<T>(std::move(comp));
 		}
 		else {
-			kengine_log(*e.registry(), very_verbose, "meta::load_from_json", "Component is empty, not parsing anything");
+			kengine_log(*e.registry(), very_verbose, "meta::json::load", "Component is empty, not parsing anything");
 			e.emplace<T>();
 		}
 	}

@@ -21,7 +21,7 @@
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 // kengine meta/json
-#include "kengine/meta/json/helpers/json_helper.hpp"
+#include "kengine/meta/json/helpers/load_entity.hpp"
 
 // kengine helpers
 #include "kengine/async/helpers/start_task.hpp"
@@ -133,7 +133,7 @@ namespace kengine::json_scene_loader {
 				const auto e = r.create();
 				kengine_logf(r, verbose, log_category, "Creating temporary [%u]", e);
 				scene.loaded_entities.push_back(e);
-				json_helper::load_entity(json, { r, e });
+				meta::json::load_entity(json, { r, e });
 			}
 
 			kengine_log(r, log, log_category, "Temporary scene loaded");
@@ -157,7 +157,7 @@ namespace kengine::json_scene_loader {
 				std::ifstream f(entry.path());
 				const auto json = nlohmann::json::parse(f);
 				kengine_logf(r, verbose, log_category, "Creating model [%u]", e);
-				json_helper::load_entity(json, { r, e });
+				meta::json::load_entity(json, { r, e });
 			}
 
 			return {};
@@ -178,7 +178,7 @@ namespace kengine::json_scene_loader {
 			for (const auto & json : scene_json) {
 				const auto e = r.create();
 				kengine_logf(r, verbose, log_category, "Creating [%u]", e);
-				json_helper::load_entity(json, { r, e });
+				meta::json::load_entity(json, { r, e });
 			}
 
 			kengine_log(r, log, log_category, "Scene loaded");
