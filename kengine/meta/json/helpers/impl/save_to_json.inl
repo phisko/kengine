@@ -9,9 +9,9 @@
 // kengine core
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
-namespace kengine {
+namespace kengine::meta {
 	template<typename T>
-	nlohmann::json meta_component_implementation<meta::save_to_json, T>::function(entt::const_handle e) noexcept {
+	nlohmann::json meta_component_implementation<save_to_json, T>::function(entt::const_handle e) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		kengine_logf(*e.registry(), very_verbose, "meta::save_to_json", "Saving [%u]'s %s to JSON", e.entity(), putils::reflection::get_class_name<T>());
 

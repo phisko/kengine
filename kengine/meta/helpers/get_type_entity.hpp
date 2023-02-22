@@ -3,9 +3,9 @@
 // entt
 #include <entt/entity/fwd.hpp>
 
-namespace kengine::type_helper {
+namespace kengine::meta {
 	template<typename T>
 	entt::entity get_type_entity(entt::registry & r) noexcept;
 }
 
-#include "type_helper.inl"
+#include "get_type_entity.inl"

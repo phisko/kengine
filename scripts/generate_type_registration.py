@@ -18,13 +18,13 @@ Registration files should contain the following format:
 {
 	"pre_registrations": [
 		{
-			"registration": "kengine::register_metadata",
+			"registration": "kengine::meta::register_metadata",
 			"header": "kengine/helpers/meta/register_metadata.hpp"
 		},
 	]
 	"registrations": [
 		{
-			"registration": "kengine::register_component_with_script_languages",
+			"registration": "kengine::meta::register_component_with_script_languages",
 			"header": "kengine/helpers/meta/register_with_script_languages.hpp"
 		},
 		...

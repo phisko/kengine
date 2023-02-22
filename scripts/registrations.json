@@ -1,21 +1,21 @@
 {
 	"pre_registrations": [
 		{
-			"registration": "kengine::register_storage",
+			"registration": "kengine::meta::register_storage",
 			"header": "kengine/meta/helpers/register_storage.hpp"
 		},
 		{
-			"registration": "kengine::register_metadata",
+			"registration": "kengine::meta::register_metadata",
 			"header": "kengine/meta/helpers/register_metadata.hpp"
 		}
 	],
 	"registrations": [
 		{
-			"registration": "kengine::register_meta_components",
+			"registration": "kengine::meta::register_meta_components",
 			"header": "kengine/meta/helpers/register_meta_components.hpp"
 		},
 		{
-			"registration": "kengine::register_component_with_script_languages",
+			"registration": "kengine::meta::register_component_with_script_languages",
 			"header": "kengine/meta/helpers/register_with_script_languages.hpp"
 		}
 	]

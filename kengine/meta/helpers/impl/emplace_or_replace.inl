@@ -8,7 +8,7 @@
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
-namespace kengine {
+namespace kengine::meta {
 	namespace impl {
 		// Helper function to handle non-movable types
 		template<typename T>
@@ -25,7 +25,7 @@ namespace kengine {
 	}
 
 	template<typename T>
-	void meta_component_implementation<meta::emplace_or_replace, T>::function(entt::handle e, const void * comp) noexcept {
+	void meta_component_implementation<emplace_or_replace, T>::function(entt::handle e, const void * comp) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		kengine_logf(*e.registry(), very_verbose, "meta::emplace_or_replace", "Emplacing or replacing [%u]'s %s", e.entity(), putils::reflection::get_class_name<T>());
 
@@ -43,7 +43,7 @@ namespace kengine {
 	}
 
 	template<typename T>
-	void meta_component_implementation<meta::emplace_or_replace_move, T>::function(entt::handle e, void * comp) noexcept {
+	void meta_component_implementation<emplace_or_replace_move, T>::function(entt::handle e, void * comp) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		kengine_logf(*e.registry(), very_verbose, "meta::emplace_or_replace_move", "Emplacing or replacing [%u]'s %s by move", e.entity(), putils::reflection::get_class_name<T>());
 

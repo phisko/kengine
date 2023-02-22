@@ -114,7 +114,7 @@ The engine uses "type entities" to hold information about the various components
 
 Meta components are attached to these "type entities", and hold a generic function's implementation for that specific type. Because they hold functions, they are very similar to function components.
 
-An example makes this clearer: [edit_imgui](kengine/meta/functions/edit_imgui.md) is a meta component that, when called, will draw its "parent component"'s properties using [ImGui](https://github.com/ocornut/imgui/) for the given entity. The following code will display a window to edit `e`'s [name](kengine/core/data/name.md) component.
+An example makes this clearer: [edit_imgui](kengine/meta/imgui/functions/edit_imgui.md) is a meta component that, when called, will draw its "parent component"'s properties using [ImGui](https://github.com/ocornut/imgui/) for the given entity. The following code will display a window to edit `e`'s [name](kengine/core/data/name.md) component.
 
 ```cpp
 // r is a registry with the "type entity" for `name` already setup

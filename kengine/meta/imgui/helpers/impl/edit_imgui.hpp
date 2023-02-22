@@ -7,11 +7,11 @@
 #include "kengine/meta/imgui/functions/edit_imgui.hpp"
 
 // kengine helpers
-#include "kengine/meta/helpers/register_meta_component_implementation.hpp"
+#include "kengine/meta/helpers/impl/meta_component_implementation.hpp"
 
-namespace kengine {
+namespace kengine::meta {
 	template<typename T>
-	struct meta_component_implementation<meta::edit_imgui, T> : std::true_type {
+	struct meta_component_implementation<edit_imgui, T> : std::true_type {
 		static void function(entt::handle e) noexcept;
 	};
 }

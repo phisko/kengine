@@ -9,17 +9,17 @@
 #include "kengine/core/data/transform.hpp"
 
 // kengine meta
-#include "kengine/meta/helpers/attribute_helper.hpp"
+#include "kengine/meta/helpers/find_attribute.hpp"
 #include "kengine/meta/helpers/register_metadata.hpp"
-#include "kengine/meta/helpers/type_helper.hpp"
+#include "kengine/meta/helpers/get_type_entity.hpp"
 
-TEST(attribute_helper, find_attribute) {
+TEST(meta, find_attribute) {
 	entt::registry r;
-	kengine::register_metadata<kengine::core::transform>(r);
+	kengine::meta::register_metadata<kengine::core::transform>(r);
 
-	const auto e = kengine::type_helper::get_type_entity<kengine::core::transform>(r);
+	const auto e = kengine::meta::get_type_entity<kengine::core::transform>(r);
 
-	const auto attr = kengine::meta::attribute_helper::find_attribute({ r, e }, "bounding_box");
+	const auto attr = kengine::meta::find_attribute({ r, e }, "bounding_box");
 	EXPECT_NE(attr, nullptr);
 
 	const auto expected = putils::reflection::runtime::find_attribute<kengine::core::transform>("bounding_box");

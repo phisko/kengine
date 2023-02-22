@@ -6,7 +6,7 @@ Helper functions for [ImGui](https://github.com/ocornut/imgui) + kengine operati
 
 `display_entity` and `edit_entity` are implemented in terms of `meta components`.
 
-For components to appear in the ImGui tree, the [display_imgui](../../meta/functions/display_imgui.md)/[edit_imgui](../../meta/functions/display_imgui.md) `meta components` must first have been registered for them, along with the basic [has](../../meta/functions/has.md), [emplace_or_replace](../../meta/functions/emplace_or_replace.md) and [remove](../../meta/functions/remove.md).
+For components to appear in the ImGui tree, the [display_imgui](../functions/display_imgui.md)/[edit_imgui](../functions/edit_imgui.md) `meta components` must first have been registered for them, along with the basic [has](../../functions/has.md), [emplace_or_replace](../../functions/emplace_or_replace.md) and [remove](../../functions/remove.md).
 
 ## Members
 
@@ -32,4 +32,4 @@ Displays an entity as an ImGui tree with write-enabled attributes.
 float get_scale(const entt::registry & r) noexcept;
 ```
 
-Returns the desired scale for all ImGui elements, calculated based on all existing [imgui_scale components](../data/imgui_scale.md).
+Returns the desired scale for all ImGui elements, calculated based on all existing [imgui_scale components](../../../imgui/data/scale.md).

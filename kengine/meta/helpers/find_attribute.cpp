@@ -1,4 +1,4 @@
-#include "attribute_helper.hpp"
+#include "find_attribute.hpp"
 
 // entt
 #include <entt/entity/handle.hpp>
@@ -9,15 +9,16 @@
 // kengine core
 #include "kengine/core/data/name.hpp"
 #include "kengine/core/assert/helpers/kengine_assert.hpp"
+#include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 // kengine meta
-#include "kengine/meta/helpers/type_helper.hpp"
+#include "kengine/meta/helpers/get_type_entity.hpp"
 
-namespace kengine::meta::attribute_helper {
+namespace kengine::meta {
 	const putils::reflection::runtime::attribute_info * find_attribute(entt::handle type_entity, std::string_view path, std::string_view separator) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_logf(*type_entity.registry(), very_verbose, "attribute_helper", "Finding [%u]'s '%s' attribute ", type_entity.entity(), std::string(path).c_str());
+		kengine_logf(*type_entity.registry(), very_verbose, "meta", "Finding [%u]'s '%s' attribute ", type_entity.entity(), std::string(path).c_str());
 
 		const auto attrs = type_entity.try_get<attributes>();
 		if (!attrs) {

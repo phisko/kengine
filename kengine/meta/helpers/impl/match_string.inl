@@ -15,7 +15,7 @@
 // kengine core
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
-namespace kengine {
+namespace kengine::meta {
 	namespace impl {
 		template<typename Member>
 		static bool match_attribute(const Member & member, const char * str) noexcept {
@@ -70,7 +70,7 @@ namespace kengine {
 	}
 
 	template<typename T>
-	bool meta_component_implementation<meta::match_string, T>::function(entt::const_handle e, const char * str) noexcept {
+	bool meta_component_implementation<match_string, T>::function(entt::const_handle e, const char * str) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		kengine_logf(*e.registry(), very_verbose, "meta::match_string", "Matching [%u]'s %s against %s", e.entity(), putils::reflection::get_class_name<T>(), str);
 

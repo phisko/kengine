@@ -8,11 +8,11 @@
 #include "register_storage.hpp"
 #include "register_with_script_languages.hpp"
 
-namespace kengine {
+namespace kengine::meta {
 	template<typename... Comps>
 	void register_everything(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_log(r, verbose, "register_everything", "Registering types");
+		kengine_log(r, verbose, "meta", "Registering types");
 
 		register_storage<Comps...>(r);
 		register_metadata<Comps...>(r);
