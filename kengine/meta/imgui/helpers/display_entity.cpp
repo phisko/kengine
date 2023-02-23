@@ -18,8 +18,8 @@
 // kengine meta/imgui
 #include "kengine/meta/imgui/functions/display.hpp"
 
-// kengine model_instance
-#include "kengine/model_instance/data/instance.hpp"
+// kengine instance
+#include "kengine/instance/data/instance.hpp"
 
 namespace kengine::meta::imgui {
 	static constexpr auto log_category = "meta_imgui";
@@ -42,7 +42,7 @@ namespace kengine::meta::imgui {
 		KENGINE_PROFILING_SCOPE;
 		kengine_logf(*e.registry(), very_verbose, log_category, "Displaying [%u] and its model", e.entity());
 
-		const auto instance = e.try_get<data::instance>();
+		const auto instance = e.try_get<instance::instance>();
 		if (!instance || instance->model == entt::null) {
 			kengine_log(*e.registry(), very_verbose, log_category, "No model found");
 			display_entity(e);

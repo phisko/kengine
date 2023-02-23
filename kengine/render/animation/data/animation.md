@@ -10,7 +10,7 @@ Component that plays an animation on the entity.
 unsigned int current_anim = 0;
 ```
 
-Index into the [model_animation::animations](model_animation.md) vector of this entity's [model entity](../../model_instance/data/model.md).
+Index into the [model_animation::animations](model_animation.md) vector of this entity's [model entity](../../instance/).
 
 ### current_time
 

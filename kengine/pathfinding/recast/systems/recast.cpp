@@ -19,9 +19,8 @@
 // kengine main_loop
 #include "kengine/main_loop/functions/execute.hpp"
 
-// kengine model_instance
-#include "kengine/model_instance/data/model.hpp"
-#include "kengine/model_instance/data/model_data.hpp"
+// kengine instance
+#include "kengine/render/data/model_data.hpp"
 
 // kengine pathfinding
 #include "kengine/pathfinding/data/nav_mesh.hpp"
@@ -35,7 +34,7 @@ namespace kengine::systems {
 	namespace recast_impl {
 		adjustables g_adjustables;
 
-		void build_recast_component(entt::registry & r, entt::entity e, const data::model & model, const data::model_data & model_data, const data::nav_mesh & nav_mesh) noexcept;
+		void build_recast_component(entt::registry & r, entt::entity e, const data::model_data & model_data, const data::nav_mesh & nav_mesh) noexcept;
 		void process_built_recast_components(entt::registry & r) noexcept;
 		void do_pathfinding(entt::registry & r, float delta_time) noexcept;
 	}
@@ -44,7 +43,7 @@ namespace kengine::systems {
 		entt::registry & r;
 
 		struct processed {};
-		kengine::new_entity_processor<processed, data::model, data::model_data, data::nav_mesh> processor{
+		kengine::new_entity_processor<processed, data::model_data, data::nav_mesh> processor{
 			r,
 			[this](auto &&... args) noexcept {
 				recast_impl::build_recast_component(r, FWD(args)...);

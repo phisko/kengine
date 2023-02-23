@@ -172,13 +172,15 @@ See [CMake](#cmake) for instructions on how to enable each library.
         * [kengine_meta_imgui_entity_editor](kengine/imgui/entity_editor/): edit entities in ImGui windows
         * [kengine_meta_imgui_entity_selector](kengine/imgui/entity_selector/): select entities in an ImGui window
     * [kengine_meta_json](kengine/meta/json/): meta components for JSON
-* [kengine_model_instance](kengine/model_instance/): use model entities, which other entities can be instances of
+* [kengine_instance](kengine/instance/): use model entities, which other entities can be instances of
+    * [kengine_instance_find_model_by_name](kengine/instance/find_model_by_name/): find an entity's model by its name
 * [kengine_pathfinding](kengine/pathfinding/): add pathfinding capabilities to entities
     * [kengine_pathfinding_recast](kengine/pathfinding/recast/): implement pathfinding using [Recast](https://github.com/recastnavigation/recastnavigation)
 * [kengine_physics](kengine/physics/): move and query entities in space
     * [kengine_physics_bullet](kengine/physics/bullet/): implement physics using [Bullet](https://github.com/bulletphysics/bullet3)
 * [kengine_render](kengine/render/): display entities in graphical applications
     * [kengine_render_animation](kengine/animation/): play animations on entities
+    * [kengine_render_find_model_by_asset](kengine/render/find_model_by_asset/): find an entity's model by its asset
     * [kengine_render_kreogl](kengine/render/kreogl/): implement rendering using [kreogl](https://github.com/phisko/kreogl)
     * [kengine_render_on_click](kengine/render/on_click/): notify entities that are clicked by the user
     * [kengine_render_sfml](kengine/render/sfml/): implement rendering using [SFML](https://github.com/SFML/SFML)

@@ -8,7 +8,6 @@
 #include "kengine/main_loop/data/keep_alive.hpp"
 #include "kengine/main_loop/functions/execute.hpp"
 #include "kengine/main_loop/helpers/main_loop.hpp"
-#include "kengine/model_instance/data/graphics.hpp"
 #include "kengine/scripting/lua/data/lua.hpp"
 #include "kengine/scripting/lua/helpers/lua_helper.hpp"
 #include "kengine/scripting/lua/systems/lua.cpp"

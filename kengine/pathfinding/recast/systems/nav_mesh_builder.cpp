@@ -17,6 +17,7 @@
 #include "putils/with.hpp"
 
 // kengine core
+#include "kengine/core/data/name.hpp"
 #include "kengine/core/data/transform.hpp"
 #include "kengine/core/assert/helpers/kengine_assert.hpp"
 #include "kengine/core/log/helpers/kengine_log.hpp"
@@ -30,9 +31,9 @@
 #include "kengine/glm/helpers/convert_to_referencial.hpp"
 #include "kengine/glm/helpers/get_model_matrix.hpp"
 
-// kengine model_instance
-#include "kengine/model_instance/data/model.hpp"
-#include "kengine/model_instance/data/model_data.hpp"
+// kengine instance
+#include "kengine/render/data/asset.hpp"
+#include "kengine/render/data/model_data.hpp"
 
 // kengine pathfinding
 #include "kengine/pathfinding/data/nav_mesh.hpp"
@@ -554,17 +555,26 @@ namespace kengine::systems::recast_impl {
 		};
 	};
 
-	void build_recast_component(entt::registry & r, entt::entity e, const data::model & model, const data::model_data & model_data, const data::nav_mesh & nav_mesh) noexcept {
+	void build_recast_component(entt::registry & r, entt::entity e, const data::model_data & model_data, const data::nav_mesh & nav_mesh) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		kengine_logf(r, verbose, "recast", "Building recast component for [%u]", e);
 
 		kengine_assert(r, nav_mesh.verts_per_poly <= DT_VERTS_PER_POLYGON);
+
+		async::task::string model_name;
+		if (const auto asset = r.try_get<render::asset>(e))
+			model_name = asset->file;
+		else if (const auto name = r.try_get<core::name>(e))
+			model_name = name->name;
+		else
+			model_name.set("%u", e);
+
 		kengine::async::start_task(
 			r, e,
-			async::task::string("recast: load %s", model.file.c_str()),
-			std::async(std::launch::async, [&r, e, &model, &model_data, &nav_mesh] {
-				const putils::scoped_thread_name thread_name(putils::string<64>("Load navmesh for %s", model.file.c_str()));
-				return build_recast_component::create_recast_mesh(model.file.c_str(), { r, e }, nav_mesh, model_data);
+			async::task::string("recast: load %s", model_name.c_str()),
+			std::async(std::launch::async, [&r, e, &model_name, &model_data, &nav_mesh] {
+				const putils::scoped_thread_name thread_name(putils::string<64>("Load navmesh for %s", model_name.c_str()));
+				return build_recast_component::create_recast_mesh(model_name.c_str(), { r, e }, nav_mesh, model_data);
 			})
 		);
 	}

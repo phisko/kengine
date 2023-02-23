@@ -33,10 +33,9 @@
 // kengine main_loop
 #include "kengine/main_loop/functions/execute.hpp"
 
-// kengine model_instance
-#include "kengine/model_instance/data/model_data.hpp"
-#include "kengine/model_instance/data/model.hpp"
-#include "kengine/model_instance/helpers/instance_helper.hpp"
+// kengine render
+#include "kengine/render/data/model_data.hpp"
+#include "kengine/render/data/asset.hpp"
 
 // kengine render/polyvox
 #include "kengine/render/polyvox/data/polyvox.hpp"
@@ -54,7 +53,7 @@ namespace kengine::systems {
 		entt::registry & r;
 
 		struct processed {};
-		kengine::new_entity_processor<processed, data::model> processor{ r, putils_forward_to_this(load_model) };
+		kengine::new_entity_processor<processed, render::asset> processor{ r, putils_forward_to_this(load_model) };
 
 		magica_voxel(entt::handle e) noexcept
 			: r(*e.registry()) {
@@ -89,11 +88,11 @@ namespace kengine::systems {
 			});
 		}
 
-		void load_model(entt::entity e, const data::model & model) noexcept {
+		void load_model(entt::entity e, const render::asset & asset) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, verbose, "magica_voxel", "Loading model for %s", model.file.c_str());
+			kengine_logf(r, verbose, "magica_voxel", "Loading model for %s", asset.file.c_str());
 
-			const auto & f = model.file.c_str();
+			const auto & f = asset.file.c_str();
 			if (std::filesystem::path(f).extension() != ".vox")
 				return;
 
