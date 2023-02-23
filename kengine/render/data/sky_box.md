@@ -1,6 +1,6 @@
 # [sky_box](sky_box.hpp)
 
-Component that draws a skybox. The entity's [model](../../model_instance/data/model.md) must have a `sky_box_model` component.
+Component that draws a skybox. The entity's [model](../../instance/) must have a `sky_box_model` component.
 
 ## Members
 
@@ -14,7 +14,7 @@ Color filter to be applied over the skybox. Stored as a [putils::normalized_colo
 
 # [sky_box_model](sky_box.hpp)
 
-[Model component](../../model_instance/data/model.md) that lists the textures required to draw a skybox.
+[Model component](../../instance/) that lists the textures required to draw a skybox.
 
 ### textures
 

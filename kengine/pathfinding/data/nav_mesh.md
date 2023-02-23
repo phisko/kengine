@@ -1,6 +1,6 @@
 # [nav_mesh](nav_mesh.hpp)
 
-Component that specifies how to build a navmesh for the [model entity](../../model_instance/data/model.md).
+Component that specifies how to build a navmesh for the [model entity](../../instance/).
 
 # get_path
 

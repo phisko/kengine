@@ -1,6 +1,6 @@
 # [animation_files](animation_files.hpp)
 
-Component listing the animation files to be loaded for the [model entity](../../model_instance/data/model.md).
+Component listing the animation files to be loaded for the [model entity](../../instance/).
 
 ## Members
 

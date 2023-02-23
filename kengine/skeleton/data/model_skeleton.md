@@ -1,6 +1,6 @@
 # [model_skeleton](model_skeleton.hpp)
 
-Component listing the bones contained in the [model entity](../../model_instance/data/model.md).
+Component listing the bones contained in the [model entity](../../instance/).
 
 ## Members
 

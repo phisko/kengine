@@ -16,9 +16,6 @@
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
-// kengine model_instance
-#include "kengine/model_instance/data/instance.hpp"
-
 // kengine imgui
 #include "kengine/imgui/helpers/get_scale.hpp"
 

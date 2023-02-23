@@ -1,23 +1,14 @@
 #pragma once
 
-#ifndef KENGINE_GRAPHICS_STRING_MAX_LENGTH
-#define KENGINE_GRAPHICS_STRING_MAX_LENGTH 128
-#endif
+// kengine core
+#include "kengine/core/data/name.hpp"
 
-// putils
-#include "putils/string.hpp"
-#include "putils/color.hpp"
-
-namespace kengine::data {
+namespace kengine::instance::find_model_by_name {
 	//! putils reflect all
-	//! used_types: [refltype::string, putils::normalized_color]
-	struct graphics {
-		static constexpr char string_name[] = "graphics_string";
-		using string = putils::string<KENGINE_GRAPHICS_STRING_MAX_LENGTH, string_name>;
-
-		string appearance;
-		putils::normalized_color color{ 1.f, 1.f, 1.f, 1.f };
+	//! used_types: [kengine::core::name::string]
+	struct instance_of_name {
+		core::name::string name;
 	};
 }
 
-#include "graphics.rpp"
+#include "instance_of_name.rpp"

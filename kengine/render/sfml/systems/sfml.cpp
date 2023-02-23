@@ -39,14 +39,14 @@
 #include "kengine/main_loop/functions/execute.hpp"
 #include "kengine/main_loop/helpers/is_running.hpp"
 
-// kengine model_instance
-#include "kengine/model_instance/data/graphics.hpp"
-#include "kengine/model_instance/data/model.hpp"
-#include "kengine/model_instance/helpers/instance_helper.hpp"
+// kengine instance
+#include "kengine/instance/helpers/try_get_model.hpp"
 
 // kengine render
+#include "kengine/render/data/asset.hpp"
 #include "kengine/render/data/camera.hpp"
 #include "kengine/render/data/debug_graphics.hpp"
+#include "kengine/render/data/drawable.hpp"
 #include "kengine/render/data/viewport.hpp"
 #include "kengine/render/data/window.hpp"
 #include "kengine/render/helpers/camera_helper.hpp"
@@ -95,7 +95,7 @@ namespace kengine::systems {
 		kengine::new_entity_processor<processed_window, data::window> window_processor{ r, putils_forward_to_this(create_window) };
 
 		struct processed_model {};
-		kengine::new_entity_processor<processed_model, data::model> model_processor{ r, putils_forward_to_this(create_texture) };
+		kengine::new_entity_processor<processed_model, render::asset> model_processor{ r, putils_forward_to_this(create_texture) };
 
 		sfml(entt::handle e) noexcept
 			: r(*e.registry()) {
@@ -338,8 +338,8 @@ namespace kengine::systems {
 			} drawables;
 
 			kengine_log(r, very_verbose, "sfml", "Queueing sprites");
-			for (const auto & [e, transform, graphics] : r.view<core::transform, data::graphics>().each()) {
-				auto sprite = create_entity_sprite(e, transform, graphics);
+			for (const auto & [e, transform, drawable] : r.view<core::transform, render::drawable>().each()) {
+				auto sprite = create_entity_sprite(e, transform, drawable);
 				if (sprite != std::nullopt) {
 					kengine_logf(r, very_verbose, "sfml", "Queueing sprite for [%u]", e);
 					drawables.sprites.emplace_back(std::move(*sprite));
@@ -454,18 +454,18 @@ namespace kengine::systems {
 			render_texture.display();
 		}
 
-		std::optional<sf::Sprite> create_entity_sprite(entt::entity e, const core::transform & transform, const data::graphics & graphics) noexcept {
+		std::optional<sf::Sprite> create_entity_sprite(entt::entity e, const core::transform & transform, const render::drawable & drawable) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, very_verbose, "sfml", "Creating entity sprite for [%u] (%s)", e, graphics.appearance.c_str());
+			kengine_logf(r, very_verbose, "sfml", "Creating entity sprite for [%u]", e);
 
-			const auto * texture = instance_helper::try_get_model<data::sfml_texture>({ r, e });
+			const auto * texture = instance::try_get_model<data::sfml_texture>({ r, e });
 			if (texture == nullptr) {
 				kengine_logf(r, warning, "sfml", "Failed to find sfml_texture in [%u]'s model", e);
 				return std::nullopt;
 			}
 
 			sf::Sprite sprite(texture->texture);
-			sprite.setColor(convert_color(graphics.color));
+			sprite.setColor(convert_color(drawable.color));
 			sprite.setPosition(transform.bounding_box.position.x - transform.bounding_box.size.x / 2.f, transform.bounding_box.position.y - transform.bounding_box.size.y / 2.f);
 
 			const auto texture_size = texture->texture.getSize();
@@ -515,13 +515,13 @@ namespace kengine::systems {
 			ImGui::SFML::Update(*sf_window.window, delta_clock.restart());
 		}
 
-		void create_texture(entt::entity e, const data::model & model) noexcept {
+		void create_texture(entt::entity e, const render::asset & asset) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, verbose, "sfml", "Attempting to load texture for [%u] (%s)", e, model.file.c_str());
+			kengine_logf(r, verbose, "sfml", "Attempting to load texture for [%u] (%s)", e, asset.file.c_str());
 
 			sf::Texture texture;
-			if (texture.loadFromFile(model.file.c_str())) {
-				kengine_logf(r, log, "sfml", "Loaded texture for '%s'", model.file.c_str());
+			if (texture.loadFromFile(asset.file.c_str())) {
+				kengine_logf(r, log, "sfml", "Loaded texture for '%s'", asset.file.c_str());
 				r.emplace<data::sfml_texture>(e, std::move(texture));
 			}
 		}
