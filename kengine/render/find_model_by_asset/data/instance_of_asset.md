@@ -1,11 +1,3 @@
 # [instance_of_asset](instance_of_asset.hpp)
 
-Component used to find the entity's [model](model.md) by its asset.
-
-## Members
-
-```cpp
-kengine::render::asset::string asset;
-```
-
-Asset to use as this entity's [model](model.md).
+Specialization of [instance_of](../../../instance/find_model/data/instance_of.md) to find a model by its [asset](../../data/asset.md).

@@ -5,11 +5,8 @@
 #define refltype kengine::render::find_model_by_asset::instance_of_asset
 putils_reflection_info {
 	putils_reflection_class_name;
-	putils_reflection_attributes(
-		putils_reflection_attribute(asset)
-	);
-	putils_reflection_used_types(
-		putils_reflection_type(kengine::render::asset::string)
+	putils_reflection_parents(
+		putils_reflection_type(refltype::base)
 	);
 };
 #undef refltype
