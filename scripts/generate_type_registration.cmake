@@ -39,7 +39,7 @@ function(kengine_generate_type_registration)
                 --root ${source_dir}
                 --clang-args ${clang_args}
         )
-        set(command_file ${registration_file}_command.py)
+        set(command_file "${registration_file}_command_$<CONFIG>.py")
         putils_generate_python_command_file(${command_file} "${command}")
         add_custom_command(
                 OUTPUT ${registration_file}
@@ -66,7 +66,7 @@ function(kengine_generate_type_registration)
             --export-macro ${export_macro}
             --clang-args ${clang_args}
     )
-    set(command_file ${main_file}_command.py)
+    set(command_file "${main_file}_command_$<CONFIG>.py")
     putils_generate_python_command_file(${command_file} "${command}")
     add_custom_command(
             OUTPUT ${main_file}
