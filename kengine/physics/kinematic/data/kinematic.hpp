@@ -1,6 +1,6 @@
 #pragma once
 
-namespace kengine::data {
+namespace kengine::physics::kinematic {
 	//! putils reflect all
 	struct kinematic {};
 }

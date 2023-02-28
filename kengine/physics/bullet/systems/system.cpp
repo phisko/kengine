@@ -1,4 +1,4 @@
-#include "bullet.hpp"
+#include "system.hpp"
 
 // stl
 #include <map>
@@ -82,20 +82,22 @@ namespace putils {
 	}
 }
 
-namespace kengine::systems {
-	struct bullet {
+namespace kengine::physics::bullet {
+	static constexpr auto log_category = "bullet";
+
+	struct system {
 		entt::registry & r;
 
 		struct processed {};
-		kengine::new_entity_processor<processed, core::transform, data::physics, instance::instance> processor{ r, putils_forward_to_this(add_or_update_bullet_data) };
+		kengine::new_entity_processor<processed, core::transform, kengine::physics::physics, instance::instance> processor{ r, putils_forward_to_this(add_or_update_bullet_data) };
 
 		const entt::scoped_connection connections[6] = {
-			r.on_construct<data::model_collider>().connect<&bullet::update_all_instances>(this),
-			r.on_update<data::model_collider>().connect<&bullet::update_all_instances>(this),
-			r.on_construct<data::model_skeleton>().connect<&bullet::update_all_instances>(this),
-			r.on_update<data::model_skeleton>().connect<&bullet::update_all_instances>(this),
-			r.on_construct<data::skeleton>().connect<&bullet::on_skeleton_updated>(this),
-			r.on_update<data::skeleton>().connect<&bullet::on_skeleton_updated>(this),
+			r.on_construct<model_collider>().connect<&system::update_all_instances>(this),
+			r.on_update<model_collider>().connect<&system::update_all_instances>(this),
+			r.on_construct<data::model_skeleton>().connect<&system::update_all_instances>(this),
+			r.on_update<data::model_skeleton>().connect<&system::update_all_instances>(this),
+			r.on_construct<data::skeleton>().connect<&system::on_skeleton_updated>(this),
+			r.on_update<data::skeleton>().connect<&system::on_skeleton_updated>(this),
 		};
 
 		btDefaultCollisionConfiguration collisionConfiguration;
@@ -127,7 +129,7 @@ namespace kengine::systems {
 					::glm::extractEulerAngleYXZ(mat, transform->yaw, transform->pitch, transform->roll);
 				}
 
-				systems::bullet * system;
+				system * system;
 				core::transform * transform;
 			};
 
@@ -146,13 +148,13 @@ namespace kengine::systems {
 			bullet_data & operator=(bullet_data &&) noexcept = default;
 		};
 
-		bullet(entt::handle e) noexcept
+		system(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "bullet", "Initializing");
+			kengine_log(r, log, log_category, "Initializing");
 
 			e.emplace<main_loop::execute>(putils_forward_to_this(execute));
-			e.emplace<functions::query_position>(putils_forward_to_this(query_position));
+			e.emplace<kengine::physics::query_position>(putils_forward_to_this(query_position));
 
 			e.emplace<adjustable::adjustable>() = {
 				"Physics",
@@ -168,30 +170,30 @@ namespace kengine::systems {
 			processor.process();
 		}
 
-		~bullet() noexcept {
+		~system() noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			kengine_log(r, log, "bullet", "Shutting down");
+			kengine_log(r, log, log_category, "Shutting down");
 			// Make sure these are destroyed before the system
 			r.storage<bullet_data>().clear();
 		}
 
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, very_verbose, "bullet", "Executing");
+			kengine_log(r, very_verbose, log_category, "Executing");
 
 			processor.process();
 
-			kengine_log(r, very_verbose, "bullet", "Removing obsolete bullet_data");
-			for (auto [e, bullet] : r.view<bullet_data>(entt::exclude<data::physics>).each()) {
-				kengine_logf(r, verbose, "bullet", "Removing bullet_data from [%u]", e);
+			kengine_log(r, very_verbose, log_category, "Removing obsolete bullet_data");
+			for (auto [e, bullet] : r.view<bullet_data>(entt::exclude<physics>).each()) {
+				kengine_logf(r, verbose, log_category, "Removing bullet_data from [%u]", e);
 				r.remove<bullet_data>(e);
 			}
 
-			kengine_log(r, very_verbose, "bullet", "Updating gravity");
+			kengine_log(r, very_verbose, log_category, "Updating gravity");
 			dynamics_world.setGravity({ 0.f, -adjustables.gravity, 0.f });
 
-			kengine_log(r, very_verbose, "bullet", "Stepping simulation");
+			kengine_log(r, very_verbose, log_category, "Stepping simulation");
 			dynamics_world.stepSimulation(delta_time);
 			detect_collisions();
 
@@ -219,24 +221,24 @@ namespace kengine::systems {
 		void on_skeleton_updated(entt::registry & r, entt::entity e) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			if (r.all_of<core::transform, data::physics, instance::instance>(e))
-				add_or_update_bullet_data(e, r.get<core::transform>(e), r.get<data::physics>(e), r.get<instance::instance>(e));
+			if (r.all_of<core::transform, physics, instance::instance>(e))
+				add_or_update_bullet_data(e, r.get<core::transform>(e), r.get<physics>(e), r.get<instance::instance>(e));
 		}
 
-		void add_or_update_bullet_data(entt::entity e, core::transform & transform, data::physics & physics, const instance::instance & instance) noexcept {
+		void add_or_update_bullet_data(entt::entity e, core::transform & transform, physics & physics, const instance::instance & instance) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			if (!r.all_of<data::model_collider>(instance.model)) {
-				kengine_logf(r, verbose, "bullet", "Not adding bullet_data to [%u] because its model doesn't have a model_collider", e);
+			if (!r.all_of<model_collider>(instance.model)) {
+				kengine_logf(r, verbose, log_category, "Not adding bullet_data to [%u] because its model doesn't have a model_collider", e);
 				return;
 			}
 
 			if (r.all_of<data::model_skeleton>(instance.model) && !r.all_of<data::skeleton>(e)) {
-				kengine_logf(r, verbose, "bullet", "Not adding bullet_data to [%u] because it doesn't have a skeleton yet, while its model does", e);
+				kengine_logf(r, verbose, log_category, "Not adding bullet_data to [%u] because it doesn't have a skeleton yet, while its model does", e);
 				return;
 			}
 
-			kengine_logf(r, verbose, "bullet", "Adding bullet_data to [%u]", e);
+			kengine_logf(r, verbose, log_category, "Adding bullet_data to [%u]", e);
 
 			r.remove<bullet_data>(e);
 			add_bullet_data(e, transform, physics, instance.model);
@@ -244,14 +246,14 @@ namespace kengine::systems {
 
 		void update_all_instances(entt::registry & r, entt::entity model_entity) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, verbose, "bullet", "Updating all instances of [%u]", model_entity);
+			kengine_logf(r, verbose, log_category, "Updating all instances of [%u]", model_entity);
 
-			for (const auto & [e, transform, physics, instance] : r.view<core::transform, data::physics, instance::instance>().each())
+			for (const auto & [e, transform, physics, instance] : r.view<core::transform, kengine::physics::physics, instance::instance>().each())
 				if (instance.model == model_entity)
 					add_or_update_bullet_data(e, transform, physics, instance);
 		}
 
-		void add_bullet_data(entt::entity e, core::transform & transform, data::physics & physics, entt::entity model_entity) noexcept {
+		void add_bullet_data(entt::entity e, core::transform & transform, physics & physics, entt::entity model_entity) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			auto & comp = r.emplace<bullet_data>(e);
@@ -261,7 +263,7 @@ namespace kengine::systems {
 			comp.state->system = this;
 			comp.state->transform = &transform;
 
-			const auto & model_collider = r.get<data::model_collider>(model_entity);
+			const auto & model_collider = r.get<kengine::physics::model_collider>(model_entity);
 
 			const auto skeleton = r.try_get<data::skeleton>(e);
 			const auto model_skeleton = r.try_get<data::model_skeleton>(model_entity);
@@ -284,7 +286,7 @@ namespace kengine::systems {
 			dynamics_world.addRigidBody(comp.body.get());
 		}
 
-		void add_shape(bullet_data & comp, const data::model_collider::collider & collider, const core::transform & transform, const data::skeleton * skeleton, const data::model_skeleton * model_skeleton, const core::transform * model_transform) {
+		void add_shape(bullet_data & comp, const model_collider::collider & collider, const core::transform & transform, const data::skeleton * skeleton, const data::model_skeleton * model_skeleton, const core::transform * model_transform) {
 			KENGINE_PROFILING_SCOPE;
 
 			const auto size = collider.transform.bounding_box.size * transform.bounding_box.size;
@@ -292,43 +294,43 @@ namespace kengine::systems {
 			btCollisionShape * shape = nullptr;
 			{
 				switch (collider.shape) {
-					case data::model_collider::collider::box: {
+					case model_collider::collider::box: {
 						static collision_shape_map shapes;
 						shape = get_collision_shape(shapes, size, [&] { return new btBoxShape({ size.x / 2.f, size.y / 2.f, size.z / 2.f }); });
 						break;
 					}
-					case data::model_collider::collider::capsule: {
+					case model_collider::collider::capsule: {
 						static collision_shape_map shapes;
 						shape = get_collision_shape(shapes, size, [&] { return new btCapsuleShape(std::min(size.x, size.z) / 2.f, size.y); });
 						break;
 					}
-					case data::model_collider::collider::cone: {
+					case model_collider::collider::cone: {
 						static collision_shape_map shapes;
 						shape = get_collision_shape(shapes, size, [&] { return new btConeShape(std::min(size.x, size.z) / 2.f, size.y); });
 						break;
 					}
-					case data::model_collider::collider::cylinder: {
+					case model_collider::collider::cylinder: {
 						static collision_shape_map shapes;
 						shape = get_collision_shape(shapes, size, [&] { return new btCylinderShape({ size.x / 2.f, size.y / 2.f, size.z / 2.f }); });
 						break;
 					}
-					case data::model_collider::collider::sphere: {
+					case model_collider::collider::sphere: {
 						static collision_shape_map shapes;
 						shape = get_collision_shape(shapes, size, [&] { return new btSphereShape(std::min(std::min(size.x, size.y), size.y) / 2.f); });
 						break;
 					}
 					default:
-						static_assert(magic_enum::enum_count<data::model_collider::collider::shape_type>() == 5);
+						static_assert(magic_enum::enum_count<model_collider::collider::shape_type>() == 5);
 						return;
 				}
 			}
 			comp.shape->addChildShape(to_bullet(transform, collider, skeleton, model_skeleton, model_transform), shape);
 		}
 
-		void update_bullet_data(entt::entity e, bullet_data & comp, const core::transform & transform, data::physics & physics, entt::entity model_entity, bool first = false) noexcept {
+		void update_bullet_data(entt::entity e, bullet_data & comp, const core::transform & transform, physics & physics, entt::entity model_entity, bool first = false) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			const bool kinematic = r.all_of<data::kinematic>(e);
+			const bool kinematic = r.all_of<kinematic::kinematic>(e);
 
 			if (physics.changed || first) {
 				// comp.body->clearForces();
@@ -370,7 +372,7 @@ namespace kengine::systems {
 			if (skeleton && model_skeleton) {
 				const auto model_transform = r.try_get<core::transform>(model_entity);
 				int i = 0;
-				for (const auto & collider : r.get<data::model_collider>(model_entity).colliders) {
+				for (const auto & collider : r.get<model_collider>(model_entity).colliders) {
 					comp.shape->updateChildTransform(i, to_bullet(transform, collider, skeleton, model_skeleton, model_transform));
 					++i;
 				}
@@ -383,8 +385,8 @@ namespace kengine::systems {
 			const auto num_manifolds = dispatcher.getNumManifolds();
 			if (num_manifolds <= 0)
 				return;
-			kengine_log(r, very_verbose, "bullet", "Detecting collisions");
-			for (const auto & [callback_entity, on_collision] : r.view<functions::on_collision>().each())
+			kengine_log(r, very_verbose, log_category, "Detecting collisions");
+			for (const auto & [callback_entity, on_collision] : r.view<kengine::physics::on_collision>().each())
 				for (int i = 0; i < num_manifolds; ++i) {
 					const auto contact_manifold = dispatcher.getManifoldByIndexInternal(i);
 					const auto object_a = (btCollisionObject *)(contact_manifold->getBody0());
@@ -392,14 +394,14 @@ namespace kengine::systems {
 
 					const auto e1 = entt::entity(object_a->getUserIndex());
 					const auto e2 = entt::entity(object_b->getUserIndex());
-					kengine_logf(r, verbose, "bullet", "Collision between [%u] & [%u]", e1, e2);
+					kengine_logf(r, verbose, log_category, "Collision between [%u] & [%u]", e1, e2);
 					on_collision(e1, e2);
 				}
 		}
 
 		void query_position(const putils::point3f & pos, float radius, const entity_iterator_func & func) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, verbose, "bullet", "Querying radius %f around position { %f, %f, %f }", radius, pos.x, pos.y, pos.z);
+			kengine_logf(r, verbose, log_category, "Querying radius %f around position { %f, %f, %f }", radius, pos.x, pos.y, pos.z);
 
 			btSphereShape sphere(radius);
 			btPairCachingGhostObject ghost;
@@ -417,7 +419,7 @@ namespace kengine::systems {
 				btScalar addSingleResult(btManifoldPoint & cp, const btCollisionObjectWrapper * colObj0Wrap, int partId0, int index0, const btCollisionObjectWrapper * colObj1Wrap, int partId1, int index1) final {
 					kengine_assert(r, colObj1Wrap->m_collisionObject == &ghost);
 					const auto e = entt::entity(colObj0Wrap->m_collisionObject->getUserIndex());
-					kengine_logf(r, verbose, "bullet", "Found [%u]", e);
+					kengine_logf(r, verbose, log_category, "Found [%u]", e);
 					func({ r, e });
 					return 1.f;
 				}
@@ -436,7 +438,7 @@ namespace kengine::systems {
 		btVector3 to_bullet(const putils::point3f & p) noexcept { return { p.x, p.y, p.z }; }
 
 		btTransform to_bullet(const core::transform & transform) noexcept {
-			kengine_log(r, very_verbose, "bullet", "Converting transform for entity");
+			kengine_log(r, very_verbose, log_category, "Converting transform for entity");
 
 			::glm::mat4 mat(1.f);
 
@@ -451,9 +453,9 @@ namespace kengine::systems {
 			return ret;
 		}
 
-		btTransform to_bullet(const core::transform & parent, const data::model_collider::collider & collider, const data::skeleton * skeleton, const data::model_skeleton * model_skeleton, const core::transform * model_transform) noexcept {
+		btTransform to_bullet(const core::transform & parent, const model_collider::collider & collider, const data::skeleton * skeleton, const data::model_skeleton * model_skeleton, const core::transform * model_transform) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, very_verbose, "bullet", "Converting transform for collider");
+			kengine_log(r, very_verbose, log_category, "Converting transform for collider");
 
 			::glm::mat4 mat{ 1.f };
 
@@ -477,10 +479,10 @@ namespace kengine::systems {
 #ifndef KENGINE_NDEBUG
 		struct drawer : public btIDebugDraw {
 		public:
-			drawer(systems::bullet & system) noexcept
+			drawer(system & system) noexcept
 				: system(system) {
 				KENGINE_PROFILING_SCOPE;
-				kengine_log(system.r, verbose, "bullet", "Constructing debug drawer");
+				kengine_log(system.r, verbose, log_category, "Constructing debug drawer");
 				debug_entity = system.r.create();
 				system.r.emplace<core::transform>(debug_entity);
 				system.r.emplace<data::debug_graphics>(debug_entity);
@@ -488,7 +490,7 @@ namespace kengine::systems {
 
 			void cleanup() noexcept {
 				KENGINE_PROFILING_SCOPE;
-				kengine_log(system.r, very_verbose, "bullet", "Cleaning up debug drawer");
+				kengine_log(system.r, very_verbose, log_category, "Cleaning up debug drawer");
 				auto & comp = get_debug_component();
 				comp.elements.clear();
 			}
@@ -515,13 +517,15 @@ namespace kengine::systems {
 
 			void draw3dText(const btVector3 & location, const char * text_string) override {}
 
-			void reportErrorWarning(const char * warning_string) override { std::cerr << "[Bullet] " << warning_string; }
+			void reportErrorWarning(const char * warning_string) override {
+				kengine_log(system.r, warning, log_category, warning_string);
+			}
 
 			void setDebugMode(int debugMode) override {}
 			int getDebugMode() const override { return DBG_DrawWireframe; }
 
 		private:
-			systems::bullet & system;
+			system & system;
 			entt::entity debug_entity;
 		};
 
@@ -530,8 +534,8 @@ namespace kengine::systems {
 	};
 
 	DEFINE_KENGINE_SYSTEM_CREATOR(
-		bullet,
-		bullet::bullet_data,
-		bullet::processed
+		system,
+		system::bullet_data,
+		system::processed
 	)
 }

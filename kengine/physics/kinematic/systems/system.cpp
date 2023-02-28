@@ -1,4 +1,4 @@
-#include "kinematic.hpp"
+#include "system.hpp"
 
 // entt
 #include <entt/entity/handle.hpp>
@@ -22,24 +22,26 @@
 // kengine physics/kinematic
 #include "kengine/physics/kinematic/data/kinematic.hpp"
 
-namespace kengine::systems {
-	struct kinematic {
+namespace kengine::physics::kinematic {
+	static constexpr auto log_category = "physics_kinematic";
+
+	struct system {
 		entt::registry & r;
 
-		kinematic(entt::handle e) noexcept
+		system(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "kinematic", "Initializing");
+			kengine_log(r, log, log_category, "Initializing");
 
 			e.emplace<main_loop::execute>(putils_forward_to_this(execute));
 		}
 
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, very_verbose, "kinematic", "Executing");
+			kengine_log(r, very_verbose, log_category, "Executing");
 
-			for (const auto & [e, transform, physics] : r.view<core::transform, data::physics, data::kinematic>().each()) {
-				kengine_logf(r, very_verbose, "kinematic", "Moving [%u]", e);
+			for (const auto & [e, transform, physics] : r.view<core::transform, physics, kinematic>().each()) {
+				kengine_logf(r, very_verbose, log_category, "Moving [%u]", e);
 
 				transform.bounding_box.position += physics.movement * delta_time;
 
@@ -55,5 +57,5 @@ namespace kengine::systems {
 		}
 	};
 
-	DEFINE_KENGINE_SYSTEM_CREATOR(kinematic)
+	DEFINE_KENGINE_SYSTEM_CREATOR(system)
 }

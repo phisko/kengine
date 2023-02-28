@@ -10,7 +10,7 @@
 // putils
 #include "putils/function.hpp"
 
-namespace kengine::data {
+namespace kengine::physics::collision {
 	//! putils reflect all
 	struct collision {
 		using function = putils::function<void(entt::entity, entt::entity), KENGINE_COLLISION_FUNCTION_SIZE>;
