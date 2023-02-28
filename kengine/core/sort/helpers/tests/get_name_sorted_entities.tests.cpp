@@ -40,7 +40,7 @@ struct core_sort : ::testing::Test {
 TEST_F(core_sort, get_name_sorted_entities_std_vector) {
 	const auto vec = kengine::core::sort::get_name_sorted_entities<const int, const std::string>(r);
 
-	static_assert(putils::is_specialization<putils_typeof(vec), std::vector>());
+	static_assert(putils::specialization<putils_typeof(vec), std::vector>);
 	EXPECT_EQ(vec.size(), data.size());
 
 	size_t count = 0;
