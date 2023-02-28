@@ -4,12 +4,13 @@ project(kengine)
 cmake_policy(VERSION 3.15) # options shouldn't clear variables
 
 set(CMAKE_CXX_STANDARD 20)
-if (MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /DNOMINMAX")
-endif()
 
 add_library(kengine_include INTERFACE)
 target_include_directories(kengine_include INTERFACE .)
+
+if(MSVC)
+    target_compile_options(kengine_include INTERFACE /bigobj)
+endif()
 
 add_library(kengine INTERFACE)
 target_link_libraries(kengine INTERFACE kengine_include)
