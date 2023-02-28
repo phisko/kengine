@@ -2,8 +2,8 @@
 
 #include "putils/reflection.hpp"
 
-#define refltype kengine::data::recast_nav_mesh
+#define refltype kengine::pathfinding::recast::nav_mesh
 putils_reflection_info {
-	putils_reflection_class_name;
+	putils_reflection_custom_class_name(recast_nav_mesh);
 };
 #undef refltype

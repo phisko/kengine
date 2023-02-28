@@ -10,29 +10,30 @@
 #include "kengine/core/log/helpers/kengine_log.hpp"
 
 // impl
-#include "recast_crowd.hpp"
+#include "crowd.hpp"
 
-namespace kengine::data {
+namespace kengine::pathfinding::recast {
 	//! putils reflect all
-	struct recast_agent {
+	//! class_name: recast_agent
+	struct agent {
 		int index = 0;
 		entt::handle crowd;
 
-		~recast_agent() noexcept {
+		~agent() noexcept {
 			if (!crowd)
 				return;
 
 			kengine_logf(*crowd.registry(), verbose, "recast", "Removing agent from crowd [%u]", crowd.entity());
-			const auto & crowd_component = crowd.get<data::recast_crowd>();
-			crowd_component.crowd->removeAgent(index);
+			const auto & crowd_component = crowd.get<recast::crowd>();
+			crowd_component.ptr->removeAgent(index);
 		}
 
-		PUTILS_DELETE_COPY(recast_agent);
-		recast_agent() noexcept = default;
-		recast_agent(recast_agent && rhs) noexcept {
+		PUTILS_DELETE_COPY(agent);
+		agent() noexcept = default;
+		agent(agent && rhs) noexcept {
 			*this = std::move(rhs);
 		}
-		recast_agent & operator=(recast_agent && rhs) noexcept {
+		agent & operator=(agent && rhs) noexcept {
 			std::swap(index, rhs.index);
 			std::swap(crowd, rhs.crowd);
 			return *this;
@@ -40,4 +41,4 @@ namespace kengine::data {
 	};
 }
 
-#include "recast_agent.rpp"
+#include "agent.rpp"

@@ -1,4 +1,4 @@
-#include "recast.hpp"
+#include "system.hpp"
 #include "common.hpp"
 
 // entt
@@ -19,47 +19,38 @@
 // kengine main_loop
 #include "kengine/main_loop/functions/execute.hpp"
 
-// kengine instance
-#include "kengine/render/data/model_data.hpp"
-
 // kengine pathfinding
 #include "kengine/pathfinding/data/nav_mesh.hpp"
 
 // kengine pathfinding/recast
-#include "kengine/pathfinding/recast/data/recast_agent.hpp"
-#include "kengine/pathfinding/recast/data/recast_crowd.hpp"
-#include "kengine/pathfinding/recast/data/recast_nav_mesh.hpp"
+#include "kengine/pathfinding/recast/data/agent.hpp"
+#include "kengine/pathfinding/recast/data/crowd.hpp"
+#include "kengine/pathfinding/recast/data/nav_mesh.hpp"
 
-namespace kengine::systems {
-	namespace recast_impl {
-		adjustables g_adjustables;
+namespace kengine::pathfinding::recast {
+	adjustables g_adjustables;
 
-		void build_recast_component(entt::registry & r, entt::entity e, const data::model_data & model_data, const data::nav_mesh & nav_mesh) noexcept;
-		void process_built_recast_components(entt::registry & r) noexcept;
-		void do_pathfinding(entt::registry & r, float delta_time) noexcept;
-	}
-
-	struct recast {
+	struct system {
 		entt::registry & r;
 
 		struct processed {};
-		kengine::new_entity_processor<processed, data::model_data, data::nav_mesh> processor{
+		kengine::new_entity_processor<processed, data::model_data, pathfinding::nav_mesh> processor{
 			r,
 			[this](auto &&... args) noexcept {
-				recast_impl::build_recast_component(r, FWD(args)...);
+				build_recast_component(r, FWD(args)...);
 			}
 		};
 
-		recast(entt::handle e) noexcept
+		system(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "recast", "Initializing");
+			kengine_log(r, log, log_category, "Initializing");
 
 			e.emplace<main_loop::execute>(putils_forward_to_this(execute));
 			e.emplace<adjustable::adjustable>() = {
 				"Recast",
 				{
-					{ "Path optimization range", &recast_impl::g_adjustables.path_optimization_range },
+					{ "Path optimization range", &g_adjustables.path_optimization_range },
 				}
 			};
 
@@ -68,20 +59,20 @@ namespace kengine::systems {
 
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, very_verbose, "recast", "Executing");
+			kengine_log(r, very_verbose, log_category, "Executing");
 
 			processor.process();
 
-			recast_impl::process_built_recast_components(r);
-			recast_impl::do_pathfinding(r, delta_time);
+			process_built_recast_components(r);
+			do_pathfinding(r, delta_time);
 		}
 	};
 
 	DEFINE_KENGINE_SYSTEM_CREATOR(
-		recast,
-		recast::processed,
-		data::recast_agent,
-		data::recast_crowd,
-		data::recast_nav_mesh
+		system,
+		system::processed,
+		agent,
+		crowd,
+		nav_mesh
 	)
 }

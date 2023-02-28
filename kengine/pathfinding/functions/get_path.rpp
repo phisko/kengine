@@ -1,0 +1,16 @@
+#pragma once
+
+#include "putils/reflection.hpp"
+
+#define refltype kengine::pathfinding::get_path
+putils_reflection_info {
+	putils_reflection_class_name;
+	putils_reflection_parents(
+		putils_reflection_type(refltype::base)
+	);
+	putils_reflection_used_types(
+		putils_reflection_type(kengine::pathfinding::get_path_impl::path),
+		putils_reflection_type(putils::point3f)
+	);
+};
+#undef refltype
