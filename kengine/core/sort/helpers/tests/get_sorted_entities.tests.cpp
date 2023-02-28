@@ -40,7 +40,7 @@ TEST_F(core_sort, get_sorted_entities_std_vector) {
 		return *std::get<1>(lhs) < *std::get<1>(rhs);
 	});
 
-	static_assert(putils::is_specialization<putils_typeof(vec), std::vector>());
+	static_assert(putils::specialization<putils_typeof(vec), std::vector>);
 	EXPECT_EQ(vec.size(), data.size());
 
 	size_t count = 0;
