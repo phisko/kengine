@@ -6,17 +6,15 @@
 namespace kengine {
 	namespace meta {
 		using for_each_entity_signature = void(entt::registry & r, const entity_iterator_func & func);
+
+		//! putils reflect all
+		//! parents: [refltype::base]
 		struct for_each_entity : base_function<for_each_entity_signature> {};
 
-		using for_each_entity_without_signature = void(entt::registry & r, const entity_iterator_func & func);
-		struct for_each_entity_without : base_function<for_each_entity_without_signature> {};
+		//! putils reflect all
+		//! parents: [refltype::base]
+		struct for_each_entity_without : base_function<for_each_entity_signature> {};
 	}
 }
 
-#define refltype kengine::meta::for_each_entity
-kengine_function_reflection_info;
-#undef refltype
-
-#define refltype kengine::meta::for_each_entity_without
-kengine_function_reflection_info;
-#undef refltype
+#include "for_each_entity.rpp"

@@ -5,9 +5,9 @@
 
 namespace kengine::functions {
 	using create_system_signature = entt::entity(entt::registry &);
+	//! putils reflect all
+	//! parents: [refltype::base]
 	struct create_system : base_function<create_system_signature> {};
 }
 
-#define refltype kengine::functions::create_system
-kengine_function_reflection_info;
-#undef refltype
+#include "create_system.rpp"

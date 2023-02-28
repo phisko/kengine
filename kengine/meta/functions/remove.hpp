@@ -5,9 +5,9 @@
 
 namespace kengine::meta {
 	using remove_signature = void(entt::handle);
+	//! putils reflect all
+	//! parents: [refltype::base]
 	struct remove : base_function<remove_signature> {};
 }
 
-#define refltype kengine::meta::remove
-kengine_function_reflection_info;
-#undef refltype
+#include "remove.rpp"

@@ -8,9 +8,9 @@
 
 namespace kengine::functions {
 	using query_position_signature = void(const putils::point3f & pos, float radius, const entity_iterator_func & func);
+	//! putils reflect all
+	//! parents: [refltype::base]
 	struct query_position : base_function<query_position_signature> {};
 }
 
-#define refltype kengine::functions::query_position
-kengine_function_reflection_info;
-#undef refltype
+#include "query_position.rpp"

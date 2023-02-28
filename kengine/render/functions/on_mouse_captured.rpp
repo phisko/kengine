@@ -1,0 +1,12 @@
+#pragma once
+
+#include "putils/reflection.hpp"
+
+#define refltype kengine::functions::on_mouse_captured
+putils_reflection_info {
+	putils_reflection_class_name;
+	putils_reflection_parents(
+		putils_reflection_type(refltype::base)
+	);
+};
+#undef refltype

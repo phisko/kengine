@@ -8,9 +8,9 @@
 
 namespace kengine::meta::json {
 	using save_signature = nlohmann::json(entt::const_handle);
+	//! putils reflect all
+	//! parents: [refltype::base]
 	struct save : base_function<save_signature> {};
 }
 
-#define refltype kengine::meta::json::save
-kengine_function_reflection_info;
-#undef refltype
+#include "save.rpp"

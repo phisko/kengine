@@ -9,15 +9,13 @@
 namespace kengine::functions {
 	using register_types_signature = void(entt::registry & r);
 
+	//! putils reflect all
+	//! parents: [refltype::base]
 	struct pre_register_types : base_function<register_types_signature> {};
 
+	//! putils reflect all
+	//! parents: [refltype::base]
 	struct register_types : base_function<register_types_signature> {};
 }
 
-#define refltype kengine::functions::pre_register_types
-kengine_function_reflection_info;
-#undef refltype
-
-#define refltype kengine::functions::register_types
-kengine_function_reflection_info;
-#undef refltype
+#include "register_types.rpp"

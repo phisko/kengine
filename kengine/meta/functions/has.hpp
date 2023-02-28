@@ -5,9 +5,9 @@
 
 namespace kengine::meta {
 	using has_signature = bool(entt::const_handle);
+	//! putils reflect all
+	//! parents: [refltype::base]
 	struct has : base_function<has_signature> {};
 }
 
-#define refltype kengine::meta::has
-kengine_function_reflection_info;
-#undef refltype
+#include "has.rpp"
