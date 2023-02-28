@@ -10,7 +10,7 @@
 // kengine pathfinding/recast
 #include "kengine/pathfinding/recast/helpers/unique_ptr.hpp"
 
-namespace kengine::data {
+namespace kengine::pathfinding::recast {
 	using nav_mesh_ptr = unique_ptr<dtNavMesh, dtFreeNavMesh>;
 	using nav_mesh_query_ptr = unique_ptr<dtNavMeshQuery, dtFreeNavMeshQuery>;
 
@@ -21,11 +21,12 @@ namespace kengine::data {
 	};
 
 	//! putils reflect name
-	struct recast_nav_mesh {
+	//! class_name: recast_nav_mesh
+	struct nav_mesh {
 		nav_mesh_data data;
-		nav_mesh_ptr nav_mesh = nullptr;
+		nav_mesh_ptr ptr = nullptr;
 		nav_mesh_query_ptr nav_mesh_query = nullptr;
 	};
 }
 
-#include "recast_nav_mesh.rpp"
+#include "nav_mesh.rpp"

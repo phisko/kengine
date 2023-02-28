@@ -9,7 +9,7 @@
 // putils
 #include "putils/point.hpp"
 
-namespace kengine::data {
+namespace kengine::pathfinding {
 	//! putils reflect all
 	//! used_types: [putils::point3f]
 	struct pathfinding {

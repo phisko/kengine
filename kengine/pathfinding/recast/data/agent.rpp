@@ -2,9 +2,9 @@
 
 #include "putils/reflection.hpp"
 
-#define refltype kengine::data::recast_agent
+#define refltype kengine::pathfinding::recast::agent
 putils_reflection_info {
-	putils_reflection_class_name;
+	putils_reflection_custom_class_name(recast_agent);
 	putils_reflection_attributes(
 		putils_reflection_attribute(index),
 		putils_reflection_attribute(crowd)

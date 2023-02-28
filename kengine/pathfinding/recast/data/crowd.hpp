@@ -6,13 +6,14 @@
 // kengine pathfinding/recast
 #include "kengine/pathfinding/recast/helpers/unique_ptr.hpp"
 
-namespace kengine::data {
+namespace kengine::pathfinding::recast {
 	using crowd_ptr = unique_ptr<dtCrowd, dtFreeCrowd>;
 
 	//! putils reflect name
-	struct recast_crowd {
-		crowd_ptr crowd = nullptr;
+	//! class_name: recast_crowd
+	struct crowd {
+		crowd_ptr ptr = nullptr;
 	};
 }
 
-#include "recast_crowd.rpp"
+#include "crowd.rpp"
