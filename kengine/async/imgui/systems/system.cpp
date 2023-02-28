@@ -18,6 +18,9 @@
 // kengine async
 #include "kengine/async/data/task.hpp"
 
+// kengine imgui
+#include "kengine/imgui/helpers/set_context.hpp"
+
 // kengine imgui/imgui_tool
 #include "kengine/imgui/tool/data/tool.hpp"
 
@@ -49,6 +52,9 @@ namespace kengine::async::imgui {
 				kengine_log(r, very_verbose, "async_imgui", "Disabled");
 				return;
 			}
+
+			if (!kengine::imgui::set_context(r))
+				return;
 
 			if (ImGui::Begin("Async tasks", enabled)) {
 				if (ImGui::BeginTable("Tasks", 2)) {

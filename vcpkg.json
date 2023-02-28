@@ -1,0 +1,37 @@
+{
+    "builtin-baseline": "d5bc0e71e06dfe6594ffb8fb2430919f1b435f94",
+    "dependencies": [
+        "gtest",
+        "magic-enum",
+        "nlohmann-json",
+        "lua",
+        "sol2",
+        "pybind11",
+
+        "assimp",
+        "freetype",
+        "glew",
+        "glfw3",
+        "glm",
+        "stb",
+
+        "entt",
+        "termcolor",
+        "bullet3",
+        "recast",
+        "sfml",
+        "imgui-sfml",
+        {
+            "name": "imgui",
+            "features": [
+                "docking-experimental",
+                "glfw-binding",
+                "opengl3-binding"
+            ]
+        }
+    ],
+    "overrides": [
+        { "name": "assimp", "version": "5.0.1" },
+        { "name": "sol2", "version": "3.2.2" }
+    ]
+}

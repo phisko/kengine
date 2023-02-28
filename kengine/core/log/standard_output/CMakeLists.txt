@@ -1,3 +1,4 @@
 project(kengine)
 
-putils_conan_download_and_link_packages(${system_name} PRIVATE termcolor/2.0.0)
+find_path(TERMCOLOR_INCLUDE_DIRS "termcolor/termcolor.hpp")
+target_include_directories(${system_name} PRIVATE ${TERMCOLOR_INCLUDE_DIRS})

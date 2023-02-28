@@ -37,6 +37,9 @@
 // kengine adjustable
 #include "kengine/adjustable/data/adjustable.hpp"
 
+// kengine imgui
+#include "kengine/imgui/helpers/set_context.hpp"
+
 // kengine imgui/imgui_tool
 #include "kengine/imgui/tool/data/tool.hpp"
 
@@ -110,6 +113,9 @@ namespace kengine::adjustable::imgui {
 				kengine_log(r, very_verbose, "adjustable_imgui", "Disabled");
 				return;
 			}
+
+			if (!kengine::imgui::set_context(r))
+				return;
 
 			processor.process();
 

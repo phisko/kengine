@@ -23,6 +23,9 @@
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 #include "kengine/core/sort/helpers/get_name_sorted_entities.hpp"
 
+// kengine imgui
+#include "kengine/imgui/helpers/set_context.hpp"
+
 // kengine imgui/imgui_tool
 #include "kengine/imgui/tool/data/tool.hpp"
 
@@ -64,6 +67,9 @@ namespace kengine::meta::imgui::engine_stats {
 				kengine_log(r, very_verbose, log_category, "Disabled");
 				return;
 			}
+
+			if (!kengine::imgui::set_context(r))
+				return;
 
 			if (ImGui::Begin("Engine stats", enabled)) {
 				ImGui::Text("Entities: %zu", r.alive());

@@ -26,6 +26,9 @@
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 #include "kengine/core/sort/helpers/get_name_sorted_entities.hpp"
 
+// kengine imgui
+#include "kengine/imgui/helpers/set_context.hpp"
+
 // kengine imgui/tool
 #include "kengine/imgui/tool/data/tool.hpp"
 
@@ -74,6 +77,9 @@ namespace kengine::imgui::tool {
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, very_verbose, log_category, "Executing");
+
+			if (!imgui::set_context(r))
+				return;
 
 			processor.process();
 

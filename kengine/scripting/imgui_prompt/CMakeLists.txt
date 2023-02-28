@@ -1,5 +1,7 @@
 project(kengine)
 
+system_link_private_libraries(kengine_imgui)
+
 if(KENGINE_SCRIPTING_LUA)
     system_link_private_libraries(kengine_scripting_lua)
 endif()

@@ -34,6 +34,9 @@
 // kengine adjustable
 #include "kengine/adjustable/data/adjustable.hpp"
 
+// kengine imgui
+#include "kengine/imgui/helpers/set_context.hpp"
+
 // kengine imgui/imgui_tool
 #include "kengine/imgui/tool/data/tool.hpp"
 
@@ -120,6 +123,9 @@ namespace kengine::core::log::imgui {
 				kengine_log(r, very_verbose, "log_imgui", "Disabled");
 				return;
 			}
+
+			if (!kengine::imgui::set_context(r))
+				return;
 
 			if (ImGui::Begin("log", enabled)) {
 				draw_filters();

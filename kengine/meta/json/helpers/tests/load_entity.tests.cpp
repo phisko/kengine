@@ -10,15 +10,20 @@
 
 // kengine meta
 #include "kengine/meta/helpers/register_metadata.hpp"
-#include "kengine/meta/helpers/register_meta_components.hpp"
+#include "kengine/meta/helpers/register_meta_component_implementation.hpp"
 
 // kengine meta/json
+#include "kengine/meta/json/functions/load.hpp"
+#include "kengine/meta/json/helpers/impl/load.hpp"
 #include "kengine/meta/json/helpers/load_entity.hpp"
 
 TEST(meta_json, load_entity) {
 	entt::registry r;
 	kengine::meta::register_metadata<kengine::core::name, kengine::core::transform>(r);
-	kengine::meta::register_meta_components<kengine::core::name, kengine::core::transform>(r);
+	kengine::meta::register_meta_component_implementation<
+		kengine::meta::json::load,
+		kengine::core::name, kengine::core::transform
+	>(r);
 
 	const char * expected_name = "hello";
 	const putils::point3f expected_pos = { 42.f, -42.f, 84.f };
