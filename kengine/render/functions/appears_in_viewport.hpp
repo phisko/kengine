@@ -5,9 +5,9 @@
 
 namespace kengine::functions {
 	using appears_in_viewport_signature = bool(entt::entity entity);
+	//! putils reflect all
+	//! parents: [refltype::base]
 	struct appears_in_viewport : base_function<appears_in_viewport_signature> {};
 }
 
-#define refltype kengine::functions::appears_in_viewport
-kengine_function_reflection_info;
-#undef refltype
+#include "appears_in_viewport.rpp"

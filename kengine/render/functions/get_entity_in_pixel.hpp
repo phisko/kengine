@@ -8,9 +8,9 @@
 
 namespace kengine::functions {
 	using get_entity_in_pixel_signature = entt::entity(entt::entity window, const putils::point2ui & pixel);
+	//! putils reflect all
+	//! parents: [refltype::base]
 	struct get_entity_in_pixel : base_function<get_entity_in_pixel_signature> {};
 }
 
-#define refltype kengine::functions::get_entity_in_pixel
-kengine_function_reflection_info;
-#undef refltype
+#include "get_entity_in_pixel.rpp"

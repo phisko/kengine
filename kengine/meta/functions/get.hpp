@@ -5,16 +5,14 @@
 
 namespace kengine::meta {
 	using get_signature = void *(entt::handle);
+	//! putils reflect all
+	//! parents: [refltype::base]
 	struct get : base_function<get_signature> {};
 
 	using get_const_signature = const void *(entt::const_handle);
+	//! putils reflect all
+	//! parents: [refltype::base]
 	struct get_const : base_function<get_const_signature> {};
 }
 
-#define refltype kengine::meta::get
-kengine_function_reflection_info;
-#undef refltype
-
-#define refltype kengine::meta::get_const
-kengine_function_reflection_info;
-#undef refltype
+#include "get.rpp"

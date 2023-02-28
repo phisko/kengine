@@ -5,9 +5,9 @@
 
 namespace kengine::meta::imgui {
 	using display_signature = void(entt::const_handle);
+	//! putils reflect all
+	//! parents: [refltype::base]
 	struct display : base_function<display_signature> {};
 }
 
-#define refltype kengine::meta::imgui::display
-kengine_function_reflection_info;
-#undef refltype
+#include "display.rpp"

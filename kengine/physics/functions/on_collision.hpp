@@ -5,9 +5,9 @@
 
 namespace kengine::functions {
 	using on_collision_signature = void(entt::entity first, entt::entity second);
+	//! putils reflect all
+	//! parents: [refltype::base]
 	struct on_collision : base_function<on_collision_signature> {};
 }
 
-#define refltype kengine::functions::on_collision
-kengine_function_reflection_info;
-#undef refltype
+#include "on_collision.rpp"
