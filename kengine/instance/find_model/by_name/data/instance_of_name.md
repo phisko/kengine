@@ -1,11 +1,3 @@
 # [instance_of_name](instance_of_name.hpp)
 
-Component used to find the entity's [model](model.md) by its name.
-
-## Members
-
-```cpp
-kengine::core::name::string model_name;
-```
-
-Name of the entity to use as this entity's [model](model.md).
+Specialization of [instance_of](../../data/instance_of.md) to find a model by its [name](../../../../core/data/name.md).

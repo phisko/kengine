@@ -12,5 +12,5 @@ Entities referenced by instances are called `model entities`. They hold shared d
 	* [model_has](helpers/model_has.md): check if the model has a component
 	* [try_get_model](helpers/try_get_model.md): attempt to get the model's component
 
-Sub-libraries:
-* [kengine_instance_find_model_by_name](find_model_by_name): find an entity's model by its name
+Sub-libaries:
+* [kengine_instance_find_model](find_model): system template to find an entity's model by a given component
