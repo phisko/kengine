@@ -3,7 +3,7 @@
 // putils
 #include "putils/point.hpp"
 
-namespace kengine::data {
+namespace kengine::physics {
 	//! putils reflect all
 	//! used_types: [putils::vec3f]
 	struct physics {

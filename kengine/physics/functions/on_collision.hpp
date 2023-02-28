@@ -3,7 +3,7 @@
 // kengine functions
 #include "kengine/base_function.hpp"
 
-namespace kengine::functions {
+namespace kengine::physics {
 	using on_collision_signature = void(entt::entity first, entt::entity second);
 	//! putils reflect all
 	//! parents: [refltype::base]

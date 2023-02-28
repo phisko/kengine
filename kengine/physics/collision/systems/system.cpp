@@ -1,4 +1,4 @@
-#include "collision.hpp"
+#include "system.hpp"
 
 // entt
 #include <entt/entity/handle.hpp>
@@ -17,32 +17,34 @@
 // kengine physics/collision
 #include "kengine/physics/collision/data/collision.hpp"
 
-namespace kengine::systems {
-	struct collision {
+namespace kengine::physics::collision {
+	static constexpr auto log_category = "physics_collision";
+
+	struct system {
 		entt::registry & r;
 
-		collision(entt::handle e) noexcept
+		system(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "collision", "Initializing");
-			e.emplace<functions::on_collision>(putils_forward_to_this(on_collision));
+			kengine_log(r, log, log_category, "Initializing");
+			e.emplace<physics::on_collision>(putils_forward_to_this(on_collision));
 		}
 
 		void on_collision(entt::entity first, entt::entity second) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, verbose, "collision", "Collision between [%u] and [%u]", first, second);
+			kengine_logf(r, verbose, log_category, "Collision between [%u] and [%u]", first, second);
 			trigger(first, second);
 			trigger(second, first);
 		}
 
 		void trigger(entt::entity first, entt::entity second) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			const auto collision = r.try_get<data::collision>(first);
+			const auto collision = r.try_get<physics::collision::collision>(first);
 			if (!collision || collision->on_collide == nullptr)
 				return;
 			collision->on_collide(first, second);
 		}
 	};
 
-	DEFINE_KENGINE_SYSTEM_CREATOR(collision)
+	DEFINE_KENGINE_SYSTEM_CREATOR(system)
 }

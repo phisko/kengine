@@ -15,7 +15,7 @@
 // kengine core
 #include "kengine/core/data/transform.hpp"
 
-namespace kengine::data {
+namespace kengine::physics {
 	//! putils reflect all
 	//! used_types: [refltype::collider]
 	struct model_collider {
