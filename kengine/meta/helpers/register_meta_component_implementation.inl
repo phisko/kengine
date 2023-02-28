@@ -13,6 +13,7 @@
 
 // kengine meta
 #include "kengine/meta/helpers/get_type_entity.hpp"
+#include "kengine/meta/helpers/impl/meta_component_implementation.hpp"
 
 namespace kengine::meta {
 	template<typename Meta, typename... Comps>
