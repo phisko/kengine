@@ -2,6 +2,10 @@
 
 // entt
 #include <entt/entity/handle.hpp>
+#include <entt/entity/registry.hpp>
+
+// kengine
+#include "kengine/core/log/helpers/kengine_log.hpp"
 
 namespace kengine::meta {
 	template<typename T>
