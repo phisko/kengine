@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.15)
 project(kengine)
 
-cmake_policy(VERSION 3.13) # options shouldn't clear variables
+cmake_policy(VERSION 3.15) # options shouldn't clear variables
 
 set(CMAKE_CXX_STANDARD 20)
 if (MSVC)
@@ -22,15 +22,8 @@ if (NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
     putils_set_output_directories(bin lib lib)
 endif()
 
-# entt
-set(customFindPackageNames entt:EnTT)
-set(customLibraryNames entt:EnTT)
-putils_conan_download_and_link_packages_with_names(
-        kengine_include INTERFACE
-        "${customFindPackageNames}"
-        "${customLibraryNames}"
-        entt/3.11.0
-)
+find_package(EnTT CONFIG REQUIRED)
+target_link_libraries(kengine_include INTERFACE EnTT::EnTT)
 
 option(KENGINE_GENERATE_REFLECTION "Generate reflection headers for kengine data types")
 option(KENGINE_ALL_SYSTEMS "Build all systems")

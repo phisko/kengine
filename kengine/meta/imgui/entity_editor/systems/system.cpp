@@ -18,6 +18,7 @@
 
 // kengine imgui
 #include "kengine/imgui/helpers/get_scale.hpp"
+#include "kengine/imgui/helpers/set_context.hpp"
 
 // kengine imgui/tool
 #include "kengine/imgui/tool/data/tool.hpp"
@@ -55,6 +56,9 @@ namespace kengine::meta::imgui::entity_editor {
 				kengine_log(r, very_verbose, log_category, "Disabled");
 				return;
 			}
+
+			if (!kengine::imgui::set_context(r))
+				return;
 
 			const auto scale = kengine::imgui::get_scale(r);
 			for (const auto selected : r.view<core::selected>()) {

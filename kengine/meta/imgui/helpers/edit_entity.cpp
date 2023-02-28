@@ -20,6 +20,9 @@
 // kengine meta/imgui
 #include "kengine/meta/imgui/functions/edit.hpp"
 
+// kengine imgui
+#include "kengine/imgui/helpers/set_context.hpp"
+
 // kengine instance
 #include "kengine/instance/data/instance.hpp"
 
@@ -31,6 +34,9 @@ namespace kengine::meta::imgui {
 		kengine_logf(*e.registry(), very_verbose, log_category, "Editing [%u]", e.entity());
 
 		const auto & r = *e.registry();
+
+		if (!kengine::imgui::set_context(r))
+			return;
 
 		if (ImGui::BeginPopupContextWindow()) {
 			const auto types = core::sort::get_name_sorted_entities<const has, const emplace_or_replace>(r);
@@ -67,6 +73,9 @@ namespace kengine::meta::imgui {
 	void edit_entity_and_model(entt::handle e) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		kengine_logf(*e.registry(), very_verbose, log_category, "Editing [%u] and its model", e.entity());
+
+		if (!kengine::imgui::set_context(*e.registry()))
+			return;
 
 		const auto instance = e.try_get<instance::instance>();
 		if (!instance || instance->model == entt::null) {

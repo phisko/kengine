@@ -20,6 +20,9 @@
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
+// kengine imgui
+#include "kengine/imgui/helpers/set_context.hpp"
+
 // kengine imgui/imgui_tool
 #include "kengine/imgui/tool/data/tool.hpp"
 
@@ -70,6 +73,9 @@ namespace kengine::systems {
 				kengine_log(r, very_verbose, "imgui_prompt", "Disabled");
 				return;
 			}
+
+			if (!kengine::imgui::set_context(r))
+				return;
 
 			if (ImGui::Begin("Prompt", enabled)) {
 				ImGui::Columns(2);

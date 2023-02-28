@@ -56,7 +56,7 @@
 #include "kengine/render/sfml/data/sfml_texture.hpp"
 
 // imgui-sfml
-#include "imgui-sfml/imgui-SFML.h"
+#include "imgui-SFML.h"
 
 #ifndef KENGINE_MAX_VIEWPORTS
 #define KENGINE_MAX_VIEWPORTS 8

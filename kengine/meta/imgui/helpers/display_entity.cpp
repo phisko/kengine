@@ -18,6 +18,9 @@
 // kengine meta/imgui
 #include "kengine/meta/imgui/functions/display.hpp"
 
+// kengine imgui
+#include "kengine/imgui/helpers/set_context.hpp"
+
 // kengine instance
 #include "kengine/instance/data/instance.hpp"
 
@@ -27,6 +30,9 @@ namespace kengine::meta::imgui {
 	void display_entity(entt::const_handle e) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		kengine_logf(*e.registry(), very_verbose, log_category, "Displaying [%u]", e.entity());
+
+		if (!kengine::imgui::set_context(*e.registry()))
+			return;
 
 		const auto types = core::sort::get_name_sorted_entities<const has, const display>(*e.registry());
 
@@ -41,6 +47,9 @@ namespace kengine::meta::imgui {
 	void display_entity_and_model(entt::const_handle e) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		kengine_logf(*e.registry(), very_verbose, log_category, "Displaying [%u] and its model", e.entity());
+
+		if (!kengine::imgui::set_context(*e.registry()))
+			return;
 
 		const auto instance = e.try_get<instance::instance>();
 		if (!instance || instance->model == entt::null) {

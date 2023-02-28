@@ -9,16 +9,27 @@
 #include "kengine/core/data/transform.hpp"
 
 // kengine meta
+#include "kengine/meta/functions/has.hpp"
+#include "kengine/meta/helpers/impl/has.hpp"
 #include "kengine/meta/helpers/register_metadata.hpp"
-#include "kengine/meta/helpers/register_meta_components.hpp"
+#include "kengine/meta/helpers/register_meta_component_implementation.hpp"
 
 // kengine meta/json
+#include "kengine/meta/json/functions/save.hpp"
+#include "kengine/meta/json/helpers/impl/save.hpp"
 #include "kengine/meta/json/helpers/save_entity.hpp"
 
 TEST(meta_json, save_entity) {
 	entt::registry r;
 	kengine::meta::register_metadata<kengine::core::name, kengine::core::transform>(r);
-	kengine::meta::register_meta_components<kengine::core::name, kengine::core::transform>(r);
+	kengine::meta::register_meta_component_implementation<
+		kengine::meta::json::save,
+		kengine::core::name, kengine::core::transform
+	>(r);
+	kengine::meta::register_meta_component_implementation<
+		kengine::meta::has,
+		kengine::core::name, kengine::core::transform
+	>(r);
 
 	const char * expected_name = "hello";
 	const putils::point3f expected_pos = { 42.f, -42.f, 84.f };

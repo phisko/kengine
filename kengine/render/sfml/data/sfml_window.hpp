@@ -7,7 +7,7 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 
 // impl
-#include "imgui-sfml/imgui-SFML.h"
+#include "imgui-SFML.h"
 
 namespace kengine::data {
 	//! putils reflect name
