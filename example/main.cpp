@@ -4,13 +4,13 @@
 
 // kengine
 #include "kengine/core/data/transform.hpp"
-#include "kengine/log/stdout/systems/log_stdout.hpp"
+#include "kengine/core/log/standard_output/systems/system.hpp"
 #include "kengine/main_loop/data/keep_alive.hpp"
 #include "kengine/main_loop/functions/execute.hpp"
-#include "kengine/main_loop/helpers/main_loop.hpp"
-#include "kengine/scripting/lua/data/lua.hpp"
-#include "kengine/scripting/lua/helpers/lua_helper.hpp"
-#include "kengine/scripting/lua/systems/lua.cpp"
+#include "kengine/main_loop/helpers/run.hpp"
+#include "kengine/scripting/lua/data/scripts.hpp"
+#include "kengine/scripting/lua/helpers/register_types.hpp"
+#include "kengine/scripting/lua/systems/system.cpp"
 
 struct debug_system {
     debug_system(entt::handle e) noexcept
@@ -22,7 +22,7 @@ struct debug_system {
     }
 
     void execute(float delta_time) noexcept {
-        for (const auto & [e, transform, lua] : r.view<kengine::core::transform, kengine::data::lua>().each()) {
+        for (const auto & [e, transform, lua_scripts] : r.view<kengine::core::transform, kengine::scripting::lua::scripts>().each()) {
             std::cout << "Entity " << (int)e << std::endl;
             std::cout << "\tTransform: "
                 << transform.bounding_box.position.x << ' '
@@ -30,7 +30,7 @@ struct debug_system {
                 << transform.bounding_box.position.z << std::endl;
 
             std::cout << "\tScripts:" << std::endl;
-            for (const auto & script : lua.scripts)
+            for (const auto & script : lua_scripts.files)
                 std::cout << "\t\t[" << script << "]" << std::endl;
 
             std::cout << std::endl;
@@ -53,23 +53,23 @@ int main(int, char **av) {
 
     entt::registry r;
 
-    kengine::systems::add_log_stdout(r);
-    kengine::systems::add_lua(r);
+    kengine::core::log::standard_output::add_system(r);
+    kengine::scripting::lua::add_system(r);
     add_debug_system(r);
 
     const auto e = r.create();
     r.emplace<kengine::main_loop::keep_alive>(e);
     r.emplace<kengine::core::transform>(e).bounding_box.position = { 42.f, 0.f, 42.f };
-    r.emplace<kengine::data::lua>(e).scripts = { "unit.lua" };
+    r.emplace<kengine::scripting::lua::scripts>(e).files = { "unit.lua" };
 
 	// Register types to be used in lua
-	kengine::lua_helper::register_types<
+	kengine::scripting::lua::register_types<
 		true, // components
 		kengine::core::transform,
-		kengine::data::lua
+		kengine::scripting::lua::scripts
 	>(r);
 
-	kengine::lua_helper::register_types<
+	kengine::scripting::lua::register_types<
 		false, // non-components
 		putils::rect3f,
 		putils::point3f
