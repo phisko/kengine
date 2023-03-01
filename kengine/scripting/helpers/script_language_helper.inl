@@ -16,8 +16,10 @@
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
+#ifdef KENGINE_MAIN_LOOP
 // kengine main_loop
 #include "kengine/main_loop/helpers/stop_running.hpp"
+#endif
 
 // Reflection API for entt::handle
 // We use entt::handle as entt::entity is a scalar and doesn't play well with scripting languages
@@ -64,6 +66,7 @@ namespace kengine::script_language_helper {
 			)
 		);
 
+#ifdef KENGINE_MAIN_LOOP
 		kengine_log(r, verbose, "script_language_helper", "Registering function stop_running");
 		register_function(
 			"stop_running",
@@ -73,6 +76,9 @@ namespace kengine::script_language_helper {
 				}
 			)
 		);
+#else
+		kengine_log(r, verbose, "script_language_helper", "Not registering function stop_running because KENGINE_MAIN_LOOP is not defined");
+#endif
 
 		kengine_log(r, verbose, "script_language_helper", "Registering type entt::handle");
 		register_type(putils::meta::type<entt::handle>{});

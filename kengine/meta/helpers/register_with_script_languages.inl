@@ -11,11 +11,15 @@
 // kengine core
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
+#ifdef KENGINE_SCRIPTING_LUA
 // kengine scripting/lua
 #include "kengine/scripting/lua/helpers/lua_helper.hpp"
+#endif
 
+#ifdef KENGINE_SCRIPTING_PYTHON
 // kengine scripting/python
 #include "kengine/scripting/python/helpers/python_helper.hpp"
+#endif
 
 namespace kengine::meta {
 
@@ -47,12 +51,16 @@ namespace kengine::meta {
 #endif
 		};
 
-#ifdef KENGINE_PYTHON
+#ifdef KENGINE_SCRIPTING_PYTHON
 		r.storage<data::python_state>();
+#else
+		kengine_log(r, verbose, "meta", "Not registering with Python because KENGINE_SCRIPTING_PYTHON is not defined");
 #endif
 
-#ifdef KENGINE_LUA
+#ifdef KENGINE_SCRIPTING_LUA
 		r.storage<data::lua_state>();
+#else
+		kengine_log(r, verbose, "meta", "Not registering with Lua because KENGINE_SCRIPTING_LUA is not defined");
 #endif
 
 		std::for_each(std::execution::par_unseq, putils_range(language_registrators), [&](const auto func) {
@@ -79,10 +87,14 @@ namespace kengine::meta {
 
 #ifdef KENGINE_SCRIPTING_PYTHON
 		python_helper::register_function(r, name, func);
+#else
+		kengine_log(r, verbose, "meta", "Not registering with Python because KENGINE_SCRIPTING_PYTHON is not defined");
 #endif
 
 #ifdef KENGINE_SCRIPTING_LUA
 		lua_helper::register_function(r, name, func);
+#else
+		kengine_log(r, verbose, "meta", "Not registering with Lua because KENGINE_SCRIPTING_LUA is not defined");
 #endif
 	}
 }
