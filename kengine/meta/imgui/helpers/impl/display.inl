@@ -10,6 +10,9 @@
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
+// kengine imgui
+#include "kengine/imgui/helpers/set_context.hpp"
+
 namespace kengine::meta {
 	template<typename T>
 	void meta_component_implementation<imgui::display, T>::function(entt::const_handle e) noexcept {
@@ -25,6 +28,9 @@ namespace kengine::meta {
 			static constexpr T instance;
 			comp = &instance;
 		}
+
+		if (!kengine::imgui::set_context(*e.registry()))
+			return;
 
 		if (comp)
 			putils::reflection::imgui_edit(*comp);
