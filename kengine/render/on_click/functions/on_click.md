@@ -14,4 +14,4 @@ void (int button);
 
 ## Usage
 
-The [on_click system](../systems/on_click.md) will call this `function component` for the entity found in the clicked pixel.
+The [on_click system](../systems/system.md) will call this `function component` for the entity found in the clicked pixel.

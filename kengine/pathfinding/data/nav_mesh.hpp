@@ -17,7 +17,7 @@
 namespace kengine::pathfinding {
 	//! putils reflect all
 	struct nav_mesh {
-		size_t concerned_mesh = 0; // Index into data::model_data::meshes, pointing to the mesh for which to generate the navmesh
+		size_t concerned_mesh = 0; // Index into render::model_data::meshes, pointing to the mesh for which to generate the navmesh
 		float cell_size = .25f;
 		float cell_height = .25f;
 		float walkable_slope = putils::pi / 4.f;

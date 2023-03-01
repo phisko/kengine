@@ -158,7 +158,7 @@ namespace kengine::render::sfml {
 
 			const auto * window_comp = r.try_get<render::window>(window_entity);
 			if (window_comp == nullptr) {
-				kengine_logf(r, verbose, log_category, "Destroying window [%u] as data::window was removed", window_entity);
+				kengine_logf(r, verbose, log_category, "Destroying window [%u] as render::window was removed", window_entity);
 				r.remove<window>(window_entity);
 				return false;
 			}
@@ -274,7 +274,7 @@ namespace kengine::render::sfml {
 				kengine_logf(r, very_verbose, log_category, "Rendering to camera [%u]", e);
 
 				if (viewport.window == entt::null) {
-					kengine_logf(r, verbose, log_category, "Setting target window for data::viewport in [%u]", e);
+					kengine_logf(r, verbose, log_category, "Setting target window for viewport in [%u]", e);
 					viewport.window = window_entity;
 				}
 				else if (viewport.window != window_entity) {
