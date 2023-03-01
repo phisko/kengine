@@ -1,4 +1,4 @@
-#include "sfml.hpp"
+#include "system.hpp"
 
 // entt
 #include <entt/entity/handle.hpp>
@@ -6,6 +6,9 @@
 
 // imgui
 #include <imgui.h>
+
+// imgui-sfml
+#include <imgui-SFML.h>
 
 // sfml
 #include <SFML/Graphics/RenderTexture.hpp>
@@ -49,20 +52,19 @@
 #include "kengine/render/data/drawable.hpp"
 #include "kengine/render/data/viewport.hpp"
 #include "kengine/render/data/window.hpp"
-#include "kengine/render/helpers/camera_helper.hpp"
+#include "kengine/render/helpers/convert_to_screen_percentage.hpp"
 
 // kengine render/sfml
-#include "kengine/render/sfml/data/sfml_window.hpp"
-#include "kengine/render/sfml/data/sfml_texture.hpp"
-
-// imgui-sfml
-#include "imgui-SFML.h"
+#include "kengine/render/sfml/data/window.hpp"
+#include "kengine/render/sfml/data/texture.hpp"
 
 #ifndef KENGINE_MAX_VIEWPORTS
 #define KENGINE_MAX_VIEWPORTS 8
 #endif
 
-namespace kengine::systems {
+namespace kengine::render::sfml {
+	static constexpr auto log_category = "render_sfml";
+
 	template<typename PointType>
 	struct vector_converter {
 		const PointType & p;
@@ -84,7 +86,7 @@ namespace kengine::systems {
 		return { tmp.r, tmp.g, tmp.b, tmp.a };
 	}
 
-	struct sfml {
+	struct system {
 		entt::registry & r;
 		putils::vector<entt::scoped_connection, 2> connections;
 
@@ -92,15 +94,15 @@ namespace kengine::systems {
 		input::buffer * input_buffer = nullptr;
 
 		struct processed_window {};
-		kengine::new_entity_processor<processed_window, data::window> window_processor{ r, putils_forward_to_this(create_window) };
+		kengine::new_entity_processor<processed_window, render::window> window_processor{ r, putils_forward_to_this(create_window) };
 
 		struct processed_model {};
 		kengine::new_entity_processor<processed_model, render::asset> model_processor{ r, putils_forward_to_this(create_texture) };
 
-		sfml(entt::handle e) noexcept
+		system(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "sfml", "Initializing");
+			kengine_log(r, log, log_category, "Initializing");
 
 			e.emplace<main_loop::execute>(putils_forward_to_this(execute));
 			auto & scale = e.emplace<imgui::scale>();
@@ -115,15 +117,15 @@ namespace kengine::systems {
 			model_processor.process();
 		}
 
-		~sfml() noexcept {
+		~system() noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "sfml", "Shutting down");
+			kengine_log(r, log, log_category, "Shutting down");
 			ImGui::SFML::Shutdown();
 		}
 
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, very_verbose, "sfml", "Executing");
+			kengine_log(r, very_verbose, log_category, "Executing");
 
 			window_processor.process();
 			model_processor.process();
@@ -131,49 +133,49 @@ namespace kengine::systems {
 			const auto sf_delta_time = delta_clock.restart();
 
 			if (input_buffer == nullptr) {
-				kengine_log(r, verbose, "sfml", "Finding input buffer");
+				kengine_log(r, verbose, log_category, "Finding input buffer");
 				for (const auto & [e, buffer] : r.view<input::buffer>().each()) {
 					input_buffer = &buffer;
 					break;
 				}
 			}
 
-			kengine_log(r, very_verbose, "sfml", "Processing windows");
-			for (auto [window, sf_window] : r.view<data::sfml_window>().each()) {
-				kengine_logf(r, very_verbose, "sfml", "Processing window [%u]", window);
+			kengine_log(r, very_verbose, log_category, "Processing windows");
+			for (auto [window, sf_window] : r.view<sfml::window>().each()) {
+				kengine_logf(r, very_verbose, log_category, "Processing window [%u]", window);
 				if (!update_window_state(window, sf_window))
 					continue;
 				// We process events after rendering, even though it's not the expected order, because
 				// of how the SFML-ImGui binding handles input :(
 				render(window, sf_window);
-				process_events(window, *sf_window.window, sf_delta_time);
+				process_events(window, *sf_window.ptr, sf_delta_time);
 			}
 		}
 
-		bool update_window_state(entt::entity window_entity, data::sfml_window & sf_window_comp) noexcept {
+		bool update_window_state(entt::entity window_entity, window & sf_window_comp) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, very_verbose, "sfml", "Updating window state for [%u]", window_entity);
+			kengine_logf(r, very_verbose, log_category, "Updating window state for [%u]", window_entity);
 
-			const auto * window_comp = r.try_get<data::window>(window_entity);
+			const auto * window_comp = r.try_get<render::window>(window_entity);
 			if (window_comp == nullptr) {
-				kengine_logf(r, verbose, "sfml", "Destroying window [%u] as data::window was removed", window_entity);
-				r.remove<data::sfml_window>(window_entity);
+				kengine_logf(r, verbose, log_category, "Destroying window [%u] as data::window was removed", window_entity);
+				r.remove<window>(window_entity);
 				return false;
 			}
 
-			if (!sf_window_comp.window->isOpen()) {
-				kengine_logf(r, verbose, "sfml", "Destroying [%u] because window was closed", window_entity);
+			if (!sf_window_comp.ptr->isOpen()) {
+				kengine_logf(r, verbose, log_category, "Destroying [%u] because window was closed", window_entity);
 				r.destroy(window_entity);
 				return false;
 			}
 
-			sf_window_comp.window->setSize(convertVector(window_comp->size));
+			sf_window_comp.ptr->setSize(convertVector(window_comp->size));
 			return true;
 		}
 
 		void process_events(entt::entity window, sf::RenderWindow & sf_window, sf::Time delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, very_verbose, "sfml", "Processing events for [%u]", window);
+			kengine_logf(r, very_verbose, log_category, "Processing events for [%u]", window);
 
 			sf::Event event;
 			while (sf_window.pollEvent(event)) {
@@ -190,10 +192,10 @@ namespace kengine::systems {
 		putils::point2f previous_mouse_pos{ 0.f, 0.f };
 		void process_input(entt::entity window, const sf::Event & e) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, very_verbose, "sfml", "Processing input event for [%u]", window);
+			kengine_logf(r, very_verbose, log_category, "Processing input event for [%u]", window);
 
 			if (input_buffer == nullptr) {
-				kengine_log(r, verbose, "sfml", "No input buffer, cannot process event");
+				kengine_log(r, verbose, log_category, "No input buffer, cannot process event");
 				return;
 			}
 
@@ -256,36 +258,36 @@ namespace kengine::systems {
 			}
 		}
 
-		void render(entt::entity window_entity, data::sfml_window & sf_window) noexcept {
+		void render(entt::entity window_entity, window & sf_window) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, very_verbose, "sfml", "Rendering to [%u]", window_entity);
+			kengine_logf(r, very_verbose, log_category, "Rendering to [%u]", window_entity);
 
-			sf_window.window->clear();
+			sf_window.ptr->clear();
 
 			struct viewport_to_blit {
 				const sf::RenderTexture * render_texture;
-				const data::viewport * viewport;
+				const viewport * viewport;
 			};
 			putils::vector<viewport_to_blit, KENGINE_MAX_VIEWPORTS> to_blit;
 
-			for (auto [e, cam, viewport] : r.view<data::camera, data::viewport>().each()) {
-				kengine_logf(r, very_verbose, "sfml", "Rendering to camera [%u]", e);
+			for (auto [e, cam, viewport] : r.view<camera, viewport>().each()) {
+				kengine_logf(r, very_verbose, log_category, "Rendering to camera [%u]", e);
 
 				if (viewport.window == entt::null) {
-					kengine_logf(r, verbose, "sfml", "Setting target window for data::viewport in [%u]", e);
+					kengine_logf(r, verbose, log_category, "Setting target window for data::viewport in [%u]", e);
 					viewport.window = window_entity;
 				}
 				else if (viewport.window != window_entity) {
-					kengine_logf(r, very_verbose, "sfml", "Skipping camera [%u] because its viewport ([%u]) doesn't match", e, viewport.window);
+					kengine_logf(r, very_verbose, log_category, "Skipping camera [%u] because its viewport ([%u]) doesn't match", e, viewport.window);
 					continue;
 				}
 
 				sf::RenderTexture * render_texture = (sf::RenderTexture *)viewport.texture;
-				if (viewport.texture == data::viewport::INVALID_RENDER_TEXTURE) {
-					kengine_logf(r, verbose, "sfml", "Creating render texture for camera [%u]", e);
+				if (viewport.texture == viewport::INVALID_RENDER_TEXTURE) {
+					kengine_logf(r, verbose, log_category, "Creating render texture for camera [%u]", e);
 					render_texture = new sf::RenderTexture;
 					render_texture->create(viewport.resolution.x, viewport.resolution.y);
-					viewport.texture = (data::viewport::render_texture)render_texture;
+					viewport.texture = (viewport::render_texture)render_texture;
 				}
 
 				render_texture->setView(sf::View{ convertVector(cam.frustum.position), convertVector(cam.frustum.size) });
@@ -298,17 +300,17 @@ namespace kengine::systems {
 			});
 
 			for (const auto & blit : to_blit) {
-				auto render_texture_sprite = create_render_texture_sprite(*blit.render_texture, *sf_window.window, *blit.viewport);
-				sf_window.window->draw(std::move(render_texture_sprite));
+				auto render_texture_sprite = create_render_texture_sprite(*blit.render_texture, *sf_window.ptr, *blit.viewport);
+				sf_window.ptr->draw(std::move(render_texture_sprite));
 			}
 
-			ImGui::SFML::Render(*sf_window.window);
-			sf_window.window->display();
+			ImGui::SFML::Render(*sf_window.ptr);
+			sf_window.ptr->display();
 		}
 
 		void render_to_texture(sf::RenderTexture & render_texture) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, very_verbose, "sfml", "Rendering to texture");
+			kengine_log(r, very_verbose, log_category, "Rendering to texture");
 
 			render_texture.clear();
 
@@ -337,11 +339,11 @@ namespace kengine::systems {
 				std::vector<element> ordered_elements;
 			} drawables;
 
-			kengine_log(r, very_verbose, "sfml", "Queueing sprites");
+			kengine_log(r, very_verbose, log_category, "Queueing sprites");
 			for (const auto & [e, transform, drawable] : r.view<core::transform, render::drawable>().each()) {
 				auto sprite = create_entity_sprite(e, transform, drawable);
 				if (sprite != std::nullopt) {
-					kengine_logf(r, very_verbose, "sfml", "Queueing sprite for [%u]", e);
+					kengine_logf(r, very_verbose, log_category, "Queueing sprite for [%u]", e);
 					drawables.sprites.emplace_back(std::move(*sprite));
 					drawables.ordered_elements.push_back({
 						.type = drawables::element::sprite,
@@ -351,19 +353,19 @@ namespace kengine::systems {
 				}
 			}
 
-			kengine_log(r, very_verbose, "sfml", "Queueing debug graphics");
-			for (const auto & [e, transform, debug] : r.view<core::transform, data::debug_graphics>().each()) {
-				kengine_logf(r, very_verbose, "sfml", "Queueing debug graphics for [%u]", e);
+			kengine_log(r, very_verbose, log_category, "Queueing debug graphics");
+			for (const auto & [e, transform, debug] : r.view<core::transform, debug_graphics>().each()) {
+				kengine_logf(r, very_verbose, log_category, "Queueing debug graphics for [%u]", e);
 				for (const auto & element : debug.elements) {
 					const sf::Color color(convert_color(element.color));
 
 					auto pos = element.pos;
-					if (element.relative_to == data::debug_graphics::reference_space::object)
+					if (element.relative_to == debug_graphics::reference_space::object)
 						pos += transform.bounding_box.position;
 
 					const auto height = pos.z;
 
-					using element_type = data::debug_graphics::element_type;
+					using element_type = debug_graphics::element_type;
 					switch (element.type) {
 						case element_type::line: {
 							drawables::line line;
@@ -394,7 +396,7 @@ namespace kengine::systems {
 						}
 						case element_type::box: {
 							auto size = element.box.size;
-							if (element.relative_to == data::debug_graphics::reference_space::object)
+							if (element.relative_to == debug_graphics::reference_space::object)
 								size *= transform.bounding_box.size;
 							sf::RectangleShape rectangle{ convertVector(size) };
 							rectangle.setFillColor(color);
@@ -415,12 +417,12 @@ namespace kengine::systems {
 				}
 			}
 
-			kengine_log(r, very_verbose, "sfml", "Sorting drawables");
+			kengine_log(r, very_verbose, log_category, "Sorting drawables");
 			std::ranges::sort(drawables.ordered_elements, [](const drawables::element & lhs, const drawables::element & rhs) noexcept {
 				return lhs.height < rhs.height;
 			});
 
-			kengine_log(r, very_verbose, "sfml", "Drawing drawables");
+			kengine_log(r, very_verbose, log_category, "Drawing drawables");
 			for (const auto & element : drawables.ordered_elements) {
 				switch (element.type) {
 					case drawables::element::sprite: {
@@ -456,32 +458,32 @@ namespace kengine::systems {
 
 		std::optional<sf::Sprite> create_entity_sprite(entt::entity e, const core::transform & transform, const render::drawable & drawable) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, very_verbose, "sfml", "Creating entity sprite for [%u]", e);
+			kengine_logf(r, very_verbose, log_category, "Creating entity sprite for [%u]", e);
 
-			const auto * texture = instance::try_get_model<data::sfml_texture>({ r, e });
+			const auto * texture = instance::try_get_model<sfml::texture>({ r, e });
 			if (texture == nullptr) {
-				kengine_logf(r, warning, "sfml", "Failed to find sfml_texture in [%u]'s model", e);
+				kengine_logf(r, warning, log_category, "Failed to find sfml_texture in [%u]'s model", e);
 				return std::nullopt;
 			}
 
-			sf::Sprite sprite(texture->texture);
+			sf::Sprite sprite(texture->value);
 			sprite.setColor(convert_color(drawable.color));
 			sprite.setPosition(transform.bounding_box.position.x - transform.bounding_box.size.x / 2.f, transform.bounding_box.position.y - transform.bounding_box.size.y / 2.f);
 
-			const auto texture_size = texture->texture.getSize();
+			const auto texture_size = texture->value.getSize();
 			sprite.setScale(transform.bounding_box.size.x / texture_size.x, transform.bounding_box.size.y / texture_size.y);
 			sprite.setRotation(transform.yaw);
 			return sprite;
 		}
 
-		sf::Sprite create_render_texture_sprite(const sf::RenderTexture & render_texture, const sf::RenderWindow & window, const data::viewport & viewport) noexcept {
+		sf::Sprite create_render_texture_sprite(const sf::RenderTexture & render_texture, const sf::RenderWindow & window, const viewport & viewport) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, verbose, "sfml", "Creating render texture sprite");
+			kengine_log(r, verbose, log_category, "Creating render texture sprite");
 
 			sf::Sprite render_texture_sprite(render_texture.getTexture());
 
 			const auto screen_size = window.getSize();
-			const auto box = camera_helper::convert_to_screen_percentage(viewport.bounding_box, { (float)screen_size.x, (float)screen_size.y }, viewport);
+			const auto box = convert_to_screen_percentage(viewport.bounding_box, { (float)screen_size.x, (float)screen_size.y }, viewport);
 			render_texture_sprite.setPosition(screen_size.x * box.position.x, screen_size.y * box.position.y);
 
 			const auto texture_size = render_texture.getTexture().getSize();
@@ -490,11 +492,11 @@ namespace kengine::systems {
 			return render_texture_sprite;
 		}
 
-		void create_window(entt::entity e, const data::window & window_comp) noexcept {
+		void create_window(entt::entity e, const render::window & window_comp) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, log, "sfml", "Creating window for [%u] (%s)", e, window_comp.name.c_str());
+			kengine_logf(r, log, log_category, "Creating window for [%u] (%s)", e, window_comp.name.c_str());
 
-			auto & sf_window = r.emplace<data::sfml_window>(
+			auto & sf_window = r.emplace<window>(
 				e,
 				std::make_unique<sf::RenderWindow>(
 					sf::VideoMode{ window_comp.size.x, window_comp.size.y },
@@ -503,7 +505,7 @@ namespace kengine::systems {
 				)
 			);
 
-			ImGui::SFML::Init(*sf_window.window);
+			ImGui::SFML::Init(*sf_window.ptr);
 
 			r.emplace<imgui::context>(e, ImGui::GetCurrentContext());
 #if 0
@@ -512,26 +514,26 @@ namespace kengine::systems {
 			io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 			io.ConfigViewportsNoTaskBarIcon = true;
 #endif
-			ImGui::SFML::Update(*sf_window.window, delta_clock.restart());
+			ImGui::SFML::Update(*sf_window.ptr, delta_clock.restart());
 		}
 
 		void create_texture(entt::entity e, const render::asset & asset) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, verbose, "sfml", "Attempting to load texture for [%u] (%s)", e, asset.file.c_str());
+			kengine_logf(r, verbose, log_category, "Attempting to load texture for [%u] (%s)", e, asset.file.c_str());
 
 			sf::Texture texture;
 			if (texture.loadFromFile(asset.file.c_str())) {
-				kengine_logf(r, log, "sfml", "Loaded texture for '%s'", asset.file.c_str());
-				r.emplace<data::sfml_texture>(e, std::move(texture));
+				kengine_logf(r, log, log_category, "Loaded texture for '%s'", asset.file.c_str());
+				r.emplace<sfml::texture>(e, std::move(texture));
 			}
 		}
 	};
 
 	DEFINE_KENGINE_SYSTEM_CREATOR(
-		sfml,
-		sfml::processed_model,
-		sfml::processed_window,
-		data::sfml_window,
-		data::sfml_texture
+		system,
+		system::processed_model,
+		system::processed_window,
+		sfml::window,
+		sfml::texture
 	)
 }

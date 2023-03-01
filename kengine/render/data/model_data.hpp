@@ -11,7 +11,7 @@
 #include "putils/function.hpp"
 #include "putils/default_constructors.hpp"
 
-namespace kengine::data {
+namespace kengine::render {
 	//! putils reflect all
 	//! used_types: [refltype::mesh, refltype::vertex_attribute]
 	struct model_data {

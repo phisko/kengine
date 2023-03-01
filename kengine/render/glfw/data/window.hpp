@@ -6,22 +6,24 @@
 // putils
 #include "putils/raii.hpp"
 
-namespace kengine::data {
-	//! putils reflect none
-	struct glfw_window {
+namespace kengine::render::glfw {
+	//! putils reflect name
+	//! class_name: glfw_window
+	struct window {
 		static inline void free_window(GLFWwindow *(&window)) {
 			if (window)
 				glfwDestroyWindow(window);
 		}
 
-		putils::raii<GLFWwindow *, free_window> window{ nullptr };
+		putils::raii<GLFWwindow *, free_window> ptr{ nullptr };
 	};
 
 	//! putils reflect all
-	struct glfw_window_init {
+	//! class_name: glfw_window_init
+	struct window_init {
 		std::function<void()> set_hints = nullptr;
 		std::function<void()> on_window_created = nullptr;
 	};
 }
 
-#include "glfw_window.rpp"
+#include "window.rpp"

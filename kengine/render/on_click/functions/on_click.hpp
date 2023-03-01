@@ -3,7 +3,7 @@
 // kengine functions
 #include "kengine/base_function.hpp"
 
-namespace kengine::functions {
+namespace kengine::render::on_click {
 	using on_click_signature = void(int button);
 	//! putils reflect all
 	//! parents: [refltype::base]

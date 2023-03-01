@@ -2,7 +2,7 @@
 
 #include "putils/reflection.hpp"
 
-#define refltype kengine::functions::get_entity_in_pixel
+#define refltype kengine::render::get_entity_in_pixel
 putils_reflection_info {
 	putils_reflection_class_name;
 	putils_reflection_parents(

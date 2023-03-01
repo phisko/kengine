@@ -6,13 +6,14 @@
 // putils
 #include "putils/default_constructors.hpp"
 
-namespace kengine::data {
+namespace kengine::render::kreogl {
 	//! putils reflect name
-	struct kreogl_animation_files {
-		PUTILS_MOVE_ONLY(kreogl_animation_files);
+	//! class_name: kreogl_animation_files
+	struct animation_files {
+		PUTILS_MOVE_ONLY(animation_files);
 
-		std::vector<std::unique_ptr<kreogl::animation_file>> files;
+		std::vector<std::unique_ptr<::kreogl::animation_file>> files;
 	};
 }
 
-#include "kreogl_animation_files.rpp"
+#include "animation_files.rpp"

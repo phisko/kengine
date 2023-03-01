@@ -9,9 +9,9 @@
 // kengine render
 #include "kengine/render/data/on_screen.hpp"
 
-namespace kengine::data {
+namespace kengine::render {
 	//! putils reflect all
-	//! parents: [kengine::data::on_screen]
+	//! parents: [kengine::render::on_screen]
 	//! used_types: [putils::rect2f, putils::point2i]
 	struct viewport : on_screen {
 		using render_texture = std::intptr_t;

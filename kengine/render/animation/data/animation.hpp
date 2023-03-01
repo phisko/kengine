@@ -1,6 +1,6 @@
 #pragma once
 
-namespace kengine::data {
+namespace kengine::render::animation {
 	//! putils reflect all
 	struct animation {
 		unsigned int current_anim = 0; // Index into data::model_animation.animations

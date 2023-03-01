@@ -12,8 +12,8 @@
 // kengine data
 #include "kengine/input/data/buffer.hpp"
 
-namespace kengine::systems {
-	struct glfw_input_handler {
+namespace kengine::render::glfw {
+	struct input_handler {
 		void on_key(GLFWwindow * window, int key, int scancode, int action, int mods) noexcept;
 		void on_click(GLFWwindow * window, int button, int action, int mods) noexcept;
 		void on_mouse_move(GLFWwindow * window, double xpos, double ypos) noexcept;

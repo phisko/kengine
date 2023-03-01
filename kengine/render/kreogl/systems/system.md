@@ -1,4 +1,4 @@
-# [kreogl](kreogl.hpp)
+# [system](system.hpp)
 
 System that uses the [kreogl](https://github.com/phisko/kreogl) library to render entities in 3D.
 

@@ -7,7 +7,7 @@
 #include "putils/point.hpp"
 #include "putils/color.hpp"
 
-namespace kengine {
+namespace kengine::render::kreogl {
 	static inline ::glm::ivec2 toglm(const putils::point2i & p) noexcept {
 		return { p.x, p.y };
 	}

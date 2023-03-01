@@ -8,7 +8,7 @@
 #include "putils/string.hpp"
 #include "putils/color.hpp"
 
-namespace kengine::data {
+namespace kengine::render {
 	//! putils reflect all
 	//! used_types: [refltype::string, putils::normalized_color]
 	struct sky_box_model {

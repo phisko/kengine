@@ -3,11 +3,12 @@
 // sfml
 #include <SFML/Graphics/Texture.hpp>
 
-namespace kengine::data {
+namespace kengine::render::sfml {
 	//! putils reflect all
-	struct sfml_texture {
-		sf::Texture texture;
+	//! class_name: sfml_texture
+	struct texture {
+		sf::Texture value;
 	};
 }
 
-#include "sfml_texture.rpp"
+#include "texture.rpp"

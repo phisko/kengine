@@ -1,4 +1,4 @@
-#include "glfw_input_handler.hpp"
+#include "input_handler.hpp"
 
 // imgui
 #include <imgui.h>
@@ -6,8 +6,8 @@
 // kengine helpers
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
-namespace kengine::systems {
-	void glfw_input_handler::on_key(GLFWwindow * window, int key, int scancode, int action, int mods) noexcept {
+namespace kengine::render::glfw {
+	void input_handler::on_key(GLFWwindow * window, int key, int scancode, int action, int mods) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
 		if (buffer == nullptr || (ImGui::GetCurrentContext() != nullptr && ImGui::GetIO().WantCaptureKeyboard))
@@ -21,7 +21,7 @@ namespace kengine::systems {
 			buffer->keys.push_back(input::buffer::key_event{ e, key, false });
 	}
 
-	void glfw_input_handler::on_click(GLFWwindow * window, int button, int action, int mods) noexcept {
+	void input_handler::on_click(GLFWwindow * window, int button, int action, int mods) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
 		if (buffer == nullptr || (ImGui::GetCurrentContext() != nullptr && ImGui::GetIO().WantCaptureMouse))
@@ -35,7 +35,7 @@ namespace kengine::systems {
 			buffer->clicks.push_back(input::buffer::click_event{ e, last_pos, button, false });
 	}
 
-	void glfw_input_handler::on_mouse_move(GLFWwindow * window, double xpos, double ypos) noexcept {
+	void input_handler::on_mouse_move(GLFWwindow * window, double xpos, double ypos) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
 		if (last_pos.x == FLT_MAX) {
@@ -57,7 +57,7 @@ namespace kengine::systems {
 		buffer->moves.push_back(info);
 	}
 
-	void glfw_input_handler::on_scroll(GLFWwindow * window, double xoffset, double yoffset) noexcept {
+	void input_handler::on_scroll(GLFWwindow * window, double xoffset, double yoffset) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
 		if (buffer == nullptr || (ImGui::GetCurrentContext() != nullptr && ImGui::GetIO().WantCaptureMouse))

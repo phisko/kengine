@@ -6,7 +6,7 @@
 // kengine functions
 #include "kengine/base_function.hpp"
 
-namespace kengine::functions {
+namespace kengine::render {
 	using get_position_in_pixel_signature = std::optional<putils::point3f>(entt::entity window, const putils::point2ui & pixel);
 	//! putils reflect all
 	//! parents: [refltype::base]

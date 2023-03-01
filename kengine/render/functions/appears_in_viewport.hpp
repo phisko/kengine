@@ -3,7 +3,7 @@
 // kengine functions
 #include "kengine/base_function.hpp"
 
-namespace kengine::functions {
+namespace kengine::render {
 	using appears_in_viewport_signature = bool(entt::entity entity);
 	//! putils reflect all
 	//! parents: [refltype::base]

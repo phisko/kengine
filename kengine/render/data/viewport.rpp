@@ -2,7 +2,7 @@
 
 #include "putils/reflection.hpp"
 
-#define refltype kengine::data::viewport
+#define refltype kengine::render::viewport
 putils_reflection_info {
 	putils_reflection_class_name;
 	putils_reflection_attributes(
@@ -13,7 +13,7 @@ putils_reflection_info {
 		putils_reflection_attribute(texture)
 	);
 	putils_reflection_parents(
-		putils_reflection_type(kengine::data::on_screen)
+		putils_reflection_type(kengine::render::on_screen)
 	);
 	putils_reflection_used_types(
 		putils_reflection_type(putils::rect2f),

@@ -15,7 +15,7 @@
 #include "putils/point.hpp"
 #include "putils/function.hpp"
 
-namespace kengine::data {
+namespace kengine::render::animation {
 	//! putils reflect all
 	//! used_types: [refltype::anim]
 	struct model_animation {

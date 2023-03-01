@@ -34,7 +34,7 @@ namespace kengine::pathfinding::recast {
 		entt::registry & r;
 
 		struct processed {};
-		kengine::new_entity_processor<processed, data::model_data, pathfinding::nav_mesh> processor{
+		kengine::new_entity_processor<processed, render::model_data, pathfinding::nav_mesh> processor{
 			r,
 			[this](auto &&... args) noexcept {
 				build_recast_component(r, FWD(args)...);

@@ -13,17 +13,17 @@
 // impl
 #include "highlight_glsl.hpp"
 
-namespace kengine {
-	class highlight_shader : public kreogl::shader {
+namespace kengine::render::kreogl {
+	class highlight_shader : public ::kreogl::shader {
 	public:
 		PUTILS_MOVE_ONLY(highlight_shader);
 
 		highlight_shader(const entt::registry & r) noexcept;
 
 	private:
-		void draw(const kreogl::draw_params & params) noexcept override;
+		void draw(const ::kreogl::draw_params & params) noexcept override;
 		void add_source_files() noexcept override;
-		std::vector<kreogl::uniform_base *> get_uniforms() noexcept override;
+		std::vector<::kreogl::uniform_base *> get_uniforms() noexcept override;
 
 	private:
 		highlight_glsl _glsl;

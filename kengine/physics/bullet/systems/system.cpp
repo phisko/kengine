@@ -485,7 +485,7 @@ namespace kengine::physics::bullet {
 				kengine_log(system.r, verbose, log_category, "Constructing debug drawer");
 				debug_entity = system.r.create();
 				system.r.emplace<core::transform>(debug_entity);
-				system.r.emplace<data::debug_graphics>(debug_entity);
+				system.r.emplace<render::debug_graphics>(debug_entity);
 			}
 
 			void cleanup() noexcept {
@@ -496,18 +496,18 @@ namespace kengine::physics::bullet {
 			}
 
 		private:
-			data::debug_graphics & get_debug_component() noexcept { return system.r.get<data::debug_graphics>(debug_entity); }
+			render::debug_graphics & get_debug_component() noexcept { return system.r.get<render::debug_graphics>(debug_entity); }
 
 			void drawLine(const btVector3 & from, const btVector3 & to, const btVector3 & color) noexcept override {
 				KENGINE_PROFILING_SCOPE;
 
-				data::debug_graphics::element debug_element;
+				render::debug_graphics::element debug_element;
 				{
-					debug_element.type = data::debug_graphics::element_type::line;
+					debug_element.type = render::debug_graphics::element_type::line;
 					debug_element.line.end = system.to_putils(from);
 					debug_element.pos = system.to_putils(to);
 					debug_element.color = putils::normalized_color{ color[0], color[1], color[2], 1.f };
-					debug_element.relative_to = data::debug_graphics::reference_space::world;
+					debug_element.relative_to = render::debug_graphics::reference_space::world;
 				}
 				auto & comp = get_debug_component();
 				comp.elements.emplace_back(std::move(debug_element));

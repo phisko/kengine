@@ -3,7 +3,7 @@
 // reflection
 #include "putils/reflection.hpp"
 
-namespace kengine::data {
+namespace kengine::render {
 	//! putils reflect all
 	struct no_shadow {};
 }

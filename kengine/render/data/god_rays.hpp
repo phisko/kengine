@@ -1,6 +1,6 @@
 #pragma once
 
-namespace kengine::data {
+namespace kengine::render {
 	//! putils reflect all
 	struct god_rays {
 		float scattering = .1f;

@@ -2,7 +2,7 @@
 
 #include "putils/reflection.hpp"
 
-#define refltype kengine::data::light
+#define refltype kengine::render::light
 putils_reflection_info {
 	putils_reflection_class_name;
 	putils_reflection_attributes(
@@ -21,7 +21,7 @@ putils_reflection_info {
 };
 #undef refltype
 
-#define refltype kengine::data::dir_light
+#define refltype kengine::render::dir_light
 putils_reflection_info {
 	putils_reflection_class_name;
 	putils_reflection_attributes(
@@ -32,7 +32,7 @@ putils_reflection_info {
 		putils_reflection_attribute(shadow_caster_max_distance)
 	);
 	putils_reflection_parents(
-		putils_reflection_type(kengine::data::light)
+		putils_reflection_type(kengine::render::light)
 	);
 	putils_reflection_used_types(
 		putils_reflection_type(refltype::vector),
@@ -41,7 +41,7 @@ putils_reflection_info {
 };
 #undef refltype
 
-#define refltype kengine::data::point_light
+#define refltype kengine::render::point_light
 putils_reflection_info {
 	putils_reflection_class_name;
 	putils_reflection_attributes(
@@ -50,12 +50,12 @@ putils_reflection_info {
 		putils_reflection_attribute(attenuation_quadratic)
 	);
 	putils_reflection_parents(
-		putils_reflection_type(kengine::data::light)
+		putils_reflection_type(kengine::render::light)
 	);
 };
 #undef refltype
 
-#define refltype kengine::data::spot_light
+#define refltype kengine::render::spot_light
 putils_reflection_info {
 	putils_reflection_class_name;
 	putils_reflection_attributes(
@@ -64,7 +64,7 @@ putils_reflection_info {
 		putils_reflection_attribute(outer_cut_off)
 	);
 	putils_reflection_parents(
-		putils_reflection_type(kengine::data::point_light)
+		putils_reflection_type(kengine::render::point_light)
 	);
 	putils_reflection_used_types(
 		putils_reflection_type(putils::vec3f)
