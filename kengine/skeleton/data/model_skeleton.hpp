@@ -7,7 +7,7 @@
 // reflection
 #include "putils/reflection.hpp"
 
-namespace kengine::data {
+namespace kengine::skeleton {
 	//! putils reflect all
 	//! used_types: [refltype::mesh]
 	struct model_skeleton {
