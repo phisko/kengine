@@ -51,7 +51,7 @@ namespace kengine::pathfinding::recast {
 		using poly_mesh_ptr = unique_ptr<rcPolyMesh, rcFreePolyMesh>;
 		using poly_mesh_detail_ptr = unique_ptr<rcPolyMeshDetail, rcFreePolyMeshDetail>;
 
-		static std::optional<nav_mesh> create_recast_mesh(const char * file, entt::handle e, const pathfinding::nav_mesh & nav_mesh, const data::model_data & model_data) noexcept {
+		static std::optional<nav_mesh> create_recast_mesh(const char * file, entt::handle e, const pathfinding::nav_mesh & nav_mesh, const render::model_data & model_data) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_logf(*e.registry(), verbose, log_category, "Building navmesh for %s", file);
 
@@ -114,7 +114,7 @@ namespace kengine::pathfinding::recast {
 			f.write((const char *)data.data.get(), data.size);
 		}
 
-		static nav_mesh_data create_nav_mesh_data(const entt::registry & r, const pathfinding::nav_mesh & nav_mesh, const data::model_data & model_data, const data::model_data::mesh & mesh_data) noexcept {
+		static nav_mesh_data create_nav_mesh_data(const entt::registry & r, const pathfinding::nav_mesh & nav_mesh, const render::model_data & model_data, const render::model_data::mesh & mesh_data) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, verbose, log_category, "Creating navmesh data");
 
@@ -200,7 +200,7 @@ namespace kengine::pathfinding::recast {
 			return ret;
 		}
 
-		static std::unique_ptr<float[]> get_vertices(const entt::registry & r, const data::model_data & model_data, const data::model_data::mesh & mesh_data) noexcept {
+		static std::unique_ptr<float[]> get_vertices(const entt::registry & r, const render::model_data & model_data, const render::model_data::mesh & mesh_data) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, very_verbose, log_category, "Getting vertices");
 
@@ -219,7 +219,7 @@ namespace kengine::pathfinding::recast {
 			return vertices;
 		}
 
-		static std::optional<std::ptrdiff_t> get_vertex_position_offset(const entt::registry & r, const data::model_data & model_data) noexcept {
+		static std::optional<std::ptrdiff_t> get_vertex_position_offset(const entt::registry & r, const render::model_data & model_data) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, very_verbose, log_category, "Getting vertex position offset");
 
@@ -241,7 +241,7 @@ namespace kengine::pathfinding::recast {
 			return (const float *)(vertex + position_offset);
 		}
 
-		static rcConfig get_config(const entt::registry & r, const pathfinding::nav_mesh & nav_mesh, const data::model_data::mesh & mesh_data, const float * vertices) noexcept {
+		static rcConfig get_config(const entt::registry & r, const pathfinding::nav_mesh & nav_mesh, const render::model_data::mesh & mesh_data, const float * vertices) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, very_verbose, log_category, "Getting rcConfig");
 
@@ -298,7 +298,7 @@ namespace kengine::pathfinding::recast {
 			return cfg;
 		}
 
-		static height_field_ptr create_height_field(const entt::registry & r, rcContext & ctx, const rcConfig & cfg, const kengine::data::model_data::mesh & mesh_data, const float * vertices) noexcept {
+		static height_field_ptr create_height_field(const entt::registry & r, rcContext & ctx, const rcConfig & cfg, const kengine::render::model_data::mesh & mesh_data, const float * vertices) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, very_verbose, log_category, "Creating height field");
 
@@ -550,7 +550,7 @@ namespace kengine::pathfinding::recast {
 		};
 	};
 
-	void build_recast_component(entt::registry & r, entt::entity e, const data::model_data & model_data, const pathfinding::nav_mesh & nav_mesh) noexcept {
+	void build_recast_component(entt::registry & r, entt::entity e, const render::model_data & model_data, const pathfinding::nav_mesh & nav_mesh) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		kengine_logf(r, verbose, log_category, "Building recast component for [%u]", e);
 

@@ -6,24 +6,19 @@
 // sfml
 #include <SFML/Graphics/RenderWindow.hpp>
 
-// impl
-#include "imgui-SFML.h"
-
-namespace kengine::data {
+namespace kengine::render::sfml {
 	//! putils reflect name
-	struct sfml_window {
-		std::unique_ptr<sf::RenderWindow> window;
+	//! class_name: sfml_window
+	struct window {
+		std::unique_ptr<sf::RenderWindow> ptr;
 
-		sfml_window() noexcept = default;
+		window() noexcept = default;
 
-		sfml_window(std::unique_ptr<sf::RenderWindow> && window) noexcept
-			: window(std::move(window)) {}
+		window(std::unique_ptr<sf::RenderWindow> && ptr) noexcept
+			: ptr(std::move(ptr)) {}
 
-		~sfml_window() noexcept {
-			if (window)
-				ImGui::SFML::Shutdown(*window);
-		}
+		KENGINE_RENDER_SFML_EXPORT ~window() noexcept;
 	};
 }
 
-#include "sfml_window.rpp"
+#include "window.rpp"

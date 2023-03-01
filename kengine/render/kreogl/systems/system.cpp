@@ -1,4 +1,4 @@
-#include "kreogl.hpp"
+#include "system.hpp"
 
 // stl
 #include <algorithm>
@@ -76,20 +76,23 @@
 #include "kengine/render/data/window.hpp"
 #include "kengine/render/functions/get_entity_in_pixel.hpp"
 #include "kengine/render/functions/get_position_in_pixel.hpp"
-#include "kengine/render/helpers/camera_helper.hpp"
+#include "kengine/render/helpers/convert_to_screen_percentage.hpp"
+#include "kengine/render/helpers/entity_appears_in_viewport.hpp"
+#include "kengine/render/helpers/get_facings.hpp"
+#include "kengine/render/helpers/get_viewport_for_pixel.hpp"
 
 // kengine render/animation
 #include "kengine/render/animation/data/animation.hpp"
-#include "kengine/render/animation/data/animation_files.hpp"
+#include "kengine/render/animation/data/files.hpp"
 #include "kengine/render/animation/data/model_animation.hpp"
 
 // kengine render/glfw
-#include "kengine/render/glfw/data/glfw_window.hpp"
+#include "kengine/render/glfw/data/window.hpp"
 
 // kengine render/kreogl
-#include "kengine/render/kreogl/data/kreogl_animation_files.hpp"
-#include "kengine/render/kreogl/data/kreogl_debug_graphics.hpp"
-#include "kengine/render/kreogl/data/kreogl_model.hpp"
+#include "kengine/render/kreogl/data/animation_files.hpp"
+#include "kengine/render/kreogl/data/debug_graphics.hpp"
+#include "kengine/render/kreogl/data/model.hpp"
 #include "kengine/render/kreogl/shaders/highlight_shader.hpp"
 #include "kengine/render/kreogl/helpers/putils_to_glm.hpp"
 
@@ -97,26 +100,28 @@
 #include "kengine/skeleton/data/model_skeleton.hpp"
 #include "kengine/skeleton/data/skeleton.hpp"
 
-namespace kengine::systems {
-	struct kreogl {
+namespace kengine::render::kreogl {
+	static constexpr auto log_category = "render_kreogl";
+
+	struct system {
 		entt::registry & r;
 
 		struct processed_window {};
-		kengine::new_entity_processor<processed_window, data::window> window_processor{ r, putils_forward_to_this(create_window) };
+		kengine::new_entity_processor<processed_window, render::window> window_processor{ r, putils_forward_to_this(create_window) };
 
 		struct processed_model {};
 		kengine::new_entity_processor<processed_model, render::asset> model_processor{ r, putils_forward_to_this(create_model_from_disk) };
 
 		struct processed_animation_files {};
-		kengine::new_entity_processor<processed_animation_files, data::animation_files> animation_files_processor{ r, putils_forward_to_this(load_animation_files) };
+		kengine::new_entity_processor<processed_animation_files, render::animation::files> animation_files_processor{ r, putils_forward_to_this(load_animation_files) };
 
 		struct processed_sky_box {};
-		kengine::new_entity_processor<processed_sky_box, data::sky_box_model> sky_box_processor{ r, putils_forward_to_this(create_sky_box_from_disk) };
+		kengine::new_entity_processor<processed_sky_box, render::sky_box_model> sky_box_processor{ r, putils_forward_to_this(create_sky_box_from_disk) };
 
-		kreogl(entt::handle e) noexcept
+		system(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "kreogl", "Initializing");
+			kengine_log(r, log, log_category, "Initializing");
 
 			e.emplace<main_loop::execute>(putils_forward_to_this(execute));
 
@@ -128,8 +133,8 @@ namespace kengine::systems {
 				}
 			};
 
-			e.emplace<functions::get_entity_in_pixel>(putils_forward_to_this(get_entity_in_pixel));
-			e.emplace<functions::get_position_in_pixel>(putils_forward_to_this(get_position_in_pixel));
+			e.emplace<render::get_entity_in_pixel>(putils_forward_to_this(get_entity_in_pixel));
+			e.emplace<render::get_position_in_pixel>(putils_forward_to_this(get_position_in_pixel));
 
 			window_processor.process();
 			model_processor.process();
@@ -137,15 +142,15 @@ namespace kengine::systems {
 			sky_box_processor.process();
 		}
 
-		void create_window(entt::entity window_entity, data::window & window) noexcept {
+		void create_window(entt::entity window_entity, render::window & window) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, log, "kreogl", "Initializing window for [%u]", window_entity);
+			kengine_logf(r, log, log_category, "Initializing window for [%u]", window_entity);
 
 			// Ask the GLFW system to initialize the window
 			window.assigned_system = "Kreogl";
-			r.emplace<data::glfw_window_init>(window_entity) = {
+			r.emplace<glfw::window_init>(window_entity) = {
 				.set_hints = [this]() noexcept {
-					kengine_log(r, verbose, "kreogl", "Setting window hints");
+					kengine_log(r, verbose, log_category, "Setting window hints");
 					glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 					glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 					glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -155,10 +160,10 @@ namespace kengine::systems {
 #endif
 				},
 				.on_window_created = [this, window_entity]() noexcept {
-					kengine_log(r, verbose, "kreogl", "GLFW window created");
-					kengine_log(r, verbose, "kreogl", "Creating kreogl window");
-					const auto & glfw_window = r.get<data::glfw_window>(window_entity);
-					auto & kreogl_window = r.emplace<::kreogl::window>(window_entity, *glfw_window.window.get());
+					kengine_log(r, verbose, log_category, "GLFW window created");
+					kengine_log(r, verbose, log_category, "Creating kreogl window");
+					const auto & glfw_window = r.get<glfw::window>(window_entity);
+					auto & kreogl_window = r.emplace<::kreogl::window>(window_entity, *glfw_window.ptr.get());
 					kreogl_window.remove_camera(kreogl_window.get_default_camera());
 					init_imgui(window_entity);
 					// clang-format off
@@ -169,7 +174,7 @@ namespace kengine::systems {
 
 		void init_imgui(entt::entity window_entity) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "kreogl", "Initializing ImGui");
+			kengine_log(r, log, log_category, "Initializing ImGui");
 
 			r.emplace<imgui::context>(window_entity, ImGui::CreateContext());
 
@@ -178,8 +183,8 @@ namespace kengine::systems {
 			io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 			io.ConfigViewportsNoTaskBarIcon = true;
 
-			const auto & glfw_comp = r.get<data::glfw_window>(window_entity);
-			ImGui_ImplGlfw_InitForOpenGL(glfw_comp.window.get(), true);
+			const auto & glfw_comp = r.get<glfw::window>(window_entity);
+			ImGui_ImplGlfw_InitForOpenGL(glfw_comp.ptr.get(), true);
 			ImGui_ImplOpenGL3_Init();
 
 			ImGui_ImplOpenGL3_NewFrame();
@@ -189,7 +194,7 @@ namespace kengine::systems {
 
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, very_verbose, "kreogl", "Executing");
+			kengine_log(r, very_verbose, log_category, "Executing");
 
 			window_processor.process();
 			model_processor.process();
@@ -205,7 +210,7 @@ namespace kengine::systems {
 
 		void create_model_from_disk(entt::entity model_entity, const render::asset & asset) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, verbose, "kreogl", "Creating model from disk for [%u] (%s)", model_entity, asset.file.c_str());
+			kengine_logf(r, verbose, log_category, "Creating model from disk for [%u] (%s)", model_entity, asset.file.c_str());
 
 			const auto & file = asset.file.c_str();
 
@@ -240,9 +245,9 @@ namespace kengine::systems {
 			std::vector<animation_file> animation_files;
 		};
 
-		void load_animation_files(entt::entity model_entity, const data::animation_files & animation_files) noexcept {
+		void load_animation_files(entt::entity model_entity, const animation::files & animation_files) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, verbose, "kreogl", "Loading animation files for [%u]", model_entity);
+			kengine_logf(r, verbose, log_category, "Loading animation files for [%u]", model_entity);
 
 			const auto task_entity = r.create(); // A task might be attached to model_entity to load the model itself
 			kengine::async::start_task(
@@ -254,7 +259,7 @@ namespace kengine::systems {
 
 					animation_files_task_result result;
 					result.model_entity = model_entity;
-					result.animation_files.resize(animation_files.files.size());
+					result.animation_files.resize(animation_files.list.size());
 
 					// Profiling this shows that:
 					// * with par_unseq, each thread takes ~700ms
@@ -262,7 +267,7 @@ namespace kengine::systems {
 					// This isn't a performance loss so I'm leaving it as is, but I haven't found an explanation so far
 					std::transform(
 						std::execution::par_unseq,
-						putils_range(animation_files.files),
+						putils_range(animation_files.list),
 						result.animation_files.begin(),
 						[](const std::string & file) {
 							const putils::scoped_thread_name thread_name(putils::string<128>("Animation loader for %s", file.c_str()));
@@ -274,15 +279,15 @@ namespace kengine::systems {
 			);
 		}
 
-		void add_animations_to_model_animation_component(data::model_animation & model_animation, const char * file, const ::kreogl::animation_file & animations) noexcept {
+		void add_animations_to_model_animation_component(animation::model_animation & model_animation, const char * file, const ::kreogl::animation_file & animations) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			for (const auto & animation : animations.animations) {
 				std::string name = file;
 				name += '/';
 				name += animation->name;
-				kengine_logf(r, verbose, "kreogl", "Adding animation %s", name.c_str());
-				model_animation.animations.push_back(data::model_animation::anim{
+				kengine_logf(r, verbose, log_category, "Adding animation %s", name.c_str());
+				model_animation.animations.push_back(animation::model_animation::anim{
 					.name = std::move(name),
 					.total_time = animation->total_time,
 					.ticks_per_second = animation->ticks_per_second,
@@ -300,9 +305,9 @@ namespace kengine::systems {
 			::kreogl::texture_data back;
 		};
 
-		void create_sky_box_from_disk(entt::entity sky_box_entity, const data::sky_box_model & sky_box) noexcept {
+		void create_sky_box_from_disk(entt::entity sky_box_entity, const sky_box_model & sky_box) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, verbose, "kreogl", "Loading skybox for [%u]", sky_box_entity);
+			kengine_logf(r, verbose, log_category, "Loading skybox for [%u]", sky_box_entity);
 
 			const auto task_entity = r.create();
 			kengine::async::start_task(
@@ -324,7 +329,7 @@ namespace kengine::systems {
 
 		void complete_loading_tasks() noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, very_verbose, "kreogl", "Completing loading tasks");
+			kengine_log(r, very_verbose, log_category, "Completing loading tasks");
 
 			using namespace std::chrono_literals;
 
@@ -335,7 +340,7 @@ namespace kengine::systems {
 			kengine::async::process_results<::kreogl::assimp_model_data>(r, [this](entt::entity e, ::kreogl::assimp_model_data && model_data) {
 				// Sync properties from loaded model to kengine components
 				const auto & asset = r.get<render::asset>(e);
-				add_animations_to_model_animation_component(r.get_or_emplace<data::model_animation>(e), asset.file.c_str(), *model_data.animations);
+				add_animations_to_model_animation_component(r.get_or_emplace<animation::model_animation>(e), asset.file.c_str(), *model_data.animations);
 				if (model_data.skeleton) {
 					auto & model_skeleton = r.emplace<data::model_skeleton>(e);
 					for (const auto & mesh : model_data.skeleton->meshes)
@@ -344,12 +349,12 @@ namespace kengine::systems {
 						});
 				}
 
-				r.emplace<data::kreogl_model>(e, ::kreogl::assimp::load_animated_model(std::move(model_data)));
+				r.emplace<model>(e, ::kreogl::assimp::load_animated_model(std::move(model_data)));
 			});
 
 			kengine::async::process_results<animation_files_task_result>(r, [this](entt::entity task_entity, animation_files_task_result && result) {
-				auto & model_animation = r.get_or_emplace<data::model_animation>(result.model_entity);
-				auto & kreogl_animation_files = r.emplace<data::kreogl_animation_files>(result.model_entity);
+				auto & model_animation = r.get_or_emplace<animation::model_animation>(result.model_entity);
+				auto & kreogl_animation_files = r.emplace<animation_files>(result.model_entity);
 				for (auto & animation_file : result.animation_files) {
 					add_animations_to_model_animation_component(model_animation, animation_file.file_name, *animation_file.kreogl_animation_file);
 					kreogl_animation_files.files.push_back(std::move(animation_file.kreogl_animation_file));
@@ -365,15 +370,15 @@ namespace kengine::systems {
 
 		void load_models_to_opengl() noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, very_verbose, "kreogl", "Loading model data to OpenGL");
+			kengine_log(r, very_verbose, log_category, "Loading model data to OpenGL");
 
-			for (const auto & [model_entity, model_data] : r.view<data::model_data>(entt::exclude<data::kreogl_model>).each())
+			for (const auto & [model_entity, model_data] : r.view<model_data>(entt::exclude<model>).each())
 				create_model_from_model_data(model_entity, model_data);
 		}
 
-		void create_model_from_model_data(entt::entity model_entity, const data::model_data & model_data) noexcept {
+		void create_model_from_model_data(entt::entity model_entity, const model_data & model_data) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, verbose, "kreogl", "Creating model from model data for [%u]", model_entity);
+			kengine_logf(r, verbose, log_category, "Creating model from model data for [%u]", model_entity);
 
 			::kreogl::model_data kreogl_model_data;
 
@@ -411,79 +416,79 @@ namespace kengine::systems {
 
 			// We assume custom-built meshes are voxels, might need a better alternative to this
 			const auto & vertex_specification = ::kreogl::vertex_specification::position_color;
-			r.emplace<data::kreogl_model>(model_entity, std::make_unique<::kreogl::animated_model>(vertex_specification, kreogl_model_data));
+			r.emplace<model>(model_entity, std::make_unique<::kreogl::animated_model>(vertex_specification, kreogl_model_data));
 		}
 
 		void create_missing_objects() noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, very_verbose, "kreogl", "Creating missing objects");
+			kengine_log(r, very_verbose, log_category, "Creating missing objects");
 
-			for (const auto & [entity, instance] : r.view<instance::instance>(entt::exclude<::kreogl::animated_object, ::kreogl::sprite_2d, ::kreogl::sprite_3d, data::sky_box>).each()) {
+			for (const auto & [entity, instance] : r.view<instance::instance>(entt::exclude<::kreogl::animated_object, ::kreogl::sprite_2d, ::kreogl::sprite_3d, sky_box>).each()) {
 				if (instance.model == entt::null) {
-					kengine_logf(r, warning, "kreogl", "[%u] has no model", entity);
+					kengine_logf(r, warning, log_category, "[%u] has no model", entity);
 					continue;
 				}
 
 				const auto model_entity = instance.model;
-				kengine_logf(r, verbose, "kreogl", "Creating object for [%u] (model [%u])", entity, model_entity);
+				kengine_logf(r, verbose, log_category, "Creating object for [%u] (model [%u])", entity, model_entity);
 
-				if (const auto kreogl_model = r.try_get<data::kreogl_model>(model_entity)) {
-					kengine_logf(r, verbose, "kreogl", "Creating animated_object to [%u]", entity);
-					r.emplace<::kreogl::animated_object>(entity).model = kreogl_model->model.get();
+				if (const auto kreogl_model = r.try_get<model>(model_entity)) {
+					kengine_logf(r, verbose, log_category, "Creating animated_object to [%u]", entity);
+					r.emplace<::kreogl::animated_object>(entity).model = kreogl_model->ptr.get();
 					if (r.all_of<data::model_skeleton>(model_entity)) {
-						kengine_logf(r, verbose, "kreogl", "Adding skeleton to [%u]", entity);
+						kengine_logf(r, verbose, log_category, "Adding skeleton to [%u]", entity);
 						r.emplace<data::skeleton>(entity);
 					}
 				}
 
 				if (const auto kreogl_texture = r.try_get<::kreogl::texture>(model_entity)) {
-					if (r.all_of<data::sprite_2d>(entity)) {
-						kengine_logf(r, verbose, "kreogl", "Creating sprite_2d for [%u]", entity);
+					if (r.all_of<sprite_2d>(entity)) {
+						kengine_logf(r, verbose, log_category, "Creating sprite_2d for [%u]", entity);
 						r.emplace<::kreogl::sprite_2d>(entity).tex = kreogl_texture;
 					}
-					if (r.all_of<data::sprite_3d>(entity)) {
-						kengine_logf(r, verbose, "kreogl", "Creating sprite_3d for [%u]", entity);
+					if (r.all_of<sprite_3d>(entity)) {
+						kengine_logf(r, verbose, log_category, "Creating sprite_3d for [%u]", entity);
 						r.emplace<::kreogl::sprite_3d>(entity).tex = kreogl_texture;
 					}
 				}
 			}
 
-			for (auto [text_2d_entity, text_2d] : r.view<data::text_2d>(entt::exclude<::kreogl::text_2d>).each()) {
-				kengine_logf(r, verbose, "kreogl", "Creating text_2d for [%u]", text_2d_entity);
+			for (auto [text_2d_entity, text_2d] : r.view<text_2d>(entt::exclude<::kreogl::text_2d>).each()) {
+				kengine_logf(r, verbose, log_category, "Creating text_2d for [%u]", text_2d_entity);
 				r.emplace<::kreogl::text_2d>(text_2d_entity);
 			}
 
-			for (auto [text_3d_entity, text_3d] : r.view<data::text_3d>(entt::exclude<::kreogl::text_3d>).each()) {
-				kengine_logf(r, verbose, "kreogl", "Creating text_3d for [%u]", text_3d_entity);
+			for (auto [text_3d_entity, text_3d] : r.view<text_3d>(entt::exclude<::kreogl::text_3d>).each()) {
+				kengine_logf(r, verbose, log_category, "Creating text_3d for [%u]", text_3d_entity);
 				r.emplace<::kreogl::text_3d>(text_3d_entity);
 			}
 
-			for (auto [light_entity, light] : r.view<data::dir_light>(entt::exclude<::kreogl::directional_light>).each()) {
-				kengine_logf(r, verbose, "kreogl", "Creating directional_light for [%u]", light_entity);
+			for (auto [light_entity, light] : r.view<dir_light>(entt::exclude<::kreogl::directional_light>).each()) {
+				kengine_logf(r, verbose, log_category, "Creating directional_light for [%u]", light_entity);
 				r.emplace<::kreogl::directional_light>(light_entity);
 			}
 
-			for (auto [light_entity, light] : r.view<data::point_light>(entt::exclude<::kreogl::point_light>).each()) {
-				kengine_logf(r, verbose, "kreogl", "Creating point_light for [%u]", light_entity);
+			for (auto [light_entity, light] : r.view<point_light>(entt::exclude<::kreogl::point_light>).each()) {
+				kengine_logf(r, verbose, log_category, "Creating point_light for [%u]", light_entity);
 				r.emplace<::kreogl::point_light>(light_entity);
 			}
 
-			for (auto [light_entity, light] : r.view<data::spot_light>(entt::exclude<::kreogl::spot_light>).each()) {
-				kengine_logf(r, verbose, "kreogl", "Creating spot_light for [%u]", light_entity);
+			for (auto [light_entity, light] : r.view<spot_light>(entt::exclude<::kreogl::spot_light>).each()) {
+				kengine_logf(r, verbose, log_category, "Creating spot_light for [%u]", light_entity);
 				r.emplace<::kreogl::spot_light>(light_entity);
 			}
 
-			for (auto [debug_entity, debug_graphics] : r.view<data::debug_graphics>(entt::exclude<data::kreogl_debug_graphics>).each()) {
-				kengine_logf(r, verbose, "kreogl", "Creating debug_graphics for [%u]", debug_entity);
-				r.emplace<data::kreogl_debug_graphics>(debug_entity);
+			for (auto [debug_entity, debug_graphics] : r.view<render::debug_graphics>(entt::exclude<kreogl::debug_graphics>).each()) {
+				kengine_logf(r, verbose, log_category, "Creating debug_graphics for [%u]", debug_entity);
+				r.emplace<kreogl::debug_graphics>(debug_entity);
 			}
 		}
 
 		void tick_animations(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, very_verbose, "kreogl", "Ticking animations");
+			kengine_log(r, very_verbose, log_category, "Ticking animations");
 
-			const auto view = r.view<::kreogl::animated_object, data::animation>();
+			const auto view = r.view<::kreogl::animated_object, animation::animation>();
 			std::for_each(std::execution::par_unseq, putils_range(view), [&](entt::entity entity) noexcept {
 				const putils::scoped_thread_name thread_name("Animation ticker");
 				const auto & [kreogl_object, animation] = view.get(entity);
@@ -491,19 +496,19 @@ namespace kengine::systems {
 			});
 		}
 
-		void tick_object_animation(float delta_time, entt::entity entity, ::kreogl::animated_object & kreogl_object, data::animation & animation) noexcept {
+		void tick_object_animation(float delta_time, entt::entity entity, ::kreogl::animated_object & kreogl_object, animation::animation & animation) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, very_verbose, "kreogl", "Ticking animation for [%u]", entity);
+			kengine_logf(r, very_verbose, log_category, "Ticking animation for [%u]", entity);
 
 			if (!kreogl_object.animation) {
-				kengine_log(r, very_verbose, "kreogl", "No animation to play");
+				kengine_log(r, very_verbose, log_category, "No animation to play");
 				return;
 			}
 
 			kreogl_object.tick_animation(delta_time);
 
 			// Sync properties from kreogl_object to kengine components
-			kengine_logf(r, very_verbose, "kreogl", "Syncing animation time and skeleton for [%u]", entity);
+			kengine_logf(r, very_verbose, log_category, "Syncing animation time and skeleton for [%u]", entity);
 			animation.current_time = kreogl_object.animation->current_time;
 
 			auto & skeleton = r.get<data::skeleton>(entity);
@@ -522,7 +527,7 @@ namespace kengine::systems {
 
 		void draw() noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, very_verbose, "kreogl", "Drawing");
+			kengine_log(r, very_verbose, log_category, "Drawing");
 
 			const auto view = r.view<::kreogl::window>();
 			if (view.empty())
@@ -532,7 +537,7 @@ namespace kengine::systems {
 			ImGui::Render();
 
 			for (const auto & [window_entity, kreogl_window] : view.each()) {
-				kengine_logf(r, very_verbose, "kreogl", "Drawing to [%u]", window_entity);
+				kengine_logf(r, very_verbose, log_category, "Drawing to [%u]", window_entity);
 				kreogl_window.prepare_for_draw();
 				draw_to_cameras(window_entity, kreogl_window);
 				ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -545,7 +550,7 @@ namespace kengine::systems {
 		float last_scale = 1.f;
 		void update_imgui_scale() noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, very_verbose, "kreogl", "Updating ImGui scale");
+			kengine_log(r, very_verbose, log_category, "Updating ImGui scale");
 
 			const auto scale = imgui::get_scale(r);
 			ImGui::GetIO().FontGlobalScale = scale;
@@ -555,7 +560,7 @@ namespace kengine::systems {
 
 		void end_imgui_frame() noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, very_verbose, "kreogl", "Ending ImGui frame");
+			kengine_log(r, very_verbose, log_category, "Ending ImGui frame");
 
 			if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
 				GLFWwindow * backup_current_context = glfwGetCurrentContext();
@@ -566,23 +571,23 @@ namespace kengine::systems {
 
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
-			if (!r.view<data::glfw_window>().empty())
+			if (!r.view<glfw::window>().empty())
 				ImGui::NewFrame();
 		}
 
 		void draw_to_cameras(entt::entity window_entity, ::kreogl::window & kreogl_window) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			for (auto [camera_entity, camera, viewport] : r.view<data::camera, data::viewport>().each()) {
+			for (auto [camera_entity, camera, viewport] : r.view<camera, viewport>().each()) {
 				if (viewport.window != entt::null && viewport.window != window_entity) {
-					kengine_logf(r, very_verbose, "kreogl", "Skipping camera [%u] because its viewport's window ([%u]) doesn't match", camera_entity, viewport.window);
+					kengine_logf(r, very_verbose, log_category, "Skipping camera [%u] because its viewport's window ([%u]) doesn't match", camera_entity, viewport.window);
 					continue;
 				}
 
-				kengine_logf(r, very_verbose, "kreogl", "Drawing to camera [%u]", camera_entity);
+				kengine_logf(r, very_verbose, log_category, "Drawing to camera [%u]", camera_entity);
 
 				if (viewport.window == entt::null) {
-					kengine_logf(r, verbose, "kreogl", "Setting target window for data::viewport in [%u]", camera_entity);
+					kengine_logf(r, verbose, log_category, "Setting target window for data::viewport in [%u]", camera_entity);
 					viewport.window = window_entity;
 					create_kreogl_camera(camera_entity, viewport);
 				}
@@ -593,9 +598,9 @@ namespace kengine::systems {
 			}
 		}
 
-		void create_kreogl_camera(entt::entity camera_entity, data::viewport & viewport) noexcept {
+		void create_kreogl_camera(entt::entity camera_entity, viewport & viewport) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, verbose, "kreogl", "Creating camera for [%u]", camera_entity);
+			kengine_logf(r, verbose, log_category, "Creating camera for [%u]", camera_entity);
 
 			const ::kreogl::camera::construction_params params{
 				.viewport = {
@@ -603,16 +608,16 @@ namespace kengine::systems {
 				}
 			};
 			auto & kreogl_camera = r.emplace<::kreogl::camera>(camera_entity, params);
-			viewport.texture = data::viewport::render_texture(kreogl_camera.get_viewport().get_render_texture());
+			viewport.texture = render::viewport::render_texture(kreogl_camera.get_viewport().get_render_texture());
 		}
 
-		void sync_camera_properties(::kreogl::camera & kreogl_camera, const data::camera & camera, const data::viewport & viewport) noexcept {
+		void sync_camera_properties(::kreogl::camera & kreogl_camera, const camera & camera, const viewport & viewport) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, very_verbose, "kreogl", "Syncing camera properties");
+			kengine_log(r, very_verbose, log_category, "Syncing camera properties");
 
 			kreogl_camera.set_position(toglm(camera.frustum.position));
 
-			const auto facings = camera_helper::get_facings(camera);
+			const auto facings = get_facings(camera);
 			kreogl_camera.set_direction(toglm(facings.front));
 			kreogl_camera.set_fov(camera.frustum.size.y);
 			kreogl_camera.set_near_plane(camera.near_plane);
@@ -626,7 +631,7 @@ namespace kengine::systems {
 		}
 
 		// Lazy-init these as OpenGL context doesn't exist upon construction, so can't init the shader
-		std::optional<kengine::highlight_shader> highlight_shader;
+		std::optional<kreogl::highlight_shader> highlight_shader;
 		std::optional<::kreogl::shader_pipeline> shader_pipeline;
 
 		void draw_to_camera(::kreogl::window & kreogl_window, entt::entity camera_entity, const ::kreogl::camera & kreogl_camera) noexcept {
@@ -636,9 +641,9 @@ namespace kengine::systems {
 			sync_everything(kreogl_world, camera_entity);
 
 			if (!shader_pipeline) {
-				highlight_shader = kengine::highlight_shader{ r };
+				highlight_shader = kreogl::highlight_shader{ r };
 				shader_pipeline = [this] {
-					kengine_log(r, verbose, "kreogl", "Initializing shader pipeline");
+					kengine_log(r, verbose, log_category, "Initializing shader pipeline");
 					auto ret = ::kreogl::shader_pipeline::get_default_shaders();
 					ret.add_shader(::kreogl::shader_step::post_process, *highlight_shader);
 					return ret;
@@ -650,7 +655,7 @@ namespace kengine::systems {
 
 		void sync_everything(::kreogl::world & kreogl_world, entt::entity camera_entity) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, very_verbose, "kreogl", "Syncing everything for camera [%u]", camera_entity);
+			kengine_logf(r, very_verbose, log_category, "Syncing everything for camera [%u]", camera_entity);
 
 			sync_all_objects(kreogl_world, camera_entity);
 			sync_all_lights(kreogl_world, camera_entity);
@@ -658,7 +663,7 @@ namespace kengine::systems {
 
 		void sync_common_properties(auto & kreogl_object, entt::entity entity, const instance::instance * instance, const core::transform & transform, const auto & colored_component, ::kreogl::world & kreogl_world) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, very_verbose, "kreogl", "Syncing common properties for [%u]", entity);
+			kengine_logf(r, very_verbose, log_category, "Syncing common properties for [%u]", entity);
 
 			const core::transform * model_transform = nullptr;
 			if (instance)
@@ -672,34 +677,34 @@ namespace kengine::systems {
 
 		void sync_all_objects(::kreogl::world & kreogl_world, entt::entity camera_entity) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, very_verbose, "kreogl", "Syncing all objects for camera [%u]", camera_entity);
+			kengine_logf(r, very_verbose, log_category, "Syncing all objects for camera [%u]", camera_entity);
 
 			for (const auto & [entity, instance, transform, drawable, kreogl_object] : r.view<instance::instance, core::transform, render::drawable, ::kreogl::animated_object>().each()) {
-				if (!camera_helper::entity_appears_in_viewport(r, entity, camera_entity))
+				if (!entity_appears_in_viewport(r, entity, camera_entity))
 					continue;
 				sync_common_properties(kreogl_object, entity, &instance, transform, drawable, kreogl_world);
 				sync_animation_properties(kreogl_object, entity, instance);
-				kreogl_object.cast_shadows = !r.all_of<data::no_shadow>(entity);
+				kreogl_object.cast_shadows = !r.all_of<no_shadow>(entity);
 			}
 
 			sync_sprite_2d_properties(kreogl_world, camera_entity);
-			for (const auto & [sprite_entity, instance, transform, drawable, kreogl_sprite_3d] : r.view<instance::instance, core::transform, render::drawable, data::sprite_3d, ::kreogl::sprite_3d>().each()) {
-				if (!camera_helper::entity_appears_in_viewport(r, sprite_entity, camera_entity))
+			for (const auto & [sprite_entity, instance, transform, drawable, kreogl_sprite_3d] : r.view<instance::instance, core::transform, render::drawable, sprite_3d, ::kreogl::sprite_3d>().each()) {
+				if (!entity_appears_in_viewport(r, sprite_entity, camera_entity))
 					continue;
 				sync_common_properties(kreogl_sprite_3d, sprite_entity, &instance, transform, drawable, kreogl_world);
 			}
 
 			sync_text_2d_properties(kreogl_world, camera_entity);
-			for (const auto & [text_entity, transform, text_3d, kreogl_text_3d] : r.view<core::transform, data::text_3d, ::kreogl::text_3d>().each()) {
-				if (!camera_helper::entity_appears_in_viewport(r, text_entity, camera_entity))
+			for (const auto & [text_entity, transform, text_3d, kreogl_text_3d] : r.view<core::transform, text_3d, ::kreogl::text_3d>().each()) {
+				if (!entity_appears_in_viewport(r, text_entity, camera_entity))
 					continue;
 				sync_text_properties(kreogl_text_3d, text_entity, transform, text_3d, kreogl_world);
 			}
 
 			sync_debug_graphics_properties(kreogl_world, camera_entity);
 
-			for (const auto & [sky_box_entity, sky_box, instance] : r.view<data::sky_box, instance::instance>().each()) {
-				if (!camera_helper::entity_appears_in_viewport(r, sky_box_entity, camera_entity))
+			for (const auto & [sky_box_entity, sky_box, instance] : r.view<sky_box, instance::instance>().each()) {
+				if (!entity_appears_in_viewport(r, sky_box_entity, camera_entity))
 					continue;
 				const auto kreogl_skybox = instance::try_get_model<::kreogl::skybox_texture>(r, instance);
 				if (!kreogl_skybox)
@@ -711,9 +716,9 @@ namespace kengine::systems {
 
 		void sync_animation_properties(::kreogl::animated_object & kreogl_object, entt::entity entity, const instance::instance & instance) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, very_verbose, "kreogl", "Syncing animation properties for [%u]", entity);
+			kengine_logf(r, very_verbose, log_category, "Syncing animation properties for [%u]", entity);
 
-			const auto animation = r.try_get<data::animation>(entity);
+			const auto animation = r.try_get<render::animation::animation>(entity);
 			if (!animation)
 				return;
 
@@ -728,10 +733,10 @@ namespace kengine::systems {
 					.loop = animation->loop
 				};
 
-				static const std::unordered_map<data::animation::mover_behavior, ::kreogl::animation::mover_behavior> mover_behaviors = {
-					{ data::animation::mover_behavior::update_transform_component, ::kreogl::animation::mover_behavior::update_transform },
-					{ data::animation::mover_behavior::update_bones, ::kreogl::animation::mover_behavior::update_bones },
-					{ data::animation::mover_behavior::none, ::kreogl::animation::mover_behavior::none }
+				static const std::unordered_map<render::animation::animation::mover_behavior, ::kreogl::animation::mover_behavior> mover_behaviors = {
+					{ render::animation::animation::mover_behavior::update_transform_component, ::kreogl::animation::mover_behavior::update_transform },
+					{ render::animation::animation::mover_behavior::update_bones, ::kreogl::animation::mover_behavior::update_bones },
+					{ render::animation::animation::mover_behavior::none, ::kreogl::animation::mover_behavior::none }
 				};
 
 				kreogl_object.animation->position_mover_behavior = mover_behaviors.at(animation->position_mover_behavior);
@@ -742,74 +747,74 @@ namespace kengine::systems {
 
 		const ::kreogl::animation_model * find_animation_model(const instance::instance & instance, size_t animation_index) {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, very_verbose, "kreogl", "Finding animation model");
+			kengine_log(r, very_verbose, log_category, "Finding animation model");
 
-			const auto & kreogl_model = instance::get_model<data::kreogl_model>(r, instance);
-			if (animation_index < kreogl_model.model->animations->animations.size()) {
-				kengine_log(r, very_verbose, "kreogl", "Found animation in model");
-				return kreogl_model.model->animations->animations[animation_index].get();
+			const auto & kreogl_model = instance::get_model<model>(r, instance);
+			if (animation_index < kreogl_model.ptr->animations->animations.size()) {
+				kengine_log(r, very_verbose, log_category, "Found animation in model");
+				return kreogl_model.ptr->animations->animations[animation_index].get();
 			}
 
-			kengine_log(r, very_verbose, "kreogl", "Animation isn't in model, looking in animation_files");
+			kengine_log(r, very_verbose, log_category, "Animation isn't in model, looking in animation_files");
 
-			const auto kreogl_model_animation_files = instance::try_get_model<data::kreogl_animation_files>(r, instance);
+			const auto kreogl_model_animation_files = instance::try_get_model<animation_files>(r, instance);
 			if (!kreogl_model_animation_files) {
-				kengine_log(r, very_verbose, "kreogl", "No animation_files, animation not found");
+				kengine_log(r, very_verbose, log_category, "No animation_files, animation not found");
 				return nullptr;
 			}
 
-			size_t skipped_animations = kreogl_model.model->animations->animations.size();
+			size_t skipped_animations = kreogl_model.ptr->animations->animations.size();
 			for (const auto & file : kreogl_model_animation_files->files) {
 				const auto index_in_file = animation_index - skipped_animations;
 				if (index_in_file < file->animations.size()) {
-					kengine_log(r, very_verbose, "kreogl", "Found animation in animation_files");
+					kengine_log(r, very_verbose, log_category, "Found animation in animation_files");
 					return file->animations[index_in_file].get();
 				}
 				skipped_animations += file->animations.size();
 			}
 
-			kengine_log(r, very_verbose, "kreogl", "Animation not found");
+			kengine_log(r, very_verbose, log_category, "Animation not found");
 			return nullptr;
 		}
 
 		void sync_sprite_2d_properties(::kreogl::world & kreogl_world, entt::entity camera_entity) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, very_verbose, "kreogl", "Syncing sprite_2d properties for camera [%u]", camera_entity);
+			kengine_logf(r, very_verbose, log_category, "Syncing sprite_2d properties for camera [%u]", camera_entity);
 
-			for (const auto & [sprite_entity, instance, transform, drawable, sprite_2d, kreogl_sprite_2d] : r.view<instance::instance, core::transform, render::drawable, data::sprite_2d, ::kreogl::sprite_2d>().each()) {
-				if (!camera_helper::entity_appears_in_viewport(r, sprite_entity, camera_entity))
+			for (const auto & [sprite_entity, instance, transform, drawable, sprite_2d, kreogl_sprite_2d] : r.view<instance::instance, core::transform, render::drawable, sprite_2d, ::kreogl::sprite_2d>().each()) {
+				if (!entity_appears_in_viewport(r, sprite_entity, camera_entity))
 					continue;
 
 				sync_common_properties(kreogl_sprite_2d, sprite_entity, &instance, transform, drawable, kreogl_world);
 
-				kengine_logf(r, very_verbose, "kreogl", "Syncing sprite_2d properties for [%u]", sprite_entity);
-				const auto & viewport = r.get<data::viewport>(camera_entity);
-				const auto & box = camera_helper::convert_to_screen_percentage(transform.bounding_box, viewport.resolution, sprite_2d);
+				kengine_logf(r, very_verbose, log_category, "Syncing sprite_2d properties for [%u]", sprite_entity);
+				const auto & viewport = r.get<render::viewport>(camera_entity);
+				const auto & box = convert_to_screen_percentage(transform.bounding_box, viewport.resolution, sprite_2d);
 				kreogl_sprite_2d.transform = get_on_screen_matrix(transform, box.position, box.size, sprite_2d);
 			}
 		}
 
 		void sync_text_2d_properties(::kreogl::world & kreogl_world, entt::entity camera_entity) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, very_verbose, "kreogl", "Syncing text_2d properties for camera [%u]", camera_entity);
+			kengine_logf(r, very_verbose, log_category, "Syncing text_2d properties for camera [%u]", camera_entity);
 
-			for (const auto & [text_entity, transform, text_2d, kreogl_text_2d] : r.view<core::transform, data::text_2d, ::kreogl::text_2d>().each()) {
-				if (!camera_helper::entity_appears_in_viewport(r, text_entity, camera_entity))
+			for (const auto & [text_entity, transform, text_2d, kreogl_text_2d] : r.view<core::transform, text_2d, ::kreogl::text_2d>().each()) {
+				if (!entity_appears_in_viewport(r, text_entity, camera_entity))
 					continue;
 
 				sync_text_properties(kreogl_text_2d, text_entity, transform, text_2d, kreogl_world);
 
-				kengine_logf(r, very_verbose, "kreogl", "Syncing text_2d properties for [%u]", text_entity);
-				const auto & viewport = r.get<data::viewport>(camera_entity);
-				const auto & box = camera_helper::convert_to_screen_percentage(transform.bounding_box, viewport.resolution, text_2d);
+				kengine_logf(r, very_verbose, log_category, "Syncing text_2d properties for [%u]", text_entity);
+				const auto & viewport = r.get<render::viewport>(camera_entity);
+				const auto & box = convert_to_screen_percentage(transform.bounding_box, viewport.resolution, text_2d);
 				auto scale = transform.bounding_box.size.y;
 				switch (text_2d.coordinates) {
-					case data::text_2d::coordinate_type::pixels:
+					case text_2d::coordinate_type::pixels:
 						scale /= viewport.resolution.y;
 						break;
-					case data::text_2d::coordinate_type::screen_percentage:
+					case text_2d::coordinate_type::screen_percentage:
 					default:
-						static_assert(magic_enum::enum_count<data::text_2d::coordinate_type>() == 2);
+						static_assert(magic_enum::enum_count<text_2d::coordinate_type>() == 2);
 						break;
 				}
 				kreogl_text_2d.transform = get_on_screen_matrix(transform, box.position, { scale, scale, scale }, text_2d);
@@ -818,13 +823,13 @@ namespace kengine::systems {
 
 		void sync_debug_graphics_properties(::kreogl::world & kreogl_world, entt::entity camera_entity) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, very_verbose, "kreogl", "Syncing debug_graphics properties for camera [%u]", camera_entity);
+			kengine_logf(r, very_verbose, log_category, "Syncing debug_graphics properties for camera [%u]", camera_entity);
 
-			for (const auto & [debug_entity, transform, debug_graphics, kreogl_debug_graphics] : r.view<core::transform, data::debug_graphics, data::kreogl_debug_graphics>().each()) {
-				if (!camera_helper::entity_appears_in_viewport(r, debug_entity, camera_entity))
+			for (const auto & [debug_entity, transform, debug_graphics, kreogl_debug_graphics] : r.view<core::transform, render::debug_graphics, kreogl::debug_graphics>().each()) {
+				if (!entity_appears_in_viewport(r, debug_entity, camera_entity))
 					continue;
 
-				kengine_logf(r, very_verbose, "kreogl", "Syncing debug_graphics properties for [%u]", debug_entity);
+				kengine_logf(r, very_verbose, log_category, "Syncing debug_graphics properties for [%u]", debug_entity);
 				kreogl_debug_graphics.elements.resize(debug_graphics.elements.size());
 				for (size_t i = 0; i < debug_graphics.elements.size(); ++i) {
 					const auto & element = debug_graphics.elements[i];
@@ -834,21 +839,21 @@ namespace kengine::systems {
 
 					kreogl_element.transform = ::glm::mat4{ 1.f };
 					switch (element.type) {
-						case data::debug_graphics::element_type::line:
+						case render::debug_graphics::element_type::line:
 							kreogl_element.type = ::kreogl::debug_element::type::line;
 							kreogl_element.line_start = toglm(element.pos);
 							kreogl_element.line_end = toglm(element.line.end);
 							break;
-						case data::debug_graphics::element_type::box:
+						case render::debug_graphics::element_type::box:
 							kreogl_element.type = ::kreogl::debug_element::type::box;
 							apply_debug_graphics_transform(kreogl_element.transform, transform, toglm(element.pos), toglm(element.box.size), element.relative_to);
 							break;
-						case data::debug_graphics::element_type::sphere:
+						case render::debug_graphics::element_type::sphere:
 							kreogl_element.type = ::kreogl::debug_element::type::sphere;
 							apply_debug_graphics_transform(kreogl_element.transform, transform, toglm(element.pos), ::glm::vec3(element.sphere.radius), element.relative_to);
 							break;
 						default:
-							static_assert(magic_enum::enum_count<data::debug_graphics::element_type>() == 3); // Exhaustive switch
+							static_assert(magic_enum::enum_count<render::debug_graphics::element_type>() == 3); // Exhaustive switch
 							kengine_assert_failed(r, "Non-exhaustive switch");
 							break;
 					}
@@ -858,22 +863,22 @@ namespace kengine::systems {
 			}
 		}
 
-		void apply_debug_graphics_transform(::glm::mat4 & matrix, const core::transform & transform, const ::glm::vec3 & pos, const ::glm::vec3 & size, data::debug_graphics::reference_space reference_space) noexcept {
+		void apply_debug_graphics_transform(::glm::mat4 & matrix, const core::transform & transform, const ::glm::vec3 & pos, const ::glm::vec3 & size, render::debug_graphics::reference_space reference_space) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			matrix = ::glm::translate(matrix, pos);
-			if (reference_space == data::debug_graphics::reference_space::object) {
+			if (reference_space == render::debug_graphics::reference_space::object) {
 				matrix = ::glm::translate(matrix, toglm(transform.bounding_box.position));
 				matrix = ::glm::rotate(matrix, transform.yaw, { 0.f, 1.f, 0.f });
 				matrix = ::glm::rotate(matrix, transform.pitch, { 1.f, 0.f, 0.f });
 				matrix = ::glm::rotate(matrix, transform.roll, { 0.f, 0.f, 1.f });
 			}
 			matrix = ::glm::scale(matrix, size);
-			if (reference_space == data::debug_graphics::reference_space::object)
+			if (reference_space == render::debug_graphics::reference_space::object)
 				matrix = ::glm::scale(matrix, toglm(transform.bounding_box.size));
 		}
 
-		::glm::mat4 get_on_screen_matrix(const core::transform & transform, const putils::point3f & position, const putils::point3f & size, const data::on_screen & onScreen) noexcept {
+		::glm::mat4 get_on_screen_matrix(const core::transform & transform, const putils::point3f & position, const putils::point3f & size, const on_screen & onScreen) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			::glm::mat4 model{ 1.f };
@@ -889,7 +894,7 @@ namespace kengine::systems {
 			return model;
 		}
 
-		void sync_text_properties(auto & kreogl_text, entt::entity text_entity, const core::transform & transform, const data::text & text, ::kreogl::world & kreogl_world) noexcept {
+		void sync_text_properties(auto & kreogl_text, entt::entity text_entity, const core::transform & transform, const text & text, ::kreogl::world & kreogl_world) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			sync_common_properties(kreogl_text, text_entity, nullptr, transform, text, kreogl_world);
@@ -897,17 +902,17 @@ namespace kengine::systems {
 			kreogl_text.value = text.value;
 			kreogl_text.font_size = text.font_size;
 			switch (text.alignment) {
-				case data::text::alignment_type::left:
+				case text::alignment_type::left:
 					kreogl_text.alignment = ::kreogl::text::alignment_type::left;
 					break;
-				case data::text::alignment_type::right:
+				case text::alignment_type::right:
 					kreogl_text.alignment = ::kreogl::text::alignment_type::right;
 					break;
-				case data::text::alignment_type::center:
+				case text::alignment_type::center:
 					kreogl_text.alignment = ::kreogl::text::alignment_type::center;
 					break;
 				default:
-					static_assert(magic_enum::enum_count<data::text::alignment_type>() == 3); // Exhaustive switch
+					static_assert(magic_enum::enum_count<text::alignment_type>() == 3); // Exhaustive switch
 					kengine_assert_failed(r, "Non-exhaustive switch");
 					break;
 			}
@@ -915,7 +920,7 @@ namespace kengine::systems {
 
 		void sync_all_lights(::kreogl::world & kreogl_world, entt::entity camera_entity) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, very_verbose, "kreogl", "Syncing all lights for camera [%u]", camera_entity);
+			kengine_logf(r, very_verbose, log_category, "Syncing all lights for camera [%u]", camera_entity);
 
 			sync_all_dir_lights(kreogl_world, camera_entity);
 			sync_all_point_lights(kreogl_world, camera_entity);
@@ -924,15 +929,15 @@ namespace kengine::systems {
 
 		void sync_all_dir_lights(::kreogl::world & kreogl_world, entt::entity camera_entity) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, very_verbose, "kreogl", "Syncing all directional lights for camera [%u]", camera_entity);
+			kengine_logf(r, very_verbose, log_category, "Syncing all directional lights for camera [%u]", camera_entity);
 
-			for (const auto & [light_entity, dir_light, kreogl_dir_light] : r.view<data::dir_light, ::kreogl::directional_light>().each()) {
-				if (!camera_helper::entity_appears_in_viewport(r, light_entity, camera_entity))
+			for (const auto & [light_entity, dir_light, kreogl_dir_light] : r.view<dir_light, ::kreogl::directional_light>().each()) {
+				if (!entity_appears_in_viewport(r, light_entity, camera_entity))
 					continue;
 
 				sync_light_properties(light_entity, kreogl_dir_light, dir_light, kreogl_world);
 
-				kengine_logf(r, very_verbose, "kreogl", "Syncing directional light properties for [%u]", light_entity);
+				kengine_logf(r, very_verbose, log_category, "Syncing directional light properties for [%u]", light_entity);
 				kreogl_dir_light.direction = toglm(dir_light.direction);
 				kreogl_dir_light.light_sphere_distance = dir_light.light_sphere_distance;
 				kreogl_dir_light.ambient_strength = dir_light.ambient_strength;
@@ -946,10 +951,10 @@ namespace kengine::systems {
 
 		void sync_all_point_lights(::kreogl::world & kreogl_world, entt::entity camera_entity) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, very_verbose, "kreogl", "Syncing all point lights for camera [%u]", camera_entity);
+			kengine_logf(r, very_verbose, log_category, "Syncing all point lights for camera [%u]", camera_entity);
 
-			for (const auto & [light_entity, transform, point_light, kreogl_point_light] : r.view<core::transform, data::point_light, ::kreogl::point_light>().each()) {
-				if (!camera_helper::entity_appears_in_viewport(r, light_entity, camera_entity))
+			for (const auto & [light_entity, transform, point_light, kreogl_point_light] : r.view<core::transform, point_light, ::kreogl::point_light>().each()) {
+				if (!entity_appears_in_viewport(r, light_entity, camera_entity))
 					continue;
 				sync_point_light_properties(light_entity, transform, kreogl_point_light, point_light, kreogl_world);
 			}
@@ -957,24 +962,24 @@ namespace kengine::systems {
 
 		void sync_all_spot_lights(::kreogl::world & kreogl_world, entt::entity camera_entity) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, very_verbose, "kreogl", "Syncing all spot lights for camera [%u]", camera_entity);
+			kengine_logf(r, very_verbose, log_category, "Syncing all spot lights for camera [%u]", camera_entity);
 
-			for (const auto & [light_entity, transform, spot_light, kreogl_spot_light] : r.view<core::transform, data::spot_light, ::kreogl::spot_light>().each()) {
-				if (!camera_helper::entity_appears_in_viewport(r, light_entity, camera_entity))
+			for (const auto & [light_entity, transform, spot_light, kreogl_spot_light] : r.view<core::transform, spot_light, ::kreogl::spot_light>().each()) {
+				if (!entity_appears_in_viewport(r, light_entity, camera_entity))
 					continue;
 
 				sync_point_light_properties(light_entity, transform, kreogl_spot_light, spot_light, kreogl_world);
 
-				kengine_logf(r, very_verbose, "kreogl", "Syncing spot light properties for [%u]", light_entity);
+				kengine_logf(r, very_verbose, log_category, "Syncing spot light properties for [%u]", light_entity);
 				kreogl_spot_light.direction = toglm(spot_light.direction);
 				kreogl_spot_light.cut_off = spot_light.cut_off;
 				kreogl_spot_light.outer_cut_off = spot_light.outer_cut_off;
 			}
 		}
 
-		void sync_light_properties(entt::entity light_entity, auto & kreogl_light, const data::light & light, ::kreogl::world & kreogl_world) noexcept {
+		void sync_light_properties(entt::entity light_entity, auto & kreogl_light, const light & light, ::kreogl::world & kreogl_world) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, very_verbose, "kreogl", "Syncing light properties for [%u]", light_entity);
+			kengine_logf(r, very_verbose, log_category, "Syncing light properties for [%u]", light_entity);
 
 			kreogl_light.color = toglm(light.color);
 			kreogl_light.diffuse_strength = light.diffuse_strength;
@@ -985,7 +990,7 @@ namespace kengine::systems {
 			kreogl_light.shadow_map_max_bias = light.shadow_map_max_bias;
 			kreogl_light.shadow_map_min_bias = light.shadow_map_min_bias;
 
-			if (const auto god_rays = r.try_get<data::god_rays>(light_entity)) {
+			if (const auto god_rays = r.try_get<render::god_rays>(light_entity)) {
 				if (!kreogl_light.volumetric_lighting)
 					kreogl_light.volumetric_lighting.emplace();
 				kreogl_light.volumetric_lighting->default_step_length = god_rays->default_step_length;
@@ -999,9 +1004,9 @@ namespace kengine::systems {
 			kreogl_world.add(kreogl_light);
 		}
 
-		void sync_point_light_properties(entt::entity light_entity, const core::transform & transform, ::kreogl::point_light & kreogl_light, const data::point_light & light, ::kreogl::world & kreogl_world) noexcept {
+		void sync_point_light_properties(entt::entity light_entity, const core::transform & transform, ::kreogl::point_light & kreogl_light, const point_light & light, ::kreogl::world & kreogl_world) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, very_verbose, "kreogl", "Syncing point light properties for [%u]", light_entity);
+			kengine_logf(r, very_verbose, log_category, "Syncing point light properties for [%u]", light_entity);
 
 			sync_light_properties(light_entity, kreogl_light, light, kreogl_world);
 
@@ -1013,7 +1018,7 @@ namespace kengine::systems {
 
 		entt::entity get_entity_in_pixel(entt::entity window_id, const putils::point2ui & pixel) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, verbose, "kreogl", "Getting entity in { %zu, %zu } of [%u]", pixel.x, pixel.y, window_id);
+			kengine_logf(r, verbose, log_category, "Getting entity in { %zu, %zu } of [%u]", pixel.x, pixel.y, window_id);
 
 			const auto entity_id_in_pixel = read_from_gbuffer(window_id, pixel, ::kreogl::gbuffer::texture::user_data);
 			if (!entity_id_in_pixel)
@@ -1021,17 +1026,17 @@ namespace kengine::systems {
 
 			const auto ret = entt::entity(entity_id_in_pixel->r);
 			if (ret == entt::entity(entt::id_type(0))) {
-				kengine_log(r, verbose, "kreogl", "Found no entity");
+				kengine_log(r, verbose, log_category, "Found no entity");
 				return entt::null;
 			}
 
-			kengine_logf(r, verbose, "kreogl", "Found [%u]", ret);
+			kengine_logf(r, verbose, log_category, "Found [%u]", ret);
 			return ret;
 		}
 
 		std::optional<putils::point3f> get_position_in_pixel(entt::entity window, const putils::point2ui & pixel) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, verbose, "kreogl", "Getting position in { %zu, %zu } of [%u]", pixel.x, pixel.y, window);
+			kengine_logf(r, verbose, log_category, "Getting position in { %zu, %zu } of [%u]", pixel.x, pixel.y, window);
 
 			// Check that an entity was drawn in the pixel, otherwise position buffer is invalid
 			if (get_entity_in_pixel(window, pixel) == entt::null)
@@ -1039,11 +1044,11 @@ namespace kengine::systems {
 
 			const auto position_in_pixel = read_from_gbuffer(window, pixel, ::kreogl::gbuffer::texture::position);
 			if (!position_in_pixel) {
-				kengine_log(r, verbose, "kreogl", "Found no position");
+				kengine_log(r, verbose, log_category, "Found no position");
 				return std::nullopt;
 			}
 
-			kengine_logf(r, verbose, "kreogl", "Found { %f, %f, %f }", position_in_pixel->x, position_in_pixel->y, position_in_pixel->y);
+			kengine_logf(r, verbose, log_category, "Found { %f, %f, %f }", position_in_pixel->x, position_in_pixel->y, position_in_pixel->y);
 			return &position_in_pixel->x;
 		}
 
@@ -1059,26 +1064,26 @@ namespace kengine::systems {
 				}
 
 				if (window == entt::null) {
-					kengine_log(r, verbose, "kreogl", "No existing Kreogl window");
+					kengine_log(r, verbose, log_category, "No existing Kreogl window");
 					return std::nullopt;
 				}
 			}
 
 			if (!r.all_of<::kreogl::window>(window)) {
-				kengine_logf(r, verbose, "kreogl", "[%u] does not have a Kreogl window", window);
+				kengine_logf(r, verbose, log_category, "[%u] does not have a Kreogl window", window);
 				return std::nullopt;
 			}
 
-			const auto viewport_info = camera_helper::get_viewport_for_pixel({ r, window }, pixel);
+			const auto viewport_info = get_viewport_for_pixel({ r, window }, pixel);
 			if (viewport_info.camera == entt::null) {
-				kengine_logf(r, verbose, "kreogl", "Found no viewport containing pixel { %d, %d }", pixel.x, pixel.y);
+				kengine_logf(r, verbose, log_category, "Found no viewport containing pixel { %d, %d }", pixel.x, pixel.y);
 				return std::nullopt;
 			}
 
 			const auto camera_entity = viewport_info.camera;
 			const auto kreogl_camera = r.try_get<::kreogl::camera>(camera_entity);
 			if (!kreogl_camera) {
-				kengine_logf(r, verbose, "kreogl", "Viewport [%u] does not have a kreogl::camera", camera_entity);
+				kengine_logf(r, verbose, log_category, "Viewport [%u] does not have a kreogl::camera", camera_entity);
 				return std::nullopt;
 			}
 
@@ -1088,7 +1093,7 @@ namespace kengine::systems {
 
 			const auto pixel_in_gbuffer = ::glm::vec2(gbuffer_size) * toglm(viewport_info.viewport_percent);
 			if (pixel_in_gbuffer.x >= float(gbuffer_size.x) || pixel_in_gbuffer.y > float(gbuffer_size.y) || pixel_in_gbuffer.y == 0) {
-				kengine_logf(r, verbose, "kreogl", "Pixel is out of [%u]'s gbuffer's bounds", camera_entity);
+				kengine_logf(r, verbose, log_category, "Pixel is out of [%u]'s gbuffer's bounds", camera_entity);
 				return std::nullopt;
 			}
 
@@ -1097,14 +1102,14 @@ namespace kengine::systems {
 	};
 
 	DEFINE_KENGINE_SYSTEM_CREATOR(
-		kreogl,
-		kreogl::processed_animation_files,
-		kreogl::processed_model,
-		kreogl::processed_sky_box,
-		kreogl::processed_window,
-		data::kreogl_animation_files,
-		data::kreogl_debug_graphics,
-		data::kreogl_model,
+		system,
+		system::processed_animation_files,
+		system::processed_model,
+		system::processed_sky_box,
+		system::processed_window,
+		animation_files,
+		debug_graphics,
+		model,
 		::kreogl::animated_object,
 		::kreogl::camera,
 		::kreogl::directional_light,

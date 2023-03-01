@@ -7,7 +7,7 @@
 #include "putils/color.hpp"
 #include "putils/point.hpp"
 
-namespace kengine::data {
+namespace kengine::render {
 	/*!
 	 * putils reflect all
 	 * used_types: [

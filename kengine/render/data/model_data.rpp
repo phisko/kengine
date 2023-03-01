@@ -2,7 +2,7 @@
 
 #include "putils/reflection.hpp"
 
-#define refltype kengine::data::model_data
+#define refltype kengine::render::model_data
 putils_reflection_info {
 	putils_reflection_class_name;
 	putils_reflection_attributes(
@@ -18,7 +18,7 @@ putils_reflection_info {
 };
 #undef refltype
 
-#define refltype kengine::data::model_data::mesh
+#define refltype kengine::render::model_data::mesh
 putils_reflection_info {
 	putils_reflection_custom_class_name(model_data_mesh);
 	putils_reflection_attributes(
@@ -32,7 +32,7 @@ putils_reflection_info {
 };
 #undef refltype
 
-#define refltype kengine::data::model_data::mesh::buffer
+#define refltype kengine::render::model_data::mesh::buffer
 putils_reflection_info {
 	putils_reflection_custom_class_name(model_data_mesh_buffer);
 	putils_reflection_attributes(
@@ -43,7 +43,7 @@ putils_reflection_info {
 };
 #undef refltype
 
-#define refltype kengine::data::model_data::vertex_attribute
+#define refltype kengine::render::model_data::vertex_attribute
 putils_reflection_info {
 	putils_reflection_custom_class_name(model_data_vertex_attribute);
 	putils_reflection_attributes(

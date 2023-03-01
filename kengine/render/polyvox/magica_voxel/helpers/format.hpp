@@ -1,6 +1,6 @@
 #pragma once
 
-namespace magica_voxel_format {
+namespace kengine::render::polyvox::magica_voxel::format {
 	// based on https://github.com/ephtracy/voxel-model/blob/master/magica_voxel-file-format-vox.txt
 
 	struct file_header {

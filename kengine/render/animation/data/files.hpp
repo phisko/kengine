@@ -4,11 +4,12 @@
 #include <string>
 #include <vector>
 
-namespace kengine::data {
+namespace kengine::render::animation {
 	//! putils reflect all
-	struct animation_files {
-		std::vector<std::string> files;
+	//! class_name: animation_files
+	struct files {
+		std::vector<std::string> list;
 	};
 }
 
-#include "animation_files.rpp"
+#include "files.rpp"

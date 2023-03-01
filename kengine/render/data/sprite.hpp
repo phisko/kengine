@@ -6,10 +6,10 @@
 // kengine render
 #include "kengine/render/data/on_screen.hpp"
 
-namespace kengine::data {
+namespace kengine::render {
 	//! putils reflect all
-	//! parents: [kengine::data::on_screen]
-	struct sprite_2d : data::on_screen { // UI element
+	//! parents: [kengine::render::on_screen]
+	struct sprite_2d : on_screen { // UI element
 	};
 
 	//! putils reflect all

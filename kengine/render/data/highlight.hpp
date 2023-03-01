@@ -4,7 +4,7 @@
 #include "putils/point.hpp"
 #include "putils/color.hpp"
 
-namespace kengine::data {
+namespace kengine::render {
 	//! putils reflect all
 	//! used_types: [putils::normalized_color]
 	struct highlight {

@@ -11,7 +11,7 @@
 #define KENGINE_WINDOW_COMPONENT_NAME_MAX_LENGTH 64
 #endif
 
-namespace kengine::data {
+namespace kengine::render {
 	//! putils reflect all
 	//! used_types: [refltype::string, putils::point2ui]
 	struct window {

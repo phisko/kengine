@@ -3,7 +3,7 @@
 // putils
 #include "putils/rect.hpp"
 
-namespace kengine::data {
+namespace kengine::render {
 	//! putils reflect all
 	struct camera {
 		putils::rect3f frustum{ { 0.f, 0.f, 0.f }, { 1.f, 1.f, 1.f } };

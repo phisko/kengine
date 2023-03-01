@@ -1,4 +1,4 @@
-# [on_click](on_click.hpp)
+# [system](system.hpp)
 
 System that forwards click events to entities with an [on_click](../functions/on_click.md) `function Component`.
 

@@ -3,11 +3,12 @@
 // kreogl
 #include "kreogl/animation/animated_model.hpp"
 
-namespace kengine::data {
+namespace kengine::render::kreogl {
 	//! putils reflect name
-	struct kreogl_model {
-		std::unique_ptr<kreogl::animated_model> model;
+	//! class_name: kreogl_model
+	struct model {
+		std::unique_ptr<::kreogl::animated_model> ptr;
 	};
 }
 
-#include "kreogl_model.rpp"
+#include "model.rpp"

@@ -14,7 +14,7 @@
 // kengine render
 #include "kengine/render/data/on_screen.hpp"
 
-namespace kengine::data {
+namespace kengine::render {
 	//! kengine registration off
 	//! putils reflect all
 	//! used_types: [refltype::string, putils::normalized_color]
@@ -37,12 +37,12 @@ namespace kengine::data {
 
 	// UI element
 	//! putils reflect all
-	//! parents: [kengine::data::text, kengine::data::on_screen]
+	//! parents: [kengine::render::text, kengine::render::on_screen]
 	struct text_2d : text, on_screen {};
 
 	// Ground feedback and such
 	//! putils reflect all
-	//! parents: [kengine::data::text]
+	//! parents: [kengine::render::text]
 	struct text_3d : text {};
 }
 

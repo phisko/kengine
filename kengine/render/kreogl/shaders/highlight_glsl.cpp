@@ -1,6 +1,7 @@
 #include "highlight_glsl.hpp"
 
-const char * highlight_glsl::frag = R"(
+namespace kengine::render::kreogl {
+	const char * highlight_glsl::frag = R"(
 #version 330
 
 uniform vec3 view_pos;
@@ -48,3 +49,4 @@ void main() {
 
 	out_color = highlight * highlight_color;
 })";
+}

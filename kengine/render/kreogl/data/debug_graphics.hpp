@@ -6,11 +6,12 @@
 // kreogl
 #include "kreogl/debug_element.hpp"
 
-namespace kengine::data {
+namespace kengine::render::kreogl {
 	//! putils reflect name
-	struct kreogl_debug_graphics {
-		std::vector<kreogl::debug_element> elements;
+	//! class_name: kreogl_debug_graphics
+	struct debug_graphics {
+		std::vector<::kreogl::debug_element> elements;
 	};
 }
 
-#include "kreogl_debug_graphics.rpp"
+#include "debug_graphics.rpp"

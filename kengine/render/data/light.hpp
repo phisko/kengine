@@ -9,7 +9,7 @@
 #define KENGINE_MAX_CSM_COUNT 5
 #endif
 
-namespace kengine::data {
+namespace kengine::render {
 	//! kengine registration off
 	//! putils reflect all
 	//! used_types: [putils::normalized_color]
@@ -25,7 +25,7 @@ namespace kengine::data {
 	};
 
 	//! putils reflect all
-	//! parents: [kengine::data::light]
+	//! parents: [kengine::render::light]
 	//! used_types: [refltype::vector, putils::vec3f]
 	struct dir_light : light {
 		static constexpr char vector_name[] = "dir_light_cascade_vector";
@@ -40,7 +40,7 @@ namespace kengine::data {
 	};
 
 	//! putils reflect all
-	//! parents: [kengine::data::light]
+	//! parents: [kengine::render::light]
 	struct point_light : light {
 		float attenuation_constant = 1.f;
 		float attenuation_linear = .09f;
@@ -48,7 +48,7 @@ namespace kengine::data {
 	};
 
 	//! putils reflect all
-	//! parents: [kengine::data::point_light]
+	//! parents: [kengine::render::point_light]
 	//! used_types: [putils::vec3f]
 	struct spot_light : point_light {
 		putils::vec3f direction = { 0.f, -1.f, 0.f };
