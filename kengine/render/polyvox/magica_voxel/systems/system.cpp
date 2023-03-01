@@ -74,7 +74,7 @@ namespace kengine::render::polyvox::magica_voxel {
 		};
 
 		struct async_loaded_data {
-			model_data model_data;
+			model_data data;
 			format::chunk_content::size offset_to_apply;
 		};
 
@@ -85,7 +85,7 @@ namespace kengine::render::polyvox::magica_voxel {
 			processor.process();
 
 			kengine::async::process_results<async_loaded_data>(r, [this](entt::entity e, async_loaded_data && loaded_data) {
-				r.emplace<model_data>(e, std::move(loaded_data.model_data));
+				r.emplace<model_data>(e, std::move(loaded_data.data));
 				apply_offset(e, loaded_data.offset_to_apply);
 			});
 		}
@@ -121,9 +121,9 @@ namespace kengine::render::polyvox::magica_voxel {
 			}
 
 			async_loaded_data ret;
-			unserialize(binary_file.c_str(), ret.model_data.meshes.emplace_back(), ret.offset_to_apply);
-			ret.model_data.free = release(e);
-			ret.model_data.init<mesh_type::VertexType>();
+			unserialize(binary_file.c_str(), ret.data.meshes.emplace_back(), ret.offset_to_apply);
+			ret.data.free = release(e);
+			ret.data.init<mesh_type::VertexType>();
 			return ret;
 		}
 

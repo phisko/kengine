@@ -481,7 +481,7 @@ namespace kengine::pathfinding::recast {
 			return nav_mesh_query;
 		}
 
-		static get_path::callable get_path(const core::transform * model_transform, const pathfinding::nav_mesh & nav_mesh, const recast::nav_mesh & recast) noexcept {
+		static get_path::callable get_path_implementation(const core::transform * model_transform, const pathfinding::nav_mesh & nav_mesh, const recast::nav_mesh & recast) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			return [&, model_transform](entt::handle environment, const putils::point3f & start_world_space, const putils::point3f & end_world_space) {
@@ -584,7 +584,7 @@ namespace kengine::pathfinding::recast {
 
 			const auto & recast = r.emplace<nav_mesh>(e, std::move(*opt));
 			const auto & nav_mesh = r.get<pathfinding::nav_mesh>(e);
-			r.emplace<get_path>(e, build_recast_component::get_path(r.try_get<core::transform>(e), nav_mesh, recast));
+			r.emplace<get_path>(e, build_recast_component::get_path_implementation(r.try_get<core::transform>(e), nav_mesh, recast));
 		});
 	}
 }

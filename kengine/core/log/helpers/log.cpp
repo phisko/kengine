@@ -10,11 +10,11 @@
 #include "kengine/core/log/data/severity_control.hpp"
 
 namespace kengine::core::log {
-	void log(const entt::registry & r, severity severity, const char * category, const char * message) noexcept {
+	void log(const entt::registry & r, severity message_severity, const char * category, const char * message) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
 		const event log_event{
-			.severity = severity,
+			.message_severity = message_severity,
 			.category = category,
 			.message = message
 		};

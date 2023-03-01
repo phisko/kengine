@@ -57,16 +57,16 @@ namespace kengine::core::log::standard_output {
 
 			const std::lock_guard lock(mutex);
 
-			if (log_event.severity == severity::warning)
+			if (log_event.message_severity == severity::warning)
 				std::cout << termcolor::yellow;
-			else if (log_event.severity == severity::error)
+			else if (log_event.message_severity == severity::error)
 				std::cout << termcolor::red;
 
 			const auto & thread_name = putils::get_thread_name();
 			if (!thread_name.empty())
 				std::cout << '{' << thread_name << "}\t";
 
-			std::cout << magic_enum::enum_name<severity>(log_event.severity) << "\t[" << log_event.category << "]\t" << log_event.message << std::endl;
+			std::cout << magic_enum::enum_name<severity>(log_event.message_severity) << "\t[" << log_event.category << "]\t" << log_event.message << std::endl;
 			std::cout << termcolor::reset;
 		}
 	};

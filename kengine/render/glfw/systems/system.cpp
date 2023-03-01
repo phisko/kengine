@@ -41,7 +41,7 @@ namespace kengine::render::glfw {
 
 	struct system {
 		entt::registry & r;
-		input_handler input_handler;
+		input_handler input;
 
 		struct processed_input_buffer {};
 		kengine::new_entity_processor<processed_input_buffer, input::buffer> input_buffer_processor{ r, putils_forward_to_this(set_input_buffer) };
@@ -119,8 +119,8 @@ namespace kengine::render::glfw {
 
 		void set_input_buffer(entt::entity e, input::buffer & input_buffer) noexcept {
 			kengine_log(r, verbose, log_category, "Setting input buffer");
-			kengine_assert(r, input_handler.buffer == nullptr);
-			input_handler.buffer = &input_buffer;
+			kengine_assert(r, input.buffer == nullptr);
+			input.buffer = &input_buffer;
 		}
 
 		void create_window(entt::entity e, render::window & window, const window_init & init_glfw) noexcept {
@@ -158,7 +158,7 @@ namespace kengine::render::glfw {
 				comp.size = { (unsigned int)width, (unsigned int)height };
 			});
 
-#define forward_to_input_handler(function) [](auto... args) { g_this->input_handler.function(args...); }
+#define forward_to_input_handler(function) [](auto... args) { g_this->input.function(args...); }
 			glfwSetMouseButtonCallback(glfw_comp.ptr.get(), forward_to_input_handler(on_click));
 			glfwSetCursorPosCallback(glfw_comp.ptr.get(), forward_to_input_handler(on_mouse_move));
 			glfwSetScrollCallback(glfw_comp.ptr.get(), forward_to_input_handler(on_scroll));

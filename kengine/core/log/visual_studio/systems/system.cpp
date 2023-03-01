@@ -62,7 +62,7 @@ namespace kengine::core::log::visual_studio {
 			const auto & thread_name = putils::get_thread_name();
 			if (!thread_name.empty())
 				s += '{' + thread_name + "}\t";
-			s += magic_enum::enum_name<severity>(log_event.severity);
+			s += magic_enum::enum_name<severity>(log_event.message_severity);
 			s += "\t[";
 			s += log_event.category;
 			s += "]\t";

@@ -266,7 +266,7 @@ namespace kengine::render::sfml {
 
 			struct viewport_to_blit {
 				const sf::RenderTexture * render_texture;
-				const viewport * viewport;
+				const viewport * ptr;
 			};
 			putils::vector<viewport_to_blit, KENGINE_MAX_VIEWPORTS> to_blit;
 
@@ -296,11 +296,11 @@ namespace kengine::render::sfml {
 			}
 
 			std::ranges::sort(to_blit, [](const viewport_to_blit & lhs, const viewport_to_blit & rhs) noexcept {
-				return lhs.viewport->z_order < rhs.viewport->z_order;
+				return lhs.ptr->z_order < rhs.ptr->z_order;
 			});
 
 			for (const auto & blit : to_blit) {
-				auto render_texture_sprite = create_render_texture_sprite(*blit.render_texture, *sf_window.ptr, *blit.viewport);
+				auto render_texture_sprite = create_render_texture_sprite(*blit.render_texture, *sf_window.ptr, *blit.ptr);
 				sf_window.ptr->draw(std::move(render_texture_sprite));
 			}
 
