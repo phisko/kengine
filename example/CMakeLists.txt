@@ -5,9 +5,9 @@ set(CMAKE_CXX_STANDARD 20)
 
 # Alternatively, set KENGINE_ALL_SYSTEMS to compile everything
 set(KENGINE_CORE ON CACHE BOOL "Enable kengine_core" FORCE)
+set(KENGINE_CORE_LOG ON CACHE BOOL "Enable kengine_core_log" FORCE)
+set(KENGINE_CORE_LOG_STANDARD_OUTPUT ON CACHE BOOL "Enable kengine_core_log_standard_output" FORCE)
 set(KENGINE_MAIN_LOOP ON CACHE BOOL "Enable kengine_main_loop" FORCE)
-set(KENGINE_LOG ON CACHE BOOL "Enable kengine_log" FORCE)
-set(KENGINE_LOG_STDOUT ON CACHE BOOL "Enable kengine_log_stdout" FORCE)
 set(KENGINE_SCRIPTING ON CACHE BOOL "Enable kengine_scripting" FORCE)
 set(KENGINE_SCRIPTING_LUA ON CACHE BOOL "Enable kengine_scripting_lua" FORCE)
 add_subdirectory(.. kengine)

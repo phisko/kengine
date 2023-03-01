@@ -1,0 +1,14 @@
+{
+    "builtin-baseline": "d5bc0e71e06dfe6594ffb8fb2430919f1b435f94",
+    "dependencies": [
+        "magic-enum",
+        "nlohmann-json",
+        "lua",
+        "sol2",
+        "entt",
+        "termcolor"
+    ],
+    "overrides": [
+        { "name": "sol2", "version": "3.2.2" }
+    ]
+}
