@@ -3,11 +3,12 @@
 // sol
 #include <sol/sol.hpp>
 
-namespace kengine::data {
+namespace kengine::scripting::lua {
 	//! putils reflect all
-	struct lua_state {
-		sol::state * state = nullptr;
+	//! class_name: lua_state
+	struct state {
+		sol::state * ptr = nullptr;
 	};
 }
 
-#include "lua_state.rpp"
+#include "state.rpp"

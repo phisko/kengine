@@ -3,11 +3,12 @@
 // sol
 #include <sol/sol.hpp>
 
-namespace kengine::data {
+namespace kengine::scripting::lua {
 	//! putils reflect all
-	struct lua_table {
-		sol::table table;
+	//! class_name: lua_table
+	struct table {
+		sol::table value;
 	};
 }
 
-#include "lua_table.rpp"
+#include "table.rpp"

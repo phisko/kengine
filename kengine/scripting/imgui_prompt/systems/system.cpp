@@ -1,4 +1,4 @@
-#include "imgui_prompt.hpp"
+#include "system.hpp"
 
 // stl
 #include <list>
@@ -31,16 +31,18 @@
 
 #ifdef KENGINE_SCRIPTING_LUA
 // kengine scripting/lua
-#include "kengine/scripting/lua/data/lua_state.hpp"
+#include "kengine/scripting/lua/data/state.hpp"
 #endif
 
 #ifdef KENGINE_SCRIPTING_PYTHON
 // kengine scripting/python
-#include "kengine/scripting/python/data/python_state.hpp"
+#include "kengine/scripting/python/data/state.hpp"
 #endif
 
-namespace kengine::systems {
-	struct imgui_prompt {
+namespace kengine::scripting::imgui_prompt {
+	static constexpr auto log_category = "scripting_imgui_prompt";
+
+	struct system {
 		entt::registry & r;
 		bool * enabled;
 
@@ -53,10 +55,10 @@ namespace kengine::systems {
 		int max_lines = 128;
 		char buff[1024] = "";
 
-		imgui_prompt(entt::handle e) noexcept
+		system(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "imgui_prompt", "Initializing");
+			kengine_log(r, log, log_category, "Initializing");
 
 			e.emplace<main_loop::execute>(putils_forward_to_this(execute));
 
@@ -67,10 +69,10 @@ namespace kengine::systems {
 
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, very_verbose, "imgui_prompt", "Executing");
+			kengine_log(r, very_verbose, log_category, "Executing");
 
 			if (!*enabled) {
-				kengine_log(r, very_verbose, "imgui_prompt", "Disabled");
+				kengine_log(r, very_verbose, log_category, "Disabled");
 				return;
 			}
 
@@ -96,11 +98,11 @@ namespace kengine::systems {
 		bool should_scroll_down = false;
 		void draw_history() noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, very_verbose, "imgui_prompt", "Drawing history");
+			kengine_log(r, very_verbose, log_category, "Drawing history");
 
 			int tmp = max_lines;
 			if (ImGui::InputInt("Max history", &tmp, 0, 0, ImGuiInputTextFlags_EnterReturnsTrue)) {
-				kengine_logf(r, verbose, "imgui_prompt", "Max history changed to %d", tmp);
+				kengine_logf(r, verbose, log_category, "Max history changed to %d", tmp);
 				max_lines = tmp;
 			}
 
@@ -113,7 +115,7 @@ namespace kengine::systems {
 				ImGui::TextColored({ line.color.r, line.color.g, line.color.b, line.color.a }, "%s", line.text.c_str());
 				ImGui::PopTextWrapPos();
 				if (ImGui::IsItemClicked(1)) {
-					kengine_logf(r, log, "imgui_prompt", "Setting clipboard text to '%s'", line.text.c_str());
+					kengine_logf(r, log, log_category, "Setting clipboard text to '%s'", line.text.c_str());
 					ImGui::SetClipboardText(line.text.c_str());
 				}
 				if (ImGui::IsItemHovered())
@@ -121,7 +123,7 @@ namespace kengine::systems {
 			}
 
 			if (should_scroll_down) {
-				kengine_log(r, log, "imgui_prompt", "Scrolling down");
+				kengine_log(r, log, log_category, "Scrolling down");
 				ImGui::SetScrollHereY();
 				should_scroll_down = false;
 			}
@@ -132,12 +134,12 @@ namespace kengine::systems {
 		bool first_draw_prompt = true;
 		bool draw_prompt() noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, very_verbose, "imgui_prompt", "Drawing prompt");
+			kengine_log(r, very_verbose, log_category, "Drawing prompt");
 
 			if (putils::reflection::imgui_enum_combo("##language", selected_language) || first_draw_prompt) {
 				std::string new_language(magic_enum::enum_names<language>()[(int)selected_language]);
 
-				kengine_logf(r, log, "imgui_prompt", "Changed language to %s", new_language.c_str());
+				kengine_logf(r, log, log_category, "Changed language to %s", new_language.c_str());
 				history.add_line(
 					std::move(new_language),
 					true,
@@ -152,7 +154,7 @@ namespace kengine::systems {
 				ImGui::SetTooltip("Ctrl+Enter to execute");
 
 			if (ret) {
-				kengine_log(r, log, "imgui_prompt", "User confirmed prompt");
+				kengine_log(r, log, log_category, "User confirmed prompt");
 				should_scroll_down = true;
 				ImGui::SetKeyboardFocusHere(-1);
 			}
@@ -161,7 +163,7 @@ namespace kengine::systems {
 
 		void eval() noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, log, "imgui_prompt", "Evaluating '%s'", buff);
+			kengine_logf(r, log, log_category, "Evaluating '%s'", buff);
 
 			switch (selected_language) {
 				case language::lua:
@@ -180,29 +182,29 @@ namespace kengine::systems {
 		void eval_lua() noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-#ifndef KENGINE_LUA
-			kengine_log(r, error, "imgui_prompt", "Attempt to evaluate Lua script but KENGINE_LUA is not defined");
+#ifndef KENGINE_SCRIPTING_LUA
+			kengine_log(r, error, log_category, "Attempt to evaluate Lua script but KENGINE_SCRIPTING_LUA is not defined");
 			history.add_line(
-				"Please compile with KENGINE_LUA",
+				"Please compile with KENGINE_SCRIPTING_LUA",
 				false,
 				putils::normalized_color{ 1.f, 0.f, 0.f }
 			);
 #else
-			kengine_logf(r, log, "imgui_prompt", "Evaluating Lua script: '%s'", buff);
+			kengine_logf(r, log, log_category, "Evaluating Lua script: '%s'", buff);
 
-			for (const auto & [e, state] : r.view<kengine::data::lua_state>().each()) {
+			for (const auto & [e, state] : r.view<scripting::lua::state>().each()) {
 				if (first_eval_lua) {
-					setup_output_redirect(*state.state);
+					setup_output_redirect(*state.ptr);
 					first_eval_lua = false;
 				}
 
 				active = true;
 				try {
-					kengine_logf(r, verbose, "imgui_prompt", "Evaluating with state [%u]", e);
-					state.state->script(buff);
+					kengine_logf(r, verbose, log_category, "Evaluating with state [%u]", e);
+					state.ptr->script(buff);
 				}
 				catch (const std::exception & e) {
-					kengine_logf(r, error, "imgui_prompt", "Error: %s", e.what());
+					kengine_logf(r, error, log_category, "Error: %s", e.what());
 					history.add_error(e.what());
 				}
 				active = false;
@@ -213,9 +215,9 @@ namespace kengine::systems {
 #ifdef KENGINE_SCRIPTING_LUA
 		void setup_output_redirect(sol::state & state) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "imgui_prompt", "Setting up output redirection for Lua");
+			kengine_log(r, log, log_category, "Setting up output redirection for Lua");
 
-			static imgui_prompt * g_this = nullptr;
+			static system * g_this = nullptr;
 			kengine_assert_with_message(r, !g_this, "imgui_prompt system doesn't support existing in multiple registries currently. Fix this!");
 			g_this = this;
 
@@ -263,14 +265,14 @@ namespace kengine::systems {
 			KENGINE_PROFILING_SCOPE;
 
 #ifndef KENGINE_SCRIPTING_PYTHON
-			kengine_log(r, error, "imgui_prompt", "Attempt to evaluate python script but KENGINE_PYTHON is not defined");
+			kengine_log(r, error, log_category, "Attempt to evaluate python script but KENGINE_SCRIPTING_PYTHON is not defined");
 			history.add_line(
-				"Please compile with KENGINE_PYTHON",
+				"Please compile with KENGINE_SCRIPTING_PYTHON",
 				false,
 				putils::normalized_color{ 1.f, 0.f, 0.f }
 			);
 #else
-			kengine_logf(r, log, "imgui_prompt", "Evaluating python script: '%s'", buff);
+			kengine_logf(r, log, log_category, "Evaluating python script: '%s'", buff);
 
 #ifdef __GNUC__
 // Ignore "declared with greater visibility than the type of its field" warnings
@@ -318,7 +320,7 @@ namespace kengine::systems {
 				py::exec(buff);
 			}
 			catch (const std::exception & e) {
-				kengine_logf(r, error, "imgui_prompt", "Error: %s", e.what());
+				kengine_logf(r, error, log_category, "Error: %s", e.what());
 				history.add_error(e.what());
 			}
 
@@ -353,5 +355,5 @@ namespace kengine::systems {
 		} history;
 	};
 
-	DEFINE_KENGINE_SYSTEM_CREATOR(imgui_prompt)
+	DEFINE_KENGINE_SYSTEM_CREATOR(system)
 }

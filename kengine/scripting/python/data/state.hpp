@@ -12,10 +12,11 @@
 #pragma GCC diagnostic ignored "-Wattributes"
 #endif
 
-namespace kengine::data {
+namespace kengine::scripting::python {
 	//! putils reflect none
-	struct python_state {
-		python_state() noexcept = default;
+	//! class_name: python_state
+	struct state {
+		state() noexcept = default;
 
 		py::scoped_interpreter guard;
 		py::module_ module_ = py::module_::create_extension_module("kengine", nullptr, new PyModuleDef);
@@ -27,4 +28,4 @@ namespace kengine::data {
 #pragma GCC diagnostic pop
 #endif
 
-#include "python_state.rpp"
+#include "state.rpp"
