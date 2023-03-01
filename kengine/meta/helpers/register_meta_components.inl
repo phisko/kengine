@@ -21,13 +21,17 @@
 #include "kengine/meta/helpers/impl/match_string.hpp"
 #include "kengine/meta/helpers/impl/remove.hpp"
 
+#ifdef KENGINE_META_IMGUI
 // kengine meta/imgui
 #include "kengine/meta/imgui/helpers/impl/display.hpp"
 #include "kengine/meta/imgui/helpers/impl/edit.hpp"
+#endif
 
+#ifdef KENGINE_META_JSON
 // kengine meta/json
 #include "kengine/meta/json/helpers/impl/load.hpp"
 #include "kengine/meta/json/helpers/impl/save.hpp"
+#endif
 
 namespace kengine::meta {
 	template<typename... Comps>
@@ -39,17 +43,21 @@ namespace kengine::meta {
 		std::vector<component_registrator *> registrators;
 
 		putils::for_each_type<
+#ifdef KENGINE_META_IMGUI
+			meta::imgui::display,
+			meta::imgui::edit,
+#endif
+#ifdef KENGINE_META_JSON
+			meta::json::load,
+			meta::json::save,
+#endif
 			meta::count,
 			meta::emplace_or_replace, meta::emplace_or_replace_move,
 			meta::for_each_entity, meta::for_each_entity_without,
 			meta::get, meta::get_const,
 			meta::has,
 			meta::match_string,
-			meta::remove,
-			meta::imgui::display,
-			meta::imgui::edit,
-			meta::json::load,
-			meta::json::save>([&](auto t) {
+			meta::remove>([&](auto t) {
 			using type = putils_wrapped_type(t);
 
 			kengine_logf(r, verbose, "meta", "Pre-instantiating storage for %s", putils::reflection::get_class_name<type>());
