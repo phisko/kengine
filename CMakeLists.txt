@@ -63,6 +63,8 @@ function(add_system path)
     endif()
 
     file(GLOB sources
+            ${path}/data/*.cpp
+            ${path}/functions/*.cpp
             ${path}/helpers/*.cpp
             ${path}/systems/*.cpp)
 
