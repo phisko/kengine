@@ -587,7 +587,7 @@ namespace kengine::render::kreogl {
 				kengine_logf(r, very_verbose, log_category, "Drawing to camera [%u]", camera_entity);
 
 				if (viewport.window == entt::null) {
-					kengine_logf(r, verbose, log_category, "Setting target window for data::viewport in [%u]", camera_entity);
+					kengine_logf(r, verbose, log_category, "Setting target window for viewport in [%u]", camera_entity);
 					viewport.window = window_entity;
 					create_kreogl_camera(camera_entity, viewport);
 				}

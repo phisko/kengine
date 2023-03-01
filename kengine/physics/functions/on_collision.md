@@ -14,4 +14,4 @@ void (entt::entity first, entt::entity second);
 
 ## Usage
 
-Physics systems (such as the [bullet system](../bullet/systems/bullet.md)) call this `function component` when collisions are detected.
+Physics systems (such as the [bullet system](../bullet/systems/system.md)) call this `function component` when collisions are detected.

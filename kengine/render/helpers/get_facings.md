@@ -7,7 +7,7 @@ struct facings {
     putils::vec3f up;
 };
 
-facings get_facings(const data::camera & camera) noexcept;
+facings get_facings(const camera & camera) noexcept;
 ```
 
 Returns the facing vectors for `camera`.

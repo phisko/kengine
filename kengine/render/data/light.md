@@ -103,9 +103,9 @@ float attenuation_quadratic = .032f;
 
 Reference values provided by [Ogre3D](http://wiki.ogre3d.org/tiki-index.php?page=-Point+Light+Attenuation).
 
-## data::spot_light
+## spot_light
 
-Used to represent a spot light, such as a flash light. Inherits from `data::point_light`.
+Used to represent a spot light, such as a flash light. Inherits from `point_light`.
 
 ### direction
 
