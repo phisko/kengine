@@ -11,7 +11,7 @@ TEST(log, kengine_log) {
 	entt::registry r;
 
 	struct event {
-		kengine::core::log::severity severity;
+		kengine::core::log::severity message_severity;
 		std::string category;
 		std::string message;
 	};
@@ -21,7 +21,7 @@ TEST(log, kengine_log) {
 	r.emplace<kengine::core::log::on_log>(
 		e, [&](const kengine::core::log::event & event) {
 			output.push_back({
-				.severity = event.severity,
+				.message_severity = event.message_severity,
 				.category = event.category,
 				.message = event.message,
 			});
@@ -33,11 +33,11 @@ TEST(log, kengine_log) {
 
 	EXPECT_EQ(output.size(), 2);
 
-	EXPECT_EQ(output[0].severity, kengine::core::log::severity::verbose);
+	EXPECT_EQ(output[0].message_severity, kengine::core::log::severity::verbose);
 	EXPECT_EQ(output[0].category, "Category");
 	EXPECT_EQ(output[0].message, "Message");
 
-	EXPECT_EQ(output[1].severity, kengine::core::log::severity::warning);
+	EXPECT_EQ(output[1].message_severity, kengine::core::log::severity::warning);
 	EXPECT_EQ(output[1].category, "OtherCategory");
 	EXPECT_EQ(output[1].message, "OtherMessage");
 }

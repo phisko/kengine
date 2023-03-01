@@ -16,8 +16,8 @@ namespace kengine::core::log {
 
 		bool passes(const event & event) const noexcept {
 			if (const auto it = category_severities.find(event.category); it != category_severities.end())
-				return event.severity >= it->second;
-			return event.severity >= global_severity;
+				return event.message_severity >= it->second;
+			return event.message_severity >= global_severity;
 		}
 	};
 }

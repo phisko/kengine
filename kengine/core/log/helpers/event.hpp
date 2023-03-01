@@ -6,7 +6,7 @@
 namespace kengine::core::log {
 	//! putils reflect all
 	struct event {
-		severity severity;
+		severity message_severity;
 		const char * category;
 		const char * message;
 	};

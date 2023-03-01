@@ -117,19 +117,19 @@ namespace kengine::physics::bullet {
 			struct motion_state : public btMotionState {
 				void getWorldTransform(btTransform & world_trans) const final {
 					KENGINE_PROFILING_SCOPE;
-					world_trans = system->to_bullet(*transform);
+					world_trans = owning_system->to_bullet(*transform);
 				}
 
 				void setWorldTransform(const btTransform & world_trans) final {
 					KENGINE_PROFILING_SCOPE;
 
-					transform->bounding_box.position = system->to_putils(world_trans.getOrigin());
+					transform->bounding_box.position = owning_system->to_putils(world_trans.getOrigin());
 					::glm::mat4 mat;
 					world_trans.getOpenGLMatrix(::glm::value_ptr(mat));
 					::glm::extractEulerAngleYXZ(mat, transform->yaw, transform->pitch, transform->roll);
 				}
 
-				system * system;
+				system * owning_system;
 				core::transform * transform;
 			};
 
@@ -140,7 +140,7 @@ namespace kengine::physics::bullet {
 			~bullet_data() noexcept {
 				KENGINE_PROFILING_SCOPE;
 				if (state)
-					state->system->dynamics_world.removeRigidBody(body.get());
+					state->owning_system->dynamics_world.removeRigidBody(body.get());
 			}
 
 			bullet_data() noexcept = default;
@@ -260,7 +260,7 @@ namespace kengine::physics::bullet {
 			comp.shape = std::make_unique<btCompoundShape>();
 
 			comp.state = std::make_unique<bullet_data::motion_state>();
-			comp.state->system = this;
+			comp.state->owning_system = this;
 			comp.state->transform = &transform;
 
 			const auto & model_collider = r.get<kengine::physics::model_collider>(model_entity);
@@ -480,23 +480,23 @@ namespace kengine::physics::bullet {
 		struct drawer : public btIDebugDraw {
 		public:
 			drawer(system & system) noexcept
-				: system(system) {
+				: owning_system(system) {
 				KENGINE_PROFILING_SCOPE;
-				kengine_log(system.r, verbose, log_category, "Constructing debug drawer");
-				debug_entity = system.r.create();
-				system.r.emplace<core::transform>(debug_entity);
-				system.r.emplace<render::debug_graphics>(debug_entity);
+				kengine_log(owning_system.r, verbose, log_category, "Constructing debug drawer");
+				debug_entity = owning_system.r.create();
+				owning_system.r.emplace<core::transform>(debug_entity);
+				owning_system.r.emplace<render::debug_graphics>(debug_entity);
 			}
 
 			void cleanup() noexcept {
 				KENGINE_PROFILING_SCOPE;
-				kengine_log(system.r, very_verbose, log_category, "Cleaning up debug drawer");
+				kengine_log(owning_system.r, very_verbose, log_category, "Cleaning up debug drawer");
 				auto & comp = get_debug_component();
 				comp.elements.clear();
 			}
 
 		private:
-			render::debug_graphics & get_debug_component() noexcept { return system.r.get<render::debug_graphics>(debug_entity); }
+			render::debug_graphics & get_debug_component() noexcept { return owning_system.r.get<render::debug_graphics>(debug_entity); }
 
 			void drawLine(const btVector3 & from, const btVector3 & to, const btVector3 & color) noexcept override {
 				KENGINE_PROFILING_SCOPE;
@@ -504,8 +504,8 @@ namespace kengine::physics::bullet {
 				render::debug_graphics::element debug_element;
 				{
 					debug_element.type = render::debug_graphics::element_type::line;
-					debug_element.line.end = system.to_putils(from);
-					debug_element.pos = system.to_putils(to);
+					debug_element.line.end = owning_system.to_putils(from);
+					debug_element.pos = owning_system.to_putils(to);
 					debug_element.color = putils::normalized_color{ color[0], color[1], color[2], 1.f };
 					debug_element.relative_to = render::debug_graphics::reference_space::world;
 				}
@@ -518,14 +518,14 @@ namespace kengine::physics::bullet {
 			void draw3dText(const btVector3 & location, const char * text_string) override {}
 
 			void reportErrorWarning(const char * warning_string) override {
-				kengine_log(system.r, warning, log_category, warning_string);
+				kengine_log(owning_system.r, warning, log_category, warning_string);
 			}
 
 			void setDebugMode(int debugMode) override {}
 			int getDebugMode() const override { return DBG_DrawWireframe; }
 
 		private:
-			system & system;
+			system & owning_system;
 			entt::entity debug_entity;
 		};
 

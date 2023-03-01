@@ -51,7 +51,7 @@ namespace kengine::core::log::imgui {
 		bool * enabled;
 
 		struct internal_log_event {
-			severity severity;
+			severity message_severity;
 			std::string thread;
 			std::string category;
 			std::string message;
@@ -102,7 +102,7 @@ namespace kengine::core::log::imgui {
 			KENGINE_PROFILING_SCOPE;
 
 			internal_log_event internal_event{
-				log_event.severity,
+				log_event.message_severity,
 				putils::get_thread_name(),
 				log_event.category,
 				log_event.message
@@ -188,9 +188,9 @@ namespace kengine::core::log::imgui {
 
 			const auto passes_severity = [&] {
 				if (const auto it = filters.category_severities.find(e.category); it != filters.category_severities.end())
-					if (e.severity >= it->second)
+					if (e.message_severity >= it->second)
 						return true;
-				return filters.severities[int(e.severity)];
+				return filters.severities[int(e.message_severity)];
 			};
 
 			if (!passes_severity())
@@ -231,7 +231,7 @@ namespace kengine::core::log::imgui {
 				const std::lock_guard lock_guard(mutex);
 				for (const auto & event : filtered_events) {
 					ImGui::TableNextColumn();
-					ImGui::Text("%s", putils::string<1024>(magic_enum::enum_name(event.severity)).c_str());
+					ImGui::Text("%s", putils::string<1024>(magic_enum::enum_name(event.message_severity)).c_str());
 					ImGui::TableNextColumn();
 					ImGui::Text("%s", event.thread.c_str());
 					ImGui::TableNextColumn();
