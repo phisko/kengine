@@ -14,6 +14,8 @@
 #include "kengine/async/data/task.hpp"
 
 namespace kengine::async {
+	static constexpr auto log_category = "async";
+
 	template<typename T>
 	bool process_results(entt::registry & r) noexcept {
 		return process_results<T>(r, [](auto &&...) {});
@@ -22,7 +24,7 @@ namespace kengine::async {
 	template<typename T, std::invocable<entt::entity, T &&> Func>
 	bool process_results(entt::registry & r, Func && func) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_log(r, very_verbose, "async", "Processing async results");
+		kengine_log(r, very_verbose, log_category, "Processing async results");
 
 		const auto now = std::chrono::system_clock::now();
 
@@ -32,11 +34,11 @@ namespace kengine::async {
 			using namespace std::chrono_literals;
 			const auto status = async_result.future.wait_for(0s);
 			if (status == std::future_status::timeout) {
-				kengine_logf(r, verbose, "async", "Async task '%s' still running (started %fs ago)", async_task.name.c_str(), time_running);
+				kengine_logf(r, verbose, log_category, "Async task '%s' still running (started %fs ago)", async_task.name.c_str(), time_running);
 				continue;
 			}
 
-			kengine_logf(r, log, "async", "Async task '%s' completed after %fs", async_task.name.c_str(), time_running);
+			kengine_logf(r, log, log_category, "Async task '%s' completed after %fs", async_task.name.c_str(), time_running);
 
 			auto data = async_result.future.get();
 

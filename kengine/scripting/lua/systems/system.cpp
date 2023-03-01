@@ -20,12 +20,11 @@
 
 // kengine scripting/lua
 #include "kengine/scripting/lua/data/scripts.hpp"
+#include "kengine/scripting/lua/helpers/log_category.hpp"
 #include "kengine/scripting/lua/helpers/register_function.hpp"
 #include "kengine/scripting/lua/helpers/register_types.hpp"
 
 namespace kengine::scripting::lua {
-	static constexpr auto log_category = "scripting_lua";
-
 	struct system {
 		entt::registry & r;
 		sol::state * state;

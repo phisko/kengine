@@ -14,13 +14,14 @@
 #endif
 
 #include "entt_handle_reflection.hpp"
+#include "log_category.hpp"
 
 namespace kengine::scripting {
 	template<typename Func, typename Func2>
 	void init_bindings(entt::registry & r, Func && register_function, Func2 && register_type) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
-		kengine_log(r, verbose, "script_language_helper", "Registering function create_entity");
+		kengine_log(r, verbose, log_category, "Registering function create_entity");
 		register_function(
 			"create_entity",
 			std::function<entt::handle()>(
@@ -28,7 +29,7 @@ namespace kengine::scripting {
 			)
 		);
 
-		kengine_log(r, verbose, "script_language_helper", "Registering function destroy_entity");
+		kengine_log(r, verbose, log_category, "Registering function destroy_entity");
 		register_function(
 			"destroy_entity",
 			std::function<void(entt::handle)>(
@@ -36,7 +37,7 @@ namespace kengine::scripting {
 			)
 		);
 
-		kengine_log(r, verbose, "script_language_helper", "Registering function for_each_entity");
+		kengine_log(r, verbose, log_category, "Registering function for_each_entity");
 		using ForEachEntityCallback = std::function<void(entt::handle)>;
 		register_function(
 			"for_each_entity",
@@ -50,7 +51,7 @@ namespace kengine::scripting {
 		);
 
 #ifdef KENGINE_MAIN_LOOP
-		kengine_log(r, verbose, "script_language_helper", "Registering function stop_running");
+		kengine_log(r, verbose, log_category, "Registering function stop_running");
 		register_function(
 			"stop_running",
 			std::function<void()>(
@@ -60,10 +61,10 @@ namespace kengine::scripting {
 			)
 		);
 #else
-		kengine_log(r, verbose, "script_language_helper", "Not registering function stop_running because KENGINE_MAIN_LOOP is not defined");
+		kengine_log(r, verbose, log_category, "Not registering function stop_running because KENGINE_MAIN_LOOP is not defined");
 #endif
 
-		kengine_log(r, verbose, "script_language_helper", "Registering type entt::handle");
+		kengine_log(r, verbose, log_category, "Registering type entt::handle");
 		register_type(putils::meta::type<entt::handle>{});
 	}
 }

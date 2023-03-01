@@ -15,6 +15,8 @@
 #include "kengine/command_line/data/arguments.hpp"
 
 namespace kengine::command_line {
+	static constexpr auto log_category = "command_line";
+
 	void create_entity(entt::registry & r, int argc, const char ** argv) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
@@ -26,6 +28,6 @@ namespace kengine::command_line {
 			s << ' ' << argument;
 		}
 
-		kengine_logf(r, log, "command_line", "Creating command-line:%s", s.str().c_str());
+		kengine_logf(r, log, log_category, "Creating command-line:%s", s.str().c_str());
 	}
 }
