@@ -3,7 +3,7 @@
 // kengine functions
 #include "kengine/base_function.hpp"
 
-namespace kengine::functions {
+namespace kengine::system_creator {
 	using create_system_signature = entt::entity(entt::registry &);
 	//! putils reflect all
 	//! parents: [refltype::base]
