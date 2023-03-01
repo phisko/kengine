@@ -36,7 +36,7 @@
 		const entt::handle e{ r, r.create() }; \
 		kengine_logf(r, verbose, "system_creator", "Registering " #system_name " system as [%u]", e.entity()); \
 \
-		e.emplace<kengine::functions::create_system>([e](entt::registry & r) { \
+		e.emplace<kengine::system_creator::create_system>([e](entt::registry & r) { \
 			if (e.registry() == &r) { \
 				kengine_logf(r, verbose, "system_creator", "Constructing " #system_name " system in [%u]", e.entity()); \
 				(void)e.get_or_emplace<system_name>(e); \
