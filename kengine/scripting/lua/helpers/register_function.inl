@@ -5,6 +5,8 @@
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 #include "kengine/scripting/lua/data/state.hpp"
 
+#include "log_category.hpp"
+
 namespace kengine::scripting::lua {
 	template<typename Func>
 	void register_function(const entt::registry & r, const char * name, Func && func) noexcept {

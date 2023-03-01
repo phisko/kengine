@@ -10,6 +10,8 @@
 
 #include "entt_handle_reflection.hpp"
 
+#include "log_category.hpp"
+
 namespace kengine::scripting {
 	template<typename T, typename Func, typename Func2>
 	void register_component(entt::registry & r, Func && register_entity_member, Func2 && register_function) noexcept {
@@ -18,10 +20,10 @@ namespace kengine::scripting {
 		static_assert(putils::reflection::has_class_name<T>());
 
 		const auto class_name = putils::reflection::get_class_name<T>();
-		kengine_logf(r, verbose, "script_language_helper", "Registering component '%s'", class_name);
+		kengine_logf(r, verbose, log_category, "Registering component '%s'", class_name);
 
 		if constexpr (!std::is_empty<T>()) {
-			kengine_logf(r, verbose, "script_language_helper", "Registering entt::handle member get_%s", class_name);
+			kengine_logf(r, verbose, log_category, "Registering entt::handle member get_%s", class_name);
 			register_entity_member(
 				putils::string<128>("get_%s", class_name).c_str(),
 				std::function<T &(entt::handle)>(
@@ -31,7 +33,7 @@ namespace kengine::scripting {
 				)
 			);
 
-			kengine_logf(r, verbose, "script_language_helper", "Registering entt::handle member try_get_%s", class_name);
+			kengine_logf(r, verbose, log_category, "Registering entt::handle member try_get_%s", class_name);
 			register_entity_member(
 				putils::string<128>("try_get_%s", class_name).c_str(),
 				std::function<const T *(entt::handle)>(
@@ -41,7 +43,7 @@ namespace kengine::scripting {
 				)
 			);
 
-			kengine_logf(r, verbose, "script_language_helper", "Registering entt::handle member emplace_%s", class_name);
+			kengine_logf(r, verbose, log_category, "Registering entt::handle member emplace_%s", class_name);
 			register_entity_member(
 				putils::string<128>("emplace_%s", class_name).c_str(),
 				std::function<T &(entt::handle)>(
@@ -51,7 +53,7 @@ namespace kengine::scripting {
 				)
 			);
 
-			kengine_logf(r, verbose, "script_language_helper", "Registering function for_each_entity_with_%s", class_name);
+			kengine_logf(r, verbose, log_category, "Registering function for_each_entity_with_%s", class_name);
 			using ForEachEntityFunc = std::function<void(entt::handle, T &)>;
 			register_function(
 				putils::string<128>("for_each_entity_with_%s", class_name).c_str(),
@@ -64,7 +66,7 @@ namespace kengine::scripting {
 			);
 		}
 		else {
-			kengine_logf(r, verbose, "script_language_helper", "Registering entt::handle member emplace_%s", class_name);
+			kengine_logf(r, verbose, log_category, "Registering entt::handle member emplace_%s", class_name);
 			register_entity_member(
 				putils::string<128>("emplace_%s", class_name).c_str(),
 				std::function<void(entt::handle)>(
@@ -74,7 +76,7 @@ namespace kengine::scripting {
 				)
 			);
 
-			kengine_logf(r, verbose, "script_language_helper", "Registering function for_each_entity_with_%s", class_name);
+			kengine_logf(r, verbose, log_category, "Registering function for_each_entity_with_%s", class_name);
 			using ForEachEntityFunc = std::function<void(entt::handle)>;
 			register_function(
 				putils::string<128>("for_each_entity_with_%s", class_name).c_str(),
@@ -87,7 +89,7 @@ namespace kengine::scripting {
 			);
 		}
 
-		kengine_logf(r, verbose, "script_language_helper", "Registering entt::handle member has_%s", class_name);
+		kengine_logf(r, verbose, log_category, "Registering entt::handle member has_%s", class_name);
 		register_entity_member(
 			putils::string<128>("has_%s", class_name).c_str(),
 			std::function<bool(entt::handle)>(
@@ -97,7 +99,7 @@ namespace kengine::scripting {
 			)
 		);
 
-		kengine_logf(r, verbose, "script_language_helper", "Registering entt::handle member remove_%s", class_name);
+		kengine_logf(r, verbose, log_category, "Registering entt::handle member remove_%s", class_name);
 		register_entity_member(
 			putils::string<128>("remove_%s", class_name).c_str(),
 			std::function<void(entt::handle)>(

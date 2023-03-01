@@ -32,13 +32,15 @@ putils_reflection_info {
 #undef refltype
 
 namespace kengine::core::log {
+	static constexpr auto log_category = "core_log";
+
 	severity_control parse_command_line_severity(const entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_log(r, very_verbose, "log_helper", "Parsing command-line severity");
+		kengine_log(r, very_verbose, log_category, "Parsing command-line severity");
 
 		static std::optional<severity_control> command_line_severity;
 		if (command_line_severity != std::nullopt) {
-			kengine_logf(r, very_verbose, "log_helper", "Found pre-parsed %s", putils::reflection::to_json(*command_line_severity).dump(4).c_str());
+			kengine_logf(r, very_verbose, log_category, "Found pre-parsed %s", putils::reflection::to_json(*command_line_severity).dump(4).c_str());
 			return *command_line_severity;
 		}
 
@@ -46,14 +48,14 @@ namespace kengine::core::log {
 
 		for (const auto & [e, command_line] : r.view<command_line::arguments>().each()) {
 			const auto opts = putils::parse_arguments<options>(command_line.args);
-			kengine_logf(r, very_verbose, "log_helper", "Found %s in [%u]", putils::reflection::to_json(opts).dump(4).c_str(), e);
+			kengine_logf(r, very_verbose, log_category, "Found %s in [%u]", putils::reflection::to_json(opts).dump(4).c_str(), e);
 
 			command_line_severity->global_severity = opts.log_level;
 			const auto categories = putils::split(opts.log_category_levels.c_str(), ',');
 			for (const auto & category : categories) {
 				const auto key_value = putils::split(category.c_str(), ':');
 				if (key_value.size() != 2) {
-					kengine_log(r, error, "core_log", "--log_category_levels should be formatted as '--log_category_levels=first_category:log,second_category:verbose,third_category:error'");
+					kengine_log(r, error, log_category, "--log_category_levels should be formatted as '--log_category_levels=first_category:log,second_category:verbose,third_category:error'");
 					continue;
 				}
 
@@ -63,7 +65,7 @@ namespace kengine::core::log {
 			}
 		}
 
-		kengine_logf(r, very_verbose, "log_helper", "Parsed %s", putils::reflection::to_json(*command_line_severity).dump(4).c_str());
+		kengine_logf(r, very_verbose, log_category, "Parsed %s", putils::reflection::to_json(*command_line_severity).dump(4).c_str());
 		return *command_line_severity;
 	}
 }

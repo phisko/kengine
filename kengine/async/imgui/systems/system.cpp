@@ -28,6 +28,8 @@
 #include "kengine/main_loop/functions/execute.hpp"
 
 namespace kengine::async::imgui {
+	static constexpr auto log_category = "async_imgui";
+
 	struct system {
 		entt::registry & r;
 		bool * enabled = nullptr;
@@ -35,7 +37,7 @@ namespace kengine::async::imgui {
 		system(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "async_imgui", "Initializing");
+			kengine_log(r, log, log_category, "Initializing");
 
 			e.emplace<core::name>("Async tasks");
 			auto & tool = e.emplace<kengine::imgui::tool::tool>();
@@ -46,10 +48,10 @@ namespace kengine::async::imgui {
 
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, very_verbose, "async_imgui", "Executing");
+			kengine_log(r, very_verbose, log_category, "Executing");
 
 			if (!*enabled) {
-				kengine_log(r, very_verbose, "async_imgui", "Disabled");
+				kengine_log(r, very_verbose, log_category, "Disabled");
 				return;
 			}
 
@@ -64,7 +66,7 @@ namespace kengine::async::imgui {
 
 					const auto now = std::chrono::system_clock::now();
 					for (const auto & [e, task] : r.view<async::task>().each()) {
-						kengine_logf(r, very_verbose, "async_imgui", "Found async task %s", task.name.c_str());
+						kengine_logf(r, very_verbose, log_category, "Found async task %s", task.name.c_str());
 
 						ImGui::TableNextRow();
 

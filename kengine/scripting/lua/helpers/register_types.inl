@@ -18,6 +18,8 @@
 #include "kengine/scripting/helpers/register_component.hpp"
 #include "kengine/scripting/lua/data/state.hpp"
 
+#include "log_category.hpp"
+
 namespace kengine::scripting::lua {
 	namespace impl {
 		template<bool IsComponent, typename T>
@@ -43,11 +45,11 @@ namespace kengine::scripting::lua {
 	template<bool IsComponent, typename... Types>
 	void register_types(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_log(r, verbose, "lua", "Registering types");
+		kengine_log(r, verbose, log_category, "Registering types");
 
 		putils::for_each_type<Types...>([&](auto && t) noexcept {
 			using type = putils_wrapped_type(t);
-			kengine_logf(r, verbose, "lua", "Registering type %s", putils::reflection::get_class_name<type>());
+			kengine_logf(r, verbose, log_category, "Registering type %s", putils::reflection::get_class_name<type>());
 			const auto view = r.view<state>();
 			std::for_each(std::execution::par_unseq, putils_range(view), [&](entt::entity e) {
 				const putils::scoped_thread_name thread_name(putils::string<128>("Lua registration for %s", putils::reflection::get_class_name<type>()));

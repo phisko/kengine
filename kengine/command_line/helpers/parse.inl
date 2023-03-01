@@ -14,17 +14,19 @@
 #include "kengine/command_line/data/arguments.hpp"
 
 namespace kengine::command_line {
+	static constexpr auto log_category = "command_line";
+
 	template<typename T>
 	T parse(const entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_log(r, verbose, "command_line", "Parsing command-line");
+		kengine_log(r, verbose, log_category, "Parsing command-line");
 
 		for (const auto & [e, args] : r.view<arguments>().each()) {
-			kengine_logf(r, very_verbose, "command_line", "Parsing command-line from [%u]", e);
+			kengine_logf(r, very_verbose, log_category, "Parsing command-line from [%u]", e);
 			return putils::parse_arguments<T>(args.args);
 		}
 
-		kengine_log(r, verbose, "command_line", "Found no command-line entity");
+		kengine_log(r, verbose, log_category, "Found no command-line entity");
 		return T{};
 	}
 }

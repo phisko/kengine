@@ -17,14 +17,13 @@
 
 // kengine scripting/python
 #include "kengine/scripting/python/data/scripts.hpp"
+#include "kengine/scripting/python/helpers/log_category.hpp"
 #include "kengine/scripting/python/helpers/register_types.hpp"
 
 // kengine main_loop
 #include "kengine/main_loop/functions/execute.hpp"
 
 namespace kengine::scripting::python {
-	static constexpr auto log_category = "scripting_python";
-
 	struct system {
 		entt::registry & r;
 		py::module_ * module_;

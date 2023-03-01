@@ -11,7 +11,7 @@
 
 namespace kengine::main_loop {
 	bool is_running(const entt::registry & r) noexcept {
-		kengine_log(r, very_verbose, "is_running", "Checking for main_loop::keep_alive");
+		kengine_log(r, very_verbose, "main_loop", "Checking for main_loop::keep_alive");
 		return !r.view<keep_alive>().empty();
 	}
 }
