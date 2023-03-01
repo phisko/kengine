@@ -1,4 +1,4 @@
-#include "lua_helper.hpp"
+#include "register_types.hpp"
 
 // stl
 #include <algorithm>
@@ -12,24 +12,14 @@
 #include "putils/range.hpp"
 #include "putils/thread_name.hpp"
 
-// kengine core
+// kengine
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
+#include "kengine/scripting/helpers/register_component.hpp"
+#include "kengine/scripting/lua/data/state.hpp"
 
-namespace kengine::lua_helper {
+namespace kengine::scripting::lua {
 	namespace impl {
-		template<typename Func>
-		void register_entity_member(sol::state & state, const char * name, Func && func) noexcept {
-			KENGINE_PROFILING_SCOPE;
-			state[putils::reflection::get_class_name<entt::handle>()][name] = FWD(func);
-		}
-
-		template<typename Func>
-		void register_function_with_state(sol::state & state, const char * name, Func && func) noexcept {
-			KENGINE_PROFILING_SCOPE;
-			state[name] = FWD(func);
-		}
-
 		template<bool IsComponent, typename T>
 		void register_type_with_state(entt::registry & r, sol::state & state) noexcept {
 			KENGINE_PROFILING_SCOPE;
@@ -37,13 +27,13 @@ namespace kengine::lua_helper {
 			putils::lua::register_type<T>(state);
 
 			if constexpr (IsComponent) {
-				script_language_helper::register_component<T>(
+				scripting::register_component<T>(
 					r,
-					[&](auto &&... args) noexcept {
-						register_entity_member(state, FWD(args)...);
+					[&](const char * name, auto && func) noexcept {
+						state[putils::reflection::get_class_name<entt::handle>()][name] = FWD(func);
 					},
-					[&](auto &&... args) noexcept {
-						register_function_with_state(state, FWD(args)...);
+					[&](const char * name, auto && func) noexcept {
+						state[name] = func;
 					}
 				);
 			}
@@ -58,20 +48,12 @@ namespace kengine::lua_helper {
 		putils::for_each_type<Types...>([&](auto && t) noexcept {
 			using type = putils_wrapped_type(t);
 			kengine_logf(r, verbose, "lua", "Registering type %s", putils::reflection::get_class_name<type>());
-			const auto view = r.view<data::lua_state>();
+			const auto view = r.view<state>();
 			std::for_each(std::execution::par_unseq, putils_range(view), [&](entt::entity e) {
 				const putils::scoped_thread_name thread_name(putils::string<128>("Lua registration for %s", putils::reflection::get_class_name<type>()));
 				const auto & [comp] = view.get(e);
-				impl::register_type_with_state<IsComponent, type>(r, *comp.state);
+				impl::register_type_with_state<IsComponent, type>(r, *comp.ptr);
 			});
 		});
-	}
-
-	template<typename Func>
-	void register_function(const entt::registry & r, const char * name, Func && func) noexcept {
-		KENGINE_PROFILING_SCOPE;
-		kengine_logf(r, log, "lua", "Registering function %s", name);
-		for (const auto & [e, comp] : r.view<data::lua_state>().each())
-			impl::register_function_with_state(*comp.state, name, func);
 	}
 }

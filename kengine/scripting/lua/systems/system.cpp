@@ -1,4 +1,4 @@
-#include "lua.hpp"
+#include "system.hpp"
 
 // entt
 #include <entt/entity/handle.hpp>
@@ -15,58 +15,64 @@
 // kengine main_loop
 #include "kengine/main_loop/functions/execute.hpp"
 
-// kengine scripting/lua
-#include "kengine/scripting/lua/data/lua.hpp"
-#include "kengine/scripting/lua/helpers/lua_helper.hpp"
+// kengine scripting
+#include "kengine/scripting/helpers/init_bindings.hpp"
 
-namespace kengine::systems {
-	struct lua {
+// kengine scripting/lua
+#include "kengine/scripting/lua/data/scripts.hpp"
+#include "kengine/scripting/lua/helpers/register_function.hpp"
+#include "kengine/scripting/lua/helpers/register_types.hpp"
+
+namespace kengine::scripting::lua {
+	static constexpr auto log_category = "scripting_lua";
+
+	struct system {
 		entt::registry & r;
 		sol::state * state;
 
-		lua(entt::handle e) noexcept
+		system(entt::handle e) noexcept
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, log, "lua", "Initializing");
+			kengine_log(r, log, log_category, "Initializing");
 
 			e.emplace<main_loop::execute>(putils_forward_to_this(execute));
 
-			kengine_log(r, verbose, "lua", "Creating Lua state");
+			kengine_log(r, verbose, log_category, "Creating Lua state");
 			state = new sol::state;
-			e.emplace<data::lua_state>(state);
+			e.emplace<lua::state>(state);
 
-			kengine_log(r, verbose, "lua", "Opening libraries");
+			kengine_log(r, verbose, log_category, "Opening libraries");
 			state->open_libraries();
 
-			kengine_log(r, verbose, "lua", "Registering script_language_helper functions");
-			script_language_helper::init(
+			kengine_log(r, verbose, log_category, "Registering script_language_helper functions");
+			scripting::init_bindings(
 				r,
-				[&](auto &&... args) noexcept {
-					lua_helper::impl::register_function_with_state(*state, FWD(args)...);
+				[&](const char * name, auto && func) noexcept {
+					(*state)[name] = func;
 				},
 				[&](auto type) noexcept {
 					using T = putils_wrapped_type(type);
-					lua_helper::impl::register_type_with_state<false, T>(r, *state);
+					impl::register_type_with_state<false, T>(r, *state);
 				}
 			);
 		}
 
 		void execute(float delta_time) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, very_verbose, "lua", "Executing");
+			kengine_log(r, very_verbose, log_category, "Executing");
 
-			const auto view = r.view<data::lua>();
+			const auto view = r.view<scripts>();
 			if (!view.empty()) {
-				kengine_log(r, very_verbose, "lua", "Setting delta_time in Lua state");
+				kengine_log(r, very_verbose, log_category, "Setting delta_time in Lua state");
 				(*state)["delta_time"] = delta_time;
 			}
 
 			for (const auto & [e, comp] : view.each()) {
-				kengine_logf(r, very_verbose, "lua", "Setting 'self' to [%u]", e);
+				kengine_logf(r, very_verbose, log_category, "Setting 'self' to [%u]", e);
 				(*state)["self"] = entt::handle{ r, e };
 
-				for (const auto & s : comp.scripts) {
-					kengine_logf(r, very_verbose, "lua", "Running script %s for [%u]", s.c_str(), e);
+				for (const auto & s : comp.files) {
+					kengine_logf(r, very_verbose, log_category, "Running script %s for [%u]", s.c_str(), e);
 
 					state->safe_script_file(s.c_str(), [this](lua_State *, sol::protected_function_result pfr) {
 						const sol::error err = pfr;
@@ -78,5 +84,5 @@ namespace kengine::systems {
 		}
 	};
 
-	DEFINE_KENGINE_SYSTEM_CREATOR(lua)
+	DEFINE_KENGINE_SYSTEM_CREATOR(system)
 }

@@ -1,4 +1,4 @@
-#include "python_helper.hpp"
+#include "register_types.hpp"
 
 // entt
 #include <entt/entity/registry.hpp>
@@ -10,13 +10,18 @@
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
-// kengine scripting/python
-#include "kengine/scripting/python/data/python_state.hpp"
+// kengine scripting
+#include "kengine/scripting/helpers/register_component.hpp"
 
-namespace kengine::python_helper {
+// kengine scripting/python
+#include "kengine/scripting/python/data/state.hpp"
+
+#include "register_function.hpp"
+
+namespace kengine::scripting::python {
 	namespace impl {
 		template<typename Ret, typename... Args>
-		void register_entity_member(py::class_<entt::handle> & entity, const char * name, const script_language_helper::function<Ret(Args...)> & func) noexcept {
+		void register_entity_member(py::class_<entt::handle> & entity, const char * name, const std::function<Ret(Args...)> & func) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			if constexpr (std::is_reference_v<Ret>)
@@ -25,18 +30,8 @@ namespace kengine::python_helper {
 				entity.def(name, func);
 		}
 
-		template<typename Ret, typename... Args>
-		void register_function_with_state(data::python_state & state, const char * name, const script_language_helper::function<Ret(Args...)> & func) noexcept {
-			KENGINE_PROFILING_SCOPE;
-
-			if constexpr (std::is_reference_v<Ret>)
-				state.module_.def(name, func, py::return_value_policy::reference);
-			else
-				state.module_.def(name, func);
-		}
-
 		template<bool IsComponent, typename T>
-		void register_type_with_state(entt::registry & r, data::python_state & state) noexcept {
+		void register_type_with_state(entt::registry & r, state & state) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			const py::gil_scoped_acquire acquire; // In case we're called from a worker thread
@@ -58,7 +53,7 @@ namespace kengine::python_helper {
 				putils::python::register_type<T>(state.module_);
 
 			if constexpr (IsComponent) {
-				script_language_helper::register_component<T>(
+				scripting::register_component<T>(
 					r,
 					[&](auto &&... args) noexcept {
 						register_entity_member(*state.entity, FWD(args)...);
@@ -81,17 +76,8 @@ namespace kengine::python_helper {
 
 			kengine_logf(r, verbose, "python", "Registering type %s", putils::reflection::get_class_name<type>());
 			// No point in multithreading this since the GIL can only be owned by one thread
-			for (const auto & [e, comp] : r.view<data::python_state>().each())
+			for (const auto & [e, comp] : r.view<state>().each())
 				impl::register_type_with_state<IsComponent, type>(r, comp);
 		});
-	}
-
-	template<typename Ret, typename... Args>
-	void register_function(const entt::registry & r, const char * name, const script_language_helper::function<Ret(Args...)> & func) noexcept {
-		KENGINE_PROFILING_SCOPE;
-		kengine_logf(r, log, "python", "Registering function %s", name);
-
-		for (const auto & [e, comp] : r.view<data::python_state>().each())
-			impl::register_function_with_state(comp, name, func);
 	}
 }

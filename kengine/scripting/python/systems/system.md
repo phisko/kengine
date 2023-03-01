@@ -1,3 +1,3 @@
-# [python](python.hpp)
+# [system](system.hpp)
 
-System that executes [Python scripts](../data/python.md) attached to entities.
+System that executes [Python scripts](../data/scripts.md) attached to entities.

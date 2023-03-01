@@ -1,3 +1,3 @@
-# [lua](lua.hpp)
+# [system](system.hpp)
 
-System that executes [Lua scripts](../data/lua.md) attached to entities.
+System that executes [Lua scripts](../data/scripts.md) attached to entities.

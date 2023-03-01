@@ -13,16 +13,17 @@
 
 #ifdef KENGINE_SCRIPTING_LUA
 // kengine scripting/lua
-#include "kengine/scripting/lua/helpers/lua_helper.hpp"
+#include "kengine/scripting/lua/helpers/register_function.hpp"
+#include "kengine/scripting/lua/helpers/register_types.hpp"
 #endif
 
 #ifdef KENGINE_SCRIPTING_PYTHON
 // kengine scripting/python
-#include "kengine/scripting/python/helpers/python_helper.hpp"
+#include "kengine/scripting/python/helpers/register_function.hpp"
+#include "kengine/scripting/python/helpers/register_types.hpp"
 #endif
 
 namespace kengine::meta {
-
 	template<typename... Comps>
 	void register_component_with_script_languages(entt::registry & r) noexcept {
 		kengine_log(r, verbose, "meta", "Registering components");
@@ -44,21 +45,21 @@ namespace kengine::meta {
 		static constexpr language_registrator * language_registrators[] = {
 			nullptr, // Needed to avoid zero-sized array
 #ifdef KENGINE_SCRIPTING_PYTHON
-			python_helper::register_types<IsComponent, Comps...>,
+			scripting::python::register_types<IsComponent, Comps...>,
 #endif
 #ifdef KENGINE_SCRIPTING_LUA
-			lua_helper::register_types<IsComponent, Comps...>,
+			scripting::lua::register_types<IsComponent, Comps...>,
 #endif
 		};
 
 #ifdef KENGINE_SCRIPTING_PYTHON
-		r.storage<data::python_state>();
+		r.storage<scripting::python::state>();
 #else
 		kengine_log(r, verbose, "meta", "Not registering with Python because KENGINE_SCRIPTING_PYTHON is not defined");
 #endif
 
 #ifdef KENGINE_SCRIPTING_LUA
-		r.storage<data::lua_state>();
+		r.storage<scripting::lua::state>();
 #else
 		kengine_log(r, verbose, "meta", "Not registering with Lua because KENGINE_SCRIPTING_LUA is not defined");
 #endif
@@ -86,13 +87,13 @@ namespace kengine::meta {
 		kengine_logf(r, verbose, "meta", "Registering function %s", name);
 
 #ifdef KENGINE_SCRIPTING_PYTHON
-		python_helper::register_function(r, name, func);
+		scripting::python::register_function(r, name, func);
 #else
 		kengine_log(r, verbose, "meta", "Not registering with Python because KENGINE_SCRIPTING_PYTHON is not defined");
 #endif
 
 #ifdef KENGINE_SCRIPTING_LUA
-		lua_helper::register_function(r, name, func);
+		scripting::lua::register_function(r, name, func);
 #else
 		kengine_log(r, verbose, "meta", "Not registering with Lua because KENGINE_SCRIPTING_LUA is not defined");
 #endif
