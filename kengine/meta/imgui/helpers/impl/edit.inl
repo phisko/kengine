@@ -10,8 +10,10 @@
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
+#ifdef KENGINE_IMGUI
 // kengine imgui
 #include "kengine/imgui/helpers/set_context.hpp"
+#endif
 
 namespace kengine::meta {
 	template<typename T>
@@ -29,8 +31,10 @@ namespace kengine::meta {
 			comp = &instance;
 		}
 
+#ifdef KENGINE_IMGUI
 		if (!kengine::imgui::set_context(*e.registry()))
 			return;
+#endif
 
 		if (comp)
 			putils::reflection::imgui_edit(*comp);
