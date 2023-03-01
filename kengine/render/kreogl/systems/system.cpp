@@ -342,9 +342,9 @@ namespace kengine::render::kreogl {
 				const auto & asset = r.get<render::asset>(e);
 				add_animations_to_model_animation_component(r.get_or_emplace<animation::model_animation>(e), asset.file.c_str(), *model_data.animations);
 				if (model_data.skeleton) {
-					auto & model_skeleton = r.emplace<data::model_skeleton>(e);
+					auto & model_skeleton = r.emplace<skeleton::model_skeleton>(e);
 					for (const auto & mesh : model_data.skeleton->meshes)
-						model_skeleton.meshes.push_back(data::model_skeleton::mesh{
+						model_skeleton.meshes.push_back(skeleton::model_skeleton::mesh{
 							.bone_names = mesh.bone_names,
 						});
 				}
@@ -435,9 +435,9 @@ namespace kengine::render::kreogl {
 				if (const auto kreogl_model = r.try_get<model>(model_entity)) {
 					kengine_logf(r, verbose, log_category, "Creating animated_object to [%u]", entity);
 					r.emplace<::kreogl::animated_object>(entity).model = kreogl_model->ptr.get();
-					if (r.all_of<data::model_skeleton>(model_entity)) {
+					if (r.all_of<skeleton::model_skeleton>(model_entity)) {
 						kengine_logf(r, verbose, log_category, "Adding skeleton to [%u]", entity);
-						r.emplace<data::skeleton>(entity);
+						r.emplace<skeleton::skeleton>(entity);
 					}
 				}
 
@@ -511,7 +511,7 @@ namespace kengine::render::kreogl {
 			kengine_logf(r, very_verbose, log_category, "Syncing animation time and skeleton for [%u]", entity);
 			animation.current_time = kreogl_object.animation->current_time;
 
-			auto & skeleton = r.get<data::skeleton>(entity);
+			auto & skeleton = r.get<skeleton::skeleton>(entity);
 			const auto nb_meshes = kreogl_object.skeleton.meshes.size();
 			skeleton.meshes.resize(nb_meshes);
 			for (size_t i = 0; i < nb_meshes; ++i) {

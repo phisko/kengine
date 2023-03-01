@@ -13,7 +13,7 @@
 #define KENGINE_SKELETON_MAX_BONES 100
 #endif
 
-namespace kengine::data {
+namespace kengine::skeleton {
 	//! putils reflect all
 	//! used_types: [refltype::mesh]
 	struct skeleton {
