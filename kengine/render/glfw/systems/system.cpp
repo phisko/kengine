@@ -19,6 +19,9 @@
 #include "kengine/core/helpers/new_entity_processor.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
+// kengine imgui
+#include "kengine/imgui/helpers/set_context.hpp"
+
 // kengine input
 #include "kengine/input/data/buffer.hpp"
 
@@ -69,11 +72,13 @@ namespace kengine::systems {
 			const auto input_mode = captured ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL;
 			const auto state = captured ? "captured" : "released";
 
-			kengine_logf(r, verbose, "glfw", "Mouse %s for ImGui", state);
-			if (captured)
-				ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NoMouse;
-			else
-				ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
+			if (imgui::set_context(r)) {
+				kengine_logf(r, verbose, log_category, "Mouse %s for ImGui", state);
+				if (captured)
+					ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NoMouse;
+				else
+					ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
+			}
 
 			if (window == entt::null) {
 				for (const auto & [e, glfw] : r.view<data::glfw_window>().each()) {
