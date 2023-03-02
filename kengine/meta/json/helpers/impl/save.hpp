@@ -7,7 +7,7 @@
 #include "kengine/meta/json/functions/save.hpp"
 
 // kengine helpers
-#include "kengine/meta/helpers/register_meta_component_implementation.hpp"
+#include "kengine/meta/helpers/impl/meta_component_implementation.hpp"
 
 namespace kengine::meta {
 	template<typename T>
