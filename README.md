@@ -168,18 +168,19 @@ See [CMake](#cmake) for instructions on how to enable each library.
 * [kengine_main_loop](kengine/main_loop/): run a game's main loop, handling delta time
 * [kengine_meta](kengine/meta/): meta components and reflection facilities
     * [kengine_meta_imgui](kengine/meta/imgui/): meta components for ImGui
-        * [kengine_meta_imgui_engine_stats](kengine/imgui/engine_stats/): display engine stats in an ImGui window
-        * [kengine_meta_imgui_entity_editor](kengine/imgui/entity_editor/): edit entities in ImGui windows
-        * [kengine_meta_imgui_entity_selector](kengine/imgui/entity_selector/): select entities in an ImGui window
+        * [kengine_meta_imgui_engine_stats](kengine/meta/imgui/engine_stats/): display engine stats in an ImGui window
+        * [kengine_meta_imgui_entity_editor](kengine/meta/imgui/entity_editor/): edit entities in ImGui windows
+        * [kengine_meta_imgui_entity_selector](kengine/meta/imgui/entity_selector/): select entities in an ImGui window
     * [kengine_meta_json](kengine/meta/json/): meta components for JSON
 * [kengine_instance](kengine/instance/): use model entities, which other entities can be instances of
-    * [kengine_instance_find_model_by_name](kengine/instance/find_model_by_name/): find an entity's model by its name
+    * [kengine_instance_find_model](kengine/instance/find_model/): template system to find an entity's model by a given component
+    * [kengine_instance_find_model_by_name](kengine/instance/find_model/by_name/): find an entity's model by its name
 * [kengine_pathfinding](kengine/pathfinding/): add pathfinding capabilities to entities
     * [kengine_pathfinding_recast](kengine/pathfinding/recast/): implement pathfinding using [Recast](https://github.com/recastnavigation/recastnavigation)
 * [kengine_physics](kengine/physics/): move and query entities in space
     * [kengine_physics_bullet](kengine/physics/bullet/): implement physics using [Bullet](https://github.com/bulletphysics/bullet3)
 * [kengine_render](kengine/render/): display entities in graphical applications
-    * [kengine_render_animation](kengine/animation/): play animations on entities
+    * [kengine_render_animation](kengine/render/animation/): play animations on entities
     * [kengine_render_find_model_by_asset](kengine/render/find_model_by_asset/): find an entity's model by its asset
     * [kengine_render_kreogl](kengine/render/kreogl/): implement rendering using [kreogl](https://github.com/phisko/kreogl)
     * [kengine_render_on_click](kengine/render/on_click/): notify entities that are clicked by the user
@@ -187,7 +188,6 @@ See [CMake](#cmake) for instructions on how to enable each library.
 * [kengine_scripting](kengine/scripting/): run scripts from other languages
     * [kengine_scripting_imgui_prompt](kengine/scripting/imgui_prompt/): interpret scripting commands in an ImGui window
     * [kengine_scripting_lua](kengine/scripting/lua/): run scripts in Lua
-        * [kengine_scripting_lua_imgui_bindings](kengine/scripting/lua/imgui_bindings/): ImGui bindings for Lua
     * [kengine_scripting_python](kengine/scripting/python/): run scripts in Python
 * [kengine_skeleton](kengine/skeleton/): manipulate entities' skeletons
 * [kengine_system_creator](kengine/system_creator/): helpers to manipulate system entities
