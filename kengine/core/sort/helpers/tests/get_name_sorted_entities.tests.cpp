@@ -1,41 +1,7 @@
-// entt
-#include <entt/entity/registry.hpp>
+#include "sort.tests.hpp"
 
-// gtest
-#include <gtest/gtest.h>
-
-// kengine core
+// kengine
 #include "kengine/core/sort/helpers/get_name_sorted_entities.hpp"
-
-struct core_sort : ::testing::Test {
-	struct entity_data {
-		std::string s;
-		int i = 0;
-		kengine::core::name name;
-	};
-
-	entt::registry r;
-
-	const std::vector<entity_data> data{
-		{ .s = "hello", .i = 1, .name = { "B" } },
-		{ .s = "hi", .i = 0, .name = { "A" } }
-	};
-
-	const std::vector<entity_data> sorted_data = [this] {
-		auto ret = data;
-		std::ranges::sort(ret, [](const auto & lhs, const auto & rhs) { return lhs.i < rhs.i; });
-		return ret;
-	}();
-
-	core_sort() {
-		for (const auto & d : data) {
-			const auto e = r.create();
-			r.emplace<std::string>(e, d.s);
-			r.emplace<int>(e, d.i);
-			r.emplace<kengine::core::name>(e, d.name);
-		}
-	}
-};
 
 TEST_F(core_sort, get_name_sorted_entities_std_vector) {
 	const auto vec = kengine::core::sort::get_name_sorted_entities<const int, const std::string>(r);
