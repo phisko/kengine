@@ -29,22 +29,25 @@
 namespace kengine::meta::imgui {
 	static constexpr auto log_category = "meta_imgui";
 
-	void edit_entity(entt::handle e) noexcept {
+	bool edit_entity(entt::handle e) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		kengine_logf(*e.registry(), very_verbose, log_category, "Editing [%u]", e.entity());
 
 		const auto & r = *e.registry();
 
 		if (!kengine::imgui::set_context(r))
-			return;
+			return false;
 
+		bool ret = false;
 		if (ImGui::BeginPopupContextWindow()) {
 			const auto types = core::sort::get_name_sorted_entities<const has, const emplace_or_replace>(r);
 
 			for (const auto & [_, name, has, emplace_or_replace] : types)
 				if (!has->call(e))
-					if (ImGui::MenuItem(name->name.c_str()))
+					if (ImGui::MenuItem(name->name.c_str())) {
+						ret = true;
 						emplace_or_replace->call(e, nullptr);
+					}
 
 			ImGui::EndPopup();
 		}
@@ -58,43 +61,48 @@ namespace kengine::meta::imgui {
 
 			if (const auto remove = r.try_get<meta::remove>(type_entity)) {
 				if (ImGui::BeginPopupContextItem()) {
-					if (ImGui::MenuItem("Remove"))
+					if (ImGui::MenuItem("Remove")) {
+						ret = true;
 						remove->call(e);
+					}
 					ImGui::EndPopup();
 				}
 			}
 			if (tree_node_open) {
-				edit->call(e);
+				ret |= edit->call(e);
 				ImGui::TreePop();
 			}
 		}
+
+		return ret;
 	}
 
-	void edit_entity_and_model(entt::handle e) noexcept {
+	bool edit_entity_and_model(entt::handle e) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		kengine_logf(*e.registry(), very_verbose, log_category, "Editing [%u] and its model", e.entity());
 
 		if (!kengine::imgui::set_context(*e.registry()))
-			return;
+			return false;
 
 		const auto instance = e.try_get<instance::instance>();
 		if (!instance || instance->model == entt::null) {
 			kengine_log(*e.registry(), very_verbose, log_category, "No model found");
-			edit_entity(e);
-			return;
+			return edit_entity(e);
 		}
 
 		kengine_logf(*e.registry(), very_verbose, log_category, "Found model [%u]", instance->model);
+
+		bool ret = false;
 		if (ImGui::BeginTabBar("##tabs")) {
 			ImGui::PushItemWidth(ImGui::GetWindowWidth() / 2.f);
 
 			if (ImGui::BeginTabItem("object")) {
-				edit_entity(e);
+				ret |= edit_entity(e);
 				ImGui::EndTabItem();
 			}
 
 			if (ImGui::BeginTabItem("Model")) {
-				edit_entity({ *e.registry(), instance->model });
+				ret |= edit_entity({ *e.registry(), instance->model });
 				ImGui::EndTabItem();
 			}
 
@@ -102,5 +110,7 @@ namespace kengine::meta::imgui {
 
 			ImGui::EndTabBar();
 		}
+
+		return ret;
 	}
 }

@@ -12,7 +12,7 @@
 namespace kengine::meta {
 	template<typename T>
 	struct meta_component_implementation<imgui::edit, T> : std::true_type {
-		static void function(entt::handle e) noexcept;
+		static bool function(entt::handle e) noexcept;
 	};
 }
 

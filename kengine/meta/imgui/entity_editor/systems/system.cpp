@@ -74,7 +74,8 @@ namespace kengine::meta::imgui::entity_editor {
 				kengine_logf(r, very_verbose, log_category, "Displaying [%u] (%s)", selected, window_title.c_str());
 
 				if (ImGui::Begin(window_title.c_str(), &open, ImGuiWindowFlags_NoSavedSettings))
-					edit_entity_and_model({ r, selected });
+					if (edit_entity_and_model({ r, selected }))
+						kengine_logf(r, log, log_category, "[%u] was modified", selected);
 				ImGui::End();
 
 				if (!open) {
