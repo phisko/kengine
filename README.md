@@ -19,7 +19,7 @@ The engine uses Git submodules, and should therefore be cloned recursively with
 git clone https://github.com/phisko/kengine --recursive
 ```
 
-The engine has been tested on Windows with MSVC and MinGW. MinGW is a bit finnicky, as some build configurations simply don't work. This is mostly due to external dependencies pulled from [conan](https://conan.io/), which could be built from source in order to fix the errors. At the time of writing I don't have a personal need for it, so I haven't gone out of my way to do so.
+The engine has been tested on Windows with MSVC and MinGW.
 
 Linux compilation works with GCC. At the time of writing, clang doesn't support C++ 20's `constexpr std::string` and `std::vector`.
 
@@ -252,7 +252,7 @@ It is possible to test for the existence of a library during compilation thanks 
 
 ### Third-party dependencies
 
-Some libraries make use of [Conan](https://conan.io/) for dependency management. The necessary packages will be automatically downloaded when you run CMake.
+Some libraries make use of [vcpkg](https://vcpkg.io/) for dependency management.
 
 ### Library creation
 

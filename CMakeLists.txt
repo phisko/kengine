@@ -19,7 +19,7 @@ target_link_libraries(kengine INTERFACE kengine_include)
 add_subdirectory(putils/reflection/meta/cmake_helpers kengine_cmake_helpers)
 
 if (NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
-    # These must be set before processing systems, as conan DLLs need to be copied next to executables
+    # These must be set before processing systems, as vcpkg DLLs need to be copied next to executables
     putils_set_output_directories(bin lib lib)
 endif()
 
