@@ -13,6 +13,7 @@
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 // kengine meta
+#include "kengine/meta/helpers/register_meta_component_implementation.hpp"
 #include "kengine/meta/helpers/impl/count.hpp"
 #include "kengine/meta/helpers/impl/emplace_or_replace.hpp"
 #include "kengine/meta/helpers/impl/for_each_entity.hpp"

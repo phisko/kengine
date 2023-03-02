@@ -10,7 +10,7 @@
 #include "kengine/meta/json/functions/load.hpp"
 
 // kengine helpers
-#include "kengine/meta/helpers/register_meta_component_implementation.hpp"
+#include "kengine/meta/helpers/impl/meta_component_implementation.hpp"
 
 namespace kengine::meta {
 	template<typename T>
