@@ -24,21 +24,21 @@ on:
 
 jobs:
   build_core:
-    uses: phisko/cmake-cxx-conan/.github/workflows/build.yml@main
+    uses: phisko/cmake-cxx-vcpkg/.github/workflows/build.yml@main
     with:
       vcpkg_commit: 'd5bc0e71e06dfe6594ffb8fb2430919f1b435f94'
       apt_dependencies: libgl-dev libglu1-mesa-dev libx11-dev libx11-xcb-dev libfontenc-dev libice-dev libsm-dev libxau-dev libxaw7-dev libxcomposite-dev libxcursor-dev libxdamage-dev libxdmcp-dev libxext-dev libxfixes-dev libxft-dev libxi-dev libxinerama-dev libxkbfile-dev libxmu-dev libxmuu-dev libxpm-dev libxrandr-dev libxrender-dev libxres-dev libxss-dev libxt-dev libxtst-dev libxv-dev libxvmc-dev libxxf86vm-dev xtrans-dev libxcb-render0-dev libxcb-render-util0-dev libxcb-xkb-dev libxcb-icccm4-dev libxcb-image0-dev libxcb-keysyms1-dev libxcb-randr0-dev libxcb-shape0-dev libxcb-sync-dev libxcb-xfixes0-dev libxcb-xinerama0-dev xkb-data libxcb-dri3-dev uuid-dev libxcb-util-dev libudev-dev libopengl-dev autoconf libtool
       cmake_options: -DKENGINE_TESTS=ON
 
   build_systems:
-    uses: phisko/cmake-cxx-conan/.github/workflows/build.yml@main
+    uses: phisko/cmake-cxx-vcpkg/.github/workflows/build.yml@main
     with:
       vcpkg_commit: 'd5bc0e71e06dfe6594ffb8fb2430919f1b435f94'
       apt_dependencies: libgl-dev libglu1-mesa-dev libx11-dev libx11-xcb-dev libfontenc-dev libice-dev libsm-dev libxau-dev libxaw7-dev libxcomposite-dev libxcursor-dev libxdamage-dev libxdmcp-dev libxext-dev libxfixes-dev libxft-dev libxi-dev libxinerama-dev libxkbfile-dev libxmu-dev libxmuu-dev libxpm-dev libxrandr-dev libxrender-dev libxres-dev libxss-dev libxt-dev libxtst-dev libxv-dev libxvmc-dev libxxf86vm-dev xtrans-dev libxcb-render0-dev libxcb-render-util0-dev libxcb-xkb-dev libxcb-icccm4-dev libxcb-image0-dev libxcb-keysyms1-dev libxcb-randr0-dev libxcb-shape0-dev libxcb-sync-dev libxcb-xfixes0-dev libxcb-xinerama0-dev xkb-data libxcb-dri3-dev uuid-dev libxcb-util-dev libudev-dev libopengl-dev autoconf libtool
       cmake_options: -DKENGINE_ALL_SYSTEMS=ON -DKENGINE_TESTS=ON
 
   build_type_registration:
-    uses: phisko/cmake-cxx-conan/.github/workflows/build.yml@main
+    uses: phisko/cmake-cxx-vcpkg/.github/workflows/build.yml@main
     with:
       vcpkg_commit: 'd5bc0e71e06dfe6594ffb8fb2430919f1b435f94'
       apt_dependencies: libgl-dev libglu1-mesa-dev libx11-dev libx11-xcb-dev libfontenc-dev libice-dev libsm-dev libxau-dev libxaw7-dev libxcomposite-dev libxcursor-dev libxdamage-dev libxdmcp-dev libxext-dev libxfixes-dev libxft-dev libxi-dev libxinerama-dev libxkbfile-dev libxmu-dev libxmuu-dev libxpm-dev libxrandr-dev libxrender-dev libxres-dev libxss-dev libxt-dev libxtst-dev libxv-dev libxvmc-dev libxxf86vm-dev xtrans-dev libxcb-render0-dev libxcb-render-util0-dev libxcb-xkb-dev libxcb-icccm4-dev libxcb-image0-dev libxcb-keysyms1-dev libxcb-randr0-dev libxcb-shape0-dev libxcb-sync-dev libxcb-xfixes0-dev libxcb-xinerama0-dev xkb-data libxcb-dri3-dev uuid-dev libxcb-util-dev libudev-dev libopengl-dev autoconf libtool
@@ -46,7 +46,7 @@ jobs:
       pip_dependencies: libclang
 
   build_everything:
-    uses: phisko/cmake-cxx-conan/.github/workflows/build.yml@main
+    uses: phisko/cmake-cxx-vcpkg/.github/workflows/build.yml@main
     with:
       vcpkg_commit: 'd5bc0e71e06dfe6594ffb8fb2430919f1b435f94'
       apt_dependencies: libgl-dev libglu1-mesa-dev libx11-dev libx11-xcb-dev libfontenc-dev libice-dev libsm-dev libxau-dev libxaw7-dev libxcomposite-dev libxcursor-dev libxdamage-dev libxdmcp-dev libxext-dev libxfixes-dev libxft-dev libxi-dev libxinerama-dev libxkbfile-dev libxmu-dev libxmuu-dev libxpm-dev libxrandr-dev libxrender-dev libxres-dev libxss-dev libxt-dev libxtst-dev libxv-dev libxvmc-dev libxxf86vm-dev xtrans-dev libxcb-render0-dev libxcb-render-util0-dev libxcb-xkb-dev libxcb-icccm4-dev libxcb-image0-dev libxcb-keysyms1-dev libxcb-randr0-dev libxcb-shape0-dev libxcb-sync-dev libxcb-xfixes0-dev libxcb-xinerama0-dev xkb-data libxcb-dri3-dev uuid-dev libxcb-util-dev libudev-dev libopengl-dev autoconf libtool
@@ -54,7 +54,7 @@ jobs:
       pip_dependencies: libclang
 
   build_shared:
-    uses: phisko/cmake-cxx-conan/.github/workflows/build.yml@main
+    uses: phisko/cmake-cxx-vcpkg/.github/workflows/build.yml@main
     with:
       vcpkg_commit: 'd5bc0e71e06dfe6594ffb8fb2430919f1b435f94'
       apt_dependencies: libgl-dev libglu1-mesa-dev libx11-dev libx11-xcb-dev libfontenc-dev libice-dev libsm-dev libxau-dev libxaw7-dev libxcomposite-dev libxcursor-dev libxdamage-dev libxdmcp-dev libxext-dev libxfixes-dev libxft-dev libxi-dev libxinerama-dev libxkbfile-dev libxmu-dev libxmuu-dev libxpm-dev libxrandr-dev libxrender-dev libxres-dev libxss-dev libxt-dev libxtst-dev libxv-dev libxvmc-dev libxxf86vm-dev xtrans-dev libxcb-render0-dev libxcb-render-util0-dev libxcb-xkb-dev libxcb-icccm4-dev libxcb-image0-dev libxcb-keysyms1-dev libxcb-randr0-dev libxcb-shape0-dev libxcb-sync-dev libxcb-xfixes0-dev libxcb-xinerama0-dev xkb-data libxcb-dri3-dev uuid-dev libxcb-util-dev libudev-dev libopengl-dev autoconf libtool
