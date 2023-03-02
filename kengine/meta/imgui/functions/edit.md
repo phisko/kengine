@@ -5,12 +5,16 @@
 ## Prototype
 
 ```cpp
-void (entt::handle e);
+bool (entt::handle e);
 ```
 
 ### Parameters
 
 * `e`: entity for which the parent component should be edited
+
+### Return value
+
+Whether the component was modified.
 
 ## Usage
 

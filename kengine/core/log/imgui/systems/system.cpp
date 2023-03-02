@@ -153,10 +153,11 @@ namespace kengine::core::log::imgui {
 						}
 				}
 
-			putils::reflection::imgui_edit("Categories", filters.category_severities);
-			control->category_severities.clear();
-			for (const auto & [category, severity] : filters.category_severities)
-				control->category_severities.emplace(category, severity);
+			if (putils::reflection::imgui_edit("Categories", filters.category_severities)) {
+				control->category_severities.clear();
+				for (const auto & [category, severity] : filters.category_severities)
+					control->category_severities.emplace(category, severity);
+			}
 
 			if (ImGui::InputText("Category", filters.category_search, putils::lengthof(filters.category_search))) {
 				kengine_logf(r, verbose, log_category, "Category filter changed to '%s'", filters.category_search);
