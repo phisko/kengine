@@ -279,10 +279,10 @@ Similarly to source files, if any `*.tests.cpp` files are found in a library's `
 Basic libraries shouldn't need their own `CMakeLists.txt`, since their source files will be automatically. However, if a library needs custom behavior (e.g. to add extra sources or to link against a third-party library), it may add its own `CMakeLists.txt`. That `CMakeLists.txt` will be called **after** the call to `add_library`.
 
 The following variables and functions are defined before calling the `CMakeLists.txt`:
-* `system_name`: the library's name
-* `system_tests_name`: the library's GoogleTest target's name
+* `kengine_library_name`: the library's name
+* `kengine_library_tests_name`: the library's GoogleTest target's name
 * `link_type`: the library's link type (`PUBLIC` or `INTERFACE`, depending on whether sources were found or not)
-* `system_link_public_libraries(libraries)`: links against other libraries (publicly)
-* `system_link_private_libraries(libraries)`: links against other libraries (privately)
+* `kengine_library_link_public_libraries(libraries)`: links against other libraries (publicly)
+* `kengine_library_link_private_libraries(libraries)`: links against other libraries (privately)
 * `register_types_from_headers(headers)`: adds headers for which [type registration](#kengine_type_registration) and [reflection headers](#kengine_generate_reflection) may be generated
-* `subdirectory_is_not_system(path)`: indicates to the root `CMakeLists.txt` that it shouldn't process `path` as a kengine library
+* `subdirectory_is_not_kengine_library(path)`: indicates to the root `CMakeLists.txt` that it shouldn't process `path` as a kengine library

@@ -1,4 +1,4 @@
 project(kengine)
 
 find_package(imgui CONFIG REQUIRED)
-system_link_public_libraries(imgui::imgui)
+kengine_library_link_public_libraries(imgui::imgui)

@@ -15,11 +15,11 @@ endif()
 add_library(kengine INTERFACE)
 target_link_libraries(kengine INTERFACE kengine_include)
 
-# Include this here so systems can use helpers
+# Include this here so sub-libraries can use helpers
 add_subdirectory(putils/reflection/meta/cmake_helpers kengine_cmake_helpers)
 
 if (NOT CMAKE_RUNTIME_OUTPUT_DIRECTORY)
-    # These must be set before processing systems, as vcpkg DLLs need to be copied next to executables
+    # These must be set before processing sub-libraries, as vcpkg DLLs need to be copied next to executables
     putils_set_output_directories(bin lib lib)
 endif()
 
@@ -27,7 +27,7 @@ find_package(EnTT CONFIG REQUIRED)
 target_link_libraries(kengine_include INTERFACE EnTT::EnTT)
 
 option(KENGINE_GENERATE_REFLECTION "Generate reflection headers for kengine data types")
-option(KENGINE_ALL_SYSTEMS "Build all systems")
+option(KENGINE_ALL_LIBRARIES "Build all libraries")
 option(KENGINE_TESTS "Build tests")
 if(KENGINE_TESTS)
     enable_testing()
@@ -41,24 +41,24 @@ set(
         kengine_core_profiling
 )
 
-function(add_system path)
+function(add_kengine_library path)
     file(RELATIVE_PATH relative_path ${CMAKE_CURRENT_LIST_DIR} ${path})
     # Convert kengine/render/kreogl to kengine_render_kreogl
-    string(REPLACE "/" "_" system_name ${relative_path})
+    string(REPLACE "/" "_" kengine_library_name ${relative_path})
 
     # Convert kengine_render_kreogl to KENGINE_RENDER_KREOGL
-    string(TOUPPER ${system_name} upper_system_name)
+    string(TOUPPER ${kengine_library_name} kengine_library_upper_name)
 
     # If the plugin isn't one of the default dependencies, add an option to enable it
-    list(FIND default_dependencies ${system_name} default_dependencies_index)
+    list(FIND default_dependencies ${kengine_library_name} default_dependencies_index)
     if(${default_dependencies_index} EQUAL -1)
         set(default_enabled ${KENGINE_ALL_SYSTEMS})
     else()
         set(default_enabled ON)
     endif()
 
-    option(${upper_system_name} "Build ${system_name}" ${default_enabled})
-    if(NOT ${${upper_system_name}})
+    option(${kengine_library_upper_name} "Build ${kengine_library_name}" ${default_enabled})
+    if(NOT ${${kengine_library_upper_name}})
         return()
     endif()
 
@@ -71,11 +71,11 @@ function(add_system path)
     list(LENGTH sources sources_length)
     if(sources_length GREATER 0)
         set(link_type PUBLIC)
-        add_library(${system_name} ${sources})
-        putils_export_symbols(${system_name})
+        add_library(${kengine_library_name} ${sources})
+        putils_export_symbols(${kengine_library_name})
     else()
         set(link_type INTERFACE)
-        add_library(${system_name} INTERFACE)
+        add_library(${kengine_library_name} INTERFACE)
     endif()
 
     if(KENGINE_TESTS)
@@ -84,27 +84,27 @@ function(add_system path)
                 ${path}/systems/tests/*.tests.cpp)
         list(LENGTH test_sources test_sources_length)
         if(test_sources_length GREATER 0)
-            set(system_tests_name ${system_name}_tests)
-            putils_add_test_executable(${system_tests_name} ${test_sources})
-            target_link_libraries(${system_tests_name} PRIVATE ${system_name})
+            set(kengine_library_tests_name ${kengine_library_name}_tests)
+            putils_add_test_executable(${kengine_library_tests_name} ${test_sources})
+            target_link_libraries(${kengine_library_tests_name} PRIVATE ${kengine_library_name})
         endif()
     endif()
 
     # Expose link type so that the system's CMakeLists can use it
     set(link_type ${link_type} PARENT_SCOPE)
 
-    target_link_libraries(kengine INTERFACE ${system_name})
+    target_link_libraries(kengine INTERFACE ${kengine_library_name})
 
-    target_compile_definitions(${system_name} ${link_type} ${upper_system_name})
-    target_link_libraries(${system_name} ${link_type} kengine_include)
+    target_compile_definitions(${kengine_library_name} ${link_type} ${kengine_library_upper_name})
+    target_link_libraries(${kengine_library_name} ${link_type} kengine_include)
 
     # Link against the default dependencies
     if(${default_dependencies_index} EQUAL -1)
-        target_link_libraries(${system_name} ${link_type} ${default_dependencies})
+        target_link_libraries(${kengine_library_name} ${link_type} ${default_dependencies})
     endif()
 
     if(NOT "${parent_system_name}" STREQUAL "")
-        target_link_libraries(${system_name} ${link_type} ${parent_system_name})
+        target_link_libraries(${kengine_library_name} ${link_type} ${parent_system_name})
     endif()
 
     # Headers for which we'll generate reflection headers and/or type registration code
@@ -114,16 +114,16 @@ function(add_system path)
 
     if(EXISTS ${path}/CMakeLists.txt)
         # Helpers for the system CMakeLists
-        macro(subdirectory_is_not_system path)
+        macro(subdirectory_is_not_kengine_library path)
             set(ignored_subdirectories ${ignored_subdirectories} ${CMAKE_CURRENT_LIST_DIR}/${path} PARENT_SCOPE)
         endmacro()
 
-        function(system_link_public_libraries)
-            target_link_libraries(${system_name} ${link_type} ${ARGN})
+        function(kengine_library_link_public_libraries)
+            target_link_libraries(${kengine_library_name} ${link_type} ${ARGN})
         endfunction()
 
-        function(system_link_private_libraries)
-            target_link_libraries(${system_name} PRIVATE ${ARGN})
+        function(kengine_library_link_private_libraries)
+            target_link_libraries(${kengine_library_name} PRIVATE ${ARGN})
         endfunction()
 
         macro(register_types_from_headers)
@@ -137,21 +137,21 @@ function(add_system path)
     # Generate reflection headers
     list(LENGTH system_headers headers_length)
     if(headers_length GREATER 0)
-        get_target_property(cxx_standard ${system_name} CXX_STANDARD)
+        get_target_property(cxx_standard ${kengine_library_name} CXX_STANDARD)
         if(${cxx_standard} STREQUAL cxx_standard-NOTFOUND)
-            set_target_properties(${system_name} PROPERTIES CXX_STANDARD ${CMAKE_CXX_STANDARD})
+            set_target_properties(${kengine_library_name} PROPERTIES CXX_STANDARD ${CMAKE_CXX_STANDARD})
         endif()
 
         include(putils/reflection/scripts/generate_reflection_headers.cmake)
         if(KENGINE_GENERATE_REFLECTION)
             putils_generate_reflection_headers(
-                    TARGET ${system_name}
+                    TARGET ${kengine_library_name}
                     SOURCES ${system_headers}
             )
         endif()
     endif()
 
-    set(parent_system_name ${system_name})
+    set(parent_system_name ${kengine_library_name})
     add_systems_in_directory(${path})
 
     # Add our headers to the ones we'll want to generate type registration for
@@ -170,14 +170,14 @@ function(add_systems_in_directory root)
             continue()
         endif()
 
-        add_system(${child})
+        add_kengine_library(${child})
     endforeach()
 
     set(headers_to_register ${headers_to_register} PARENT_SCOPE)
 endfunction()
 
 # Add core first so other systems can link against it
-add_system(${CMAKE_CURRENT_LIST_DIR}/kengine/core)
+add_kengine_library(${CMAKE_CURRENT_LIST_DIR}/kengine/core)
 set(ignored_subdirectories ${CMAKE_CURRENT_LIST_DIR}/kengine/core)
 
 # Then add the other systems

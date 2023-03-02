@@ -1,3 +1,3 @@
 project(kengine)
 
-system_link_public_libraries(kengine_glm)
+kengine_library_link_public_libraries(kengine_glm)

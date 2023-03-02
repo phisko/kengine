@@ -1,3 +1,3 @@
 project(kengine)
 
-system_link_private_libraries(kengine_command_line)
+kengine_library_link_private_libraries(kengine_command_line)
