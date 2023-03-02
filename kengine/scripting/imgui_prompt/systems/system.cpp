@@ -238,19 +238,15 @@ namespace kengine::scripting::imgui_prompt {
 			std::string line;
 
 			// Stolen from luaB_print
-			const int nargs = lua_gettop(L);
-			lua_getglobal(L, "to_string");
-			for (int i = 1; i <= nargs; i++) {
-				lua_pushvalue(L, -1); /* function to be called */
-				lua_pushvalue(L, i); /* value to print */
-				lua_call(L, 1, 1);
-				const char * s = lua_tolstring(L, -1, nullptr); /* get result */
-				if (s == nullptr)
-					return luaL_error(L, "'to_string' must return a string to 'print'");
-				if (i > 1)
-					line += '\t';
-				line += s;
-				lua_pop(L, 1); /* pop result */
+			int n = lua_gettop(L);  /* number of arguments */
+			int i;
+			for (i = 1; i <= n; i++) {  /* for each argument */
+				size_t l;
+				const char * s = luaL_tolstring(L, i, &l);  /* convert it to string */
+				if (i > 1)  /* not the first element? */
+					line += '\t';  /* add a tab before it */
+				line += s;  /* print it */
+				lua_pop(L, 1);  /* pop result */
 			}
 
 			if (active)
