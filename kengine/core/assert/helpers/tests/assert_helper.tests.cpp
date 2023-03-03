@@ -58,14 +58,14 @@ TEST_F(core_assert, kengine_assert_with_message_true) {
 }
 
 TEST_F(core_assert, kengine_assert_with_message_false) {
-	kengine_assert_with_message(r, false, "foo", "bar");
+	kengine_assert_with_message(r, false, "{}{}", "foo", "bar");
 	EXPECT_STREQ(file, __FILE__);
 	EXPECT_EQ(line, 61); // Hardcoded line number based on the above condition
 	EXPECT_EQ(expr, "foobar");
 }
 
 TEST_F(core_assert, kengine_assert_failed) {
-	kengine_assert_failed(r, "foo", "bar");
+	kengine_assert_failed(r, "{}{}", "foo", "bar");
 	EXPECT_STREQ(file, __FILE__);
 	EXPECT_EQ(line, 68); // Hardcoded line number based on the above condition
 	EXPECT_EQ(expr, "foobar");
