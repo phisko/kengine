@@ -29,7 +29,7 @@ TEST(log, kengine_log) {
 	);
 
 	kengine_log(r, verbose, "Category", "Message");
-	kengine_logf(r, warning, "OtherCategory", "%s", "OtherMessage");
+	kengine_logf(r, warning, "OtherCategory", "{}", "OtherMessage");
 
 	EXPECT_EQ(output.size(), 2);
 

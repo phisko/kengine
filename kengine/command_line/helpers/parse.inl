@@ -22,7 +22,7 @@ namespace kengine::command_line {
 		kengine_log(r, verbose, log_category, "Parsing command-line");
 
 		for (const auto & [e, args] : r.view<arguments>().each()) {
-			kengine_logf(r, very_verbose, log_category, "Parsing command-line from [%u]", e);
+			kengine_logf(r, very_verbose, log_category, "Parsing command-line from {}", e);
 			return putils::parse_arguments<T>(args.args);
 		}
 

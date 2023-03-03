@@ -24,7 +24,7 @@
 #include <entt/entity/fwd.hpp>
 
 // putils
-#include "putils/concatenate.hpp"
+#include "putils/string.hpp"
 
 // kengine core/assert
 #include "kengine/core/assert/helpers/assert_failed.hpp"
@@ -32,7 +32,7 @@
 
 #define kengine_assert_failed(r, ...) \
 	do { \
-		const bool should_break = kengine::core::assert::assert_failed(r, __FILE__, __LINE__, putils::concatenate(__VA_ARGS__)); \
+		const bool should_break = kengine::core::assert::assert_failed(r, __FILE__, __LINE__, putils::string<1024>(__VA_ARGS__).c_str()); \
 		if (should_break && kengine::core::assert::is_debugger_present()) \
 			kengine_debug_break; \
 	} while (false)

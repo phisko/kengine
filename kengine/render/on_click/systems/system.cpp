@@ -35,7 +35,7 @@ namespace kengine::render::on_click {
 				return;
 
 			const auto & r = *window.registry();
-			kengine_logf(r, verbose, log_category, "Click in { %f, %f }", coords.x, coords.y);
+			kengine_logf(r, verbose, log_category, "Click in {}", coords);
 
 			for (const auto & [_, get_entity] : r.view<get_entity_in_pixel>().each()) {
 				const auto e = get_entity(window, coords);
@@ -46,11 +46,11 @@ namespace kengine::render::on_click {
 
 				const auto on_click = r.try_get<render::on_click::on_click>(e);
 				if (on_click) {
-					kengine_logf(r, log, log_category, "Calling on_click on [%u]", e);
+					kengine_logf(r, log, log_category, "Calling on_click on {}", e);
 					on_click->call(button);
 				}
 				else
-					kengine_logf(r, verbose, log_category, "Clicked [%u], did not have on_click", e);
+					kengine_logf(r, verbose, log_category, "Clicked {}, did not have on_click", e);
 			}
 		}
 	};

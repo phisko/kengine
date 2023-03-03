@@ -20,12 +20,12 @@ namespace kengine::scripting {
 		static_assert(putils::reflection::has_class_name<T>());
 
 		const auto class_name = putils::reflection::get_class_name<T>();
-		kengine_logf(r, verbose, log_category, "Registering component '%s'", class_name);
+		kengine_logf(r, verbose, log_category, "Registering component '{}'", class_name);
 
 		if constexpr (!std::is_empty<T>()) {
-			kengine_logf(r, verbose, log_category, "Registering entt::handle member get_%s", class_name);
+			kengine_logf(r, verbose, log_category, "Registering entt::handle member get_{}", class_name);
 			register_entity_member(
-				putils::string<128>("get_%s", class_name).c_str(),
+				putils::string<128>("get_{}", class_name).c_str(),
 				std::function<T &(entt::handle)>(
 					[](entt::handle self) noexcept {
 						return std::ref(self.get<T>());
@@ -33,9 +33,9 @@ namespace kengine::scripting {
 				)
 			);
 
-			kengine_logf(r, verbose, log_category, "Registering entt::handle member try_get_%s", class_name);
+			kengine_logf(r, verbose, log_category, "Registering entt::handle member try_get_{}", class_name);
 			register_entity_member(
-				putils::string<128>("try_get_%s", class_name).c_str(),
+				putils::string<128>("try_get_{}", class_name).c_str(),
 				std::function<const T *(entt::handle)>(
 					[](entt::handle self) noexcept {
 						return self.try_get<T>();
@@ -43,9 +43,9 @@ namespace kengine::scripting {
 				)
 			);
 
-			kengine_logf(r, verbose, log_category, "Registering entt::handle member emplace_%s", class_name);
+			kengine_logf(r, verbose, log_category, "Registering entt::handle member emplace_{}", class_name);
 			register_entity_member(
-				putils::string<128>("emplace_%s", class_name).c_str(),
+				putils::string<128>("emplace_{}", class_name).c_str(),
 				std::function<T &(entt::handle)>(
 					[](entt::handle self) noexcept {
 						return std::ref(self.get_or_emplace<T>());
@@ -53,10 +53,10 @@ namespace kengine::scripting {
 				)
 			);
 
-			kengine_logf(r, verbose, log_category, "Registering function for_each_entity_with_%s", class_name);
+			kengine_logf(r, verbose, log_category, "Registering function for_each_entity_with_{}", class_name);
 			using ForEachEntityFunc = std::function<void(entt::handle, T &)>;
 			register_function(
-				putils::string<128>("for_each_entity_with_%s", class_name).c_str(),
+				putils::string<128>("for_each_entity_with_{}", class_name).c_str(),
 				std::function<void(const ForEachEntityFunc &)>(
 				[&](const ForEachEntityFunc & f) {
 					for (const auto & [e, comp] : r.view<T>().each())
@@ -66,9 +66,9 @@ namespace kengine::scripting {
 			);
 		}
 		else {
-			kengine_logf(r, verbose, log_category, "Registering entt::handle member emplace_%s", class_name);
+			kengine_logf(r, verbose, log_category, "Registering entt::handle member emplace_{}", class_name);
 			register_entity_member(
-				putils::string<128>("emplace_%s", class_name).c_str(),
+				putils::string<128>("emplace_{}", class_name).c_str(),
 				std::function<void(entt::handle)>(
 					[](entt::handle self) noexcept {
 						self.emplace<T>();
@@ -76,10 +76,10 @@ namespace kengine::scripting {
 				)
 			);
 
-			kengine_logf(r, verbose, log_category, "Registering function for_each_entity_with_%s", class_name);
+			kengine_logf(r, verbose, log_category, "Registering function for_each_entity_with_{}", class_name);
 			using ForEachEntityFunc = std::function<void(entt::handle)>;
 			register_function(
-				putils::string<128>("for_each_entity_with_%s", class_name).c_str(),
+				putils::string<128>("for_each_entity_with_{}", class_name).c_str(),
 				std::function<void(const ForEachEntityFunc &)>(
 				[&](const ForEachEntityFunc & f) {
 					for (const auto & [e] : r.view<T>().each())
@@ -89,9 +89,9 @@ namespace kengine::scripting {
 			);
 		}
 
-		kengine_logf(r, verbose, log_category, "Registering entt::handle member has_%s", class_name);
+		kengine_logf(r, verbose, log_category, "Registering entt::handle member has_{}", class_name);
 		register_entity_member(
-			putils::string<128>("has_%s", class_name).c_str(),
+			putils::string<128>("has_{}", class_name).c_str(),
 			std::function<bool(entt::handle)>(
 				[](entt::handle self) noexcept {
 					return self.all_of<T>();
@@ -99,9 +99,9 @@ namespace kengine::scripting {
 			)
 		);
 
-		kengine_logf(r, verbose, log_category, "Registering entt::handle member remove_%s", class_name);
+		kengine_logf(r, verbose, log_category, "Registering entt::handle member remove_{}", class_name);
 		register_entity_member(
-			putils::string<128>("remove_%s", class_name).c_str(),
+			putils::string<128>("remove_{}", class_name).c_str(),
 			std::function<void(entt::handle)>(
 				[](entt::handle self) noexcept {
 					self.remove<T>();

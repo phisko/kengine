@@ -5,7 +5,7 @@
 ## Prototype
 
 ```cpp
-bool (const char * file, int line, const std::string & expr);
+bool (const char * file, int line, const char * expr);
 ```
 
 ### Parameters

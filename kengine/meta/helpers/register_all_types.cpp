@@ -25,7 +25,7 @@ namespace kengine::meta {
 		destination_registry.emplace<pre_registered>(destination_registry.create());
 
 		for (const auto & [e, pre_register_types] : main_registry->view<functions::pre_register_types>().each()) {
-			kengine_logf(destination_registry, very_verbose, log_category, "Found registration in [%u]", e);
+			kengine_logf(destination_registry, very_verbose, log_category, "Found registration in {}", e);
 			pre_register_types(destination_registry);
 		}
 	}
@@ -41,7 +41,7 @@ namespace kengine::meta {
 			main_registry = &destination_registry;
 
 		for (const auto & [e, register_types] : main_registry->view<functions::register_types>().each()) {
-			kengine_logf(destination_registry, very_verbose, log_category, "Found registration in [%u]", e);
+			kengine_logf(destination_registry, very_verbose, log_category, "Found registration in {}", e);
 			register_types(destination_registry);
 		}
 	}

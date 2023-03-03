@@ -41,7 +41,7 @@ namespace kengine::physics::kinematic {
 			kengine_log(r, very_verbose, log_category, "Executing");
 
 			for (const auto & [e, transform, physics] : r.view<core::transform, physics, kinematic>().each()) {
-				kengine_logf(r, very_verbose, log_category, "Moving [%u]", e);
+				kengine_logf(r, very_verbose, log_category, "Moving {}", e);
 
 				transform.bounding_box.position += physics.movement * delta_time;
 

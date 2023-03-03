@@ -2,6 +2,7 @@
     "builtin-baseline": "d5bc0e71e06dfe6594ffb8fb2430919f1b435f94",
     "dependencies": [
         "gtest",
+        "fmt",
         "magic-enum",
         "nlohmann-json",
         "lua",

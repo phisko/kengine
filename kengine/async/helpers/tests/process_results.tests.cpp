@@ -14,7 +14,7 @@ TEST(async, process_results_deferred_return_value) {
 	const auto e = r.create();
 	kengine::async::start_task(
 		r, e,
-		kengine::async::task::string("%s %d", "hello", 0),
+		kengine::async::task::string("{} {}", "hello", 0),
 		std::async(std::launch::deferred, [] {
 			return 42;
 		})
@@ -36,7 +36,7 @@ TEST(async, process_results_deferred_side_effect) {
 	int result = 0;
 	kengine::async::start_task(
 		r, e,
-		kengine::async::task::string("%s %d", "hello", 0),
+		kengine::async::task::string("{} {}", "hello", 0),
 		std::async(std::launch::deferred, [&] {
 			result = 42;
 			return 0;
@@ -57,7 +57,7 @@ TEST(async, process_results_async_return_value) {
 	const auto e = r.create();
 	kengine::async::start_task(
 		r, e,
-		kengine::async::task::string("%s %d", "hello", 0),
+		kengine::async::task::string("{} {}", "hello", 0),
 		std::async(std::launch::async, [] {
 			return 42;
 		})
@@ -79,7 +79,7 @@ TEST(async, process_results_async_side_effect) {
 	int result = 0;
 	kengine::async::start_task(
 		r, e,
-		kengine::async::task::string("%s %d", "hello", 0),
+		kengine::async::task::string("{} {}", "hello", 0),
 		std::async(std::launch::async, [&] {
 			result = 42;
 			return 0;

@@ -2,8 +2,10 @@
 
 // putils
 #include "putils/string.hpp"
+#include "putils/reflection_helpers/reflectible_formatter.hpp"
 
-// kengine core/log
+// kengine
+#include "kengine/core/helpers/entt_formatter.hpp"
 #include "kengine/core/log/helpers/log.hpp"
 
 #ifndef KENGINE_LOG_MAX_SEVERITY

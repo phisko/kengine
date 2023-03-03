@@ -20,7 +20,7 @@ namespace kengine::meta::json {
 
 	nlohmann::json save_entity(entt::const_handle e) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_logf(*e.registry(), verbose, log_category, "Saving [%u] to JSON", e.entity());
+		kengine_logf(*e.registry(), verbose, log_category, "Saving {} to JSON", e);
 
 		nlohmann::json ret;
 
@@ -30,7 +30,7 @@ namespace kengine::meta::json {
 			ret[name.name.c_str()] = save_to_json(e);
 		}
 
-		kengine_logf(*e.registry(), very_verbose, log_category, "Output: %s", ret.dump(4).c_str());
+		kengine_logf(*e.registry(), very_verbose, log_category, "Output: {}", ret.dump(4));
 		return ret;
 	}
 }

@@ -31,7 +31,7 @@ namespace kengine::meta {
 			KENGINE_PROFILING_SCOPE;
 
 			using type = putils_wrapped_type(t);
-			kengine_logf(r, verbose, "meta", "Registering metadata for %s", putils::reflection::get_class_name<type>());
+			kengine_logf(r, verbose, "meta", "Registering metadata for {}", putils::reflection::get_class_name<type>());
 
 			const auto e = get_type_entity<type>(r);
 			r.emplace<meta::attributes>(e, &putils::reflection::runtime::get_attributes<type>());

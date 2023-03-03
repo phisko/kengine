@@ -24,8 +24,8 @@ namespace kengine::meta::json {
 
 	void load_entity(const nlohmann::json & entity_json, entt::handle e) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_logf(*e.registry(), verbose, log_category, "Loading [%u] from JSON", e.entity());
-		kengine_logf(*e.registry(), very_verbose, log_category, "Input: %s", entity_json.dump(4).c_str());
+		kengine_logf(*e.registry(), verbose, log_category, "Loading {} from JSON", e);
+		kengine_logf(*e.registry(), very_verbose, log_category, "Input: {}", entity_json.dump(4));
 
 		const auto view = e.registry()->view<const load>();
 		std::for_each(std::execution::par_unseq, putils_range(view), [&](entt::entity loader_entity) {

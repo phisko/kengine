@@ -142,8 +142,8 @@ namespace kengine::core::log::imgui {
 
 			bool changed = false;
 			for (const auto & [log_level, name] : magic_enum::enum_entries<severity>())
-				if (ImGui::Checkbox(putils::string<32>(name).c_str(), &filters.severities[(int)log_level])) {
-					kengine_logf(r, verbose, log_category, "Filter for %s changed to %d", putils::string<32>(name).c_str(), filters.severities[(int)log_level]);
+				if (ImGui::Checkbox(putils::string<32>("{}", name).c_str(), &filters.severities[(int)log_level])) {
+					kengine_logf(r, verbose, log_category, "Filter for {} changed to {}", putils::string<32>(name), filters.severities[(int)log_level]);
 					changed = true;
 
 					for (int i = 0; i < putils::lengthof(filters.severities); ++i)
@@ -160,12 +160,12 @@ namespace kengine::core::log::imgui {
 			}
 
 			if (ImGui::InputText("Category", filters.category_search, putils::lengthof(filters.category_search))) {
-				kengine_logf(r, verbose, log_category, "Category filter changed to '%s'", filters.category_search);
+				kengine_logf(r, verbose, log_category, "Category filter changed to '{}'", filters.category_search);
 				changed = true;
 			}
 
 			if (ImGui::InputText("Thread", filters.thread_search, putils::lengthof(filters.thread_search))) {
-				kengine_logf(r, verbose, log_category, "Thread filter changed to '%s'", filters.thread_search);
+				kengine_logf(r, verbose, log_category, "Thread filter changed to '{}'", filters.thread_search);
 				changed = true;
 			}
 

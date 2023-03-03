@@ -102,7 +102,7 @@ namespace kengine::scripting::imgui_prompt {
 
 			int tmp = max_lines;
 			if (ImGui::InputInt("Max history", &tmp, 0, 0, ImGuiInputTextFlags_EnterReturnsTrue)) {
-				kengine_logf(r, verbose, log_category, "Max history changed to %d", tmp);
+				kengine_logf(r, verbose, log_category, "Max history changed to {}", tmp);
 				max_lines = tmp;
 			}
 
@@ -115,7 +115,7 @@ namespace kengine::scripting::imgui_prompt {
 				ImGui::TextColored({ line.color.r, line.color.g, line.color.b, line.color.a }, "%s", line.text.c_str());
 				ImGui::PopTextWrapPos();
 				if (ImGui::IsItemClicked(1)) {
-					kengine_logf(r, log, log_category, "Setting clipboard text to '%s'", line.text.c_str());
+					kengine_logf(r, log, log_category, "Setting clipboard text to '{}'", line.text);
 					ImGui::SetClipboardText(line.text.c_str());
 				}
 				if (ImGui::IsItemHovered())
@@ -139,7 +139,7 @@ namespace kengine::scripting::imgui_prompt {
 			if (putils::reflection::imgui_enum_combo("##language", selected_language) || first_draw_prompt) {
 				std::string new_language(magic_enum::enum_names<language>()[(int)selected_language]);
 
-				kengine_logf(r, log, log_category, "Changed language to %s", new_language.c_str());
+				kengine_logf(r, log, log_category, "Changed language to {}", new_language);
 				history.add_line(
 					std::move(new_language),
 					true,
@@ -163,7 +163,7 @@ namespace kengine::scripting::imgui_prompt {
 
 		void eval() noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, log, log_category, "Evaluating '%s'", buff);
+			kengine_logf(r, log, log_category, "Evaluating '{}", buff);
 
 			switch (selected_language) {
 				case language::lua:
@@ -190,7 +190,7 @@ namespace kengine::scripting::imgui_prompt {
 				putils::normalized_color{ 1.f, 0.f, 0.f }
 			);
 #else
-			kengine_logf(r, log, log_category, "Evaluating Lua script: '%s'", buff);
+			kengine_logf(r, log, log_category, "Evaluating Lua script: '{}'", buff);
 
 			for (const auto & [e, state] : r.view<scripting::lua::state>().each()) {
 				if (first_eval_lua) {
@@ -200,11 +200,11 @@ namespace kengine::scripting::imgui_prompt {
 
 				active = true;
 				try {
-					kengine_logf(r, verbose, log_category, "Evaluating with state [%u]", e);
+					kengine_logf(r, verbose, log_category, "Evaluating with state {}", e);
 					state.ptr->script(buff);
 				}
 				catch (const std::exception & e) {
-					kengine_logf(r, error, log_category, "Error: %s", e.what());
+					kengine_logf(r, error, log_category, "Error: {}", e.what());
 					history.add_error(e.what());
 				}
 				active = false;
@@ -268,7 +268,7 @@ namespace kengine::scripting::imgui_prompt {
 				putils::normalized_color{ 1.f, 0.f, 0.f }
 			);
 #else
-			kengine_logf(r, log, log_category, "Evaluating python script: '%s'", buff);
+			kengine_logf(r, log, log_category, "Evaluating python script: '{}'", buff);
 
 #ifdef __GNUC__
 // Ignore "declared with greater visibility than the type of its field" warnings
@@ -316,7 +316,7 @@ namespace kengine::scripting::imgui_prompt {
 				py::exec(buff);
 			}
 			catch (const std::exception & e) {
-				kengine_logf(r, error, log_category, "Error: %s", e.what());
+				kengine_logf(r, error, log_category, "Error: {}", e.what());
 				history.add_error(e.what());
 			}
 

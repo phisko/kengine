@@ -9,7 +9,7 @@
 namespace kengine::meta {
 	template<typename T>
 	size_t meta_component_implementation<count, T>::function(entt::registry & r) noexcept {
-		kengine_logf(r, very_verbose, "meta::count", "Counting number of %s", putils::reflection::get_class_name<T>());
+		kengine_logf(r, very_verbose, "meta::count", "Counting number of {}", putils::reflection::get_class_name<T>());
 
 		const auto view = r.view<T>();
 		if constexpr (requires { view.size(); }) { // in-place-delete views don't have size()

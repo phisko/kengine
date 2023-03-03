@@ -58,7 +58,7 @@ namespace kengine::core::log::file {
 
 			file.open(file_name);
 			if (!file) {
-				kengine_assert_failed(r, "log_file system couldn't open output file '%s'", file_name);
+				kengine_assert_failed(r, "log_file system couldn't open output file '{}'", file_name);
 				return;
 			}
 

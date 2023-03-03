@@ -76,7 +76,7 @@ namespace kengine::scripting::python {
 		putils::for_each_type<Types...>([&](auto && t) noexcept {
 			using type = putils_wrapped_type(t);
 
-			kengine_logf(r, verbose, log_category, "Registering type %s", putils::reflection::get_class_name<type>());
+			kengine_logf(r, verbose, log_category, "Registering type {}", putils::reflection::get_class_name<type>());
 			// No point in multithreading this since the GIL can only be owned by one thread
 			for (const auto & [e, comp] : r.view<state>().each())
 				impl::register_type_with_state<IsComponent, type>(r, comp);

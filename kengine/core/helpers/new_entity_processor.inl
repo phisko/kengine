@@ -31,7 +31,7 @@ namespace kengine {
 
 		const auto view = r.view<Comps...>(entt::exclude<ProcessedTag>);
 		for (const auto e : view) {
-			kengine_logf(r, very_verbose, "new_entity_processor", "Processing [%u]", e);
+			kengine_logf(r, very_verbose, "new_entity_processor", "Processing {}", e);
 
 			r.emplace<ProcessedTag>(e);
 			std::apply(

@@ -3,6 +3,9 @@
 // stl
 #include <chrono>
 
+// fmt
+#include <fmt/chrono.h>
+
 // kengine core/log
 #include "kengine/core/log/helpers/kengine_log.hpp"
 
@@ -29,16 +32,16 @@ namespace kengine::async {
 		const auto now = std::chrono::system_clock::now();
 
 		for (const auto & [e, async_result, async_task] : r.view<result<T>, task>().each()) {
-			const auto time_running = std::chrono::duration<float>(now - async_task.start).count();
+			const auto time_running = now - async_task.start;
 
 			using namespace std::chrono_literals;
 			const auto status = async_result.future.wait_for(0s);
 			if (status == std::future_status::timeout) {
-				kengine_logf(r, verbose, log_category, "Async task '%s' still running (started %fs ago)", async_task.name.c_str(), time_running);
+				kengine_logf(r, verbose, log_category, "Async task '{}' still running (started {:%S}s ago)", async_task.name, time_running);
 				continue;
 			}
 
-			kengine_logf(r, log, log_category, "Async task '%s' completed after %fs", async_task.name.c_str(), time_running);
+			kengine_logf(r, log, log_category, "Async task '{}' completed after {:%S}s", async_task.name, time_running);
 
 			auto data = async_result.future.get();
 

@@ -16,9 +16,9 @@
 // putils
 #include "putils/forward_to.hpp"
 #include "putils/ini_file.hpp"
+#include "putils/parse.hpp"
 #include "putils/split.hpp"
 #include "putils/static_assert.hpp"
-#include "putils/to_string.hpp"
 #include "putils/vector.hpp"
 
 // kengine core
@@ -132,7 +132,7 @@ namespace kengine::adjustable::imgui {
 
 				ImGui::Separator();
 				if (ImGui::InputText("Name", name_search, sizeof(name_search))) {
-					kengine_logf(r, verbose, log_category, "Name search changed to '%s'", name_search);
+					kengine_logf(r, verbose, log_category, "Name search changed to '{}'", name_search);
 					search_out_of_date = true;
 				}
 				ImGui::Separator();
@@ -291,7 +291,7 @@ namespace kengine::adjustable::imgui {
 			KENGINE_PROFILING_SCOPE;
 
 			auto & comp = r.get<adjustable>(e);
-			kengine_logf(r, verbose, log_category, "Adjustable destroyed in [%u] (section %s)", e, comp.section.c_str());
+			kengine_logf(r, verbose, log_category, "Adjustable destroyed in {} (section {})", e, comp.section);
 			remove_adjustable_from_section(comp, root_section);
 		}
 
@@ -318,11 +318,11 @@ namespace kengine::adjustable::imgui {
 
 		void init_adjustable(adjustable & comp) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, verbose, log_category, "Initializing section %s", comp.section.c_str());
+			kengine_logf(r, verbose, log_category, "Initializing section {}", comp.section);
 
 			const auto it = loaded_file.sections.find(comp.section.c_str());
 			if (it == loaded_file.sections.end()) {
-				kengine_logf(r, warning, log_category, "Section '%s' not found in INI file", comp.section.c_str());
+				kengine_logf(r, warning, log_category, "Section '{}' not found in INI file", comp.section);
 				return;
 			}
 
@@ -330,11 +330,11 @@ namespace kengine::adjustable::imgui {
 			for (auto & value : comp.values) {
 				const auto it = section.values.find(value.name.c_str());
 				if (it == section.values.end()) {
-					kengine_logf(r, warning, log_category, "Value for '%s' not found in INI file", value.name.c_str());
+					kengine_logf(r, warning, log_category, "Value for '{}' not found in INI file", value.name);
 					continue;
 				}
 
-				kengine_logf(r, verbose, log_category, "Initializing %s to %s", value.name.c_str(), it->second.c_str());
+				kengine_logf(r, verbose, log_category, "Initializing {} to {}", value.name, it->second);
 				set_value(value, it->second.c_str());
 			}
 		}
@@ -395,39 +395,39 @@ namespace kengine::adjustable::imgui {
 
 			std::ofstream f(KENGINE_ADJUSTABLE_SAVE_FILE, std::ofstream::trunc);
 			if (!f) {
-				kengine_assert_failed(r, "Failed to open '", KENGINE_ADJUSTABLE_SAVE_FILE, "' with write permissions");
+				kengine_assert_failed(r, "Failed to open '" KENGINE_ADJUSTABLE_SAVE_FILE "' with write permissions");
 				return;
 			}
 
 			putils::ini_file ini;
 
 			for (const auto & [e, comp] : r.view<adjustable>().each()) {
-				kengine_logf(r, verbose, log_category, "Adding section %s to INI file", e, comp.section.c_str());
+				kengine_logf(r, verbose, log_category, "Adding section {} to INI file", e, comp.section);
 				auto & section = ini.sections[comp.section.c_str()];
 
 				for (const auto & value : comp.values) {
-					kengine_logf(r, verbose, log_category, "Adding value %s to section %s of INI file", e, value.name.c_str());
+					kengine_logf(r, verbose, log_category, "Adding value {} to section {} of INI file", e, value.name);
 					auto & ini_value = section.values[value.name.c_str()];
 
 					switch (value.type) {
 						case adjustable::value_type::Int: {
-							ini_value = putils::to_string(value.int_storage.value);
-							kengine_logf(r, verbose, log_category, "Adding int value %s", e, ini_value.c_str());
+							ini_value = fmt::format("{}", value.int_storage.value);
+							kengine_logf(r, verbose, log_category, "Adding int value {}", e, ini_value);
 							break;
 						}
 						case adjustable::value_type::Float: {
-							ini_value = putils::to_string(value.float_storage.value);
-							kengine_logf(r, verbose, log_category, "Adding float value %s", e, ini_value.c_str());
+							ini_value = fmt::format("{}", value.float_storage.value);
+							kengine_logf(r, verbose, log_category, "Adding float value {}", e, ini_value);
 							break;
 						}
 						case adjustable::value_type::Bool: {
-							ini_value = putils::to_string(value.bool_storage.value);
-							kengine_logf(r, verbose, log_category, "Adding bool value %s", e, ini_value.c_str());
+							ini_value = fmt::format("{}", value.bool_storage.value);
+							kengine_logf(r, verbose, log_category, "Adding bool value {}", e, ini_value);
 							break;
 						}
 						case adjustable::value_type::Color: {
-							ini_value = putils::to_string(putils::to_rgba(value.color_storage.value));
-							kengine_logf(r, verbose, log_category, "Adding color value %s", e, ini_value.c_str());
+							ini_value = fmt::format("{}", putils::to_rgba(value.color_storage.value));
+							kengine_logf(r, verbose, log_category, "Adding color value {}", e, ini_value);
 							break;
 						}
 						default: {

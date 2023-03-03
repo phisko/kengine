@@ -32,7 +32,7 @@ namespace kengine::physics::collision {
 
 		void on_collision(entt::entity first, entt::entity second) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, verbose, log_category, "Collision between [%u] and [%u]", first, second);
+			kengine_logf(r, verbose, log_category, "Collision between {} and {}", first, second);
 			trigger(first, second);
 			trigger(second, first);
 		}

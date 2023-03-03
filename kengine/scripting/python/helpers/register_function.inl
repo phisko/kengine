@@ -23,7 +23,7 @@ namespace kengine::scripting::python {
 	template<typename Ret, typename... Args>
 	void register_function(const entt::registry & r, const char * name, const std::function<Ret(Args...)> & func) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_logf(r, log, log_category, "Registering function %s", name);
+		kengine_logf(r, log, log_category, "Registering function {}", name);
 
 		for (const auto & [e, comp] : r.view<state>().each())
 			impl::register_function_with_state(comp, name, func);

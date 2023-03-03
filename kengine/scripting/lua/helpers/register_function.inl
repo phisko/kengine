@@ -11,7 +11,7 @@ namespace kengine::scripting::lua {
 	template<typename Func>
 	void register_function(const entt::registry & r, const char * name, Func && func) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_logf(r, log, "lua", "Registering function %s", name);
+		kengine_logf(r, log, "lua", "Registering function {}", name);
 		for (const auto & [e, comp]: r.view<state>().each()) {
 			auto & state = *comp.ptr;
 			state[name] = func;

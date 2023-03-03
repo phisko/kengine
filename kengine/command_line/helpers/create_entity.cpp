@@ -2,7 +2,6 @@
 
 // stl
 #include <span>
-#include <sstream>
 
 // entt
 #include <entt/entity/registry.hpp>
@@ -22,12 +21,9 @@ namespace kengine::command_line {
 
 		const auto e = r.create();
 		auto & comp = r.emplace<arguments>(e);
-		std::stringstream s;
-		for (const char * argument : std::span(argv, argc)) {
+		for (const char * argument : std::span(argv, argc))
 			comp.args.emplace_back(argument);
-			s << ' ' << argument;
-		}
 
-		kengine_logf(r, log, log_category, "Creating command-line:%s", s.str().c_str());
+		kengine_logf(r, log, log_category, "Creating command-line: {}", comp.args);
 	}
 }

@@ -93,14 +93,14 @@ namespace kengine::meta::imgui::engine_stats {
 
 			const auto new_collection = display_collection_creator();
 			if (new_collection) {
-				kengine_logf(r, log, log_category, "New tracked collection: %s", new_collection->name.c_str());
+				kengine_logf(r, log, log_category, "New tracked collection: {}", new_collection->name);
 				tracked.push_back(*new_collection);
 				save_tracked_collections(tracked);
 			}
 
 			for (size_t i = 0; i < tracked.size(); ++i) {
 				auto & collection = tracked[i];
-				kengine_logf(r, very_verbose, log_category, "Displaying tracked collection %s", collection.name.c_str());
+				kengine_logf(r, very_verbose, log_category, "Displaying tracked collection {}", collection.name);
 
 				if (collection.missing_components.empty()) {
 					kengine_log(r, very_verbose, log_category, "No missing components, displaying count");
@@ -118,7 +118,7 @@ namespace kengine::meta::imgui::engine_stats {
 						missing_components += s;
 					}
 
-					kengine_logf(r, very_verbose, log_category, "Missing components %s", missing_components.c_str());
+					kengine_logf(r, very_verbose, log_category, "Missing components {}", missing_components);
 					ImGui::Text("%s: missing Component Entities for %s", collection.name.c_str(), missing_components.c_str());
 					find_missing_component_entities(collection);
 				}
@@ -168,7 +168,7 @@ namespace kengine::meta::imgui::engine_stats {
 					const auto it = std::ranges::find(creating.components, e);
 					bool in_creating = it != creating.components.end();
 					if (ImGui::Checkbox(name->name.c_str(), &in_creating)) {
-						kengine_logf(r, verbose, log_category, "Adding component %s to potential new collection", name->name.c_str());
+						kengine_logf(r, verbose, log_category, "Adding component {} to potential new collection", name->name);
 						if (in_creating)
 							creating.components.push_back(e);
 						else
@@ -183,7 +183,7 @@ namespace kengine::meta::imgui::engine_stats {
 
 		size_t get_collection_count(const collection & collection) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, very_verbose, log_category, "Getting entity count for collection %s", collection.name.c_str());
+			kengine_logf(r, very_verbose, log_category, "Getting entity count for collection {}", collection.name);
 
 			if (collection.components.size() == 1) {
 				const auto comp = collection.components[0];
@@ -199,14 +199,14 @@ namespace kengine::meta::imgui::engine_stats {
 				for (const auto comp : collection.components) {
 					const auto & has = r.get<meta::has>(comp);
 					if (!has({ r, e })) {
-						kengine_logf(r, very_verbose, log_category, "Discarding entity [%u] because it doesn't have %s", e, r.get<core::name>(comp).name.c_str());
+						kengine_logf(r, very_verbose, log_category, "Discarding entity {} because it doesn't have {}", e, r.get<core::name>(comp).name);
 						good = false;
 						break;
 					}
 				}
 
 				if (good) {
-					kengine_logf(r, very_verbose, log_category, "Found entity [%u]", e);
+					kengine_logf(r, very_verbose, log_category, "Found entity {}", e);
 					++ret;
 				}
 			});
@@ -220,7 +220,7 @@ namespace kengine::meta::imgui::engine_stats {
 
 			std::ofstream f(KENGINE_STATS_TRACKED_COLLECTIONS_SAVE_FILE);
 			if (!f) {
-				kengine_assert_failed(r, "Failed to open '", KENGINE_STATS_TRACKED_COLLECTIONS_SAVE_FILE, "' for writing");
+				kengine_assert_failed(r, "Failed to open '" KENGINE_STATS_TRACKED_COLLECTIONS_SAVE_FILE "' for writing");
 				return;
 			}
 
@@ -268,7 +268,7 @@ namespace kengine::meta::imgui::engine_stats {
 						}
 
 					if (!found) {
-						kengine_logf(r, warning, log_category, "Missing type entity for %s", std::string(name_json).c_str());
+						kengine_logf(r, warning, log_category, "Missing type entity for {}", name_json);
 						collection.missing_components.push_back(name_json);
 					}
 				}
@@ -281,13 +281,13 @@ namespace kengine::meta::imgui::engine_stats {
 
 		void find_missing_component_entities(collection & collection) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, very_verbose, log_category, "Looking for missing components for collection %s", collection.name.c_str());
+			kengine_logf(r, very_verbose, log_category, "Looking for missing components for collection {}", collection.name);
 
 			for (size_t i = 0; i < collection.missing_components.size(); ++i) {
 				const auto & comp_name = collection.missing_components[i];
 				for (const auto & [e, name] : r.view<core::name>().each())
 					if (comp_name == name.name) {
-						kengine_logf(r, log, log_category, "Found type entity for %s", comp_name.c_str());
+						kengine_logf(r, log, log_category, "Found type entity for {}", comp_name);
 						collection.components.push_back(e);
 						collection.missing_components.erase(collection.missing_components.begin() + i);
 						--i;
