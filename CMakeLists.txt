@@ -52,7 +52,7 @@ function(add_kengine_library path)
     # If the plugin isn't one of the default dependencies, add an option to enable it
     list(FIND default_dependencies ${kengine_library_name} default_dependencies_index)
     if(${default_dependencies_index} EQUAL -1)
-        set(default_enabled ${KENGINE_ALL_SYSTEMS})
+        set(default_enabled ${KENGINE_ALL_LIBRARIES})
     else()
         set(default_enabled ON)
     endif()
