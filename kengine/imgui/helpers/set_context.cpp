@@ -1,8 +1,5 @@
 #include "set_context.hpp"
 
-// imgui
-#include <imgui.h>
-
 // entt
 #include <entt/entity/registry.hpp>
 
@@ -24,7 +21,7 @@ namespace kengine::imgui {
 		}
 
 		for (const auto & [e, imgui_context] : r.view<context>().each()) {
-			kengine_logf(r, verbose, log_category, "Found context %p in [%u]", imgui_context.ptr, e);
+			kengine_logf(r, verbose, log_category, "Found context {} in {}", imgui_context.ptr, e);
 			set_context_callback(static_cast<ImGuiContext *>(imgui_context.ptr));
 			return true;
 		}

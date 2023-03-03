@@ -31,11 +31,11 @@ namespace kengine::main_loop {
 
 		delta_time *= get_time_factor(r);
 
-		kengine_logf(r, very_verbose, log_category, "Calling execute (dt: %f)", delta_time);
+		kengine_logf(r, very_verbose, log_category, "Calling execute (dt: {})", delta_time);
 		for (const auto & [e, func] : r.view<kengine::main_loop::execute>().each()) {
 			if (!is_running(r))
 				break;
-			kengine_logf(r, very_verbose, log_category, "Calling execute on [%u]", e);
+			kengine_logf(r, very_verbose, log_category, "Calling execute on {}", e);
 			func(delta_time);
 		}
 	}
@@ -69,11 +69,11 @@ namespace kengine::main_loop {
 
 			float ret = 1.f;
 			for (const auto & [e, time_modulator] : r.view<time_modulator>().each()) {
-				kengine_logf(r, very_verbose, log_category, "Found time modulator [%u] (%f)", e, time_modulator.factor);
+				kengine_logf(r, very_verbose, log_category, "Found time modulator {} ({})", e, time_modulator.factor);
 				ret *= time_modulator.factor;
 			}
 
-			kengine_logf(r, very_verbose, log_category, "Final time modulator: %f", ret);
+			kengine_logf(r, very_verbose, log_category, "Final time modulator: {}", ret);
 			return ret;
 		}
 

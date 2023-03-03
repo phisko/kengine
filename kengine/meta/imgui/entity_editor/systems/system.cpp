@@ -69,17 +69,17 @@ namespace kengine::meta::imgui::entity_editor {
 				const auto name = r.try_get<core::name>(selected);
 				const auto window_title =
 					name ?
-					putils::string<64>("%s##[%d]", name->name.c_str(), selected) :
-					putils::string<64>("[%d] Entity editor", selected);
-				kengine_logf(r, very_verbose, log_category, "Displaying [%u] (%s)", selected, window_title.c_str());
+					putils::string<64>("{}##{}", name->name, selected) :
+					putils::string<64>("{} Entity editor", selected);
+				kengine_logf(r, very_verbose, log_category, "Displaying {} ({})", selected, window_title);
 
 				if (ImGui::Begin(window_title.c_str(), &open, ImGuiWindowFlags_NoSavedSettings))
 					if (edit_entity_and_model({ r, selected }))
-						kengine_logf(r, log, log_category, "[%u] was modified", selected);
+						kengine_logf(r, log, log_category, "{} was modified", selected);
 				ImGui::End();
 
 				if (!open) {
-					kengine_logf(r, log, log_category, "De-selecting [%u]", selected);
+					kengine_logf(r, log, log_category, "De-selecting {}", selected);
 					r.remove<core::selected>(selected);
 				}
 			}

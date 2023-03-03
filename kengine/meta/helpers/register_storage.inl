@@ -20,7 +20,7 @@ namespace kengine::meta {
 
 		putils::for_each_type<Comps...>([&](auto && t) noexcept {
 			using type = putils_wrapped_type(t);
-			kengine_logf(r, verbose, "meta", "Pre-instantiating storage for %s", putils::reflection::get_class_name<type>());
+			kengine_logf(r, verbose, "meta", "Pre-instantiating storage for {}", putils::reflection::get_class_name<type>());
 			r.storage<type>(); // Pre-instantiate the component pool
 		});
 	}

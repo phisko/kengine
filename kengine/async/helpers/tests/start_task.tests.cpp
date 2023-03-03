@@ -30,7 +30,7 @@ TEST(async, start_task_formatted_name) {
 	const auto e = r.create();
 	kengine::async::start_task(
 		r, e,
-		kengine::async::task::string("%s %d", "hello", 0),
+		kengine::async::task::string("{} {}", "hello", 0),
 		std::async(std::launch::deferred, [] {})
 	);
 	EXPECT_EQ(r.get<kengine::async::task>(e).name, "hello 0");

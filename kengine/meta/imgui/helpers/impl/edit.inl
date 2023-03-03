@@ -19,7 +19,7 @@ namespace kengine::meta {
 	template<typename T>
 	bool meta_component_implementation<imgui::edit, T>::function(entt::handle e) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_logf(*e.registry(), very_verbose, "meta::imgui::edit", "Editing [%u]'s %s", e.entity(), putils::reflection::get_class_name<T>());
+		kengine_logf(*e.registry(), very_verbose, "meta::imgui::edit", "Editing {}'s {}", e, putils::reflection::get_class_name<T>());
 
 		T * comp = nullptr;
 
@@ -42,7 +42,7 @@ namespace kengine::meta {
 		}
 
 		if (putils::reflection::imgui_edit(*comp)) {
-			kengine_logf(*e.registry(), verbose, "meta::imgui::edit", "Modified [%u]'s %s", e.entity(), putils::reflection::get_class_name<T>());
+			kengine_logf(*e.registry(), verbose, "meta::imgui::edit", "Modified {}'s {}", e, putils::reflection::get_class_name<T>());
 			return true;
 		}
 

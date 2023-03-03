@@ -68,7 +68,7 @@ namespace kengine::render::kreogl {
 		_glsl.screen_size = params.camera.get_viewport().get_resolution();
 
 		for (const auto & [entity, highlight] : _r->view<highlight>().each()) {
-			kengine_logf(*_r, very_verbose, log_category, "Drawing highlights for [%u]", entity);
+			kengine_logf(*_r, very_verbose, log_category, "Drawing highlights for {}", entity);
 
 			uniform_checker.should_check = true;
 			_glsl.entity_id = float(entity);

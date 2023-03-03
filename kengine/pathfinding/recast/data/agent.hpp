@@ -23,7 +23,7 @@ namespace kengine::pathfinding::recast {
 			if (!crowd)
 				return;
 
-			kengine_logf(*crowd.registry(), verbose, "recast", "Removing agent from crowd [%u]", crowd.entity());
+			kengine_logf(*crowd.registry(), verbose, "recast", "Removing agent from crowd {}", crowd);
 			const auto & crowd_component = crowd.get<recast::crowd>();
 			crowd_component.ptr->removeAgent(index);
 		}

@@ -15,8 +15,8 @@
 // putils
 #include "putils/forward_to.hpp"
 #include "putils/ini_file.hpp"
+#include "putils/parse.hpp"
 #include "putils/split.hpp"
-#include "putils/to_string.hpp"
 
 // kengine core
 #include "kengine/core/data/name.hpp"
@@ -89,7 +89,7 @@ namespace kengine::imgui::tool {
 					if (ImGui::MenuItem("Disable all")) {
 						kengine_log(r, log, log_category, "Disabling all tools");
 						for (auto [e, comp] : r.view<tool>().each()) {
-							kengine_logf(r, verbose, log_category, "Disabling %s", r.get<core::name>(e).name.c_str());
+							kengine_logf(r, verbose, log_category, "Disabling {}", r.get<core::name>(e).name);
 							comp.enabled = false;
 						}
 					}
@@ -107,12 +107,12 @@ namespace kengine::imgui::tool {
 
 		void display_menu_entry(const char * name, const menu_entry & entry, bool & must_save) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, very_verbose, log_category, "Displaying menu entry %s", name);
+			kengine_logf(r, very_verbose, log_category, "Displaying menu entry {}", name);
 
 			if (entry.comp) {
 				if (ImGui::MenuItem(name, nullptr, entry.comp->enabled)) {
 					entry.comp->enabled = !entry.comp->enabled;
-					kengine_logf(r, log, log_category, "Turned %s %s", entry.comp->enabled ? "on" : "off", name);
+					kengine_logf(r, log, log_category, "Turned {} {}", entry.comp->enabled ? "on" : "off", name);
 					must_save = true;
 				}
 				return;
@@ -130,11 +130,11 @@ namespace kengine::imgui::tool {
 
 			const auto name = r.try_get<core::name>(e);
 			if (!name) {
-				kengine_assert_failed(r, "Entity ", int(e), " has a imgui::tool::tool but no core::name");
+				kengine_assert_failed(r, "{} has a imgui::tool::tool but no core::name", e);
 				return;
 			}
 
-			kengine_logf(r, verbose, log_category, "Initializing %s", name->name.c_str());
+			kengine_logf(r, verbose, log_category, "Initializing {}", name->name);
 			const auto & section = configuration.sections["Tools"];
 			if (const auto it = section.values.find(name->name.c_str()); it != section.values.end())
 				comp.enabled = putils::parse<bool>(it->second);
@@ -142,17 +142,17 @@ namespace kengine::imgui::tool {
 			menu_entry * current_entry = &root_entry;
 			const auto entry_names = putils::split(name->name.c_str(), '/');
 			for (const auto & entry_name : entry_names) {
-				kengine_assert_with_message(r, current_entry->comp == nullptr, "Intermediate menu '", entry_name, "' for ImGui tool '", name->name, "' has the name of an existing tool");
+				kengine_assert_with_message(r, current_entry->comp == nullptr, "Intermediate menu '{}' for ImGui tool '{}' has the name of an existing tool", entry_name, name->name);
 				current_entry = &current_entry->subentries[entry_name];
 			}
 
-			kengine_assert_with_message(r, current_entry->subentries.empty(), "Leaf entry for ImGui tool '", name->name, "' was previously used as an intermediate menu");
+			kengine_assert_with_message(r, current_entry->subentries.empty(), "Leaf entry for ImGui tool '{}' was previously used as an intermediate menu", name->name);
 			current_entry->comp = &comp;
 		}
 
 		void on_destroy_imgui_tool(entt::registry & r, entt::entity e) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, verbose, log_category, "Destroyed ImGui tool in [%u]", e);
+			kengine_logf(r, verbose, log_category, "Destroyed ImGui tool in {}", e);
 
 			const auto & comp = r.get<tool>(e);
 			if (!remove_tool_from_entry(comp, root_entry))
@@ -183,7 +183,7 @@ namespace kengine::imgui::tool {
 
 			std::ofstream f(KENGINE_IMGUI_TOOLS_SAVE_FILE);
 			if (!f) {
-				kengine_assert_failed(r, "Failed to open '", KENGINE_IMGUI_TOOLS_SAVE_FILE, "' with write permission");
+				kengine_assert_failed(r, "Failed to open '" KENGINE_IMGUI_TOOLS_SAVE_FILE "' with write permission");
 				return;
 			}
 
@@ -192,8 +192,8 @@ namespace kengine::imgui::tool {
 
 			const auto sorted = core::sort::get_name_sorted_entities<KENGINE_IMGUI_MAX_TOOLS, tool>(r);
 			for (const auto & [e, name, comp] : sorted) {
-				std::string value = putils::to_string(comp->enabled);
-				kengine_logf(r, verbose, log_category, "Saving %s (%s)", name->name.c_str(), value.c_str());
+				auto value = fmt::format("{}", comp->enabled);
+				kengine_logf(r, verbose, log_category, "Saving {} ({})", name->name, value);
 				section.values[name->name.c_str()] = std::move(value);
 			}
 

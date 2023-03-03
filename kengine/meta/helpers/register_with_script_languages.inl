@@ -72,10 +72,10 @@ namespace kengine::meta {
 
 		putils::for_each_type<Comps...>([&](auto && t) noexcept {
 			using type = putils_wrapped_type(t);
-			kengine_logf(r, verbose, "meta", "Registering used types for %s", putils::reflection::get_class_name<type>());
+			kengine_logf(r, verbose, "meta", "Registering used types for {}", putils::reflection::get_class_name<type>());
 			putils::reflection::for_each_used_type<type>([&](auto && t) noexcept {
 				using used_type = putils_wrapped_type(t.type);
-				kengine_logf(r, verbose, "meta", "Registering %s", putils::reflection::get_class_name<used_type>());
+				kengine_logf(r, verbose, "meta", "Registering {}", putils::reflection::get_class_name<used_type>());
 				register_with_script_languages<false, used_type>(r);
 			});
 		});
@@ -84,7 +84,7 @@ namespace kengine::meta {
 	template<typename F>
 	void register_with_script_languages(const entt::registry & r, const char * name, F && func) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_logf(r, verbose, "meta", "Registering function %s", name);
+		kengine_logf(r, verbose, "meta", "Registering function {}", name);
 
 #ifdef KENGINE_SCRIPTING_PYTHON
 		scripting::python::register_function(r, name, func);

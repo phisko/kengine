@@ -19,7 +19,7 @@ namespace kengine::meta {
 				if (!e.all_of<T>())
 					e.emplace<T>();
 				else
-					kengine_assert_failed(*e.registry(), "Attempting to replace a non-movable %s", putils::reflection::get_class_name<T>());
+					kengine_assert_failed(*e.registry(), "Attempting to replace a non-movable {}", putils::reflection::get_class_name<T>());
 			}
 		}
 	}
@@ -27,7 +27,7 @@ namespace kengine::meta {
 	template<typename T>
 	void meta_component_implementation<emplace_or_replace, T>::function(entt::handle e, const void * comp) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_logf(*e.registry(), very_verbose, "meta::emplace_or_replace", "Emplacing or replacing [%u]'s %s", e.entity(), putils::reflection::get_class_name<T>());
+		kengine_logf(*e.registry(), very_verbose, "meta::emplace_or_replace", "Emplacing or replacing {}'s {}", e, putils::reflection::get_class_name<T>());
 
 		if (comp) {
 			kengine_log(*e.registry(), very_verbose, "meta::emplace_or_replace", "Copying from argument");
@@ -36,7 +36,7 @@ namespace kengine::meta {
 				e.emplace_or_replace<T>(*typed_comp);
 			}
 			else
-				kengine_assert_failed(*e.registry(), "Attempting to copy-assign a non-copyable %s", putils::reflection::get_class_name<T>());
+				kengine_assert_failed(*e.registry(), "Attempting to copy-assign a non-copyable {}", putils::reflection::get_class_name<T>());
 		}
 		else
 			impl::emplace_or_replace<T>(e);
@@ -45,7 +45,7 @@ namespace kengine::meta {
 	template<typename T>
 	void meta_component_implementation<emplace_or_replace_move, T>::function(entt::handle e, void * comp) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_logf(*e.registry(), very_verbose, "meta::emplace_or_replace_move", "Emplacing or replacing [%u]'s %s by move", e.entity(), putils::reflection::get_class_name<T>());
+		kengine_logf(*e.registry(), very_verbose, "meta::emplace_or_replace_move", "Emplacing or replacing {}'s {} by move", e, putils::reflection::get_class_name<T>());
 
 		if (comp) {
 			kengine_log(*e.registry(), very_verbose, "meta::emplace_or_replace_move", "Moving from argument");
@@ -54,7 +54,7 @@ namespace kengine::meta {
 				e.emplace_or_replace<T>(std::move(*typed_comp));
 			}
 			else
-				kengine_assert_failed(*e.registry(), "Attempting to move-assign a non-movable %s", putils::reflection::get_class_name<T>());
+				kengine_assert_failed(*e.registry(), "Attempting to move-assign a non-movable {}", putils::reflection::get_class_name<T>());
 		}
 		else
 			impl::emplace_or_replace<T>(e);

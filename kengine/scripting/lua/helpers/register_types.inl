@@ -49,10 +49,10 @@ namespace kengine::scripting::lua {
 
 		putils::for_each_type<Types...>([&](auto && t) noexcept {
 			using type = putils_wrapped_type(t);
-			kengine_logf(r, verbose, log_category, "Registering type %s", putils::reflection::get_class_name<type>());
+			kengine_logf(r, verbose, log_category, "Registering type {}", putils::reflection::get_class_name<type>());
 			const auto view = r.view<state>();
 			std::for_each(std::execution::par_unseq, putils_range(view), [&](entt::entity e) {
-				const putils::scoped_thread_name thread_name(putils::string<128>("Lua registration for %s", putils::reflection::get_class_name<type>()));
+				const putils::scoped_thread_name thread_name(putils::string<128>("Lua registration for {}", putils::reflection::get_class_name<type>()));
 				const auto & [comp] = view.get(e);
 				impl::register_type_with_state<IsComponent, type>(r, *comp.ptr);
 			});

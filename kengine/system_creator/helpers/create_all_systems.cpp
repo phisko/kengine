@@ -21,7 +21,7 @@ namespace kengine::system_creator {
 			main_registry = &destination_registry;
 
 		for (const auto & [e, create_system] : main_registry->view<create_system>().each()) {
-			kengine_logf(destination_registry, verbose, log_category, "Creating system from [%u]", e);
+			kengine_logf(destination_registry, verbose, log_category, "Creating system from {}", e);
 			create_system(destination_registry);
 		}
 	}

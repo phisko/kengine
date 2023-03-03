@@ -66,11 +66,11 @@ namespace kengine::scripting::python {
 			module_->attr("delta_time") = delta_time;
 
 			for (auto [e, comp] : view.each()) {
-				kengine_logf(r, very_verbose, log_category, "Setting 'self' to [%u]", e);
+				kengine_logf(r, very_verbose, log_category, "Setting 'self' to {}", e);
 				module_->attr("self") = entt::handle{ r, e };
 
 				for (const auto & s : comp.files) {
-					kengine_logf(r, very_verbose, log_category, "Running script %s for [%u]", s.c_str(), e);
+					kengine_logf(r, very_verbose, log_category, "Running script {} for {}", s, e);
 					try {
 						py::eval_file(s.c_str(), py::globals());
 					}

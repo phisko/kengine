@@ -31,7 +31,7 @@ namespace kengine::meta::imgui {
 
 	bool edit_entity(entt::handle e) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_logf(*e.registry(), very_verbose, log_category, "Editing [%u]", e.entity());
+		kengine_logf(*e.registry(), very_verbose, log_category, "Editing {}", e);
 
 		const auto & r = *e.registry();
 
@@ -79,7 +79,7 @@ namespace kengine::meta::imgui {
 
 	bool edit_entity_and_model(entt::handle e) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_logf(*e.registry(), very_verbose, log_category, "Editing [%u] and its model", e.entity());
+		kengine_logf(*e.registry(), very_verbose, log_category, "Editing {} and its model", e);
 
 		if (!kengine::imgui::set_context(*e.registry()))
 			return false;
@@ -90,7 +90,7 @@ namespace kengine::meta::imgui {
 			return edit_entity(e);
 		}
 
-		kengine_logf(*e.registry(), very_verbose, log_category, "Found model [%u]", instance->model);
+		kengine_logf(*e.registry(), very_verbose, log_category, "Found model {}", instance->model);
 
 		bool ret = false;
 		if (ImGui::BeginTabBar("##tabs")) {

@@ -9,7 +9,7 @@
 #endif
 
 // putils
-#include "putils/to_string.hpp"
+#include "putils/parse.hpp"
 #include "putils/reflection_helpers/imgui_helper.hpp"
 
 // kengine core
@@ -72,7 +72,7 @@ namespace kengine::meta {
 	template<typename T>
 	bool meta_component_implementation<match_string, T>::function(entt::const_handle e, const char * str) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_logf(*e.registry(), very_verbose, "meta::match_string", "Matching [%u]'s %s against %s", e.entity(), putils::reflection::get_class_name<T>(), str);
+		kengine_logf(*e.registry(), very_verbose, "meta::match_string", "Matching {}'s {} against {}", e, putils::reflection::get_class_name<T>(), str);
 
 		if constexpr (std::is_empty<T>()) {
 			kengine_log(*e.registry(), very_verbose, "meta::match_string", "Component is empty, returning false");
@@ -94,7 +94,7 @@ namespace kengine::meta {
 			bool matches = false;
 			putils::reflection::for_each_attribute(*comp, [&](const auto & attr) noexcept {
 				if (impl::match_attribute(attr.member, str)) {
-					kengine_logf(*e.registry(), very_verbose, "meta::match_string", "Component's '%s' attribute matches, returning true", attr.name);
+					kengine_logf(*e.registry(), very_verbose, "meta::match_string", "Component's '{}' attribute matches, returning true", attr.name);
 					matches = true;
 				}
 			});

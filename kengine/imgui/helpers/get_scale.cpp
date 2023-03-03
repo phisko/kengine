@@ -19,11 +19,11 @@ namespace kengine::imgui {
 
 		float result = 1.f;
 		for (const auto & [e, comp] : r.view<scale>().each()) {
-			kengine_logf(r, very_verbose, log_category, "Found modifier [%u] (%f)", e, comp.modifier);
+			kengine_logf(r, very_verbose, log_category, "Found modifier {} ({})", e, comp.modifier);
 			result *= comp.modifier;
 		}
 
-		kengine_logf(r, very_verbose, log_category, "Final scale: %f", result);
+		kengine_logf(r, very_verbose, log_category, "Final scale: {}", result);
 		return result;
 	}
 }

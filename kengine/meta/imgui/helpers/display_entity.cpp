@@ -29,7 +29,7 @@ namespace kengine::meta::imgui {
 
 	void display_entity(entt::const_handle e) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_logf(*e.registry(), very_verbose, log_category, "Displaying [%u]", e.entity());
+		kengine_logf(*e.registry(), very_verbose, log_category, "Displaying {}", e);
 
 		if (!kengine::imgui::set_context(*e.registry()))
 			return;
@@ -46,7 +46,7 @@ namespace kengine::meta::imgui {
 
 	void display_entity_and_model(entt::const_handle e) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_logf(*e.registry(), very_verbose, log_category, "Displaying [%u] and its model", e.entity());
+		kengine_logf(*e.registry(), very_verbose, log_category, "Displaying {} and its model", e);
 
 		if (!kengine::imgui::set_context(*e.registry()))
 			return;
@@ -58,7 +58,7 @@ namespace kengine::meta::imgui {
 			return;
 		}
 
-		kengine_logf(*e.registry(), very_verbose, log_category, "Found model [%u]", instance->model);
+		kengine_logf(*e.registry(), very_verbose, log_category, "Found model {}", instance->model);
 		if (ImGui::BeginTabBar("##tabs")) {
 			if (ImGui::BeginTabItem("object")) {
 				display_entity(e);

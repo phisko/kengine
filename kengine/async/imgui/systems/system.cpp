@@ -66,7 +66,7 @@ namespace kengine::async::imgui {
 
 					const auto now = std::chrono::system_clock::now();
 					for (const auto & [e, task] : r.view<async::task>().each()) {
-						kengine_logf(r, very_verbose, log_category, "Found async task %s", task.name.c_str());
+						kengine_logf(r, very_verbose, log_category, "Found async task {}", task.name);
 
 						ImGui::TableNextRow();
 

@@ -9,8 +9,8 @@
 
 // putils
 #include "putils/forward_to.hpp"
+#include "putils/parse.hpp"
 #include "putils/string.hpp"
-#include "putils/to_string.hpp"
 
 // kengine core
 #include "kengine/core/data/name.hpp"
@@ -76,7 +76,7 @@ namespace kengine::meta::imgui::entity_selector {
 
 			if (ImGui::Begin("Entity selector", enabled)) {
 				if (ImGui::InputText("Search", name_search, sizeof(name_search))) {
-					kengine_logf(r, verbose, log_category, "New name search entered: '%s'", name_search);
+					kengine_logf(r, verbose, log_category, "New name search entered: '{}'", name_search);
 					search_out_of_date = true;
 				}
 
@@ -106,11 +106,11 @@ namespace kengine::meta::imgui::entity_selector {
 
 		void apply_search(entt::entity e) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, very_verbose, log_category, "Applying search to [%u]", e);
+			kengine_logf(r, very_verbose, log_category, "Applying search to {}", e);
 
 			search_result result{
 				e,
-				{ "[%u]", e }
+				{ "{}", e }
 			};
 
 			const auto name = r.try_get<core::name>(e);
@@ -141,7 +141,7 @@ namespace kengine::meta::imgui::entity_selector {
 							result.display_text += type->name;
 						}
 
-						kengine_logf(r, very_verbose, log_category, "Match found in %s", r.get<core::name>(type_entity));
+						kengine_logf(r, very_verbose, log_category, "Match found in {}", r.get<core::name>(type_entity));
 						matches = true;
 					}
 				}
@@ -162,11 +162,11 @@ namespace kengine::meta::imgui::entity_selector {
 			for (const auto & result : search_results)
 				if (display_search_result(result)) {
 					if (r.all_of<core::selected>(result.e)) {
-						kengine_logf(r, log, log_category, "De-selecting [%u]", result.e);
+						kengine_logf(r, log, log_category, "De-selecting {}", result.e);
 						r.erase<core::selected>(result.e);
 					}
 					else {
-						kengine_logf(r, log, log_category, "Selecting [%u]", result.e);
+						kengine_logf(r, log, log_category, "Selecting {}", result.e);
 						r.emplace<core::selected>(result.e);
 					}
 				}
@@ -174,7 +174,7 @@ namespace kengine::meta::imgui::entity_selector {
 
 		bool display_search_result(const search_result & result) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, very_verbose, log_category, "Displaying search result [%u]", result.e);
+			kengine_logf(r, very_verbose, log_category, "Displaying search result {}", result.e);
 
 			ImGui::PushID(int(result.e));
 
@@ -183,11 +183,11 @@ namespace kengine::meta::imgui::entity_selector {
 			const auto open_tree_node = ImGui::TreeNode(result.display_text.c_str());
 			if (ImGui::BeginPopupContextItem()) {
 				if (ImGui::MenuItem("Select")) {
-					kengine_logf(r, log, log_category, "Toggling selection for [%u]", result.e);
+					kengine_logf(r, log, log_category, "Toggling selection for {}", result.e);
 					ret = true;
 				}
 				if (ImGui::MenuItem("Remove")) {
-					kengine_logf(r, log, log_category, "Destroying [%u]", result.e);
+					kengine_logf(r, log, log_category, "Destroying {}", result.e);
 					r.destroy(result.e);
 					ret = false;
 				}

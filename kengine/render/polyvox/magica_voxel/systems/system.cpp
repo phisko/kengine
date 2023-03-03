@@ -92,7 +92,7 @@ namespace kengine::render::polyvox::magica_voxel {
 
 		void load_model(entt::entity e, const render::asset & asset) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, verbose, log_category, "Loading model for %s", asset.file.c_str());
+			kengine_logf(r, verbose, log_category, "Loading model for {}", asset.file);
 
 			const auto & f = asset.file.c_str();
 			if (std::filesystem::path(f).extension() != ".vox")
@@ -100,9 +100,9 @@ namespace kengine::render::polyvox::magica_voxel {
 
 			kengine::async::start_task(
 				r, e,
-				async::task::string("magica_voxel: load %s", f),
+				async::task::string("magica_voxel: load {}", f),
 				std::async(std::launch::async, [this, e, &f] {
-					const putils::scoped_thread_name thread_name(putils::string<64>("Load %s", f));
+					const putils::scoped_thread_name thread_name(putils::string<64>("Load {}", f));
 					return load_model_data(e, f);
 				})
 			);
@@ -111,7 +111,7 @@ namespace kengine::render::polyvox::magica_voxel {
 		async_loaded_data load_model_data(entt::entity e, const char * file) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			const putils::string<256> binary_file("%s.bin", file);
+			const putils::string<256> binary_file("{}.bin", file);
 
 			if (!std::filesystem::exists(binary_file.c_str())) {
 				kengine_log(r, verbose, log_category, "Binary file does not exist, creating it");
@@ -129,11 +129,11 @@ namespace kengine::render::polyvox::magica_voxel {
 
 		void unserialize(const char * f, model_data::mesh & mesh_data, format::chunk_content::size & size) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, verbose, log_category, "Unserializing from %s", f);
+			kengine_logf(r, verbose, log_category, "Unserializing from {}", f);
 
 			std::ifstream file(f, std::ofstream::binary);
 			if (!file) {
-				kengine_assert_failed(r, "[magica_voxel] Failed to load '", f, "'");
+				kengine_assert_failed(r, "[magica_voxel] Failed to load '{}'", f);
 				return;
 			}
 
@@ -167,7 +167,7 @@ namespace kengine::render::polyvox::magica_voxel {
 
 			return [this, e] {
 				if (const auto model_data = r.try_get<render::model_data>(e)) {
-					kengine_logf(r, verbose, log_category, "Releasing data for [%u]", e);
+					kengine_logf(r, verbose, log_category, "Releasing data for {}", e);
 					delete[] (const char *)model_data->meshes[0].vertices.data;
 					delete[] (const char *)model_data->meshes[0].indices.data;
 				}
@@ -176,11 +176,11 @@ namespace kengine::render::polyvox::magica_voxel {
 
 		model_and_offset load_vox_model(const char * f) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, verbose, log_category, "Loading vox model from %s", f);
+			kengine_logf(r, verbose, log_category, "Loading vox model from {}", f);
 
 			std::ifstream stream(f, std::ios::binary);
 			if (!stream) {
-				kengine_assert_failed(r, "[magica_voxel] Failed to load '", f, "'");
+				kengine_assert_failed(r, "[magica_voxel] Failed to load '{}'", f);
 				return model_and_offset{};
 			}
 
@@ -189,14 +189,14 @@ namespace kengine::render::polyvox::magica_voxel {
 			format::chunk_header main;
 			read_from_stream(main, stream);
 			if (!id_matches(main.id, "MAIN")) {
-				kengine_assert_failed(r, "[magica_voxel] Expected 'MAIN' chunk header in '", f, "'");
+				kengine_assert_failed(r, "[magica_voxel] Expected 'MAIN' chunk header in '{}'", f);
 				return model_and_offset{};
 			}
 
 			format::chunk_header first;
 			read_from_stream(first, stream);
 			if (!id_matches(first.id, "SIZE")) {
-				kengine_assert_failed(r, "[magica_voxel] Expected 'SIZE' chunk header in '", f, "'");
+				kengine_assert_failed(r, "[magica_voxel] Expected 'SIZE' chunk header in '{}'", f);
 				return model_and_offset{};
 			}
 			kengine_assert(r, first.children_bytes == 0);
@@ -213,7 +213,7 @@ namespace kengine::render::polyvox::magica_voxel {
 			format::chunk_header voxels_header;
 			read_from_stream(voxels_header, stream);
 			if (!id_matches(voxels_header.id, "XYZI")) {
-				kengine_assert_failed(r, "[magica_voxel] Expected 'XYZI' chunk header in '", f, "'");
+				kengine_assert_failed(r, "[magica_voxel] Expected 'XYZI' chunk header in '{}'", f);
 				return model_and_offset{};
 			}
 
@@ -237,7 +237,7 @@ namespace kengine::render::polyvox::magica_voxel {
 
 		bool id_matches(const char * s1, const char * s2) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, very_verbose, log_category, "Checking ID %s", s2);
+			kengine_logf(r, very_verbose, log_category, "Checking ID {}", s2);
 			return strncmp(s1, s2, 4) == 0;
 		}
 
@@ -253,7 +253,7 @@ namespace kengine::render::polyvox::magica_voxel {
 
 		model_data generate_model_data(entt::entity e, const mesh_type & mesh) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, verbose, log_category, "Generating model data for [%u]", e);
+			kengine_logf(r, verbose, log_category, "Generating model data for {}", e);
 
 			model_data model_data;
 			model_data.free = release(e);
@@ -271,7 +271,7 @@ namespace kengine::render::polyvox::magica_voxel {
 			KENGINE_PROFILING_SCOPE;
 
 			if (r.all_of<core::transform>(e)) {
-				kengine_logf(r, verbose, log_category, "[%u] already has a core::transform. Mesh offset will not be applied", e);
+				kengine_logf(r, verbose, log_category, "{} already has a core::transform. Mesh offset will not be applied", e);
 				return;
 			}
 			kengine_log(r, log, log_category, "Applying mesh offset");
@@ -283,11 +283,11 @@ namespace kengine::render::polyvox::magica_voxel {
 
 		void serialize(const char * f, const model_data & model_data, const format::chunk_content::size & size) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, verbose, log_category, "Serializing to %s", f);
+			kengine_logf(r, verbose, log_category, "Serializing to {}", f);
 
 			std::ofstream file(f, std::ofstream::binary | std::ofstream::trunc);
 			if (!file) {
-				kengine_assert_failed(r, "[magica_voxel] Failed to serialize to '", f, "'");
+				kengine_assert_failed(r, "[magica_voxel] Failed to serialize to '{}'", f);
 				return;
 			}
 

@@ -13,7 +13,7 @@ namespace kengine::meta {
 	template<typename T>
 	nlohmann::json meta_component_implementation<json::save, T>::function(entt::const_handle e) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_logf(*e.registry(), very_verbose, "meta::json::save", "Saving [%u]'s %s to JSON", e.entity(), putils::reflection::get_class_name<T>());
+		kengine_logf(*e.registry(), very_verbose, "meta::json::save", "Saving {}'s {} to JSON", e, putils::reflection::get_class_name<T>());
 
 		if constexpr (std::is_empty<T>()) {
 			kengine_log(*e.registry(), very_verbose, "meta::json::save", "Component is empty");

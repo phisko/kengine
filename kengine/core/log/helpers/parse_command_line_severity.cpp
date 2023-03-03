@@ -2,6 +2,7 @@
 
 // putils
 #include "putils/command_line_arguments.hpp"
+#include "putils/parse.hpp"
 #include "putils/reflection_helpers/json_helper.hpp"
 #include "putils/split.hpp"
 
@@ -40,7 +41,7 @@ namespace kengine::core::log {
 
 		static std::optional<severity_control> command_line_severity;
 		if (command_line_severity != std::nullopt) {
-			kengine_logf(r, very_verbose, log_category, "Found pre-parsed %s", putils::reflection::to_json(*command_line_severity).dump(4).c_str());
+			kengine_logf(r, very_verbose, log_category, "Found pre-parsed {}", putils::reflection::to_json(*command_line_severity).dump(4));
 			return *command_line_severity;
 		}
 
@@ -48,7 +49,7 @@ namespace kengine::core::log {
 
 		for (const auto & [e, command_line] : r.view<command_line::arguments>().each()) {
 			const auto opts = putils::parse_arguments<options>(command_line.args);
-			kengine_logf(r, very_verbose, log_category, "Found %s in [%u]", putils::reflection::to_json(opts).dump(4).c_str(), e);
+			kengine_logf(r, very_verbose, log_category, "Found {} in {}", putils::reflection::to_json(opts).dump(4), e);
 
 			command_line_severity->global_severity = opts.log_level;
 			const auto categories = putils::split(opts.log_category_levels.c_str(), ',');
@@ -65,7 +66,7 @@ namespace kengine::core::log {
 			}
 		}
 
-		kengine_logf(r, very_verbose, log_category, "Parsed %s", putils::reflection::to_json(*command_line_severity).dump(4).c_str());
+		kengine_logf(r, very_verbose, log_category, "Parsed {}", *command_line_severity);
 		return *command_line_severity;
 	}
 }

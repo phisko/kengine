@@ -10,12 +10,12 @@ namespace kengine::render {
 
 	bool entity_appears_in_viewport(const entt::registry & r, entt::entity entity, entt::entity viewport_entity) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_logf(r, very_verbose, log_category, "Checking whether [%u] appears in viewport [%u]", entity, viewport_entity);
+		kengine_logf(r, very_verbose, log_category, "Checking whether {} appears in viewport {}", entity, viewport_entity);
 
 		const auto wants_to_appear = [&](entt::entity lhs, entt::entity rhs) noexcept {
 			if (const auto appears_in_viewport = r.try_get<render::appears_in_viewport>(lhs))
 				if (!appears_in_viewport->call(rhs)) {
-					kengine_logf(r, very_verbose, log_category, "[%u] refused", lhs);
+					kengine_logf(r, very_verbose, log_category, "{} refused", lhs);
 					return false;
 				}
 			return true;

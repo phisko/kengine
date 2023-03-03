@@ -21,18 +21,18 @@ namespace kengine::meta {
 	entt::entity get_type_entity(entt::registry & r) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		if constexpr (putils::reflection::has_class_name<T>())
-			kengine_logf(r, very_verbose, "meta", "Getting type entity for %s", putils::reflection::get_class_name<T>());
+			kengine_logf(r, very_verbose, "meta", "Getting type entity for {}", putils::reflection::get_class_name<T>());
 
 		if (const auto e = r.view<type_entity_tag<T>>().front(); e != entt::null) {
 			if constexpr (putils::reflection::has_class_name<T>())
-				kengine_logf(r, very_verbose, "meta", "Found existing type entity [%u] for '%s'", e, putils::reflection::get_class_name<T>());
+				kengine_logf(r, very_verbose, "meta", "Found existing type entity {} for '{}'", e, putils::reflection::get_class_name<T>());
 			return e;
 		}
 
 		const auto e = r.create();
 
 		if constexpr (putils::reflection::has_class_name<T>())
-			kengine_logf(r, verbose, "meta", "Initializing type entity [%u] for '%s'", e, putils::reflection::get_class_name<T>());
+			kengine_logf(r, verbose, "meta", "Initializing type entity {} for '{}'", e, putils::reflection::get_class_name<T>());
 
 		r.emplace<type_entity_tag<T>>(e);
 		return e;

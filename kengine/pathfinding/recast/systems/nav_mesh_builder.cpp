@@ -53,19 +53,19 @@ namespace kengine::pathfinding::recast {
 
 		static std::optional<nav_mesh> create_recast_mesh(const char * file, entt::handle e, const pathfinding::nav_mesh & nav_mesh, const render::model_data & model_data) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(*e.registry(), verbose, log_category, "Building navmesh for %s", file);
+			kengine_logf(*e.registry(), verbose, log_category, "Building navmesh for {}", file);
 
 			const auto & r = *e.registry();
 
 			recast::nav_mesh result;
 
-			const putils::string<4096> binary_file("%s.nav", file);
+			const putils::string<4096> binary_file("{}.nav", file);
 			result.data = load_binary_file(binary_file.c_str(), nav_mesh);
 			if (result.data.data) {
 				kengine_log(r, verbose, log_category, "Found binary file");
 			}
 			else {
-				kengine_logf(r, verbose, log_category, "Found no binary file for %s, creating nav mesh data", file);
+				kengine_logf(r, verbose, log_category, "Found no binary file for {}, creating nav mesh data", file);
 				result.data = create_nav_mesh_data(r, nav_mesh, model_data, model_data.meshes[nav_mesh.concerned_mesh]);
 				if (result.data.data == nullptr)
 					return std::nullopt;
@@ -106,7 +106,7 @@ namespace kengine::pathfinding::recast {
 
 		static void save_binary_file(const entt::registry & r, const char * binary_file, const nav_mesh_data & data, const pathfinding::nav_mesh & nav_mesh) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, verbose, log_category, "Saving binary file %s", binary_file);
+			kengine_logf(r, verbose, log_category, "Saving binary file {}", binary_file);
 
 			std::ofstream f(binary_file, std::ofstream::trunc | std::ofstream::binary);
 			f.write((const char *)&nav_mesh, sizeof(nav_mesh));
@@ -228,7 +228,7 @@ namespace kengine::pathfinding::recast {
 			for (const auto name : potential_names)
 				for (const auto & attribute : model_data.vertex_attributes)
 					if (attribute.name == name) {
-						kengine_logf(r, very_verbose, log_category, "Found vertex position offset [%u] (named %s)", attribute.offset, attribute.name);
+						kengine_logf(r, very_verbose, log_category, "Found vertex position offset {} (named {})", attribute.offset, attribute.name);
 						return attribute.offset;
 					}
 
@@ -487,8 +487,8 @@ namespace kengine::pathfinding::recast {
 			return [&, model_transform](entt::handle environment, const putils::point3f & start_world_space, const putils::point3f & end_world_space) {
 				KENGINE_PROFILING_SCOPE;
 				kengine_logf(
-					*environment.registry(), verbose, log_category, "Getting path in [%u] from { %f, %f, %f } to { %f, %f, %f }",
-					environment, start_world_space.x, start_world_space.y, start_world_space.z, end_world_space.x, end_world_space.y, end_world_space.z
+					*environment.registry(), verbose, log_category, "Getting path in {} from {} to {}",
+					environment, start_world_space, end_world_space
 				);
 				static const dtQueryFilter filter;
 
@@ -552,7 +552,7 @@ namespace kengine::pathfinding::recast {
 
 	void build_recast_component(entt::registry & r, entt::entity e, const render::model_data & model_data, const pathfinding::nav_mesh & nav_mesh) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_logf(r, verbose, log_category, "Building recast component for [%u]", e);
+		kengine_logf(r, verbose, log_category, "Building recast component for {}", e);
 
 		kengine_assert(r, nav_mesh.verts_per_poly <= DT_VERTS_PER_POLYGON);
 
@@ -562,13 +562,13 @@ namespace kengine::pathfinding::recast {
 		else if (const auto name = r.try_get<core::name>(e))
 			model_name = name->name;
 		else
-			model_name.set("%u", e);
+			model_name.set("{}", e);
 
 		kengine::async::start_task(
 			r, e,
-			async::task::string("recast: load %s", model_name.c_str()),
+			async::task::string("recast: load {}", model_name),
 			std::async(std::launch::async, [&r, e, &model_name, &model_data, &nav_mesh] {
-				const putils::scoped_thread_name thread_name(putils::string<64>("Load navmesh for %s", model_name.c_str()));
+				const putils::scoped_thread_name thread_name(putils::string<64>("Load navmesh for {}", model_name));
 				return build_recast_component::create_recast_mesh(model_name.c_str(), { r, e }, nav_mesh, model_data);
 			})
 		);

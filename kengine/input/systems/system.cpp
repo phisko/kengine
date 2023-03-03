@@ -6,7 +6,6 @@
 
 // putils
 #include "putils/forward_to.hpp"
-#include "putils/reflection_helpers/json_helper.hpp"
 
 // kengine core
 #include "kengine/core/log/helpers/kengine_log.hpp"
@@ -40,29 +39,29 @@ namespace kengine::input {
 			kengine_log(r, very_verbose, log_category, "Executing");
 
 			for (const auto & [e, comp] : r.view<handler>().each()) {
-				kengine_logf(r, very_verbose, log_category, "Forwarding buffered events to [%u]", e);
+				kengine_logf(r, very_verbose, log_category, "Forwarding buffered events to {}", e);
 
 				for (const auto & event : buffer->keys)
 					if (comp.on_key != nullptr) {
-						kengine_logf(r, very_verbose, log_category, "Forwarding key event %s to [%u]", putils::reflection::to_json(event).dump().c_str(), e);
+						kengine_logf(r, very_verbose, log_category, "Forwarding key event {} to {}", event, e);
 						comp.on_key({ r, event.window }, event.key, event.pressed);
 					}
 
 				if (comp.on_mouse_button != nullptr)
 					for (const auto & event : buffer->clicks) {
-						kengine_logf(r, very_verbose, log_category, "Forwarding mouse button event %s to [%u]", putils::reflection::to_json(event).dump().c_str(), e);
+						kengine_logf(r, very_verbose, log_category, "Forwarding mouse button event {} to {}", event, e);
 						comp.on_mouse_button({ r, event.window }, event.button, event.pos, event.pressed);
 					}
 
 				if (comp.on_mouse_move != nullptr)
 					for (const auto & event : buffer->moves) {
-						kengine_logf(r, very_verbose, log_category, "Forwarding mouse move event %s to [%u]", putils::reflection::to_json(event).dump().c_str(), e);
+						kengine_logf(r, very_verbose, log_category, "Forwarding mouse move event {} to {}", event, e);
 						comp.on_mouse_move({ r, event.window }, event.pos, event.rel);
 					}
 
 				if (comp.on_scroll != nullptr)
 					for (const auto & event : buffer->scrolls) {
-						kengine_logf(r, very_verbose, log_category, "Forwarding scroll event %s to [%u]", putils::reflection::to_json(event).dump().c_str(), e);
+						kengine_logf(r, very_verbose, log_category, "Forwarding scroll event {} to {}", event, e);
 						comp.on_scroll({ r, event.window }, event.xoffset, event.yoffset, event.pos);
 					}
 			}

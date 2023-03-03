@@ -18,13 +18,13 @@
 namespace kengine::meta {
 	const putils::reflection::runtime::attribute_info * find_attribute(entt::handle type_entity, std::string_view path, std::string_view separator) noexcept {
 		KENGINE_PROFILING_SCOPE;
-		kengine_logf(*type_entity.registry(), very_verbose, "meta", "Finding [%u]'s '%s' attribute ", type_entity.entity(), std::string(path).c_str());
+		kengine_logf(*type_entity.registry(), very_verbose, "meta", "Finding {}'s '{}' attribute ", type_entity, path);
 
 		const auto attrs = type_entity.try_get<attributes>();
 		if (!attrs) {
 			const auto name_comp = type_entity.try_get<core::name>();
 			const auto type_name = name_comp ? name_comp->name.c_str() : "<unknown>";
-			kengine_assert_failed(*type_entity.registry(), "Cannot search attributes for '", type_name, "' without meta::attributes");
+			kengine_assert_failed(*type_entity.registry(), "Cannot search attributes for '{}' without meta::attributes", type_name);
 			return nullptr;
 		}
 

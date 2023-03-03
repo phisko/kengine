@@ -75,7 +75,7 @@ namespace kengine::render::glfw {
 			const auto state = captured ? "captured" : "released";
 
 			if (imgui::set_context(r)) {
-				kengine_logf(r, verbose, log_category, "Mouse %s for ImGui", state);
+				kengine_logf(r, verbose, log_category, "Mouse {} for ImGui", state);
 				if (captured)
 					ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NoMouse;
 				else
@@ -84,7 +84,7 @@ namespace kengine::render::glfw {
 
 			if (window == entt::null) {
 				for (const auto & [e, glfw] : r.view<glfw::window>().each()) {
-					kengine_logf(r, verbose, log_category, "Mouse %s for [%u]", state, e);
+					kengine_logf(r, verbose, log_category, "Mouse {} for {}", state, e);
 					glfwSetInputMode(glfw.ptr.get(), GLFW_CURSOR, input_mode);
 				}
 				return;
@@ -93,7 +93,7 @@ namespace kengine::render::glfw {
 			const auto glfw = r.try_get<glfw::window>(window);
 			if (glfw == nullptr)
 				return;
-			kengine_logf(r, verbose, log_category, "Mouse %s for [%u]", state, window);
+			kengine_logf(r, verbose, log_category, "Mouse {} for {}", state, window);
 			glfwSetInputMode(glfw->ptr.get(), GLFW_CURSOR, input_mode);
 		}
 
@@ -109,9 +109,9 @@ namespace kengine::render::glfw {
 
 			kengine_log(r, very_verbose, log_category, "Checking if windows were closed");
 			for (const auto & [e, window, glfw] : r.view<render::window, window>().each()) {
-				kengine_logf(r, very_verbose, log_category, "Checking if [%u] was closed", e);
+				kengine_logf(r, very_verbose, log_category, "Checking if {} was closed", e);
 				if (glfwWindowShouldClose(glfw.ptr.get())) {
-					kengine_logf(r, log, log_category, "Destroying [%u] because its window was closed", e);
+					kengine_logf(r, log, log_category, "Destroying {} because its window was closed", e);
 					r.destroy(e);
 				}
 			}
@@ -125,7 +125,7 @@ namespace kengine::render::glfw {
 
 		void create_window(entt::entity e, render::window & window, const window_init & init_glfw) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, verbose, log_category, "Creating window for [%u]", e);
+			kengine_logf(r, verbose, log_category, "Creating window for {}", e);
 
 			init_global_glfw();
 
@@ -153,7 +153,7 @@ namespace kengine::render::glfw {
 			glfwSetWindowUserPointer(glfw_comp.ptr.get(), (void *)e);
 			glfwSetWindowSizeCallback(glfw_comp.ptr.get(), [](GLFWwindow * window, int width, int height) noexcept {
 				const auto e = entt::entity(intptr_t(glfwGetWindowUserPointer(window)));
-				kengine_logf(g_this->r, verbose, log_category, "Window size for [%u] changed to { %d, %d }", e, width, height);
+				kengine_logf(g_this->r, verbose, log_category, "Window size for {} changed to ({}, {})", e, width, height);
 				auto & comp = g_this->r.get<render::window>(e);
 				comp.size = { (unsigned int)width, (unsigned int)height };
 			});
@@ -182,7 +182,7 @@ namespace kengine::render::glfw {
 
 				static const entt::registry * g_r = &r;
 				glfwSetErrorCallback([](int error, const char * desc) {
-					kengine_logf(*g_r, error, log_category, "Error code: %d. Description: '%s'", error, desc);
+					kengine_logf(*g_r, error, log_category, "Error code: {}. Description: '{}'", error, desc);
 				});
 
 				const auto ret = glfwInit();

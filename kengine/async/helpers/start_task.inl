@@ -15,7 +15,7 @@ namespace kengine::async {
 	void start_task(entt::registry & r, entt::entity e, const task::string & task_name, std::future<T> && future) noexcept {
 		KENGINE_PROFILING_SCOPE;
 
-		kengine_logf(r, log, "async", "Async task '%s' starting", task_name.c_str());
+		kengine_logf(r, log, "async", "Async task '{}' starting", task_name);
 		r.emplace<task>(e, task_name);
 		r.emplace<result<T>>(e, std::move(future));
 	}

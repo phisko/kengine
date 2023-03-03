@@ -61,7 +61,7 @@ namespace kengine::meta {
 			meta::remove>([&](auto t) {
 			using type = putils_wrapped_type(t);
 
-			kengine_logf(r, verbose, "meta", "Pre-instantiating storage for %s", putils::reflection::get_class_name<type>());
+			kengine_logf(r, verbose, "meta", "Pre-instantiating storage for {}", putils::reflection::get_class_name<type>());
 			r.storage<type>();
 			registrators.emplace_back(register_meta_component_implementation<type, Comps...>);
 		});
