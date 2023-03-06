@@ -44,7 +44,7 @@
 #include "kengine/physics/kinematic/data/kinematic.hpp"
 #include "kengine/render/data/debug_graphics.hpp"
 #include "kengine/skeleton/data/bone_names.hpp"
-#include "kengine/skeleton/data/skeleton.hpp"
+#include "kengine/skeleton/data/bone_matrices.hpp"
 #include "kengine/skeleton/helpers/get_bone_matrix.hpp"
 
 namespace putils {
@@ -79,8 +79,8 @@ namespace kengine::physics::bullet {
 			r.on_update<model_collider>().connect<&system::update_all_instances>(this),
 			r.on_construct<skeleton::bone_names>().connect<&system::update_all_instances>(this),
 			r.on_update<skeleton::bone_names>().connect<&system::update_all_instances>(this),
-			r.on_construct<skeleton::skeleton>().connect<&system::on_skeleton_updated>(this),
-			r.on_update<skeleton::skeleton>().connect<&system::on_skeleton_updated>(this),
+			r.on_construct<skeleton::bone_matrices>().connect<&system::on_skeleton_updated>(this),
+			r.on_update<skeleton::bone_matrices>().connect<&system::on_skeleton_updated>(this),
 		};
 
 		btDefaultCollisionConfiguration collisionConfiguration;
@@ -216,7 +216,7 @@ namespace kengine::physics::bullet {
 				return;
 			}
 
-			if (r.all_of<skeleton::bone_names>(instance.model) && !r.all_of<skeleton::skeleton>(e)) {
+			if (r.all_of<skeleton::bone_names>(instance.model) && !r.all_of<skeleton::bone_matrices>(e)) {
 				kengine_logf(r, verbose, log_category, "Not adding bullet_data to {} because it doesn't have a skeleton yet, while its model does", e);
 				return;
 			}
@@ -248,7 +248,7 @@ namespace kengine::physics::bullet {
 
 			const auto & model_collider = r.get<kengine::physics::model_collider>(model_entity);
 
-			const auto skeleton = r.try_get<skeleton::skeleton>(e);
+			const auto skeleton = r.try_get<skeleton::bone_matrices>(e);
 			const auto bone_names = r.try_get<skeleton::bone_names>(model_entity);
 			const auto model_transform = r.try_get<core::transform>(model_entity);
 
@@ -269,7 +269,7 @@ namespace kengine::physics::bullet {
 			dynamics_world.addRigidBody(comp.body.get());
 		}
 
-		void add_shape(bullet_data & comp, const model_collider::collider & collider, const core::transform & transform, const skeleton::skeleton * skeleton, const skeleton::bone_names * bone_names, const core::transform * model_transform) {
+		void add_shape(bullet_data & comp, const model_collider::collider & collider, const core::transform & transform, const skeleton::bone_matrices * skeleton, const skeleton::bone_names * bone_names, const core::transform * model_transform) {
 			KENGINE_PROFILING_SCOPE;
 
 			const auto size = collider.transform.bounding_box.size * transform.bounding_box.size;
@@ -349,7 +349,7 @@ namespace kengine::physics::bullet {
 
 			physics.changed = false;
 
-			const auto skeleton = r.try_get<skeleton::skeleton>(e);
+			const auto skeleton = r.try_get<skeleton::bone_matrices>(e);
 			const auto bone_names = r.try_get<skeleton::bone_names>(model_entity);
 
 			if (skeleton && bone_names) {
@@ -436,7 +436,7 @@ namespace kengine::physics::bullet {
 			return ret;
 		}
 
-		btTransform to_bullet(const core::transform & parent, const model_collider::collider & collider, const skeleton::skeleton * skeleton, const skeleton::bone_names * bone_names, const core::transform * model_transform) noexcept {
+		btTransform to_bullet(const core::transform & parent, const model_collider::collider & collider, const skeleton::bone_matrices * skeleton, const skeleton::bone_names * bone_names, const core::transform * model_transform) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, very_verbose, log_category, "Converting transform for collider");
 

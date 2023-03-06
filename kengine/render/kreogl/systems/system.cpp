@@ -77,7 +77,7 @@
 #include "kengine/render/kreogl/helpers/putils_to_glm.hpp"
 #include "kengine/render/kreogl/shaders/highlight_shader.hpp"
 #include "kengine/skeleton/data/bone_names.hpp"
-#include "kengine/skeleton/data/skeleton.hpp"
+#include "kengine/skeleton/data/bone_matrices.hpp"
 
 namespace kengine::render::kreogl {
 	static constexpr auto log_category = "render_kreogl";
@@ -416,7 +416,7 @@ namespace kengine::render::kreogl {
 					r.emplace<::kreogl::animated_object>(entity).model = kreogl_model->ptr.get();
 					if (r.all_of<skeleton::bone_names>(model_entity)) {
 						kengine_logf(r, verbose, log_category, "Adding skeleton to {}", entity);
-						r.emplace<skeleton::skeleton>(entity);
+						r.emplace<skeleton::bone_matrices>(entity);
 					}
 				}
 
@@ -490,7 +490,7 @@ namespace kengine::render::kreogl {
 			kengine_logf(r, very_verbose, log_category, "Syncing animation time and skeleton for {}", entity);
 			animation.current_time = kreogl_object.animation->current_time;
 
-			auto & skeleton = r.get<skeleton::skeleton>(entity);
+			auto & skeleton = r.get<skeleton::bone_matrices>(entity);
 			const auto nb_meshes = kreogl_object.skeleton.meshes.size();
 			skeleton.meshes.resize(nb_meshes);
 			for (size_t i = 0; i < nb_meshes; ++i) {
