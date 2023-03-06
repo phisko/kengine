@@ -1,4 +1,4 @@
-# [adjustable](adjustable.hpp)
+# [values](values.hpp)
 
 Utility component exposing values that may be adjusted at runtime, e.g. by the [imgui_adjustable](../imgui/systems/system.md) system.
 
@@ -13,7 +13,7 @@ static bool global_bool = false;
 static int global_int = 42;
 
 const auto e = registry.create();
-registry.emplace<kengine::adjustable::adjustable>(e) = {
+registry.emplace<kengine::adjustable::values>(e) = {
         "Globals", // Category for these adjustables
         { // vector of adjustables
             { "Bool name", &global_bool },

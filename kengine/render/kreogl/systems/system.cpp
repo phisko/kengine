@@ -31,7 +31,7 @@
 #include "kreogl/world.hpp"
 
 // kengine
-#include "kengine/adjustable/data/adjustable.hpp"
+#include "kengine/adjustable/data/values.hpp"
 #include "kengine/async/helpers/process_results.hpp"
 #include "kengine/async/helpers/start_task.hpp"
 #include "kengine/core/data/transform.hpp"
@@ -105,7 +105,7 @@ namespace kengine::render::kreogl {
 			e.emplace<main_loop::execute>(putils_forward_to_this(execute));
 
 			auto & scale = e.emplace<imgui::scale>();
-			e.emplace<adjustable::adjustable>() = {
+			e.emplace<adjustable::values>() = {
 				"ImGui",
 				{
 					{ "Scale", &scale.modifier },

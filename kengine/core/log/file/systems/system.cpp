@@ -16,7 +16,7 @@
 #include "putils/thread_name.hpp"
 
 // kengine
-#include "kengine/adjustable/data/adjustable.hpp"
+#include "kengine/adjustable/data/values.hpp"
 #include "kengine/command_line/helpers/parse.hpp"
 #include "kengine/core/assert/helpers/kengine_assert.hpp"
 #include "kengine/core/log/data/severity_control.hpp"
@@ -55,7 +55,7 @@ namespace kengine::core::log::file {
 			}
 
 			auto & control = e.emplace<severity_control>(parse_command_line_severity(r));
-			e.emplace<adjustable::adjustable>() = {
+			e.emplace<adjustable::values>() = {
 				"Log",
 				{
 					{ "File", &control.global_severity },

@@ -28,7 +28,7 @@
 #include "putils/forward_to.hpp"
 
 // kengine
-#include "kengine/adjustable/data/adjustable.hpp"
+#include "kengine/adjustable/data/values.hpp"
 #include "kengine/core/assert/helpers/kengine_assert.hpp"
 #include "kengine/core/data/transform.hpp"
 #include "kengine/core/helpers/new_entity_processor.hpp"
@@ -139,7 +139,7 @@ namespace kengine::physics::bullet {
 			e.emplace<main_loop::execute>(putils_forward_to_this(execute));
 			e.emplace<kengine::physics::query_position>(putils_forward_to_this(query_position));
 
-			e.emplace<adjustable::adjustable>() = {
+			e.emplace<adjustable::values>() = {
 				"Physics",
 				{
 					{ "Gravity", &adjustables.gravity },
