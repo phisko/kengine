@@ -2,7 +2,7 @@
 
 // putils
 #include "putils/string.hpp"
-#include "putils/reflection_helpers/reflectible_formatter.hpp"
+#include "putils/fmt/fmt.hpp"
 
 // kengine
 #include "kengine/core/helpers/entt_formatter.hpp"

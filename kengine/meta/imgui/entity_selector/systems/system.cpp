@@ -9,12 +9,12 @@
 
 // putils
 #include "putils/forward_to.hpp"
-#include "putils/parse.hpp"
 #include "putils/string.hpp"
 
 // kengine core
 #include "kengine/core/data/name.hpp"
 #include "kengine/core/data/selected.hpp"
+#include "kengine/core/helpers/entt_scanner.hpp"
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 #include "kengine/core/sort/helpers/get_name_sorted_entities.hpp"
@@ -123,7 +123,9 @@ namespace kengine::meta::imgui::entity_selector {
 				result.display_text += " -- ";
 
 				bool matches = false;
-				if (std::isdigit(name_search[0]) && putils::parse<entt::entity>(name_search) == e) {
+
+				entt::entity id;
+				if (scn::scan_default(name_search, id) && id == e) {
 					kengine_log(r, very_verbose, log_category, "Match found in ID");
 					matches = true;
 					result.display_text += "ID";

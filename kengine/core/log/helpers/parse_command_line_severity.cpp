@@ -2,8 +2,7 @@
 
 // putils
 #include "putils/command_line_arguments.hpp"
-#include "putils/parse.hpp"
-#include "putils/reflection_helpers/json_helper.hpp"
+#include "putils/scn/scn.hpp"
 #include "putils/split.hpp"
 
 // kengine core/profiling
@@ -41,7 +40,7 @@ namespace kengine::core::log {
 
 		static std::optional<severity_control> command_line_severity;
 		if (command_line_severity != std::nullopt) {
-			kengine_logf(r, very_verbose, log_category, "Found pre-parsed {}", putils::reflection::to_json(*command_line_severity).dump(4));
+			kengine_logf(r, very_verbose, log_category, "Found pre-parsed {}", *command_line_severity);
 			return *command_line_severity;
 		}
 
@@ -49,7 +48,7 @@ namespace kengine::core::log {
 
 		for (const auto & [e, command_line] : r.view<command_line::arguments>().each()) {
 			const auto opts = putils::parse_arguments<options>(command_line.args);
-			kengine_logf(r, very_verbose, log_category, "Found {} in {}", putils::reflection::to_json(opts).dump(4), e);
+			kengine_logf(r, very_verbose, log_category, "Found {} in {}", opts, e);
 
 			command_line_severity->global_severity = opts.log_level;
 			const auto categories = putils::split(opts.log_category_levels.c_str(), ',');
@@ -61,8 +60,9 @@ namespace kengine::core::log {
 				}
 
 				const auto & key = key_value[0];
-				const auto value = putils::parse<severity>(key_value[1]);
-				command_line_severity->category_severities[key] = value;
+				severity value;
+				if (scn::scan_default(key_value[1], value))
+					command_line_severity->category_severities[key] = value;
 			}
 		}
 
