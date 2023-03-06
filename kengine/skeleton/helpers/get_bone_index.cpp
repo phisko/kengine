@@ -11,7 +11,7 @@
 namespace kengine::skeleton {
 	static constexpr auto log_category = "skeleton";
 
-	bone_indices get_bone_index(const entt::registry & r, const char * bone, const model_skeleton & model) noexcept {
+	bone_indices get_bone_index(const entt::registry & r, const char * bone, const bone_names & model) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		kengine_logf(r, very_verbose, log_category, "Getting bone index for {}", bone);
 

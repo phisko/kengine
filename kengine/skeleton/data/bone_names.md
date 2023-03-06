@@ -1,4 +1,4 @@
-# [model_skeleton](model_skeleton.hpp)
+# [bone_names](bone_names.hpp)
 
 Component listing the bones contained in the [model entity](../../instance/).
 

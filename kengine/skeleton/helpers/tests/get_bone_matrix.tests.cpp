@@ -15,7 +15,7 @@ TEST(skeleton_helper, get_bone_matrix) {
 		.meshes = { { .bone_mats_mesh_space = { expected } } }
 	};
 
-	const kengine::skeleton::model_skeleton model{
+	const kengine::skeleton::bone_names model{
 		.meshes = { { { bone_name } } }
 	};
 

@@ -8,7 +8,7 @@
 
 // kengine
 #include "kengine/skeleton/data/skeleton.hpp"
-#include "kengine/skeleton/data/model_skeleton.hpp"
+#include "kengine/skeleton/data/bone_names.hpp"
 
 namespace kengine::skeleton {
 	struct bone_indices {
@@ -16,5 +16,5 @@ namespace kengine::skeleton {
 		unsigned int bone_index = 0;
 	};
 
-	KENGINE_SKELETON_EXPORT bone_indices get_bone_index(const entt::registry & r, const char * bone, const model_skeleton & model) noexcept;
+	KENGINE_SKELETON_EXPORT bone_indices get_bone_index(const entt::registry & r, const char * bone, const bone_names & model) noexcept;
 }

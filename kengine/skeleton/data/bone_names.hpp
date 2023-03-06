@@ -10,7 +10,7 @@
 namespace kengine::skeleton {
 	//! putils reflect all
 	//! used_types: [refltype::mesh]
-	struct model_skeleton {
+	struct bone_names {
 		//! putils reflect all
 		//! class_name: model_skeleton_mesh
 		struct mesh {
@@ -20,4 +20,4 @@ namespace kengine::skeleton {
 	};
 }
 
-#include "model_skeleton.rpp"
+#include "bone_names.rpp"

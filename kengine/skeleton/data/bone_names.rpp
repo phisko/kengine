@@ -2,7 +2,7 @@
 
 #include "putils/reflection.hpp"
 
-#define refltype kengine::skeleton::model_skeleton
+#define refltype kengine::skeleton::bone_names
 putils_reflection_info {
 	putils_reflection_class_name;
 	putils_reflection_attributes(
@@ -14,7 +14,7 @@ putils_reflection_info {
 };
 #undef refltype
 
-#define refltype kengine::skeleton::model_skeleton::mesh
+#define refltype kengine::skeleton::bone_names::mesh
 putils_reflection_info {
 	putils_reflection_custom_class_name(model_skeleton_mesh);
 	putils_reflection_attributes(
