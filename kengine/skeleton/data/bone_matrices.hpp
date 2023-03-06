@@ -16,7 +16,7 @@
 namespace kengine::skeleton {
 	//! putils reflect all
 	//! used_types: [refltype::mesh]
-	struct skeleton {
+	struct bone_matrices {
 		//! putils reflect all
 		//! class_name: skeleton_mesh
 		struct mesh {
@@ -27,4 +27,4 @@ namespace kengine::skeleton {
 	};
 }
 
-#include "skeleton.rpp"
+#include "bone_matrices.rpp"

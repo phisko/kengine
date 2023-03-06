@@ -1,4 +1,4 @@
-# [skeleton](skeleton.hpp)
+# [skeleton](bone_matrices.hpp)
 
 Component that holds transformation matrices for the entity's bones.
 
