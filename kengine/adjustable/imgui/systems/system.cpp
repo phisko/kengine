@@ -16,7 +16,7 @@
 // putils
 #include "putils/forward_to.hpp"
 #include "putils/ini_file.hpp"
-#include "putils/parse.hpp"
+#include "putils/scn/scn.hpp"
 #include "putils/split.hpp"
 #include "putils/static_assert.hpp"
 #include "putils/vector.hpp"
@@ -347,26 +347,33 @@ namespace kengine::adjustable::imgui {
 					*storage.ptr = storage.value;
 			};
 
+			const std::string_view view(s);
 			switch (value.type) {
 				case adjustable::value_type::Int: {
-					value.int_storage.value = putils::parse<int>(s);
+					const auto result = scn::scan_default(view, value.int_storage.value);
+					if (!result)
+						kengine_assert_failed(r, "{}", result.error().msg());
 					assign_ptr(value.int_storage);
 					break;
 				}
 				case adjustable::value_type::Float: {
-					value.float_storage.value = putils::parse<float>(s);
+					const auto result = scn::scan_default(view, value.float_storage.value);
+					if (!result)
+						kengine_assert_failed(r, "{}", result.error().msg());
 					assign_ptr(value.float_storage);
 					break;
 				}
 				case adjustable::value_type::Bool: {
-					value.bool_storage.value = putils::parse<bool>(s);
+					const auto result = scn::scan_default(view, value.bool_storage.value);
+					if (!result)
+						kengine_assert_failed(r, "{}", result.error().msg());
 					assign_ptr(value.bool_storage);
 					break;
 				}
 				case adjustable::value_type::Color: {
-					putils::color tmp;
-					tmp.rgba = putils::parse<unsigned int>(s);
-					value.color_storage.value = putils::to_normalized_color(tmp);
+					const auto result = scn::scan_default(view, value.color_storage.value);
+					if (!result)
+						kengine_assert_failed(r, "{}", result.error().msg());
 					assign_ptr(value.color_storage);
 					break;
 				}

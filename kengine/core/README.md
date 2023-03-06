@@ -7,6 +7,8 @@ Components and helpers that are accessed by most (if not all) other libraries.
 	* [selected](data/selected.md): tags an entity as selected by the user
 	* [transform](data/transform.md): an entity's position, rotation and scale
 * [helpers](helpers/)
+	* [entt_formatter](helpers/entt_formatter.md): `fmt::formatter` specialization for `entt` types
+	* [entt_scanner](helpers/entt_scanner.md): `scn::scanner` specialization for `entt` types
 	* [new_entity_processor](helpers/new_entity_processor.md): automatically call a functor when entities enter a group
 
 Sub-libraries:

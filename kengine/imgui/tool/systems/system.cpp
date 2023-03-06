@@ -15,7 +15,7 @@
 // putils
 #include "putils/forward_to.hpp"
 #include "putils/ini_file.hpp"
-#include "putils/parse.hpp"
+#include "putils/scn/scn.hpp"
 #include "putils/split.hpp"
 
 // kengine core
@@ -136,8 +136,11 @@ namespace kengine::imgui::tool {
 
 			kengine_logf(r, verbose, log_category, "Initializing {}", name->name);
 			const auto & section = configuration.sections["Tools"];
-			if (const auto it = section.values.find(name->name.c_str()); it != section.values.end())
-				comp.enabled = putils::parse<bool>(it->second);
+			if (const auto it = section.values.find(name->name.c_str()); it != section.values.end()) {
+				const auto result = scn::scan_default(it->second, comp.enabled);
+				if (!result)
+					kengine_assert_failed(r, "{}", result.error().msg());
+			}
 
 			menu_entry * current_entry = &root_entry;
 			const auto entry_names = putils::split(name->name.c_str(), '/');

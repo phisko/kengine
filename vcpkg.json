@@ -3,6 +3,7 @@
     "dependencies": [
         "gtest",
         "fmt",
+        "scnlib",
         "magic-enum",
         "nlohmann-json",
         "lua",
