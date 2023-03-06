@@ -1,4 +1,4 @@
-# [physics](physics.hpp)
+# [physics](inertia.hpp)
 
 Component that moves the entity.
 

@@ -28,7 +28,7 @@
 #include "kengine/pathfinding/recast/data/agent.hpp"
 #include "kengine/pathfinding/recast/data/crowd.hpp"
 #include "kengine/pathfinding/recast/data/nav_mesh.hpp"
-#include "kengine/physics/data/physics.hpp"
+#include "kengine/physics/data/inertia.hpp"
 
 #include "common.hpp"
 
@@ -240,12 +240,12 @@ namespace kengine::pathfinding::recast {
 			for (int i = 0; i < nb_agents; ++i) {
 				const auto agent = active_agents[i];
 				const auto e = entt::entity(intptr_t(agent->params.userData));
-				const auto & [transform, physics] = r.get<core::transform, physics::physics>(e);
+				const auto & [transform, physics] = r.get<core::transform, physics::inertia>(e);
 				read_from_agent(transform, physics, *agent, environment_info);
 			}
 		}
 
-		static void read_from_agent(core::transform & transform, physics::physics & physics, const dtCrowdAgent & agent, const environment_info & environment_info) noexcept {
+		static void read_from_agent(core::transform & transform, physics::inertia & physics, const dtCrowdAgent & agent, const environment_info & environment_info) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			physics.movement = environment_info.environment_scale * putils::point3f{ agent.vel };
@@ -272,7 +272,7 @@ namespace kengine::pathfinding::recast {
 			const auto editableAgent = crowd.ptr->getEditableAgent(agent.index);
 			fill_crowd_agent_params(editableAgent->params, object_info);
 			memcpy(editableAgent->npos, object_info.object_in_nav_mesh.position.raw, sizeof(float[3]));
-			memcpy(editableAgent->nvel, e.get<physics::physics>().movement.raw, sizeof(float[3]));
+			memcpy(editableAgent->nvel, e.get<physics::inertia>().movement.raw, sizeof(float[3]));
 		}
 
 		static void update_destination(entt::handle e, const nav_mesh & nav_mesh, const crowd & crowd, const putils::point3f & destination_in_model, const putils::point3f & search_extents) noexcept {
