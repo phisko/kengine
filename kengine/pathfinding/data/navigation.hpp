@@ -12,7 +12,7 @@
 namespace kengine::pathfinding {
 	//! putils reflect all
 	//! used_types: [putils::point3f]
-	struct pathfinding {
+	struct navigation {
 		entt::entity environment = entt::null; // Entity in which we are navigating. Should have a model with a nav_mesh
 		putils::point3f destination{ 0.f, 0.f, 0.f };
 		float search_distance = 2.f;
@@ -20,4 +20,4 @@ namespace kengine::pathfinding {
 	};
 }
 
-#include "pathfinding.rpp"
+#include "navigation.rpp"

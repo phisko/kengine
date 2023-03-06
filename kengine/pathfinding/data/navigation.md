@@ -1,6 +1,6 @@
-# [pathfinding](pathfinding.hpp)
+# [navigation](navigation.hpp)
 
-Component that performs pathfinding for the entity.
+Component that performs navigation for the entity.
 
 ## Members
 
