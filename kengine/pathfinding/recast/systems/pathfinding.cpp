@@ -24,7 +24,7 @@
 #include "kengine/instance/helpers/get_model.hpp"
 #include "kengine/instance/helpers/try_get_model.hpp"
 #include "kengine/pathfinding/data/nav_mesh.hpp"
-#include "kengine/pathfinding/data/pathfinding.hpp"
+#include "kengine/pathfinding/data/navigation.hpp"
 #include "kengine/pathfinding/recast/data/agent.hpp"
 #include "kengine/pathfinding/recast/data/crowd.hpp"
 #include "kengine/pathfinding/recast/data/nav_mesh.hpp"
@@ -48,7 +48,7 @@ namespace kengine::pathfinding::recast {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, very_verbose, log_category, "Removing old agents");
 
-			for (auto [e, agent] : r.view<recast::agent>(entt::exclude<kengine::pathfinding::pathfinding>).each()) {
+			for (auto [e, agent] : r.view<recast::agent>(entt::exclude<navigation>).each()) {
 				kengine_logf(r, verbose, log_category, "Removing agent {} from crowd {}", e, agent.crowd);
 				auto & crowd = r.get<recast::crowd>(agent.crowd);
 				crowd.ptr->removeAgent(agent.index);
@@ -60,22 +60,22 @@ namespace kengine::pathfinding::recast {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, very_verbose, log_category, "Creating new agents");
 
-			for (auto [e, pathfinding, transform] : r.view<kengine::pathfinding::pathfinding, core::transform>(entt::exclude<agent>).each()) {
-				if (pathfinding.environment == entt::null) {
+			for (auto [e, navigation, transform] : r.view<navigation, core::transform>(entt::exclude<agent>).each()) {
+				if (navigation.environment == entt::null) {
 					kengine_logf(r, very_verbose, log_category, "Entity {} has null environment", e);
 					continue;
 				}
 
-				const auto crowd = get_crowd_component({ r, pathfinding.environment });
+				const auto crowd = get_crowd_component({ r, navigation.environment });
 				if (!crowd) {
-					kengine_logf(r, warning, log_category, "Entity {}'s environment {} has no crowd component", e, pathfinding.environment);
+					kengine_logf(r, warning, log_category, "Entity {}'s environment {} has no crowd component", e, navigation.environment);
 					continue;
 				}
 
-				kengine_logf(r, verbose, log_category, "Adding agent {} to crowd {}", e, pathfinding.environment);
+				kengine_logf(r, verbose, log_category, "Adding agent {} to crowd {}", e, navigation.environment);
 
-				const auto object_info = get_object_info(get_environment_info({ r, pathfinding.environment }), transform, pathfinding);
-				attach_agent_component({ r, e }, object_info, *crowd, pathfinding.environment);
+				const auto object_info = get_object_info(get_environment_info({ r, navigation.environment }), transform, navigation);
+				attach_agent_component({ r, e }, object_info, *crowd, navigation.environment);
 			}
 		}
 
@@ -105,7 +105,7 @@ namespace kengine::pathfinding::recast {
 			putils::rect3f object_in_nav_mesh;
 			float max_speed;
 		};
-		static object_info get_object_info(const environment_info & environment, const core::transform & transform, const pathfinding & pathfinding) noexcept {
+		static object_info get_object_info(const environment_info & environment, const core::transform & transform, const navigation & navigation) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			object_info ret;
@@ -113,7 +113,7 @@ namespace kengine::pathfinding::recast {
 				glm::convert_to_referencial(transform.bounding_box.position, environment.world_to_model),
 				transform.bounding_box.size / environment.environment_scale
 			};
-			ret.max_speed = putils::get_length(putils::point3f{ pathfinding.max_speed, 0.f, 0.f } / environment.environment_scale);
+			ret.max_speed = putils::get_length(putils::point3f{ navigation.max_speed, 0.f, 0.f } / environment.environment_scale);
 			return ret;
 		}
 
@@ -178,15 +178,15 @@ namespace kengine::pathfinding::recast {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, very_verbose, log_category, "Moving changed agents");
 
-			for (auto [e, pathfinding, agent] : r.view<kengine::pathfinding::pathfinding, recast::agent>().each()) {
-				if (pathfinding.environment == agent.crowd) {
+			for (auto [e, navigation, agent] : r.view<navigation, recast::agent>().each()) {
+				if (navigation.environment == agent.crowd) {
 					kengine_logf(r, very_verbose, log_category, "Entity {} has a null environment", e);
 					continue;
 				}
 
-				const auto new_crowd = get_crowd_component({ r, pathfinding.environment });
+				const auto new_crowd = get_crowd_component({ r, navigation.environment });
 				if (!new_crowd) {
-					kengine_logf(r, warning, log_category, "Entity {}'s environment {} has no crowd component", e, pathfinding.environment);
+					kengine_logf(r, warning, log_category, "Entity {}'s environment {} has no crowd component", e, navigation.environment);
 					continue;
 				}
 
@@ -196,8 +196,8 @@ namespace kengine::pathfinding::recast {
 					old_crowd->ptr->removeAgent(agent.index);
 				}
 
-				const auto object_info = get_object_info(get_environment_info({ r, pathfinding.environment }), r.get<core::transform>(e), pathfinding);
-				attach_agent_component({ r, e }, object_info, *new_crowd, pathfinding.environment);
+				const auto object_info = get_object_info(get_environment_info({ r, navigation.environment }), r.get<core::transform>(e), navigation);
+				attach_agent_component({ r, e }, object_info, *new_crowd, navigation.environment);
 			}
 		}
 
@@ -230,8 +230,8 @@ namespace kengine::pathfinding::recast {
 			for (int i = 0; i < nb_agents; ++i) {
 				const auto agent = active_agents[i];
 				const auto e = entt::entity(intptr_t(agent->params.userData));
-				const auto & [transform, pathfinding] = r.get<core::transform, kengine::pathfinding::pathfinding>(e);
-				write_to_agent({ r, e }, transform, pathfinding, environment_info, nav_mesh, crowd);
+				const auto & [transform, navigation] = r.get<core::transform, pathfinding::navigation>(e);
+				write_to_agent({ r, e }, transform, navigation, environment_info, nav_mesh, crowd);
 			}
 
 			crowd.ptr->update(delta_time, nullptr);
@@ -252,15 +252,15 @@ namespace kengine::pathfinding::recast {
 			transform.bounding_box.position = glm::convert_to_referencial(agent.npos, environment_info.model_to_world);
 		}
 
-		static void write_to_agent(entt::handle e, const core::transform & transform, const kengine::pathfinding::pathfinding & pathfinding, const environment_info & environment_info, const nav_mesh & nav_mesh, const crowd & crowd) noexcept {
+		static void write_to_agent(entt::handle e, const core::transform & transform, const navigation & navigation, const environment_info & environment_info, const nav_mesh & nav_mesh, const crowd & crowd) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_logf(*e.registry(), very_verbose, log_category, "Writing to agent {}", e);
 
-			const auto object_info = get_object_info(environment_info, transform, pathfinding);
+			const auto object_info = get_object_info(environment_info, transform, navigation);
 			update_agent_component(e, object_info, crowd);
 
-			const auto destination_in_model = glm::convert_to_referencial(pathfinding.destination, environment_info.world_to_model);
-			const auto search_extents = putils::point3f{ pathfinding.search_distance, pathfinding.search_distance, pathfinding.search_distance } / environment_info.environment_scale;
+			const auto destination_in_model = glm::convert_to_referencial(navigation.destination, environment_info.world_to_model);
+			const auto search_extents = putils::point3f{ navigation.search_distance, navigation.search_distance, navigation.search_distance } / environment_info.environment_scale;
 			update_destination(e, nav_mesh, crowd, destination_in_model, search_extents);
 		}
 
