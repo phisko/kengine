@@ -4,17 +4,11 @@
 #include <entt/entity/handle.hpp>
 #include <entt/entity/registry.hpp>
 
-// kengine core
+// kengine
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
-
-// kengine input
 #include "kengine/input/data/handler.hpp"
-
-// kengine render
 #include "kengine/render/functions/get_entity_in_pixel.hpp"
-
-// kengine render/on_click
 #include "kengine/render/on_click/functions/on_click.hpp"
 
 namespace kengine::render::on_click {

@@ -8,18 +8,12 @@
 #include "putils/forward_to.hpp"
 #include "putils/reflection_helpers/json_helper.hpp"
 
-// kengine core
-#include "kengine/core/log/helpers/kengine_log.hpp"
+// kengine
 #include "kengine/core/helpers/new_entity_processor.hpp"
+#include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
-
-// kengine instance
 #include "kengine/instance/data/instance.hpp"
-
-// kengine instance/find_model
 #include "kengine/instance/find_model/data/instance_of.hpp"
-
-// kengine main_loop
 #include "kengine/main_loop/functions/execute.hpp"
 
 namespace kengine::instance::find_model {

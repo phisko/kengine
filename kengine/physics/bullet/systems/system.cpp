@@ -27,42 +27,25 @@
 // putils
 #include "putils/forward_to.hpp"
 
-// kengine core
-#include "kengine/core/data/transform.hpp"
-#include "kengine/core/assert/helpers/kengine_assert.hpp"
-#include "kengine/core/log/helpers/kengine_log.hpp"
-#include "kengine/core/helpers/new_entity_processor.hpp"
-#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
-
-// kengine adjustable
+// kengine
 #include "kengine/adjustable/data/adjustable.hpp"
-
-// kengine glm
+#include "kengine/core/assert/helpers/kengine_assert.hpp"
+#include "kengine/core/data/transform.hpp"
+#include "kengine/core/helpers/new_entity_processor.hpp"
+#include "kengine/core/log/helpers/kengine_log.hpp"
+#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 #include "kengine/glm/helpers/get_model_matrix.hpp"
-
-// kengine main_loop
-#include "kengine/main_loop/functions/execute.hpp"
-
-// kengine instance
 #include "kengine/instance/data/instance.hpp"
-
-// kengine physics
+#include "kengine/main_loop/functions/execute.hpp"
 #include "kengine/physics/data/model_collider.hpp"
 #include "kengine/physics/data/physics.hpp"
-
-// kengine physics/kinematic
+#include "kengine/physics/functions/on_collision.hpp"
+#include "kengine/physics/functions/query_position.hpp"
 #include "kengine/physics/kinematic/data/kinematic.hpp"
-
-// kengine render
 #include "kengine/render/data/debug_graphics.hpp"
-
-// kengine skeleton
 #include "kengine/skeleton/data/model_skeleton.hpp"
 #include "kengine/skeleton/data/skeleton.hpp"
 #include "kengine/skeleton/helpers/get_bone_matrix.hpp"
-
-#include "kengine/physics/functions/on_collision.hpp"
-#include "kengine/physics/functions/query_position.hpp"
 
 namespace putils {
 	inline bool operator<(const point3f & lhs, const point3f & rhs) noexcept {

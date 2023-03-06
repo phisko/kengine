@@ -3,7 +3,7 @@
 // imgui
 #include <imgui.h>
 
-// kengine helpers
+// kengine
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 namespace kengine::render::glfw {

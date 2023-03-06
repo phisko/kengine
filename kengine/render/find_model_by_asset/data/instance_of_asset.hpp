@@ -1,10 +1,8 @@
 #pragma once
 
-// kengine core
-#include "kengine/render/data/asset.hpp"
-
-// kengine instance/find_model
+// kengine
 #include "kengine/instance/find_model/data/instance_of.hpp"
+#include "kengine/render/data/asset.hpp"
 
 namespace kengine::render::find_model_by_asset {
 	//! putils reflect all

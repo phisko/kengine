@@ -1,7 +1,7 @@
 // gtest
 #include <gtest/gtest.h>
 
-// kengine glm
+// kengine
 #include "kengine/glm/helpers/to_vec.hpp"
 
 TEST(glm, to_vec) {

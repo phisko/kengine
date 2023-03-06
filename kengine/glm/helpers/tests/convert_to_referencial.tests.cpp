@@ -4,7 +4,7 @@
 // glm
 #include <glm/ext/matrix_transform.hpp>
 
-// kengine glm
+// kengine
 #include "kengine/glm/helpers/convert_to_referencial.hpp"
 
 TEST(glm, convert_to_referencial) {

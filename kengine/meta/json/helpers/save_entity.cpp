@@ -4,15 +4,11 @@
 #include <entt/entity/handle.hpp>
 #include <entt/entity/registry.hpp>
 
-// kengine core
+// kengine
 #include "kengine/core/data/name.hpp"
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
-
-// kengine meta
 #include "kengine/meta/functions/has.hpp"
-
-// kengine meta/json
 #include "kengine/meta/json/functions/save.hpp"
 
 namespace kengine::meta::json {

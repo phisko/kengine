@@ -7,7 +7,7 @@
 // putils
 #include "putils/default_constructors.hpp"
 
-// kengine pathfinding/recast
+// kengine
 #include "kengine/pathfinding/recast/helpers/unique_ptr.hpp"
 
 namespace kengine::pathfinding::recast {

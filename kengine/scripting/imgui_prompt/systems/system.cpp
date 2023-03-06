@@ -14,28 +14,20 @@
 #include "putils/forward_to.hpp"
 #include "putils/reflection_helpers/imgui_helper.hpp"
 
-// kengine core
+// kengine
 #include "kengine/core/data/name.hpp"
 #include "kengine/core/assert/helpers/kengine_assert.hpp"
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
-
-// kengine imgui
 #include "kengine/imgui/helpers/set_context.hpp"
-
-// kengine imgui/imgui_tool
 #include "kengine/imgui/tool/data/tool.hpp"
-
-// kengine main_loop
 #include "kengine/main_loop/functions/execute.hpp"
 
 #ifdef KENGINE_SCRIPTING_LUA
-// kengine scripting/lua
 #include "kengine/scripting/lua/data/state.hpp"
 #endif
 
 #ifdef KENGINE_SCRIPTING_PYTHON
-// kengine scripting/python
 #include "kengine/scripting/python/data/state.hpp"
 #endif
 

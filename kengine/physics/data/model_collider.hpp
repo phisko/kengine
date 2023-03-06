@@ -12,7 +12,7 @@
 #include "putils/string.hpp"
 #include "putils/vector.hpp"
 
-// kengine core
+// kengine
 #include "kengine/core/data/transform.hpp"
 
 namespace kengine::physics {

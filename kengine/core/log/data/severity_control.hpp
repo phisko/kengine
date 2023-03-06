@@ -3,7 +3,7 @@
 // stl
 #include <unordered_map>
 
-// kengine core/log
+// kengine
 #include "kengine/core/log/helpers/event.hpp"
 #include "kengine/core/log/helpers/severity.hpp"
 

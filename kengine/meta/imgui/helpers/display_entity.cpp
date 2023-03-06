@@ -7,22 +7,14 @@
 // imgui
 #include <imgui.h>
 
-// kengine core
-#include "kengine/core/sort/helpers/get_name_sorted_entities.hpp"
+// kengine
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
-
-// kengine meta
+#include "kengine/core/sort/helpers/get_name_sorted_entities.hpp"
+#include "kengine/imgui/helpers/set_context.hpp"
+#include "kengine/instance/data/instance.hpp"
 #include "kengine/meta/functions/has.hpp"
 #include "kengine/meta/helpers/get_type_entity.hpp"
-
-// kengine meta/imgui
 #include "kengine/meta/imgui/functions/display.hpp"
-
-// kengine imgui
-#include "kengine/imgui/helpers/set_context.hpp"
-
-// kengine instance
-#include "kengine/instance/data/instance.hpp"
 
 namespace kengine::meta::imgui {
 	static constexpr auto log_category = "meta_imgui";

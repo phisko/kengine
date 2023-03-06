@@ -6,14 +6,10 @@
 // putils
 #include "putils/python/python_helper.hpp"
 
-// kengine core
+// kengine
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
-
-// kengine scripting
 #include "kengine/scripting/helpers/register_component.hpp"
-
-// kengine scripting/python
 #include "kengine/scripting/python/data/state.hpp"
 
 #include "register_function.hpp"

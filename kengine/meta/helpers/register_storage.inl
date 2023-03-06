@@ -8,7 +8,7 @@
 // meta
 #include "putils/meta/for_each.hpp"
 
-// kengine core
+// kengine
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 

@@ -4,7 +4,7 @@
 // gtest
 #include <gtest/gtest.h>
 
-// kengine core
+// kengine
 #include "kengine/core/log/helpers/kengine_log.hpp"
 
 TEST(log, kengine_log) {

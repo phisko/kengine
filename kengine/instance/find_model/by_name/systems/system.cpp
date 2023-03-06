@@ -1,6 +1,6 @@
 #include "system.hpp"
 
-// kengine instance
+// kengine
 #include "kengine/instance/find_model/systems/system.hpp"
 #include "kengine/instance/find_model/by_name/data/instance_of_name.hpp"
 

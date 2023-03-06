@@ -20,16 +20,12 @@
 #include "putils/forward_to.hpp"
 #include "putils/thread_name.hpp"
 
-// kengine adjustable
+// kengine
 #include "kengine/adjustable/data/adjustable.hpp"
-
-// kengine core/log
 #include "kengine/core/log/data/severity_control.hpp"
 #include "kengine/core/log/functions/on_log.hpp"
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/log/helpers/parse_command_line_severity.hpp"
-
-// kengine core/profiling
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 namespace kengine::core::log::visual_studio {

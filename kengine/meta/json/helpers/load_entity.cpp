@@ -11,12 +11,10 @@
 // putils
 #include "putils/range.hpp"
 
-// kengine core
+// kengine
 #include "kengine/core/data/name.hpp"
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
-
-// kengine meta/json
 #include "kengine/meta/json/functions/load.hpp"
 
 namespace kengine::meta::json {

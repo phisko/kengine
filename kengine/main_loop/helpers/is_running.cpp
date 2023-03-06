@@ -3,10 +3,8 @@
 // entt
 #include <entt/entity/registry.hpp>
 
-// kengine core
+// kengine
 #include "kengine/core/log/helpers/kengine_log.hpp"
-
-// kengine main_loop
 #include "kengine/main_loop/data/keep_alive.hpp"
 
 namespace kengine::main_loop {

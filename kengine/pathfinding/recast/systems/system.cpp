@@ -8,21 +8,13 @@
 // putils
 #include "putils/forward_to.hpp"
 
-// kengine core
-#include "kengine/core/log/helpers/kengine_log.hpp"
-#include "kengine/core/helpers/new_entity_processor.hpp"
-#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
-
-// kengine adjustable
+// kengine
 #include "kengine/adjustable/data/adjustable.hpp"
-
-// kengine main_loop
+#include "kengine/core/helpers/new_entity_processor.hpp"
+#include "kengine/core/log/helpers/kengine_log.hpp"
+#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 #include "kengine/main_loop/functions/execute.hpp"
-
-// kengine pathfinding
 #include "kengine/pathfinding/data/nav_mesh.hpp"
-
-// kengine pathfinding/recast
 #include "kengine/pathfinding/recast/data/agent.hpp"
 #include "kengine/pathfinding/recast/data/crowd.hpp"
 #include "kengine/pathfinding/recast/data/nav_mesh.hpp"

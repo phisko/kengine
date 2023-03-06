@@ -1,6 +1,6 @@
 #pragma once
 
-// kengine functions
+// kengine
 #include "kengine/base_function.hpp"
 
 namespace kengine::main_loop {

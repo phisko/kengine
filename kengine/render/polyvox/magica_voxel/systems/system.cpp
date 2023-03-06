@@ -19,25 +19,17 @@
 #include "putils/string.hpp"
 #include "putils/thread_name.hpp"
 
-// kengine core
-#include "kengine/core/data/transform.hpp"
-#include "kengine/core/assert/helpers/kengine_assert.hpp"
-#include "kengine/core/log/helpers/kengine_log.hpp"
-#include "kengine/core/helpers/new_entity_processor.hpp"
-#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
-
-// kengine async
-#include "kengine/async/helpers/start_task.hpp"
+// kengine
 #include "kengine/async/helpers/process_results.hpp"
-
-// kengine main_loop
+#include "kengine/async/helpers/start_task.hpp"
+#include "kengine/core/assert/helpers/kengine_assert.hpp"
+#include "kengine/core/data/transform.hpp"
+#include "kengine/core/helpers/new_entity_processor.hpp"
+#include "kengine/core/log/helpers/kengine_log.hpp"
+#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 #include "kengine/main_loop/functions/execute.hpp"
-
-// kengine render
-#include "kengine/render/data/model_data.hpp"
 #include "kengine/render/data/asset.hpp"
-
-// kengine render/polyvox
+#include "kengine/render/data/model_data.hpp"
 #include "kengine/render/polyvox/data/polyvox.hpp"
 #include "kengine/render/polyvox/magica_voxel/helpers/format.hpp"
 

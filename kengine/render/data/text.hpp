@@ -11,7 +11,7 @@
 #include "putils/string.hpp"
 #include "putils/color.hpp"
 
-// kengine render
+// kengine
 #include "kengine/render/data/on_screen.hpp"
 
 namespace kengine::render {

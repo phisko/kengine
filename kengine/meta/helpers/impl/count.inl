@@ -3,7 +3,7 @@
 // entt
 #include <entt/entity/registry.hpp>
 
-// kengine core
+// kengine
 #include "kengine/core/log/helpers/kengine_log.hpp"
 
 namespace kengine::meta {

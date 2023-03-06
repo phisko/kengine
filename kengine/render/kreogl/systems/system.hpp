@@ -1,6 +1,6 @@
 #pragma once
 
-// kengine system_creator
+// kengine
 #include "kengine/system_creator/helpers/system_creator_helper.hpp"
 
 namespace kengine::render::kreogl {

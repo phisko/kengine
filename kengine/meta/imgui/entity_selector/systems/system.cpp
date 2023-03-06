@@ -11,28 +11,18 @@
 #include "putils/forward_to.hpp"
 #include "putils/string.hpp"
 
-// kengine core
+// kengine
 #include "kengine/core/data/name.hpp"
 #include "kengine/core/data/selected.hpp"
 #include "kengine/core/helpers/entt_scanner.hpp"
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 #include "kengine/core/sort/helpers/get_name_sorted_entities.hpp"
-
-// kengine imgui
 #include "kengine/imgui/helpers/set_context.hpp"
-
-// kengine imgui/imgui_tool
 #include "kengine/imgui/tool/data/tool.hpp"
-
-// kengine main_loop
 #include "kengine/main_loop/functions/execute.hpp"
-
-// kengine meta
 #include "kengine/meta/functions/has.hpp"
 #include "kengine/meta/functions/match_string.hpp"
-
-// kengine meta/imgui
 #include "kengine/meta/imgui/helpers/display_entity.hpp"
 
 namespace kengine::meta::imgui::entity_selector {

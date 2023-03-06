@@ -3,10 +3,9 @@
 // entt
 #include <entt/entity/fwd.hpp>
 
-// kengine meta
+// kengine
 #include "kengine/meta/functions/for_each_entity.hpp"
 
-// kengine helpers
 #include "meta_component_implementation.hpp"
 
 namespace kengine::meta {

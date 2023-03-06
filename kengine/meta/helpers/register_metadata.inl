@@ -11,12 +11,10 @@
 // putils
 #include "putils/reflection_helpers/runtime_helper.hpp"
 
-// kengine core
+// kengine
 #include "kengine/core/data/name.hpp"
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
-
-// kengine meta
 #include "kengine/meta/data/attributes.hpp"
 #include "kengine/meta/data/size.hpp"
 #include "kengine/meta/helpers/get_type_entity.hpp"

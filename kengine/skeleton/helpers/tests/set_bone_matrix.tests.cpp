@@ -4,7 +4,7 @@
 // entt
 #include <entt/entity/registry.hpp>
 
-// kengine skeleton
+// kengine
 #include "kengine/skeleton/helpers/get_bone_matrix.hpp"
 #include "kengine/skeleton/helpers/set_bone_matrix.hpp"
 

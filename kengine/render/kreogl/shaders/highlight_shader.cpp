@@ -9,11 +9,9 @@
 #include "kreogl/impl/shaders/helpers/quad/quad_glsl.hpp"
 #include "kreogl/impl/shapes/quad.hpp"
 
-// kengine core
+// kengine
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
-
-// kengine render
 #include "kengine/render/data/highlight.hpp"
 
 namespace kengine::render::kreogl {

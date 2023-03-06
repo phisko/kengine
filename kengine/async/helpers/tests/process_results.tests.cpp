@@ -4,7 +4,7 @@
 // entt
 #include <entt/entity/registry.hpp>
 
-// kengine async
+// kengine
 #include "kengine/async/data/task.hpp"
 #include "kengine/async/helpers/start_task.hpp"
 #include "kengine/async/helpers/process_results.hpp"

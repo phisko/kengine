@@ -10,21 +10,13 @@
 // putils
 #include "putils/forward_to.hpp"
 
-// kengine core
+// kengine
+#include "kengine/async/data/task.hpp"
 #include "kengine/core/data/name.hpp"
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
-
-// kengine async
-#include "kengine/async/data/task.hpp"
-
-// kengine imgui
 #include "kengine/imgui/helpers/set_context.hpp"
-
-// kengine imgui/imgui_tool
 #include "kengine/imgui/tool/data/tool.hpp"
-
-// kengine main_loop
 #include "kengine/main_loop/functions/execute.hpp"
 
 namespace kengine::async::imgui {

@@ -4,7 +4,7 @@
 // gtest
 #include <gtest/gtest.h>
 
-// kengine main_loop
+// kengine
 #include "kengine/main_loop/data/keep_alive.hpp"
 #include "kengine/main_loop/functions/execute.hpp"
 #include "kengine/main_loop/helpers/stop_running.hpp"

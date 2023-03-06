@@ -18,17 +18,13 @@
 #include "putils/forward_to.hpp"
 #include "putils/thread_name.hpp"
 
-// kengine core/log
+// kengine
+#include "kengine/adjustable/data/adjustable.hpp"
 #include "kengine/core/log/data/severity_control.hpp"
 #include "kengine/core/log/functions/on_log.hpp"
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/log/helpers/parse_command_line_severity.hpp"
-
-// kengine core/profiling
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
-
-// kengine adjustable
-#include "kengine/adjustable/data/adjustable.hpp"
 
 namespace kengine::core::log::standard_output {
 	static constexpr auto log_category = "core_log_standard_output";

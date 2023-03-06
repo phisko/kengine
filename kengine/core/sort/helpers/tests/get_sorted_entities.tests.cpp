@@ -1,6 +1,6 @@
 #include "sort.tests.hpp"
 
-// kengine core
+// kengine
 #include "kengine/core/sort/helpers/get_sorted_entities.hpp"
 
 TEST_F(core_sort, get_sorted_entities_std_vector) {

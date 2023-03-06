@@ -18,21 +18,15 @@
 #include "putils/scn/scn.hpp"
 #include "putils/split.hpp"
 
-// kengine core
-#include "kengine/core/data/name.hpp"
+// kengine
 #include "kengine/core/assert/helpers/kengine_assert.hpp"
-#include "kengine/core/log/helpers/kengine_log.hpp"
+#include "kengine/core/data/name.hpp"
 #include "kengine/core/helpers/new_entity_processor.hpp"
+#include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 #include "kengine/core/sort/helpers/get_name_sorted_entities.hpp"
-
-// kengine imgui
 #include "kengine/imgui/helpers/set_context.hpp"
-
-// kengine imgui/tool
 #include "kengine/imgui/tool/data/tool.hpp"
-
-// kengine main_loop
 #include "kengine/main_loop/functions/execute.hpp"
 
 #ifndef KENGINE_IMGUI_TOOLS_SAVE_FILE

@@ -4,7 +4,7 @@
 #include <entt/entity/handle.hpp>
 #include <entt/entity/registry.hpp>
 
-// kengine core
+// kengine
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 namespace kengine::meta {

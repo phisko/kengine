@@ -4,13 +4,9 @@
 #include "putils/string.hpp"
 #include "putils/get_call_stack.hpp"
 
-// kengine core/assert
+// kengine
 #include "kengine/core/assert/functions/on_assert_failed.hpp"
-
-// kengine core/log
 #include "kengine/core/log/helpers/kengine_log.hpp"
-
-// kengine core/profiling
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 namespace kengine::core::assert {

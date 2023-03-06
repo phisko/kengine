@@ -6,7 +6,7 @@
 // putils
 #include "putils/reflection_helpers/json_helper.hpp"
 
-// kengine core
+// kengine
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 namespace kengine::meta {

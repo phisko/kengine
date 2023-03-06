@@ -3,7 +3,7 @@
 // recast
 #include <DetourCrowd.h>
 
-// kengine pathfinding/recast
+// kengine
 #include "kengine/pathfinding/recast/helpers/unique_ptr.hpp"
 
 namespace kengine::pathfinding::recast {

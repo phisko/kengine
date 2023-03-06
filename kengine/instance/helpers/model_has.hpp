@@ -3,7 +3,7 @@
 // entt
 #include <entt/entity/fwd.hpp>
 
-// kengine instance
+// kengine
 #include "kengine/instance/data/instance.hpp"
 
 namespace kengine::instance {

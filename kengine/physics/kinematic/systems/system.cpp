@@ -8,18 +8,12 @@
 #include "putils/angle.hpp"
 #include "putils/forward_to.hpp"
 
-// kengine core
+// kengine
 #include "kengine/core/data/transform.hpp"
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
-
-// kengine main_loop
 #include "kengine/main_loop/functions/execute.hpp"
-
-// kengine physics
 #include "kengine/physics/data/physics.hpp"
-
-// kengine physics/kinematic
 #include "kengine/physics/kinematic/data/kinematic.hpp"
 
 namespace kengine::physics::kinematic {

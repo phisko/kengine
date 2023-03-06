@@ -7,15 +7,11 @@
 // putils
 #include "putils/forward_to.hpp"
 
-// kengine core
+// kengine
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
-
-// kengine input
 #include "kengine/input/data/buffer.hpp"
 #include "kengine/input/data/handler.hpp"
-
-// kengine main_loop
 #include "kengine/main_loop/functions/execute.hpp"
 
 namespace kengine::input {

@@ -1,6 +1,6 @@
 #include "instance.tests.hpp"
 
-// kengine instance
+// kengine
 #include "kengine/instance/helpers/model_has.hpp"
 
 TEST_F(instance, model_has_entity) {

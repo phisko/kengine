@@ -1,6 +1,6 @@
 #pragma once
 
-// kengine core/log
+// kengine
 #include "kengine/core/log/helpers/severity.hpp"
 
 namespace kengine::core::log {

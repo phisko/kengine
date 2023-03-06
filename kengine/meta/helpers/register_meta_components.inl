@@ -9,10 +9,8 @@
 #include "putils/range.hpp"
 #include "putils/thread_name.hpp"
 
-// kengine core
+// kengine
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
-
-// kengine meta
 #include "kengine/meta/helpers/register_meta_component_implementation.hpp"
 #include "kengine/meta/helpers/impl/count.hpp"
 #include "kengine/meta/helpers/impl/emplace_or_replace.hpp"
@@ -23,13 +21,11 @@
 #include "kengine/meta/helpers/impl/remove.hpp"
 
 #ifdef KENGINE_META_IMGUI
-// kengine meta/imgui
 #include "kengine/meta/imgui/helpers/impl/display.hpp"
 #include "kengine/meta/imgui/helpers/impl/edit.hpp"
 #endif
 
 #ifdef KENGINE_META_JSON
-// kengine meta/json
 #include "kengine/meta/json/helpers/impl/load.hpp"
 #include "kengine/meta/json/helpers/impl/save.hpp"
 #endif
