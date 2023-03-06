@@ -5,7 +5,6 @@
 #endif
 
 // stl
-#include <variant>
 #include <vector>
 
 // magic_enum
@@ -19,13 +18,14 @@
 namespace kengine::adjustable {
 	//! putils reflect all
 	//! used_types: [refltype::string, refltype::value]
-	struct adjustable {
+	//! class_name: adjustable_values
+	struct values {
 		static constexpr char string_name[] = "adjustable_string";
 		using string = putils::string<KENGINE_ADJUSTABLE_NAME_MAX_LENGTH, string_name>;
 		struct value;
 
 		string section;
-		std::vector<value> values;
+		std::vector<value> entries;
 
 		enum class value_type {
 			Bool,
@@ -37,7 +37,7 @@ namespace kengine::adjustable {
 
 		/*!
 		 * putils reflect all
-		 * class_name: adjustable_value
+		 * class_name: adjustable_values_value
 		 * used_types: [
 		 * 		refltype::storage_for_bool,
 		 * 		refltype::storage_for_float,
@@ -135,10 +135,10 @@ namespace kengine::adjustable {
 	};
 }
 
-#include "adjustable.rpp"
+#include "values.rpp"
 
 template<typename T, const char * Name>
-#define refltype kengine::adjustable::adjustable::value::storage<T, Name>
+#define refltype kengine::adjustable::values::value::storage<T, Name>
 putils_reflection_info_template {
 	static constexpr auto class_name = Name;
 	putils_reflection_attributes(

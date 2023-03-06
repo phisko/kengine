@@ -3,7 +3,7 @@
 Expose global values that the user may adjust.
 
 * [data](data/)
-	* [adjustable](data/adjustable.md): component that exposes values
+	* [values](data/values.md): component that exposes values to adjust
 
 Sub-libaries:
 * [imgui](imgui/)

@@ -23,7 +23,7 @@
 #include "putils/vector.hpp"
 
 // kengine
-#include "kengine/adjustable/data/adjustable.hpp"
+#include "kengine/adjustable/data/values.hpp"
 #include "kengine/core/data/transform.hpp"
 #include "kengine/core/helpers/new_entity_processor.hpp"
 #include "kengine/core/log/helpers/kengine_log.hpp"
@@ -92,7 +92,7 @@ namespace kengine::render::sfml {
 
 			e.emplace<main_loop::execute>(putils_forward_to_this(execute));
 			auto & scale = e.emplace<imgui::scale>();
-			e.emplace<adjustable::adjustable>() = {
+			e.emplace<adjustable::values>() = {
 				"ImGui",
 				{
 					{ "scale", &scale.modifier },

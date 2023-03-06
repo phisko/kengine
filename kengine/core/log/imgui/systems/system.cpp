@@ -21,7 +21,7 @@
 #include "putils/reflection_helpers/imgui_helper.hpp"
 
 // kengine
-#include "kengine/adjustable/data/adjustable.hpp"
+#include "kengine/adjustable/data/values.hpp"
 #include "kengine/core/data/name.hpp"
 #include "kengine/core/log/functions/on_log.hpp"
 #include "kengine/core/log/helpers/kengine_log.hpp"
@@ -78,7 +78,7 @@ namespace kengine::core::log::imgui {
 			auto & tool = e.emplace<kengine::imgui::tool::tool>();
 			enabled = &tool.enabled;
 
-			e.emplace<adjustable::adjustable>() = {
+			e.emplace<adjustable::values>() = {
 				"Log",
 				{
 					{ "ImGui max events", &max_events },

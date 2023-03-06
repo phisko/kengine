@@ -2,12 +2,12 @@
 
 #include "putils/reflection.hpp"
 
-#define refltype kengine::adjustable::adjustable
+#define refltype kengine::adjustable::values
 putils_reflection_info {
-	putils_reflection_class_name;
+	putils_reflection_custom_class_name(adjustable_values);
 	putils_reflection_attributes(
 		putils_reflection_attribute(section),
-		putils_reflection_attribute(values)
+		putils_reflection_attribute(entries)
 	);
 	putils_reflection_used_types(
 		putils_reflection_type(refltype::string),
@@ -16,9 +16,9 @@ putils_reflection_info {
 };
 #undef refltype
 
-#define refltype kengine::adjustable::adjustable::value
+#define refltype kengine::adjustable::values::value
 putils_reflection_info {
-	putils_reflection_custom_class_name(adjustable_value);
+	putils_reflection_custom_class_name(adjustable_values_value);
 	putils_reflection_attributes(
 		putils_reflection_attribute(name),
 		putils_reflection_attribute(bool_storage),
