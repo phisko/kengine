@@ -6,7 +6,7 @@
 namespace kengine::physics {
 	//! putils reflect all
 	//! used_types: [putils::vec3f]
-	struct physics {
+	struct inertia {
 		float mass = 1.f;
 
 		putils::vec3f movement{ 0.f, 0.f, 0.f };
@@ -17,4 +17,4 @@ namespace kengine::physics {
 	};
 }
 
-#include "physics.rpp"
+#include "inertia.rpp"

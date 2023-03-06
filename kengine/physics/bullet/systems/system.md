@@ -1,6 +1,6 @@
 # [system](system.hpp)
 
-System that simulates physics using the Bullet Physics library according to the information found in entities' [physics component](../../data/physics.md).
+System that simulates physics using the Bullet Physics library according to the information found in entities' [inertia component](../../data/inertia.md).
 
 ## Queries
 
