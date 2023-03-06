@@ -127,7 +127,7 @@ namespace kengine::meta::imgui::entity_selector {
 						if (!has->call({ r, e }) || !match_func->call({ r, e }, name_search))
 							continue;
 
-						if (result.display_text.size() + type->name.size() + 2 < decltype(result.display_text)::max_size) {
+						if (result.display_text.size() + type->name.size() + 2 < result.display_text.max_size()) {
 							if (matches) // Isn't the first time
 								result.display_text += ", ";
 							result.display_text += type->name;
