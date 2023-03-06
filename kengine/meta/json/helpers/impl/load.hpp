@@ -6,10 +6,8 @@
 // entt
 #include <entt/entity/fwd.hpp>
 
-// kengine meta
+// kengine
 #include "kengine/meta/json/functions/load.hpp"
-
-// kengine helpers
 #include "kengine/meta/helpers/impl/meta_component_implementation.hpp"
 
 namespace kengine::meta {

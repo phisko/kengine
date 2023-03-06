@@ -3,7 +3,7 @@
 // entt
 #include <entt/entity/fwd.hpp>
 
-// kengine meta
+// kengine
 #include "kengine/meta/data/attributes.hpp"
 
 namespace kengine::meta {

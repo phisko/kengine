@@ -1,7 +1,7 @@
 // gtest
 #include <gtest/gtest.h>
 
-// kengine render
+// kengine
 #include "kengine/render/helpers/convert_to_screen_percentage.hpp"
 
 TEST(render, convert_to_screen_percentage_percentage) {

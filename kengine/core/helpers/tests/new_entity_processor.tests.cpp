@@ -4,7 +4,7 @@
 // entt
 #include <entt/entity/registry.hpp>
 
-// kengine core
+// kengine
 #include "kengine/core/helpers/new_entity_processor.hpp"
 
 struct core : ::testing::Test {

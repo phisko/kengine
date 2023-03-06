@@ -13,26 +13,16 @@
 // putils
 #include "putils/forward_to.hpp"
 
-// kengine core
+// kengine
 #include "kengine/core/assert/helpers/kengine_assert.hpp"
-#include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/helpers/new_entity_processor.hpp"
+#include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
-
-// kengine imgui
 #include "kengine/imgui/helpers/set_context.hpp"
-
-// kengine input
 #include "kengine/input/data/buffer.hpp"
-
-// kengine main_loop
 #include "kengine/main_loop/functions/execute.hpp"
-
-// kengine render
 #include "kengine/render/data/window.hpp"
 #include "kengine/render/functions/on_mouse_captured.hpp"
-
-// kengine render/glfw
 #include "kengine/render/glfw/data/window.hpp"
 #include "kengine/render/glfw/helpers/input_handler.hpp"
 

@@ -1,10 +1,8 @@
 // gtest
 #include <gtest/gtest.h>
 
-// kengine core
+// kengine
 #include "kengine/core/data/transform.hpp"
-
-// kengine glm
 #include "kengine/glm/helpers/extract_from_matrix.hpp"
 #include "kengine/glm/helpers/get_model_matrix.hpp"
 

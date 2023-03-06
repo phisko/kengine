@@ -7,18 +7,12 @@
 // putils
 #include "putils/forward_to.hpp"
 
-// kengine core
+// kengine
 #include "kengine/core/assert/helpers/kengine_assert.hpp"
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
-
-// kengine main_loop
 #include "kengine/main_loop/functions/execute.hpp"
-
-// kengine scripting
 #include "kengine/scripting/helpers/init_bindings.hpp"
-
-// kengine scripting/lua
 #include "kengine/scripting/lua/data/scripts.hpp"
 #include "kengine/scripting/lua/helpers/log_category.hpp"
 #include "kengine/scripting/lua/helpers/register_function.hpp"

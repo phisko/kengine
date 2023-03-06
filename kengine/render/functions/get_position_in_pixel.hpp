@@ -3,7 +3,7 @@
 // putils
 #include "putils/point.hpp"
 
-// kengine functions
+// kengine
 #include "kengine/base_function.hpp"
 
 namespace kengine::render {

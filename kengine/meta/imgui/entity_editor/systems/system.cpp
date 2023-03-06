@@ -10,23 +10,15 @@
 // putils
 #include "putils/forward_to.hpp"
 
-// kengine core
+// kengine
 #include "kengine/core/data/name.hpp"
 #include "kengine/core/data/selected.hpp"
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
-
-// kengine imgui
 #include "kengine/imgui/helpers/get_scale.hpp"
 #include "kengine/imgui/helpers/set_context.hpp"
-
-// kengine imgui/tool
 #include "kengine/imgui/tool/data/tool.hpp"
-
-// kengine main_loop
 #include "kengine/main_loop/functions/execute.hpp"
-
-// kengine meta/imgui
 #include "kengine/meta/imgui/helpers/edit_entity.hpp"
 
 namespace kengine::meta::imgui::entity_editor {

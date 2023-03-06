@@ -7,7 +7,7 @@
 // entt
 #include <entt/entity/fwd.hpp>
 
-// kengine async
+// kengine
 #include "kengine/async/data/task.hpp"
 
 namespace kengine::async {

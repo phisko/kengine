@@ -3,11 +3,9 @@
 // glm
 #include <glm/gtc/matrix_transform.hpp>
 
-// kengine core
+// kengine
 #include "kengine/core/data/transform.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
-
-// kengine glm
 #include "kengine/glm/helpers/to_vec.hpp"
 
 namespace kengine::glm {

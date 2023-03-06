@@ -4,7 +4,7 @@
 // gtest
 #include <gtest/gtest.h>
 
-// kengine skeleton
+// kengine
 #include "kengine/skeleton/helpers/get_bone_index.hpp"
 
 TEST(skeleton_helper, get_bone_index) {

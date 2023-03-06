@@ -2,7 +2,7 @@
 
 #ifdef _WIN32
 
-// kengine system_creator
+// kengine
 #include "kengine/system_creator/helpers/system_creator_helper.hpp"
 
 namespace kengine::core::log::visual_studio {

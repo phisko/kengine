@@ -4,7 +4,7 @@
 // entt
 #include <entt/entity/registry.hpp>
 
-// kengine core
+// kengine
 #include "kengine/core/assert/functions/on_assert_failed.hpp"
 #include "kengine/core/assert/helpers/kengine_assert.hpp"
 

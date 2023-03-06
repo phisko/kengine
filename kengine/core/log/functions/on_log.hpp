@@ -1,9 +1,7 @@
 #pragma once
 
-// kengine functions
+// kengine
 #include "kengine/base_function.hpp"
-
-// kengine core/log
 #include "kengine/core/log/helpers/event.hpp"
 
 namespace kengine::core::log {

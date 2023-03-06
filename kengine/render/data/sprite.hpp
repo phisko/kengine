@@ -3,7 +3,7 @@
 // reflection
 #include "putils/reflection.hpp"
 
-// kengine render
+// kengine
 #include "kengine/render/data/on_screen.hpp"
 
 namespace kengine::render {

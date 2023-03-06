@@ -6,7 +6,7 @@
 // putils
 #include "putils/default_constructors.hpp"
 
-// kengine core
+// kengine
 #include "kengine/core/log/helpers/kengine_log.hpp"
 
 // impl

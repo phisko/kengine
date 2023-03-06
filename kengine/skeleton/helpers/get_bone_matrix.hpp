@@ -6,7 +6,7 @@
 // glm
 #include <glm/glm.hpp>
 
-// kengine skeleton
+// kengine
 #include "kengine/skeleton/data/skeleton.hpp"
 #include "kengine/skeleton/data/model_skeleton.hpp"
 

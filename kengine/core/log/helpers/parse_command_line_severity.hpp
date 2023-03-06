@@ -3,7 +3,7 @@
 // entt
 #include <entt/entity/fwd.hpp>
 
-// kengine core/log
+// kengine
 #include "kengine/core/log/data/severity_control.hpp"
 #include "kengine/core/log/functions/on_log.hpp"
 

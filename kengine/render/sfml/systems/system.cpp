@@ -22,30 +22,18 @@
 #include "putils/forward_to.hpp"
 #include "putils/vector.hpp"
 
-// kengine core
-#include "kengine/core/data/transform.hpp"
-#include "kengine/core/log/helpers/kengine_log.hpp"
-#include "kengine/core/helpers/new_entity_processor.hpp"
-#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
-
-// kengine adjustable
+// kengine
 #include "kengine/adjustable/data/adjustable.hpp"
-
-// kengine imgui
+#include "kengine/core/data/transform.hpp"
+#include "kengine/core/helpers/new_entity_processor.hpp"
+#include "kengine/core/log/helpers/kengine_log.hpp"
+#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 #include "kengine/imgui/data/context.hpp"
 #include "kengine/imgui/data/scale.hpp"
-
-// kengine input
 #include "kengine/input/data/buffer.hpp"
-
-// kengine main_loop
+#include "kengine/instance/helpers/try_get_model.hpp"
 #include "kengine/main_loop/functions/execute.hpp"
 #include "kengine/main_loop/helpers/is_running.hpp"
-
-// kengine instance
-#include "kengine/instance/helpers/try_get_model.hpp"
-
-// kengine render
 #include "kengine/render/data/asset.hpp"
 #include "kengine/render/data/camera.hpp"
 #include "kengine/render/data/debug_graphics.hpp"
@@ -53,10 +41,8 @@
 #include "kengine/render/data/viewport.hpp"
 #include "kengine/render/data/window.hpp"
 #include "kengine/render/helpers/convert_to_screen_percentage.hpp"
-
-// kengine render/sfml
-#include "kengine/render/sfml/data/window.hpp"
 #include "kengine/render/sfml/data/texture.hpp"
+#include "kengine/render/sfml/data/window.hpp"
 
 #ifndef KENGINE_MAX_VIEWPORTS
 #define KENGINE_MAX_VIEWPORTS 8

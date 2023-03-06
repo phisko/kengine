@@ -13,19 +13,13 @@
 // putils
 #include "putils/forward_to.hpp"
 
-// kengine core
+// kengine
 #include "kengine/core/data/transform.hpp"
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
-
-// kengine instance
-#include "kengine/render/data/model_data.hpp"
-
-// kengine render/polyvox
-#include "kengine/render/polyvox/data/polyvox.hpp"
-
-// kengine main_loop
 #include "kengine/main_loop/functions/execute.hpp"
+#include "kengine/render/data/model_data.hpp"
+#include "kengine/render/polyvox/data/polyvox.hpp"
 
 namespace kengine::render::polyvox {
 	static constexpr auto log_category = "render_polyvox";

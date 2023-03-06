@@ -7,7 +7,7 @@
 // gtest
 #include <gtest/gtest.h>
 
-// kengine instance
+// kengine
 #include "kengine/instance/data/instance.hpp"
 
 struct instance : ::testing::Test {

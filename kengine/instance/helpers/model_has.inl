@@ -4,7 +4,7 @@
 #include <entt/entity/handle.hpp>
 #include <entt/entity/registry.hpp>
 
-// kengine helpers
+// kengine
 #include "kengine/core/assert/helpers/kengine_assert.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 

@@ -3,7 +3,7 @@
 // nlohmann
 #include <nlohmann/json.hpp>
 
-// kengine functions
+// kengine
 #include "kengine/base_function.hpp"
 
 namespace kengine::meta::json {

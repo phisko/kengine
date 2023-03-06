@@ -7,7 +7,7 @@
 // gtest
 #include <gtest/gtest.h>
 
-// kengine command_line
+// kengine
 #include "kengine/command_line/data/arguments.hpp"
 #include "kengine/command_line/helpers/create_entity.hpp"
 

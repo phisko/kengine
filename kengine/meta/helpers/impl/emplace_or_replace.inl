@@ -3,7 +3,7 @@
 // entt
 #include <entt/entity/handle.hpp>
 
-// kengine core
+// kengine
 #include "kengine/core/assert/helpers/kengine_assert.hpp"
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"

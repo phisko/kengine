@@ -3,7 +3,7 @@
 // entt
 #include <entt/entity/registry.hpp>
 
-// kengine core/log
+// kengine
 #include "kengine/core/log/functions/on_log.hpp"
 
 namespace kengine::core::log {

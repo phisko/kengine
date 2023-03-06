@@ -5,7 +5,7 @@
 // gtest
 #include <gtest/gtest.h>
 
-// kengine render
+// kengine
 #include "kengine/render/data/window.hpp"
 #include "kengine/render/data/viewport.hpp"
 #include "kengine/render/helpers/get_viewport_for_pixel.hpp"

@@ -1,6 +1,6 @@
 #include "convert_to_referencial.hpp"
 
-// kengine glm
+// kengine
 #include "kengine/glm/helpers/to_vec.hpp"
 
 namespace kengine::glm {

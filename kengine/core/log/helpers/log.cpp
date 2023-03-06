@@ -3,11 +3,9 @@
 // entt
 #include <entt/entity/registry.hpp>
 
-// kengine core/profiling
-#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
-
-// kengine core/log
+// kengine
 #include "kengine/core/log/data/severity_control.hpp"
+#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 namespace kengine::core::log {
 	void log(const entt::registry & r, severity message_severity, const char * category, const char * message) noexcept {

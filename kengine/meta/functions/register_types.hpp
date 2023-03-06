@@ -3,7 +3,7 @@
 // entt
 #include <entt/entity/fwd.hpp>
 
-// kengine functions
+// kengine
 #include "kengine/base_function.hpp"
 
 namespace kengine::functions {

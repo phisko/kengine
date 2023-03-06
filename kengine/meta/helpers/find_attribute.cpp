@@ -6,13 +6,11 @@
 // putils
 #include "putils/reflection_helpers/runtime_helper.hpp"
 
-// kengine core
-#include "kengine/core/data/name.hpp"
+// kengine
 #include "kengine/core/assert/helpers/kengine_assert.hpp"
+#include "kengine/core/data/name.hpp"
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
-
-// kengine meta
 #include "kengine/meta/helpers/get_type_entity.hpp"
 
 namespace kengine::meta {

@@ -1,9 +1,7 @@
 #pragma once
 
-// kengine core
+// kengine
 #include "kengine/core/data/name.hpp"
-
-// kengine instance/find_model
 #include "kengine/instance/find_model/data/instance_of.hpp"
 
 namespace kengine::instance::find_model::by_name {

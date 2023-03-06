@@ -21,29 +21,15 @@
 #include "putils/static_assert.hpp"
 #include "putils/vector.hpp"
 
-// kengine core
+// kengine
+#include "kengine/adjustable/data/adjustable.hpp"
+#include "kengine/core/assert/helpers/kengine_assert.hpp"
 #include "kengine/core/data/name.hpp"
 #include "kengine/core/helpers/new_entity_processor.hpp"
-
-// kengine core/assert
-#include "kengine/core/assert/helpers/kengine_assert.hpp"
-
-// kengine core/log
 #include "kengine/core/log/helpers/kengine_log.hpp"
-
-// kengine core/profiling
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
-
-// kengine adjustable
-#include "kengine/adjustable/data/adjustable.hpp"
-
-// kengine imgui
 #include "kengine/imgui/helpers/set_context.hpp"
-
-// kengine imgui/imgui_tool
 #include "kengine/imgui/tool/data/tool.hpp"
-
-// kengine main_loop
 #include "kengine/main_loop/functions/execute.hpp"
 
 #ifndef KENGINE_DEFAULT_ADJUSTABLE_SAVE_PATH

@@ -30,38 +30,27 @@
 #include "kreogl/window.hpp"
 #include "kreogl/world.hpp"
 
-// kengine core
-#include "kengine/core/data/transform.hpp"
-#include "kengine/core/log/helpers/kengine_log.hpp"
-#include "kengine/core/helpers/new_entity_processor.hpp"
-#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
-
-// kengine adjustable
+// kengine
 #include "kengine/adjustable/data/adjustable.hpp"
-
-// kengine async
-#include "kengine/async/helpers/start_task.hpp"
 #include "kengine/async/helpers/process_results.hpp"
-
-// kengine glm
+#include "kengine/async/helpers/start_task.hpp"
+#include "kengine/core/data/transform.hpp"
+#include "kengine/core/helpers/new_entity_processor.hpp"
+#include "kengine/core/log/helpers/kengine_log.hpp"
+#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 #include "kengine/glm/helpers/get_model_matrix.hpp"
 #include "kengine/glm/helpers/glm_formatter.hpp"
-
-// kengine imgui
 #include "kengine/imgui/data/context.hpp"
 #include "kengine/imgui/data/scale.hpp"
 #include "kengine/imgui/helpers/get_scale.hpp"
-
-// kengine main_loop
-#include "kengine/main_loop/data/keep_alive.hpp"
-#include "kengine/main_loop/functions/execute.hpp"
-
-// kengine instance
 #include "kengine/instance/data/instance.hpp"
 #include "kengine/instance/helpers/get_model.hpp"
 #include "kengine/instance/helpers/try_get_model.hpp"
-
-// kengine render
+#include "kengine/main_loop/data/keep_alive.hpp"
+#include "kengine/main_loop/functions/execute.hpp"
+#include "kengine/render/animation/data/animation.hpp"
+#include "kengine/render/animation/data/files.hpp"
+#include "kengine/render/animation/data/model_animation.hpp"
 #include "kengine/render/data/asset.hpp"
 #include "kengine/render/data/camera.hpp"
 #include "kengine/render/data/debug_graphics.hpp"
@@ -77,27 +66,16 @@
 #include "kengine/render/data/window.hpp"
 #include "kengine/render/functions/get_entity_in_pixel.hpp"
 #include "kengine/render/functions/get_position_in_pixel.hpp"
+#include "kengine/render/glfw/data/window.hpp"
 #include "kengine/render/helpers/convert_to_screen_percentage.hpp"
 #include "kengine/render/helpers/entity_appears_in_viewport.hpp"
 #include "kengine/render/helpers/get_facings.hpp"
 #include "kengine/render/helpers/get_viewport_for_pixel.hpp"
-
-// kengine render/animation
-#include "kengine/render/animation/data/animation.hpp"
-#include "kengine/render/animation/data/files.hpp"
-#include "kengine/render/animation/data/model_animation.hpp"
-
-// kengine render/glfw
-#include "kengine/render/glfw/data/window.hpp"
-
-// kengine render/kreogl
 #include "kengine/render/kreogl/data/animation_files.hpp"
 #include "kengine/render/kreogl/data/debug_graphics.hpp"
 #include "kengine/render/kreogl/data/model.hpp"
-#include "kengine/render/kreogl/shaders/highlight_shader.hpp"
 #include "kengine/render/kreogl/helpers/putils_to_glm.hpp"
-
-// kengine skeleton
+#include "kengine/render/kreogl/shaders/highlight_shader.hpp"
 #include "kengine/skeleton/data/model_skeleton.hpp"
 #include "kengine/skeleton/data/skeleton.hpp"
 

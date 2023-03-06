@@ -5,13 +5,11 @@
 // gtest
 #include <gtest/gtest.h>
 
-// kengine core
+// kengine
 #include "kengine/core/data/transform.hpp"
-
-// kengine meta
 #include "kengine/meta/helpers/find_attribute.hpp"
-#include "kengine/meta/helpers/register_metadata.hpp"
 #include "kengine/meta/helpers/get_type_entity.hpp"
+#include "kengine/meta/helpers/register_metadata.hpp"
 
 TEST(meta, find_attribute) {
 	entt::registry r;

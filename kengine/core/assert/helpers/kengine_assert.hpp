@@ -26,7 +26,7 @@
 // putils
 #include "putils/string.hpp"
 
-// kengine core/assert
+// kengine
 #include "kengine/core/assert/helpers/assert_failed.hpp"
 #include "kengine/core/assert/helpers/is_debugger_present.hpp"
 

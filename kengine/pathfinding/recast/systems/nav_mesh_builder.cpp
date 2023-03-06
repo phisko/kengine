@@ -16,32 +16,23 @@
 #include "putils/thread_name.hpp"
 #include "putils/with.hpp"
 
-// kengine core
+// kengine
+#include "kengine/async/helpers/process_results.hpp"
+#include "kengine/async/helpers/start_task.hpp"
+#include "kengine/core/assert/helpers/kengine_assert.hpp"
 #include "kengine/core/data/name.hpp"
 #include "kengine/core/data/transform.hpp"
-#include "kengine/core/assert/helpers/kengine_assert.hpp"
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
-
-// kengine async
-#include "kengine/async/helpers/start_task.hpp"
-#include "kengine/async/helpers/process_results.hpp"
-
-// kengine glm
 #include "kengine/glm/helpers/convert_to_referencial.hpp"
 #include "kengine/glm/helpers/get_model_matrix.hpp"
-
-// kengine instance
+#include "kengine/pathfinding/data/nav_mesh.hpp"
+#include "kengine/pathfinding/functions/get_path.hpp"
+#include "kengine/pathfinding/recast/data/nav_mesh.hpp"
 #include "kengine/render/data/asset.hpp"
 #include "kengine/render/data/model_data.hpp"
 
-// kengine pathfinding
-#include "kengine/pathfinding/data/nav_mesh.hpp"
-#include "kengine/pathfinding/functions/get_path.hpp"
-
-// kengine pathfinding/recast
 #include "common.hpp"
-#include "kengine/pathfinding/recast/data/nav_mesh.hpp"
 
 namespace kengine::pathfinding::recast {
 	struct build_recast_component {

@@ -11,7 +11,7 @@
 #include "putils/point.hpp"
 #include "putils/vector.hpp"
 
-// kengine functions
+// kengine
 #include "kengine/base_function.hpp"
 
 namespace kengine::pathfinding {

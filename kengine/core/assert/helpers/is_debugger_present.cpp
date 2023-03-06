@@ -5,7 +5,7 @@
 #include <windows.h>
 #endif
 
-// kengine core/profiling
+// kengine
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 namespace kengine::core::assert {

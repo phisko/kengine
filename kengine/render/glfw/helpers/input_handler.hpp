@@ -9,7 +9,7 @@
 // putils
 #include "putils/point.hpp"
 
-// kengine data
+// kengine
 #include "kengine/input/data/buffer.hpp"
 
 namespace kengine::render::glfw {

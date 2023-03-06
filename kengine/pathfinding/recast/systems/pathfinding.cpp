@@ -15,31 +15,22 @@
 #include "putils/range.hpp"
 #include "putils/thread_name.hpp"
 
-// kengine core
+// kengine
 #include "kengine/core/data/transform.hpp"
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
-
-// kengine glm
 #include "kengine/glm/helpers/convert_to_referencial.hpp"
 #include "kengine/glm/helpers/get_model_matrix.hpp"
-
-// kengine instance
 #include "kengine/instance/helpers/get_model.hpp"
 #include "kengine/instance/helpers/try_get_model.hpp"
-
-// kengine pathfinding
-#include "kengine/pathfinding/data/pathfinding.hpp"
 #include "kengine/pathfinding/data/nav_mesh.hpp"
-
-// kengine physics
-#include "kengine/physics/data/physics.hpp"
-
-// kengine recast
-#include "common.hpp"
+#include "kengine/pathfinding/data/pathfinding.hpp"
 #include "kengine/pathfinding/recast/data/agent.hpp"
 #include "kengine/pathfinding/recast/data/crowd.hpp"
 #include "kengine/pathfinding/recast/data/nav_mesh.hpp"
+#include "kengine/physics/data/physics.hpp"
+
+#include "common.hpp"
 
 namespace kengine::pathfinding::recast {
 	struct do_pathfinding {

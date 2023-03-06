@@ -6,15 +6,11 @@
 // fmt
 #include <fmt/chrono.h>
 
-// kengine core/log
-#include "kengine/core/log/helpers/kengine_log.hpp"
-
-// kengine core/profiling
-#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
-
-// kengine async
+// kengine
 #include "kengine/async/data/result.hpp"
 #include "kengine/async/data/task.hpp"
+#include "kengine/core/log/helpers/kengine_log.hpp"
+#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 namespace kengine::async {
 	static constexpr auto log_category = "async";

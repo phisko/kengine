@@ -9,12 +9,10 @@
 // meta
 #include "putils/meta/concepts/invocable.hpp"
 
-// kengine core
+// kengine
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_frame.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
-
-// kengine main_loop
 #include "kengine/main_loop/data/time_modulator.hpp"
 #include "kengine/main_loop/functions/execute.hpp"
 #include "kengine/main_loop/helpers/is_running.hpp"

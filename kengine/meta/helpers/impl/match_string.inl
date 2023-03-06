@@ -12,7 +12,7 @@
 #include "putils/fmt/fmt.hpp"
 #include "putils/reflection_helpers/imgui_helper.hpp"
 
-// kengine core
+// kengine
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 namespace kengine::meta {

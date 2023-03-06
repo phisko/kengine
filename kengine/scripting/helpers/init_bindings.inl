@@ -4,12 +4,11 @@
 #include <entt/entity/handle.hpp>
 #include <entt/entity/registry.hpp>
 
-// kengine core
+// kengine
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 #ifdef KENGINE_MAIN_LOOP
-// kengine main_loop
 #include "kengine/main_loop/helpers/stop_running.hpp"
 #endif
 

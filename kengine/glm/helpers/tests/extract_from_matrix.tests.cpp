@@ -4,7 +4,7 @@
 // glm
 #include <glm/ext/matrix_transform.hpp>
 
-// kengine glm
+// kengine
 #include "kengine/glm/helpers/extract_from_matrix.hpp"
 
 TEST(glm, extract_position) {

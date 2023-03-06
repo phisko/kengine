@@ -5,14 +5,10 @@
 #include "putils/scn/scn.hpp"
 #include "putils/split.hpp"
 
-// kengine core/profiling
-#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
-
-// kengine core/log
-#include "kengine/core/log/helpers/kengine_log.hpp"
-
-// kengine command_line
+// kengine
 #include "kengine/command_line/data/arguments.hpp"
+#include "kengine/core/log/helpers/kengine_log.hpp"
+#include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 namespace {
 	struct options {

@@ -20,27 +20,15 @@
 #include "putils/thread_name.hpp"
 #include "putils/reflection_helpers/imgui_helper.hpp"
 
-// kengine core
+// kengine
+#include "kengine/adjustable/data/adjustable.hpp"
 #include "kengine/core/data/name.hpp"
-
-// kengine core/log
 #include "kengine/core/log/functions/on_log.hpp"
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/log/helpers/parse_command_line_severity.hpp"
-
-// kengine core/profiling
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
-
-// kengine adjustable
-#include "kengine/adjustable/data/adjustable.hpp"
-
-// kengine imgui
 #include "kengine/imgui/helpers/set_context.hpp"
-
-// kengine imgui/imgui_tool
 #include "kengine/imgui/tool/data/tool.hpp"
-
-// kengine main_loop
 #include "kengine/main_loop/functions/execute.hpp"
 
 namespace kengine::core::log::imgui {

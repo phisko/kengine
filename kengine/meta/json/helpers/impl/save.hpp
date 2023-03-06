@@ -3,10 +3,8 @@
 // entt
 #include <entt/entity/fwd.hpp>
 
-// kengine meta
+// kengine
 #include "kengine/meta/json/functions/save.hpp"
-
-// kengine helpers
 #include "kengine/meta/helpers/impl/meta_component_implementation.hpp"
 
 namespace kengine::meta {

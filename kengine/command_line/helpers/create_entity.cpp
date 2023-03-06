@@ -6,12 +6,10 @@
 // entt
 #include <entt/entity/registry.hpp>
 
-// kengine core
+// kengine
+#include "kengine/command_line/data/arguments.hpp"
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
-
-// kengine command_line
-#include "kengine/command_line/data/arguments.hpp"
 
 namespace kengine::command_line {
 	static constexpr auto log_category = "command_line";

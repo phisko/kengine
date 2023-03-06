@@ -7,15 +7,11 @@
 // putils
 #include "putils/forward_to.hpp"
 
-// kengine core
+// kengine
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
-
-// kengine physics
-#include "kengine/physics/functions/on_collision.hpp"
-
-// kengine physics/collision
 #include "kengine/physics/collision/data/collision.hpp"
+#include "kengine/physics/functions/on_collision.hpp"
 
 namespace kengine::physics::collision {
 	static constexpr auto log_category = "physics_collision";

@@ -4,17 +4,13 @@
 // gtest
 #include <gtest/gtest.h>
 
-// kengine core
+// kengine
 #include "kengine/core/data/name.hpp"
 #include "kengine/core/data/transform.hpp"
-
-// kengine meta
 #include "kengine/meta/functions/has.hpp"
 #include "kengine/meta/helpers/impl/has.hpp"
 #include "kengine/meta/helpers/register_metadata.hpp"
 #include "kengine/meta/helpers/register_meta_component_implementation.hpp"
-
-// kengine meta/json
 #include "kengine/meta/json/functions/save.hpp"
 #include "kengine/meta/json/helpers/impl/save.hpp"
 #include "kengine/meta/json/helpers/save_entity.hpp"

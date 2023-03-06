@@ -7,11 +7,9 @@
 // magic_enum
 #include <magic_enum.hpp>
 
-// kengine core
+// kengine
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
-
-// kengine render
 #include "kengine/render/data/viewport.hpp"
 #include "kengine/render/data/window.hpp"
 #include "kengine/render/helpers/convert_to_screen_percentage.hpp"

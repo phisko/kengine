@@ -8,17 +8,15 @@
 #include "putils/range.hpp"
 #include "putils/thread_name.hpp"
 
-// kengine core
+// kengine
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
 #ifdef KENGINE_SCRIPTING_LUA
-// kengine scripting/lua
 #include "kengine/scripting/lua/helpers/register_function.hpp"
 #include "kengine/scripting/lua/helpers/register_types.hpp"
 #endif
 
 #ifdef KENGINE_SCRIPTING_PYTHON
-// kengine scripting/python
 #include "kengine/scripting/python/helpers/register_function.hpp"
 #include "kengine/scripting/python/helpers/register_types.hpp"
 #endif
