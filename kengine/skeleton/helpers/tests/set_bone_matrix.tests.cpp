@@ -16,7 +16,7 @@ TEST(skeleton_helper, set_bone_matrix) {
 		.meshes = { {} }
 	};
 
-	const kengine::skeleton::model_skeleton model{
+	const kengine::skeleton::bone_names model{
 		.meshes = { { { bone_name } } }
 	};
 

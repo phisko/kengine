@@ -9,7 +9,7 @@
 namespace kengine::skeleton {
 	static constexpr auto log_category = "skeleton";
 
-	void set_bone_matrix(const entt::registry & r, const char * bone, const glm::mat4 & m, skeleton & skeleton, const model_skeleton & model) noexcept {
+	void set_bone_matrix(const entt::registry & r, const char * bone, const glm::mat4 & m, skeleton & skeleton, const bone_names & model) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		kengine_logf(r, very_verbose, log_category, "Setting bone matrix for {}", bone);
 

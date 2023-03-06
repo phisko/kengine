@@ -76,7 +76,7 @@
 #include "kengine/render/kreogl/data/model.hpp"
 #include "kengine/render/kreogl/helpers/putils_to_glm.hpp"
 #include "kengine/render/kreogl/shaders/highlight_shader.hpp"
-#include "kengine/skeleton/data/model_skeleton.hpp"
+#include "kengine/skeleton/data/bone_names.hpp"
 #include "kengine/skeleton/data/skeleton.hpp"
 
 namespace kengine::render::kreogl {
@@ -321,9 +321,9 @@ namespace kengine::render::kreogl {
 				const auto & asset = r.get<render::asset>(e);
 				add_animations_to_model_animation_component(r.get_or_emplace<animation::model_animation>(e), asset.file.c_str(), *model_data.animations);
 				if (model_data.skeleton) {
-					auto & model_skeleton = r.emplace<skeleton::model_skeleton>(e);
+					auto & bone_names = r.emplace<skeleton::bone_names>(e);
 					for (const auto & mesh : model_data.skeleton->meshes)
-						model_skeleton.meshes.push_back(skeleton::model_skeleton::mesh{
+						bone_names.meshes.push_back(skeleton::bone_names::mesh{
 							.bone_names = mesh.bone_names,
 						});
 				}
@@ -414,7 +414,7 @@ namespace kengine::render::kreogl {
 				if (const auto kreogl_model = r.try_get<model>(model_entity)) {
 					kengine_logf(r, verbose, log_category, "Creating animated_object to {}", entity);
 					r.emplace<::kreogl::animated_object>(entity).model = kreogl_model->ptr.get();
-					if (r.all_of<skeleton::model_skeleton>(model_entity)) {
+					if (r.all_of<skeleton::bone_names>(model_entity)) {
 						kengine_logf(r, verbose, log_category, "Adding skeleton to {}", entity);
 						r.emplace<skeleton::skeleton>(entity);
 					}

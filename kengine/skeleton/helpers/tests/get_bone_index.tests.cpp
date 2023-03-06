@@ -8,7 +8,7 @@
 #include "kengine/skeleton/helpers/get_bone_index.hpp"
 
 TEST(skeleton_helper, get_bone_index) {
-	const kengine::skeleton::model_skeleton comp{
+	const kengine::skeleton::bone_names comp{
 		.meshes = {
 			{ { "0.0", "0.1" } },
 			{ { "1.0", "1.1" } },
