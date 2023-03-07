@@ -18,7 +18,7 @@
 #include "putils/split.hpp"
 
 // kengine
-#include "kengine/adjustable/data/values.hpp"
+#include "kengine/config/data/values.hpp"
 #include "kengine/core/assert/helpers/kengine_assert.hpp"
 #include "kengine/core/data/name.hpp"
 #include "kengine/core/helpers/new_entity_processor.hpp"
@@ -28,8 +28,8 @@
 #include "kengine/imgui/tool/data/tool.hpp"
 #include "kengine/main_loop/functions/execute.hpp"
 
-namespace kengine::adjustable::imgui {
-	static constexpr auto log_category = "adjustable_imgui";
+namespace kengine::config::imgui {
+	static constexpr auto log_category = "config_imgui";
 
 	struct system {
 		entt::registry & r;
@@ -51,12 +51,12 @@ namespace kengine::adjustable::imgui {
 		};
 		section root_section;
 
-		// Remove section from ImGui tree when adjustable is destroyed
-		const entt::scoped_connection connection = r.on_destroy<values>().connect<&system::on_destroy_adjustable>(this);
+		// Remove section from ImGui tree when config is destroyed
+		const entt::scoped_connection connection = r.on_destroy<values>().connect<&system::on_destroy_config>(this);
 
-		// Add new section to ImGui tree when adjustable is created
+		// Add new section to ImGui tree when config is created
 		struct processed {};
-		kengine::new_entity_processor<processed, values> processor{ r, putils_forward_to_this(on_construct_adjustable) };
+		kengine::new_entity_processor<processed, values> processor{ r, putils_forward_to_this(on_construct_config) };
 
 		system(entt::handle e) noexcept
 			: r(*e.registry()) {
@@ -65,7 +65,7 @@ namespace kengine::adjustable::imgui {
 
 			e.emplace<main_loop::execute>(putils_forward_to_this(execute));
 
-			e.emplace<core::name>("Adjustables");
+			e.emplace<core::name>("Config values");
 			auto & tool = e.emplace<kengine::imgui::tool::tool>();
 			enabled = &tool.enabled;
 
@@ -90,7 +90,7 @@ namespace kengine::adjustable::imgui {
 
 			processor.process();
 
-			if (ImGui::Begin("Adjustables", enabled)) {
+			if (ImGui::Begin("Config values", enabled)) {
 				if (ImGui::InputText("Name", name_search, sizeof(name_search))) {
 					kengine_logf(r, verbose, log_category, "Name search changed to '{}'", name_search);
 					search_out_of_date = true;
@@ -103,7 +103,7 @@ namespace kengine::adjustable::imgui {
 					search_out_of_date = false;
 				}
 
-				if (ImGui::BeginChild("##adjustables"))
+				if (ImGui::BeginChild("##config values"))
 					for (const auto & [name, section] : root_section.subsections)
 						display_menu_entry(name.c_str(), section);
 				ImGui::EndChild();
@@ -238,13 +238,13 @@ namespace kengine::adjustable::imgui {
 			ImGui::Columns();
 		}
 
-		void on_construct_adjustable(entt::entity e, values & comp) noexcept {
+		void on_construct_config(entt::entity e, values & comp) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			section * current_section = &root_section;
-			const auto section_names = putils::split(comp.section.c_str(), '/');
-			for (const auto & section_name : section_names)
-				current_section = &current_section->subsections[section_name];
+			const auto section_names = putils::split(comp.section, '/');
+			for (const auto section_name : section_names)
+				current_section = &current_section->subsections[std::string(section_name)];
 
 			section::entry entry;
 			entry.e = e;
@@ -254,15 +254,15 @@ namespace kengine::adjustable::imgui {
 			search_out_of_date = true;
 		}
 
-		void on_destroy_adjustable(entt::registry & r, entt::entity e) noexcept {
+		void on_destroy_config(entt::registry & r, entt::entity e) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			auto & comp = r.get<values>(e);
-			kengine_logf(r, verbose, log_category, "Adjustable destroyed in {} (section {})", e, comp.section);
-			remove_adjustable_from_section(comp, root_section);
+			kengine_logf(r, verbose, log_category, "Config destroyed in {} (section {})", e, comp.section);
+			remove_config_from_section(comp, root_section);
 		}
 
-		bool remove_adjustable_from_section(const values & comp, section & section) noexcept {
+		bool remove_config_from_section(const values & comp, section & section) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			if (const auto it = std::ranges::find_if(section.entries, [&](const auto & entry) { return entry.component == &comp; }); it != section.entries.end()) {
@@ -272,7 +272,7 @@ namespace kengine::adjustable::imgui {
 
 			for (auto it = section.subsections.begin(); it != section.subsections.end(); ++it) {
 				auto & subsection = it->second;
-				if (remove_adjustable_from_section(comp, subsection)) {
+				if (remove_config_from_section(comp, subsection)) {
 					if (subsection.subsections.empty())
 						section.subsections.erase(it);
 					return true;

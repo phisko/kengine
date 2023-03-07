@@ -28,7 +28,7 @@
 #include "putils/forward_to.hpp"
 
 // kengine
-#include "kengine/adjustable/data/values.hpp"
+#include "kengine/config/data/values.hpp"
 #include "kengine/core/assert/helpers/kengine_assert.hpp"
 #include "kengine/core/data/transform.hpp"
 #include "kengine/core/helpers/new_entity_processor.hpp"
@@ -94,7 +94,7 @@ namespace kengine::physics::bullet {
 			bool enable_debug = false;
 			bool editor_mode = false;
 			float gravity = 1.f;
-		} adjustables;
+		} config;
 
 		struct bullet_data {
 			struct motion_state : public btMotionState {
@@ -139,13 +139,13 @@ namespace kengine::physics::bullet {
 			e.emplace<main_loop::execute>(putils_forward_to_this(execute));
 			e.emplace<kengine::physics::query_position>(putils_forward_to_this(query_position));
 
-			e.emplace<adjustable::values>() = {
+			e.emplace<config::values>() = {
 				"Physics",
 				{
-					{ "Gravity", &adjustables.gravity },
+					{ "Gravity", &config.gravity },
 #ifndef KENGINE_NDEBUG
-					{ "Debug", &adjustables.enable_debug },
-					{ "Editor mode (reload colliders each frame)", &adjustables.editor_mode },
+					{ "Debug", &config.enable_debug },
+					{ "Editor mode (reload colliders each frame)", &config.editor_mode },
 #endif
 				}
 			};
@@ -174,7 +174,7 @@ namespace kengine::physics::bullet {
 			}
 
 			kengine_log(r, very_verbose, log_category, "Updating gravity");
-			dynamics_world.setGravity({ 0.f, -adjustables.gravity, 0.f });
+			dynamics_world.setGravity({ 0.f, -config.gravity, 0.f });
 
 			kengine_log(r, very_verbose, log_category, "Stepping simulation");
 			dynamics_world.stepSimulation(delta_time);
@@ -182,7 +182,7 @@ namespace kengine::physics::bullet {
 
 #ifndef KENGINE_NDEBUG
 			drawer.cleanup();
-			dynamics_world.setDebugDrawer(adjustables.enable_debug ? &drawer : nullptr);
+			dynamics_world.setDebugDrawer(config.enable_debug ? &drawer : nullptr);
 			dynamics_world.debugDrawWorld();
 #endif
 		}

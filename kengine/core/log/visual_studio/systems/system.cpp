@@ -21,7 +21,7 @@
 #include "putils/thread_name.hpp"
 
 // kengine
-#include "kengine/adjustable/data/values.hpp"
+#include "kengine/config/data/values.hpp"
 #include "kengine/core/log/data/severity_control.hpp"
 #include "kengine/core/log/functions/on_log.hpp"
 #include "kengine/core/log/helpers/kengine_log.hpp"
@@ -42,7 +42,7 @@ namespace kengine::core::log::visual_studio {
 			kengine_log(*e.registry(), log, log_category, "Initializing");
 
 			auto & control = e.emplace<severity_control>(parse_command_line_severity(*e.registry()));
-			e.emplace<adjustable::values>() = {
+			e.emplace<config::values>() = {
 				"Log",
 				{
 					{ "Visual Studio Console", &control.global_severity },

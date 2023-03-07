@@ -14,31 +14,32 @@
 #include "putils/forward_to.hpp"
 #include "putils/ini_file.hpp"
 #include "putils/scn/scn.hpp"
+#include "putils/split.hpp"
 
 // kengine
-#include "kengine/adjustable/data/values.hpp"
+#include "kengine/config/data/values.hpp"
 #include "kengine/core/assert/helpers/kengine_assert.hpp"
 #include "kengine/core/helpers/new_entity_processor.hpp"
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 #include "kengine/main_loop/functions/execute.hpp"
 
-#ifndef KENGINE_ADJUSTABLE_SAVE_FILE
-#define KENGINE_ADJUSTABLE_SAVE_FILE "adjust.ini"
+#ifndef KENGINE_CONFIG_SAVE_FILE
+#define KENGINE_CONFIG_SAVE_FILE "config.ini"
 #endif
 
-namespace kengine::adjustable::ini {
-	static constexpr auto log_category = "adjustable_ini";
+namespace kengine::config::ini {
+	static constexpr auto log_category = "config_ini";
 
 	struct system {
 		entt::registry & r;
 		putils::ini_file loaded_file = load_ini_file();
 
-		// Initialize new adjustables with the INI contents
+		// Initialize new config values with the INI contents
 		struct processed {};
-		kengine::new_entity_processor<processed, values> processor{ r, putils_forward_to_this(on_construct_adjustable) };
+		kengine::new_entity_processor<processed, values> processor{ r, putils_forward_to_this(on_construct_config) };
 
-		// Save to the INI file when adjustables change
+		// Save to the INI file when config values change
 		const entt::scoped_connection connection = r.on_update<values>().connect<&system::save>(this);
 
 		system(entt::handle e) noexcept
@@ -57,14 +58,22 @@ namespace kengine::adjustable::ini {
 			processor.process();
 		}
 
-		void on_construct_adjustable(entt::entity e, values & comp) noexcept {
+		void on_construct_config(entt::entity e, values & comp) noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_logf(r, verbose, log_category, "Initializing section {}", comp.section);
 
-			const auto it = loaded_file.sections.find(comp.section.c_str());
-			if (it == loaded_file.sections.end()) {
-				kengine_logf(r, warning, log_category, "Section '{}' not found in INI file", comp.section);
-				return;
+			auto it = loaded_file.sections.cend();
+			const auto sections = putils::split(comp.section, '/');
+			for (const auto section : sections) {
+				const auto & current_sections = it == loaded_file.sections.end()
+					? loaded_file.sections
+					: it->second.sections;
+
+				it = current_sections.find(std::string(section));
+				if (it == current_sections.end()) {
+					kengine_logf(r, warning, log_category, "Section '{}' not found in INI file", comp.section);
+					return;
+				}
 			}
 
 			const auto & section = it->second;
@@ -128,9 +137,9 @@ namespace kengine::adjustable::ini {
 
 		putils::ini_file load_ini_file() noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_log(r, verbose, log_category, "Loading from " KENGINE_ADJUSTABLE_SAVE_FILE);
+			kengine_log(r, verbose, log_category, "Loading from " KENGINE_CONFIG_SAVE_FILE);
 
-			std::ifstream f(KENGINE_ADJUSTABLE_SAVE_FILE);
+			std::ifstream f(KENGINE_CONFIG_SAVE_FILE);
 
 			putils::ini_file ret;
 			f >> ret;
@@ -139,11 +148,11 @@ namespace kengine::adjustable::ini {
 
 		void save(entt::registry &, entt::entity e) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, verbose, log_category, "Saving to " KENGINE_ADJUSTABLE_SAVE_FILE " because {} changed", e);
+			kengine_logf(r, verbose, log_category, "Saving to " KENGINE_CONFIG_SAVE_FILE " because {} changed", e);
 
-			std::ofstream f(KENGINE_ADJUSTABLE_SAVE_FILE, std::ofstream::trunc);
+			std::ofstream f(KENGINE_CONFIG_SAVE_FILE, std::ofstream::trunc);
 			if (!f) {
-				kengine_assert_failed(r, "Failed to open '" KENGINE_ADJUSTABLE_SAVE_FILE "' with write permissions");
+				kengine_assert_failed(r, "Failed to open '" KENGINE_CONFIG_SAVE_FILE "' with write permissions");
 				return;
 			}
 

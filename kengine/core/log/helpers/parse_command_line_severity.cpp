@@ -47,18 +47,18 @@ namespace kengine::core::log {
 			kengine_logf(r, very_verbose, log_category, "Found {} in {}", opts, e);
 
 			command_line_severity->global_severity = opts.log_level;
-			const auto categories = putils::split(opts.log_category_levels.c_str(), ',');
-			for (const auto & category : categories) {
-				const auto key_value = putils::split(category.c_str(), ':');
+			const auto categories = putils::split(opts.log_category_levels, ',');
+			for (const auto category : categories) {
+				const auto key_value = putils::split(category, ':');
 				if (key_value.size() != 2) {
 					kengine_log(r, error, log_category, "--log_category_levels should be formatted as '--log_category_levels=first_category:log,second_category:verbose,third_category:error'");
 					continue;
 				}
 
-				const auto & key = key_value[0];
+				const auto key = key_value[0];
 				severity value;
 				if (scn::scan_default(key_value[1], value))
-					command_line_severity->category_severities[key] = value;
+					command_line_severity->category_severities[std::string(key)] = value;
 			}
 		}
 

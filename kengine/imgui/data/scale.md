@@ -4,7 +4,7 @@ Component that scales all ImGui elements.
 
 ## Usage
 
-Graphics systems sometimes offer an [adjustable](../../adjustable/data/values.md) that lets users scale ImGui elements to their liking. There are of course other potential use cases.
+Graphics systems sometimes offer an [config](../../config/data/values.md) that lets users scale ImGui elements to their liking. There are of course other potential use cases.
 
 ## Members
 

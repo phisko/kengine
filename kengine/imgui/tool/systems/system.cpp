@@ -137,10 +137,10 @@ namespace kengine::imgui::tool {
 			}
 
 			menu_entry * current_entry = &root_entry;
-			const auto entry_names = putils::split(name->name.c_str(), '/');
-			for (const auto & entry_name : entry_names) {
+			const auto entry_names = putils::split(name->name, '/');
+			for (const auto entry_name : entry_names) {
 				kengine_assert_with_message(r, current_entry->comp == nullptr, "Intermediate menu '{}' for ImGui tool '{}' has the name of an existing tool", entry_name, name->name);
-				current_entry = &current_entry->subentries[entry_name];
+				current_entry = &current_entry->subentries[std::string(entry_name)];
 			}
 
 			kengine_assert_with_message(r, current_entry->subentries.empty(), "Leaf entry for ImGui tool '{}' was previously used as an intermediate menu", name->name);
