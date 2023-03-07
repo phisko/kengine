@@ -6,4 +6,5 @@ Expose global values that the user may adjust.
 	* [values](data/values.md): component that exposes values to adjust
 
 Sub-libaries:
-* [imgui](imgui/)
+* [kengine_adjustable_imgui](imgui/)
+* [kengine_adjustable_ini](ini/)
