@@ -155,8 +155,8 @@ See [CMake](#cmake) for instructions on how to enable each library.
         * [kengine_core_log_visual_studio](kengine/core/log/visual_studio/): log to VS's output window
     * [kengine_core_profiling](kengine/core/profiling/): profiling using [Tracy](https://github.com/wolfpld/tracy)
     * [kengine_core_sort](kengine/core/sort/): entity sorting helpers
-* [kengine_adjustable](kengine/adjustable/): expose global values that the user may adjust
-    * [kengine_adjustable_imgui](kengine/adjustable/imgui/): display adjustables in an ImGui window
+* [kengine_config](kengine/config/): expose global values that the user may adjust
+    * [kengine_config_imgui](kengine/config/imgui/): display config values in an ImGui window
 * [kengine_async](kengine/async/): run asynchronous tasks
     * [kengine_async_imgui](kengine/async/imgui/): display running tasks in an ImGui window
 * [kengine_command_line](kengine/command_line/): manipulate the command-line
