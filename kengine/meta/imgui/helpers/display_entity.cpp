@@ -11,7 +11,7 @@
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 #include "kengine/core/sort/helpers/get_name_sorted_entities.hpp"
 #include "kengine/imgui/helpers/set_context.hpp"
-#include "kengine/instance/data/instance.hpp"
+#include "kengine/model/data/instance.hpp"
 #include "kengine/meta/functions/has.hpp"
 #include "kengine/meta/helpers/get_type_entity.hpp"
 #include "kengine/meta/imgui/functions/display.hpp"
@@ -43,7 +43,7 @@ namespace kengine::meta::imgui {
 		if (!kengine::imgui::set_context(*e.registry()))
 			return;
 
-		const auto instance = e.try_get<instance::instance>();
+		const auto instance = e.try_get<model::instance>();
 		if (!instance || instance->model == entt::null) {
 			kengine_log(*e.registry(), very_verbose, log_category, "No model found");
 			display_entity(e);

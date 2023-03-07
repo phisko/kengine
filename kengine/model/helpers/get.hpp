@@ -4,14 +4,14 @@
 #include <entt/entity/fwd.hpp>
 
 // kengine
-#include "kengine/instance/data/instance.hpp"
+#include "kengine/model/data/instance.hpp"
 
-namespace kengine::instance {
+namespace kengine::model {
 	template<typename Comp>
-	const Comp & get_model(entt::const_handle instance) noexcept;
+	const Comp & get(entt::const_handle instance) noexcept;
 
 	template<typename Comp>
-	const Comp & get_model(const entt::registry & r, const instance & instance) noexcept;
+	const Comp & get(const entt::registry & r, const instance & instance) noexcept;
 }
 
-#include "get_model.inl"
+#include "get.inl"

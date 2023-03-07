@@ -9,7 +9,7 @@ Component that performs navigation for the entity.
 ```cpp
 entt::entity environment;
 ```
-Entity in which we are navigating. It must be an [instance](../../instance/data/instance.md) of a model with a [nav_mesh](nav_mesh.md).
+Entity in which we are navigating. It must be an [instance](../../model/data/instance.md) of a model with a [nav_mesh](nav_mesh.md).
 
 ### destination
 

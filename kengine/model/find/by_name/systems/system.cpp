@@ -1,11 +1,11 @@
 #include "system.hpp"
 
 // kengine
-#include "kengine/instance/find_model/systems/system.hpp"
-#include "kengine/instance/find_model/by_name/data/instance_of_name.hpp"
+#include "kengine/model/find/systems/system.hpp"
+#include "kengine/model/find/by_name/data/instance_of_name.hpp"
 
-namespace kengine::instance::find_model::by_name {
-	using system = find_model::system<instance_of_name>;
+namespace kengine::model::find::by_name {
+	using system = find::system<instance_of_name>;
 
 	DEFINE_KENGINE_SYSTEM_CREATOR(
 		system,

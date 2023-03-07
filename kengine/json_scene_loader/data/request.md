@@ -18,7 +18,7 @@ A path to a JSON file describing entities that will be spawned before loading, a
 string model_directory;
 ```
 
-A path to a directory that will be recursively searched for JSON files describing [model entities](../../instance/). These will all be loaded asynchronously before loading the scene.
+A path to a directory that will be recursively searched for JSON files describing [model entities](../../model/). These will all be loaded asynchronously before loading the scene.
 
 ### scene
 

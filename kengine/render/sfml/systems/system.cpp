@@ -31,7 +31,7 @@
 #include "kengine/imgui/data/context.hpp"
 #include "kengine/imgui/data/scale.hpp"
 #include "kengine/input/data/buffer.hpp"
-#include "kengine/instance/helpers/try_get_model.hpp"
+#include "kengine/model/helpers/try_get.hpp"
 #include "kengine/main_loop/functions/execute.hpp"
 #include "kengine/main_loop/helpers/is_running.hpp"
 #include "kengine/render/data/asset.hpp"
@@ -446,7 +446,7 @@ namespace kengine::render::sfml {
 			KENGINE_PROFILING_SCOPE;
 			kengine_logf(r, very_verbose, log_category, "Creating entity sprite for {}", e);
 
-			const auto * texture = instance::try_get_model<sfml::texture>({ r, e });
+			const auto * texture = model::try_get<sfml::texture>({ r, e });
 			if (texture == nullptr) {
 				kengine_logf(r, warning, log_category, "Failed to find sfml_texture in {}'s model", e);
 				return std::nullopt;

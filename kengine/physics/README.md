@@ -4,7 +4,7 @@ Components and systems to handle moving objects.
 
 * [data](data)
 	* [inertia](data/inertia.md): applies movement to an entity
-	* [model_collider](data/model_collider.md): [model component](../instance/) listing the model's colliders
+	* [model_collider](data/model_collider.md): [model component](../model/) listing the model's colliders
 * [functions](functions)
 	* [on_collision](functions/on_collision.md): called whenever two entities collide
 	* [query_position](functions/query_position.md): returns a list of entities around a position

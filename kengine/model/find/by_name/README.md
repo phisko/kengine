@@ -1,4 +1,4 @@
-# kengine_instance_find_model_by_name
+# kengine_model_find_by_name
 
 System that automatically finds the model for an entity based on its name.
 

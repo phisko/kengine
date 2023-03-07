@@ -1,15 +1,15 @@
-#include "instance.tests.hpp"
+#include "model.tests.hpp"
 
 // kengine
-#include "kengine/instance/helpers/model_has.hpp"
+#include "kengine/model/helpers/has.hpp"
 
-TEST_F(instance, model_has_entity) {
-	EXPECT_TRUE(kengine::instance::model_has<std::string>(e));
-	EXPECT_FALSE(kengine::instance::model_has<int>(e));
+TEST_F(model, has_entity) {
+	EXPECT_TRUE(kengine::model::has<std::string>(e));
+	EXPECT_FALSE(kengine::model::has<int>(e));
 }
 
-TEST_F(instance, model_has_component) {
-	const auto & comp = e.get<kengine::instance::instance>();
-	EXPECT_TRUE(kengine::instance::model_has<std::string>(r, comp));
-	EXPECT_FALSE(kengine::instance::model_has<int>(r, comp));
+TEST_F(model, has_component) {
+	const auto & comp = e.get<kengine::model::instance>();
+	EXPECT_TRUE(kengine::model::has<std::string>(r, comp));
+	EXPECT_FALSE(kengine::model::has<int>(r, comp));
 }

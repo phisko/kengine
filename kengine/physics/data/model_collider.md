@@ -1,6 +1,6 @@
 # [model_collider](model_collider.hpp)
 
-Component that describes the colliders for a [model entity](../../instance/).
+Component that describes the colliders for a [model entity](../../model/).
 
 ## Members
 

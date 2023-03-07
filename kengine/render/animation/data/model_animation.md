@@ -1,6 +1,6 @@
 # [model_animation](model_animation.hpp)
 
-Component holding a list of all animations loaded for a [model entity](../../../instance/). `model_animation` also exposes functions to extract information from the animations.
+Component holding a list of all animations loaded for a [model entity](../../../model/). `model_animation` also exposes functions to extract information from the animations.
 
 ## Members
 

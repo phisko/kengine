@@ -2,7 +2,7 @@
 
 Component that represents an asset file.
 
-Typically attached to [model entities](../../instance).
+Typically attached to [model entities](../../model).
 
 ## Members
 

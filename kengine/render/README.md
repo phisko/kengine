@@ -3,7 +3,7 @@
 Components and libraries to render graphical representations of entities.
 
 * [data](data)
-	* [asset](data/asset.md): indicates that an entity is the [model](../instance/) for a given asset
+	* [asset](data/asset.md): indicates that an entity is the [model](../model/) for a given asset
 	* [camera](data/camera.md): uses an entity as a camera, drawing it to a [viewport](data/viewport.md)
 	* [debug_graphics](data/debug_graphics.md): draw debug elements
 	* [drawable](data/drawable.md): mark an entity as drawable
@@ -31,7 +31,7 @@ Components and libraries to render graphical representations of entities.
 
 Sub-libraries:
 * [kengine_render_animation](animation): animate entities
-* [kengine_render_find_model_by_asset](find_model_by_asset): find an entity's [model](../instance/) based on its [asset](data/asset.md)
+* [kengine_render_find_model_by_asset](find_model_by_asset): find an entity's [model](../model/) based on its [asset](data/asset.md)
 * [kengine_render_glfw](glfw): create windows with GLFW
 * [kengine_render_kreogl](kreogl): render entities with Kreogl
 * [kengine_render_on_click](on_click): notify entities when they are clicked
