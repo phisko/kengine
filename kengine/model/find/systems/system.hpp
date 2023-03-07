@@ -12,15 +12,15 @@
 #include "kengine/core/helpers/new_entity_processor.hpp"
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
-#include "kengine/instance/data/instance.hpp"
-#include "kengine/instance/find_model/data/instance_of.hpp"
+#include "kengine/model/data/instance.hpp"
+#include "kengine/model/find/data/instance_of.hpp"
 #include "kengine/main_loop/functions/execute.hpp"
 
-namespace kengine::instance::find_model {
+namespace kengine::model::find {
 	template<typename InstanceOf>
 	struct system {
 		using model_component = typename InstanceOf::model_component;
-		static inline const auto log_category = fmt::format("instance_find_model_by_{}", putils::reflection::get_class_name<model_component>());
+		static inline const auto log_category = fmt::format("instance_find_by_{}", putils::reflection::get_class_name<model_component>());
 
 		entt::registry & r;
 

@@ -172,9 +172,9 @@ See [CMake](#cmake) for instructions on how to enable each library.
         * [kengine_meta_imgui_entity_editor](kengine/meta/imgui/entity_editor/): edit entities in ImGui windows
         * [kengine_meta_imgui_entity_selector](kengine/meta/imgui/entity_selector/): select entities in an ImGui window
     * [kengine_meta_json](kengine/meta/json/): meta components for JSON
-* [kengine_instance](kengine/instance/): use model entities, which other entities can be instances of
-    * [kengine_instance_find_model](kengine/instance/find_model/): template system to find an entity's model by a given component
-    * [kengine_instance_find_model_by_name](kengine/instance/find_model/by_name/): find an entity's model by its name
+* [kengine_model](kengine/model/): use model entities, which other entities can be instances of
+    * [kengine_model_find](kengine/model/find/): template system to find an entity's model by a given component
+    * [kengine_model_find_by_name](kengine/model/find/by_name/): find an entity's model by its name
 * [kengine_pathfinding](kengine/pathfinding/): add pathfinding capabilities to entities
     * [kengine_pathfinding_recast](kengine/pathfinding/recast/): implement pathfinding using [Recast](https://github.com/recastnavigation/recastnavigation)
 * [kengine_physics](kengine/physics/): move and query entities in space

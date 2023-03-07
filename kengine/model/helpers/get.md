@@ -1,11 +1,11 @@
-# [get_model](get_model.hpp)
+# [get](get.hpp)
 
 ```cpp
 template<typename Comp>
-const Comp & get_model(entt::const_handle instance);
+const Comp & get(entt::const_handle instance);
 
 template<typename Comp>
-const Comp & get_model(const entt::registry & r, const instance::instance & instance);
+const Comp & get(const entt::registry & r, const model::instance & instance);
 ```
 
 Returns the `Comp` component of the `model entity` for `instance`.

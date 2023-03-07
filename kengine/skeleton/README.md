@@ -3,7 +3,7 @@
 Components to represent skeletons and helpers to manipulate them.
 
 * [data](data)
-	* [bone_names](data/bone_names.md): a [model entity](../instance/)'s skeleton (i.e. the bone names)
+	* [bone_names](data/bone_names.md): a [model entity](../model/)'s skeleton (i.e. the bone names)
 	* [skeleton](data/bone_matrices.md): an entity's skeleton
 * [helpers](helpers)
 	* [get_bone_index](helpers/get_bone_index.md)

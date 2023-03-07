@@ -1,4 +1,4 @@
-#include "get_model.hpp"
+#include "get.hpp"
 
 // entt
 #include <entt/entity/handle.hpp>
@@ -8,16 +8,16 @@
 #include "kengine/core/assert/helpers/kengine_assert.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 
-namespace kengine::instance {
+namespace kengine::model {
 	template<typename Comp>
-	const Comp & get_model(const entt::registry & r, const instance & instance) noexcept {
+	const Comp & get(const entt::registry & r, const instance & instance) noexcept {
 		KENGINE_PROFILING_SCOPE;
 		kengine_assert(r, instance.model != entt::null);
 		return r.get<Comp>(instance.model);
 	}
 
 	template<typename Comp>
-	const Comp & get_model(entt::const_handle e) noexcept {
-		return get_model<Comp>(*e.registry(), e.get<instance>());
+	const Comp & get(entt::const_handle e) noexcept {
+		return get<Comp>(*e.registry(), e.get<instance>());
 	}
 }

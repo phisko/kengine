@@ -1,4 +1,4 @@
-# kengine_instance_find_model
+# kengine_model_find
 
 System template to find an entity's model by a given component.
 
@@ -8,4 +8,4 @@ System template to find an entity's model by a given component.
 	* [system](systems/system.md): system template
 
 Sub-libraries:
-* [kengine_instance_find_model_by_name](by_name): find an entity's model by its name
+* [kengine_model_find_by_name](by_name): find an entity's model by its name

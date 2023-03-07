@@ -3,7 +3,7 @@
 // reflection
 #include "putils/reflection.hpp"
 
-namespace kengine::instance::find_model {
+namespace kengine::model::find {
 	template<typename ModelComponent>
 	struct instance_of {
 		using base = instance_of<ModelComponent>;
@@ -14,7 +14,7 @@ namespace kengine::instance::find_model {
 }
 
 template<typename ModelComponent>
-#define refltype kengine::instance::find_model::instance_of<ModelComponent>
+#define refltype kengine::model::find::instance_of<ModelComponent>
 putils_reflection_info_template {
 	putils_reflection_attributes(
 		putils_reflection_attribute(model)

@@ -35,7 +35,7 @@
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 #include "kengine/glm/helpers/get_model_matrix.hpp"
-#include "kengine/instance/data/instance.hpp"
+#include "kengine/model/data/instance.hpp"
 #include "kengine/main_loop/functions/execute.hpp"
 #include "kengine/physics/data/model_collider.hpp"
 #include "kengine/physics/data/inertia.hpp"
@@ -72,7 +72,7 @@ namespace kengine::physics::bullet {
 		entt::registry & r;
 
 		struct processed {};
-		kengine::new_entity_processor<processed, core::transform, inertia, instance::instance> processor{ r, putils_forward_to_this(add_or_update_bullet_data) };
+		kengine::new_entity_processor<processed, core::transform, inertia, model::instance> processor{ r, putils_forward_to_this(add_or_update_bullet_data) };
 
 		const entt::scoped_connection connections[6] = {
 			r.on_construct<model_collider>().connect<&system::update_all_instances>(this),
@@ -204,11 +204,11 @@ namespace kengine::physics::bullet {
 		void on_skeleton_updated(entt::registry & r, entt::entity e) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
-			if (r.all_of<core::transform, inertia, instance::instance>(e))
-				add_or_update_bullet_data(e, r.get<core::transform>(e), r.get<inertia>(e), r.get<instance::instance>(e));
+			if (r.all_of<core::transform, inertia, model::instance>(e))
+				add_or_update_bullet_data(e, r.get<core::transform>(e), r.get<inertia>(e), r.get<model::instance>(e));
 		}
 
-		void add_or_update_bullet_data(entt::entity e, core::transform & transform, inertia & inertia, const instance::instance & instance) noexcept {
+		void add_or_update_bullet_data(entt::entity e, core::transform & transform, inertia & inertia, const model::instance & instance) noexcept {
 			KENGINE_PROFILING_SCOPE;
 
 			if (!r.all_of<model_collider>(instance.model)) {
@@ -231,7 +231,7 @@ namespace kengine::physics::bullet {
 			KENGINE_PROFILING_SCOPE;
 			kengine_logf(r, verbose, log_category, "Updating all instances of {}", model_entity);
 
-			for (const auto & [e, transform, inertia, instance] : r.view<core::transform, inertia, instance::instance>().each())
+			for (const auto & [e, transform, inertia, instance] : r.view<core::transform, inertia, model::instance>().each())
 				if (instance.model == model_entity)
 					add_or_update_bullet_data(e, transform, inertia, instance);
 		}

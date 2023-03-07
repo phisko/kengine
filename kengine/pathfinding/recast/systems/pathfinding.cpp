@@ -21,8 +21,8 @@
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 #include "kengine/glm/helpers/convert_to_referencial.hpp"
 #include "kengine/glm/helpers/get_model_matrix.hpp"
-#include "kengine/instance/helpers/get_model.hpp"
-#include "kengine/instance/helpers/try_get_model.hpp"
+#include "kengine/model/helpers/get.hpp"
+#include "kengine/model/helpers/try_get.hpp"
 #include "kengine/pathfinding/data/nav_mesh.hpp"
 #include "kengine/pathfinding/data/navigation.hpp"
 #include "kengine/pathfinding/recast/data/agent.hpp"
@@ -90,7 +90,7 @@ namespace kengine::pathfinding::recast {
 
 			environment_info ret;
 
-			const auto model_transform = instance::try_get_model<core::transform>(environment);
+			const auto model_transform = model::try_get<core::transform>(environment);
 			const auto & environment_transform = environment.get<core::transform>();
 
 			ret.environment_scale = environment_transform.bounding_box.size;
@@ -126,7 +126,7 @@ namespace kengine::pathfinding::recast {
 				return crowd;
 
 			kengine_logf(*e.registry(), very_verbose, log_category, "No crowd component in {}, creating a new one", e);
-			const auto nav_mesh = instance::try_get_model<recast::nav_mesh>(e);
+			const auto nav_mesh = model::try_get<recast::nav_mesh>(e);
 			if (!nav_mesh) {
 				kengine_logf(*e.registry(), very_verbose, log_category, "No recast nav mesh in {}, cannot create crowd", e);
 				return crowd;
@@ -217,7 +217,7 @@ namespace kengine::pathfinding::recast {
 			KENGINE_PROFILING_SCOPE;
 			kengine_logf(*environment.registry(), very_verbose, log_category, "Updating crowd for {}", environment);
 
-			const auto & nav_mesh = instance::get_model<recast::nav_mesh>(environment);
+			const auto & nav_mesh = model::get<recast::nav_mesh>(environment);
 			const auto environment_info = get_environment_info(environment);
 
 			static dtCrowdAgent * active_agents[KENGINE_RECAST_MAX_AGENTS];
