@@ -9,7 +9,7 @@
 #include "putils/forward_to.hpp"
 
 // kengine
-#include "kengine/adjustable/data/values.hpp"
+#include "kengine/config/data/values.hpp"
 #include "kengine/core/helpers/new_entity_processor.hpp"
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
@@ -20,7 +20,7 @@
 #include "kengine/pathfinding/recast/data/nav_mesh.hpp"
 
 namespace kengine::pathfinding::recast {
-	adjustables g_adjustables;
+	config g_config;
 
 	struct system {
 		entt::registry & r;
@@ -39,10 +39,10 @@ namespace kengine::pathfinding::recast {
 			kengine_log(r, log, log_category, "Initializing");
 
 			e.emplace<main_loop::execute>(putils_forward_to_this(execute));
-			e.emplace<adjustable::values>() = {
+			e.emplace<kengine::config::values>() = {
 				"Recast",
 				{
-					{ "Path optimization range", &g_adjustables.path_optimization_range },
+					{ "Path optimization range", &g_config.path_optimization_range },
 				}
 			};
 

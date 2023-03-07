@@ -1,6 +1,6 @@
-# kengine_adjustable_imgui
+# kengine_config_imgui
 
-ImGui system that exposes [adjustables](../).
+ImGui system that exposes [config values](../).
 
 * [systems](systems/)
 	* [system](systems/system.md)

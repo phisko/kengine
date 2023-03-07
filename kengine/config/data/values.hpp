@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef KENGINE_ADJUSTABLE_NAME_MAX_LENGTH
-#define KENGINE_ADJUSTABLE_NAME_MAX_LENGTH 64
+#ifndef KENGINE_CONFIG_NAME_MAX_LENGTH
+#define KENGINE_CONFIG_NAME_MAX_LENGTH 64
 #endif
 
 // stl
@@ -15,13 +15,13 @@
 #include "putils/color.hpp"
 #include "putils/lengthof.hpp"
 
-namespace kengine::adjustable {
+namespace kengine::config {
 	//! putils reflect all
 	//! used_types: [refltype::string, refltype::value]
-	//! class_name: adjustable_values
+	//! class_name: config_values
 	struct values {
-		static constexpr char string_name[] = "adjustable_string";
-		using string = putils::string<KENGINE_ADJUSTABLE_NAME_MAX_LENGTH, string_name>;
+		static constexpr char string_name[] = "config_string";
+		using string = putils::string<KENGINE_CONFIG_NAME_MAX_LENGTH, string_name>;
 		struct value;
 
 		string section;
@@ -37,7 +37,7 @@ namespace kengine::adjustable {
 
 		/*!
 		 * putils reflect all
-		 * class_name: adjustable_values_value
+		 * class_name: config_values_value
 		 * used_types: [
 		 * 		refltype::storage_for_bool,
 		 * 		refltype::storage_for_float,
@@ -56,16 +56,16 @@ namespace kengine::adjustable {
 				T value;
 			};
 
-			static constexpr char _bool_storage_name[] = "adjustable_storage_bool";
+			static constexpr char _bool_storage_name[] = "config_storage_bool";
 			using storage_for_bool = storage<bool, _bool_storage_name>;
 
-			static constexpr char _float_storage_name[] = "adjustable_storage_float";
+			static constexpr char _float_storage_name[] = "config_storage_float";
 			using storage_for_float = storage<float, _float_storage_name>;
 
-			static constexpr char _int_storage_name[] = "adjustable_storage_int";
+			static constexpr char _int_storage_name[] = "config_storage_int";
 			using storage_for_int = storage<int, _int_storage_name>;
 
-			static constexpr char _color_storage_name[] = "adjustable_storage_color";
+			static constexpr char _color_storage_name[] = "config_storage_color";
 			using storage_for_color = storage<putils::normalized_color, _color_storage_name>;
 
 			value() noexcept {}
@@ -138,7 +138,7 @@ namespace kengine::adjustable {
 #include "values.rpp"
 
 template<typename T, const char * Name>
-#define refltype kengine::adjustable::values::value::storage<T, Name>
+#define refltype kengine::config::values::value::storage<T, Name>
 putils_reflection_info_template {
 	static constexpr auto class_name = Name;
 	putils_reflection_attributes(
