@@ -17,6 +17,8 @@
 #include "kengine/meta/helpers/impl/for_each_entity.hpp"
 #include "kengine/meta/helpers/impl/get.hpp"
 #include "kengine/meta/helpers/impl/has.hpp"
+#include "kengine/meta/helpers/impl/has_metadata.hpp"
+#include "kengine/meta/helpers/impl/get_metadata.hpp"
 #include "kengine/meta/helpers/impl/match_string.hpp"
 #include "kengine/meta/helpers/impl/remove.hpp"
 
@@ -53,6 +55,8 @@ namespace kengine::meta {
 			meta::for_each_entity, meta::for_each_entity_without,
 			meta::get, meta::get_const,
 			meta::has,
+			meta::has_metadata,
+			meta::get_metadata,
 			meta::match_string,
 			meta::remove>([&](auto t) {
 			using type = putils_wrapped_type(t);

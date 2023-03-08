@@ -2,11 +2,11 @@
 
 #include "putils/reflection.hpp"
 
-#define refltype kengine::imgui::scale
+#define refltype kengine::pathfinding::recast::config
 putils_reflection_info {
-	putils_reflection_class_name;
+	putils_reflection_custom_class_name(pathfinding_recast_config);
 	putils_reflection_attributes(
-		putils_reflection_attribute(modifier)
+		putils_reflection_attribute(path_optimization_range)
 	);
 	putils_reflection_type_metadata(
 		putils_reflection_metadata("config", true)

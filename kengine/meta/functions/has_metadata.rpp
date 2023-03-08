@@ -2,8 +2,11 @@
 
 #include "putils/reflection.hpp"
 
-#define refltype kengine::config::configurable
+#define refltype kengine::meta::has_metadata
 putils_reflection_info {
 	putils_reflection_class_name;
+	putils_reflection_parents(
+		putils_reflection_type(refltype::base)
+	);
 };
 #undef refltype

@@ -1,3 +1,5 @@
 project(kengine)
 
 kengine_library_link_private_libraries(kengine_imgui)
+kengine_library_link_private_libraries(kengine_meta_imgui)
+kengine_library_link_private_libraries(kengine_meta_json)

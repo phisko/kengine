@@ -110,7 +110,8 @@ function(add_kengine_library path)
     # Headers for which we'll generate reflection headers and/or type registration code
     file(GLOB system_headers
             ${path}/data/*.hpp
-            ${path}/functions/*.hpp)
+            ${path}/functions/*.hpp
+            ${path}/systems/*.hpp)
 
     if(EXISTS ${path}/CMakeLists.txt)
         # Helpers for the system CMakeLists

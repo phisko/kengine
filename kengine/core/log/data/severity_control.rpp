@@ -15,5 +15,8 @@ putils_reflection_info {
 	putils_reflection_used_types(
 		putils_reflection_type(kengine::core::log::event)
 	);
+	putils_reflection_type_metadata(
+		putils_reflection_metadata("config", true)
+	);
 };
 #undef refltype

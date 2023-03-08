@@ -32,10 +32,14 @@ namespace kengine {
 			kengine_logf(r, very_verbose, "new_entity_processor", "Processing {}", e);
 
 			r.emplace<ProcessedTag>(e);
-			std::apply(
-				callback,
-				std::tuple_cat(std::make_tuple(e), view.get(e))
-			);
+			if constexpr (detail::any_is_empty<Comps...>())
+				callback(e);
+			else {
+				std::apply(
+					callback,
+					std::tuple_cat(std::make_tuple(e), view.get(e))
+				);
+			}
 		}
 	}
 }
