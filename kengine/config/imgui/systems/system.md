@@ -1,6 +1,6 @@
 # [system](system.hpp)
 
-System that renders an ImGui window with editing tools for [config](../../data/values.md) components.
+System that renders an ImGui window with editing tools for [config](../../data/configurable.md) components.
 
 An config value can specify a category by formatting its `name` like so:
 ```

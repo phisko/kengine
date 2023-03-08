@@ -10,6 +10,7 @@
 namespace kengine::core::log {
 	//! putils reflect all
 	//! used_types: [kengine::core::log::event]
+	//! metadata: [("config", true)]
 	struct severity_control {
 		severity global_severity = severity::log;
 		std::unordered_map<std::string, severity> category_severities;

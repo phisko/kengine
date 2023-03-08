@@ -16,9 +16,10 @@
 #include "putils/thread_name.hpp"
 
 // kengine
-#include "kengine/config/data/values.hpp"
 #include "kengine/command_line/helpers/parse.hpp"
+#include "kengine/config/data/configurable.hpp"
 #include "kengine/core/assert/helpers/kengine_assert.hpp"
+#include "kengine/core/data/name.hpp"
 #include "kengine/core/log/data/severity_control.hpp"
 #include "kengine/core/log/functions/on_log.hpp"
 #include "kengine/core/log/helpers/kengine_log.hpp"
@@ -54,13 +55,9 @@ namespace kengine::core::log::file {
 				return;
 			}
 
-			auto & control = e.emplace<severity_control>(parse_command_line_severity(r));
-			e.emplace<config::values>() = {
-				"Log",
-				{
-					{ "File", &control.global_severity },
-				}
-			};
+			e.emplace<core::name>("Log/File");
+			e.emplace<config::configurable>();
+			e.emplace<severity_control>(parse_command_line_severity(r));
 		}
 
 		void log(const event & log_event) noexcept {

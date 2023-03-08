@@ -10,37 +10,45 @@
 // magic_enum
 #include <magic_enum.hpp>
 
+// nlohmann
+#include <nlohmann/json.hpp>
+
 // putils
 #include "putils/forward_to.hpp"
-#include "putils/ini_file.hpp"
 #include "putils/scn/scn.hpp"
 #include "putils/split.hpp"
 
 // kengine
-#include "kengine/config/data/values.hpp"
+#include "kengine/config/data/configurable.hpp"
 #include "kengine/core/assert/helpers/kengine_assert.hpp"
+#include "kengine/core/data/name.hpp"
 #include "kengine/core/helpers/new_entity_processor.hpp"
 #include "kengine/core/log/helpers/kengine_log.hpp"
 #include "kengine/core/profiling/helpers/kengine_profiling_scope.hpp"
 #include "kengine/main_loop/functions/execute.hpp"
+#include "kengine/meta/functions/has.hpp"
+#include "kengine/meta/functions/has_metadata.hpp"
+#include "kengine/meta/json/functions/load.hpp"
+#include "kengine/meta/json/functions/save.hpp"
 
 #ifndef KENGINE_CONFIG_SAVE_FILE
-#define KENGINE_CONFIG_SAVE_FILE "config.ini"
+#define KENGINE_CONFIG_SAVE_FILE "config.json"
 #endif
 
-namespace kengine::config::ini {
-	static constexpr auto log_category = "config_ini";
+namespace kengine::config::json {
+	static constexpr auto log_category = "config_json";
+	static constexpr auto config_metadata = "config";
 
 	struct system {
 		entt::registry & r;
-		putils::ini_file loaded_file = load_ini_file();
+		nlohmann::json loaded_file = load_json_file();
 
-		// Initialize new config values with the INI contents
+		// Initialize new config values with the JSON contents
 		struct processed {};
-		kengine::new_entity_processor<processed, values> processor{ r, putils_forward_to_this(on_construct_config) };
+		kengine::new_entity_processor<processed, core::name, configurable> processor{ r, putils_forward_to_this(on_construct_config) };
 
-		// Save to the INI file when config values change
-		const entt::scoped_connection connection = r.on_update<values>().connect<&system::save>(this);
+		// Save to the JSON file when config values change
+		const entt::scoped_connection connection = r.on_update<configurable>().connect<&system::save>(this);
 
 		system(entt::handle e) noexcept
 			: r(*e.registry()) {
@@ -58,97 +66,44 @@ namespace kengine::config::ini {
 			processor.process();
 		}
 
-		void on_construct_config(entt::entity e, values & comp) noexcept {
+		void on_construct_config(entt::entity e) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, verbose, log_category, "Initializing section {}", comp.section);
 
-			auto it = loaded_file.sections.cend();
-			const auto sections = putils::split(comp.section, '/');
+			const auto & name = r.get<core::name>(e);
+			kengine_logf(r, verbose, log_category, "Initializing {} ({})", e, name.name);
+
+			auto * current_json_section = &loaded_file;
+			const auto sections = putils::split(name.name, '/');
 			for (const auto section : sections) {
-				const auto & current_sections = it == loaded_file.sections.end()
-					? loaded_file.sections
-					: it->second.sections;
-
-				it = current_sections.find(std::string(section));
-				if (it == current_sections.end()) {
-					kengine_logf(r, warning, log_category, "Section '{}' not found in INI file", comp.section);
+				const auto it = current_json_section->find(std::string(section));
+				if (it == current_json_section->end()) {
+					kengine_logf(r, warning, log_category, "Section '{}' not found in JSON file", name.name);
 					return;
 				}
+				current_json_section = &*it;
 			}
 
-			const auto & section = it->second;
-			for (auto & value : comp.entries) {
-				const auto it = section.values.find(value.name.c_str());
-				if (it == section.values.end()) {
-					kengine_logf(r, warning, log_category, "Value for '{}' not found in INI file", value.name);
-					continue;
-				}
-
-				kengine_logf(r, verbose, log_category, "Initializing {} to {}", value.name, it->second);
-				set_value(value, it->second.c_str());
-			}
+			for (const auto & [type_entity, load_json, has_metadata] : r.view<meta::json::load, meta::has_metadata>().each())
+				if (has_metadata(config_metadata))
+					load_json(*current_json_section, { r, e });
 		}
 
-		void set_value(values::value & value, const char * s) noexcept {
-			KENGINE_PROFILING_SCOPE;
-
-			const auto assign_ptr = [](auto & storage) {
-				if (storage.ptr != nullptr)
-					*storage.ptr = storage.value;
-			};
-
-			const std::string_view view(s);
-			switch (value.type) {
-				case values::value_type::Int: {
-					const auto result = scn::scan_default(view, value.int_storage.value);
-					if (!result)
-						kengine_assert_failed(r, "{}", result.error().msg());
-					assign_ptr(value.int_storage);
-					break;
-				}
-				case values::value_type::Float: {
-					const auto result = scn::scan_default(view, value.float_storage.value);
-					if (!result)
-						kengine_assert_failed(r, "{}", result.error().msg());
-					assign_ptr(value.float_storage);
-					break;
-				}
-				case values::value_type::Bool: {
-					const auto result = scn::scan_default(view, value.bool_storage.value);
-					if (!result)
-						kengine_assert_failed(r, "{}", result.error().msg());
-					assign_ptr(value.bool_storage);
-					break;
-				}
-				case values::value_type::Color: {
-					const auto result = scn::scan_default(view, value.color_storage.value);
-					if (!result)
-						kengine_assert_failed(r, "{}", result.error().msg());
-					assign_ptr(value.color_storage);
-					break;
-				}
-				default: {
-					static_assert(magic_enum::enum_count<values::value_type>() == 5); // + 1 for Invalid
-					kengine_assert_failed(r, "Unknown values::value type");
-					break;
-				}
-			}
-		}
-
-		putils::ini_file load_ini_file() noexcept {
+		nlohmann::json load_json_file() const noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, verbose, log_category, "Loading from " KENGINE_CONFIG_SAVE_FILE);
 
 			std::ifstream f(KENGINE_CONFIG_SAVE_FILE);
+			if (!f) {
+				kengine_log(r, verbose, log_category, "Failed to open " KENGINE_CONFIG_SAVE_FILE);
+				return {};
+			}
 
-			putils::ini_file ret;
-			f >> ret;
-			return ret;
+			return nlohmann::json::parse(f);
 		}
 
-		void save(entt::registry &, entt::entity e) noexcept {
+		void save(entt::registry &, entt::entity changed_entity) noexcept {
 			KENGINE_PROFILING_SCOPE;
-			kengine_logf(r, verbose, log_category, "Saving to " KENGINE_CONFIG_SAVE_FILE " because {} changed", e);
+			kengine_logf(r, verbose, log_category, "Saving to " KENGINE_CONFIG_SAVE_FILE " because {} changed", changed_entity);
 
 			std::ofstream f(KENGINE_CONFIG_SAVE_FILE, std::ofstream::trunc);
 			if (!f) {
@@ -156,47 +111,22 @@ namespace kengine::config::ini {
 				return;
 			}
 
-			putils::ini_file ini;
+			nlohmann::json json;
+			for (const auto & [e, name] : r.view<core::name, configurable>().each()) {
+				kengine_logf(r, verbose, log_category, "Saving {} ({}) to JSON file", e, name.name);
 
-			for (const auto & [e, comp] : r.view<values>().each()) {
-				kengine_logf(r, verbose, log_category, "Adding section {} to INI file", e, comp.section);
-				auto & section = ini.sections[comp.section.c_str()];
+				auto * current_json_section = &json;
+				const auto sections = putils::split(name.name, '/');
+				for (const auto section : sections)
+					current_json_section = &(*current_json_section)[section];
 
-				for (const auto & value : comp.entries) {
-					kengine_logf(r, verbose, log_category, "Adding value {} to section {} of INI file", e, value.name);
-					auto & ini_value = section.values[value.name.c_str()];
-
-					switch (value.type) {
-						case values::value_type::Int: {
-							ini_value = fmt::format("{}", value.int_storage.value);
-							kengine_logf(r, verbose, log_category, "Adding int value {}", e, ini_value);
-							break;
-						}
-						case values::value_type::Float: {
-							ini_value = fmt::format("{}", value.float_storage.value);
-							kengine_logf(r, verbose, log_category, "Adding float value {}", e, ini_value);
-							break;
-						}
-						case values::value_type::Bool: {
-							ini_value = fmt::format("{}", value.bool_storage.value);
-							kengine_logf(r, verbose, log_category, "Adding bool value {}", e, ini_value);
-							break;
-						}
-						case values::value_type::Color: {
-							ini_value = fmt::format("{}", value.color_storage.value);
-							kengine_logf(r, verbose, log_category, "Adding color value {}", e, ini_value);
-							break;
-						}
-						default: {
-							static_assert(magic_enum::enum_count<values::value_type>() == 5); // + 1 for Invalid
-							kengine_assert_failed(r, "Unknown values::value type");
-							break;
-						}
-					}
-				}
+				for (const auto & [type_entity, name, has, save_json, has_metadata] : r.view<core::name, meta::has, meta::json::save, meta::has_metadata>().each())
+					if (has({ r, e }) && has_metadata(config_metadata))
+						current_json_section->merge_patch({
+							{ name.name, save_json({ r, e }) }
+						});
 			}
-
-			f << ini;
+			f << json.dump(4);
 		}
 	};
 

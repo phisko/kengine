@@ -2,11 +2,11 @@
 
 #include "putils/reflection.hpp"
 
-#define refltype kengine::imgui::scale
+#define refltype kengine::core::log::imgui::config
 putils_reflection_info {
-	putils_reflection_class_name;
+	putils_reflection_custom_class_name(core_log_imgui_config);
 	putils_reflection_attributes(
-		putils_reflection_attribute(modifier)
+		putils_reflection_attribute(max_events)
 	);
 	putils_reflection_type_metadata(
 		putils_reflection_metadata("config", true)

@@ -1,0 +1,17 @@
+#pragma once
+
+#include "putils/reflection.hpp"
+
+#define refltype kengine::physics::bullet::config
+putils_reflection_info {
+	putils_reflection_custom_class_name(physics_bullet_config);
+	putils_reflection_attributes(
+		putils_reflection_attribute(enable_debug),
+		putils_reflection_attribute(editor_mode),
+		putils_reflection_attribute(gravity)
+	);
+	putils_reflection_type_metadata(
+		putils_reflection_metadata("config", true)
+	);
+};
+#undef refltype

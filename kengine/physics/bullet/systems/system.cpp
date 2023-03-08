@@ -28,8 +28,9 @@
 #include "putils/forward_to.hpp"
 
 // kengine
-#include "kengine/config/data/values.hpp"
+#include "kengine/config/data/configurable.hpp"
 #include "kengine/core/assert/helpers/kengine_assert.hpp"
+#include "kengine/core/data/name.hpp"
 #include "kengine/core/data/transform.hpp"
 #include "kengine/core/helpers/new_entity_processor.hpp"
 #include "kengine/core/log/helpers/kengine_log.hpp"
@@ -46,6 +47,8 @@
 #include "kengine/skeleton/data/bone_names.hpp"
 #include "kengine/skeleton/data/bone_matrices.hpp"
 #include "kengine/skeleton/helpers/get_bone_matrix.hpp"
+
+#include "config.hpp"
 
 namespace putils {
 	inline bool operator<(const point3f & lhs, const point3f & rhs) noexcept {
@@ -70,6 +73,7 @@ namespace kengine::physics::bullet {
 
 	struct system {
 		entt::registry & r;
+		const config * cfg = nullptr;
 
 		struct processed {};
 		kengine::new_entity_processor<processed, core::transform, inertia, model::instance> processor{ r, putils_forward_to_this(add_or_update_bullet_data) };
@@ -89,12 +93,6 @@ namespace kengine::physics::bullet {
 		btSequentialImpulseConstraintSolver solver;
 
 		btDiscreteDynamicsWorld dynamics_world{ &dispatcher, overlappingPairCache.get(), &solver, &collisionConfiguration };
-
-		struct {
-			bool enable_debug = false;
-			bool editor_mode = false;
-			float gravity = 1.f;
-		} config;
 
 		struct bullet_data {
 			struct motion_state : public btMotionState {
@@ -139,16 +137,9 @@ namespace kengine::physics::bullet {
 			e.emplace<main_loop::execute>(putils_forward_to_this(execute));
 			e.emplace<kengine::physics::query_position>(putils_forward_to_this(query_position));
 
-			e.emplace<config::values>() = {
-				"Physics",
-				{
-					{ "Gravity", &config.gravity },
-#ifndef KENGINE_NDEBUG
-					{ "Debug", &config.enable_debug },
-					{ "Editor mode (reload colliders each frame)", &config.editor_mode },
-#endif
-				}
-			};
+			e.emplace<core::name>("Physics");
+			e.emplace<kengine::config::configurable>();
+			cfg = &e.emplace<config>();
 
 			processor.process();
 		}
@@ -174,7 +165,7 @@ namespace kengine::physics::bullet {
 			}
 
 			kengine_log(r, very_verbose, log_category, "Updating gravity");
-			dynamics_world.setGravity({ 0.f, -config.gravity, 0.f });
+			dynamics_world.setGravity({ 0.f, -cfg->gravity, 0.f });
 
 			kengine_log(r, very_verbose, log_category, "Stepping simulation");
 			dynamics_world.stepSimulation(delta_time);
@@ -182,7 +173,7 @@ namespace kengine::physics::bullet {
 
 #ifndef KENGINE_NDEBUG
 			drawer.cleanup();
-			dynamics_world.setDebugDrawer(config.enable_debug ? &drawer : nullptr);
+			dynamics_world.setDebugDrawer(cfg->enable_debug ? &drawer : nullptr);
 			dynamics_world.debugDrawWorld();
 #endif
 		}

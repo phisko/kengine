@@ -171,7 +171,7 @@ namespace kengine::pathfinding::recast {
 			params.maxSpeed = params.maxAcceleration;
 
 			params.collisionQueryRange = params.radius * 2.f;
-			params.pathOptimizationRange = params.collisionQueryRange * g_config.path_optimization_range;
+			params.pathOptimizationRange = params.collisionQueryRange * g_config->path_optimization_range;
 		}
 
 		static void move_changed_agents(entt::registry & r) noexcept {

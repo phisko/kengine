@@ -21,7 +21,7 @@
 #include "putils/reflection_helpers/imgui_helper.hpp"
 
 // kengine
-#include "kengine/config/data/values.hpp"
+#include "kengine/config/data/configurable.hpp"
 #include "kengine/core/data/name.hpp"
 #include "kengine/core/log/functions/on_log.hpp"
 #include "kengine/core/log/helpers/kengine_log.hpp"
@@ -31,11 +31,14 @@
 #include "kengine/imgui/tool/data/tool.hpp"
 #include "kengine/main_loop/functions/execute.hpp"
 
+#include "config.hpp"
+
 namespace kengine::core::log::imgui {
 	static constexpr auto log_category = "core_log_imgui";
 
 	struct system {
 		const entt::registry & r;
+		const config * cfg = nullptr;
 		bool * enabled;
 
 		struct internal_log_event {
@@ -46,7 +49,6 @@ namespace kengine::core::log::imgui {
 		};
 
 		std::mutex mutex;
-		int max_events = 4096;
 		std::list<internal_log_event> events;
 		std::vector<internal_log_event> filtered_events;
 
@@ -62,13 +64,17 @@ namespace kengine::core::log::imgui {
 			: r(*e.registry()) {
 			KENGINE_PROFILING_SCOPE;
 
-			e.emplace<on_log>(putils_forward_to_this(log));
-
 			kengine_log(r, log, log_category, "Initializing");
 
 			std::fill(std::begin(filters.severities), std::end(filters.severities), true);
 
+			// Use a separate entity, as we already have a name for the imgui::tool
+			const auto config_entity = e.registry()->create();
+			e.registry()->emplace<core::name>(config_entity, "Log/ImGui");
+			e.registry()->emplace<kengine::config::configurable>(config_entity);
+			cfg = &e.registry()->emplace<config>(config_entity);
 			control = &e.emplace<severity_control>(parse_command_line_severity(r));
+
 			for (int i = 0; i < (int)control->global_severity; ++i)
 				filters.severities[i] = false;
 			filters.category_severities = control->category_severities;
@@ -78,12 +84,7 @@ namespace kengine::core::log::imgui {
 			auto & tool = e.emplace<kengine::imgui::tool::tool>();
 			enabled = &tool.enabled;
 
-			e.emplace<config::values>() = {
-				"Log",
-				{
-					{ "ImGui max events", &max_events },
-				}
-			};
+			e.emplace<on_log>(putils_forward_to_this(log));
 		}
 
 		void log(const event & log_event) noexcept {
@@ -100,7 +101,7 @@ namespace kengine::core::log::imgui {
 				const std::lock_guard lock(mutex);
 				filtered_events.push_back(internal_event);
 				events.emplace_back(std::move(internal_event));
-				if (events.size() >= max_events)
+				if (events.size() >= cfg->max_events)
 					events.pop_front();
 			}
 		}

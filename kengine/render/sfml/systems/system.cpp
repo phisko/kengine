@@ -23,7 +23,8 @@
 #include "putils/vector.hpp"
 
 // kengine
-#include "kengine/config/data/values.hpp"
+#include "kengine/config/data/configurable.hpp"
+#include "kengine/core/data/name.hpp"
 #include "kengine/core/data/transform.hpp"
 #include "kengine/core/helpers/new_entity_processor.hpp"
 #include "kengine/core/log/helpers/kengine_log.hpp"
@@ -91,13 +92,10 @@ namespace kengine::render::sfml {
 			kengine_log(r, log, log_category, "Initializing");
 
 			e.emplace<main_loop::execute>(putils_forward_to_this(execute));
-			auto & scale = e.emplace<imgui::scale>();
-			e.emplace<config::values>() = {
-				"ImGui",
-				{
-					{ "scale", &scale.modifier },
-				}
-			};
+
+			e.emplace<core::name>("Render/SFML");
+			e.emplace<config::configurable>();
+			e.emplace<imgui::scale>();
 
 			window_processor.process();
 			model_processor.process();

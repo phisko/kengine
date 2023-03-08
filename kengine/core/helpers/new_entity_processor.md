@@ -12,7 +12,7 @@ Helper type to automatically iterate over new entities matching a group of compo
 ### Nested types
 
 ```cpp
-using callback_signature = void(entt::entity e, Comps &... comps);
+using callback_signature = void(entt::entity e, Comps &... comps); // or void(entt::entity) if any of the types in Comps is empty
 using callback_type = std::function<callback_signature>;
 ```
 
