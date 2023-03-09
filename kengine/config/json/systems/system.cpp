@@ -100,28 +100,36 @@ namespace kengine::config::json {
 			}
 
 			auto json = nlohmann::json::parse(f);
-			override_through_command_line(json);
+			process_command_line(json);
 			return json;
 		}
 
-		void override_through_command_line(nlohmann::json & json) const noexcept {
+		void process_command_line(nlohmann::json & json) const noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, verbose, log_category, "Overriding through command-line");
 
+			bool dump_config = false;
 			for (const auto & [e, command_line] : r.view<command_line::arguments>().each())
 				for (const auto arg : command_line.args) {
+					constexpr const auto dump_flag = "--dump-config";
+					if (arg.starts_with(dump_flag))
+						dump_config = true;
+
 					constexpr const std::string_view flag = "--config:";
 					if (!arg.starts_with(flag))
 						continue;
+
+					kengine_logf(r, verbose, log_category, "Found override: '{}'", arg);
 					const auto key_value = arg.substr(flag.size());
 					const auto equal_pos = key_value.find('=');
 					if (equal_pos == std::string_view::npos) {
-						kengine_assert_failed(r, "Bad format for command-line option {}", arg);
+						kengine_assert_failed(r, "Bad format for command-line option '{}'", arg);
 						continue;
 					}
 
 					const auto key = key_value.substr(0, equal_pos);
 					const auto value = key_value.substr(equal_pos + 1);
+					kengine_logf(r, verbose, log_category, "Overriding '{}' with '{}'", key, value);
 					try {
 						const nlohmann::json::json_pointer ptr{ std::string(key) };
 						json[ptr] = nlohmann::json::parse(value);
@@ -130,6 +138,9 @@ namespace kengine::config::json {
 						kengine_assert_failed(r, "Error in command-line option '{}': {}", arg, e.what());
 					}
 				}
+
+			if (dump_config)
+				kengine_log(r, log, log_category, fmt::format("Config: {}", json.dump(4)).c_str());
 		}
 
 		void save(entt::registry &, entt::entity changed_entity) noexcept {
