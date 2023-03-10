@@ -66,25 +66,25 @@ namespace kengine::core::log::imgui {
 
 			kengine_log(r, log, log_category, "Initializing");
 
-			std::fill(std::begin(filters.severities), std::end(filters.severities), true);
+			e.emplace<on_log>(putils_forward_to_this(log));
 
-			// Use a separate entity, as we already have a name for the imgui::tool
-			const auto config_entity = e.registry()->create();
-			e.registry()->emplace<core::name>(config_entity, "Log/ImGui");
-			e.registry()->emplace<kengine::config::configurable>(config_entity);
-			cfg = &e.registry()->emplace<config>(config_entity);
+			// Config
+			e.emplace<core::name>("Log/ImGui");
+			e.emplace<kengine::config::configurable>();
+			cfg = &e.emplace<config>();
 			control = &e.emplace<severity_control>(parse_command_line_severity(r));
 
+			std::fill(std::begin(filters.severities), std::end(filters.severities), true);
 			for (int i = 0; i < (int)control->global_severity; ++i)
 				filters.severities[i] = false;
 			filters.category_severities = control->category_severities;
-			e.emplace<main_loop::execute>(putils_forward_to_this(execute));
 
-			e.emplace<core::name>("Log");
-			auto & tool = e.emplace<kengine::imgui::tool::tool>();
+			// Separate entity for imgui::tool, as we already have a name for the config
+			const auto imgui_tool_entity = e.registry()->create();
+			auto & tool = e.registry()->emplace<kengine::imgui::tool::tool>(imgui_tool_entity);
 			enabled = &tool.enabled;
-
-			e.emplace<on_log>(putils_forward_to_this(log));
+			e.registry()->emplace<core::name>(imgui_tool_entity, "Log");
+			e.registry()->emplace<main_loop::execute>(imgui_tool_entity, putils_forward_to_this(execute));
 		}
 
 		void log(const event & log_event) noexcept {
