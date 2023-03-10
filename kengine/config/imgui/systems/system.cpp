@@ -7,9 +7,6 @@
 #include <entt/entity/handle.hpp>
 #include <entt/entity/registry.hpp>
 
-// magic_enum
-#include <magic_enum.hpp>
-
 // imgui
 #include <imgui.h>
 
