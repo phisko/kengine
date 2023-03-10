@@ -7,9 +7,6 @@
 #include <entt/entity/handle.hpp>
 #include <entt/entity/registry.hpp>
 
-// magic_enum
-#include <magic_enum.hpp>
-
 // nlohmann
 #include <nlohmann/json.hpp>
 
@@ -42,7 +39,12 @@ namespace kengine::config::json {
 
 	struct system {
 		entt::registry & r;
-		nlohmann::json loaded_file = load_json_file();
+
+		// Loaded from and saved to KENGINE_CONFIG_SAVE_FILE
+		nlohmann::json file_config = load_json_file();
+
+		// With temporary modifications (such as command-line overrides)
+		nlohmann::json transient_config = process_command_line();
 
 		// Initialize new config values with the JSON contents
 		struct processed {};
@@ -73,7 +75,7 @@ namespace kengine::config::json {
 			const auto & name = r.get<core::name>(e);
 			kengine_logf(r, verbose, log_category, "Initializing {} ({})", e, name.name);
 
-			auto * current_json_section = &loaded_file;
+			auto * current_json_section = &transient_config;
 			const auto sections = putils::split(name.name, '/');
 			for (const auto section : sections) {
 				const auto it = current_json_section->find(std::string(section));
@@ -99,14 +101,14 @@ namespace kengine::config::json {
 				return {};
 			}
 
-			auto json = nlohmann::json::parse(f);
-			process_command_line(json);
-			return json;
+			return nlohmann::json::parse(f);
 		}
 
-		void process_command_line(nlohmann::json & json) const noexcept {
+		nlohmann::json process_command_line() const noexcept {
 			KENGINE_PROFILING_SCOPE;
 			kengine_log(r, verbose, log_category, "Overriding through command-line");
+
+			nlohmann::json ret = file_config;
 
 			bool dump_config = false;
 			for (const auto & [e, command_line] : r.view<command_line::arguments>().each())
@@ -132,7 +134,7 @@ namespace kengine::config::json {
 					kengine_logf(r, verbose, log_category, "Overriding '{}' with '{}'", key, value);
 					try {
 						const nlohmann::json::json_pointer ptr{ std::string(key) };
-						json[ptr] = nlohmann::json::parse(value);
+						ret[ptr] = nlohmann::json::parse(value);
 					}
 					catch (const nlohmann::json::parse_error & e) {
 						kengine_assert_failed(r, "Error in command-line option '{}': {}", arg, e.what());
@@ -140,7 +142,9 @@ namespace kengine::config::json {
 				}
 
 			if (dump_config)
-				kengine_log(r, log, log_category, fmt::format("Config: {}", json.dump(4)).c_str());
+				kengine_log(r, log, log_category, fmt::format("Config: {}", ret.dump(4)).c_str());
+
+			return ret;
 		}
 
 		void save(entt::registry &, entt::entity changed_entity) noexcept {
@@ -153,22 +157,20 @@ namespace kengine::config::json {
 				return;
 			}
 
-			nlohmann::json json;
-			for (const auto & [e, name] : r.view<core::name, configurable>().each()) {
-				kengine_logf(r, verbose, log_category, "Saving {} ({}) to JSON file", e, name.name);
+			const auto & section_name = r.get<core::name>(changed_entity);
 
-				auto * current_json_section = &json;
-				const auto sections = putils::split(name.name, '/');
-				for (const auto section : sections)
-					current_json_section = &(*current_json_section)[section];
+			auto * current_json_section = &file_config;
+			const auto sections = putils::split(section_name.name, '/');
+			for (const auto section : sections)
+				current_json_section = &(*current_json_section)[section];
 
-				for (const auto & [type_entity, name, has, save_json, has_metadata] : r.view<core::name, meta::has, meta::json::save, meta::has_metadata>().each())
-					if (has({ r, e }) && has_metadata(config_metadata))
-						current_json_section->merge_patch({
-							{ name.name, save_json({ r, e }) }
-						});
-			}
-			f << json.dump(4);
+			for (const auto & [type_entity, name, has, save_json, has_metadata] : r.view<core::name, meta::has, meta::json::save, meta::has_metadata>().each())
+				if (has({ r, changed_entity }) && has_metadata(config_metadata))
+					current_json_section->merge_patch({
+						{ name.name, save_json({ r, changed_entity }) }
+					});
+
+			f << file_config.dump(4);
 		}
 	};
 
